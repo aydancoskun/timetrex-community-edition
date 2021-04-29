@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,7 +43,7 @@ include_once( 'US.class.php' );
 class GovernmentForms_US_W3 extends GovernmentForms_US {
 	public $pdf_template = 'w3.pdf';
 
-	public $template_offsets = [ 0, 0 ];
+	public $page_margins = [ 0, 10 ]; //x, y - 43pt = 15mm Absolute margins that affect all drawing and templates.
 
 	public function getTemplateSchema( $name = null ) {
 		$template_schema = [
@@ -328,7 +328,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 								'halign' => 'L',
 						],
 				],
-				'contact_email' => [
+				'contact_fax' => [
 						'coordinates' => [
 								'x'      => 38,
 								'y'      => 356,
@@ -337,7 +337,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 								'halign' => 'L',
 						],
 				],
-				'contact_fax'   => [
+				'contact_email'   => [
 						'coordinates' => [
 								'x'      => 270,
 								'y'      => 356,
@@ -564,7 +564,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 		return $value;
 	}
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 

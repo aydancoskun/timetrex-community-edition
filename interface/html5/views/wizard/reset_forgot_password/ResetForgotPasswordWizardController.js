@@ -1,4 +1,4 @@
-class ResetForgotPasswordWizardController extends BaseWizardController {
+export class ResetForgotPasswordWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard'
@@ -104,10 +104,10 @@ class ResetForgotPasswordWizardController extends BaseWizardController {
 		LocalCacheData.extra_filter_for_next_open_view = null;
 		var location = Global.getBaseURL().split( '#' )[0];
 		location = location + '#!m=Login';
-		if ( LocalCacheData.all_url_args ) {
-			for ( var key in LocalCacheData.all_url_args ) {
+		if ( LocalCacheData.getAllURLArgs() ) {
+			for ( var key in LocalCacheData.getAllURLArgs() ) {
 				if ( key !== 'm' && key !== 'sm' && key !== 'key' ) {
-					location = location + '&' + key + '=' + LocalCacheData.all_url_args[key];
+					location = location + '&' + key + '=' + LocalCacheData.getAllURLArgs()[key];
 				}
 			}
 		}
@@ -125,14 +125,14 @@ class ResetForgotPasswordWizardController extends BaseWizardController {
 		this.stepsWidgetDic[1].new_password.clearErrorStyle();
 		this.stepsWidgetDic[1].confirm_password.clearErrorStyle();
 
-		if ( typeof LocalCacheData.all_url_args.key == 'undefined' ) {
+		if ( typeof LocalCacheData.getAllURLArgs().key == 'undefined' ) {
 			this.stepsWidgetDic[1].confirm_password.setErrorStyle( $.i18n._( 'Password reset key is invalid, please try resetting your password again (u)' ), true );
 		} else if ( !new_password ) {
 			this.stepsWidgetDic[1].new_password.setErrorStyle( $.i18n._( 'New password can\'t be empty' ), true );
 		} else if ( new_password !== confirm_password ) {
 			this.stepsWidgetDic[1].confirm_password.setErrorStyle( $.i18n._( 'New password does not match' ), true );
 		} else {
-			this.api.passwordReset( LocalCacheData.all_url_args.key,
+			this.api.passwordReset( LocalCacheData.getAllURLArgs().key,
 				new_password,
 				confirm_password
 				, {

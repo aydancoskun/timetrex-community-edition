@@ -1,13 +1,13 @@
-var ResponseObject = Base.extend( {
+import { Base } from './Base';
 
-	defaults: {
-		onResult: null,
-		onError: null,
-		delegate: null,
-		async: null
+export class ResponseObject extends Base {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			onResult: null,
+			onError: null,
+			delegate: null,
+			async: null
+		} );
+		super( options );
 	}
-
-
-	//we may have more
-
-} );
+}

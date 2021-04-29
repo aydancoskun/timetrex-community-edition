@@ -3,8 +3,8 @@
 <!--
 Description	T3 General Return Data Element Types
 Contact: 	CRA
-Last updated 	Ocotber 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.17 (version #.yy)
 Revision History:
 Dec 2015	Initial creation.
 -->
@@ -97,7 +97,7 @@ Dec 2015	Initial creation.
 			<xsd:element name="TestamentaryTrustInformation" type="TestamentaryTrustInformationType" minOccurs="0"/>
 			<xsd:element name="InterVivosTrustInformation" type="InterVivosTrustInformationType" minOccurs="0"/>
 			<xsd:element name="TrustFiscalPeriodStartDate" type="YYYYMMDDDateType"/>
-			<xsd:element ref="TrustFiscalPeriodEndDate"/>
+			<xsd:element ref="TrustFiscalPeriodEndDate" minOccurs="1"/>
 			<xsd:element ref="FirstYearFilingIndicator" minOccurs="0"/>
 			<xsd:group ref="FirstYearFilingIndicatorGroup" minOccurs="0"/>
 			<xsd:element name="TrustFinalGeneralIncomeTaxReturnIndicator" type="YesNoCodeType" minOccurs="0"/>

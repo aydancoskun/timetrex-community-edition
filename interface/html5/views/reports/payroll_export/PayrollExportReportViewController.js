@@ -1,4 +1,4 @@
-class PayrollExportReportViewController extends ReportBaseViewController {
+export class PayrollExportReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -139,14 +139,6 @@ class PayrollExportReportViewController extends ReportBaseViewController {
 			case ContextMenuIconName.save_new_report: //All report view
 				this.onSaveNewReportClick();
 				break;
-			case ContextMenuIconName.timesheet_view: //All report view
-				ProgressBar.showOverlay();
-				this.onViewClick( 'pdf_timesheet' );
-				break;
-			case ContextMenuIconName.timesheet_view_detail: //All report view
-				ProgressBar.showOverlay();
-				this.onViewClick( 'pdf_timesheet_detail' );
-				break;
 			case ContextMenuIconName.save_setup: //All report view
 				this.onSaveSetup( $.i18n._( 'Export setup' ) );
 				break;
@@ -171,7 +163,7 @@ class PayrollExportReportViewController extends ReportBaseViewController {
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'export_type', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.export_type_array ) );
+		form_item_input.setSourceData( $this.export_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Export Format' ), form_item_input, tab3_column1, '' );
 
 		form_item_input.bind( 'formItemChange', function( e, target ) {
@@ -480,18 +472,21 @@ class PayrollExportReportViewController extends ReportBaseViewController {
 		}
 
 		this.export_grid = new TTGrid( 'export_grid', {
+			container_selector: '.inside-editor-div .grid-div',
 			multiselect: false,
 			winMultiSelect: false,
 			sortable: false,
 			editurl: 'clientArray',
 			onSelectRow: function( id ) {
 				if ( id ) {
-
 					if ( $this.select_grid_last_row ) {
 						$this.export_grid.grid.jqGrid( 'saveRow', $this.select_grid_last_row );
 					}
+
 					$this.export_grid.grid.jqGrid( 'editRow', id, true );
 					$this.select_grid_last_row = id;
+
+					$this.export_grid.setGridColumnsWidth(); //When inline editing, it might change the width of each row, so resize the columns immediately after activating this.
 				}
 			},
 			onResizeGrid: false
@@ -1231,7 +1226,7 @@ class PayrollExportReportViewController extends ReportBaseViewController {
 				form_item_input1.AComboBox( {
 					field: code1,
 					allow_multiple_selection: true,
-					layout_name: ALayoutIDs.OPTION_COLUMN,
+					layout_name: 'global_option_column',
 					key: 'value',
 					set_empty: true
 				} );
@@ -1697,7 +1692,7 @@ class PayrollExportReportViewController extends ReportBaseViewController {
 				form_item_input.AComboBox( {
 					field: code,
 					allow_multiple_selection: true,
-					layout_name: ALayoutIDs.OPTION_COLUMN,
+					layout_name: 'global_option_column',
 					key: 'value',
 					set_empty: true
 				} );

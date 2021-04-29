@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -684,6 +684,8 @@ class ROEReport extends Report {
 						$roef->setPayPeriodType( $row['pay_period_type_id'] );
 
 						$ee_data = [
+								'id'                       => (string)TTUUID::convertStringToUUID( md5( $row['user_id'] . TTDate::parseDateTime( $row['pay_period_end_date'] ) . microtime( true ) ) ),
+								'user_id'                  => (string)$row['user_id'],
 								'payroll_reference_number' => $user_obj->getEmployeeNumber(),
 								'first_name'               => $user_obj->getFirstName(),
 								'middle_name'              => $user_obj->getMiddleName(),
@@ -734,7 +736,7 @@ class ROEReport extends Report {
 
 					if ( isset( $row['pay_period_earnings'] ) && is_array( $row['pay_period_earnings'] ) ) {
 						foreach ( $row['pay_period_earnings'] as $pay_period_earning ) {
-							$ee_data['pay_period_earnings'][] = Misc::MoneyFormat( $pay_period_earning['amount'], false );
+							$ee_data['pay_period_earnings'][] = Misc::MoneyRound( $pay_period_earning['amount'] );
 						}
 					}
 
@@ -751,7 +753,7 @@ class ROEReport extends Report {
 					if ( $format == 'pdf_form_publish_employee' ) {
 						// generate PDF for every employee and assign to each government document records
 						$this->getFormObject()->addForm( $roe );
-						GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 190, TTDate::parseDateTime( $row['pay_period_end_date'] ), $this->getFormObject()->output( 'PDF' ) );
+						GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 190, TTDate::parseDateTime( $row['pay_period_end_date'] ), ( ( $roe->countRecords() == 1 ) ? $this->getFormObject()->output( 'PDF', false ) : null ), ( ( $roe->countRecords() == 1 ) ? $this->getFormObject()->serialize() : null ) );
 						$this->getFormObject()->clearForms();
 					}
 

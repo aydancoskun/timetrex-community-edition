@@ -2,8 +2,8 @@
 
 <!--
 Description	RRSP Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.17 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -15,7 +15,7 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="bn" type="ccraType3"/>
 			<xsd:element name="SEC_RCPNT_NM" type="NameType_2" minOccurs="0"/>
 			<xsd:element name="annuit_sin" type="sinType" minOccurs="0"/>
-			<xsd:element name="rrsp_spcmn_nbr" type="char20Type" minOccurs="0"/>
+			<xsd:element name="rrsp_spcmn_nbr" type="char20Type"/>
 			<xsd:element name="ctrct_nbr" type="char12Type"/>
 			<xsd:element name="rpt_tcd" type="slipDataType"/>
 			<xsd:element name="sps_cntrb_ind" type="indicator1-2Type"/>
@@ -34,7 +34,7 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="rpt_tcd" type="otherDataType"/>
 			<xsd:element name="fileramendmentnote" type="char1309Type" minOccurs="0"/>
 			<xsd:element name="tx_yr" type="yearType"/>
-			<xsd:element name="rrsp_spcmn_nbr" type="char20Type" minOccurs="0"/>
+			<xsd:element name="rrsp_spcmn_nbr" type="char20Type"/>
 			<xsd:element name="slp_cnt" type="int7Type"/>
 			<xsd:element name="RRSP_ISU_NM" type="Line3Type"/>
 			<xsd:element name="RRSP_ISU_ADDR" type="RequiredPstlCdAddressType" minOccurs="0"/>

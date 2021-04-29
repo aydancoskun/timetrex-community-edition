@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,11 +45,11 @@ header( 'Content-Type: application/javascript; charset=UTF-8' );
 TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in, this is needed for getPreLoginData as well.
 $auth = TTNew( 'APIAuthentication' ); /** @var APIAuthentication $auth */
 ?>
-var APIGlobal = function() {
+export var APIGlobal = function() {
 };
 APIGlobal.pre_login_data = <?php echo json_encode( $auth->getPreLoginData() );?>; //Convert getPreLoginData() array to JS.
 
-need_load_pre_login_data = false;
+window.need_load_pre_login_data = false;
 
 var alternate_session_data = decodeURIComponent( getCookie( 'AlternateSessionData' ) );
 
@@ -69,8 +69,10 @@ if ( alternate_session_data ) {
 		need_load_pre_login_data = true; // need load it again since APIGlobal.pre_login_data.is_logged_in will be false when first load
 	}
 }
-delete alternate_session_data;
-delete host;
+//delete alternate_session_data; // Invalid in strict mode. Should not be needed anyway as they are not global now?
+//delete host; // Invalid in strict mode. Should not be needed anyway as they are not global now?
+alternate_session_data = null;
+host = null;
 <?php
 Debug::writeToLog();
 ?>

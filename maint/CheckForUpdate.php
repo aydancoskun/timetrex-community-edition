@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,8 +41,15 @@
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
+//Pass "-f" on the command line to force update check.
+if ( in_array( '-f', $argv ) ) {
+	$force = true;
+} else {
+	$force = false;
+}
+
 $ttsc = new TimeTrexSoapClient();
-if ( $ttsc->isUpdateNotifyEnabled() == true ) {
+if ( $force == true || $ttsc->isUpdateNotifyEnabled() == true ) {
 	sleep( rand( 0, 60 ) ); //Further randomize when calls are made.
 	$clf = new CompanyListFactory();
 	$clf->getAll();
@@ -75,24 +82,10 @@ if ( $ttsc->isUpdateNotifyEnabled() == true ) {
 			//Only need to call this on the last company
 			if ( $i == ( $clf->getRecordCount() - 1 ) ) {
 				$latest_version = $ttsc->isLatestVersion( $c_obj->getId() );
-
-				$sslf = new SystemSettingListFactory();
-				$sslf->getByName( 'new_version' );
-				if ( $sslf->getRecordCount() == 1 ) {
-					$obj = $sslf->getCurrent();
-				} else {
-					$obj = new SystemSettingListFactory();
-				}
-				$obj->setName( 'new_version' );
-
 				if ( $latest_version == false ) {
-					$obj->setValue( 1 );
+					SystemSettingFactory::setSystemSetting( 'new_version', 1 );
 				} else {
-					$obj->setValue( 0 );
-				}
-
-				if ( $obj->isValid() ) {
-					$obj->Save();
+					SystemSettingFactory::setSystemSetting( 'new_version', 0 );
 				}
 			}
 

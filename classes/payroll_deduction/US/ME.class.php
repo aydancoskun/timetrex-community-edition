@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,18 @@
 class PayrollDeduction_US_ME extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
+			20210101 => [
+					10 => [
+							[ 'income' => 22450, 'rate' => 5.8, 'constant' => 0 ],
+							[ 'income' => 53150, 'rate' => 6.75, 'constant' => 1302 ],
+							[ 'income' => 53150, 'rate' => 7.15, 'constant' => 3374 ],
+					],
+					20 => [
+							[ 'income' => 44950, 'rate' => 5.8, 'constant' => 0 ],
+							[ 'income' => 106350, 'rate' => 6.75, 'constant' => 2607 ],
+							[ 'income' => 106350, 'rate' => 7.15, 'constant' => 6752 ],
+					],
+			],
 			20200101 => [
 					10 => [
 							[ 'income' => 22200, 'rate' => 5.8, 'constant' => 0 ],
@@ -243,6 +255,17 @@ class PayrollDeduction_US_ME extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
+			20210101 => [
+					'allowance'                    => 4300,
+					'standard_deduction'           => [
+							'10' => 9700,
+							'20' => 22250,
+					],
+					'standard_deduction_threshold' => [
+							'10' => [ 83850, 158850, 75000 ], //Min/Max/Divisor
+							'20' => [ 167700, 317700, 150000 ], //Min/Max/Divsor
+					],
+			],
 			20200101 => [
 					'allowance'                    => 4300,
 					'standard_deduction'           => [

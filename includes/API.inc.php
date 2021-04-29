@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,7 +42,7 @@ forceNoCacheHeaders(); //Send headers to disable caching.
  * @return bool
  */
 function isUnauthenticatedMethod( $method ) {
-	if ( in_array( strtolower( $method ), [ 'isloggedin', 'ping' ] ) ) {
+	if ( in_array( strtolower( $method ), [ 'isloggedin', 'sendcsrftokencookie', 'senderrorreport', 'getprogressbar', 'ping' ] ) ) {
 		return true;
 	}
 
@@ -67,6 +67,49 @@ function getAuthenticatedPortalAPIMethods() {
 	];
 }
 
+/**
+ * Make sure the remote API calls can only call the child methods of a class, and not the inherited parent methods, unless they are whitelisted in APIFactory.class.php
+ * @param object $obj Object
+ * @param string $method Method
+ * @return bool
+ */
+function isWhiteListedAPICall( $obj, $method ) {
+	$api_factory_whitelisted_methods = [ 'getOptions', 'exportRecords' ]; //From APIFactory.class.php
+
+	//Handle blacklisted methods.
+	//  Functions that are blacklisted, or start with _*() should never be called remotely.
+	if ( in_array( $method, [ '__construct' ] ) === true || strpos( $method, '_' ) === 0 ) {
+		Debug::text( 'ERROR: Method is not part of the child class object! Method: ' . $method . ' Object: ' . get_class( $obj ), __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
+	}
+
+	$obj_methods = get_class_methods( $obj );
+
+	$obj_parents = class_parents( $obj );
+	if ( is_array( $obj_parents ) ) {
+		$obj_parent_methods = [];
+		foreach ( $obj_parents as $obj_parent ) {
+			if ( $obj_parent === 'APIFactory' ) {
+				$obj_parent_methods = get_class_methods( $obj_parent );
+			}
+		}
+
+		$child_class_methods = array_diff( $obj_methods, $obj_parent_methods );
+	} else {
+		$child_class_methods = $obj_methods;
+	}
+
+	$valid_class_methods = array_merge( $child_class_methods, $api_factory_whitelisted_methods );
+
+	if ( in_array( strtolower( $method ), array_map( 'strtolower', $valid_class_methods ), true ) === true ) { //Must be case insensitive, since the remote user might call 'login' rather than 'Login'.
+		return true;
+	}
+
+	Debug::text( 'ERROR: Method is not part of the child class object! Method: ' . $method . ' Object: ' . get_class( $obj ), __FILE__, __LINE__, __METHOD__, 10 );
+
+	return false;
+}
 
 /**
  * Get Cookie/Post/Get variable in that order.
@@ -98,7 +141,7 @@ function getSessionID( $authentication_type_id = 800 ) {
 	if ( isset( $_COOKIE['SessionID'] ) && isset( $_GET['SessionID'] ) && $_COOKIE['SessionID'] != $_GET['SessionID'] ) {
 		//Debug::Arr( array($_COOKIE, $_POST, $_GET), 'Input Data:', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Text( 'WARNING: Two different SessionIDs sent, COOKIE: ' . $_COOKIE['SessionID'] . ' GET: ' . $_GET['SessionID'], __FILE__, __LINE__, __METHOD__, 10 );
-		if ( isset( $_SERVER['REQUEST_URI'] ) && stripos( $_SERVER['REQUEST_URI'], 'APIClientStationUnAuthenticated' ) !== false ) {
+		if ( isset( $_SERVER['REQUEST_URI'] ) && ( stripos( $_SERVER['REQUEST_URI'], 'APIClientStationUnAuthenticated' ) !== false || stripos( $_SERVER['REQUEST_URI'], '/api/report/api.php' ) !== false ) ) {
 			Debug::Text( 'Using GET Session ID...', __FILE__, __LINE__, __METHOD__, 10 );
 			unset( $_COOKIE['SessionID'] );
 		}

@@ -2,8 +2,6 @@
 require_once( '../../../../../includes/global.inc.php' );
 require_once( '../../../../GovernmentForms/GovernmentForms.class.php' );
 $gf = new GovernmentForms();
-$gf->tcpdf_dir = '../tcpdf';
-$gf->fpdi_dir = '../fpdi';
 
 $return940 = $gf->getFormObject( 'RETURN940', 'US' );
 $return940->TaxPeriodEndDate = '1967-08-13';

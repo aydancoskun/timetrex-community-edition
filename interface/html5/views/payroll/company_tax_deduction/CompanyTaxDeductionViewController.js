@@ -1,4 +1,4 @@
-class CompanyTaxDeductionViewController extends BaseViewController {
+export class CompanyTaxDeductionViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#company_tax_deduction_view_container', //Must set el here and can only set string, so events can work
@@ -70,14 +70,15 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 		this.document_object_type_id = 300;
 
 		this.render();
+
+		//Load the FormulaBuilder as early as possible to help avoid some race conditions with input box not appearing, or appearing out of order when clicking "new" after a fresh reload.
+		if ( ( Global.getProductEdition() >= 15 ) ) {
+			Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js' );
+		}
+
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
 		} else {
-			//Load the FormulaBuilder as early as possible to help avoid some race conditions with input box not appearing, or appearing out of order when clicking "new" after a fresh reload.
-			if ( ( Global.getProductEdition() >= 15 ) ) {
-				Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js' );
-			}
-
 			this.buildContextMenu();
 		}
 
@@ -213,6 +214,24 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 
 	setEditMenuSaveAndCopyIcon( context_btn ) {
 		this.disableIconOnEmployeeSettingsTab( context_btn );
+	}
+
+	enableIconOnEmployeeSettingsTab( context_btn ) {
+		if ( this.getEditViewActiveTabName() === 'tab_employee_setting' ) {
+			context_btn.removeClass( 'disable-image' );
+		}
+	}
+
+	setEditMenuExportIcon( context_btn ) {
+		this.enableIconOnEmployeeSettingsTab( context_btn );
+	}
+
+	onExportClick() {
+		if ( this.is_edit == true && this.getEditViewActiveTabName() === 'tab_employee_setting' ) {
+			this.employee_setting_grid.grid2csv( 'export_user_deduction' );
+		} else {
+			super.onExportClick( 'export' + this.api.key_name );
+		}
 	}
 
 	saveInsideEditorData( callBack ) {
@@ -1009,6 +1028,19 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 		this.buildContextMenu( true );
 		this.setEditMenu();
 
+		this.selectContextMenu();
+		var len = this.context_menu_array.length;
+		for ( var i = 0; i < len; i++ ) {
+			var context_btn = $( this.context_menu_array[i] );
+			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+
+			if ( id === ContextMenuIconName.export_excel ) {
+				this.setEditMenuExportIcon( context_btn );
+				break;
+			}
+		}
+
+
 		var args = { filter_data: {} };
 
 		args.filter_data.company_deduction_id = this.current_edit_record.id;
@@ -1064,9 +1096,19 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 		var column_info_array = [];
 
 		var column_info = {
+			name: 'employee_number',
+			index: 'employee_number',
+			label: $.i18n._( 'Employee Number' ),
+			width: 100,
+			sortable: false,
+			title: false
+		};
+		column_info_array.push( column_info );
+
+		var column_info = {
 			name: 'user_name',
 			index: 'user_name',
-			label: $.i18n._( 'Employees' ),
+			label: $.i18n._( 'Employee' ),
 			width: 100,
 			sortable: false,
 			title: false
@@ -3383,7 +3425,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 			id: this.script_name + '_navigation',
 			api_class: TTAPI.APICompanyDeduction,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.COMPANY_DEDUCTION,
+			layout_name: 'global_deduction',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -3407,14 +3449,14 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_tax_deductions_column1, '' );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_tax_deductions_column1 );
 
 		//Legal entity
@@ -3423,7 +3465,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			layout_name: 'global_legal_entity',
 			show_search_inputs: false,
 			set_empty: true,
 			field: 'legal_entity_id'
@@ -3435,7 +3477,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayrollRemittanceAgency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
+			layout_name: 'global_payroll_remittance_agency',
 			show_search_inputs: false,
 			set_empty: true,
 			field: 'payroll_remittance_agency_id'
@@ -3480,19 +3522,19 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 		// Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
+		form_item_input.setSourceData( $this.country_array );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// Province
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'province' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// District
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'district', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'District' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// Dynamic Field 0
@@ -3625,7 +3667,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 
 		var widget_combo_box = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		widget_combo_box.TComboBox( { field: 'df_13' } );
-		widget_combo_box.setSourceData( Global.addFirstItemToArray( $this.look_back_unit_array ) );
+		widget_combo_box.setSourceData( $this.look_back_unit_array );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		widgetContainer.append( widget_combo_box );
@@ -3667,7 +3709,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIPayStubEntryAccount,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				layout_name: 'global_PayStubAccount',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'pay_stub_entry_account_id'
@@ -3687,7 +3729,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'include_account_amount_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.account_amount_type_array ) );
+		form_item_input.setSourceData( $this.account_amount_type_array );
 
 		var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Pay Stub Account Value' ) );
 
@@ -3700,7 +3742,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				api_class: TTAPI.APIPayStubEntryAccount,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				layout_name: 'global_PayStubAccount',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'include_pay_stub_entry_account'
@@ -3716,7 +3758,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'exclude_account_amount_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.account_amount_type_array ) );
+		form_item_input.setSourceData( $this.account_amount_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Pay Stub Account Value' ) );
 
@@ -3727,7 +3769,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				api_class: TTAPI.APIPayStubEntryAccount,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				layout_name: 'global_PayStubAccount',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'exclude_pay_stub_entry_account'
@@ -3744,7 +3786,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIUser,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'user'
@@ -3765,28 +3807,28 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'apply_frequency_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.apply_frequency_array ) );
+		form_item_input.setSourceData( $this.apply_frequency_array );
 		this.addEditFieldToColumn( $.i18n._( 'Apply Frequency' ), form_item_input, tab_eligibility_column1, '' );
 
 		// Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'apply_frequency_month', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_year_array ) );
+		form_item_input.setSourceData( $this.month_of_year_array );
 		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// Day of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'apply_frequency_day_of_month', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
+		form_item_input.setSourceData( $this.day_of_month_array );
 		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// Month of Quarter
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'apply_frequency_quarter_month', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_quarter_array ) );
+		form_item_input.setSourceData( $this.month_of_quarter_array );
 		this.addEditFieldToColumn( $.i18n._( 'Month of Quarter' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// Payroll Run Type
@@ -3797,7 +3839,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 			set_empty: true,
 			customFirstItemLabel: Global.any_item
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.apply_payroll_run_type_array ) );
+		form_item_input.setSourceData( $this.apply_payroll_run_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Payroll Run Type' ), form_item_input, tab_eligibility_column1, '' );
 
 		// Start Date
@@ -3834,7 +3876,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 
 		widget_combo_box = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		widget_combo_box.TComboBox( { field: 'minimum_length_of_service_unit_id' } );
-		widget_combo_box.setSourceData( Global.addFirstItemToArray( $this.length_of_service_unit_array ) );
+		widget_combo_box.setSourceData( $this.length_of_service_unit_array );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -3852,7 +3894,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 
 		widget_combo_box = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		widget_combo_box.TComboBox( { field: 'maximum_length_of_service_unit_id' } );
-		widget_combo_box.setSourceData( Global.addFirstItemToArray( $this.length_of_service_unit_array ) );
+		widget_combo_box.setSourceData( $this.length_of_service_unit_array );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -3865,7 +3907,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIContributingPayCodePolicy,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
+				layout_name: 'global_contributing_pay_code_policy',
 				show_search_inputs: true,
 				set_empty: true,
 				set_default: true,
@@ -3909,8 +3951,8 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_DROPDOWN );
 
-		var display_columns = ALayoutCache.getDefaultColumn( ALayoutIDs.COMPANY_DEDUCTION ); //Get Default columns base on different layout name
-		display_columns = Global.convertColumnsTojGridFormat( display_columns, ALayoutIDs.COMPANY_DEDUCTION ); //Convert to jQgrid format
+		var display_columns = ALayoutCache.getDefaultColumn( 'global_deduction' ); //Get Default columns base on different layout name
+		display_columns = Global.convertColumnsTojGridFormat( display_columns, 'global_deduction' ); //Convert to jQgrid format
 
 		form_item_input.ADropDown( {
 			field: 'company_tax_deduction_ids',
@@ -3964,7 +4006,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -3973,7 +4015,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -3989,7 +4031,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 				label: $.i18n._( 'Legal Entity' ),
 				in_column: 1,
 				field: 'legal_entity_id',
-				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				layout_name: 'global_legal_entity',
 				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				basic_search: true,
@@ -4000,7 +4042,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Stub Account' ),
 				in_column: 1,
 				field: 'pay_stub_entry_name_id',
-				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				layout_name: 'global_PayStubAccount',
 				api_class: TTAPI.APIPayStubEntryAccount,
 				multiple: true,
 				basic_search: true,
@@ -4011,7 +4053,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 				label: $.i18n._( 'Remittance Agency' ),
 				in_column: 2,
 				field: 'payroll_remittance_agency_id',
-				layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
+				layout_name: 'global_payroll_remittance_agency',
 				api_class: TTAPI.APIPayrollRemittanceAgency,
 				multiple: true,
 				basic_search: true,
@@ -4024,14 +4066,14 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 				field: 'calculation_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -4042,7 +4084,7 @@ class CompanyTaxDeductionViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

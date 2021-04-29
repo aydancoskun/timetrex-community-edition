@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="Submission" type="ReturnType" />
+	<xsd:complexType name="ReturnType">
+		<xsd:sequence>
+			<xsd:element name="T619" type="TransmitterType" />
+			<xsd:element name="FormVersion" type="FormVersionType" />
+			<xsd:element name="RC365" type="RC365Type" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="TransmitterType">
+		<xsd:all>
+			<xsd:element name="sbmt_ref_id" type="char8Type" />
+			<xsd:element name="rpt_tcd" type="otherDataType" />
+			<xsd:element name="trnmtr_nbr" type="transNbrType" />
+			<xsd:element name="trnmtr_tcd" type="indicator1-6Type" />
+			<xsd:element name="summ_cnt" type="int6Type" />
+			<xsd:element name="lang_cd" type="languageType" />
+			<xsd:element name="TRNMTR_NM" type="Line2Type" />
+			<xsd:element name="TRNMTR_ADDR" type="CanadaAddressType" />
+			<xsd:element name="CNTC" type="ContactType" />
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="RC365Type">
+		<xsd:sequence>
+			<!-- Section 1 - Plan information -->
+			<xsd:element name="PlanInformation" type="PlanInformationType" />
+			<!-- Section 2 - Amendment identification -->
+			<xsd:element name="AmendmentIdentification" type="AmendmentIdentificationType" />
+			<!-- Section 3 - Amendment details -->
+			<xsd:element name="AmendmentDetails" type="AmendmentDetailsType" />
+			<!-- Section 4 - Certification -->
+			<xsd:element name="Certification" type="CertificationType "/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="FormVersionType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="15" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="PlanInformationType">
+		<xsd:sequence>
+			<xsd:element name="CraRegistrationNumber" type="PRPPRegistrationNumberType" />
+			<xsd:element name="OFSIRegistrationNumber" type="NonNegativeInt20Type" minOccurs="0" />
+			<xsd:element name="PlanName" type="String80RestrictedType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AmendmentIdentificationType">
+		<xsd:sequence>
+			<xsd:element name="EffectiveDate" type="DateType" />
+			<xsd:element name="AmendmentNumber" type="AmendmentNumberType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AmendmentDetailsType">
+		<xsd:sequence>
+			<xsd:element name="IncomeTaxAct" type="YesOrNoType" />
+			<xsd:element name="PRPPActOrSimilar" type="YesOrNoType" />
+			<xsd:element name="FundingMedia" type="YesOrNoType" />
+			<xsd:element name="AdministratorInformation" type="YesOrNoType" />
+			<xsd:element name="ImpactOnCosts" type="YesOrNoType" />
+			<xsd:element name="ImpactOnFees" type="YesOrNoType" />
+			<xsd:element name="ContributionRates" type="ContributionRatesType" />
+			<xsd:element name="DescriptionOfAmendment" type="String120RestrictedType" minOccurs="0" />
+			<xsd:element name="AmendmentApplies" type="AmendmentAppliesType" />
+			<xsd:element name="MembersNotified" type="YesOrNoType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AmendmentAppliesType">
+		<xsd:choice>
+			<xsd:element name="AllMembers" type="CheckBoxType" />
+			<xsd:element name="NewEntrants" type="CheckBoxType" />
+			<xsd:element name="Other" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="ContributionRatesType">
+		<xsd:choice>
+			<xsd:element name="Yes" type="ContributionRatesDetails" />
+			<xsd:element name="No" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="ContributionRatesDetails">
+		<xsd:choice>
+			<xsd:sequence>
+				<xsd:element name="Employers" type="CheckBoxType" />
+				<xsd:element name="Members" type="CheckBoxType" minOccurs="0" />
+			</xsd:sequence>
+			<xsd:element name="Members" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="CertificationType">
+		<xsd:sequence>
+			<xsd:element name="NameOfAuthorizedOfficer" type="String60RestrictedType" />
+			<xsd:element name="Position" type="String60RestrictedType" minOccurs="0" />
+			<xsd:element name="Phone" type="PhoneNumberType" />
+			<xsd:element name="Email" type="String60Type" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="YesOrNoType">
+		<xsd:choice>
+			<xsd:element name="Yes" type="CheckBoxType" />
+			<xsd:element name="No" type="CheckBoxType" />
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:simpleType name="PhoneNumberType">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="preserve" />
+			<xsd:pattern value="(\d{3}-\d{3}-\d{4})|(\+\d{1,12})" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="DateType">
+		<xsd:restriction base="xsd:date">
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="CheckBoxType">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="0" />
+			<xsd:whiteSpace value="collapse" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="PRPPRegistrationNumberType">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="preserve" />
+			<xsd:pattern value="PRPP [0-9]{4}" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="AmendmentNumberType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1" />
+			<xsd:maxLength value="20" />
+			<xsd:whiteSpace value="preserve" />
+			<xsd:pattern value="[1-9]|([0-9]*[1-9]+[0-9]*[0]?)" />
+		</xsd:restriction>
+	</xsd:simpleType>
+		<xsd:simpleType name="NonNegativeInt20Type">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="0" />
+			<xsd:maxInclusive value="99999999999999999999" />
+			<xsd:fractionDigits value="0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="String60Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1" />
+			<xsd:maxLength value="60" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="StringRestrictedType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:whiteSpace value="preserve" />
+			<xsd:pattern value="[\p{L}\p{N}\-. '\(\)]*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="String60RestrictedType">
+		<xsd:restriction base="StringRestrictedType">
+			<xsd:maxLength value="60" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="String80RestrictedType">
+		<xsd:restriction base="StringRestrictedType">
+			<xsd:maxLength value="80" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="String120RestrictedType">
+		<xsd:restriction base="StringRestrictedType">
+			<xsd:maxLength value="30" />
+		</xsd:restriction>
+	</xsd:simpleType>	
+	<!-- Infodec defined types below this point -->
+	<xsd:simpleType name="char8Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="8"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="otherDataType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="A"/>
+			<xsd:enumeration value="M"/>
+			<xsd:enumeration value="O"/>
+			<xsd:enumeration value="a"/>
+			<xsd:enumeration value="m"/>
+			<xsd:enumeration value="o"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="transNbrType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="(MM|mm)\d{6}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="indicator1-6Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[1-6]{1}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="int6Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{1,6}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="languageType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="E"/>
+			<xsd:enumeration value="F"/>
+			<xsd:enumeration value="e"/>
+			<xsd:enumeration value="f"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="Line2Type">
+		<xsd:all>
+			<xsd:element name="l1_nm" type="char30Type"/>
+			<xsd:element name="l2_nm" type="char30Type" minOccurs="0"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="CanadaAddressType">
+		<xsd:all>
+			<xsd:element name="addr_l1_txt" type="char30Type" minOccurs="0"/>
+			<xsd:element name="addr_l2_txt" type="char30Type" minOccurs="0"/>
+			<xsd:element name="cty_nm" type="char28Type" minOccurs="0"/>
+			<xsd:element name="prov_cd" type="provinceStateType" minOccurs="0"/>
+			<xsd:element name="cntry_cd" type="countryType" minOccurs="0"/>
+			<xsd:element name="pstl_cd" type="pcType" minOccurs="0"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="ContactType">
+		<xsd:all>
+			<xsd:element name="cntc_nm" type="char22Type"/>
+			<xsd:element name="cntc_area_cd" type="numeric3Type"/>
+			<xsd:element name="cntc_phn_nbr" type="phoneType"/>
+			<xsd:element name="cntc_extn_nbr" type="int7Type" minOccurs="0"/>
+			<xsd:element name="cntc_email_area" type="char60Type" minOccurs="0"/>
+			<xsd:element name="sec_cntc_email_area" type="char60Type" minOccurs="0"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:simpleType name="char30Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="30"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char28Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="28"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="provinceType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ON"/>
+			<xsd:enumeration value="on"/>
+			<xsd:enumeration value="On"/>
+			<xsd:enumeration value="NS"/>
+			<xsd:enumeration value="ns"/>
+			<xsd:enumeration value="Ns"/>
+			<xsd:enumeration value="PE"/>
+			<xsd:enumeration value="pe"/>
+			<xsd:enumeration value="Pe"/>
+			<xsd:enumeration value="NB"/>
+			<xsd:enumeration value="nb"/>
+			<xsd:enumeration value="Nb"/>
+			<xsd:enumeration value="QC"/>
+			<xsd:enumeration value="qc"/>
+			<xsd:enumeration value="Qc"/>
+			<xsd:enumeration value="MB"/>
+			<xsd:enumeration value="mb"/>
+			<xsd:enumeration value="Mb"/>
+			<xsd:enumeration value="MA"/>
+			<xsd:enumeration value="ma"/>
+			<xsd:enumeration value="Ma"/>
+			<xsd:enumeration value="SK"/>
+			<xsd:enumeration value="sk"/>
+			<xsd:enumeration value="Sk"/>
+			<xsd:enumeration value="SA"/>
+			<xsd:enumeration value="sa"/>
+			<xsd:enumeration value="Sa"/>
+			<xsd:enumeration value="AB"/>
+			<xsd:enumeration value="ab"/>
+			<xsd:enumeration value="Ab"/>
+			<xsd:enumeration value="AL"/>
+			<xsd:enumeration value="al"/>
+			<xsd:enumeration value="Al"/>
+			<xsd:enumeration value="BC"/>
+			<xsd:enumeration value="bc"/>
+			<xsd:enumeration value="Bc"/>
+			<xsd:enumeration value="NT"/>
+			<xsd:enumeration value="nt"/>
+			<xsd:enumeration value="Nt"/>
+			<xsd:enumeration value="YT"/>
+			<xsd:enumeration value="yt"/>
+			<xsd:enumeration value="Yt"/>
+			<xsd:enumeration value="NL"/>
+			<xsd:enumeration value="nl"/>
+			<xsd:enumeration value="Nl"/>
+			<xsd:enumeration value="NF"/>
+			<xsd:enumeration value="nf"/>
+			<xsd:enumeration value="Nf"/>
+			<xsd:enumeration value="LB"/>
+			<xsd:enumeration value="lb"/>
+			<xsd:enumeration value="Lb"/>
+			<xsd:enumeration value="PQ"/>
+			<xsd:enumeration value="pq"/>
+			<xsd:enumeration value="Pq"/>
+			<xsd:enumeration value="QU"/>
+			<xsd:enumeration value="qu"/>
+			<xsd:enumeration value="Qu"/>
+			<xsd:enumeration value="NU"/>
+			<xsd:enumeration value="nu"/>
+			<xsd:enumeration value="Nu"/>
+			<xsd:enumeration value="NN"/>
+			<xsd:enumeration value="nn"/>
+			<xsd:enumeration value="Nn"/>
+			<xsd:enumeration value="US"/>
+			<xsd:enumeration value="us"/>
+			<xsd:enumeration value="Us"/>
+			<xsd:enumeration value="ZZ"/>
+			<xsd:enumeration value="zz"/>
+			<xsd:enumeration value="Zz"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="provinceStateType">
+		<xsd:union memberTypes="provinceType stateType"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="stateType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="AL"/>
+			<xsd:enumeration value="al"/>
+			<xsd:enumeration value="NV"/>
+			<xsd:enumeration value="nv"/>
+			<xsd:enumeration value="AK"/>
+			<xsd:enumeration value="ak"/>
+			<xsd:enumeration value="NH"/>
+			<xsd:enumeration value="nh"/>
+			<xsd:enumeration value="AZ"/>
+			<xsd:enumeration value="az"/>
+			<xsd:enumeration value="NJ"/>
+			<xsd:enumeration value="nj"/>
+			<xsd:enumeration value="AR"/>
+			<xsd:enumeration value="ar"/>
+			<xsd:enumeration value="NM"/>
+			<xsd:enumeration value="nm"/>
+			<xsd:enumeration value="CA"/>
+			<xsd:enumeration value="ca"/>
+			<xsd:enumeration value="NY"/>
+			<xsd:enumeration value="ny"/>
+			<xsd:enumeration value="CO"/>
+			<xsd:enumeration value="co"/>
+			<xsd:enumeration value="NC"/>
+			<xsd:enumeration value="nc"/>
+			<xsd:enumeration value="CT"/>
+			<xsd:enumeration value="ct"/>
+			<xsd:enumeration value="ND"/>
+			<xsd:enumeration value="nd"/>
+			<xsd:enumeration value="DE"/>
+			<xsd:enumeration value="de"/>
+			<xsd:enumeration value="OH"/>
+			<xsd:enumeration value="oh"/>
+			<xsd:enumeration value="DC"/>
+			<xsd:enumeration value="dc"/>
+			<xsd:enumeration value="OK"/>
+			<xsd:enumeration value="ok"/>
+			<xsd:enumeration value="FL"/>
+			<xsd:enumeration value="fl"/>
+			<xsd:enumeration value="OR"/>
+			<xsd:enumeration value="or"/>
+			<xsd:enumeration value="GA"/>
+			<xsd:enumeration value="ga"/>
+			<xsd:enumeration value="PA"/>
+			<xsd:enumeration value="pa"/>
+			<xsd:enumeration value="HI"/>
+			<xsd:enumeration value="hi"/>
+			<xsd:enumeration value="RI"/>
+			<xsd:enumeration value="ri"/>
+			<xsd:enumeration value="ID"/>
+			<xsd:enumeration value="id"/>
+			<xsd:enumeration value="SC"/>
+			<xsd:enumeration value="sc"/>
+			<xsd:enumeration value="IL"/>
+			<xsd:enumeration value="il"/>
+			<xsd:enumeration value="SD"/>
+			<xsd:enumeration value="sd"/>
+			<xsd:enumeration value="IN"/>
+			<xsd:enumeration value="in"/>
+			<xsd:enumeration value="TN"/>
+			<xsd:enumeration value="tn"/>
+			<xsd:enumeration value="IA"/>
+			<xsd:enumeration value="ia"/>
+			<xsd:enumeration value="TX"/>
+			<xsd:enumeration value="tx"/>
+			<xsd:enumeration value="KS"/>
+			<xsd:enumeration value="ks"/>
+			<xsd:enumeration value="UT"/>
+			<xsd:enumeration value="ut"/>
+			<xsd:enumeration value="KY"/>
+			<xsd:enumeration value="ky"/>
+			<xsd:enumeration value="VT"/>
+			<xsd:enumeration value="vt"/>
+			<xsd:enumeration value="LA"/>
+			<xsd:enumeration value="la"/>
+			<xsd:enumeration value="VA"/>
+			<xsd:enumeration value="va"/>
+			<xsd:enumeration value="ME"/>
+			<xsd:enumeration value="me"/>
+			<xsd:enumeration value="WA"/>
+			<xsd:enumeration value="wa"/>
+			<xsd:enumeration value="MD"/>
+			<xsd:enumeration value="md"/>
+			<xsd:enumeration value="WV"/>
+			<xsd:enumeration value="wv"/>
+			<xsd:enumeration value="MA"/>
+			<xsd:enumeration value="ma"/>
+			<xsd:enumeration value="WI"/>
+			<xsd:enumeration value="wi"/>
+			<xsd:enumeration value="MI"/>
+			<xsd:enumeration value="mi"/>
+			<xsd:enumeration value="WY"/>
+			<xsd:enumeration value="wy"/>
+			<xsd:enumeration value="MN"/>
+			<xsd:enumeration value="mn"/>
+			<xsd:enumeration value="MS"/>
+			<xsd:enumeration value="ms"/>
+			<xsd:enumeration value="MO"/>
+			<xsd:enumeration value="mo"/>
+			<xsd:enumeration value="MT"/>
+			<xsd:enumeration value="mt"/>
+			<xsd:enumeration value="NE"/>
+			<xsd:enumeration value="ne"/>
+			<xsd:enumeration value="PR"/>
+			<xsd:enumeration value="pr"/>
+			<xsd:enumeration value="AS"/>
+			<xsd:enumeration value="as"/>
+			<xsd:enumeration value="FM"/>
+			<xsd:enumeration value="fm"/>
+			<xsd:enumeration value="GU"/>
+			<xsd:enumeration value="gu"/>
+			<xsd:enumeration value="MH"/>
+			<xsd:enumeration value="mh"/>
+			<xsd:enumeration value="MP"/>
+			<xsd:enumeration value="mp"/>
+			<xsd:enumeration value="PW"/>
+			<xsd:enumeration value="pw"/>
+			<xsd:enumeration value="VI"/>
+			<xsd:enumeration value="vi"/>
+			<xsd:enumeration value="ZZ"/>
+			<xsd:enumeration value="zz"/>
+		</xsd:restriction>
+	</xsd:simpleType>	
+	<xsd:simpleType name="countryType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\p{L}{3}|\p{N}{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="pcType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="10"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char22Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="22"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="numeric3Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="phoneType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{3}-\d{4}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="int7Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{1,7}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char60Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="60"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>

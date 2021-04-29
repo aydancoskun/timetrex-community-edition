@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,19 @@
 class PayrollDeduction_US_IA extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
+			20210101 => [
+					0 => [
+							[ 'income' => 1676, 'rate' => 0.33, 'constant' => 0 ],
+							[ 'income' => 3352, 'rate' => 0.67, 'constant' => 5.53 ],
+							[ 'income' => 6704, 'rate' => 2.25, 'constant' => 16.76 ],
+							[ 'income' => 15084, 'rate' => 4.14, 'constant' => 92.18 ],
+							[ 'income' => 25140, 'rate' => 5.63, 'constant' => 439.11 ],
+							[ 'income' => 33520, 'rate' => 5.96, 'constant' => 1005.26 ],
+							[ 'income' => 50280, 'rate' => 6.25, 'constant' => 1504.71 ],
+							[ 'income' => 75420, 'rate' => 7.44, 'constant' => 2552.21 ],
+							[ 'income' => 75420, 'rate' => 8.53, 'constant' => 4422.63 ],
+					],
+			],
 			20200101 => [
 					0 => [
 							[ 'income' => 1480, 'rate' => 0.33, 'constant' => 0 ],
@@ -83,6 +96,10 @@ class PayrollDeduction_US_IA extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
+			20210101 => [
+					'standard_deduction' => [ 2130.00, 5240.00 ], //First is 0 or 1 allowances. 2nd is 2 or more allowances
+					'allowance'          => 40,
+			],
 			20200101 => [
 					'standard_deduction' => [ 1880.00, 4630.00 ], //First is 0 or 1 allowances. 2nd is 2 or more allowances
 					'allowance'          => 40,

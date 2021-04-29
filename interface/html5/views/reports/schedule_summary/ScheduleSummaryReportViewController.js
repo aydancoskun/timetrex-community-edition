@@ -1,4 +1,4 @@
-class ScheduleSummaryReportViewController extends ReportBaseViewController {
+export class ScheduleSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {} );
 

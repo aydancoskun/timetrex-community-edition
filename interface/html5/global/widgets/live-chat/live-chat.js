@@ -1,13 +1,15 @@
 var current_company = LocalCacheData.getLocalCache( 'current_company', 'JSON' ); //Can't use LocalCacheData.getCurrentCompany(); as that uses getRequiredLocalCache() and if the user logs in, then logs out before this can load, it will cause a JS exception.
 var current_user = LocalCacheData.getLoginUser();
+var chat_email_address = ( current_user.work_email != '' ? current_user.work_email : ( current_user.home_email != '' ? current_user.home_email : 'EmailNotSpecified@NoDomain.com' )  ); //Fall back to a bogus email address otherwise the live chat will be rejected, and some people have complained about that.
+var LHCChatOptions = {};
+var openSupportChat;
 
 if ( current_company && current_user ) {
 
-	var LHCChatOptions = {};
 	LHCChatOptions.attr = new Array();
 	LHCChatOptions.attr.push( {
 		'name': 'email',
-		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email ),
+		'value': chat_email_address,
 		'type': 'hidden',
 		'size': 0
 	} );
@@ -32,7 +34,7 @@ if ( current_company && current_user ) {
 	} );
 	LHCChatOptions.attr_online.push( {
 		'name': 'email',
-		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email ),
+		'value': chat_email_address,
 		'hidden': true
 	} );
 	LHCChatOptions.attr_online.push( { 'name': 'company', 'value': current_company.name, 'hidden': true } );
@@ -45,7 +47,7 @@ if ( current_company && current_user ) {
 	} );
 	LHCChatOptions.attr_prefill.push( {
 		'name': 'email',
-		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email ),
+		'value': chat_email_address,
 		'hidden': true
 	} );
 	LHCChatOptions.attr_prefill.push( {
@@ -67,7 +69,7 @@ if ( current_company && current_user ) {
 	};
 
 	//Only make a call to load the chat service JS when the chat button is actually clicked. This should help reduce the chance of JS errors occurring for users who never use the chat.
-	function openSupportChat() {
+	openSupportChat = function openSupportChat() {
 		( function() {
 			var po = document.createElement( 'script' );
 			po.type = 'text/javascript';
@@ -84,3 +86,5 @@ if ( current_company && current_user ) {
 		} )();
 	}
 }
+
+export { LHCChatOptions, openSupportChat };

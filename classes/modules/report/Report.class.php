@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -432,7 +432,7 @@ class Report {
 	}
 
 	/**
-	 * @return null
+	 * @return UserFactory|null
 	 */
 	function getUserObject() {
 		return $this->user_obj;
@@ -501,7 +501,7 @@ class Report {
 	 * @return bool
 	 */
 	function handleReportCurrency( $currency_convert_to_base, $base_currency_obj, $filter_data ) {
-		$currency_convert_to_base = $this->getCurrencyConvertToBase();
+		//$currency_convert_to_base = $this->getCurrencyConvertToBase(); //This ignores the 1st argument to this function, which defeats its purpose. Make sure we respect it now.
 		$base_currency_obj = $this->getBaseCurrencyObject();
 		$filter_data = $this->getFilterConfig();
 
@@ -636,9 +636,8 @@ class Report {
 				unset( $data['sort_'] );
 			}
 			//This must come after sub_total, as sort needs to adjust itself automatically based on sub_total.
-			if ( isset( $data['sort'] ) ) {
-				$this->setSortConfig( (array)$data['sort'] );
-			}
+			$this->setSortConfig( ( isset( $data['sort'] ) ? (array)$data['sort'] : [] ) ); //If no sorting is specified at all, we still need to call this function so we can fallback to some sane defaults determined within it.
+
 			if ( isset( $data['chart'] ) ) {
 				$this->setChartConfig( (array)$data['chart'] );
 			}
@@ -1133,6 +1132,26 @@ class Report {
 	 * @return bool
 	 */
 	function setSortConfig( $data ) {
+		//If no sorting is specified at all (blank or NONE), fallback to the first group by column, sub-total column, then display columns.
+		//   This ensures there is always some level of sorting, and the below code to always sort by sub-total columns also gets triggered.
+		if ( empty( $data ) ) {
+			$group_config = $this->getGroupConfig();
+			if ( is_array( $group_config ) && isset( $group_config[0] ) ) {
+				$data[0] = [ $group_config[0] => 'asc' ];
+			} else {
+				$sub_total_config = $this->getSubTotalConfig();
+				if ( is_array( $sub_total_config ) && isset( $sub_total_config[0] ) ) {
+					$data[0] = [ $sub_total_config[0] => 'asc' ];
+				} else {
+					$columns = $this->getColumnConfig();
+					if ( is_array( $columns ) && count( $columns ) > 0 ) {
+						reset( $columns );
+						$data[0] = [ key( $columns ) => 'asc' ];
+					}
+				}
+			}
+		}
+
 		$formatted_data = [];
 
 		//Get any sub_total columns, and use them to sort by first.
@@ -1996,8 +2015,6 @@ class Report {
 	 * @return bool
 	 */
 	function currencyConvertToBase() {
-		$this->profiler->startTimer( 'currencyConvertToBase' );
-
 		$all_currency_format_columns = array_keys( array_merge( (array)Misc::trimSortPrefix( $this->getOptions( 'column_format' ) ), $this->getCustomColumnFormatOptions() ), 'currency' );
 		$currency_convert_to_base = $this->getCurrencyConvertToBase();
 		$base_currency_obj = $this->getBaseCurrencyObject();
@@ -2016,6 +2033,8 @@ class Report {
 		if ( is_array( $this->data ) == false ) {
 			return true;
 		}
+
+		$this->profiler->startTimer( 'currencyConvertToBase' ); //Must go below the above "return" calls, otherwise stopTimer() never gets called.
 
 		// Loop over the all currency columns to match with the report data to convert the currency columns in data to base currency in company if they do exist.
 		foreach ( $this->data as $key => $row ) {

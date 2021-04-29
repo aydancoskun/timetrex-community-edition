@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,7 +37,7 @@
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
+if ( $argc < 1 || ( isset( $argv[1] ) && in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) ) {
 	$help_output = "Usage: recalculate_timesheet.php [options] [company_id]\n";
 	$help_output .= "    -start_date			Start Date to recalculate\n";
 	$help_output .= "    -end_date				End Date to recalculate\n";
@@ -49,18 +49,18 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 	$last_arg = count( $argv ) - 1;
 
 	if ( in_array( '-start_date', $argv ) ) {
-		$start_date = trim( $argv[ array_search( '-start_date', $argv ) + 1 ] );
+		$start_date = trim( $argv[array_search( '-start_date', $argv ) + 1] );
 	} else {
 		$start_date = time();
 	}
 	if ( in_array( '-end_date', $argv ) ) {
-		$end_date = trim( $argv[ array_search( '-end_date', $argv ) + 1 ] );
+		$end_date = trim( $argv[array_search( '-end_date', $argv ) + 1] );
 	} else {
 		$end_date = $start_date;
 	}
 
 	if ( in_array( '-user_id', $argv ) ) {
-		$filter_user_id = trim( $argv[ array_search( '-user_id', $argv ) + 1 ] );
+		$filter_user_id = trim( $argv[array_search( '-user_id', $argv ) + 1] );
 	} else {
 		$filter_user_id = null;
 	}
@@ -72,8 +72,8 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 		$dry_run = false;
 	}
 
-	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' AND TTUUID::isUUID( $argv[ $last_arg ] ) ) {
-		$company_id = $argv[ $last_arg ];
+	if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' && TTUUID::isUUID( $argv[$last_arg] ) ) {
+		$company_id = $argv[$last_arg];
 	}
 
 
@@ -89,7 +89,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 	$clf->getAll();
 	if ( $clf->getRecordCount() > 0 ) {
 		foreach ( $clf as $c_obj ) {
-			if ( isset( $company_id ) AND $company_id != '' AND $company_id != $c_obj->getId() ) {
+			if ( isset( $company_id ) && $company_id != '' && $company_id != $c_obj->getId() ) {
 				continue;
 			}
 
@@ -104,7 +104,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 
 				echo ' Recalculating TimeSheets from ' . date( 'r', strtotime( $start_date ) ) . ' to ' . date( 'r', strtotime( $end_date ) ) . "\n";
 
-				$flags = array(
+				$flags = [
 						'meal'              => true,
 						'undertime_absence' => true, //Needs to calculate undertime absences, otherwise it won't update accruals.
 						'break'             => true,
@@ -123,13 +123,13 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 
 						//Calculate policies for future dates.
 						'future_dates'        => false, //Calculates dates in the future.
-				);
+				];
 
 				$ulf = new UserListFactory();
 				$ulf->getByCompanyId( $c_obj->getID() );
 				if ( $ulf->getRecordCount() > 0 ) {
 					foreach ( $ulf as $user_obj ) {
-						if ( $filter_user_id == '' OR $filter_user_id == $user_obj->getId() ) {
+						if ( $filter_user_id == '' || $filter_user_id == $user_obj->getId() ) {
 							$c_obj->StartTransaction(); //Try to keep transactions are short lived as possible.
 
 //							if ( !in_array( $user_obj->getID(), array('bc150cf3-7ace-feb6-0ab0-000000000744') ) ) {

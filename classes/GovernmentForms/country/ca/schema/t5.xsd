@@ -2,8 +2,8 @@
 
 <!--
 Description	T5 Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -12,8 +12,8 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="RCPNT_NM" type="NameType" minOccurs="0"/>
 			<xsd:element name="SEC_RCPNT_NM" type="NameType_2" minOccurs="0"/>
 			<xsd:element name="sin" type="sinType"/>
-			<xsd:element name="sbrn_root" type="bnRootType"/>
-                        <xsd:element name="rcpnt_tr_acct_nbr" type="trustType" minOccurs="0"/>
+			<xsd:element name="slp_rcpnt_bn" type="bn9AccntNbr15"/>
+            <xsd:element name="rcpnt_tr_acct_nbr" type="trustType" minOccurs="0"/>
 			<xsd:element name="BUS_NM" type="Line2Type" minOccurs="0"/>
 			<xsd:element name="RCPNT_ADDR" type="T5SlipAddressType" minOccurs="0"/>
 			<xsd:element name="bn" type="ccraType3"/>

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -826,7 +826,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayPeriodSchedule( $ids ) {
-		Debug::text( 'Setting Pay Period Schedule IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Arr( $ids, 'Setting Pay Period Schedule IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 		$agency_obj = $this->getPayrollRemittanceAgencyObject();
 		if ( is_object( $agency_obj ) ) {
 			$company_obj = $agency_obj->getCompanyObject();
@@ -929,7 +929,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 					$this->Validator->inArrayKey( 'primary_day_of_month',
 												  $this->getPrimaryDayOfMonth(),
 												  TTi18n::gettext( 'Incorrect day of month' ),
-												  TTDate::getDayOfMonthArray()
+												  TTDate::getDayOfMonthArray( true )
 					);
 				}
 			}
@@ -1230,6 +1230,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		}
 
 		if ( $last_due_date == '' && $this->getRecalculateDate() != '' ) {
+			Debug::Text( '  reCalculate Date specified, using it instead of Last Due Date: ' . TTDate::getDate( 'DATE+TIME', $this->getRecalculateDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 			$last_due_date = $this->getRecalculateDate();
 		} else {
 			if ( $last_due_date == '' ) {
@@ -1253,8 +1254,9 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		switch ( $frequency_type_id ) {
 			case 1000: //each pay period
 				//For pay periods, we need to start from the last end date if there is one specified, so there is never any gaps between the periods when using the tax wizard to complete an event and advance the dates.
-				if ( $this->getEndDate() != '' ) {
+				if ( $this->getEndDate() != '' && empty( $this->getRecalculateDate() ) ) { //Only do this if we are not trying to recalculate the dates to some other date.
 					$last_due_date = TTDate::getMiddleDayEpoch( $this->getEndDate() );
+					Debug::Text( '  Using End Date as Last Due Date: ' . TTDate::getDate( 'DATE+TIME', $this->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 				}
 				$last_due_date -= 86400;
 
@@ -1262,6 +1264,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				if ( is_object( $this->getPayrollRemittanceAgencyObject() ) && is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() ) ) {
 					$le_obj = $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject();
 					if ( is_object( $le_obj ) ) {
+						//Employees must be assigned to Tax/Deduction records that are associated with this remittance agency event as well, so we can determine which pay periods to use.
 						$pplf->getByCompanyIdAndRemittanceAgencyIdAndTransactionDateAndPayPeriodSchedule( $le_obj->getCompany(), $this->getPayrollRemittanceAgencyId(), $last_due_date, $this->getPayPeriodSchedule() );
 						if ( $pplf->getRecordCount() > 0 ) {
 							Debug::Text( 'Looping over Pay Periods: ' . $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -1279,7 +1282,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 									$retval = [
 											'start_date'    => TTDate::getBeginDayEpoch( TTDate::incrementDate( $last_due_date, 2, 'day' ) ), //$last_due_date is -86400, and we need the day after it, so add 2.
 											'end_date'      => TTDate::getEndDayEpoch( $pp_obj->getTransactionDate() ),
-											'due_date'      => TTDate::incrementDate( $pp_obj->getTransactionDate(), $this->getDueDateDelayDays() ? $this->getDueDateDelayDays() : 0, 'day' ),
+											'due_date'      => TTDate::incrementDate( $pp_obj->getTransactionDate(), (int)$this->getDueDateDelayDays(), 'day' ),
 											'pay_period_id' => $pp_obj->getId(),
 									];
 
@@ -1371,7 +1374,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				];
 				break;
 			case 4100: //Monthly
-				$last_due_date += 86400;
+				//$last_due_date += 86400;
+				$last_due_date = TTDate::incrementDate( $last_due_date, 1, 'day' );
 				$due_date = TTDate::getDateOfNextDayOfMonth( $last_due_date, false, $this->getPrimaryDayOfMonth() );
 				$month_before_due_date = TTDate::incrementDate( $due_date, -1, 'month' );
 
@@ -1448,7 +1452,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 //				);
 //				break;
 			case 5100: //Weekly
-				$last_due_date += 86400;
+				//$last_due_date += 86400;
+				$last_due_date = TTDate::incrementDate( $last_due_date, 1, 'day' );
 				$due_date = TTDate::getDateOfNextDayOfWeek( $last_due_date, TTDate::getBeginWeekEpoch( $last_due_date, $this->getDayOfWeek() ) );
 				$due_date_prev_week = TTDate::incrementDate( $due_date, -1, 'week' );
 				$retval = [
@@ -1468,7 +1473,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				return $tmp_praef->calculateNextDate( $last_due_date );
 				break;
 			case 51000: //CA - Accelerated threshold 2
-				//1st - 7th, 8th to 14th, 15th to 21st, 22nd to last day of month. Pay 3rd working day after end of period.
+				//1st - 7th, 8th to 14th, 15th to 21st, 22nd to last day of month. Pay 3rd *working day* after end of period.
 				$day_of_month = TTDate::getDayOfMonth( $last_due_date );
 				$month = TTDate::getMonth( $last_due_date );
 
@@ -1476,20 +1481,34 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				if ( $day_of_month <= 7 ) {
 					$start_date = mktime( 0, 0, 0, $month, 1, date( 'Y', $last_due_date ) );
 					$end_date = mktime( 0, 0, 0, $month, 7, date( 'Y', $last_due_date ) );
-					$due_date = mktime( 0, 0, 0, $month, 10, date( 'Y', $last_due_date ) );
 				} else if ( $day_of_month <= 14 ) {
 					$start_date = mktime( 0, 0, 0, $month, 8, date( 'Y', $last_due_date ) );
 					$end_date = mktime( 0, 0, 0, $month, 14, date( 'Y', $last_due_date ) );
-					$due_date = mktime( 0, 0, 0, $month, 17, date( 'Y', $last_due_date ) );
 				} else if ( $day_of_month <= 21 ) {
 					$start_date = mktime( 0, 0, 0, $month, 15, date( 'Y', $last_due_date ) );
 					$end_date = mktime( 0, 0, 0, $month, 21, date( 'Y', $last_due_date ) );
-					$due_date = mktime( 0, 0, 0, $month, 24, date( 'Y', $last_due_date ) );
 				} else {
 					$start_date = mktime( 0, 0, 0, $month, 22, date( 'Y', $last_due_date ) );
 					$end_date = mktime( 0, 0, 0, $month, TTDate::getDaysInMonth( $start_date ), date( 'Y', $last_due_date ) );
-					$due_date = mktime( 0, 0, 0, ( $month + 1 ), 3, date( 'Y', $last_due_date ) );
 				}
+				$due_date = TTDate::incrementDate( $end_date, 1, 'day' ); //3rd working day *after* the last day of the period, so start us on the day after the end date.
+
+				$tmp_holiday_policy_dates = $this->getRecurringHolidayDates( $end_date );
+
+				$i = 1;
+				$x = 0;
+				while ( $i < 3 && $x < 100 ) { //Loop at least 3x for 3 working days. If its not a working day we have to continue looping.
+					$tmp_due_date = TTDate::getNearestWeekDay( $due_date, 2, $tmp_holiday_policy_dates );
+					if ( $tmp_due_date == $due_date ) {
+						$due_date = TTDate::incrementDate( $due_date, 1, 'day' );
+						$i++; //Only increment the counter when the date itself changes.
+					} else {
+						$due_date = $tmp_due_date;
+					}
+
+					$x++; //Prevent infinite loops just in case.
+				}
+				unset( $tmp_due_date, $tmp_holiday_policy_dates );
 
 				$retval = [
 						'due_date'   => $due_date,
@@ -2269,7 +2288,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 							$template_name = 'by_pay_period';
 							$report_obj_name = 'Form941Report';
 							break;
-						case 'F1099MISC':
+						case 'F1099NEC':
 							switch ( $report_id ) {
 								case 'html':
 								case 'pdf_form':
@@ -2277,7 +2296,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								case 'efile':
 								case 'pdf_form_publish_employee':
 									$template_name = 'by_employee';
-									$report_obj_name = 'Form1099MiscReport';
+									$report_obj_name = 'Form1099NecReport';
 									break;
 							}
 							break;
@@ -2294,6 +2313,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								case 'pdf_form_publish_employee':
 									$template_name = 'by_employee';
 									$report_obj_name = 'FormW2Report';
+									$report_data_override['config']['form']['form_type'] = 'w2'; //Always force W2 rather than W2C
 									break;
 							}
 							break;
@@ -2325,6 +2345,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								case 'pdf_form_publish_employee':
 									$template_name = 'by_employee';
 									$report_obj_name = 'FormW2Report';
+
+									$report_data_override['config']['form']['form_type'] = 'w2'; //Always force W2 rather than W2C
 
 									//This is required so FormW2Report knows what state we are trying to eFile for, so it can narrow down its choices.
 									$report_data_override['config']['form']['efile_state'] = $this->getPayrollRemittanceAgencyObject()->getProvince();

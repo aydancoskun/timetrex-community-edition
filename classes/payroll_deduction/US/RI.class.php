@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,18 @@
 class PayrollDeduction_US_RI extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
+			20210101 => [
+					10 => [
+							[ 'income' => 66200, 'rate' => 3.75, 'constant' => 0 ],
+							[ 'income' => 150550, 'rate' => 4.75, 'constant' => 2482.50 ],
+							[ 'income' => 150550, 'rate' => 5.99, 'constant' => 6489.13 ],
+					],
+					20 => [
+							[ 'income' => 66200, 'rate' => 3.75, 'constant' => 0 ],
+							[ 'income' => 150550, 'rate' => 4.75, 'constant' => 2482.50 ],
+							[ 'income' => 150550, 'rate' => 5.99, 'constant' => 6489.13 ],
+					],
+			],
 			20200101 => [
 					10 => [
 							[ 'income' => 65250, 'rate' => 3.75, 'constant' => 0 ],
@@ -272,6 +284,10 @@ class PayrollDeduction_US_RI extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
+			20210101 => [
+					'allowance'           => 1000,
+					'allowance_threshold' => 234750, //If annual income more than this, allowance is 0.
+			],
 			20200101 => [
 					'allowance'           => 1000,
 					'allowance_threshold' => 231500, //If annual income more than this, allowance is 0.

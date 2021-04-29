@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -314,6 +314,7 @@ class UserPreferenceFactory extends Factory {
 						'America/Merida'               => 'America/Merida',
 						'America/Mexico_City'          => 'America/Mexico City',
 						'America/Miquelon'             => 'America/Miquelon',
+						'America/Moncton'              => 'America/Moncton',
 						'America/Monterrey'            => 'America/Monterrey',
 						'America/Montevideo'           => 'America/Montevideo',
 						'America/Montreal'             => 'America/Montreal',
@@ -1046,7 +1047,7 @@ class UserPreferenceFactory extends Factory {
 						762 => [ 'country' => 'US', 'province' => 'GA', 'time_zone' => 'America/New_York' ], //	 N Georgia: Columbus, Augusta (overlaid on 706)
 						770 => [ 'country' => 'US', 'province' => 'GA', 'time_zone' => 'America/New_York' ], //	 Georgia: Atlanta suburbs: outside of I-285 ring road (part of what used to be 404; see also overlay 678)
 						912 => [ 'country' => 'US', 'province' => 'GA', 'time_zone' => 'America/New_York' ], //	 SE Georgia: Savannah (see splits 229, 478)
-						671 => [ 'country' => 'US', 'province' => 'GU', 'time_zone' => 'US/Guam' ], //0*	 Guam
+						671 => [ 'country' => 'US', 'province' => 'GU', 'time_zone' => 'Pacific/Guam' ],     //0*	 Guam
 						808 => [ 'country' => 'US', 'province' => 'HI', 'time_zone' => 'Pacific/Honolulu' ], //0*	 Hawaii
 						319 => [ 'country' => 'US', 'province' => 'IA', 'time_zone' => 'America/Chicago' ], //	 E Iowa: Cedar Rapids (see split 563)
 						515 => [ 'country' => 'US', 'province' => 'IA', 'time_zone' => 'America/Chicago' ], //	 Cent. Iowa: Des Moines (see split 641)
@@ -1938,9 +1939,10 @@ class UserPreferenceFactory extends Factory {
 	 * Helper functions for dealing with unauthenticated calendar access, required by Google Calendar for now.
 	 * @param null $user_name
 	 * @param int $type_id ID
+	 * @param null $selected_schedule
 	 * @return string
 	 */
-	function getScheduleIcalendarURL( $user_name = null, $type_id = null ) {
+	function getScheduleIcalendarURL( $user_name = null, $type_id = null, $selected_schedule = null ) {
 		if ( $user_name == '' ) {
 			$user_name = $this->getUserObject()->getUserName();
 		}
@@ -1949,9 +1951,21 @@ class UserPreferenceFactory extends Factory {
 			$type_id = $this->getScheduleIcalendarType();
 		}
 
-		$retval = Environment::getBaseURL() . 'ical/ical.php';
+		$url_fragments = [];
+
 		if ( $type_id == 2 ) {
-			$retval .= '?u=' . $user_name . '&k=' . $this->getScheduleIcalendarKey();
+			$url_fragments[] = 'u=' . $user_name;
+			$url_fragments[] = 'k=' . $this->getScheduleIcalendarKey();
+		}
+
+		if ( $selected_schedule != '' ) {
+			$url_fragments[] = 's=' . $selected_schedule;
+		}
+
+		$retval = Environment::getBaseURL() . 'ical/ical.php';
+
+		if ( count( $url_fragments ) > 0 ) {
+			$retval .= '?' . implode( '&', $url_fragments );
 		}
 
 		return $retval;

@@ -1,4 +1,4 @@
-var LocalCacheData = function() {
+export var LocalCacheData = function() {
 
 };
 
@@ -30,7 +30,7 @@ LocalCacheData.current_open_view_id = ''; // Save current open view's id. set in
 
 LocalCacheData.login_error_string = ''; //Error message show on Login Screen
 
-LocalCacheData.all_url_args = null; //All args from URL
+LocalCacheData.all_url_args = {}; //All args from URL
 
 LocalCacheData.current_open_primary_controller = null; // Save current open view's id. set in BaseViewController.loadView
 
@@ -359,6 +359,26 @@ LocalCacheData.getCurrentSelectSubMenuId = function() {
 LocalCacheData.setCurrentSelectSubMenuId = function( val ) {
 
 	LocalCacheData.setLocalCache( 'currentSelectSubMenuId', val );
+};
+
+LocalCacheData.setAllURLArgs = function( val ) {
+	let sanitized_val = {};
+	// Only allow objects to be passed in, note that null is recognized as an object and we ignore it.
+	if ( typeof val === 'object' && val !== null ) {
+		for ( var key in val ) {
+			if ( val.hasOwnProperty( key ) && val[key] !== undefined ) {
+				// Sanitize values to help prevent against XSS with htmlEncode plus some extra characters: ' " :
+				sanitized_val[key] = Global.htmlEncode( val[key] ).replace( /"/g, '&quot;' )
+					.replace( /'/g, '&#039;' )
+					.replace( /:/g, '&#58;' );
+			}
+		}
+	}
+	LocalCacheData.setLocalCache( 'all_url_args', sanitized_val, 'JSON' );
+};
+
+LocalCacheData.getAllURLArgs = function() {
+	return LocalCacheData.getLocalCache( 'all_url_args', 'JSON' );
 };
 
 LocalCacheData.cleanNecessaryCache = function() {

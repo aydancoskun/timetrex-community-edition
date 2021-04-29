@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,7 +47,7 @@ class DemoData {
 	protected $enable_quick_punch = true;
 	protected $max_random_users = 0;
 
-	public $create_data = [ 'schedule' => true, 'punch' => true, 'invoice' => true, 'expense' => true, 'document' => true, 'hr' => true, ]; //Set an array of what data to create.
+	public $create_data = [ 'schedule' => true, 'punch' => true, 'pay_stub' => true, 'invoice' => true, 'expense' => true, 'document' => true, 'hr' => true, ]; //Set an array of what data to create.
 
 
 	protected $first_names = [
@@ -370,6 +370,32 @@ class DemoData {
 	function setDate( $val ) {
 		if ( $val != '' ) {
 			$this->date = $val;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @return bool|int
+	 */
+	function getRandomSeed() {
+		if ( isset( $this->random_seed ) ) {
+			return $this->random_seed;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Sets the date that is used to base all other dates from.
+	 * @param $val
+	 * @return bool
+	 */
+	function setRandomSeed( $val ) {
+		if ( $val != '' ) {
+			$this->random_seed = (int)$val; //Must be an INT so we can add other values to it. Was: (int)($this->getDate() + $this->getUserNamePostfix())
 
 			return true;
 		}
@@ -3151,7 +3177,7 @@ class DemoData {
 				$egf->setName( 'Hispanic' );
 				break;
 			case 50:
-				$egf->setName( 'Indian' );
+				$egf->setName( 'Native American' );
 				break;
 		}
 
@@ -3732,7 +3758,7 @@ class DemoData {
 	 * @throws GeneralError
 	 * @throws ReflectionException
 	 */
-	function createUser( $company_id, $legal_entity_id, $type, $policy_group_id = null, $default_branch_id = null, $default_department_id = null, $default_currency_id = null, $user_group_id = null, $user_title_id = null, $ethnic_group_ids = null, $remittance_source_account_ids = null, $coordinates = null, $default_job_id = null, $default_job_item_id = null ) {
+	function createUser( $company_id, $legal_entity_id, $type, $policy_group_id = null, $default_branch_id = null, $default_department_id = null, $default_currency_id = null, $user_group_id = null, $user_title_id = null, $ethnic_group_ids = null, $remittance_source_account_ids = null, $coordinates = null, $default_job_id = null, $default_job_item_id = null, $hire_date = null ) {
 		//if ( $policy_group_id === null ) {
 		//	$policy_group_id = TTUUID::getZeroID();
 		//}
@@ -3783,8 +3809,10 @@ class DemoData {
 			}
 		}
 
-		srand( (int)($this->getDate() . $this->getUserNamePostfix() . $type) ); //Seed the random number the same for each createUser() call of the same type, so unit tests can rely on a constant hire date/employee wage.
-		$hire_date = strtotime( rand( ( TTDate::getYear() - 10 ), ( TTDate::getYear() - 2 ) ) . '-' . rand( 1, 12 ) . '-' . rand( 1, 28 ) );
+		srand( (int)($this->getRandomSeed() + $type) ); //Seed the random number the same for each createUser() call of the same type, so unit tests can rely on a constant hire date/employee wage.
+		if ( $hire_date == '' ) {
+			$hire_date = strtotime( rand( ( TTDate::getYear() - 10 ), ( TTDate::getYear() - 3 ) ) . '-' . rand( 1, 12 ) . '-' . rand( 1, 28 ) );
+		}
 
 		if ( empty( $ethnic_group_ids ) == false ) {
 			$uf->setEthnicGroup( $this->getRandomArrayValue( (array)$ethnic_group_ids ) );
@@ -4193,7 +4221,7 @@ class DemoData {
 				break;
 			case 999: //Random user
 				$next_available_employee_number = $uf->getNextAvailableEmployeeNumber( $company_id );
-				srand( (int)($this->getDate() + $this->getUserNamePostfix() + $type + $next_available_employee_number) ); //Re-seed random number otherwise all random users will be exactly the same.
+				srand( (int)($this->getRandomSeed() + $type + $next_available_employee_number) ); //Re-seed random number otherwise all random users will be exactly the same.
 
 				$first_name = $this->getRandomFirstName();
 				$last_name = $this->getRandomLastName();
@@ -6786,12 +6814,12 @@ class DemoData {
 	 * @param string|string[] $user_ids    UUID
 	 * @return bool
 	 */
-	function createRecurringSchedule( $company_id, $template_id, $start_date, $end_date, $user_ids ) {
+	function createRecurringSchedule( $company_id, $template_id, $start_date, $end_date, $user_ids, $display_weeks = 4 ) {
 		$rscf = TTnew( 'RecurringScheduleControlFactory' ); /** @var RecurringScheduleControlFactory $rscf */
 		$rscf->setCompany( $company_id );
 		$rscf->setRecurringScheduleTemplateControl( $template_id );
 		$rscf->setStartWeek( 1 );
-		$rscf->setDisplayWeeks( 4 );
+		$rscf->setDisplayWeeks( $display_weeks );
 		$rscf->setStartDate( $start_date );
 		$rscf->setEndDate( $end_date );
 		$rscf->setAutoFill( false );
@@ -6900,6 +6928,7 @@ class DemoData {
 					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
 					$rstf->setJob( TTUUID::getNotExistID() );        //Default
 					$rstf->setJobItem( TTUUID::getNotExistID() );    //Default
+					$rstf->setOpenShiftMultiplier( $open_shift_multiplier );
 
 					if ( $rstf->isValid() ) {
 						Debug::Text( 'Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -6940,6 +6969,7 @@ class DemoData {
 					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
 					$rstf->setJob( TTUUID::getNotExistID() );        //Default
 					$rstf->setJobItem( TTUUID::getNotExistID() );    //Default
+					$rstf->setOpenShiftMultiplier( $open_shift_multiplier );
 
 					if ( $rstf->isValid() ) {
 						Debug::Text( 'Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -6980,6 +7010,7 @@ class DemoData {
 					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
 					$rstf->setJob( TTUUID::getNotExistID() );        //Default
 					$rstf->setJobItem( TTUUID::getNotExistID() );    //Default
+					$rstf->setOpenShiftMultiplier( $open_shift_multiplier );
 
 					if ( $rstf->isValid() ) {
 						Debug::Text( 'Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -7005,6 +7036,7 @@ class DemoData {
 					}
 					$rstf->setBranch( TTUUID::getNotExistID() );     //Default
 					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
+					$rstf->setOpenShiftMultiplier( $open_shift_multiplier );
 
 					if ( $rstf->isValid() ) {
 						Debug::Text( 'Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -7045,6 +7077,7 @@ class DemoData {
 					}
 					$rstf->setBranch( TTUUID::getNotExistID() );     //Default
 					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
+					$rstf->setOpenShiftMultiplier( $open_shift_multiplier );
 
 					if ( $rstf->isValid() ) {
 						Debug::Text( 'Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -7071,6 +7104,7 @@ class DemoData {
 					}
 					$rstf->setBranch( TTUUID::getNotExistID() );     //Default
 					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
+					$rstf->setOpenShiftMultiplier( $open_shift_multiplier );
 
 					if ( $rstf->isValid() ) {
 						Debug::Text( 'Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -7098,6 +7132,7 @@ class DemoData {
 					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
 					$rstf->setJob( TTUUID::getNotExistID() );        //Default
 					$rstf->setJobItem( TTUUID::getNotExistID() );    //Default
+					$rstf->setOpenShiftMultiplier( $open_shift_multiplier );
 
 					if ( $rstf->isValid() ) {
 						Debug::Text( 'Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -8138,7 +8173,7 @@ class DemoData {
 		$rdaf->setStatus( 10 ); //Enabled
 		$rdaf->setRemittanceSourceAccount( $remittance_source_account_id );
 
-		srand( (int)($this->getDate() + $this->getUserNamePostfix() + $type_id) );
+		srand( (int)($this->getRandomSeed() + $type_id) );
 		$amount_type_id = array_rand( $rdaf->getOptions( 'amount_type' ) ); //10=Percent or 20=Fixed
 
 		$rdaf->setAmountType( $amount_type_id );
@@ -8217,6 +8252,10 @@ class DemoData {
 
 		TTDate::setTimeZone( 'America/Vancouver' );
 		TTi18n::setLocale( 'en_US' );
+
+		if ( $this->getRandomSeed() == '' ) {
+			$this->setRandomSeed( (int)( $this->getDate() + $this->getUserNamePostfix() ) );
+		}
 
 		$current_epoch = $this->getDate();
 
@@ -8593,19 +8632,19 @@ class DemoData {
 				//Create Invoice
 				$x = 0;
 				foreach ( $client_ids as $client_id ) {
-					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 0) ); //Different seed for each invoice
+					srand( (int)($this->getRandomSeed() + $x + 0) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], $product_ids[20][0], 100, [], $user_ids, $shipping_policy_ids );
 
-					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 1) ); //Different seed for each invoice
+					srand( (int)($this->getRandomSeed() + $x + 1) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], [ $product_ids[10][0], $product_ids[10][1], $product_ids[10][2], $product_ids[10][3], $product_ids[10][4], $product_ids[20][0] ], 40, null, $user_ids, $shipping_policy_ids );
 
-					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 2) ); //Different seed for each invoice
+					srand( (int)($this->getRandomSeed() + $x + 2) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], [ $product_ids[10][1], $product_ids[10][2], $product_ids[10][3] ], 40, null, $user_ids, $shipping_policy_ids );
 
-					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 3) ); //Different seed for each invoice
+					srand( (int)($this->getRandomSeed() + $x + 3) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], [ $product_ids[10][0], $product_ids[10][4], $product_ids[20][0] ], 100, [], $user_ids, $shipping_policy_ids );
 
-					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + 4) ); //Different seed for each invoice
+					srand( (int)($this->getRandomSeed() + $x + 4) ); //Different seed for each invoice
 					$invoice_ids[] = $this->createInvoice( $company_id, $client_id, $currency_ids[0], [ $product_ids[10][3], $product_ids[10][4] ], 100, [], $user_ids, $shipping_policy_ids );
 
 					$x++;
@@ -8952,16 +8991,17 @@ class DemoData {
 
 			if ( isset( $this->create_data['schedule'] ) && $this->create_data['schedule'] == true ) {
 				//Create recurring schedule templates
-				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 10, $policy_ids['schedule_1'] ); //Morning shift
-				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 20, $policy_ids['schedule_1'] ); //Afternoon shift
-				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 30, $policy_ids['schedule_1'] ); //Evening shift
-				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 40 );                            //Split Shift
-				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 50, $policy_ids['schedule_1'] ); //Full rotation
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 10, $policy_ids['schedule_1'] );    //Morning shift
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 20, $policy_ids['schedule_1'] );    //Afternoon shift
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 30, $policy_ids['schedule_1'] );    //Evening shift
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 40, null, 3 );                      //Split Shift - Open Shifts with 3x multiplier
+				$recurring_schedule_ids[] = $this->createRecurringScheduleTemplate( $company_id, 50, $policy_ids['schedule_1'], 3 ); //Full rotation
 
 				$recurring_schedule_start_date = TTDate::getBeginWeekEpoch( ( $current_epoch + ( 86400 * 7.5 ) ) );
 				$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[0], $recurring_schedule_start_date, '', [ $user_ids[0], $user_ids[1], $user_ids[2], $user_ids[3], $user_ids[4] ] );
 				$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[1], $recurring_schedule_start_date, '', [ $user_ids[5], $user_ids[6], $user_ids[7], $user_ids[8], $user_ids[9] ] );
 				$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[2], $recurring_schedule_start_date, '', [ $user_ids[10], $user_ids[11], $user_ids[12], $user_ids[13], $user_ids[14] ] );
+				$this->createRecurringSchedule( $company_id, $recurring_schedule_ids[3], TTDate::getBeginWeekEpoch( ( $current_epoch - ( 86400 * 28 ) ) ), '', [ TTUUID::getZeroId() ], 6 ); //Open Shift - Start as soon as possible so they can see open shifts combined with committed.
 
 
 				//Create different schedule shifts.
@@ -8994,7 +9034,8 @@ class DemoData {
 
 				//Create schedule for each employee.
 				$x = 1;
-				foreach ( $user_ids as $user_id ) {
+				foreach ( array_slice( $user_ids, 0, ( count( $user_ids ) - 3 ) ) as $user_id ) {
+					//Always skip the last 3 employees so there are employees available to fill shifts.
 					//Create schedule starting 6 weeks ago, up to the end of the week.
 					Debug::Text( 'Creating schedule for User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -9003,28 +9044,32 @@ class DemoData {
 
 					$y = 1;
 					while ( $schedule_date <= $schedule_end_date ) {
-						//Schedule just weekdays for users 1-4, then weekends and not mon/tue for user 5.
-						if ( ( ( $x % 5 ) != 0 && date( 'w', $schedule_date ) != 0 && date( 'w', $schedule_date ) != 6 )
-								|| ( ( $x % 5 ) == 0 && date( 'w', $schedule_date ) != 1 && date( 'w', $schedule_date ) != 2 )
-						) {
-							if ( ( $x % 5 ) == 0 ) {
-								$schedule_options_key = 3; //Common shift
-							} else {
-								$schedule_options_key = array_rand( $schedule_options_arr );
+						srand( (int)($this->getRandomSeed() + $x + $y ) ); //Different seed for each user.
+
+						if ( rand( 0, 99 ) < 90 ) { //90% chance of creating the schedule
+							//Schedule just weekdays for users 1-4, then weekends and not mon/tue for user 5.
+							if ( ( ( $x % 5 ) != 0 && date( 'w', $schedule_date ) != 0 && date( 'w', $schedule_date ) != 6 )
+									|| ( ( $x % 5 ) == 0 && date( 'w', $schedule_date ) != 1 && date( 'w', $schedule_date ) != 2 )
+							) {
+								if ( ( $x % 5 ) == 0 ) {
+									$schedule_options_key = 3; //Common shift
+								} else {
+									$schedule_options_key = array_rand( $schedule_options_arr );
+								}
+
+								Debug::Text( '  Schedule Date: ' . $schedule_date . ' Schedule Options Key: ' . $schedule_options_key, __FILE__, __LINE__, __METHOD__, 10 );
+
+								//Random departments/branches
+								$schedule_options_arr[$schedule_options_key]['branch_id'] = TTUUID::getNotExistID();     //Default
+								$schedule_options_arr[$schedule_options_key]['department_id'] = TTUUID::getNotExistID(); //Default
+
+								if ( ( $x % 3 ) == 0 && ( $y % 5 ) == 0 ) { //Every 3rd employee, only every 5th day.
+									$schedule_options_arr[$schedule_options_key]['branch_id'] = $branch_ids[array_rand( $branch_ids )];
+									$schedule_options_arr[$schedule_options_key]['department_id'] = $department_ids[array_rand( $department_ids )];
+								}
+
+								$this->createSchedule( $company_id, $user_id, $schedule_date, $schedule_options_arr[$schedule_options_key] );
 							}
-
-							Debug::Text( '  Schedule Date: ' . $schedule_date . ' Schedule Options Key: ' . $schedule_options_key, __FILE__, __LINE__, __METHOD__, 10 );
-
-							//Random departments/branches
-							$schedule_options_arr[$schedule_options_key]['branch_id'] = TTUUID::getNotExistID();     //Default
-							$schedule_options_arr[$schedule_options_key]['department_id'] = TTUUID::getNotExistID(); //Default
-
-							if ( ( $x % 3 ) == 0 && ( $y % 5 ) == 0 ) { //Every 3rd employee, only every 5th day.
-								$schedule_options_arr[$schedule_options_key]['branch_id'] = $branch_ids[array_rand( $branch_ids )];
-								$schedule_options_arr[$schedule_options_key]['department_id'] = $department_ids[array_rand( $department_ids )];
-							}
-
-							$this->createSchedule( $company_id, $user_id, $schedule_date, $schedule_options_arr[$schedule_options_key] );
 						}
 
 						$schedule_date += 86400;
@@ -9046,7 +9091,7 @@ class DemoData {
 
 				$x = 1;
 				foreach ( $user_ids as $user_id ) {
-					srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x) ); //Different seed for each user.
+					srand( (int)($this->getRandomSeed() + $x) ); //Different seed for each user.
 
 					//Pick random jobs/tasks that are used for the entire date range. So one employee isn't punching into 15 jobs.
 					$user_random_branch_ids = (array)array_flip( (array)array_rand( $branch_ids, 2 ) );
@@ -9065,7 +9110,7 @@ class DemoData {
 
 					$i = 1; //Start at 1 so $i % 5 == 0 doesn't match on the first iteration every time.
 					while ( $punch_date <= $end_date ) {
-						srand( (int)($this->getDate() + $this->getUserNamePostfix() + $x + $i) ); //Different seed for each user/date
+						srand( (int)($this->getRandomSeed() + $punch_date + $x + $i) ); //Different seed for each user/date
 
 						$date_stamp = TTDate::getDate( 'DATE', $punch_date );
 
@@ -9114,7 +9159,7 @@ class DemoData {
 									}
 								} else if ( rand( 0, 99 ) < 25 ) { //25% chance
 									//Create request
-									if ( rand( 0, 99 ) < 60 ) {                                                                     //60% chance
+									if ( rand( 0, 99 ) < 50 ) {                                                                     //50% chance
 										$request_id = $this->createRequest( 32, $user_id, $date_stamp, $policy_ids['absence'][2] ); //30=Multi-day Sick. These change the schedule and add a lot of absences, so keep them to a minimum.
 									} else {
 										$request_id = $this->createRequest( 30, $user_id, $date_stamp, $policy_ids['absence'][0] ); //30=Multi-day Vacation. These change the schedule and add a lot of absences, so keep them to a minimum.
@@ -9258,62 +9303,67 @@ class DemoData {
 				}
 				Debug::Text( ' c.Memory Usage: Current: ' . memory_get_usage() . ' Peak: ' . memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10 );
 
-				//Generate pay stubs for each pay period
-				//Can't do this unless punches are created too.
-				$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
-				$pplf->getByCompanyId( $company_id, null, null, null, [ 'start_date' => 'asc' ] );
-				if ( $pplf->getRecordCount() > 0 ) {
-					$n = 0;
-					foreach ( $pplf as $pp_obj ) {
-						foreach ( $user_ids as $user_id ) {
-							if ( !in_array( $user_id, $superior_user_ids ) ) {
-								//Verify timesheets at random for each regular user/pay period.
-								if ( rand( 0, 99 ) < 85 ) { //85% chance
-									$timesheet_verification_id = $this->createTimeSheetVerification( $user_id, $pp_obj->getId(), $user_id );
+				//Punches must be created for pay stubs to be created.
+				if ( isset( $this->create_data['pay_stub'] ) && $this->create_data['pay_stub'] == true ) {
+					//Generate pay stubs for each pay period
+					//Can't do this unless punches are created too.
+					$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
+					$pplf->getByCompanyId( $company_id, null, null, null, [ 'start_date' => 'asc' ] );
+					if ( $pplf->getRecordCount() > 0 ) {
+						$n = 0;
+						foreach ( $pplf as $pp_obj ) {
+							foreach ( $user_ids as $user_id ) {
+								if ( !in_array( $user_id, $superior_user_ids ) ) {
+									//Verify timesheets at random for each regular user/pay period.
 									if ( rand( 0, 99 ) < 85 ) { //85% chance
-										$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[2], true );
+										$timesheet_verification_id = $this->createTimeSheetVerification( $user_id, $pp_obj->getId(), $user_id );
 										if ( rand( 0, 99 ) < 85 ) { //85% chance
-											$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[1], true );
-											if ( rand( 0, 99 ) < 25 ) { //25% chance
-												$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[0], true );
+											$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[2], true );
+											if ( rand( 0, 99 ) < 85 ) { //85% chance
+												$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[1], true );
+												if ( rand( 0, 99 ) < 25 ) { //25% chance
+													$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[0], true );
+												}
 											}
 										}
 									}
 								}
+
+								$cps = new CalculatePayStub();
+								$cps->setUser( $user_id );
+								$cps->setPayPeriod( $pp_obj->getId() );
+								$cps->calculate();
 							}
 
-							$cps = new CalculatePayStub();
-							$cps->setUser( $user_id );
-							$cps->setPayPeriod( $pp_obj->getId() );
-							$cps->calculate();
-						}
+							if ( $n <= 1 ) {                                                 //Pay and close the first two pay periods.
+								Debug::Text( '  Processing PayStub Transactions and closing the pay period... Pay Period: ' . $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+								//Process Payments for all transactions.
+								$data['filter_data']['transaction_status_id'] = [ 10, 200 ]; //10=Pending, 200=ReIssue
+								$data['filter_data']['transaction_type_id'] = 10;            //10=Valid (Enabled)
+								$data['filter_data']['pay_period_id'] = $pp_obj->getId();
 
-						if ( $n <= 1 ) {                                                 //Pay and close the first two pay periods.
-							Debug::Text( '  Processing PayStub Transactions and closing the pay period... Pay Period: ' . $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-							//Process Payments for all transactions.
-							$data['filter_data']['transaction_status_id'] = [ 10, 200 ]; //10=Pending, 200=ReIssue
-							$data['filter_data']['transaction_type_id'] = 10;            //10=Valid (Enabled)
-							$data['filter_data']['pay_period_id'] = $pp_obj->getId();
+								$pslf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pslf */
+								$pslf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'] );
+								$pslf->exportPayStubTransaction( $pslf );
+								unset( $pslf, $data );
 
-							$pslf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pslf */
-							$pslf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'] );
-							$pslf->exportPayStubTransaction( $pslf );
-							unset( $pslf, $data );
-
-							$pp_obj->setStatus( 20 );
-							if ( $pp_obj->isValid() ) {
-								$pp_obj->Save();
+								$pp_obj->setStatus( 20 );
+								if ( $pp_obj->isValid() ) {
+									$pp_obj->Save();
+								} else {
+									Debug::Text( '  ERROR: Unable to close pay period: ' . $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+								}
 							} else {
-								Debug::Text( '  ERROR: Unable to close pay period: ' . $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+								Debug::Text( '  NOT Processing PayStub Transactions and closing the pay period... Pay Period: ' . $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 							}
-						} else {
-							Debug::Text( '  NOT Processing PayStub Transactions and closing the pay period... Pay Period: ' . $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-						}
 
-						$n++;
+							$n++;
+						}
 					}
+					unset( $pplf, $pp_obj, $user_id );
+				} else {
+					Debug::Text( 'NOTICE: Skipping pay stubs...', __FILE__, __LINE__, __METHOD__, 10 );
 				}
-				unset( $pplf, $pp_obj, $user_id );
 			} else {
 				Debug::Text( 'NOTICE: Skipping punches and pay stubs...', __FILE__, __LINE__, __METHOD__, 10 );
 			}

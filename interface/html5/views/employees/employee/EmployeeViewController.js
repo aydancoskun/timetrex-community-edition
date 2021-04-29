@@ -1,12 +1,15 @@
-class EmployeeViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImage';
+import '@/global/widgets/filebrowser/TImageAdvBrowser';
+
+export class EmployeeViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#employee_view_container', //Must set el here and can only set string, so events can work
 
-			_required_files: {
-				10: ['TImage', 'TImageAdvBrowser'],
-				15: ['leaflet', 'leaflet-timetrex'],
-			},
+			// _required_files: {
+			// 	10: ['TImage', 'TImageAdvBrowser'],
+			// 	15: ['leaflet', 'leaflet-timetrex'],
+			// },
 
 			user_api: null,
 			user_group_api: null,
@@ -890,6 +893,7 @@ class EmployeeViewController extends BaseViewController {
 
 		if ( !this.current_edit_record.id ) {
 			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' ); // Fixes issue with this div overlapping with save and continue. This div does not need to be shown until employee is saved.
 			return;
 		}
 
@@ -1199,7 +1203,7 @@ class EmployeeViewController extends BaseViewController {
 		if ( this.current_edit_record.id ) {
 			if ( this.file_browser ) {
 				this.file_browser.show();
-				this.file_browser.setImage( ServiceCaller.userPhoto + '&object_id=' + this.current_edit_record.id );
+				this.file_browser.setImage( ServiceCaller.getURLByObjectType( 'user_photo' ) + '&object_id=' + this.current_edit_record.id );
 				if ( this.is_viewing ) {
 					this.file_browser.setEnable( false );
 				} else {
@@ -1606,8 +1610,10 @@ class EmployeeViewController extends BaseViewController {
 			}
 
 			if ( !this.is_mass_editing ) {
-				var processed_data_for_map = TTMapLib.TTConvertMapData.processBasicFromGenericViewController( cells );
-				IndexViewController.openEditView( this, 'Map', processed_data_for_map );
+				import( /* webpackChunkName: "leaflet-timetrex" */ '@/framework/leaflet/leaflet-timetrex' ).then(( module )=>{
+					var processed_data_for_map = module.TTConvertMapData.processBasicFromGenericViewController( cells );
+					IndexViewController.openEditView( this, 'Map', processed_data_for_map );
+				}).catch( Global.importErrorHandler );
 			}
 		}
 	}
@@ -1759,7 +1765,7 @@ class EmployeeViewController extends BaseViewController {
 				id: this.script_name + '_navigation',
 				api_class: TTAPI.APIUser,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				navigation_mode: true,
 				show_search_inputs: true
 			} );
@@ -1781,7 +1787,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICompany,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.COMPANY,
+			layout_name: 'global_company',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'company_id'
@@ -1794,7 +1800,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			layout_name: 'global_legal_entity',
 			show_search_inputs: true,
 			field: 'legal_entity_id',
 			customSearchFilter: ( function( args ) {
@@ -1807,7 +1813,7 @@ class EmployeeViewController extends BaseViewController {
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_employee_column1 );
 
 		//First Name
@@ -1830,7 +1836,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPermissionControl,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PERMISSION_CONTROL,
+			layout_name: 'global_permission_control',
 			show_search_inputs: true,
 			field: 'permission_control_id',
 			customSearchFilter: ( function( args ) {
@@ -1845,7 +1851,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayPeriodSchedule,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
+			layout_name: 'global_pay_period_schedule',
 			show_search_inputs: true,
 			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
@@ -1860,7 +1866,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPolicyGroup,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.POLICY_GROUP,
+			layout_name: 'global_policy_group',
 			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
 			} ),
@@ -1875,7 +1881,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUserTitle,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.JOB_TITLE,
+			layout_name: 'global_job_title',
 			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
 			} ),
@@ -1892,7 +1898,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
 			} ),
@@ -1910,7 +1916,7 @@ class EmployeeViewController extends BaseViewController {
 			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
 			} ),
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'default_branch_id'
@@ -1922,7 +1928,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
 			} ),
@@ -1940,7 +1946,7 @@ class EmployeeViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				customSearchFilter: ( function( args ) {
 					return $this.setCompanyIdFilter( args );
 				} ),
@@ -1975,7 +1981,7 @@ class EmployeeViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				customSearchFilter: ( function( args ) {
 					return $this.setCompanyIdFilter( args );
 				} ),
@@ -2009,11 +2015,11 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			set_empty: true,
 			field: 'group_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_group_array ) );
+		form_item_input.setSourceData( $this.user_group_array );
 		this.addEditFieldToColumn( $.i18n._( 'Group' ), form_item_input, tab_employee_column2 );
 
 		// Ethnicity
@@ -2021,7 +2027,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIEthnicGroup,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ETHNIC_GROUP,
+			layout_name: 'global_ethnic_group',
 			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
 			} ),
@@ -2080,7 +2086,7 @@ class EmployeeViewController extends BaseViewController {
 					onResult: function( result ) {
 
 						if ( result.toLowerCase() === 'true' ) {
-							$this.file_browser.setImage( ServiceCaller.userPhoto + '&object_id=' + $this.current_edit_record.id );
+							$this.file_browser.setImage( ServiceCaller.getURLByObjectType( 'user_photo' ) + '&object_id=' + $this.current_edit_record.id );
 						} else {
 							TAlertManager.showAlert( result, 'Error' );
 						}
@@ -2101,7 +2107,7 @@ class EmployeeViewController extends BaseViewController {
 						onResult: function( result ) {
 
 							if ( result.toLowerCase() === 'true' ) {
-								$this.file_browser.setImage( ServiceCaller.userPhoto + '&object_id=' + $this.current_edit_record.id );
+								$this.file_browser.setImage( ServiceCaller.getURLByObjectType( 'user_photo' ) + '&object_id=' + $this.current_edit_record.id );
 							} else {
 								TAlertManager.showAlert( result, 'Error' );
 							}
@@ -2164,13 +2170,13 @@ class EmployeeViewController extends BaseViewController {
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
+		form_item_input.setSourceData( $this.country_array );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_contact_info_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'province' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_contact_info_column1 );
 
 		//City
@@ -2183,7 +2189,7 @@ class EmployeeViewController extends BaseViewController {
 		//Gender
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'sex_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
+		form_item_input.setSourceData( $this.sex_array );
 		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_contact_info_column2 );
 
 		//Work Phone
@@ -2217,7 +2223,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.TTextInput( { field: 'work_email', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab_contact_info_column2, '', null, true );
 
-		//Fax
+		//Home Email
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'home_email', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab_contact_info_column2, '', null, true );
@@ -2332,7 +2338,7 @@ class EmployeeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPermissionControl,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PERMISSION_CONTROL,
+			layout_name: 'global_permission_control',
 			show_search_inputs: true,
 			field: 'terminated_permission_control_id',
 			customSearchFilter: ( function( args ) {
@@ -2433,7 +2439,7 @@ class EmployeeViewController extends BaseViewController {
 				label: $.i18n._( 'Company' ),
 				in_column: 1,
 				field: 'company_id',
-				layout_name: ALayoutIDs.COMPANY,
+				layout_name: 'global_company',
 				api_class: TTAPI.APICompany,
 				multiple: false,
 				custom_first_label: Global.default_item,
@@ -2445,12 +2451,12 @@ class EmployeeViewController extends BaseViewController {
 				label: $.i18n._( 'Legal Entity' ),
 				in_column: 1,
 				field: 'legal_entity_id',
-				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				layout_name: 'global_legal_entity',
 				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				custom_first_label: Global.any_item,
-				basic_search: PermissionManager.checkTopLevelPermission( 'LegalEntity' ) ? true : false,
-				adv_search: PermissionManager.checkTopLevelPermission( 'LegalEntity' ) ? true : false,
+				basic_search: true,
+				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2460,7 +2466,7 @@ class EmployeeViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2521,7 +2527,7 @@ class EmployeeViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2529,7 +2535,7 @@ class EmployeeViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
@@ -2539,7 +2545,7 @@ class EmployeeViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
@@ -2553,7 +2559,7 @@ class EmployeeViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				field: 'default_department_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
@@ -2567,7 +2573,7 @@ class EmployeeViewController extends BaseViewController {
 				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 3,
-				layout_name: ALayoutIDs.JOB_TITLE,
+				layout_name: 'global_job_title',
 				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
@@ -2584,7 +2590,7 @@ class EmployeeViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.COMBO_BOX
 			} ),
 			new SearchField( {
@@ -2594,7 +2600,7 @@ class EmployeeViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {

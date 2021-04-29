@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -276,8 +276,8 @@ class CompanyDeductionFactory extends Factory {
 						//Province/State
 						200 => TTi18n::gettext( 'Province/State Income Tax Formula' ),
 
-						//Sub-State/Tax Area
-						300 => TTi18n::gettext( 'District/County Income Tax Formula' ),
+						//Sub-State/Tax Area - Local, City, School District, County, etc...
+						300 => TTi18n::gettext( 'Local (City/District/County) Income Tax Formula' ),
 				];
 				break;
 			case 'length_of_service_unit':
@@ -1023,8 +1023,8 @@ class CompanyDeductionFactory extends Factory {
 		$end_date = (int)( ( $ud_obj->getEndDate() == '' ) ? $this->getEndDate() : $ud_obj->getEndDate() );
 
 		if ( $this->getCalculation() == 90 && $pp_transaction_date != '' ) { //CPP
-			if ( ( $start_date == '' || TTDate::getEndDayEpoch( $pp_transaction_date ) > TTDate::getEndMonthEpoch( $start_date ) )
-					&& ( $end_date == '' || TTDate::getEndDayEpoch( $pp_transaction_date ) <= TTDate::getEndMonthEpoch( $end_date ) ) ) {
+			if ( ( empty( $start_date ) || TTDate::getEndDayEpoch( $pp_transaction_date ) > TTDate::getEndMonthEpoch( $start_date ) )
+					&& ( empty( $end_date ) || TTDate::getEndDayEpoch( $pp_transaction_date ) <= TTDate::getEndMonthEpoch( $end_date ) ) ) {
 				Debug::text( 'CPP: Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10 );
 
 				return true;
@@ -1034,8 +1034,8 @@ class CompanyDeductionFactory extends Factory {
 
 			return false;
 		} else {
-			if ( ( $start_date == '' || $pp_end_date >= $start_date )
-					&& ( $end_date == '' || $pp_end_date <= $end_date ) ) {
+			if ( ( empty( $start_date ) || $pp_end_date >= $start_date )
+					&& ( empty( $end_date ) || $pp_end_date <= $end_date ) ) {
 				Debug::text( 'Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10 );
 
 				return true;
@@ -1447,7 +1447,7 @@ class CompanyDeductionFactory extends Factory {
 			Debug::Text( '  Worked Time: ' . $worked_time . 'hrs', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		$employed_days = TTDate::getDays( ( $epoch - $ud_obj->getLengthOfServiceDate() ) );
+		$employed_days = round( TTDate::getDays( ( TTDate::getMiddleDayEpoch( $epoch ) - TTDate::getMiddleDayEpoch( $ud_obj->getLengthOfServiceDate() ) ) ) ); //Make sure we aren't using partial days.
 		Debug::Text( '  Employed Days: ' . $employed_days . ' Based On: ' . TTDate::getDate( 'DATE+TIME', $ud_obj->getLengthOfServiceDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		$minimum_length_of_service_result = false;
@@ -1455,7 +1455,7 @@ class CompanyDeductionFactory extends Factory {
 		//Check minimum length of service
 		if ( $this->getMinimumLengthOfService() == 0
 				|| ( $this->getMinimumLengthOfServiceUnit() == 50 && $worked_time >= $this->getMinimumLengthOfService() )
-				|| ( $this->getMinimumLengthOfServiceUnit() != 50 && $employed_days >= $this->getMinimumLengthOfServiceDays() ) ) {
+				|| ( $this->getMinimumLengthOfServiceUnit() != 50 && $employed_days >= floor( $this->getMinimumLengthOfServiceDays() ) ) ) { //Make sure we don't compare against partial days, as its possible for a pay stub to fall between brackets (ie: 5.0 -> 7.999, 8.0 -> 9.999)
 			$minimum_length_of_service_result = true;
 		}
 
@@ -1483,7 +1483,7 @@ class CompanyDeductionFactory extends Factory {
 			//Check maximum length of service.
 			if ( $this->getMaximumLengthOfService() == 0
 					|| ( $this->getMaximumLengthOfServiceUnit() == 50 && $worked_time <= $this->getMaximumLengthOfService() )
-					|| ( $this->getMaximumLengthOfServiceUnit() != 50 && $employed_days <= $this->getMaximumLengthOfServiceDays() ) ) {
+					|| ( $this->getMaximumLengthOfServiceUnit() != 50 && $employed_days <= ( ceil( $this->getMaximumLengthOfServiceDays() ) - 0.000001 ) ) ) { //Max of 7.999 and min of the next bracket 8.000 should never match. Make sure we don't compare against partial days as its possible for a pay stub to fall between brackets (ie: 5.0 -> 7.999, 8.0 -> 9.999)
 				$maximum_length_of_service_result = true;
 			}
 		}
@@ -3148,7 +3148,7 @@ class CompanyDeductionFactory extends Factory {
 			);
 		}
 		//  minimum length of service unit
-		if ( $this->getMinimumLengthOfServiceUnit() != '' ) {
+		if ( !empty( $this->getMinimumLengthOfServiceUnit() ) ) {
 			$this->Validator->inArrayKey( 'minimum_length_of_service_unit_id',
 										  $this->getMinimumLengthOfServiceUnit(),
 										  TTi18n::gettext( 'Incorrect minimum length of service unit' ),
@@ -3156,7 +3156,7 @@ class CompanyDeductionFactory extends Factory {
 			);
 		}
 		// maximum length of service unit
-		if ( $this->getMaximumLengthOfServiceUnit() != '' ) {
+		if ( !empty( $this->getMaximumLengthOfServiceUnit() ) ) {
 			$this->Validator->inArrayKey( 'maximum_length_of_service_unit_id',
 										  $this->getMaximumLengthOfServiceUnit(),
 										  TTi18n::gettext( 'Incorrect maximum length of service unit' ),
@@ -3204,7 +3204,7 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		// Apply Frequency
-		if ( $this->getApplyFrequency() != 0 ) {
+		if ( !empty( $this->getApplyFrequency() ) ) {
 			$this->Validator->inArrayKey( 'apply_frequency_id',
 										  $this->getApplyFrequency(),
 										  TTi18n::gettext( 'Incorrect frequency' ),
@@ -3213,7 +3213,7 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		// Frequency Month
-		if ( $this->getApplyFrequencyMonth() != 0 ) {
+		if ( !empty( $this->getApplyFrequencyMonth() ) ) {
 			$this->Validator->inArrayKey( 'apply_frequency_month',
 										  $this->getApplyFrequencyMonth(),
 										  TTi18n::gettext( 'Incorrect frequency month' ),
@@ -3222,7 +3222,7 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		// frequency day of month
-		if ( $this->getApplyFrequencyDayOfMonth() != 0 ) {
+		if ( !empty( $this->getApplyFrequencyDayOfMonth() ) ) {
 			$this->Validator->inArrayKey( 'apply_frequency_day_of_month',
 										  $this->getApplyFrequencyDayOfMonth(),
 										  TTi18n::gettext( 'Incorrect frequency day of month' ),
@@ -3231,7 +3231,7 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		// frequency day of week
-		if ( $this->getApplyFrequencyDayOfWeek() != 0 ) {
+		if ( !empty( $this->getApplyFrequencyDayOfWeek() ) ) {
 			$this->Validator->inArrayKey( 'apply_frequency_day_of_week',
 										  $this->getApplyFrequencyDayOfWeek(),
 										  TTi18n::gettext( 'Incorrect frequency day of week' ),
@@ -3240,7 +3240,7 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		//  frequency quarter month
-		if ( $this->getApplyFrequencyQuarterMonth() != 0 ) {
+		if ( !empty( $this->getApplyFrequencyQuarterMonth() ) ) {
 			$this->Validator->isGreaterThan( 'apply_frequency_quarter_month',
 											 $this->getApplyFrequencyQuarterMonth(),
 											 TTi18n::gettext( 'Incorrect frequency quarter month' ),
@@ -3256,7 +3256,7 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		// Payroll Run Type
-		if ( $this->getApplyPayrollRunType() != 0 ) {
+		if ( !empty( $this->getApplyPayrollRunType() ) ) {
 			$this->Validator->inArrayKey( 'apply_payroll_run_type_id',
 										  $this->getApplyPayrollRunType(),
 										  TTi18n::gettext( 'Incorrect payroll run type' ),

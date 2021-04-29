@@ -1,4 +1,6 @@
-class MessageControlViewController extends BaseViewController {
+import linkifyStr from 'linkifyjs/string';
+
+export class MessageControlViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#message_control_view_container',
@@ -62,7 +64,7 @@ class MessageControlViewController extends BaseViewController {
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -77,7 +79,7 @@ class MessageControlViewController extends BaseViewController {
 				field: 'object_type_id',
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -95,7 +97,7 @@ class MessageControlViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -107,7 +109,7 @@ class MessageControlViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -1008,7 +1010,7 @@ class MessageControlViewController extends BaseViewController {
 			api_class: TTAPI.APIMessageControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.MESSAGE_USER,
+			layout_name: 'global_message_user',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -1079,7 +1081,7 @@ class MessageControlViewController extends BaseViewController {
 			api_class: TTAPI.APIMessageControl,
 			column_option_key: 'user_columns',
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.MESSAGE_USER,
+			layout_name: 'global_message_user',
 			show_search_inputs: true,
 			set_empty: true,
 			custom_key_name: 'User',
@@ -1405,8 +1407,8 @@ class MessageControlViewController extends BaseViewController {
 				if ( LocalCacheData.edit_id_for_next_open_view ) {
 					var item = {};
 					item.id = LocalCacheData.edit_id_for_next_open_view;
-					if ( LocalCacheData.all_url_args.t === 'request' ) {
-						item.object_id = LocalCacheData.all_url_args.object_id;
+					if ( LocalCacheData.getAllURLArgs().t === 'request' ) {
+						item.object_id = LocalCacheData.getAllURLArgs().object_id;
 						item.object_type_id = 50;
 					}
 					this.onViewClick( item );
@@ -1507,12 +1509,12 @@ class MessageControlViewController extends BaseViewController {
 				this.addMessageRow( message_container, 'To', 'msg_to_full_name', current_item['to_first_name'] + ' ' + current_item['to_last_name'] );
 				this.addMessageRow( message_container, 'Date', 'msg_updated_date', current_item['updated_date'] );
 				this.addMessageRow( message_container, 'Subject', 'msg_subject', current_item['subject'] );
-				this.addMessageRow( message_container, 'Body', 'msg_body', current_item['body'], true );
+				this.addMessageRow( message_container, 'Body', 'msg_body', current_item['body'], true, true );
 
 			} else if ( this.is_request ) {
 				this.addMessageRow( message_container, 'From', 'req_from_full_name', current_item['from_first_name'] + ' ' + current_item['from_last_name'] + '@' + current_item['updated_date'] );
 				this.addMessageRow( message_container, 'Subject', 'req_subject', current_item['subject'] );
-				this.addMessageRow( message_container, 'Body', 'req_body', current_item['body'], true );
+				this.addMessageRow( message_container, 'Body', 'req_body', current_item['body'], true, true );
 
 			} else {
 				// Error: Message type not supported. Exit. Currently only messages and request types supported.
@@ -1535,7 +1537,7 @@ class MessageControlViewController extends BaseViewController {
 		}
 	}
 
-	addMessageRow( message_container, label, field, value, set_resize_event ) {
+	addMessageRow( message_container, label, field, value, set_resize_event, parse_link ) {
 		// Note: Take extra care with this function, as we are building widgets outside of the normal init flow, so compare to the standard flow of buildEditViewUI if anything odd happens.
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
@@ -1543,7 +1545,13 @@ class MessageControlViewController extends BaseViewController {
 		this.addEditFieldToColumn( $.i18n._( label ), form_item_input, message_container, '', null, null, set_resize_event );
 
 		// #2775 You must set the value after its added to column, not before, otherwise the field label will not resize after a large value is set.
-		form_item_input.setValue( value );
+
+		if ( parse_link ) {
+			form_item_input.html( value.linkify( { nl2br: true, className: 'linkified' } ) );
+			form_item_input.setResizeEvent();
+		} else {
+			form_item_input.setValue( value );
+		}
 
 		// #2775 You must set the opacity to 1 after adding to column, as the addEditFieldToColumn sets opacity to 0 during loading, and normally set back to 1 at the bottom of BaseVC.initEditViewData but here we are building widgets outside of the normal init flow.
 		form_item_input.css( 'opacity', '1' );

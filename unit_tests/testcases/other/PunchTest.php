@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,14 +35,14 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class PunchTest extends PHPUnit_Framework_TestCase {
+class PunchTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 	protected $pay_stub_account_link_arr = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -77,16 +77,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		//$this->deleteAllSchedules();
-
-		return true;
 	}
 
 	function getPayStubAccountLinkArray() {
@@ -2998,6 +2992,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
+
+		$this->assertTrue( isset( $punch_arr[$date_epoch] ) );
 		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
@@ -3023,12 +3019,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
 
-		if ( isset( $punch_arr[$date_epoch] ) ) {
-			$this->assertTrue( false );
-		} else {
-			$this->assertTrue( true );
-		}
-
+		$this->assertTrue( !isset( $punch_arr[$date_epoch] ) );
+		$this->assertTrue( isset( $punch_arr[$date_epoch2] ) );
 		$this->assertCount( 2, $punch_arr[$date_epoch2][0]['shift_data']['punches'] );
 		$this->assertCount( 1, $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
@@ -3051,12 +3043,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
 
-		if ( isset( $punch_arr[$date_epoch2] ) ) {
-			$this->assertTrue( false );
-		} else {
-			$this->assertTrue( true );
-		}
-
+		$this->assertTrue( !isset( $punch_arr[$date_epoch2] ) );
+		$this->assertTrue( isset( $punch_arr[$date_epoch] ) );
 		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
@@ -5168,7 +5156,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testRoundingConditionA
+	 * @group Punch_testRoundingConditionA3
 	 */
 	function testRoundingConditionA3() {
 		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
@@ -5656,7 +5644,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testDST
+	 * @group Punch_testDSTFall
 	 */
 	function testDSTFall() {
 		//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
@@ -5719,7 +5707,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testDST
+	 * @group Punch_testDSTFallB
 	 */
 	function testDSTFallB() {
 		//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
@@ -5767,7 +5755,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testDST
+	 * @group Punch_testDSTSpring
 	 */
 	function testDSTSpring() {
 		//DST time should be recorded based on the time the employee actually works, therefore one hour less on this day.
@@ -5829,7 +5817,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testDST
+	 * @group Punch_testDSTSpringB
 	 */
 	function testDSTSpringB() {
 		//DST time should be recorded based on the time the employee actually works, therefore one hour less on this day.
@@ -7658,7 +7646,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createPunchPair( $this->user_id,
 							  strtotime( $date_stamp . ' 8:00AM' ),
-							  false, //strtotime($date_stamp.' 1:00PM'),
+							  null, //strtotime($date_stamp.' 1:00PM'),
 							  [
 									  'in_type_id'    => 10,
 									  'out_type_id'   => 10,
@@ -7682,8 +7670,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 
-		$this->assertEquals( 10, $data['status_id'] ); //In/Out
-		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+		$this->assertEquals( 20, $data['status_id'] ); //Out
+		$this->assertEquals( 20, $data['type_id'] ); //Lunch
 
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
@@ -8405,7 +8393,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testStationCheckSource
+	 * @group Punch_testStationCheckSourceNetMask
 	 */
 	function testStationCheckSourceNetMask() {
 		include_once( 'Net/IPv4.php' );
@@ -8436,7 +8424,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testStationCheckSource
+	 * @group Punch_testStationCheckSourceANY
 	 */
 	function testStationCheckSourceANY() {
 		global $dd;
@@ -8460,7 +8448,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testStationCheckSource
+	 * @group Punch_testStationCheckSourceIPv4
 	 */
 	function testStationCheckSourceIPv4() {
 		global $dd;
@@ -8484,7 +8472,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testStationCheckSource
+	 * @group Punch_testStationCheckSourceIPv4NetMaskA
 	 */
 	function testStationCheckSourceIPv4NetMaskA() {
 		global $dd;
@@ -8508,7 +8496,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testStationCheckSource
+	 * @group Punch_testStationCheckSourceIPv4NetMaskB
 	 */
 	function testStationCheckSourceIPv4NetMaskB() {
 		global $dd;
@@ -8538,7 +8526,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testStationCheckSource
+	 * @group Punch_testStationCheckSourceIPv6
 	 */
 	function testStationCheckSourceIPv6() {
 		global $dd;
@@ -8562,7 +8550,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testStationCheckSource
+	 * @group Punch_testStationCheckSourceIPv6NetMaskA
 	 */
 	function testStationCheckSourceIPv6NetMaskA() {
 		global $dd;
@@ -8590,7 +8578,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Punch_testStationCheckSource
+	 * @group Punch_testStationCheckSourceIPv6NetMaskB
 	 */
 	function testStationCheckSourceIPv6NetMaskB() {
 		global $dd;

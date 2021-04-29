@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1587,8 +1587,8 @@ class UserDateTotalFactory extends Factory {
 			}
 		}
 
-		// Start Type
-		if ( $this->getStartType() != '' ) {
+		// Start Type -- This is an int, so it can return 0 in some cases.
+		if ( !empty( $this->getStartType() ) ) {
 			$this->Validator->inArrayKey( 'start_type',
 										  $this->getStartType(),
 										  TTi18n::gettext( 'Incorrect Start Type' ),
@@ -1596,14 +1596,14 @@ class UserDateTotalFactory extends Factory {
 			);
 		}
 		// Start Time Stamp
-		if ( $this->getStartTimeStamp() != '' ) {
+		if ( !empty( $this->getStartTimeStamp() ) ) {
 			$this->Validator->isDate( 'start_time_stamp',
 									  $this->getStartTimeStamp(),
 									  TTi18n::gettext( 'Incorrect start time stamp' )
 			);
 		}
-		// End Type
-		if ( $this->getEndType() != '' ) {
+		// End Type -- This is an int, so it can return 0 in some cases.
+		if ( !empty( $this->getEndType() ) ) {
 			$this->Validator->inArrayKey( 'end_type',
 										  $this->getEndType(),
 										  TTi18n::gettext( 'Incorrect End Type' ),
@@ -1622,11 +1622,23 @@ class UserDateTotalFactory extends Factory {
 									 $this->getTotalTime(),
 									 TTi18n::gettext( 'Incorrect total time' )
 		);
+		$this->Validator->isLessThan( 'total_time',
+									 $this->getTotalTime(),
+									 TTi18n::gettext( 'Total time is too high' ),
+				 					 ( 100000 * 3600 ) //100,000hrs is maximum for any single UDT record. Should be more than enough, but needs to be well lower than the SQL maximum integer value.
+		);
+
 		// Actual total time
 		$this->Validator->isNumeric( 'actual_total_time',
 									 $this->getActualTotalTime(),
 									 TTi18n::gettext( 'Incorrect actual total time' )
 		);
+		$this->Validator->isLessThan( 'actual_total_time',
+									  $this->getTotalTime(),
+									  TTi18n::gettext( 'Actual total time is too high' ),
+									  ( 100000 * 3600 ) //100,000hrs is maximum for any single UDT record. Should be more than enough, but needs to be well lower than the SQL maximum integer value.
+		);
+
 		// Currency
 		if ( $this->getCurrency() !== false && $this->getCurrency() != TTUUID::getZeroId() ) {
 			$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */

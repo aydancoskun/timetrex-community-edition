@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -33,8 +33,6 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-
-require_once( 'Numbers/Words.php' );
 
 /**
  * @package Modules\PayStubAmendment
@@ -473,30 +471,6 @@ class PayStubAmendmentFactory extends Factory {
 		}
 
 		return $this->setGenericDataValue( 'units', $value );
-	}
-
-	/**
-	 * @return bool
-	 */
-	function getPayStubId() {
-		//Find which pay period this effective date belongs too
-		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
-		$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getEffectiveDate() );
-		if ( $pplf->getRecordCount() > 0 ) {
-			$pp_obj = $pplf->getCurrent();
-			Debug::text( 'Found Pay Period ID: ' . $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-
-			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
-			$pslf->getByUserIdAndPayPeriodId( $this->getUser(), $pp_obj->getId() );
-			if ( $pslf->getRecordCount() > 0 ) {
-				$ps_obj = $pslf->getCurrent();
-				Debug::text( 'Found Pay Stub for this effective date: ' . $ps_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-
-				return $ps_obj->getId();
-			}
-		}
-
-		return false;
 	}
 
 	/**

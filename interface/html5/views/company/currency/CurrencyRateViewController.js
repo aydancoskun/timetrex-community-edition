@@ -1,4 +1,4 @@
-class CurrencyRateViewController extends BaseViewController {
+export class CurrencyRateViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -64,7 +64,7 @@ class CurrencyRateViewController extends BaseViewController {
 			api_class: TTAPI.APICurrencyRate,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY_RATE,
+			layout_name: 'global_currency_rate',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -86,7 +86,7 @@ class CurrencyRateViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			field: 'currency_id',
 			set_empty: false,
 			show_search_inputs: true

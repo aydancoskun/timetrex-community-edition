@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -421,7 +421,7 @@ class PayFormulaPolicyFactory extends Factory {
 
 		//Don't round rate, as some currencies accept more than 2 decimal places now.
 		//and all wages support up to 4 decimal places too.
-		//return Misc::MoneyFormat($rate, FALSE);
+		//return Misc::MoneyRound($rate);
 		//Debug::text(' Final Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $rate;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -272,6 +272,15 @@ class FormW2Report extends Report {
 				}
 
 				break;
+			case 'form_type': //Type of Form to generate.
+				$retval = [
+						'-1010-w2' => TTi18n::getText( 'W-2' ),
+				];
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+					$retval['-1020-w2c'] = TTi18n::getText( 'W-2C' );
+				}
+				break;
 			case 'kind_of_employer':
 				$retval = [
 						'-1010-N' => TTi18n::getText( 'None Apply' ),
@@ -529,6 +538,28 @@ class FormW2Report extends Report {
 	/**
 	 * @return mixed
 	 */
+	function getFW2CObject() {
+		if ( !isset( $this->form_obj['fw2c'] ) || !is_object( $this->form_obj['fw2c'] ) ) {
+			$this->form_obj['fw2c'] = $this->getFormObject()->getFormObject( 'w2c', 'US' );
+
+			return $this->form_obj['fw2c'];
+		}
+
+		return $this->form_obj['fw2c'];
+	}
+
+	/**
+	 * @return bool
+	 */
+	function clearFW2CObject() {
+		$this->form_obj['fw2c'] = false;
+
+		return true;
+	}
+
+	/**
+	 * @return mixed
+	 */
 	function getFW3Object() {
 		if ( !isset( $this->form_obj['fw3'] ) || !is_object( $this->form_obj['fw3'] ) ) {
 			$this->form_obj['fw3'] = $this->getFormObject()->getFormObject( 'w3', 'US' );
@@ -544,6 +575,28 @@ class FormW2Report extends Report {
 	 */
 	function clearFW3Object() {
 		$this->form_obj['fw3'] = false;
+
+		return true;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	function getFW3CObject() {
+		if ( !isset( $this->form_obj['fw3c'] ) || !is_object( $this->form_obj['fw3c'] ) ) {
+			$this->form_obj['fw3c'] = $this->getFormObject()->getFormObject( 'w3c', 'US' );
+
+			return $this->form_obj['fw3c'];
+		}
+
+		return $this->form_obj['fw3c'];
+	}
+
+	/**
+	 * @return bool
+	 */
+	function clearFW3CObject() {
+		$this->form_obj['fw3c'] = false;
 
 		return true;
 	}
@@ -618,12 +671,18 @@ class FormW2Report extends Report {
 	 * @return bool
 	 */
 	function _getData( $format = null ) {
-		$this->tmp_data = [ 'pay_stub_entry' => [], 'remittance_agency' => [] ];
+		$this->tmp_data = [ 'pay_stub_entry' => [], 'ytd_pay_stub_entry' => [], 'remittance_agency' => [] ];
 
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 		$tax_deductions = [];
 		$user_deduction_data = [];
+
+		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
+		$pd_obj = new PayrollDeduction( 'US', 'WA' ); //State doesn't matter.
+		$pd_obj->setDate( $filter_data['end_date'] );
+
+		$social_security_wage_limit = $pd_obj->getSocialSecurityMaximumEarnings();
 
 		//
 		//Figure out state/locality wages/taxes.
@@ -632,7 +691,7 @@ class FormW2Report extends Report {
 		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), [ 10, 20 ], 10, null, [ 'calculation_id' => 'asc', 'calculation_order' => 'asc' ] );
 		if ( $cdlf->getRecordCount() > 0 ) {
-			foreach ( $cdlf as $cd_obj ) {
+			foreach ( $cdlf as $cd_obj ) { /** @var CompanyDeductionFactory $cd_obj */
 				if ( in_array( $cd_obj->getCalculation(), [ 200, 300 ] ) ) { //Only consider State/District records.
 					//Debug::Text('Company Deduction: ID: '. $cd_obj->getID() .' Name: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
 					$tax_deductions[$cd_obj->getId()] = $cd_obj;
@@ -678,7 +737,7 @@ class FormW2Report extends Report {
 			foreach ( $pself as $key => $pse_obj ) {
 				$legal_entity_id = $pse_obj->getColumn( 'legal_entity_id' );
 				$user_id = $pse_obj->getColumn( 'user_id' );
-				$date_stamp = TTDate::strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) );
+				$date_stamp = TTDate::strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 				$user_id_legal_entity_map[$user_id] = $legal_entity_id; //Used as an optimization later on so we can easily get the legal entity for any specific user.
 
@@ -704,9 +763,20 @@ class FormW2Report extends Report {
 			if ( isset( $this->tmp_data['pay_stub_entry'] ) && is_array( $this->tmp_data['pay_stub_entry'] ) ) {
 				foreach ( $this->tmp_data['pay_stub_entry'] as $user_id => $data_a ) {
 					foreach ( $data_a as $date_stamp => $data_b ) {
+						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['l3'] ) ) {
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['l3'] = 0;
+						}
+
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l1'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l1']['include_pay_stub_entry_account'], $form_data['l1']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l2'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l2']['include_pay_stub_entry_account'], $form_data['l2']['exclude_pay_stub_entry_account'] );
+
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l3'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l3']['include_pay_stub_entry_account'], $form_data['l3']['exclude_pay_stub_entry_account'] );
+
+						//Make sure we cap the social security wages at the maximum amount for the year.
+						$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l3'], $this->tmp_data['ytd_pay_stub_entry'][$user_id]['l3'], $social_security_wage_limit );
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['l3'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l3'] ); //YTD adjustment *must* go above where $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'] is set to $tmp_amount_around_limit_arr['adjusted_amount'], otherwise it will never exceed the SS maximum limit, which we need it to do to handle negative SS taxable wages properly.
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l3'] = $tmp_amount_around_limit_arr['adjusted_amount'];
+
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l4'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l4']['include_pay_stub_entry_account'], $form_data['l4']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l5'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l5']['include_pay_stub_entry_account'], $form_data['l5']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l6'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['l6']['include_pay_stub_entry_account'], $form_data['l6']['exclude_pay_stub_entry_account'] );
@@ -730,11 +800,26 @@ class FormW2Report extends Report {
 							//  For example an employee not earning enough to have State income tax taken off yet.
 							//Now that user_deduction supports start/end dates per employee, we could use that to better handle employees switching between Tax/Deduction records mid-year
 							//  while still accounting for cases where nothing is deducted/withheld but still needs to be displayed.
-							foreach ( $tax_deductions as $tax_deduction_id => $cd_obj ) {
+							//The only way to do this fully is to only consider the Tax/Deductions when the user is actually assigned to it.
+							//   Therefore "if ( $tax_withheld_amount > 0 || in_array( $user_id, (array)$cd_obj->getUser() ) )" does not work,
+							//      because $tax_withheld_amount > 0 breaks the case where multiple Tax/Deductions (ie: Local income tax for multiple districts) go to the same PS Account.
+							//      Even if the user isn't assigned to say District 2, the amounts going to the same PS Account as District 1 would be included in it.
+							//      Only way to properly handle all these cases is with Tax/Deduction Start/End dates.
+							//      ** We considered trying to be "smarter" and detecting if multiple Tax/Deductions go to the same pay stub account, then only require those have the user assigned to them, but then we add inconsistency in the setup that could bite customers.
+							//         Plus we can never really be sure what wages are associated with each tax if there is any kind of standard deduction amount that is excluded.
+							//         Therefore to be consistent, always require that the user be assigned to a Tax/Deduction record, and start/end dates must be used if an employee moves states/localities.
+							//
+							//Here are some other cases to consider:
+							//   1. Employee moves from one state to another. State A needs to stop at a specific date, and State B needs to start. Normally the customer would unassign the employee from State A and assign to State B.
+							//         - Even though each state should go to their own PS Account and ideally the W2 would still show State A taxes in that case, it can never be 100% sure what wages go to each state, so we have to require start/end dates for this case.
+							//   2. Customer has employees in multiple local districts all going to the same PS Account. Employees may also move from one district to another and need to show both on the W2.
+							//         - Since each local district could be going to the same PS Account, must use Start/End dates for this too.
+							foreach ( $tax_deductions as $tax_deduction_id => $cd_obj ) { /** @var CompanyDeductionFactory $cd_obj */
 								if ( isset( $user_id_legal_entity_map[$user_id] ) && ( $user_id_legal_entity_map[$user_id] == $cd_obj->getLegalEntity() || $user_id_legal_entity_map[$user_id] == TTUUID::getZeroID() ) ) {
 									//Found Tax/Deduction associated with this pay stub account.
 									$tax_withheld_amount = Misc::calculateMultipleColumns( $data_b['psen_ids'], [ $cd_obj->getPayStubEntryAccount() ] );
-									if ( $tax_withheld_amount > 0 || in_array( $user_id, (array)$cd_obj->getUser() ) ) {
+									//if ( $tax_withheld_amount > 0 || in_array( $user_id, (array)$cd_obj->getUser() ) ) {  //This breaks cases where multiple Local Income Taxes go to the same Tax/Deduction because they all will have tax withhold > 0.
+									if ( in_array( $user_id, (array)$cd_obj->getUser() ) == true ) { //Only check if the user is assigned to a Tax/Deduction here, so we explicitly exclude ones where they are not assigned which could be for a different district. Check for Tax/Deduction Start/End dates next as well.
 										Debug::Text( 'Found User ID: ' . $user_id . ' in Tax Deduction Name: ' . $cd_obj->getName() . '(' . $cd_obj->getID() . ') Calculation ID: ' . $cd_obj->getCalculation() . ' Withheld Amount: ' . $tax_withheld_amount, __FILE__, __LINE__, __METHOD__, 10 );
 
 										$is_active_date = true;
@@ -979,8 +1064,41 @@ class FormW2Report extends Report {
 			$form_type = 'employee';
 		}
 
+		if ( !isset( $setup_data['form_type'] ) ) {
+			$setup_data['form_type'] = 'w2';
+		}
+
 		if ( isset( $this->form_data['user'] ) && is_array( $this->form_data['user'] ) ) {
 			$this->sortFormData(); //Make sure forms are sorted.
+
+			if ( isset( $setup_data['form_type'] ) && $setup_data['form_type'] == 'w2c' ) {
+				$this->file_name = 'form_w2c';
+
+				//Get W2 forms for the same tax year out of Government Documents, and unserialize them to the FormW2 object.
+				$gdlf = TTnew('GovernmentDocumentListFactory'); /** @var GovernmentDocumentListFactory $gdlf */
+				$gdlf->getByCompanyIDAndStatusAndTypeAndDate( $this->getUserObject()->getCompany(), 20, 200, TTDate::getEndYearEpoch( $filter_data['start_date'] ) ); //20=Complete, 200=W2
+				if ( $gdlf->getRecordCount() > 0 ) {
+					foreach( $gdlf as $gd_obj ) {
+						$tmp_extra_data = $gd_obj->getExtraData();
+						if ( $tmp_extra_data != '' ) {
+							$this->getFormObject()->unserialize( $tmp_extra_data );
+
+							foreach( $this->getFormObject()->getForms() as $form_obj ) {
+								//On first run, set the main form data, then just add records to it after that.
+								if ( !isset( $fw2_prev_obj ) ) {
+									$fw2_prev_obj = $form_obj; //This includes the records of the first form, so no need to call setRecords() on the first iteration.
+								} else {
+									$fw2_prev_obj->setRecords( $form_obj->getRecords() ); //This will merge the records to any existing ones.
+								}
+							}
+							unset( $form_obj );
+
+							$this->getFormObject()->clearForms();
+						}
+					}
+				}
+				unset( $gdlf, $gd_obj, $tmp_extra_data );
+			}
 
 			foreach ( $this->form_data['user'] as $legal_entity_id => $user_rows ) {
 				if ( isset( $this->form_data['legal_entity'][$legal_entity_id] ) == false ) {
@@ -1014,9 +1132,9 @@ class FormW2Report extends Report {
 					$return1040 = $this->getRETURN1040Object();
 					// Ceate the all needed data for Return1040.xsd at here.
 					$return1040->return_created_timestamp = TTDate::getDBTimeStamp( TTDate::getTime(), false );
-					$return1040->year = TTDate::getYear( $filter_data['end_date'] );
+					$return1040->year = TTDate::getYear( $filter_data['start_date'] );
 					$return1040->tax_period_begin_date = TTDate::getDate( 'Y-m-d', TTDate::getBeginDayEpoch( $filter_data['start_date'] ) );
-					$return1040->tax_period_end__date = TTDate::getDate( 'Y-m-d', TTDate::getEndDayEpoch( $filter_data['end_date'] ) );
+					$return1040->tax_period_end_date = TTDate::getDate( 'Y-m-d', TTDate::getEndDayEpoch( $filter_data['end_date'] ) );
 					$return1040->software_id = '';
 					$return1040->originator_efin = '';
 					$return1040->originator_type_code = '';
@@ -1048,7 +1166,7 @@ class FormW2Report extends Report {
 				$fw2->setShowBackground( $show_background );
 				$fw2->setType( $form_type );
 				$fw2->setShowInstructionPage( true );
-				$fw2->year = TTDate::getYear( $filter_data['end_date'] );
+				$fw2->year = TTDate::getYear( $filter_data['start_date'] );
 				$fw2->kind_of_employer = ( isset( $setup_data['kind_of_employer'] ) && $setup_data['kind_of_employer'] != '' ) ? Misc::trimSortPrefix( $setup_data['kind_of_employer'] ) : 'N';
 
 				$fw2->name = $legal_entity_obj->getLegalName();
@@ -1059,6 +1177,7 @@ class FormW2Report extends Report {
 				$fw2->company_zip_code = $legal_entity_obj->getPostalCode();
 
 				$fw2->ein = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id]['00']]->getPrimaryIdentification(); //Always use EIN from Federal Agency.
+				$fw2->efile_user_id = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id]['00']]->getTertiaryIdentification(); //Always use SSA eFile User ID
 
 				//Only use the state specific format if its the only agency that is being returned (ie: they are filtering to a specific agency).
 				// $setup_data['efile_state'] is set from PayrollRemittanceAgencyEvent->getReport().
@@ -1073,14 +1192,15 @@ class FormW2Report extends Report {
 				if ( isset( $this->form_data['remittance_agency'][$legal_entity_id][$fw2->efile_state] )
 						&& isset( $setup_data['efile_district'] ) && $setup_data['efile_district'] == true
 						&& isset( $setup_data['payroll_remittance_agency_id'] ) && isset( $this->form_data['remittance_agency_obj'][$setup_data['payroll_remittance_agency_id']] ) ) {
-					$fw2->efile_user_id = $this->form_data['remittance_agency_obj'][$setup_data['payroll_remittance_agency_id']]->getTertiaryIdentification();
+					//$fw2->efile_user_id = $this->form_data['remittance_agency_obj'][$setup_data['payroll_remittance_agency_id']]->getTertiaryIdentification();
 					$fw2->efile_agency_id = $this->form_data['remittance_agency_obj'][$setup_data['payroll_remittance_agency_id']]->getAgency();
 					Debug::Text( '    Using City eFile Format: ' . $fw2->efile_agency_id, __FILE__, __LINE__, __METHOD__, 10 );
 				} else if ( isset( $this->form_data['remittance_agency'][$legal_entity_id][$fw2->efile_state] ) ) {
-					$fw2->efile_user_id = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->efile_state]]->getTertiaryIdentification();
+					$fw2->state_secondary_id = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->efile_state]]->getSecondaryIdentification();
+					$fw2->state_tertiary_id = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->efile_state]]->getTertiaryIdentification();
 					$fw2->efile_agency_id = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->efile_state]]->getAgency();
 				} else if ( isset( $this->form_data['remittance_agency'][$legal_entity_id]['00'] ) ) {
-					$fw2->efile_user_id = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id]['00']]->getTertiaryIdentification();
+					//$fw2->efile_user_id = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id]['00']]->getTertiaryIdentification();
 					$fw2->efile_agency_id = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id]['00']]->getAgency();
 				} else {
 					Debug::Text( '    WARNING: Unable to determine remittance agency to obtain efile_user_id from...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -1105,6 +1225,8 @@ class FormW2Report extends Report {
 							$user_obj = $ulf->getCurrent();
 
 							$ee_data = [
+									'id'                  => (string)TTUUID::convertStringToUUID( md5( $user_id . $fw2->year . microtime( true ) ) ), //Should be unique for every run so we can differentiate between runs.
+									'user_id'             => (string)$user_id, //Helps with handling W2C forms.
 									'control_number'      => ( $i + 1 ),
 									'first_name'          => $user_obj->getFirstName(),
 									'middle_name'         => $user_obj->getMiddleName(),
@@ -1193,6 +1315,7 @@ class FormW2Report extends Report {
 												&& isset( $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$row['l15' . $z . '_state']]] )
 												&& $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$row['l15' . $z . '_state']]]->getType() == 20 ) ) {
 									$ee_data['l15' . $z . '_state_id'] = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$row['l15' . $z . '_state']]]->getPrimaryIdentification();
+									//$ee_data['l15' . $z . '_state_control_number'] = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$row['l15' . $z . '_state']]]->getSecondaryIdentification();
 									$ee_data['l15' . $z . '_state'] = $row['l15' . $z . '_state'];
 								} else {
 									$ee_data['l15' . $z . '_state_id'] = null;
@@ -1240,10 +1363,27 @@ class FormW2Report extends Report {
 							unset( $ee_data );
 
 							if ( $format == 'pdf_form_publish_employee' ) {
-								// generate PDF for every employee and assign to each government document records
-								$this->getFormObject()->addForm( $fw2 );
-								GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 200, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
-								$this->getFormObject()->clearForms();
+								if ( isset( $setup_data['form_type'] ) && $setup_data['form_type'] == 'w2c' ) {
+									// generate PDF for every employee and assign to each government document records
+									$this->getFormObject()->addForm( $fw2 );
+
+									$fw2c = $this->getFW2CObject();
+									$fw2c->setType( $form_type );
+									$fw2c->setShowBackground( $show_background );
+									$fw2c->mergeCorrectAndPreviousW2Objects( $fw2, $fw2_prev_obj );
+									$this->getFormObject()->clearForms(); //Clears W2 form after the W2C has been generated, so only W2C is published.
+
+									$this->getFormObject()->addForm( $fw2c );
+
+									GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 205, TTDate::getEndYearEpoch( $filter_data['start_date'] ), ( ( $fw2c->countRecords() == 1 ) ? $this->getFormObject()->output( 'PDF', false ) : null ), ( ( $fw2c->countRecords() == 1 ) ? $this->getFormObject()->serialize() : null ) );
+									$this->getFormObject()->clearForms();
+									$fw2->clearRecords(); //Clear W2 records so we only ever have 1 W2 record and 1x W2C record at any given time.
+								} else {
+									// generate PDF for every employee and assign to each government document records
+									$this->getFormObject()->addForm( $fw2 );
+									GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 200, TTDate::getEndYearEpoch( $filter_data['start_date'] ), ( ( $fw2->countRecords() == 1 ) ? $this->getFormObject()->output( 'PDF', false ) : null ), ( ( $fw2->countRecords() == 1 ) ? $this->getFormObject()->serialize() : null ) );
+									$this->getFormObject()->clearForms();
+								}
 							}
 
 							$i++;
@@ -1254,137 +1394,265 @@ class FormW2Report extends Report {
 					}
 				}
 
-				if ( $format == 'pdf_form_publish_employee' ) {
-					$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $current_user->getId() );
+				if ( $format != 'pdf_form_publish_employee' ) {
+					if ( isset( $setup_data['form_type'] ) && $setup_data['form_type'] == 'w2c' && isset( $fw2_prev_obj ) && isset( $fw2 ) ) {
+						$fw2c = $this->getFW2CObject();
+						$fw2c->setType( $form_type );
+						$fw2c->setShowBackground( $show_background );
+						$fw2c->mergeCorrectAndPreviousW2Objects( $fw2, $fw2_prev_obj );
+						$this->getFormObject()->addForm( $fw2c );
 
-					return $user_generic_status_batch_id;
-				}
+						if ( $fw2c->countRecords() > 0 && $form_type == 'government' ) {
+							//Handle W3C
+							$fw3c = $this->getFW3CObject();
+							$fw3c->setShowBackground( $show_background );
+							$fw3c->year = $fw2c->year;
+							$fw3c->ein = $fw2c->ein;
+							$fw3c->name = $fw2c->name;
+							$fw3c->trade_name = $fw2c->trade_name;
+							$fw3c->company_address1 = $fw2c->company_address1;
+							$fw3c->company_address2 = $fw2c->company_address2;
+							$fw3c->company_city = $fw2c->company_city;
+							$fw3c->company_state = $fw2c->company_state;
+							$fw3c->company_zip_code = $fw2c->company_zip_code;
 
-				$this->getFormObject()->addForm( $fw2 );
+							$fw3c->contact_name = $contact_user_obj->getFullName();
+							$fw3c->contact_phone = ( $contact_user_obj->getWorkPhoneExt() != '' ) ? $contact_user_obj->getWorkPhone() . ' x' . $contact_user_obj->getWorkPhoneExt() : $contact_user_obj->getWorkPhone();
+							$fw3c->contact_email = $contact_user_obj->getWorkEmail();
 
-				if ( $form_type == 'government' ) {
-					//Handle W3
-					$fw3 = $this->getFW3Object();
-					$fw3->setShowBackground( $show_background );
-					$fw3->year = $fw2->year;
-					$fw3->ein = $fw2->ein;
-					$fw3->name = $fw2->name;
-					$fw3->trade_name = $fw2->trade_name;
-					$fw3->company_address1 = $fw2->company_address1;
-					$fw3->company_address2 = $fw2->company_address2;
-					$fw3->company_city = $fw2->company_city;
-					$fw3->company_state = $fw2->company_state;
-					$fw3->company_zip_code = $fw2->company_zip_code;
+							$fw3c->kind_of_payer = '941';
+							$fw3c->kind_of_employer = $fw2c->kind_of_employer;
+							//$fw3c->third_party_sick_pay = TRUE;
 
-					$fw3->contact_name = $contact_user_obj->getFullName();
-					$fw3->contact_phone = ( $contact_user_obj->getWorkPhoneExt() != '' ) ? $contact_user_obj->getWorkPhone() . ' x' . $contact_user_obj->getWorkPhoneExt() : $contact_user_obj->getWorkPhone();
-					$fw3->contact_email = $contact_user_obj->getWorkEmail();
-
-					$fw3->kind_of_payer = '941';
-					$fw3->kind_of_employer = $fw2->kind_of_employer;
-					//$fw3->third_party_sick_pay = TRUE;
-
-					//Use the home state ID if possible.
-					if ( isset( $this->form_data['remittance_agency'][$legal_entity_id][$fw2->company_state] )
-							&& isset( $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->company_state]] ) && is_object( $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->company_state]] ) ) {
-						$fw3->state_id1 = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->company_state]]->getPrimaryIdentification();
-					}
-
-					$fw3->lc = $fw2->countRecords();
-					$fw3->control_number = ( $fw3->lc + 1 );
-
-					//Use sumRecords()/getRecordsTotal() so all amounts are capped properly.
-					$fw2->sumRecords();
-					$total_row = $fw2->getRecordsTotal();
-
-					//Debug::Arr($total_row, 'Total Row Data: ', __FILE__, __LINE__, __METHOD__, 10);
-					if ( is_array( $total_row ) ) {
-						$fw3->l1 = ( isset( $total_row['l1'] ) && $total_row['l1'] != 0 ) ? $total_row['l1'] : null;
-						$fw3->l2 = ( isset( $total_row['l2'] ) && $total_row['l2'] != 0 ) ? $total_row['l2'] : null;
-						$fw3->l3 = ( isset( $total_row['l3'] ) && $total_row['l3'] != 0 ) ? $total_row['l3'] : null;
-						$fw3->l4 = ( isset( $total_row['l4'] ) && $total_row['l4'] != 0 ) ? $total_row['l4'] : null;
-						$fw3->l5 = ( isset( $total_row['l5'] ) && $total_row['l5'] != 0 ) ? $total_row['l5'] : null;
-						$fw3->l6 = ( isset( $total_row['l6'] ) && $total_row['l6'] != 0 ) ? $total_row['l6'] : null;
-						$fw3->l7 = ( isset( $total_row['l7'] ) && $total_row['l7'] != 0 ) ? $total_row['l7'] : null;
-						$fw3->l8 = ( isset( $total_row['l8'] ) && $total_row['l8'] != 0 ) ? $total_row['l8'] : null;
-						$fw3->l10 = ( isset( $total_row['l10'] ) && $total_row['l10'] != 0 ) ? $total_row['l10'] : null;
-						$fw3->l11 = ( isset( $total_row['l11'] ) && $total_row['l11'] != 0 ) ? $total_row['l11'] : null;
-
-						$l12a_letters = [ 'd', 'e', 'f', 'g', 'h', 's', 'y', 'aa', 'bb', 'ee' ];
-						$fw3->l12a = null;
-						if ( isset( $total_row['l12a_code'] ) && in_array( strtolower( $total_row['l12a_code'] ), $l12a_letters ) ) {
-							$fw3->l12a = bcadd( $fw3->l12a, $total_row['l12a'] );
-						}
-						if ( isset( $total_row['l12b_code'] ) && in_array( strtolower( $total_row['l12b_code'] ), $l12a_letters ) ) {
-							$fw3->l12a = bcadd( $fw3->l12a, $total_row['l12b'] );
-						}
-						if ( isset( $total_row['l12c_code'] ) && in_array( strtolower( $total_row['l12c_code'] ), $l12a_letters ) ) {
-							$fw3->l12a = bcadd( $fw3->l12a, $total_row['l12c'] );
-						}
-						if ( isset( $total_row['l12d_code'] ) && in_array( strtolower( $total_row['l12d_code'] ), $l12a_letters ) ) {
-							$fw3->l12a = bcadd( $fw3->l12a, $total_row['l12d'] );
-						}
-
-						foreach ( range( 'a', 'z' ) as $z ) {
-							//State income tax
-							if ( isset( $total_row['l16' . $z] ) ) {
-								$fw3->l16 = bcadd( $fw3->l16, $total_row['l16' . $z] );
-								$fw3->l17 = bcadd( $fw3->l17, $total_row['l17' . $z] );
+							//Use the home state ID if possible.
+							if ( isset( $this->form_data['remittance_agency'][$legal_entity_id][$fw2c->company_state] )
+									&& isset( $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2c->company_state]] ) && is_object( $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2c->company_state]] ) ) {
+								$fw3c->state_id1 = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2c->company_state]]->getPrimaryIdentification();
 							}
-							//District income tax
-							if ( isset( $total_row['l18' . $z] ) ) {
-								$fw3->l18 = bcadd( $fw3->l18, $total_row['l18' . $z] );
-								$fw3->l19 = bcadd( $fw3->l19, $total_row['l19' . $z] );
+
+							$fw3c->lc = $fw2c->countRecords();
+
+							//Use sumRecords()/getRecordsTotal() so all amounts are capped properly.
+							$fw2c->sumRecords();
+							$total_row = $fw2c->getRecordsTotal();
+
+							Debug::Arr($total_row, 'Total Row Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+							if ( is_array( $total_row ) ) {
+								$fw3c->l1 = ( isset( $total_row['l1'] ) && $total_row['l1'] != 0 ) ? $total_row['l1'] : null;
+								$fw3c->l2 = ( isset( $total_row['l2'] ) && $total_row['l2'] != 0 ) ? $total_row['l2'] : null;
+								$fw3c->l3 = ( isset( $total_row['l3'] ) && $total_row['l3'] != 0 ) ? $total_row['l3'] : null;
+								$fw3c->l4 = ( isset( $total_row['l4'] ) && $total_row['l4'] != 0 ) ? $total_row['l4'] : null;
+								$fw3c->l5 = ( isset( $total_row['l5'] ) && $total_row['l5'] != 0 ) ? $total_row['l5'] : null;
+								$fw3c->l6 = ( isset( $total_row['l6'] ) && $total_row['l6'] != 0 ) ? $total_row['l6'] : null;
+								$fw3c->l7 = ( isset( $total_row['l7'] ) && $total_row['l7'] != 0 ) ? $total_row['l7'] : null;
+								$fw3c->l8 = ( isset( $total_row['l8'] ) && $total_row['l8'] != 0 ) ? $total_row['l8'] : null;
+								$fw3c->l10 = ( isset( $total_row['l10'] ) && $total_row['l10'] != 0 ) ? $total_row['l10'] : null;
+								$fw3c->l11 = ( isset( $total_row['l11'] ) && $total_row['l11'] != 0 ) ? $total_row['l11'] : null;
+
+								$fw3c->previous_l1 = ( isset( $total_row['previous_l1'] ) && $total_row['previous_l1'] != 0 ) ? $total_row['previous_l1'] : null;
+								$fw3c->previous_l2 = ( isset( $total_row['previous_l2'] ) && $total_row['previous_l2'] != 0 ) ? $total_row['previous_l2'] : null;
+								$fw3c->previous_l3 = ( isset( $total_row['previous_l3'] ) && $total_row['previous_l3'] != 0 ) ? $total_row['previous_l3'] : null;
+								$fw3c->previous_l4 = ( isset( $total_row['previous_l4'] ) && $total_row['previous_l4'] != 0 ) ? $total_row['previous_l4'] : null;
+								$fw3c->previous_l5 = ( isset( $total_row['previous_l5'] ) && $total_row['previous_l5'] != 0 ) ? $total_row['previous_l5'] : null;
+								$fw3c->previous_l6 = ( isset( $total_row['previous_l6'] ) && $total_row['previous_l6'] != 0 ) ? $total_row['previous_l6'] : null;
+								$fw3c->previous_l7 = ( isset( $total_row['previous_l7'] ) && $total_row['previous_l7'] != 0 ) ? $total_row['previous_l7'] : null;
+								$fw3c->previous_l8 = ( isset( $total_row['previous_l8'] ) && $total_row['previous_l8'] != 0 ) ? $total_row['previous_l8'] : null;
+								$fw3c->previous_l10 = ( isset( $total_row['previous_l10'] ) && $total_row['previous_l10'] != 0 ) ? $total_row['previous_l10'] : null;
+								$fw3c->previous_l11 = ( isset( $total_row['previous_l11'] ) && $total_row['previous_l11'] != 0 ) ? $total_row['previous_l11'] : null;
+
+								$l12a_letters = [ 'd', 'e', 'f', 'g', 'h', 's', 'y', 'aa', 'bb', 'ee' ];
+
+								$fw3c->l12a = null;
+								if ( isset( $total_row['l12a_code'] ) && in_array( strtolower( $total_row['l12a_code'] ), $l12a_letters ) ) {
+									$fw3c->l12a = bcadd( $fw3c->l12a, $total_row['l12a'] );
+								}
+								if ( isset( $total_row['l12b_code'] ) && in_array( strtolower( $total_row['l12b_code'] ), $l12a_letters ) ) {
+									$fw3c->l12a = bcadd( $fw3c->l12a, $total_row['l12b'] );
+								}
+								if ( isset( $total_row['l12c_code'] ) && in_array( strtolower( $total_row['l12c_code'] ), $l12a_letters ) ) {
+									$fw3c->l12a = bcadd( $fw3c->l12a, $total_row['l12c'] );
+								}
+								if ( isset( $total_row['l12d_code'] ) && in_array( strtolower( $total_row['l12d_code'] ), $l12a_letters ) ) {
+									$fw3c->l12a = bcadd( $fw3c->l12a, $total_row['l12d'] );
+								}
+
+								$fw3c->previous_l12a = null;
+								if ( isset( $total_row['previous_l12a_code'] ) && in_array( strtolower( $total_row['previous_l12a_code'] ), $l12a_letters ) ) {
+									$fw3c->previous_l12a = bcadd( $fw3c->previous_l12a, $total_row['previous_l12a'] );
+								}
+								if ( isset( $total_row['l12b_code'] ) && in_array( strtolower( $total_row['l12b_code'] ), $l12a_letters ) ) {
+									$fw3c->previous_l12a = bcadd( $fw3c->previous_l12a, $total_row['previous_l12b'] );
+								}
+								if ( isset( $total_row['l12c_code'] ) && in_array( strtolower( $total_row['l12c_code'] ), $l12a_letters ) ) {
+									$fw3c->previous_l12a = bcadd( $fw3c->previous_l12a, $total_row['previous_l12c'] );
+								}
+								if ( isset( $total_row['l12d_code'] ) && in_array( strtolower( $total_row['l12d_code'] ), $l12a_letters ) ) {
+									$fw3c->previous_l12a = bcadd( $fw3c->previous_l12a, $total_row['previous_l12d'] );
+								}
+
+								foreach ( range( 'a', 'z' ) as $z ) {
+									//State income tax
+									if ( isset( $total_row['l16' . $z] ) && $total_row['l16' . $z] != 0 ) {
+										$fw3c->l16 = bcadd( $fw3c->l16, $total_row['l16' . $z] );
+										$fw3c->l17 = bcadd( $fw3c->l17, $total_row['l17' . $z] );
+									}
+									//District income tax
+									if ( isset( $total_row['l18' . $z] ) && $total_row['l18' . $z] != 0 ) {
+										$fw3c->l18 = bcadd( $fw3c->l18, $total_row['l18' . $z] );
+										$fw3c->l19 = bcadd( $fw3c->l19, $total_row['l19' . $z] );
+									}
+
+									//State income tax
+									if ( isset( $total_row['previous_l16' . $z] ) && $total_row['previous_l16' . $z] != 0 ) {
+										$fw3c->previous_l16 = bcadd( $fw3c->previous_l16, $total_row['previous_l16' . $z] );
+										$fw3c->previous_l17 = bcadd( $fw3c->previous_l17, $total_row['previous_l17' . $z] );
+									}
+									//District income tax
+									if ( isset( $total_row['previous_l18' . $z] ) && $total_row['previous_l18' . $z] != 0 ) {
+										$fw3c->previous_l18 = bcadd( $fw3c->previous_l18, $total_row['previous_l18' . $z] );
+										$fw3c->previous_l19 = bcadd( $fw3c->previous_l19, $total_row['previous_l19' . $z] );
+									}
+
+								}
 							}
+
+							$this->getFormObject()->addForm( $fw3c );
 						}
-					}
-
-					$this->getFormObject()->addForm( $fw3 );
-				}
-
-				if ( $format == 'efile' ) {
-					$output_format = 'EFILE';
-					if ( $fw2->getDebug() == true ) {
-						$file_name = 'w2_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.csv';
 					} else {
-						$file_name = 'w2_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.txt';
+						$this->getFormObject()->addForm( $fw2 );
+
+						if ( $fw2->countRecords() > 0 && $form_type == 'government' ) {
+							//Handle W3
+							$fw3 = $this->getFW3Object();
+							$fw3->setShowBackground( $show_background );
+							$fw3->year = $fw2->year;
+							$fw3->ein = $fw2->ein;
+							$fw3->name = $fw2->name;
+							$fw3->trade_name = $fw2->trade_name;
+							$fw3->company_address1 = $fw2->company_address1;
+							$fw3->company_address2 = $fw2->company_address2;
+							$fw3->company_city = $fw2->company_city;
+							$fw3->company_state = $fw2->company_state;
+							$fw3->company_zip_code = $fw2->company_zip_code;
+
+							$fw3->contact_name = $contact_user_obj->getFullName();
+							$fw3->contact_phone = ( $contact_user_obj->getWorkPhoneExt() != '' ) ? $contact_user_obj->getWorkPhone() . ' x' . $contact_user_obj->getWorkPhoneExt() : $contact_user_obj->getWorkPhone();
+							$fw3->contact_email = $contact_user_obj->getWorkEmail();
+
+							$fw3->kind_of_payer = '941';
+							$fw3->kind_of_employer = $fw2->kind_of_employer;
+							//$fw3->third_party_sick_pay = TRUE;
+
+							//Use the home state ID if possible.
+							if ( isset( $this->form_data['remittance_agency'][$legal_entity_id][$fw2->company_state] )
+									&& isset( $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->company_state]] ) && is_object( $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->company_state]] ) ) {
+								$fw3->state_id1 = $this->form_data['remittance_agency_obj'][$this->form_data['remittance_agency'][$legal_entity_id][$fw2->company_state]]->getPrimaryIdentification();
+							}
+
+							$fw3->lc = $fw2->countRecords();
+							$fw3->control_number = ( $fw3->lc + 1 );
+
+							//Use sumRecords()/getRecordsTotal() so all amounts are capped properly.
+							$fw2->sumRecords();
+							$total_row = $fw2->getRecordsTotal();
+
+							//Debug::Arr($total_row, 'Total Row Data: ', __FILE__, __LINE__, __METHOD__, 10);
+							if ( is_array( $total_row ) ) {
+								$fw3->l1 = ( isset( $total_row['l1'] ) && $total_row['l1'] != 0 ) ? $total_row['l1'] : null;
+								$fw3->l2 = ( isset( $total_row['l2'] ) && $total_row['l2'] != 0 ) ? $total_row['l2'] : null;
+								$fw3->l3 = ( isset( $total_row['l3'] ) && $total_row['l3'] != 0 ) ? $total_row['l3'] : null;
+								$fw3->l4 = ( isset( $total_row['l4'] ) && $total_row['l4'] != 0 ) ? $total_row['l4'] : null;
+								$fw3->l5 = ( isset( $total_row['l5'] ) && $total_row['l5'] != 0 ) ? $total_row['l5'] : null;
+								$fw3->l6 = ( isset( $total_row['l6'] ) && $total_row['l6'] != 0 ) ? $total_row['l6'] : null;
+								$fw3->l7 = ( isset( $total_row['l7'] ) && $total_row['l7'] != 0 ) ? $total_row['l7'] : null;
+								$fw3->l8 = ( isset( $total_row['l8'] ) && $total_row['l8'] != 0 ) ? $total_row['l8'] : null;
+								$fw3->l10 = ( isset( $total_row['l10'] ) && $total_row['l10'] != 0 ) ? $total_row['l10'] : null;
+								$fw3->l11 = ( isset( $total_row['l11'] ) && $total_row['l11'] != 0 ) ? $total_row['l11'] : null;
+
+								$l12a_letters = [ 'd', 'e', 'f', 'g', 'h', 's', 'y', 'aa', 'bb', 'ee' ];
+								$fw3->l12a = null;
+								if ( isset( $total_row['l12a_code'] ) && in_array( strtolower( $total_row['l12a_code'] ), $l12a_letters ) ) {
+									$fw3->l12a = bcadd( $fw3->l12a, $total_row['l12a'] );
+								}
+								if ( isset( $total_row['l12b_code'] ) && in_array( strtolower( $total_row['l12b_code'] ), $l12a_letters ) ) {
+									$fw3->l12a = bcadd( $fw3->l12a, $total_row['l12b'] );
+								}
+								if ( isset( $total_row['l12c_code'] ) && in_array( strtolower( $total_row['l12c_code'] ), $l12a_letters ) ) {
+									$fw3->l12a = bcadd( $fw3->l12a, $total_row['l12c'] );
+								}
+								if ( isset( $total_row['l12d_code'] ) && in_array( strtolower( $total_row['l12d_code'] ), $l12a_letters ) ) {
+									$fw3->l12a = bcadd( $fw3->l12a, $total_row['l12d'] );
+								}
+
+								foreach ( range( 'a', 'z' ) as $z ) {
+									//State income tax
+									if ( isset( $total_row['l16' . $z] ) ) {
+										$fw3->l16 = bcadd( $fw3->l16, $total_row['l16' . $z] );
+										$fw3->l17 = bcadd( $fw3->l17, $total_row['l17' . $z] );
+									}
+									//District income tax
+									if ( isset( $total_row['l18' . $z] ) ) {
+										$fw3->l18 = bcadd( $fw3->l18, $total_row['l18' . $z] );
+										$fw3->l19 = bcadd( $fw3->l19, $total_row['l19' . $z] );
+									}
+								}
+							}
+
+							$this->getFormObject()->addForm( $fw3 );
+						}
 					}
-					$mime_type = 'applications/octet-stream'; //Force file to download.
-				} else if ( $format == 'efile_xml' ) {
-					$output_format = 'XML';
-					$file_name = 'w2_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.xml';
-					$mime_type = 'applications/octet-stream'; //Force file to download.
-				} else {
-					$output_format = 'PDF';
-					$file_name = $this->file_name . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.pdf';
-					$mime_type = $this->file_mime_type;
+
+					if ( $format == 'efile' ) {
+						$output_format = 'EFILE';
+						if ( $fw2->getDebug() == true ) {
+							$file_name = $setup_data['form_type'] .'_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.csv';
+						} else {
+							$file_name = $setup_data['form_type'] .'_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.txt';
+						}
+						$mime_type = 'applications/octet-stream'; //Force file to download.
+					} else if ( $format == 'efile_xml' ) {
+						$output_format = 'XML';
+						$file_name = $setup_data['form_type'] .'_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.xml';
+						$mime_type = 'applications/octet-stream'; //Force file to download.
+					} else {
+						$output_format = 'PDF';
+						$file_name = $this->file_name . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.pdf';
+						$mime_type = $this->file_mime_type;
+					}
+
+					$output = $this->getFormObject()->output( $output_format );
+
+					$file_arr[] = [ 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output ];
+
+					$this->clearFormObject();
+					$this->clearFW2Object();
+					$this->clearFW2CObject();
+					$this->clearFW3Object();
+					$this->clearFW3CObject();
+					$this->clearRETURN1040Object();
 				}
-
-				$output = $this->getFormObject()->output( $output_format );
-
-				$file_arr[] = [ 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output ];
-
-				$this->clearFormObject();
-				$this->clearFW2Object();
-				$this->clearFW3Object();
-				$this->clearRETURN1040Object();
-			} //outer foreach
-		} //if
-
-		if ( isset( $file_name ) && $file_name != '' ) {
-			$zip_filename = explode( '.', $file_name );
-			if ( isset( $zip_filename[( count( $zip_filename ) - 1 )] ) ) {
-				$zip_filename = str_replace( '.', '', str_replace( $zip_filename[( count( $zip_filename ) - 1 )], '', $file_name ) ) . '.zip';
-			} else {
-				$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
 			}
-
-			return Misc::zip( $file_arr, $zip_filename, true );
 		}
 
-		Debug::Text( ' Returning FALSE!', __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $format == 'pdf_form_publish_employee' ) {
+			$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $current_user->getId() );
+			return $user_generic_status_batch_id;
+		} else {
+			if ( isset( $file_name ) && $file_name != '' ) {
+				$zip_filename = explode( '.', $file_name );
+				if ( isset( $zip_filename[( count( $zip_filename ) - 1 )] ) ) {
+					$zip_filename = str_replace( '.', '', str_replace( $zip_filename[( count( $zip_filename ) - 1 )], '', $file_name ) ) . '.zip';
+				} else {
+					$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
+				}
 
-		return false;
+				return Misc::zip( $file_arr, $zip_filename, true );
+			}
+
+			Debug::Text( ' Returning FALSE!', __FILE__, __LINE__, __METHOD__, 10 );
+			return false;
+		}
 	}
 
 	/**

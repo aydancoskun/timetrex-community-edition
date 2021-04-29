@@ -1,9 +1,18 @@
-class WidgetTestViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImage';
+import '@/global/widgets/filebrowser/TImageAdvBrowser';
+import '@/global/widgets/color-picker/TColorPicker';
+import { SwitchButtonIcon } from '@/global/widgets/switch_button/SwitchButton';
+
+export class WidgetTestViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#awesomebox_test_view_container',
 
-			_required_files: ['TColorPicker', 'TImage', 'TImageAdvBrowser'],
+			// _required_files: [
+			// 	'TColorPicker',
+			// 	'TImage',
+			// 	'TImageAdvBrowser'
+			// ],
 
 			user_api: null,
 			user_group_api: null,
@@ -95,7 +104,7 @@ class WidgetTestViewController extends BaseViewController {
 					onResult: function( result ) {
 
 						if ( result.toLowerCase() === 'true' ) {
-							$this.file_browser.setImage( ServiceCaller.userPhoto + '&object_id=' + $this.current_edit_record.id );
+							$this.file_browser.setImage( ServiceCaller.getURLByObjectType( 'user_photo' ) + '&object_id=' + $this.current_edit_record.id );
 						} else {
 							TAlertManager.showAlert( result, 'Error' );
 						}

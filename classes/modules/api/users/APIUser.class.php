@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -224,15 +224,7 @@ class APIUser extends APIFactory {
 
 			$retarr = [];
 			foreach ( $ulf as $u_obj ) {
-				//$user_data = $u_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
-				$user_data = $u_obj->getObjectAsArray( $data['filter_columns'] );
-
-				//Hide SIN if user doesn't have permissions to see it.
-				if ( isset( $user_data['sin'] ) && $user_data['sin'] != '' && $this->getPermissionObject()->Check( 'user', 'view_sin' ) == false ) {
-					$user_data['sin'] = $u_obj->getSecureSIN();
-				}
-
-				$retarr[] = $user_data;
+				$retarr[] = $u_obj->getObjectAsArray( $data['filter_columns'] );
 
 				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $ulf->getCurrentRow() );
 			}
@@ -312,7 +304,7 @@ class APIUser extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
-				$transaction_function = function () use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
+				$transaction_function = function () use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $total_records, $permission_children_ids ) {
 					$primary_validator = new Validator();
 
 					$lf = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf */
@@ -368,7 +360,7 @@ class APIUser extends APIFactory {
 					}
 					//Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-					$is_valid = $primary_validator->isValid( $ignore_warning );
+					$is_valid = $primary_validator->isValid();
 					if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 						Debug::Text( 'Attempting to save data... API Message ID: ' . $this->getAPIMessageID(), __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -479,8 +471,10 @@ class APIUser extends APIFactory {
 
 					if ( $is_valid == false ) {
 						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+
 						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
-						$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+
+						$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ], ( ( $total_records > 1 && is_object( $lf ) ) ? $lf->getFullName() : null ) );
 					} else if ( $validate_only == true ) {
 						//Always fail transaction when valididate only is used, as	is saved to different tables immediately.
 						$lf->FailTransaction();
@@ -492,7 +486,7 @@ class APIUser extends APIFactory {
 					return [ $validator, $validator_stats, $key, $save_result ];
 				};
 
-				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
+				list( $validator, $validator_stats, $key, $save_result ) = $this->getMainClassObject()->RetryTransaction( $transaction_function );
 
 				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
@@ -594,7 +588,7 @@ class APIUser extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ], ( ( $total_records > 1 && is_object( $lf ) ) ? $lf->getFullName() : null ) );
 				}
 
 				$lf->CommitTransaction();

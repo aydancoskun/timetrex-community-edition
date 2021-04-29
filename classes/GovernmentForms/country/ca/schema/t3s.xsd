@@ -2,8 +2,8 @@
 
 <!--
 Description	T3S Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
@@ -14,14 +14,23 @@ Version#:	1.18 (version #.yy)
 
 	<!-- T3S return -->
 	<xsd:complexType name="T3SIdentType">
-   		<xsd:complexContent>
-     			<xsd:extension base="T3SpecialIdentTypeIIPlusOtherTrusteesName">
-       				<xsd:sequence>
-					<xsd:element name="RegisteredPlanName" type="Length1to60TextType"/>
-					<xsd:element name="PlanRegistrationNumber" type="PlanRegistrationNumberType"/>
-       				</xsd:sequence>
-     			</xsd:extension>
-   		</xsd:complexContent>
+		<xsd:sequence>
+			<xsd:element name="SummaryReportTypeCode" type="SummaryCodeTypeII"/>
+			<xsd:element ref="TrustAccountNumber"/>
+			<xsd:element name="TrusteeName" type="TwoLinedLength30NameType"/>
+			<xsd:element name="TrusteeMailingAddress" type="CountryCodeAddressType"/>
+			<xsd:element name="TrusteePhoneNumber" type="ThreeFieldPhoneNumberType"/>
+			<xsd:element ref="TrusteeLanguageCode" minOccurs="0"/>
+			<xsd:element ref="TrustFiscalPeriodEndDate" minOccurs="1"/>
+			<xsd:element ref="FirstYearFilingIndicator" minOccurs="0"/>
+			<xsd:element ref="DeclaredTrustProvinceCode"/>
+			<xsd:element ref="TrustEffectiveDate" minOccurs="0"/>
+			<xsd:element ref="TrustExpiryDate" minOccurs="0"/>
+			<xsd:element ref="TrustBookRecordAddress" minOccurs="0"/>
+			<xsd:element name="RegisteredPlanTrustOtherTrusteeNameGroup" type="Length1to60TextType" minOccurs="0"/>
+			<xsd:element name="RegisteredPlanName" type="Length1to60TextType"/>
+			<xsd:element name="PlanRegistrationNumber" type="PlanRegistrationNumberType"/>
+		</xsd:sequence>
 	</xsd:complexType> 
 
 	<xsd:complexType name="T3SReturnType">

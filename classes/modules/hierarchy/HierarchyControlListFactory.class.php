@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -177,7 +177,7 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 
 		$list = [];
 		if ( $object_sorted_array == false && $include_blank == true ) {
-			$list[TTUUID::getZeroID()] = '--';
+			$list[TTUUID::getZeroID()] = TTi18n::gettext('-- None --');
 		}
 
 		//Make sure we always ensure that we return valid object_types for the product edition.
@@ -187,7 +187,7 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 			if ( isset( $valid_object_type_ids[$obj->getColumn( 'object_type_id' )] ) ) {
 				if ( $object_sorted_array == true ) {
 					if ( $include_blank == true && !isset( $list[$obj->getColumn( 'object_type_id' )][TTUUID::getZeroID()] ) ) {
-						$list[$obj->getColumn( 'object_type_id' )][TTUUID::getZeroID()] = '--';
+						$list[$obj->getColumn( 'object_type_id' )][TTUUID::getZeroID()] = TTi18n::gettext('-- None --');
 					}
 
 					if ( $include_name == true ) {

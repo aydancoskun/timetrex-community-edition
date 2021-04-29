@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -108,12 +108,10 @@ class APIKPI extends APIFactory {
 		Debug::Text( 'Record Count: ' . $klf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $klf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $klf );
-			Debug::Arr( $data, 'Searching Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 			$retarr = [];
 			foreach ( $klf as $kpi_obj ) {
 				$retarr[] = $kpi_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 			}
-			Debug::Arr( $retarr, 'Getting Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -227,7 +225,7 @@ class APIKPI extends APIFactory {
 				}
 				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$is_valid = $primary_validator->isValid( $ignore_warning );
+				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 					Debug::Arr( $row, 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -252,7 +250,7 @@ class APIKPI extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				} else if ( $validate_only == true ) {
 					$lf->FailTransaction();
 				}
@@ -345,7 +343,7 @@ class APIKPI extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				}
 
 				$lf->CommitTransaction();

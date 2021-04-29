@@ -1,4 +1,4 @@
-class KPIViewController extends BaseViewController {
+export class KPIViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#kpi_view_container',
@@ -88,7 +88,7 @@ class KPIViewController extends BaseViewController {
 			api_class: TTAPI.APIKPI,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.KPI,
+			layout_name: 'global_kpi',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -108,13 +108,13 @@ class KPIViewController extends BaseViewController {
 		//Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_key_performance_indicator_column1, '' );
 
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_key_performance_indicator_column1 );
 
 		//Name
@@ -130,11 +130,11 @@ class KPIViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			set_empty: true,
 			field: 'group_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.kpi_group_array ) );
+		form_item_input.setSourceData( $this.kpi_group_array );
 		this.addEditFieldToColumn( $.i18n._( 'Group' ), form_item_input, tab_key_performance_indicator_column1 );
 
 		//Minimum Rating
@@ -186,7 +186,7 @@ class KPIViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -197,7 +197,7 @@ class KPIViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -216,7 +216,7 @@ class KPIViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
@@ -237,7 +237,7 @@ class KPIViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -249,7 +249,7 @@ class KPIViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

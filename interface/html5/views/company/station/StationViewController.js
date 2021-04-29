@@ -1,4 +1,4 @@
-class StationViewController extends BaseViewController {
+export class StationViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#station_view_container',
@@ -11,6 +11,8 @@ class StationViewController extends BaseViewController {
 			time_clock_command_array: null,
 			mode_flag_array: null,
 			default_mode_flag_array: null,
+			face_recognition_match_threshold_array: null,
+			face_recognition_required_matches_array: null,
 			poll_frequency_array: null,
 			push_frequency_array: null,
 			partial_push_frequency_array: null,
@@ -274,10 +276,12 @@ class StationViewController extends BaseViewController {
 			//#2590 - ensure field is only visible in valid types.
 			if ( parseInt( this.current_edit_record['type_id'] ) == 65 ) {
 				this.initDefaultModeFlag();
+				this.initFacialRecognitionThesholdFields();
 			} else {
 				this.edit_view_ui_dic['default_mode_flag'].parents( '.edit-view-form-item-div' ).hide();
+				this.edit_view_ui_dic['user_value_1'].parents( '.edit-view-form-item-div' ).hide();
+				this.edit_view_ui_dic['user_value_2'].parents( '.edit-view-form-item-div' ).hide();
 			}
-
 		} else {
 			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
 			this.edit_view_tab.tabs( 'option', 'active', 0 );
@@ -313,6 +317,32 @@ class StationViewController extends BaseViewController {
 
 			}
 		} );
+	}
+
+	initFacialRecognitionThesholdFields() {
+		var $this = this;
+		this.api.getOptions( 'face_recognition_match_threshold', {
+			onResult: function( result ) {
+				var result_data = Global.buildRecordArray( result.getResult() );
+
+				$this.edit_view_ui_dic['user_value_1'].setSourceData( result_data );
+				var value = ( $this.current_edit_record.user_value_1 != 0 ) ? $this.current_edit_record.user_value_1 : 0;
+				$this.edit_view_ui_dic['user_value_1'].setValue( value );
+				$this.edit_view_ui_dic['user_value_1'].parents( '.edit-view-form-item-div' ).show();
+			}
+		} );
+
+		this.api.getOptions( 'face_recognition_required_matches', {
+			onResult: function( result ) {
+				var result_data = Global.buildRecordArray( result.getResult() );
+
+				$this.edit_view_ui_dic['user_value_2'].setSourceData( result_data );
+				var value = ( $this.current_edit_record.user_value_2 != 0 ) ? $this.current_edit_record.user_value_2 : 0;
+				$this.edit_view_ui_dic['user_value_2'].setValue( value );
+				$this.edit_view_ui_dic['user_value_2'].parents( '.edit-view-form-item-div' ).show();
+			}
+		} );
+
 	}
 
 	setEditViewDataDone() {
@@ -469,7 +499,7 @@ class StationViewController extends BaseViewController {
 				api_class: TTAPI.APIStation,
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.STATION,
+				layout_name: 'global_station',
 				navigation_mode: true,
 				show_search_inputs: true
 			} );
@@ -494,13 +524,13 @@ class StationViewController extends BaseViewController {
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_station_column1, '' );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_station_column1 );
 
 		//Station
@@ -530,7 +560,7 @@ class StationViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch_id'
@@ -543,7 +573,7 @@ class StationViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department_id'
@@ -557,7 +587,7 @@ class StationViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -585,7 +615,7 @@ class StationViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -624,7 +654,7 @@ class StationViewController extends BaseViewController {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'user_group_selection_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.group_selection_type_array ) );
+		form_item_input.setSourceData( $this.group_selection_type_array );
 
 		var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
@@ -637,11 +667,11 @@ class StationViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			set_empty: true,
 			field: 'group'
 		} );
-		form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.user_group_array ) );
+		form_item_input_1.setSourceData( $this.user_group_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Selection' ) );
 
@@ -654,7 +684,7 @@ class StationViewController extends BaseViewController {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'branch_selection_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.branch_selection_type_array ) );
+		form_item_input.setSourceData( $this.branch_selection_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
@@ -667,7 +697,7 @@ class StationViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch'
@@ -684,7 +714,7 @@ class StationViewController extends BaseViewController {
 		// Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'department_selection_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.department_selection_type_array ) );
+		form_item_input.setSourceData( $this.department_selection_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 		v_box.append( form_item );
@@ -696,7 +726,7 @@ class StationViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department'
@@ -713,7 +743,7 @@ class StationViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'include_user'
@@ -725,7 +755,7 @@ class StationViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'exclude_user'
@@ -758,7 +788,7 @@ class StationViewController extends BaseViewController {
 		// Force Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
+		form_item_input.setSourceData( $this.time_zone_array );
 		this.addEditFieldToColumn( $.i18n._( 'Force Time Zone' ), form_item_input, tab_time_clock_column1 );
 
 		// Enable Automatic Punch Status
@@ -769,7 +799,7 @@ class StationViewController extends BaseViewController {
 		// Manual Command
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'manual_command' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_clock_command_array ) );
+		form_item_input.setSourceData( $this.time_clock_command_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		label = $( '<button type=\'button\' class=\' t-button widget-right-label\'>' + $.i18n._( 'Run' ) + '</button>' );
@@ -782,7 +812,7 @@ class StationViewController extends BaseViewController {
 		// Download Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'poll_frequency' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.poll_frequency_array ) );
+		form_item_input.setSourceData( $this.poll_frequency_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Last Download' ) + ': ' + ' </span>' );
@@ -799,7 +829,7 @@ class StationViewController extends BaseViewController {
 		// Full Upload Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'push_frequency' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.push_frequency_array ) );
+		form_item_input.setSourceData( $this.push_frequency_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Last Upload' ) + ': ' + ' </span>' );
@@ -815,7 +845,7 @@ class StationViewController extends BaseViewController {
 		// Partial Upload Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'partial_push_frequency' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.push_frequency_array ) );
+		form_item_input.setSourceData( $this.push_frequency_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Last Upload' ) + ': </span>' );
@@ -836,7 +866,7 @@ class StationViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'mode_flag'
@@ -847,12 +877,33 @@ class StationViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'default_mode_flag'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Default Punch Mode' ), form_item_input, tab_time_clock_column2 ); //, '', null, null, true );
+
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			allow_multiple_selection: false,
+			layout_name: 'global_option_column',
+			show_search_inputs: true,
+			set_empty: false,
+			field: 'user_value_1'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Face Recognition Threshold' ), form_item_input, tab_time_clock_column2 ); //, '', null, null, true );
+
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			allow_multiple_selection: false,
+			layout_name: 'global_option_column',
+			show_search_inputs: true,
+			set_empty: false,
+			field: 'user_value_2'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Face Recognition Matches' ), form_item_input, tab_time_clock_column2 ); //, '', null, null, true );
+
 	}
 
 	buildSearchFields() {
@@ -867,7 +918,7 @@ class StationViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -877,7 +928,7 @@ class StationViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -911,7 +962,7 @@ class StationViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -923,7 +974,7 @@ class StationViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

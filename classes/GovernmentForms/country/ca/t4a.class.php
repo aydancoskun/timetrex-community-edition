@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -577,8 +577,7 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 		}
 	}
 
-	function _outputXML() {
-
+	function _outputXML( $type = null ) {
 		//Maps other income box codes to XML element names.
 		$other_box_code_map = [
 				26  => 'elg_rtir_amt',
@@ -697,6 +696,8 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 					}
 				}
 
+				$this->revertToOriginalDataState();
+
 				$e++;
 			}
 		}
@@ -704,7 +705,7 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 		return true;
 	}
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
@@ -761,11 +762,12 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 						$this->addPage( [ 'template_page' => 2 ] );
 					}
 				}
+
+				$this->revertToOriginalDataState();
+
 				$e++;
 			}
 		}
-
-		$this->clearRecords();
 
 		return true;
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -214,6 +214,19 @@ class UserContactFactory extends Factory {
 	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+	}
+
+	/**
+	 * @return Permission|null
+	 */
+	function getPermissionObject() {
+		if ( isset( $this->permission_obj ) && is_object( $this->permission_obj ) ) {
+			return $this->permission_obj;
+		} else {
+			$this->permission_obj = new Permission();
+
+			return $this->permission_obj;
+		}
 	}
 
 	/**
@@ -665,13 +678,22 @@ class UserContactFactory extends Factory {
 
 	/**
 	 * @param null $sin
+	 * @param bool $force_secure Force the SIN to always be secure regardless of permissions.
 	 * @return bool|string
 	 */
-	function getSecureSIN( $sin = null ) {
+	function getSecureSIN( $sin = null, $force_secure = false ) {
 		if ( $sin == '' ) {
 			$sin = $this->getSIN();
 		}
+
 		if ( $sin != '' ) {
+			global $current_user;
+			if ( $force_secure == false && isset( $current_user ) && is_object( $current_user ) ) {
+				if ( $this->getPermissionObject()->Check( 'user_contact', 'view_sin', $current_user->getId(), $current_user->getCompany() ) == true ) {
+					return $sin;
+				}
+			}
+
 			return Misc::censorString( $sin, '*', null, 1, 4, 4 );
 		}
 
@@ -1153,7 +1175,7 @@ class UserContactFactory extends Factory {
 							}
 							break;
 						case 'sin':
-							$data[$variable] = $this->getSecureSIN();
+							$data[$variable] = $this->getSecureSIN(); //getSecureSIN() will display the full SIN if permissions allow.
 							break;
 						case 'birth_date':
 							if ( method_exists( $this, $function ) ) {

@@ -1,4 +1,4 @@
-class QualificationGroupViewController extends BaseTreeViewController {
+export class QualificationGroupViewController extends BaseTreeViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#qualification_group_view_container',

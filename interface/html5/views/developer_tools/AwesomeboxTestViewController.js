@@ -1,9 +1,9 @@
-class AwesomeboxTestViewController extends BaseViewController {
+export class AwesomeboxTestViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#awesomebox_test_view_container',
 
-			_required_files: ['TImage', 'TImageAdvBrowser'],
+			// _required_files: ['TImage', 'TImageAdvBrowser'],
 
 			user_api: null,
 			user_group_api: null,
@@ -74,10 +74,10 @@ class AwesomeboxTestViewController extends BaseViewController {
 			default_height: 100
 		} );
 
-		// form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_id_array ) );
+		// form_item_input.setSourceData( $this.user_id_array );
 		form_item_input.addClass( 'splayed-adropdown' );
-		var display_columns = ALayoutCache.getDefaultColumn( ALayoutIDs.USER ); //Get Default columns base on different layout name
-		display_columns = Global.convertColumnsTojGridFormat( display_columns, ALayoutIDs.USER ); //Convert to jQgrid format
+		var display_columns = ALayoutCache.getDefaultColumn( 'global_user' ); //Get Default columns base on different layout name
+		display_columns = Global.convertColumnsTojGridFormat( display_columns, 'global_user' ); //Convert to jQgrid format
 		this.addEditFieldToColumn( $.i18n._( 'User' ), form_item_input, tab_employee_column1 );
 		form_item_input.setColumns( display_columns );
 		form_item_input.setUnselectedGridData( this.user_id_array );
@@ -89,7 +89,7 @@ class AwesomeboxTestViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user_id2'
@@ -102,7 +102,7 @@ class AwesomeboxTestViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICompany,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.COMPANY,
+			layout_name: 'global_company',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'company_id'
@@ -115,7 +115,7 @@ class AwesomeboxTestViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			layout_name: 'global_legal_entity',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'legal_entity_id'
@@ -128,11 +128,11 @@ class AwesomeboxTestViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			set_empty: true,
 			field: 'group_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_group_array ) );
+		form_item_input.setSourceData( $this.user_group_array );
 		this.addEditFieldToColumn( $.i18n._( 'Group' ), form_item_input, tab_employee_column1 );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -140,18 +140,18 @@ class AwesomeboxTestViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			set_empty: true,
 			field: 'group_id2'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_group_array ) );
+		form_item_input.setSourceData( $this.user_group_array );
 		this.addEditFieldToColumn( $.i18n._( 'Group (Multi)' ), form_item_input, tab_employee_column1 );
 
 		//Status
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_employee_column1 );
 
 		TTPromise.resolve( 'Awesomeboxtest', 'init' );
@@ -167,7 +167,7 @@ class AwesomeboxTestViewController extends BaseViewController {
 				label: $.i18n._( 'Company' ),
 				in_column: 1,
 				field: 'company_id',
-				layout_name: ALayoutIDs.COMPANY,
+				layout_name: 'global_company',
 				api_class: TTAPI.APICompany,
 				multiple: false,
 				custom_first_label: Global.default_item,
@@ -179,7 +179,7 @@ class AwesomeboxTestViewController extends BaseViewController {
 				label: $.i18n._( 'Legal Entity' ),
 				in_column: 1,
 				field: 'legal_entity_id',
-				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				layout_name: 'global_legal_entity',
 				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				custom_first_label: Global.any_item,
@@ -194,7 +194,7 @@ class AwesomeboxTestViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -204,7 +204,7 @@ class AwesomeboxTestViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -212,7 +212,7 @@ class AwesomeboxTestViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,

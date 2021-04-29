@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,16 +39,12 @@ require_once( 'TTSeleniumGlobal.php' );
  * @group UI
  */
 class UILoginTest extends TTSeleniumGlobal {
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
-
-		return true;
 	}
 
 	function testUILoginLogout() {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -186,7 +186,7 @@ class LogRotate {
 
 						$retval = @rename( $filename, $new_file );
 						if ( $retval === false ) {
-							Debug::Arr( error_get_last(), 'ERROR: Unable to rename file, likely permission or access problem?: ' . $filename, __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::Text( 'ERROR: Unable to rename file, likely permission or access problem?: ' . $filename .' Error: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 						}
 					} else {
 						Debug::Text( ' Unable to rename file, file does not exist or new name does exist or we do not have permission: ' . $new_file, __FILE__, __LINE__, __METHOD__, 10 );

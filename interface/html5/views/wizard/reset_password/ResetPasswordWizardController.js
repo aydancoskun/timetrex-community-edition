@@ -1,4 +1,4 @@
-class ResetPasswordWizardController extends BaseWizardController {
+export class ResetPasswordWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard'

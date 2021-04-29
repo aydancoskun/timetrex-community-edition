@@ -1,4 +1,4 @@
-class UserEducationViewController extends BaseViewController {
+export class UserEducationViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_education_view_container',
@@ -183,7 +183,7 @@ class UserEducationViewController extends BaseViewController {
 			api_class: TTAPI.APIUserEducation,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER_Education,
+			layout_name: 'global_user_education',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -205,7 +205,7 @@ class UserEducationViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			field: 'user_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -225,7 +225,7 @@ class UserEducationViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIQualification,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.QUALIFICATION,
+			layout_name: 'global_qualification',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualification_id'
@@ -299,7 +299,7 @@ class UserEducationViewController extends BaseViewController {
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -311,7 +311,7 @@ class UserEducationViewController extends BaseViewController {
 				label: $.i18n._( 'Course' ),
 				in_column: 1,
 				field: 'qualification_id',
-				layout_name: ALayoutIDs.QUALIFICATION,
+				layout_name: 'global_qualification',
 				api_class: TTAPI.APIQualification,
 				multiple: true,
 				basic_search: true,
@@ -344,7 +344,7 @@ class UserEducationViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
@@ -358,7 +358,7 @@ class UserEducationViewController extends BaseViewController {
 				field: 'source_type_id',
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -386,7 +386,7 @@ class UserEducationViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -398,7 +398,7 @@ class UserEducationViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

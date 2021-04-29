@@ -2,8 +2,8 @@
 
 <!--
 Description	CRA-wide Standard Data Types to be imported into all CRA schemas. (Includes ISO 15000-5 CCTS Core Data Types + CRA synonyms and additions)
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema 

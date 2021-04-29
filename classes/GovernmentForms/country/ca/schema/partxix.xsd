@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
 Description	Part XIX Return Data Element Types
-Last updated 	April 2019:
-		Changed BusinessNumber type to BNTrustTypes to accept both BN and Trust account number
+Last updated    September 2020
 Version#:	1.00 (version #.yy)
 -->
 

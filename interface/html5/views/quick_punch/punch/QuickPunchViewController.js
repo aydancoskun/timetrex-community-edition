@@ -1,4 +1,10 @@
-class QuickPunchViewController extends QuickPunchBaseViewController {
+import { QuickPunchBaseViewController } from '@/views/quick_punch/QuickPunchBaseViewController';
+import { IndexViewController } from '@/quick_punch/IndexController';
+import { TTAPI } from '@/services/TimeTrexClientAPI';
+import { TAlertManager } from '@/global/TAlertManager';
+import { TTUUID } from '@/global/TTUUID';
+
+export class QuickPunchViewController extends QuickPunchBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			type_array: null,
@@ -36,7 +42,6 @@ class QuickPunchViewController extends QuickPunchBaseViewController {
 	initialize( options ) {
 		super.initialize( options );
 
-		var $this = this;
 		if ( !LocalCacheData.getPunchLoginUser() ) {
 			IndexViewController.instance.router.navigate( 'QuickPunchLogin', true );
 			return false;
@@ -45,30 +50,30 @@ class QuickPunchViewController extends QuickPunchBaseViewController {
 		this.edit_view_error_ui_dic = {};
 		this.permission_id = 'punch';
 		this.other_fields = [];
-		require( this.filterRequiredFiles(), function() {
-			$this.api = TTAPI.APIPunch;
-			$this.branch_api = TTAPI.APIBranch;
-			$this.department_api = TTAPI.APIDepartment;
-			$this.other_field_api = TTAPI.APIOtherField;
-			if ( ( Global.getProductEdition() >= 20 ) ) {
-				$this.job_api = TTAPI.APIJob;
-				$this.job_item_api = TTAPI.APIJobItem;
-			}
-			$this.company_api = TTAPI.APICompany;
-			$this.api_station = TTAPI.APIStation;
-			$this.current_user_api = TTAPI.APIAuthentication;
-			$this.initPermission();
-			ProgressBar.showOverlay();
 
-			TTPromise.add( 'QuickPunch', 'CurrentEditRecordComplete' );
+		this.api = TTAPI.APIPunch;
+		this.branch_api = TTAPI.APIBranch;
+		this.department_api = TTAPI.APIDepartment;
+		this.other_field_api = TTAPI.APIOtherField;
+		if ( ( Global.getProductEdition() >= 20 ) ) {
+			this.job_api = TTAPI.APIJob;
+			this.job_item_api = TTAPI.APIJobItem;
+		}
+		this.company_api = TTAPI.APICompany;
+		this.api_station = TTAPI.APIStation;
+		this.current_user_api = TTAPI.APIAuthentication;
+		this.initPermission();
+		ProgressBar.showOverlay();
 
-			$this.initOptions();
-			$this.getUserPunch();
+		TTPromise.add( 'QuickPunch', 'CurrentEditRecordComplete' );
 
-			$this.getOtherFields( function() {
-				TTPromise.wait( 'QuickPunch', 'CurrentEditRecordComplete', function() {
-					$this.render();
-				} );
+		this.initOptions();
+		this.getUserPunch();
+
+		var $this = this;
+		this.getOtherFields( function() {
+			TTPromise.wait( 'QuickPunch', 'CurrentEditRecordComplete', function() {
+				$this.render();
 			} );
 		} );
 	}
@@ -871,6 +876,8 @@ class QuickPunchViewController extends QuickPunchBaseViewController {
 		var record = this.current_edit_record;
 		this.save_btn.attr( 'disabled', 'disabled' );
 		this.clearErrorTips( true, true );
+
+		this.api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		this.api.setUserPunch( record, false, false, {
 			onResult: function( result ) {
 				if ( result.isValid() ) {
@@ -927,7 +934,7 @@ class QuickPunchViewController extends QuickPunchBaseViewController {
 
 }
 
-class QuickPunchModalController extends Backbone.View { //Must extend Backbone.View rather than TTBackbone otherwise Quick Punch success modal fails.
+export class QuickPunchModalController extends Backbone.View { //Must extend Backbone.View rather than TTBackbone otherwise Quick Punch success modal fails.
 	constructor( options = {} ) {
 		_.defaults( options, {
 			timed_redirect_time: 0

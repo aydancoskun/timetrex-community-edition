@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,14 +37,14 @@
 /**
  * @group SystemLog
  */
-class SystemLogTest extends PHPUnit_Framework_TestCase {
+class SystemLogTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 	protected $pay_stub_account_link_arr = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -67,16 +67,10 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 		$dd->createUserWageGroups( $this->company_id );
 
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		//$this->deleteAllSchedules();
-
-		return true;
 	}
 
 	function createPayPeriodSchedule( $shift_assigned_day = 10 ) {

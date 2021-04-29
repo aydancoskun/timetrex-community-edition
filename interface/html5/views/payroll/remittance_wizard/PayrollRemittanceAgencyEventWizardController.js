@@ -1,4 +1,6 @@
-class PayrollRemittanceAgencyEventWizardController extends BaseWindowController {
+import { PayrollRemittanceAgencyEventWizard } from './PayrollRemittanceAgencyEventWizard';
+
+export class PayrollRemittanceAgencyEventWizardController extends BaseWindowController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg',
@@ -23,8 +25,8 @@ class PayrollRemittanceAgencyEventWizardController extends BaseWindowController 
 		}
 	}
 
-	getRequiredFiles() {
-		return ['Wizard', 'WizardStep', 'views/payroll/remittance_wizard/PayrollRemittanceAgencyEventWizard.js'];
-	}
+	// getRequiredFiles() {
+	// 	return ['Wizard', 'WizardStep', 'views/payroll/remittance_wizard/PayrollRemittanceAgencyEventWizard.js'];
+	// }
 
 }

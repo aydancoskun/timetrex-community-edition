@@ -1,4 +1,4 @@
-class KPIReportViewController extends ReportBaseViewController {
+export class KPIReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 

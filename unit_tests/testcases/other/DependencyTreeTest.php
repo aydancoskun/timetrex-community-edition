@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,18 +37,14 @@
 /**
  * @group DependencyTree
  */
-class DependencyTreeTest extends PHPUnit_Framework_TestCase {
-	public function setUp() {
+class DependencyTreeTest extends PHPUnit\Framework\TestCase {
+	public function setUp(): void {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 		require_once( Environment::getBasePath() . '/classes/modules/core/DependencyTree.class.php' );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	function indexOf( $tofind, $arr ) {

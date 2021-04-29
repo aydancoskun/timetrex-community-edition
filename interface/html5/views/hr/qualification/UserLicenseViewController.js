@@ -1,4 +1,4 @@
-class UserLicenseViewController extends BaseViewController {
+export class UserLicenseViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_license_view_container',
@@ -183,7 +183,7 @@ class UserLicenseViewController extends BaseViewController {
 			api_class: TTAPI.APIUserLicense,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER_LICENSE,
+			layout_name: 'global_user_license',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -205,7 +205,7 @@ class UserLicenseViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			field: 'user_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -225,7 +225,7 @@ class UserLicenseViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIQualification,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.QUALIFICATION,
+			layout_name: 'global_qualification',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualification_id'
@@ -272,7 +272,7 @@ class UserLicenseViewController extends BaseViewController {
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -284,7 +284,7 @@ class UserLicenseViewController extends BaseViewController {
 				label: $.i18n._( 'License Type' ),
 				in_column: 1,
 				field: 'qualification_id',
-				layout_name: ALayoutIDs.QUALIFICATION,
+				layout_name: 'global_qualification',
 				api_class: TTAPI.APIQualification,
 				multiple: true,
 				basic_search: true,
@@ -297,7 +297,7 @@ class UserLicenseViewController extends BaseViewController {
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
@@ -311,7 +311,7 @@ class UserLicenseViewController extends BaseViewController {
 				field: 'source_type_id',
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -359,7 +359,7 @@ class UserLicenseViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -371,7 +371,7 @@ class UserLicenseViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

@@ -1,0 +1,1 @@
+UPDATE pay_stub SET status_id = 40, type_id = 100 WHERE status_id = 100;

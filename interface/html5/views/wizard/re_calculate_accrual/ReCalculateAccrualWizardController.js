@@ -1,4 +1,4 @@
-class ReCalculateAccrualWizardController extends BaseWizardController {
+export class ReCalculateAccrualWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg',
@@ -35,7 +35,7 @@ class ReCalculateAccrualWizardController extends BaseWizardController {
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more accrual policies' ) + ':' );
 
-				var a_combobox = this.getAComboBox( TTAPI.APIAccrualPolicy, true, ALayoutIDs.ACCRUAL_POLICY, 'accrual_policy_id' );
+				var a_combobox = this.getAComboBox( TTAPI.APIAccrualPolicy, true, 'global_accrual', 'accrual_policy_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -87,7 +87,7 @@ class ReCalculateAccrualWizardController extends BaseWizardController {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var pay_period = this.getAComboBox( TTAPI.APIPayPeriod, true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var pay_period = this.getAComboBox( TTAPI.APIPayPeriod, true, 'global_Pay_period', 'pay_period_id' );
 
 				form_item_label.text( $.i18n._( 'Pay Period' ) + ': ' );
 				form_item_input_div.append( pay_period );
@@ -98,7 +98,7 @@ class ReCalculateAccrualWizardController extends BaseWizardController {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var pay_period_schedule = this.getAComboBox( TTAPI.APIPayPeriodSchedule, true, ALayoutIDs.PAY_PERIOD_SCHEDULE, 'pay_period_schedule_id' );
+				var pay_period_schedule = this.getAComboBox( TTAPI.APIPayPeriodSchedule, true, 'global_pay_period_schedule', 'pay_period_schedule_id' );
 
 				form_item_label.text( $.i18n._( 'Pay Period Schedule' ) + ': ' );
 				form_item_input_div.append( pay_period_schedule );
@@ -123,7 +123,7 @@ class ReCalculateAccrualWizardController extends BaseWizardController {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) + ':' );
 
-				a_combobox = this.getAComboBox( TTAPI.APIUser, true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( TTAPI.APIUser, true, 'global_user', 'user_id', true );
 				div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 

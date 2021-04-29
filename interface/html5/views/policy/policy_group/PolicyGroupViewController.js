@@ -1,4 +1,4 @@
-class PolicyGroupViewController extends BaseViewController {
+export class PolicyGroupViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#policy_group_view_container',
@@ -48,7 +48,7 @@ class PolicyGroupViewController extends BaseViewController {
 			api_class: TTAPI.APIPolicyGroup,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.POLICY_GROUP,
+			layout_name: 'global_policy_group',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -85,7 +85,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user'
@@ -100,7 +100,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRegularTimePolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
+			layout_name: 'global_regular_time',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'regular_time_policy'
@@ -112,7 +112,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIOverTimePolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.OVER_TIME_POLICY,
+			layout_name: 'global_over_time',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'over_time_policy'
@@ -124,7 +124,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRoundIntervalPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
+			layout_name: 'global_round_interval',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'round_interval_policy'
@@ -136,7 +136,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIMealPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.MEAL_POLICY,
+			layout_name: 'global_meal',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'meal_policy'
@@ -148,7 +148,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBreakPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.BREAK_POLICY,
+			layout_name: 'global_break',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'break_policy'
@@ -161,7 +161,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAccrualPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.ACCRUAL_POLICY,
+			layout_name: 'global_accrual',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'accrual_policy'
@@ -173,7 +173,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPremiumPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PREMIUM_POLICY,
+			layout_name: 'global_premium',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'premium_policy'
@@ -185,7 +185,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIHolidayPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.HOLIDAY_POLICY,
+			layout_name: 'global_holiday',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'holiday_policy'
@@ -198,7 +198,7 @@ class PolicyGroupViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIExpensePolicy,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.EXPENSE_POLICY,
+				layout_name: 'global_expense_policy',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'expense_policy'
@@ -212,7 +212,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIExceptionPolicyControl,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.EXCEPTION_POLICY_CONTROL,
+			layout_name: 'global_exception',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'exception_policy_control_id'
@@ -225,7 +225,7 @@ class PolicyGroupViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'absence_policy'
@@ -284,7 +284,7 @@ class PolicyGroupViewController extends BaseViewController {
 				in_column: 1,
 				field: 'user',
 				default_args: default_args,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -296,7 +296,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Overtime Policy' ),
 				in_column: 1,
 				field: 'over_time_policy',
-				layout_name: ALayoutIDs.OVER_TIME_POLICY,
+				layout_name: 'global_over_time',
 				api_class: TTAPI.APIOverTimePolicy,
 				multiple: true,
 				basic_search: true,
@@ -308,7 +308,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Rounding Policies' ),
 				in_column: 1,
 				field: 'round_interval_policy',
-				layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
+				layout_name: 'global_round_interval',
 				api_class: TTAPI.APIRoundIntervalPolicy,
 				multiple: true,
 				basic_search: true,
@@ -320,7 +320,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Absence Policies' ),
 				in_column: 1,
 				field: 'absence_policy',
-				layout_name: ALayoutIDs.ABSENCES_POLICY,
+				layout_name: 'global_absences',
 				api_class: TTAPI.APIAbsencePolicy,
 				multiple: true,
 				basic_search: true,
@@ -332,7 +332,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Accrual Policies' ),
 				in_column: 2,
 				field: 'accrual_policy',
-				layout_name: ALayoutIDs.ACCRUAL_POLICY,
+				layout_name: 'global_accrual',
 				api_class: TTAPI.APIAccrualPolicy,
 				multiple: true,
 				basic_search: true,
@@ -344,7 +344,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Premium Policies' ),
 				in_column: 2,
 				field: 'premium_policy',
-				layout_name: ALayoutIDs.PREMIUM_POLICY,
+				layout_name: 'global_premium',
 				api_class: TTAPI.APIPremiumPolicy,
 				multiple: true,
 				basic_search: true,
@@ -356,7 +356,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Holiday Policies' ),
 				in_column: 2,
 				field: 'holiday_policy',
-				layout_name: ALayoutIDs.HOLIDAY_POLICY,
+				layout_name: 'global_holiday',
 				api_class: TTAPI.APIHolidayPolicy,
 				multiple: true,
 				basic_search: true,
@@ -368,7 +368,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Exception Policy' ),
 				in_column: 2,
 				field: 'exception_policy_control',
-				layout_name: ALayoutIDs.EXCEPTION_POLICY_CONTROL,
+				layout_name: 'global_exception',
 				api_class: TTAPI.APIExceptionPolicyControl,
 				multiple: true,
 				basic_search: true,
@@ -380,7 +380,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -392,7 +392,7 @@ class PolicyGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

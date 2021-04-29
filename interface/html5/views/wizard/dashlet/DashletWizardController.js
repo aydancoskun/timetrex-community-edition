@@ -1,4 +1,4 @@
-class DashletWizardController extends BaseWizardController {
+export class DashletWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg',
@@ -47,7 +47,6 @@ class DashletWizardController extends BaseWizardController {
 		switch ( this.current_step ) {
 			case 1:
 				var label = this.getLabel();
-				var $this = this;
 				label.text( $.i18n._( 'Choose the type of dashlet' ) );
 				this.content_div.append( label );
 				combobox = this.getComboBox( 'dashlet_type', false );
@@ -574,7 +573,7 @@ class DashletWizardController extends BaseWizardController {
 			var view_name = this.stepsDataDic[2].script;
 			var layout_id = this.stepsDataDic[2].layout;
 			if ( !saved_dashlet ) {
-				args.script = ALayoutIDs.DASHBOARD;
+				args.script = 'global_dashboard';
 				args.name = dasglet_name;
 				args.is_default = 'false';
 				args.data = {
@@ -605,7 +604,7 @@ class DashletWizardController extends BaseWizardController {
 				return;
 			}
 			if ( !saved_dashlet ) {
-				args.script = ALayoutIDs.DASHBOARD;
+				args.script = 'global_dashboard';
 				args.name = dasglet_name;
 				args.is_default = 'false';
 				args.data = {
@@ -630,7 +629,7 @@ class DashletWizardController extends BaseWizardController {
 			}
 		} else {
 			if ( !saved_dashlet ) {
-				args.script = ALayoutIDs.DASHBOARD;
+				args.script = 'global_dashboard';
 				args.name = dasglet_name;
 				args.is_default = 'false';
 				args.data = {

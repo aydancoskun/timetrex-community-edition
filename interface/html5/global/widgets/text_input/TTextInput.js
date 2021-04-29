@@ -308,6 +308,11 @@
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 			field = o.field;
 
+			//Set autocomplete widget option is defined, set it here.
+			if ( o.autocomplete ) {
+				$this.attr( 'autocomplete', o.autocomplete );
+			}
+
 			if ( o.hasOwnProperty( 'do_validate' ) ) {
 				do_validate = o.do_validate;
 			}

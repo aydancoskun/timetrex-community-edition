@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,6 +46,7 @@ class PayStubTransactionFactory extends Factory {
 	protected $remittance_destination_account_obj = null;
 	protected $pay_stub_obj = null;
 	protected $currency_obj = null;
+	protected $old_currency_id = null;
 
 	/**
 	 * @param $name
@@ -384,13 +385,8 @@ class PayStubTransactionFactory extends Factory {
 		$value = TTUUID::castUUID( $value );
 		Debug::Text( 'Currency ID: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$culf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $culf */
-		$old_currency_id = $this->getCurrency();
-
-		if ( $culf->getRecordCount() == 1
-				&& ( $this->isNew() || $old_currency_id != $value ) ) {
-			$this->setCurrencyRate( $culf->getCurrent()->getReverseConversionRate() );
-		}
+		//Currency rate is set in preValidate()
+		$this->old_currency_id = $this->getCurrency();
 
 		return $this->setGenericDataValue( 'currency_id', $value );
 	}
@@ -554,8 +550,8 @@ class PayStubTransactionFactory extends Factory {
 			}
 		}
 
-		if ( $this->getCurrencyRate() == false && is_object( $this->getPayStubObject() ) ) {
-			$this->setCurrencyRate( $this->getCurrencyObject()->getConversionRate() ); //Must always get the conversion rate from the current currency to the base currency, so it can be converted to any other currency from that.
+		if ( $this->getCurrencyRate() == false && is_object( $this->getCurrencyObject() ) && ( $this->isNew() || $this->old_currency_id != $this->getCurrency() ) ) {
+			$this->setCurrencyRate( $this->getCurrencyObject()->getReverseConversionRate() ); //Must always get the conversion rate from the current currency to the base currency, so it can be converted to any other currency from that.
 		}
 
 		return true;
@@ -874,9 +870,15 @@ class PayStubTransactionFactory extends Factory {
 			$record->setDueDate( TTDate::getBeginDayEpoch( $ps_obj->getTransactionDate() ) );
 
 			if ( $rs_obj->getValue28() != '' ) { //If specific OFFSET bank account is specified, use it here. Otherwise default to the source account.
-				$record->setInstitution( $rs_obj->getValue26() );
-				$record->setTransit( $rs_obj->getValue27() );
-				$record->setAccount( $rs_obj->getValue28() );
+				if ( $rs_obj->getCountry() == 'CA' ) {
+					$record->setInstitution( $rs_obj->getValue26() ); //Return Account Institution.
+					$record->setTransit( $rs_obj->getValue27() );
+					$record->setAccount( $rs_obj->getValue28() );
+				} else {
+					$record->setInstitution( $rs_obj->getValue1() ); //Checking/Savings Account.
+					$record->setTransit( $rs_obj->getValue27() );
+					$record->setAccount( $rs_obj->getValue28() );
+				}
 			} else {
 				$record->setInstitution( $rs_obj->getValue1() );
 				$record->setTransit( $rs_obj->getValue2() );
@@ -989,13 +991,6 @@ class PayStubTransactionFactory extends Factory {
 	 * @return array
 	 */
 	function getChequeData( $ps_obj, $pst_obj, $rs_obj, $uf_obj, $transaction_number, $alignment_grid = false ) {
-		if ( is_object( $uf_obj->getCompanyObject() ) ) {
-			$country_options = $uf_obj->getCompanyObject()->getOptions( 'country' );
-			$country = $country_options[$uf_obj->getCountry()];
-		} else {
-			$country = $uf_obj->getCountry();
-		}
-
 		return [
 				'date'             => $ps_obj->getTransactionDate(),
 				'amount'           => $pst_obj->getAmount(),
@@ -1013,15 +1008,23 @@ class PayStubTransactionFactory extends Factory {
 				'end_date'   => $ps_obj->getEndDate(),
 
 				'full_name'    => $uf_obj->getFullName(),
-				'full_address' => Misc::formatAddress( $uf_obj->getFullName(), $uf_obj->getAddress1(), $uf_obj->getAddress2(), $uf_obj->getCity(), $uf_obj->getProvince(), $uf_obj->getPostalCode(), $country, true ), //Condensed format.
+				'full_address' => Misc::formatAddress( $uf_obj->getFullName(), $uf_obj->getAddress1(), $uf_obj->getAddress2(), $uf_obj->getCity(), $uf_obj->getProvince(), $uf_obj->getPostalCode(), Option::getByKey( $uf_obj->getCountry(), $uf_obj->getCompanyObject()->getOptions( 'country' ) ), 'multiline_condensed' ), //Condensed format.
 				'address1'     => $uf_obj->getAddress1(),
 				'address2'     => $uf_obj->getAddress2(),
 				'city'         => $uf_obj->getCity(),
 				'province'     => $uf_obj->getProvince(),
 				'postal_code'  => $uf_obj->getPostalCode(),
-				'country'      => $uf_obj->getCountry(),
+				'country'      => Option::getByKey( $uf_obj->getCountry(), $uf_obj->getCompanyObject()->getOptions( 'country' ) ),
 
-				'company_name' => $uf_obj->getCompanyObject()->getName(),
+				'company_name' => $uf_obj->getLegalEntityObject()->getLegalName(),
+				'company_full_address' => Misc::formatAddress( '', $uf_obj->getLegalEntityObject()->getAddress1(), $uf_obj->getLegalEntityObject()->getAddress2(), $uf_obj->getLegalEntityObject()->getCity(), $uf_obj->getLegalEntityObject()->getProvince(), $uf_obj->getLegalEntityObject()->getPostalCode(), Option::getByKey( $uf_obj->getLegalEntityObject()->getCountry(), $uf_obj->getCompanyObject()->getOptions( 'country' ) ), 'oneline' ), //One line format.
+				'company_address1' => $uf_obj->getLegalEntityObject()->getAddress1(),
+				'company_address2' => $uf_obj->getLegalEntityObject()->getAddress2(),
+				'company_city' => $uf_obj->getLegalEntityObject()->getCity(),
+				'company_province' => $uf_obj->getLegalEntityObject()->getProvince(),
+				'company_postal_code' => $uf_obj->getLegalEntityObject()->getPostalCode(),
+				'company_country' => Option::getByKey( $uf_obj->getLegalEntityObject()->getCountry(), $uf_obj->getCompanyObject()->getOptions( 'country' ) ),
+
 
 				'symbol' => $ps_obj->getCurrencyObject()->getSymbol(),
 
@@ -1360,7 +1363,9 @@ class PayStubTransactionFactory extends Factory {
 				$tmp_pay_stub_total_transactions_processed = (int)$pst_obj->getColumn('pay_stub_total_transactions_processed');
 				if ( $tmp_pay_stub_total_transactions_processed == 0 ) {
 					//Need to break the pay stubs out by pay period/run so we can batch the agency reports by those.
-					$pay_period_run_ids[$pst_obj->getColumn( 'pay_period_id' )][(int)$pst_obj->getColumn( 'pay_stub_run_id' )][] = $pst_obj->getPayStub();
+					//  Actually, we need to batch these by pay stub transaction date as well, see case #4 in comment block around line #1422, around where the remote_batch_id is generated.
+					//$pay_period_run_ids[$pst_obj->getColumn( 'pay_period_id' )][(int)$pst_obj->getColumn( 'pay_stub_run_id' )][] = $pst_obj->getPayStub();
+					$pay_period_run_ids[(string)$pst_obj->getColumn( 'pay_period_id' )][(int)$pst_obj->getColumn( 'pay_stub_run_id' )][(int)TTDate::getMiddleDayEpoch( TTDate::strtotime( $pst_obj->getColumn( 'pay_stub_transaction_date' ) ) )][] = $pst_obj->getPayStub();
 				} else {
 					Debug::Text( '  Pay Stub: '. $pst_obj->getPayStub() .' Total Transactions Processed: '. $tmp_pay_stub_total_transactions_processed, __FILE__, __LINE__, __METHOD__, 10 );
 				}
@@ -1400,112 +1405,120 @@ class PayStubTransactionFactory extends Factory {
 											if ( $pplf->getRecordCount() > 0 ) {
 												$pp_obj = $pplf->getCurrent();
 
-												foreach ( $run_ids as $run_id => $run_pay_stub_ids ) {
-													$run_pay_stub_ids = array_unique( $run_pay_stub_ids );
-													Debug::Text( '      Run ID: ' . $run_id . ' Total Pay Stubs: ' . count( $run_pay_stub_ids ), __FILE__, __LINE__, __METHOD__, 10 );
+												foreach ( $run_ids as $run_id => $pay_stub_transaction_dates ) {
+													Debug::Text( '      Run ID: ' . $run_id . ' Total PS Transaction Dates: ' . count( $pay_stub_transaction_dates ), __FILE__, __LINE__, __METHOD__, 10 );
 
-													$report_obj = $prae_obj->getReport( 'raw', null, $pra_user_obj, new Permission() );
-													//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
+													foreach( $pay_stub_transaction_dates as $pay_stub_transaction_date => $run_pay_stub_ids ) {
+														$run_pay_stub_ids = array_unique( $run_pay_stub_ids );
+														Debug::Text( '      Run ID: ' . $run_id . ' PS Transaction Date: '. TTDate::getDate('DATE', $pay_stub_transaction_date) .' Total Pay Stubs: ' . count( $run_pay_stub_ids ), __FILE__, __LINE__, __METHOD__, 10 );
 
-													if ( is_object( $report_obj ) ) {
-														$report_data['config'] = $report_obj->getConfig();
+														$report_obj = $prae_obj->getReport( 'raw', null, $pra_user_obj, new Permission() );
+														//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
 
-														unset( $report_data['config']['filter']['time_period'], $report_data['config']['filter']['start_date'], $report_data['config']['filter']['end_date'] ); //Remove custom date filters and only use pay_period_run_ids.
+														if ( is_object( $report_obj ) ) {
+															$report_data['config'] = $report_obj->getConfig();
 
-														//Limit to just specific pay stubs that are being processed.
-														//  This helps in cases where they might be handling a terminated employee a few days into the pay period,
-														//  but have for some reason generated open pay stubs for all employees when the pay period is still in
-														//  progress that will be regenerated with different amounts at the end of the pay period.
-														//  We don't want to process a agency deposit for the other OPEN pay stubs in this case.
-														//
-														//  *NOTE: Previously we would limit it to just the pay_period_id, run_id, and status_id=25, which would prevent over impounding
-														//         when multiple pay methods exist on a single pay stub, but would result in over impounding when OPEN pay stubs exist that are never intended to be paid yet.
-														//         And also cases where they want to process payroll for a single terminated employee first, then all other employees after.
-														//         The above handling of 'pay_stub_total_transactions_processed' should take care of this though.
-														//
-														// See more comments around line 1391 that describe the different cases that need to be handled.
-														$report_data['config']['filter']['pay_stub_id'] = $run_pay_stub_ids; //Legal entity is already set in $prae_obj->getReport()
+															unset( $report_data['config']['filter']['time_period'], $report_data['config']['filter']['start_date'], $report_data['config']['filter']['end_date'] ); //Remove custom date filters and only use pay_period_run_ids.
 
-														//Get report for the entire pay period/run and only include OPEN pay stubs.
-														$report_data['config']['filter']['pay_period_id'] = $pay_period_id;                                                                                     //Legal entity is already set in $prae_obj->getReport()
-														$report_data['config']['filter']['pay_stub_run_id'] = $run_id;
-														$report_data['config']['filter']['pay_stub_status_id'] = 25; //25=OPEN
+															//Limit to just specific pay stubs that are being processed.
+															//  This helps in cases where they might be handling a terminated employee a few days into the pay period,
+															//  but have for some reason generated open pay stubs for all employees when the pay period is still in
+															//  progress that will be regenerated with different amounts at the end of the pay period.
+															//  We don't want to process a agency deposit for the other OPEN pay stubs in this case.
+															//
+															//  *NOTE: Previously we would limit it to just the pay_period_id, run_id, and status_id=25, which would prevent over impounding
+															//         when multiple pay methods exist on a single pay stub, but would result in over impounding when OPEN pay stubs exist that are never intended to be paid yet.
+															//         And also cases where they want to process payroll for a single terminated employee first, then all other employees after.
+															//         The above handling of 'pay_stub_total_transactions_processed' should take care of this though.
+															//
+															// See more comments around line 1391 that describe the different cases that need to be handled.
+															$report_data['config']['filter']['pay_stub_id'] = $run_pay_stub_ids; //Legal entity is already set in $prae_obj->getReport()
 
-														$report_obj->setConfig( (array)$report_data['config'] );
+															//Get report for the entire pay period/run and only include OPEN pay stubs.
+															$report_data['config']['filter']['pay_period_id'] = $pay_period_id;                                                                                     //Legal entity is already set in $prae_obj->getReport()
+															$report_data['config']['filter']['pay_stub_run_id'] = $run_id;
+															$report_data['config']['filter']['pay_stub_status_id'] = 25; //25=OPEN
 
-														$output_data = $report_obj->getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj );
-														Debug::Arr( $output_data, 'Report Payment Services Data: ', __FILE__, __LINE__, __METHOD__, 10 );
-														if ( is_array( $output_data ) ) {
-															if ( PRODUCTION == true && is_object( $le_obj ) && $le_obj->getPaymentServicesStatus() == 10 && $le_obj->getPaymentServicesUserName() != '' && $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
-																try {
-																	if ( isset( $output_data['agency_report_data'] )
-																			&& isset( $output_data['agency_report_data']['amount_due'] )
-																			&& $output_data['agency_report_data']['amount_due'] > 0 ) { //Skip D=Deposit where amount_due=0
-																		$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+															$report_obj->setConfig( (array)$report_data['config'] );
 
-																		//Force agency report to D=Deposit and set other necessary data.
-																		$output_data['agency_report_data']['type_id'] = 'D';             //D=Deposit
-																		$output_data['agency_report_data']['remote_batch_id'] = $tt_ps_api->generateBatchID( $pp_obj->getEndDate(), $run_id );
+															$output_data = $report_obj->getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj );
+															Debug::Arr( $output_data, 'Report Payment Services Data: ', __FILE__, __LINE__, __METHOD__, 10 );
+															if ( is_array( $output_data ) ) {
+																if ( PRODUCTION == true && is_object( $le_obj ) && $le_obj->getPaymentServicesStatus() == 10 && $le_obj->getPaymentServicesUserName() != '' && $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+																	try {
+																		if ( isset( $output_data['agency_report_data'] )
+																				&& isset( $output_data['agency_report_data']['amount_due'] )
+																				&& $output_data['agency_report_data']['amount_due'] > 0 ) { //Skip D=Deposit where amount_due=0
+																			$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
 
-																		//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
-																		//This helps to prevent duplicate records from being created, as well as work across separate or split up batches that may be processed.
-																		//  Cases to consider:
-																		//    1. Where the user generates a pay stub for an employee, pays them by direct deposit through us, then puts a stop payment on that to pay by them check instead.
-																		//       Essentially the same agency report will be submitted twice with two completely different sets of data.
-																		//    2. Where the user generates say 20 pay stubs (all open) for the current pay period that is only a few days into it, then terminates an employee and processes payment for just that one employee.
-																		//       In this case the agency report would erroneously include all open (not yet completed) pay stubs, and the terminated one.
-																		//    3. Where the user processes transactions for just one remittance source account/type, then does another remittance source account/type in a seprate batch. Both of which affect the same pay stubs.
-																		//       The above 'pay_stub_total_transactions_processed' should handle this properly.
-																		//
-																		//I think the only sure fire way to properly handle the above cases is just prevent exact duplicates from being uploaded where the pay stub IDs are exactly the same. So add $run_pay_stub_ids into the 'remote_id'
-																		//  If the user processes payment for 4 random pay stubs, then 6 other random ones, then again for all 10, it will technically could have multiple agency reports that cover the same pay stubs.
-																		//  But the balance could just be returned to them once the payment report is sent at the end of the period (ie: month) and fully reconciled.
-																		$output_data['agency_report_data']['remote_id'] = TTUUID::convertStringToUUID( md5( $prae_obj->getId() .':'. $output_data['agency_report_data']['remote_batch_id'] .':'. $pay_period_id .':'. $run_id .':'. implode( '', $run_pay_stub_ids ) ) );
-																		$output_data['agency_report_data']['pay_period_start_date'] = TTDate::getISODateStamp( $pp_obj->getStartDate() );
-																		$output_data['agency_report_data']['pay_period_end_date'] = TTDate::getISODateStamp( $pp_obj->getEndDate() );
-																		$output_data['agency_report_data']['pay_period_transaction_date'] = TTDate::getISODateStamp( $pp_obj->getTransactionDate() );
-																		$output_data['agency_report_data']['pay_period_run'] = $run_id;
+																			//Force agency report to D=Deposit and set other necessary data.
+																			$output_data['agency_report_data']['type_id'] = 'D';             //D=Deposit
+																			$output_data['agency_report_data']['remote_batch_id'] = $tt_ps_api->generateBatchID( $pp_obj->getEndDate(), $run_id );
 
-																		//Check to see if transaction date is outside of the current agency event start/end period, if so then we want to use date from the next period.
-																		if ( TTDate::getMiddleDayEpoch( $pp_obj->getTransactionDate() ) > TTDate::getMiddleDayEpoch( $prae_obj->getEndDate() ) ) {
-																			$event_next_dates = $prae_obj->calculateNextDate( $prae_obj->getDueDate() );
-																			if ( is_array( $event_next_dates ) ) {
-																				$output_data['agency_report_data']['period_start_date'] = TTDate::getISODateStamp( $event_next_dates['start_date'] );
-																				$output_data['agency_report_data']['period_end_date'] = TTDate::getISODateStamp( $event_next_dates['end_date'] );
-																				$output_data['agency_report_data']['due_date'] = TTDate::getISOTimeStamp( $event_next_dates['due_date'] );
+																			//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
+																			//This helps to prevent duplicate records from being created, as well as work across separate or split up batches that may be processed.
+																			//  Cases to consider:
+																			//    1. Where the user generates a pay stub for an employee, pays them by direct deposit through us, then puts a stop payment on that to pay by them check instead.
+																			//       Essentially the same agency report will be submitted twice with two completely different sets of data.
+																			//    2. Where the user generates say 20 pay stubs (all open) for the current pay period that is only a few days into it, then terminates an employee and processes payment for just that one employee.
+																			//       In this case the agency report would erroneously include all open (not yet completed) pay stubs, and the terminated one.
+																			//    3. Where the user processes transactions for just one remittance source account/type, then does another remittance source account/type in a seprate batch. Both of which affect the same pay stubs.
+																			//       The above 'pay_stub_total_transactions_processed' should handle this properly.
+																			//    4. Where the user processes transactions for a out-of-cycle payroll run (ie: terminated employee), that has a *pay period* transaction date in the next month (ie: Oct), but a *pay stub* transaction date in the current month (ie: Sep)
+																			//       When the transaction is processed, a agency deposit would be made and associated with Oct (PP transaction date), but when the user goes to submit a payment to the Gov. (ie: CRA),
+																			//         PaymentServices will think there is a shortfall on the balance since the agency report (amount to pay) will include the out-of-cycle pay stub (pay stub transaction date in Sep), but the impound balance has that associated with Oct.
+																			//
+																			//I think the only sure fire way to properly handle the above cases is just prevent exact duplicates from being uploaded where the pay stub IDs are exactly the same. So add $run_pay_stub_ids into the 'remote_id'
+																			//  If the user processes payment for 4 random pay stubs, then 6 other random ones, then again for all 10, it will technically could have multiple agency reports that cover the same pay stubs.
+																			//  But the balance could just be returned to them once the payment report is sent at the end of the period (ie: month) and fully reconciled.
+																			$output_data['agency_report_data']['remote_id'] = TTUUID::convertStringToUUID( md5( $prae_obj->getId() .':'. $output_data['agency_report_data']['remote_batch_id'] .':'. $pay_period_id .':'. $run_id .':'. implode( '', $run_pay_stub_ids ) ) );
+																			$output_data['agency_report_data']['pay_period_start_date'] = TTDate::getISODateStamp( $pp_obj->getStartDate() );
+																			$output_data['agency_report_data']['pay_period_end_date'] = TTDate::getISODateStamp( $pp_obj->getEndDate() );
+																			//$output_data['agency_report_data']['pay_period_transaction_date'] = TTDate::getISODateStamp( $pp_obj->getTransactionDate() );
+																			$output_data['agency_report_data']['pay_period_transaction_date'] = TTDate::getISODateStamp( $pay_stub_transaction_date ); //Must use pay stub transaction date, as the pay period transaction date could be Oct 1st, when the pay stub transaction date is Sept 30th, causing the remittance deposit and payment reports (if monthly) to mismatch and be in two different months.
+																			$output_data['agency_report_data']['pay_period_run'] = $run_id;
+
+																			//Check to see if transaction date is outside of the current agency event start/end period, if so then we want to use date from the next period.
+																			if ( TTDate::getMiddleDayEpoch( $pay_stub_transaction_date ) > TTDate::getMiddleDayEpoch( $prae_obj->getEndDate() ) ) {
+																				$event_next_dates = $prae_obj->calculateNextDate( $prae_obj->getDueDate() );
+																				if ( is_array( $event_next_dates ) ) {
+																					$output_data['agency_report_data']['period_start_date'] = TTDate::getISODateStamp( $event_next_dates['start_date'] );
+																					$output_data['agency_report_data']['period_end_date'] = TTDate::getISODateStamp( $event_next_dates['end_date'] );
+																					$output_data['agency_report_data']['due_date'] = TTDate::getISOTimeStamp( $event_next_dates['due_date'] );
+																				}
+																				unset( $event_next_dates );
 																			}
-																			unset( $event_next_dates );
-																		}
 
-																		$agency_report_arr = $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj );
+																			$agency_report_arr = $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj );
 
-																		$retval = $tt_ps_api->setAgencyReport( $agency_report_arr );
+																			$retval = $tt_ps_api->setAgencyReport( $agency_report_arr );
 
-																		Debug::Arr( $retval, 'TimeTrexPaymentServices Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
-																		if ( $retval->isValid() == true ) {
-																			Debug::Text( 'Upload successful!', __FILE__, __LINE__, __METHOD__, 10 );
+																			Debug::Arr( $retval, 'TimeTrexPaymentServices Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+																			if ( $retval->isValid() == true ) {
+																				Debug::Text( 'Upload successful!', __FILE__, __LINE__, __METHOD__, 10 );
+																			} else {
+																				Debug::Arr( $retval, 'ERROR! Unable to upload agency report data... ', __FILE__, __LINE__, __METHOD__, 10 );
+
+																				//No point in failing the transaction, as there isn't any easy way to re-trigger this right now. Its also after the transactions have all been uploaded too.
+																				//$pstlf->FailTransaction();
+																				//return FALSE;
+																			}
+																			unset( $batch_id, $remote_id );
 																		} else {
-																			Debug::Arr( $retval, 'ERROR! Unable to upload agency report data... ', __FILE__, __LINE__, __METHOD__, 10 );
-
-																			//No point in failing the transaction, as there isn't any easy way to re-trigger this right now. Its also after the transactions have all been uploaded too.
-																			//$pstlf->FailTransaction();
-																			//return FALSE;
+																			Debug::Text( 'NOTICE: Amount due is $0, not submitting a deposit record...', __FILE__, __LINE__, __METHOD__, 10 );
 																		}
-																		unset( $batch_id, $remote_id );
-																	} else {
-																		Debug::Text( 'NOTICE: Amount due is $0, not submitting a deposit record...', __FILE__, __LINE__, __METHOD__, 10 );
+																	} catch ( Exception $e ) {
+																		Debug::Text( 'ERROR! Unable to upload agency report data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 																	}
-																} catch ( Exception $e ) {
-																	Debug::Text( 'ERROR! Unable to upload agency report data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+																} else {
+																	Debug::Text( 'WARNING: Production is off, not calling payment services API...', __FILE__, __LINE__, __METHOD__, 10 );
 																}
 															} else {
-																Debug::Text( 'WARNING: Production is off, not calling payment services API...', __FILE__, __LINE__, __METHOD__, 10 );
+																Debug::Arr( $output_data, 'Report returned unexpected number of rows, not transmitting...', __FILE__, __LINE__, __METHOD__, 10 );
 															}
 														} else {
-															Debug::Arr( $output_data, 'Report returned unexpected number of rows, not transmitting...', __FILE__, __LINE__, __METHOD__, 10 );
+															Debug::Text( '  ERROR! Report object was not returned, likely a validation failure!', __FILE__, __LINE__, __METHOD__, 10 );
 														}
-													} else {
-														Debug::Text( '  ERROR! Report object was not returned, likely a validation failure!', __FILE__, __LINE__, __METHOD__, 10 );
 													}
 												}
 											} else {

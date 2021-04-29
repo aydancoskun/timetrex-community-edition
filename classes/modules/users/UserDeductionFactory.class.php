@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -118,6 +118,7 @@ class UserDeductionFactory extends Factory {
 				'user_status_id' => false,
 				'user_status'    => false,
 				'full_name'      => false,
+				'employee_number'=> false,
 
 				'length_of_service_date' => 'LengthOfServiceDate',
 				'start_date'             => 'StartDate',
@@ -2343,6 +2344,7 @@ class UserDeductionFactory extends Factory {
 						case 'first_name':
 						case 'last_name':
 						case 'middle_name':
+						case 'employee_number':
 						case 'user_status_id':
 							$data[$variable] = $this->getColumn( $variable );
 							break;

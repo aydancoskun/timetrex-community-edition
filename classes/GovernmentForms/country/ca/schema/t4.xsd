@@ -2,8 +2,8 @@
 
 <!--
 Description	T4 Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -64,7 +64,11 @@ Version#:	1.18 (version #.yy)
 					<xsd:field xpath="epaid_hlth_pln_amt"/>
 					<xsd:field xpath="stok_opt_csh_out_eamt"/>
 					<xsd:field xpath="vlntr_emergencyworker_xmpt_amt"/>
-					<xsd:field xpath="indn_txmpt_sei_amt"/> 
+					<xsd:field xpath="indn_txmpt_sei_amt"/>
+					<xsd:field xpath="empt_inc_amt_covid_prd1"/>
+					<xsd:field xpath="empt_inc_amt_covid_prd2"/>
+					<xsd:field xpath="empt_inc_amt_covid_prd3"/>
+					<xsd:field xpath="empt_inc_amt_covid_prd4"/>
 				</xsd:unique>
 			</xsd:element>
 			<!--xsd:element name="OTH_INFO" type="OtherInformationType" minOccurs="0"/-->
@@ -134,6 +138,11 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="stok_opt_csh_out_eamt" type="decimal9Type"/>
 			<xsd:element name="vlntr_emergencyworker_xmpt_amt" type="decimal9Type"/>
 			<xsd:element name="indn_txmpt_sei_amt" type="decimal9Type"/>
+			<xsd:element name="lv_supp_top_up_amt" type="signedDecimal9Type"/>
+			<xsd:element name="empt_inc_amt_covid_prd1" type="decimal9Type"/>
+			<xsd:element name="empt_inc_amt_covid_prd2" type="decimal9Type"/>
+			<xsd:element name="empt_inc_amt_covid_prd3" type="decimal9Type"/>
+			<xsd:element name="empt_inc_amt_covid_prd4" type="decimal9Type"/>
 		</xsd:choice>
 	</xsd:group>
 	<xsd:complexType name="T4SummaryType">

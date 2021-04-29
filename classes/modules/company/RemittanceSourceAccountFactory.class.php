@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -60,6 +60,13 @@ class RemittanceSourceAccountFactory extends Factory {
 						20 => TTi18n::gettext( 'Disabled' ),
 				];
 				break;
+			case 'ach_transaction_type': //ACH transactions require a transaction code that matches the bank account.
+				//**NOTE: These are different than whats in RemittanceSourceAccount because its for debit transactions instead of credit.
+				$retval = [
+						27 => TTi18n::getText( 'Checking' ),
+						37 => TTi18n::getText( 'Savings' ),
+				];
+				break;
 			case 'country':
 				$cf = TTNew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 				$retval = $cf->getOptions( 'country' );
@@ -89,6 +96,7 @@ class RemittanceSourceAccountFactory extends Factory {
 						20 => '9209P', //cheque_9209p
 						30 => 'DLT103', //cheque_dlt103
 						40 => 'DLT104', //cheque_dlt104
+						1000 => 'MBL2398', //cheque_dlt104
 				];
 				break;
 			case 'data_format':
@@ -109,6 +117,10 @@ class RemittanceSourceAccountFactory extends Factory {
 								20 => TTi18n::gettext( 'Top Check (QuickBooks) [9209P]' ), //cheque_9209p // SS9209 (still current for Quickbooks)  https://www.nebs.ca/canEcat/products/product_detail.jsp?pc=SS9209
 								30 => TTi18n::gettext( 'Top Check Lined (QuickBooks) [DLT103]' ), //cheque_dlt103 // DLT103 (fill-in lines on cheques)  https://www.deluxe.com/shopdeluxe/pd/laser-top-checks-lined/_/A-DLT103
 								40 => TTi18n::gettext( 'Top Check (QuickBooks) [DLT104]' ), //cheque_dlt104 // DLT104 ("$" & "Dollar" on cheques) https://www.deluxe.com/shopdeluxe/pd/laser-top-checks-lined/_/A-DLT104
+
+								1000 => TTi18n::gettext( 'Middle Check (Sage) [2398]' ), //cheque_mbl2398 // Middle check supplied by MBL Enterprises with double signature lines.
+
+								//2000 => //Bottom Checks
 							];
 							$valid_keys = array_keys( $tmp_retval );
 							break;
@@ -129,8 +141,8 @@ class RemittanceSourceAccountFactory extends Factory {
 								$valid_keys = [ 5, 10 ];
 							} else if ( $params['country'] == 'CA' ) {
 								$valid_keys = [ 5, 20, 30, 50, 70 ];
-							} else if ( in_array( $params['country'], [ 'AG', 'BS', 'BB', 'BZ', 'DO', 'GY', 'HT', 'JM', 'DM', 'GD', 'KN', 'LC', 'VC', 'SR', 'TT' ] ) ) { //Carribbean countries.
-								$valid_keys = [ 1000 ];
+							} else if ( in_array( $params['country'], [ 'AI', 'AG', 'AW', 'BS', 'BB', 'BZ', 'CU', 'DM', 'DO', 'GD', 'GP', 'GY', 'HT', 'JM', 'KN', 'LC', 'MQ', 'MS', 'VC', 'SR', 'TC', 'TT', 'VC', 'VI', 'VG' ] ) ) { //Caribbean countries.
+								$valid_keys = [ 10, 1000 ];
 							} else {
 								$valid_keys = [ 10 ]; //Default to US ACH format for all other countries.
 							}
@@ -1658,13 +1670,14 @@ class RemittanceSourceAccountFactory extends Factory {
 		}
 
 		//Make sure the name does not contain the account number for security reasons.
+		// **NOTE: If the stripos() needle is a false, null, or an empty string and haystack is also empty it will return 0 rather than FALSE. So just use a random UUID to work around this.
 		$this->Validator->isTrue( 'name',
-				( ( stripos( $this->Validator->stripNonNumeric( $this->getName() ), $this->getValue3() ) !== false ) ? false : true ),
+				( ( stripos( $this->Validator->stripNonNumeric( $this->getName() ), ( ( $this->getValue3() == '' ) ? TTUUID::generateUUID() : $this->getValue3() ) ) !== false ) ? false : true ),
 								  TTi18n::gettext( 'Account number must not be a part of the Name' ) );
 
 		//Make sure the description does not contain the account number for security reasons.
 		$this->Validator->isTrue( 'description',
-				( ( stripos( $this->Validator->stripNonNumeric( $this->getDescription() ), $this->getValue3() ) !== false ) ? false : true ),
+				( ( stripos( $this->Validator->stripNonNumeric( $this->getDescription() ), ( ( $this->getValue3() == '' ) ? TTUUID::generateUUID() : $this->getValue3() ) ) !== false ) ? false : true ),
 								  TTi18n::gettext( 'Account number must not be a part of the Description' ) );
 
 		//Don't allow type to be changed if its already in use. It also prevents further errors when trying to edit/delete destination records where a type mismatch occurs.

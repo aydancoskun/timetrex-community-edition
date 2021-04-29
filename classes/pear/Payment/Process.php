@@ -166,7 +166,7 @@ class Payment_Process {
     {
         $vars = array_keys(get_class_vars(get_class($this)));
         foreach ($vars as $idx => $field) {
-            if ($field{0} == '_') {
+            if ($field[0] == '_') {
                 unset($vars[$idx]);
             }
         }

@@ -1,4 +1,4 @@
-class RoundIntervalPolicyViewController extends BaseViewController {
+export class RoundIntervalPolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#round_interval_policy_view_container',
@@ -52,7 +52,7 @@ class RoundIntervalPolicyViewController extends BaseViewController {
 			api_class: TTAPI.APIRoundIntervalPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
+			layout_name: 'global_round_interval',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -87,14 +87,14 @@ class RoundIntervalPolicyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'punch_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.punch_type_array ) );
+		form_item_input.setSourceData( $this.punch_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab_rounding_policy_column1 );
 
 		//Round Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'round_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.round_type_array ) );
+		form_item_input.setSourceData( $this.round_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Round Type' ), form_item_input, tab_rounding_policy_column1 );
 
 		// Interval
@@ -123,7 +123,7 @@ class RoundIntervalPolicyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'condition_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.condition_type_array ) );
+		form_item_input.setSourceData( $this.condition_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Window Based On' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Static Time
@@ -177,7 +177,7 @@ class RoundIntervalPolicyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -188,7 +188,7 @@ class RoundIntervalPolicyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -196,7 +196,7 @@ class RoundIntervalPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -208,7 +208,7 @@ class RoundIntervalPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

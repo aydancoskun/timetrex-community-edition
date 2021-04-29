@@ -1,4 +1,4 @@
-class UserContactViewController extends BaseViewController {
+export class UserContactViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_contact_view_container',
@@ -114,7 +114,7 @@ class UserContactViewController extends BaseViewController {
 			api_class: TTAPI.APIUserContact,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER_CONTACT,
+			layout_name: 'global_user_contact',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -137,7 +137,7 @@ class UserContactViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			field: 'user_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -155,7 +155,7 @@ class UserContactViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'status_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_employee_contact_column1 );
 
 		// Type
@@ -164,7 +164,7 @@ class UserContactViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'type_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_employee_contact_column1 );
 
 		// First Name
@@ -200,7 +200,7 @@ class UserContactViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'sex_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
+		form_item_input.setSourceData( $this.sex_array );
 		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_employee_contact_column1 );
 
 		// Ethnicity
@@ -211,7 +211,7 @@ class UserContactViewController extends BaseViewController {
 			field: 'ethnic_group_id',
 			set_empty: true,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ETHNIC_GROUP,
+			layout_name: 'global_ethnic_group',
 			show_search_inputs: true
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Ethnicity' ), form_item_input, tab_employee_contact_column1 );
@@ -245,7 +245,7 @@ class UserContactViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'country'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
+		form_item_input.setSourceData( $this.country_array );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_employee_contact_column1 );
 
 		// Province/State
@@ -253,7 +253,7 @@ class UserContactViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'province'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_employee_contact_column1 );
 
 		// Postal / ZIP Code
@@ -370,7 +370,7 @@ class UserContactViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
@@ -414,7 +414,7 @@ class UserContactViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -424,7 +424,7 @@ class UserContactViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -434,7 +434,7 @@ class UserContactViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -453,7 +453,7 @@ class UserContactViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.COMBO_BOX
 			} ),
 			new SearchField( {
@@ -463,7 +463,7 @@ class UserContactViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {

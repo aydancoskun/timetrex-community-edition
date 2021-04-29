@@ -1,10 +1,10 @@
-class AboutViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImageBrowser';
+import '@/global/widgets/filebrowser/TImageAdvBrowser';
+
+export class AboutViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
-			_required_files: ['TImage', 'TImageBrowser'],
-
 			date_api: null,
-
 			employeeActive: []
 		} );
 

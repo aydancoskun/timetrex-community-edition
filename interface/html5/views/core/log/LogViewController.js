@@ -1,4 +1,4 @@
-class LogViewController extends BaseViewController {
+export class LogViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#log_view_container',
@@ -152,7 +152,7 @@ class LogViewController extends BaseViewController {
 			api_class: TTAPI.APILog,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.LOG,
+			layout_name: 'global_log',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );

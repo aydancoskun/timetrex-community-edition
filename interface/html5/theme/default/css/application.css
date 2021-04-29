@@ -77,6 +77,14 @@ html, div {
 	/*height: 100%;*/
 }
 
+hr {
+	/* From Bootstrap styling, used on login screen at least */
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	border: 0;
+	border-top: 1px solid rgba(0,0,0,.1);
+}
+
 textarea {
 	resize: vertical;
 	font-size: 12px;
@@ -397,11 +405,6 @@ progress::-moz-progress-bar {
 	top: 0;
 	width: 100%;
 	background: #ffffff;
-}
-
-.portal .content-container-after-login {
-	overflow: auto;
-	height: calc(100% - 70px);
 }
 
 .portal .content-container-after-login {
@@ -2920,10 +2923,11 @@ progress::-moz-progress-bar {
 #tab_vacancy .third-column .edit-view-form-item-div:first-child .edit-view-form-item-label-div {
 	border-top-left-radius: 0;
 	border-top: 1px solid #c7c7c7;
+	margin-left: 1px;
 }
-
+#tab_vacancy .fourth-column .edit-view-form-item-input-div,
 #tab_vacancy .third-column .edit-view-form-item-tinymce-textarea-div {
-	margin-right: 0px;
+	margin-right: 0;
 }
 
 #tinymce {
@@ -2941,11 +2945,6 @@ progress::-moz-progress-bar {
 
 .UNIT_TEST_MODE .notification-box {
 	display: none;
-}
-
-.job-vacancy-summary-description {
-	width: calc(100% - 2px);
-	margin: 0 auto;
 }
 
 .job-vacancy-summary-description .edit-view-form-item-label-div {
@@ -3452,5 +3451,40 @@ div.ui-jqgrid-view table.ui-jqgrid-htable {
 div.ui-jqgrid-view table.ui-jqgrid-btable th {
 	border-left-style: none
 }
-
 /* This fixes the 1-2px scroll on all grids issue */
+
+.form_item_resume_pdf .no-documents-message {
+	text-align: center;
+	margin: 0;
+	padding: 10px;
+}
+
+.linkified {
+    cursor: pointer;
+    color: #0000EE !important;
+}
+
+/********************************
+* PDF.js CSS
+* Used in TTPDFViewer and JobApplicationViewController
+*********************************/
+/*.pdfViewer .page {*/
+.pdfContainer .page {
+	box-sizing: content-box; /* Need this to fix margins and shadows around the PDF pages. TT app is default box-sizing:border-box, but the PDFjsViewer styles are expecting content-box. */
+	/* TODO: Check if we still need the above box-sizing with pdfload2 */
+	position: relative;
+	margin: 10px auto; /* 10px is for space between the pages, and the auto is to center align */
+	-webkit-box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.75);
+	-moz-box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.75);
+	box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.75);
+}
+
+/* Makes sure we can select text in PDFs, as rest of application is unselectable */
+.pdfContainer .textLayer {
+	-webkit-touch-callout: default;
+	-webkit-user-select: text;
+	-khtml-user-select: text;
+	-moz-user-select: text;
+	-ms-user-select: text;
+	user-select: text;
+}

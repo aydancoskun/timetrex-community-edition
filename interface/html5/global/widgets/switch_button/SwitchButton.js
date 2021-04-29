@@ -88,7 +88,7 @@
 
 } )( jQuery );
 
-var SwitchButtonIcon = function() {
+export var SwitchButtonIcon = function() {
 
 };
 

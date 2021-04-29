@@ -3,8 +3,8 @@
 <!--
 Description: 	T3P Return Data Element Types
 Contact: 	CRA
-Date created: 	October 2018
-Version#:	1.18 (version #.yy)
+Date created: 	September 2020
+Version#:	2.16 (version #.yy)
 Revision History:
 June 2015	Initial creation.
 Oct 2016	Disallow negative amount for some financial fields

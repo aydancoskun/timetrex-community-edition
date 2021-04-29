@@ -325,12 +325,12 @@ class Payment_Process_AuthorizeNet extends Payment_Process_Common
         }
 
         // Find an appropriate encapsulation character
-        $encap = str_replace(array_unique(str_split($chars)), '', $data['x_encap_char']{0} . $this->_encapChars);
+        $encap = str_replace(array_unique(str_split($chars)), '', $data['x_encap_char'][0] . $this->_encapChars);
 
         if (strlen($encap) == 0) {
-            $encap = $data['x_encap_char']{0};
+            $encap = $data['x_encap_char'][0];
         } else {
-            $encap = $encap{0};
+            $encap = $encap[0];
         }
         $this->_options['x_encap_char'] = $encap;
         $return[] = 'x_encap_char=' . rawurlencode($encap);
@@ -636,7 +636,7 @@ class Payment_Process_Result_AuthorizeNet extends Payment_Process_Result {
         }
 
         $count = count($responseArray) - 1;
-        if ($responseArray[0]{0} == $encap) {
+        if ($responseArray[0][0] == $encap) {
             $responseArray[0] = substr($responseArray[0], 1);
         }
         if (substr($responseArray[$count], -1) == $encap) {

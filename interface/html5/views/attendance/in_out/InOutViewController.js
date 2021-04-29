@@ -1,4 +1,4 @@
-class InOutViewController extends BaseViewController {
+export class InOutViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -485,6 +485,7 @@ class InOutViewController extends BaseViewController {
 			};
 		}
 
+		current_api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		return current_api.setUserPunch( record, false, ignoreWarning, callback );
 	}
 
@@ -582,7 +583,7 @@ class InOutViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 
 		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab_punch_column1 );
 
@@ -590,7 +591,7 @@ class InOutViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab_punch_column1 );
 
 		// Branch
@@ -600,7 +601,7 @@ class InOutViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch_id'
@@ -618,7 +619,7 @@ class InOutViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department_id'
@@ -638,7 +639,7 @@ class InOutViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -671,7 +672,7 @@ class InOutViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {

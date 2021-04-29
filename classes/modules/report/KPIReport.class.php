@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -904,85 +904,86 @@ class KPIReport extends Report {
 
 			$border = 0;
 
-			foreach( $this->form_data['review'] as $user_id => $user_rows ) {
-				foreach( $user_rows as $user_review_control_id => $kpi_rows ) {
-					$i = 0;
-					$this->pdf->AddPage( 'P', 'LETTER' );
+			if ( isset( $this->form_data['review'] ) && is_array( $this->form_data['review'] ) ) {
+				foreach ( $this->form_data['review'] as $user_id => $user_rows ) {
+					foreach ( $user_rows as $user_review_control_id => $kpi_rows ) {
+						$i = 0;
+						$this->pdf->AddPage( 'P', 'LETTER' );
 
-					foreach( $kpi_rows as $key => $row ) {
-						$is_review_first_page = false;
-						$row['line'] = ($i + 1);
+						foreach ( $kpi_rows as $key => $row ) {
+							$is_review_first_page = false;
+							$row['line'] = ( $i + 1 );
 
-						if ( $this->_pdf_checkMaximumPageLimit() == false ) {
-							Debug::Text( 'Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10 );
-							//Exceeded maximum pages, stop processing.
-							$this->_pdf_displayMaximumPageLimitError();
-							break;
+							if ( $this->_pdf_checkMaximumPageLimit() == false ) {
+								Debug::Text( 'Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10 );
+								//Exceeded maximum pages, stop processing.
+								$this->_pdf_displayMaximumPageLimitError();
+								break;
+							}
+
+							if ( $i == 0 ) {
+								$is_review_first_page = true;
+								$this->reviewHeader( $this->form_data['user'][$user_id], $this->form_data['user_review_control'][$user_review_control_id][$user_id] );
+								if ( isset( $this->form_data['user_review'][$user_review_control_id] ) && count( $this->form_data['user_review'][$user_review_control_id] ) > 0 ) { //Only show header if KPIs actually exist. The review might just be a general note.
+									$this->reviewKPIHeader( $columns, $column_widths );
+								}
+							}
+
+							if ( isset( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']] ) ) {
+								$description = ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['description'] != '' ) ? "\n(" . $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['description'] . ')' : '';
+								$row['kpi.name'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['name'] . $description;
+								$row['user_review.rating'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['rating'];
+								$row['user_review.note'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['note'];
+
+								$row_cell_height = $this->_pdf_getMaximumHeightFromArray( $columns, $row, $column_widths, 65, $this->_pdf_fontSize( $row_layout['height'] ), 0.75 ); //Seems to estimate a little too high, so shrink it down a bit. We force the text to always fit in the cell, so it will never be too small.
+								//Debug::Text( 'Max Row Height ('. $i .'): '. $row_cell_height, __FILE__, __LINE__, __METHOD__, 10 );
+								if ( $is_review_first_page == true && $row_cell_height > ( $total_height - 50 ) || $row_cell_height > $total_height ) { //Different max height on first page vs. 2nd page.
+									$row_cell_height = $total_height;
+								}
+								$this->reviewCheckPageBreak( $row_cell_height, true );
+
+								$this->pdf->MultiCell( $column_widths['line'], $row_cell_height, $row['line'], 1, 'C', 0, 0 );
+
+								$this->pdf->MultiCell( $column_widths['kpi.name'], $row_cell_height, $row['kpi.name'], 1, 'L', 0, 0, '', '', true, 0, false, true, 0, 'T', true );
+
+								if ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['type_id'] == 10 ) { //10=Scale
+									$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? Misc::removeTrailingZeros( $row['user_review.rating'], 0 ) : '--', 1, 'C', 0, 0, '', '', true, 0 );
+								} else if ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['type_id'] == 20 ) { //20=Yes/No
+									$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, Misc::humanBoolean( $row['user_review.rating'] ), 1, 'C', 0, 0, '', '', true, 0 );
+								} else {
+									$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? $row['user_review.rating'] : TTi18n::getText( 'N/A' ), 1, 'C', 0, 0, '', '', true, 0 );
+								}
+
+								$this->pdf->MultiCell( $column_widths['user_review.note'], $row_cell_height, ( $row['user_review.note'] != '' ) ? $row['user_review.note'] : '--', 1, 'L', 0, 0, '', '', true, 0, false, true, 0, 'T', true );
+								$this->pdf->Ln( $row_cell_height );
+							}
+
+							$i++;
 						}
 
-						if ( $i == 0 ) {
-							$is_review_first_page = true;
-							$this->reviewHeader( $this->form_data['user'][$user_id], $this->form_data['user_review_control'][$user_review_control_id][$user_id] );
-							if ( isset($this->form_data['user_review'][$user_review_control_id]) && count($this->form_data['user_review'][$user_review_control_id]) > 0 ) { //Only show header if KPIs actually exist. The review might just be a general note.
-								$this->reviewKPIHeader( $columns, $column_widths );
-							}
-						}
+						if ( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'] != '' ) {
+							$row_cell_height = $this->pdf->getStringHeight( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], wordwrap( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], $total_width ) );
 
-						if ( isset($this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]) ) {
-							$description = ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['description'] != '' ) ? "\n(" . $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['description'] . ')' : '';
-							$row['kpi.name'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['name'] . $description;
-							$row['user_review.rating'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['rating'];
-							$row['user_review.note'] = $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['note'];
-
-							$row_cell_height = $this->_pdf_getMaximumHeightFromArray( $columns, $row, $column_widths, 65, $this->_pdf_fontSize( $row_layout['height'] ), 0.75 ); //Seems to estimate a little too high, so shrink it down a bit. We force the text to always fit in the cell, so it will never be too small.
-							//Debug::Text( 'Max Row Height ('. $i .'): '. $row_cell_height, __FILE__, __LINE__, __METHOD__, 10 );
-							if ( $is_review_first_page == true && $row_cell_height > ( $total_height - 50 ) || $row_cell_height > $total_height ) { //Different max height on first page vs. 2nd page.
-								$row_cell_height = $total_height;
-							}
 							$this->reviewCheckPageBreak( $row_cell_height, true );
 
-							$this->pdf->MultiCell( $column_widths['line'], $row_cell_height, $row['line'], 1, 'C', 0, 0 );
-
-							$this->pdf->MultiCell( $column_widths['kpi.name'], $row_cell_height, $row['kpi.name'], 1, 'L', 0, 0, '', '', true, 0, false, true, 0, 'T', true );
-
-							if ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['type_id'] == 10  ) { //10=Scale
-								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? Misc::removeTrailingZeros( $row['user_review.rating'], 0) : '--', 1, 'C', 0, 0, '', '', true, 0 );
-							} elseif ( $this->form_data['user_review'][$user_review_control_id][$row['kpi.id']]['type_id'] == 20 ) { //20=Yes/No
-								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, Misc::humanBoolean( $row['user_review.rating'] ), 1, 'C', 0, 0, '', '', true, 0 );
-							} else {
-								$this->pdf->MultiCell( $column_widths['user_review.rating'], $row_cell_height, ( $row['user_review.rating'] != '' ) ? $row['user_review.rating'] : TTi18n::getText('N/A'), 1, 'C', 0, 0, '', '', true, 0 );
-							}
-
-							$this->pdf->MultiCell( $column_widths['user_review.note'], $row_cell_height, ( $row['user_review.note'] != '' ) ? $row['user_review.note'] : '--', 1, 'L', 0, 0, '', '', true, 0, false, true, 0, 'T', true );
+							$this->pdf->Ln( 5 );
+							$this->pdf->SetFont( $this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 12 ) );
+							$this->pdf->Cell( 15, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Note' ) . ':', $border, 0, 'L' );
+							$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 10 ) );
+							$this->pdf->MultiCell( ( $total_width - 15 ), $row_cell_height, $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], $border, 'L', 0, 0, '', '', true, 0 );
 							$this->pdf->Ln( $row_cell_height );
 						}
 
-						$i++;
+						$this->reviewSignature( $this->form_data['user'][$user_id], $this->form_data['user_review_control'][$user_review_control_id][$user_id] );
+
+						$this->reviewFooter();
 					}
-
-					if ( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'] != '' ) {
-						$row_cell_height = $this->pdf->getStringHeight( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], wordwrap( $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], $total_width ) );
-
-						$this->reviewCheckPageBreak( $row_cell_height, true );
-
-						$this->pdf->Ln( 5 );
-						$this->pdf->SetFont( $this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 12 ) );
-						$this->pdf->Cell( 15, $this->_pdf_scaleSize( 5 ), TTi18n::gettext( 'Note' ) . ':', $border, 0, 'L' );
-						$this->pdf->SetFont( $this->config['other']['default_font'], '', $this->_pdf_fontSize( 10 ) );
-						$this->pdf->MultiCell( ( $total_width - 15 ), $row_cell_height, $this->form_data['user_review_control'][$user_review_control_id][$user_id]['note'], $border, 'L', 0, 0, '', '', true, 0 );
-						$this->pdf->Ln( $row_cell_height );
-					}
-
-					$this->reviewSignature( $this->form_data['user'][$user_id], $this->form_data['user_review_control'][$user_review_control_id][$user_id] );
-
-					$this->reviewFooter();
 				}
+
+				$output = $this->pdf->Output( '', 'S' );
+
+				return $output;
 			}
-
-			$output = $this->pdf->Output( '', 'S' );
-
-			return $output;
-
 		}
 
 		Debug::Text( 'No data to return...', __FILE__, __LINE__, __METHOD__, 10 );

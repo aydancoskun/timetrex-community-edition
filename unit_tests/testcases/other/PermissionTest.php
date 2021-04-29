@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,14 +35,14 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class PermissionTest extends PHPUnit_Framework_TestCase {
+class PermissionTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 	protected $pay_stub_account_link_arr = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -71,16 +71,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		//$this->deleteAllSchedules();
-
-		return true;
 	}
 
 	function createPayPeriodSchedule( $shift_assigned_day = 10, $maximum_shift_time = 57600, $new_shift_trigger_time = 14400 ) {
@@ -296,8 +290,17 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'bPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame( array_merge( $subordinate_user_ids, (array)$superior_user_id ), $permission_children_ids );
 
-		//Check wage permissions, as no wage permissions should be enabled, no children should be returned.
+		//Check wage permissions, as only wage view_own permissions should be enabled, no children should be returned.
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
+		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'cPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
+		$this->assertSame( [ $superior_user_id ], $permission_children_ids );
+		$this->assertSame( false, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( 99999, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( TTUUID::getZeroID(), $permission_children_ids ) );
+
+		//Check wage permissions, as no wage permissions should be enabled, no children should be returned.
+		$permission_children_ids = $permission->getPermissionChildren( 'over_time_policy', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'cPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame( [], $permission_children_ids );
 		$this->assertSame( false, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
@@ -308,9 +311,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsB
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
+	 * @group Permission_testBasicHierarchyPermissionFunctionsB
 	 */
 	function testBasicHierarchyPermissionFunctionsB() {
 		global $dd;
@@ -351,10 +352,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsC
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
-	 *
+	 * @group Permission_testBasicHierarchyPermissionFunctionsC
 	 */
 	function testBasicHierarchyPermissionFunctionsC() {
 		global $dd;
@@ -377,6 +375,10 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Admin user at the top
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
+		$this->editUserPermission( $superior_user_id, 'wage', 'view', false );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', false );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', false );
+
 		//
 		//Add wage, view_child permissions and re-check
 		//
@@ -396,10 +398,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsD
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
-	 *
+	 * @group Permission_testBasicHierarchyPermissionFunctionsD
 	 */
 	function testBasicHierarchyPermissionFunctionsD() {
 		global $dd;
@@ -425,6 +424,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		//Add wage, view_own AND view_child permissions and re-check
 		//
+		$this->editUserPermission( $superior_user_id, 'wage', 'view', false );
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', true );
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', true );
 
@@ -441,9 +441,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsE
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
+	 * @group Permission_testBasicHierarchyPermissionFunctionsE
 	 */
 	function testBasicHierarchyPermissionFunctionsE() {
 		global $dd;
@@ -471,6 +469,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Add wage, view permissions and re-check
 		//
 		$this->editUserPermission( $superior_user_id, 'wage', 'view', true );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', false );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', false );
 
 		$permission = TTnew( 'Permission' );
 		/** @var Permission $permission */ //This clears cache
@@ -485,10 +485,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testBasicHierarchyPermissionFunctionsF
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
-	 *
+	 * @group Permission_testBasicHierarchyPermissionFunctionsF
 	 */
 	function testBasicHierarchyPermissionFunctionsF() {
 		global $dd;
@@ -531,10 +528,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testUserSummaryReportPermissionsA
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
-	 *
+	 * @group Permission_testUserSummaryReportPermissionsA
 	 */
 	function testUserSummaryReportPermissionsA() {
 		global $dd;
@@ -559,9 +553,9 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 
 		$this->editUserPermission( $superior_user_id, 'user', 'view', true ); //View all employees, but not all wages.
-		//$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
-		//$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
-		//$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view', false );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', false );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', false );
 		//$permission = TTnew('Permission'); //This clears cache
 
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
@@ -599,10 +593,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testUserSummaryReportPermissionsB
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
-	 *
+	 * @group Permission_testUserSummaryReportPermissionsB
 	 */
 	function testUserSummaryReportPermissionsB() {
 		global $dd;
@@ -669,10 +660,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testUserSummaryReportPermissionsC
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
-	 *
+	 * @group Permission_testUserSummaryReportPermissionsC
 	 */
 	function testUserSummaryReportPermissionsC() {
 		global $dd;
@@ -696,8 +684,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
 		$this->editUserPermission( $superior_user_id, 'user', 'view', true ); //View all employees, but not all wages.
-		//$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
-		//$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view', false );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', false );
 		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', true );
 		//$permission = TTnew('Permission'); //This clears cache
 
@@ -748,10 +736,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testUserSummaryReportPermissionsD
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
-	 *
+	 * @group Permission_testUserSummaryReportPermissionsD
 	 */
 	function testUserSummaryReportPermissionsD() {
 		global $dd;
@@ -828,10 +813,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @OFFgroup Permission_testUserSummaryReportPermissionsE
-	 * Need to run these in serial, otherwise they can cause UUID conflicts.
-	 * @group PermissionTest
-	 *
+	 * @group Permission_testUserSummaryReportPermissionsE
 	 */
 	function testUserSummaryReportPermissionsE() {
 		global $dd;

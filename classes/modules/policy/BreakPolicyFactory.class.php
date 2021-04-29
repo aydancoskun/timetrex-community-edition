@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -68,6 +68,12 @@ class BreakPolicyFactory extends Factory {
 						20 => TTi18n::gettext( 'Punch Time' ),
 				];
 				break;
+			case 'allocation_type':
+				$retval = [
+						10 => TTi18n::gettext( 'Proportional Distribution' ),
+						100 => TTi18n::gettext( 'At Active After Time' ),
+				];
+				break;
 			case 'columns':
 				$retval = [
 						'-1010-type'        => TTi18n::gettext( 'Type' ),
@@ -85,6 +91,7 @@ class BreakPolicyFactory extends Factory {
 
 						'-1100-include_break_punch_time' => TTi18n::gettext( 'Include Break Punch' ),
 						'-1110-include_multiple_breaks'  => TTi18n::gettext( 'Include Multiple Breaks' ),
+						'-1200-allocation_type' => TTi18n::gettext( 'Allocation Type' ),
 
 						'-1900-in_use' => TTi18n::gettext( 'In Use' ),
 
@@ -142,6 +149,8 @@ class BreakPolicyFactory extends Factory {
 				'maximum_punch_time'       => 'MaximumPunchTime',
 				'include_break_punch_time' => 'IncludeBreakPunchTime',
 				'include_multiple_breaks'  => 'IncludeMultipleBreaks',
+				'allocation_type_id'      => 'AllocationType',
+				'allocation_type'         => false,
 
 				'pay_code_id'           => 'PayCode',
 				'pay_code'              => false,
@@ -318,6 +327,23 @@ class BreakPolicyFactory extends Factory {
 		$value = (int)trim( $value );
 
 		return $this->setGenericDataValue( 'auto_detect_type_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
+	function getAllocationType() {
+		return $this->getGenericDataValue( 'allocation_type_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAllocationType( $value ) {
+		$value = (int)trim( $value );
+
+		return $this->setGenericDataValue( 'allocation_type_id', $value );
 	}
 
 	/**
@@ -545,6 +571,14 @@ class BreakPolicyFactory extends Factory {
 										  $this->getOptions( 'auto_detect_type' )
 			);
 		}
+		// Allocation Type
+		if ( $this->getAllocationType() !== false ) {
+			$this->Validator->inArrayKey( 'allocation_type',
+										  $this->getAllocationType(),
+										  TTi18n::gettext( 'Incorrect Allocation Type' ),
+										  $this->getOptions( 'allocation_type' )
+			);
+		}
 		// Start Window
 		if ( $this->getStartWindow() != '' ) {
 			$this->Validator->isNumeric( 'start_window',
@@ -698,6 +732,7 @@ class BreakPolicyFactory extends Factory {
 							break;
 						case 'type':
 						case 'auto_detect_type':
+						case 'allocation_type':
 							$function = 'get' . str_replace( '_', '', $variable );
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );

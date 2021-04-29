@@ -2,8 +2,8 @@
 
 <!--
 Description	T4RSP Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -34,6 +34,7 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="llp_wdrw_amt" type="decimal9Type" minOccurs="0"/>
 			<xsd:element name="hbp_rrsp_wdrw_amt" type="decimal9Type" minOccurs="0"/>
 			<xsd:element name="mrrg_bkdn_tramt" type="decimal9Type" minOccurs="0"/>
+			<xsd:element name="rrsp_alda_amt" type="signedDecimal11Type" minOccurs="0"/>
 		</xsd:all>
 	</xsd:complexType>
 	<xsd:complexType name="T4RSPSummaryType">
@@ -63,6 +64,7 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="tot_llp_wdrw_amt" type="decimal13Type" minOccurs="0"/>
 			<xsd:element name="tot_hbp_wdrw_amt" type="decimal13Type" minOccurs="0"/>
 			<xsd:element name="tot_mrrg_tramt" type="decimal13Type" minOccurs="0"/>
+			<xsd:element name="tot_rrsp_alda_amt" type="signedDecimal13Type" minOccurs="0"/>
 		</xsd:all>
 	</xsd:complexType>
 </xsd:schema>

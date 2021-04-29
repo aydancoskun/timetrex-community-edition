@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -214,6 +214,7 @@ class PayStubSummaryReport extends Report {
 					'-1070-country'             => TTi18n::gettext( 'Country' ),
 					'-1075-postal_code'         => TTi18n::gettext( 'Postal Code' ),
 					'-1078-home_phone'          => TTi18n::gettext( 'Home Phone' ),
+					'-1079-home_email'          => TTi18n::gettext( 'Home Email' ),
 					'-1080-user_group'          => TTi18n::gettext( 'Group' ),
 					'-1090-default_branch'      => TTi18n::gettext( 'Default Branch' ),
 					'-1100-default_department'  => TTi18n::gettext( 'Default Department' ),
@@ -249,7 +250,7 @@ class PayStubSummaryReport extends Report {
 
 				];
 
-				$retval = array_merge( $retval, $this->getOptions( 'pay_stub_account_amount_columns' ) );
+				$retval = array_merge( $retval, $this->getOptions( 'pay_stub_account_amount_columns', [ 'include_ytd_amount' => true ] ) );
 				ksort( $retval );
 
 				break;
@@ -346,25 +347,58 @@ class PayStubSummaryReport extends Report {
 						}
 					}
 				}
-				$retval['verified_time_sheet_date'] = 'time_stamp';
 				break;
-			case 'aggregates':
-				$retval = [];
+			case 'grand_total_metadata':
+				//Make sure all jobs are sum'd
+				$retval['aggregate'] = [];
 				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) ) ) );
 				if ( is_array( $dynamic_columns ) ) {
 					foreach ( $dynamic_columns as $column ) {
 						switch ( $column ) {
 							default:
-								if ( strpos( $column, '_hourly_rate' ) !== false || substr( $column, 0, 2 ) == 'PR' ) {
-									$retval[$column] = 'avg';
+								if ( strpos( $column, '_hourly_rate' ) !== false || strpos( $column, '_rate' ) !== false || substr( $column, 0, 2 ) == 'PR' ) {
+									$retval['aggregate'][$column] = 'avg';
 								} else {
-									$retval[$column] = 'sum';
+									$retval['aggregate'][$column] = 'sum';
 								}
 						}
 					}
 				}
-				$retval['verified_time_sheet'] = 'first';
-				$retval['verified_time_sheet_date'] = 'first';
+				break;
+			case 'sub_total_by_metadata':
+				//Make sure task estimates are sum'd.
+				$retval['aggregate'] = [];
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) ) ) );
+				if ( is_array( $dynamic_columns ) ) {
+					foreach ( $dynamic_columns as $column ) {
+						switch ( $column ) {
+							default:
+								if ( strpos( $column, '_hourly_rate' ) !== false || strpos( $column, '_rate' ) !== false || substr( $column, 0, 2 ) == 'PR' ) {
+									$retval['aggregate'][$column] = 'avg';
+								} else {
+									$retval['aggregate'][$column] = 'sum';
+								}
+						}
+					}
+				}
+				break;
+			case 'group_by_metadata':
+				$retval['aggregate'] = [];
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) ) ) );
+				if ( is_array( $dynamic_columns ) ) {
+					foreach ( $dynamic_columns as $column ) {
+						switch ( $column ) {
+							default:
+								if ( strpos( $column, '_hourly_rate' ) !== false || strpos( $column, '_rate' ) !== false || substr( $column, 0, 2 ) == 'PR' ) {
+									$retval['aggregate'][$column] = 'avg';
+								} else if ( substr( $column, 0, 2 ) == 'PY' ) { //YTD Amounts must use "max()" when grouping rather than sum()
+									$retval['aggregate'][$column] = 'max';
+								} else {
+									$retval['aggregate'][$column] = 'sum';
+								}
+						}
+					}
+				}
 				break;
 			case 'templates':
 				$retval = [

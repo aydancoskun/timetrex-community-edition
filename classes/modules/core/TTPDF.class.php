@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedConstantInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,7 +34,7 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( Environment::getBasePath() . '/classes/tcpdf/tcpdf.php' );
+require_once ( Environment::getBasePath() . 'vendor' . DIRECTORY_SEPARATOR . 'tecnickcom' . DIRECTORY_SEPARATOR . 'tcpdf' . DIRECTORY_SEPARATOR . 'tcpdf.php' );
 
 //Automatically create TCPDF cache path if it doesn't exist.
 if ( !file_exists( K_PATH_CACHE ) ) {

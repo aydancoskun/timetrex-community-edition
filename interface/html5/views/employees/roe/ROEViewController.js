@@ -1,4 +1,4 @@
-class ROEViewController extends BaseViewController {
+export class ROEViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#roe_view_container', //Must set el here and can only set string, so events can work
@@ -456,7 +456,7 @@ class ROEViewController extends BaseViewController {
 				default_args: default_args,
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
@@ -466,7 +466,7 @@ class ROEViewController extends BaseViewController {
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -475,7 +475,7 @@ class ROEViewController extends BaseViewController {
 				field: 'code_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -484,7 +484,7 @@ class ROEViewController extends BaseViewController {
 				field: 'pay_period_type_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -513,7 +513,7 @@ class ROEViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -525,7 +525,7 @@ class ROEViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -591,7 +591,7 @@ class ROEViewController extends BaseViewController {
 			api_class: TTAPI.APIROE,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ROE,
+			layout_name: 'global_roe',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -621,7 +621,7 @@ class ROEViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			field: 'user_id',
 			show_search_inputs: true,
 			set_empty: true
@@ -636,19 +636,19 @@ class ROEViewController extends BaseViewController {
 		// Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_status_array ) );
+		form_item_input.setSourceData( $this.user_status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_roe_column1 );
 
 		// Reason
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'code_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.code_array ) );
+		form_item_input.setSourceData( $this.code_array );
 		this.addEditFieldToColumn( $.i18n._( 'Reason' ), form_item_input, tab_roe_column1 );
 
 		// Pay Period Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'pay_period_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Type' ), form_item_input, tab_roe_column1 );
 
 		// First Day Worked
@@ -726,7 +726,7 @@ class ROEViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			field: 'absence_policy_ids',
 			show_search_inputs: true,
 			set_empty: true
@@ -744,7 +744,7 @@ class ROEViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			field: 'insurable_earnings_psea_ids',
 			show_search_inputs: true,
 			set_empty: true
@@ -759,7 +759,7 @@ class ROEViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			field: 'vacation_psea_ids',
 			show_search_inputs: true,
 			set_empty: true

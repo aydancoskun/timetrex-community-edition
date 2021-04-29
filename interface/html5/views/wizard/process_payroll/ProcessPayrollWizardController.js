@@ -1,4 +1,4 @@
-class ProcessPayrollWizardController extends BaseWizardController {
+export class ProcessPayrollWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg',
@@ -74,7 +74,7 @@ class ProcessPayrollWizardController extends BaseWizardController {
 
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more pay periods to process payroll for' ) + ':' );
-				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, 'global_Pay_period', 'pay_period_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -808,6 +808,8 @@ class ProcessPayrollWizardController extends BaseWizardController {
 				grid = current_step_ui.pay_stub_generate;
 				ids = grid.grid.jqGrid( 'getGridParam', 'selarrrow' );
 				ProgressBar.showOverlay();
+
+				TTAPI.APIPayStub.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 				TTAPI.APIPayStub.generatePayStubs( ids, {
 					onResult: function( result ) {
 						if ( result.isValid() ) {

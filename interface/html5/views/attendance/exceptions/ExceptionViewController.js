@@ -1,4 +1,4 @@
-class ExceptionViewController extends BaseViewController {
+export class ExceptionViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#exception_view_container',
@@ -343,14 +343,14 @@ class ExceptionViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
-				layout_name: ALayoutIDs.PAY_PERIOD,
+				layout_name: 'global_Pay_period',
 				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
@@ -361,7 +361,7 @@ class ExceptionViewController extends BaseViewController {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -375,7 +375,7 @@ class ExceptionViewController extends BaseViewController {
 				multiple: true,
 				adv_search: true,
 				basic_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -385,7 +385,7 @@ class ExceptionViewController extends BaseViewController {
 				multiple: true,
 				adv_search: true,
 				basic_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -393,7 +393,7 @@ class ExceptionViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
@@ -403,7 +403,7 @@ class ExceptionViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
@@ -414,7 +414,7 @@ class ExceptionViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				field: 'default_department_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
@@ -425,7 +425,7 @@ class ExceptionViewController extends BaseViewController {
 				label: $.i18n._( 'Branch' ),
 				in_column: 2,
 				field: 'branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: false,
@@ -436,7 +436,7 @@ class ExceptionViewController extends BaseViewController {
 				label: $.i18n._( 'Department' ),
 				field: 'department_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: false,
@@ -448,7 +448,7 @@ class ExceptionViewController extends BaseViewController {
 				label: $.i18n._( 'Title' ),
 				in_column: 3,
 				field: 'title_id',
-				layout_name: ALayoutIDs.JOB_TITLE,
+				layout_name: 'global_job_title',
 				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,

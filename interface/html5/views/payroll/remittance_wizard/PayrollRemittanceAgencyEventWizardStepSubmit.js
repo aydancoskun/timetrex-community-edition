@@ -1,4 +1,6 @@
-class PayrollRemittanceAgencyEventWizardStepSubmit extends WizardStep {
+import { WizardStep } from '@/global/widgets/wizard/WizardStep';
+
+export class PayrollRemittanceAgencyEventWizardStepSubmit extends WizardStep {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			name: 'summary',
@@ -44,7 +46,7 @@ class PayrollRemittanceAgencyEventWizardStepSubmit extends WizardStep {
 
 				break;
 
-			case 'F1099MISC':
+			case 'F1099NEC':
 				retval = 'publish';
 				break;
 
@@ -138,11 +140,11 @@ class PayrollRemittanceAgencyEventWizardStepSubmit extends WizardStep {
 							$.i18n._( 'Navigate to the agency\'s website and upload the eFile downloaded in the above step.' )
 						);
 						break;
-					case 'F1099MISC':
-						$this.addButton( 'Government1099Misc',
+					case 'F1099NEC':
+						$this.addButton( 'Government1099Nec',
 							Icons.print,
-							$.i18n._( '1099-MISC Forms' ),
-							$.i18n._( 'Generate the government 1099-MISC forms to print and file manually.' )
+							$.i18n._( '1099-NEC Forms' ),
+							$.i18n._( 'Generate the government 1099-NEC forms to print and file manually.' )
 						);
 						break;
 					case 'F940':
@@ -324,10 +326,10 @@ class PayrollRemittanceAgencyEventWizardStepSubmit extends WizardStep {
 							break;
 					}
 					break;
-				case 'F1099MISC':
+				case 'F1099NEC':
 					switch ( icon ) {
-						case 'Government1099Misc':
-							Global.loadScript( 'views/reports/form1099/Form1099MiscReportViewController', function() {
+						case 'Government1099Nec':
+							Global.loadScript( 'views/reports/form1099/Form1099NecReportViewController', function() {
 								$this.getWizardObject().getReport( 'pdf_form_government' );
 							} );
 							break;

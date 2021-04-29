@@ -1,4 +1,4 @@
-class ReCalculateTimeSheetWizardController extends BaseWizardController {
+export class ReCalculateTimeSheetWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg'
@@ -38,7 +38,7 @@ class ReCalculateTimeSheetWizardController extends BaseWizardController {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more pay periods' ) );
 
-				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, 'global_Pay_period', 'pay_period_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -53,7 +53,7 @@ class ReCalculateTimeSheetWizardController extends BaseWizardController {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) + ':' );
 
-				a_combobox = this.getAComboBox( TTAPI.APIUser, true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( TTAPI.APIUser, true, 'global_user', 'user_id', true );
 				div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 

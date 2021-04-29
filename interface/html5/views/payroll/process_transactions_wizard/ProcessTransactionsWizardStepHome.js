@@ -1,4 +1,6 @@
-class ProcessTransactionsWizardStepHome extends WizardStep {
+import { WizardStep } from '@/global/widgets/wizard/WizardStep';
+
+export class ProcessTransactionsWizardStepHome extends WizardStep {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			name: 'home',
@@ -15,37 +17,35 @@ class ProcessTransactionsWizardStepHome extends WizardStep {
 
 	init() {
 		var $this = this;
-		require( this._required_files, function() {
-			var external_data = $this.getWizardObject().getExternalData();
-			if ( external_data.transaction_source_data ) {
-				$this.source_accounts = [];
-				$this.normalizeSourceAccounts( external_data.transaction_source_data );
-				delete external_data.transaction_source_data;
+		var external_data = $this.getWizardObject().getExternalData();
+		if ( external_data.transaction_source_data ) {
+			$this.source_accounts = [];
+			$this.normalizeSourceAccounts( external_data.transaction_source_data );
+			delete external_data.transaction_source_data;
+			$this.render();
+			return;
+		}
+
+		var api = TTAPI.APIPayStubTransaction;
+		var filter_data = {};
+		if ( external_data ) {
+			var temp_filter_data = external_data.filter_data;
+
+			// Ignore ugliness from report setup data ( We only want to send the filter forward )
+			var ignore_fields = ['chart', 'columns', 'sort', 'sort_', 'order', 'other', 'template', 'sub_total'];
+			for ( var n in temp_filter_data ) {
+				if ( ignore_fields.indexOf( n ) == -1 ) {
+					filter_data[n] = temp_filter_data[n];
+				}
+			}
+		}
+
+		api.getPayPeriodTransactionSummary( filter_data, {
+			onResult: function( result ) {
+				var transactions = result.getResult();
+				$this.normalizeSourceAccounts( transactions );
 				$this.render();
-				return;
 			}
-
-			var api = TTAPI.APIPayStubTransaction;
-			var filter_data = {};
-			if ( external_data ) {
-				var temp_filter_data = external_data.filter_data;
-
-				// Ignore ugliness from report setup data ( We only want to send the filter forward )
-				var ignore_fields = ['chart', 'columns', 'sort', 'sort_', 'order', 'other', 'template', 'sub_total'];
-				for ( var n in temp_filter_data ) {
-					if ( ignore_fields.indexOf( n ) == -1 ) {
-						filter_data[n] = temp_filter_data[n];
-					}
-				}
-			}
-
-			api.getPayPeriodTransactionSummary( filter_data, {
-				onResult: function( result ) {
-					var transactions = result.getResult();
-					$this.normalizeSourceAccounts( transactions );
-					$this.render();
-				}
-			} );
 		} );
 	}
 
@@ -95,8 +95,7 @@ class ProcessTransactionsWizardStepHome extends WizardStep {
 		var $this = this;
 		TTPromise.wait( 'processTransactionsWizard', 'render', function() {
 			$( $this.el ).show();
-			//select first input.
-			$( $( '.process_transactions_wizard input' )[0] ).focus();
+			( $( '.process_transactions_wizard input' )[1] ).focus(); //Select first input field by default.
 		} );
 		this.buildForm();
 	}
@@ -125,7 +124,7 @@ class ProcessTransactionsWizardStepHome extends WizardStep {
 			for ( var n in this.source_accounts ) {
 				var item = this.source_accounts[n];
 				var row = $( '<tr></tr>' );
-				var chk = $( '<input type="checkbox" value="' + item.id + '" CHECKED="CHECKED" tabIndex="' + tab_index + '"></input>' );
+				var chk = $( '<input type="checkbox" value="' + item.id + '" tabIndex="' + tab_index + '" checked></input>' );
 				tab_index++;
 
 				chk.on( 'change', function( e ) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -59,9 +59,8 @@ class Environment {
 	/**
 	 * @return mixed
 	 */
-	static function getBasePath() {
-		//return dirname( __FILE__ ) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR;
-		return str_replace( 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'core', '', dirname( __FILE__ ) );
+	static function getBasePath() : string {
+		return dirname(__FILE__, 4) . DIRECTORY_SEPARATOR; // return directory 4 levels up from this file + seperator as includes expect it
 	}
 
 	/**
@@ -134,6 +133,10 @@ class Environment {
 				$api = 'soap';
 			} else if ( defined( 'TIMETREX_JSON_API' ) && TIMETREX_JSON_API == true ) {
 				$api = 'json';
+			} else if ( defined( 'TIMETREX_REPORT_API' ) && TIMETREX_REPORT_API == true ) {
+				$api = 'report';
+			} else {
+				$api = 'json'; //If this is called from something like index.php, default to the JSON api.
 			}
 		}
 

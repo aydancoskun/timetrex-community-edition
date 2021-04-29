@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,12 +35,12 @@
  ********************************************************************************/
 
 //This must go above include for global.inc.php
-if ( isset( $argv ) AND in_array( '--config', $argv ) ) {
-	$_SERVER['TT_CONFIG_FILE'] = trim( $argv[ ( array_search( '--config', $argv ) + 1 ) ] );
+if ( isset( $argv ) && in_array( '--config', $argv ) ) {
+	$_SERVER['TT_CONFIG_FILE'] = trim( $argv[( array_search( '--config', $argv ) + 1 )] );
 }
 
 //If requirements only check is enabled, do not connect to the database just in case the database isnt setup yet or setup incorrectly.
-if ( isset( $argv ) AND in_array( '--requirements_only', $argv ) ) {
+if ( isset( $argv ) && in_array( '--requirements_only', $argv ) ) {
 	$disable_database_connection = true;
 }
 
@@ -61,7 +61,7 @@ require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPAR
 
 //Since we aren't including database.inc.php, force the timezone to be set to avoid   WARNING(2): getdate(): It is not safe to rely on the system's timezone settings. You are *required* to use the date.timezone setting or the date_default_timezone_set()
 //Sometimes scripts won't make a database connection
-if ( !isset( $config_vars['other']['system_timezone'] ) OR ( isset( $config_vars['other']['system_timezone'] ) AND $config_vars['other']['system_timezone'] == '' ) ) {
+if ( !isset( $config_vars['other']['system_timezone'] ) || ( isset( $config_vars['other']['system_timezone'] ) && $config_vars['other']['system_timezone'] == '' ) ) {
 	$config_vars['other']['system_timezone'] = @date( 'e' );
 }
 if ( $config_vars['other']['system_timezone'] == '' ) {
@@ -90,7 +90,7 @@ $php_cli = $config_vars['path']['php_cli'];
 
 function moveUpgradeFiles( $upgrade_staging_latest_dir ) {
 	$latest_file_list = Misc::getFileList( $upgrade_staging_latest_dir, null, true );
-	if ( is_array( $latest_file_list ) AND count( $latest_file_list ) > 0 ) {
+	if ( is_array( $latest_file_list ) && count( $latest_file_list ) > 0 ) {
 		foreach ( $latest_file_list as $latest_file ) {
 			$new_file = str_replace( $upgrade_staging_latest_dir, Environment::getBasePath(), $latest_file );
 
@@ -155,7 +155,7 @@ Debug::Text( 'Version: ' . APPLICATION_VERSION . ' (PHP: v' . phpversion() . ') 
 ob_implicit_flush( true );
 ob_end_flush();
 
-if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( isset( $argv[1] ) && in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: unattended_upgrade.php\n";
 	$help_output .= " [--config] = Config file to use.\n";
 	$help_output .= " [--schema_only] = Run a schema upgrade only.\n";
@@ -199,13 +199,13 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 		$full_force = false;
 	}
 
-	if ( isset( $argv ) AND in_array( '--upgrade_file', $argv ) ) { //Allow forcing a specific file to use for upgrading instead of downloading one.
-		$manual_upgrade_file_name = trim( $argv[ ( array_search( '--upgrade_file', $argv ) + 1 ) ] );
+	if ( isset( $argv ) && in_array( '--upgrade_file', $argv ) ) { //Allow forcing a specific file to use for upgrading instead of downloading one.
+		$manual_upgrade_file_name = trim( $argv[( array_search( '--upgrade_file', $argv ) + 1 )] );
 	}
 
 	if ( in_array( '--pre_requirements_update', $argv ) ) {
 		Debug::Text( 'Running pre-requirements update only...', __FILE__, __LINE__, __METHOD__, 10 );
-		if ( $force == true OR version_compare( APPLICATION_VERSION, '10.0.0', '>=' ) == true ) {
+		if ( $force == true || version_compare( APPLICATION_VERSION, '10.0.0', '>=' ) == true ) {
 			//Cant enable INTL/ZIP extensions, as they won't load on some stack installs...
 //			Debug::Text('  Running: v10.0.0 Pre-Requirements Update...', __FILE__, __LINE__, __METHOD__, 10);
 //
@@ -266,7 +266,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 
 	if ( in_array( '--requirements_only', $argv ) ) {
 		Debug::Text( 'Checking requirements only...', __FILE__, __LINE__, __METHOD__, 10 );
-		$exclude_requirements = array('php_cli_requirements', 'base_url', 'clean_cache');
+		$exclude_requirements = [ 'php_cli_requirements', 'base_url', 'clean_cache' ];
 		if ( in_array( '--web_installer', $argv ) ) {
 			Debug::Text( '  Launched from web installer...', __FILE__, __LINE__, __METHOD__, 10 );
 			//When run from the web_installer most requirements are already checked, so exclude the slow ones.
@@ -376,7 +376,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 		*/
 
 		Debug::Text( 'AutoUpgrade Stage2... Version: ' . APPLICATION_VERSION, __FILE__, __LINE__, __METHOD__, 10 );
-		if ( $force == false AND ( PRODUCTION == false OR DEPLOYMENT_ON_DEMAND == true ) ) { //Allow FORCE=TRUE to override this.
+		if ( $force == false && ( PRODUCTION == false || DEPLOYMENT_ON_DEMAND == true ) ) { //Allow FORCE=TRUE to override this.
 			echo "ERROR: Not doing full upgrade when PRODUCTION mode is disabled, or in ONDEMAND mode... Use FORCE argument to override.\n";
 			CLIExit( 1 );
 		}
@@ -392,9 +392,9 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 		//Don't check file_checksums, as the script is run from the old version and therefore the checksum version match will fail everytime.
 		//They should have been checked above anyways, so in theory this shouldn't matter.
 
-		$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_stage2_requirements'), 'pre_install.php' ), 'r' );
+		$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_stage2_requirements' ], 'pre_install.php' ), 'r' );
 		@fclose( $handle );
-		if ( $install_obj->checkAllRequirements( false, array('file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache') ) == 0 ) {
+		if ( $install_obj->checkAllRequirements( false, [ 'file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache' ] ) == 0 ) {
 			$install_obj->setDatabaseConnection( $db ); //Default connection
 
 			//Make sure at least one company exists in the database, this only works for upgrades, not initial installs.
@@ -425,7 +425,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 
 					Debug::Text( 'Upgrading database schema successful!', __FILE__, __LINE__, __METHOD__, 10 );
 					echo "Upgrading database schema successful!\n";
-					$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_new_schema'), 'pre_install.php' ), 'r' );
+					$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_new_schema' ], 'pre_install.php' ), 'r' );
 					@fclose( $handle );
 
 					Debug::Text( 'Cleaning up temporary files...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -448,7 +448,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 
 					Debug::Text( 'Stage 2 Successfull!', __FILE__, __LINE__, __METHOD__, 10 );
 					echo "Stage 2 Successfull!\n";
-					$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_done'), 'pre_install.php' ), 'r' );
+					$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_done' ], 'pre_install.php' ), 'r' );
 					@fclose( $handle );
 
 					//Make sure we disable the installer even if an error has occurred.
@@ -476,8 +476,8 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 	}
 
 	//Stage 1, Full upgrade, including downloading the file.
-	if ( in_array( '--schema_only', $argv ) == false AND in_array( '--stage2', $argv ) == false ) {
-		if ( $force == false AND ( PRODUCTION == false OR DEPLOYMENT_ON_DEMAND == true ) ) { //Allow FORCE=TRUE to override this.
+	if ( in_array( '--schema_only', $argv ) == false && in_array( '--stage2', $argv ) == false ) {
+		if ( $force == false && ( PRODUCTION == false || DEPLOYMENT_ON_DEMAND == true ) ) { //Allow FORCE=TRUE to override this.
 			echo "ERROR: Not doing full upgrade when PRODUCTION mode is disabled, or in ONDEMAND mode... Use FORCE argument to override.\n";
 			CLIExit( 1 );
 		}
@@ -495,14 +495,14 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 		Debug::Text( 'Checking if new version is available, current version: ' . APPLICATION_VERSION . ' Force: ' . (int)$full_force, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$ttsc = new TimeTrexSoapClient();
-		if ( $full_force === true OR $ttsc->isNewVersionReadyForUpgrade( $force ) === true ) {
+		if ( $full_force === true || $ttsc->isNewVersionReadyForUpgrade( $force ) === true ) {
 			Debug::Text( 'New version available, or force used...', __FILE__, __LINE__, __METHOD__, 10 );
 
 			$handle = @fopen( 'http://www.timetrex.com/pre_install.php?v=' . $install_obj->getFullApplicationVersion() . '&os=' . PHP_OS . '&php_version=' . PHP_VERSION . '&web_server=' . urlencode( substr( $_SERVER['SERVER_SOFTWARE'], 0, 20 ) ) . '&page=unattended_upgrade', 'r' );
 			@fclose( $handle );
 
 			$install_obj->cleanCacheDirectory();
-			if ( $install_obj->checkAllRequirements( false, array('file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache') ) == 0 ) {
+			if ( $install_obj->checkAllRequirements( false, [ 'file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache' ] ) == 0 ) {
 				Debug::Text( 'New version available, collecting data to download...', __FILE__, __LINE__, __METHOD__, 10 );
 				echo "New version available, collecting data to download...\n";
 
@@ -515,13 +515,13 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 				for ( $i = 0; $i < 3; $i++ ) {
 					$file_url = $ttsc->getUpgradeFileURL( $force );
 					Debug::Arr( $file_url, 'File Upgrade URL: ', __FILE__, __LINE__, __METHOD__, 10 );
-					if ( !is_soap_fault( $file_url ) AND $file_url === false ) {
+					if ( !is_soap_fault( $file_url ) && $file_url === false ) {
 						//Skip retries in case the .ZIP file is already downloaded for testing.
 						Debug::Text( 'Upgrade URL not available from server, either already running latest version or not ready to upgrade yet, skip retries: ' . $i, __FILE__, __LINE__, __METHOD__, 10 );
 						break;
 					}
 
-					if ( !is_soap_fault( $file_url ) AND $file_url !== false AND $file_url != '' ) {
+					if ( !is_soap_fault( $file_url ) && $file_url !== false && $file_url != '' ) {
 						$file_url_size = Misc::getRemoteHTTPFileSize( $file_url );
 						if ( $file_url_size > 0 ) {
 							Debug::Text( 'Got File Upgrade URL and size, breaking retry loop...' . $i, __FILE__, __LINE__, __METHOD__, 10 );
@@ -536,16 +536,16 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 					sleep( 120 );
 				}
 
-				if ( file_exists( $upgrade_file_name ) OR ( !is_soap_fault( $file_url ) AND $file_url !== false AND $file_url != '' ) ) {
-					$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_download'), 'pre_install.php' ), 'r' );
+				if ( file_exists( $upgrade_file_name ) || ( !is_soap_fault( $file_url ) && $file_url !== false && $file_url != '' ) ) {
+					$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_download' ], 'pre_install.php' ), 'r' );
 					@fclose( $handle );
 
-					if ( isset( $manual_upgrade_file_name ) AND $manual_upgrade_file_name != '' AND file_exists( $manual_upgrade_file_name ) AND filesize( $manual_upgrade_file_name ) > 0 ) {
+					if ( isset( $manual_upgrade_file_name ) && $manual_upgrade_file_name != '' && file_exists( $manual_upgrade_file_name ) && filesize( $manual_upgrade_file_name ) > 0 ) {
 						Debug::Text( 'Using manual upgrade file: ' . $manual_upgrade_file_name . ' Current Size: ' . filesize( $manual_upgrade_file_name ), __FILE__, __LINE__, __METHOD__, 10 );
 						echo 'Using Manual Upgrade File: ' . $manual_upgrade_file_name . "...\n";
 						$upgrade_file_name = $manual_upgrade_file_name;
 					} else {
-						if ( file_exists( $upgrade_file_name ) == false OR ( isset( $file_url_size ) AND filesize( $upgrade_file_name ) != $file_url_size ) ) {
+						if ( file_exists( $upgrade_file_name ) == false || ( isset( $file_url_size ) && filesize( $upgrade_file_name ) != $file_url_size ) ) {
 							Debug::Text( 'Attempting to download latest version...', __FILE__, __LINE__, __METHOD__, 10 );
 							echo "Attempting to download latest version...\n";
 							sleep( 5 ); //Sleep for 5 seconds so it can be cancelled easy if needed.
@@ -553,7 +553,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 							//$bytes_downloaded = @file_put_contents( $upgrade_file_name, fopen( $file_url, 'r') );
 							$bytes_downloaded = Misc::downloadHTTPFile( $file_url, $upgrade_file_name );
 							Debug::Text( 'Downloaded file: ' . $upgrade_file_name . ' Size: ' . @filesize( $upgrade_file_name ) . ' Bytes downloaded: ' . $bytes_downloaded . ' Remote Size: ' . $file_url_size, __FILE__, __LINE__, __METHOD__, 10 );
-							if ( $bytes_downloaded != $file_url_size OR @filesize( $upgrade_file_name ) <= 0 ) {
+							if ( $bytes_downloaded != $file_url_size || @filesize( $upgrade_file_name ) <= 0 ) {
 								Debug::Text( 'ERROR: File did not download correctly...', __FILE__, __LINE__, __METHOD__, 10 );
 								echo 'ERROR: File did not download correctly...' . "\n";
 								setAutoUpgradeFailed();
@@ -567,7 +567,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 						}
 					}
 
-					if ( file_exists( $upgrade_file_name ) AND filesize( $upgrade_file_name ) > 0 ) {
+					if ( file_exists( $upgrade_file_name ) && filesize( $upgrade_file_name ) > 0 ) {
 						Debug::Text( 'Cleaning staging directory: ' . $upgrade_staging_dir, __FILE__, __LINE__, __METHOD__, 10 );
 						echo 'Cleaning staging directory: ' . $upgrade_staging_dir . "\n";
 						Misc::cleanDir( $upgrade_staging_dir, true, true, true );
@@ -578,7 +578,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 						$zip = new ZipArchive;
 						$zip_result = $zip->open( $upgrade_file_name );
 						if ( $zip_result === true ) {
-							$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_unzip'), 'pre_install.php' ), 'r' );
+							$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_unzip' ], 'pre_install.php' ), 'r' );
 							@fclose( $handle );
 
 							//Hide errors from this, like failed streams, or file already exists warnings and such. Don't think there is anything we can do about them anyways.
@@ -601,7 +601,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 						if ( file_exists( $upgrade_staging_dir ) ) {
 							if ( $handle = opendir( $upgrade_staging_dir ) ) {
 								while ( ( $entry = readdir( $handle ) ) !== false ) {
-									if ( $entry != '.' AND $entry != '..' AND $entry != 'latest_version' ) { //In case the rename occurred and for some reason those files can't be cleared/deleted, ignore it.
+									if ( $entry != '.' && $entry != '..' && $entry != 'latest_version' ) { //In case the rename occurred and for some reason those files can't be cleared/deleted, ignore it.
 										$upgrade_staging_extract_dir = $upgrade_staging_dir . DIRECTORY_SEPARATOR . $entry;
 										break;
 									}
@@ -610,7 +610,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 							}
 
 							if ( isset( $upgrade_staging_extract_dir ) ) {
-								$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_rename_dir'), 'pre_install.php' ), 'r' );
+								$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_rename_dir' ], 'pre_install.php' ), 'r' );
 								@fclose( $handle );
 
 								//Make sure the latest directory does not exist before renaming the unzipped directory to it. This may help with some Access Denied errors on Windows.
@@ -641,7 +641,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 									Debug::Text( 'Running pre-requirements update... Command: ' . $command . ' Exit Code: ' . $exit_code, __FILE__, __LINE__, __METHOD__, 10 );
 									if ( $exit_code == 0 ) {
 										Debug::Text( 'New version pre-requirements met...', __FILE__, __LINE__, __METHOD__, 10 );
-										$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_pre_requirements'), 'pre_install.php' ), 'r' );
+										$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_pre_requirements' ], 'pre_install.php' ), 'r' );
 										@fclose( $handle );
 
 										$command = '"' . $php_cli . '" -d opcache.enable_cli=0 "' . $latest_unattended_upgrade_tool . '" --config "' . CONFIG_FILE . '" --requirements_only'; //Make each part is quoted in case there are spaces in the paths.
@@ -649,12 +649,12 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 										Debug::Text( 'Checking new version system requirements... Command: ' . $command . ' Exit Code: ' . $exit_code, __FILE__, __LINE__, __METHOD__, 10 );
 										if ( $exit_code == 0 ) {
 											Debug::Text( 'New version system requirements met...', __FILE__, __LINE__, __METHOD__, 10 );
-											$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_new_requirements'), 'pre_install.php' ), 'r' );
+											$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_new_requirements' ], 'pre_install.php' ), 'r' );
 											@fclose( $handle );
 
 											moveUpgradeFiles( $upgrade_staging_latest_dir );
 
-											$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_launch_stage2'), 'pre_install.php' ), 'r' );
+											$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( [ 'v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_launch_stage2' ], 'pre_install.php' ), 'r' );
 											@fclose( $handle );
 
 											$global_class_map['TTUUID'] = 'core/TTUUID.class.php'; //Need to manually map the TTUUID class as it may be required by autoloaded classes in this process.
@@ -732,7 +732,7 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 			} else {
 				Debug::Text( 'ERROR: Current system requirements check failed...', __FILE__, __LINE__, __METHOD__, 10 );
 				echo "ERROR: Current system requirements check failed...\n";
-				echo '  Failed Requirements: ' . implode( ',', $install_obj->getFailedRequirements( false, array('file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache') ) ) . "\n";
+				echo '  Failed Requirements: ' . implode( ',', $install_obj->getFailedRequirements( false, [ 'file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache' ] ) ) . "\n";
 				setAutoUpgradeFailed();
 			}
 		} else {

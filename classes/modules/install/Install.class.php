@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedFunctionInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -978,8 +978,8 @@ class Install {
 		}
 		Debug::text( 'Comparing with Version: ' . $php_version, __FILE__, __LINE__, __METHOD__, 9 );
 
-		$min_version = '7.0.0';  //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
-		$max_version = '7.4.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
+		$min_version = '7.2.0';  //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
+		$max_version = '8.0.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
 
 		$unsupported_versions = [ '' ];
 
@@ -1019,6 +1019,20 @@ class Install {
 
 		//Debug::text('RetVal: '. $retval, __FILE__, __LINE__, __METHOD__, 9);
 		return $retval;
+	}
+
+	/**
+	 * Require 64-bit PHP versions, since accrual policies with length of service dates >2038 will fail otherwise.
+	 * @return int
+	 */
+	function checkPHPINTSize() {
+		return 0; //Don't require this in v12.7.1, wait until at least 12.7.2 or after the US tax form updates.
+
+		if ( PHP_INT_SIZE === 8 ) {
+			return 0;
+		}
+
+		return 1;
 	}
 
 	/**
@@ -1416,7 +1430,7 @@ class Install {
 		}
 
 		if ( $this->getDatabaseType() == 'postgresql' ) {
-			if ( $db_version == null || version_compare( $db_version, '9.4', '>=' ) == 1 ) { //v9.4 has JSONB support.
+			if ( $db_version == null || version_compare( $db_version, '9.6', '>=' ) == 1 ) { //v9.6 has JSONB support.
 				return 0;
 			}
 		}
@@ -1669,58 +1683,6 @@ class Install {
 		include_once( 'HTTP/Download.php' );
 
 		if ( class_exists( 'HTTP_Download' ) ) {
-			return 0;
-		}
-
-		return 1;
-	}
-
-	/**
-	 * @return int
-	 */
-	function checkPEARValidate() {
-		include_once( 'Validate.php' );
-
-		if ( class_exists( 'Validate' ) ) {
-			return 0;
-		}
-
-		return 1;
-	}
-
-	/**
-	 * @return int
-	 */
-	function checkPEARValidate_Finance() {
-		include_once( 'Validate/Finance.php' );
-
-		if ( class_exists( 'Validate_Finance' ) ) {
-			return 0;
-		}
-
-		return 1;
-	}
-
-	/**
-	 * @return int
-	 */
-	function checkPEARValidate_Finance_CreditCard() {
-		include_once( 'Validate/Finance/CreditCard.php' );
-
-		if ( class_exists( 'Validate_Finance_CreditCard' ) ) {
-			return 0;
-		}
-
-		return 1;
-	}
-
-	/**
-	 * @return int
-	 */
-	function checkPEARNET_Curl() {
-		include_once( 'Net/Curl.php' );
-
-		if ( class_exists( 'NET_Curl' ) ) {
 			return 0;
 		}
 
@@ -2167,21 +2129,9 @@ class Install {
 	}
 
 	/**
-	 * @return int
-	 */
-	function checkPHPMagicQuotesGPC() {
-		if ( get_magic_quotes_gpc() == 1 ) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	/**
 	 * @return string
 	 */
 	function getCurrentTimeTrexVersion() {
-		//return '1.2.1';
 		return APPLICATION_VERSION;
 	}
 
@@ -2236,6 +2186,7 @@ class Install {
 		//$retarr[1]++; //Test failed requirements.
 
 		$retarr[$this->checkPHPVersion()]++;
+		$retarr[$this->checkPHPINTSize()]++;
 		$retarr[$this->checkDatabaseType()]++;
 		//$retarr[$this->checkDatabaseVersion()]++; //Requires DB connection, which we often won't have.
 		$retarr[$this->checkSOAP()]++;
@@ -2294,10 +2245,9 @@ class Install {
 		$retarr[$this->checkPHPMemoryLimit()]++;
 		$retarr[$this->checkPHPMaxPostSize()]++;
 		$retarr[$this->checkPHPMaxUploadSize()]++;
-		$retarr[$this->checkPHPMagicQuotesGPC()]++;
 
 		if ( $this->getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$retarr[$this->checkPEARValidate()]++;
+			//$retarr[$this->checkPEARValidate()]++;
 		}
 
 		//Debug::Arr($retarr, 'RetArr: ', __FILE__, __LINE__, __METHOD__, 9);
@@ -2324,6 +2274,10 @@ class Install {
 
 		if ( $fail_all == true || $this->checkPHPVersion() != 0 ) {
 			$retarr[] = 'PHPVersion';
+		}
+
+		if ( $fail_all == true || $this->checkPHPINTSize() != 0 ) {
+			$retarr[] = 'PHPINT';
 		}
 
 		if ( $fail_all == true || $this->checkDatabaseType() != 0 ) {
@@ -2477,14 +2431,11 @@ class Install {
 		if ( $fail_all == true || $this->checkPHPMaxUploadSize() != 0 ) {
 			$retarr[] = 'PHPUploadSize';
 		}
-		if ( $fail_all == true || $this->checkPHPMagicQuotesGPC() != 0 ) {
-			$retarr[] = 'PHPMagicQuotesGPC';
-		}
 
 		if ( $fail_all == true || $this->getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			if ( $fail_all == true || $this->checkPEARValidate() != 0 ) {
-				$retarr[] = 'PEARVal';
-			}
+			//if ( $fail_all == true || $this->checkPEARValidate() != 0 ) {
+			//	$retarr[] = 'PEARVal';
+			//}
 		}
 
 		if ( isset( $retarr ) ) {

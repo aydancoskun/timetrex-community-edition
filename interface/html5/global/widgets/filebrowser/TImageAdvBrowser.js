@@ -55,7 +55,7 @@
 
 			var d = new Date();
 			image.hide();
-			image.attr( 'src', val + '&t=' + d.getTime() );
+			image.attr( 'src', val + '&t=' + d.getTime() + '&X-CSRF-Token=' + getCookie( 'CSRF-Token' ) );
 			image.css( 'height', 'auto' );
 			image.css( 'width', 'auto' );
 

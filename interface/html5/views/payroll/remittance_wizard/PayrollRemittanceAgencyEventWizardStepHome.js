@@ -1,4 +1,6 @@
-class PayrollRemittanceAgencyEventWizardStepHome extends WizardStep {
+import { WizardStep } from '@/global/widgets/wizard/WizardStep';
+
+export class PayrollRemittanceAgencyEventWizardStepHome extends WizardStep {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			name: 'home',

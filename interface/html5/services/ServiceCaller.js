@@ -1,27 +1,29 @@
-$.xhrPool = [];
+import { ResponseObject } from '@/model/ResponseObject';
+import { TTUUID } from '@/global/TTUUID';
+import { APIReturnHandler } from '@/model/APIReturnHandler';
 
-var ServiceCaller = Backbone.Model.extend( {
-	getOptions: function() {
-		if ( !arguments || arguments.length < 2 ) {
-			return;
+export class ServiceCaller extends Backbone.Model {
+
+	constructor() {
+		$.xhrPool = [];
+		super();
+	}
+
+	getIsIdempotent() {
+		if ( this.is_idempotent ) {
+			return this.is_idempotent
 		}
-		return this.argumentsHandler( this.className, 'getOptions', arguments );
-	},
 
-	getPagerData: function() {
+		return false;
+	}
 
-		return this.argumentsHandler( this.className, 'getPagerData', arguments );
-	},
+	setIsIdempotent( value ) {
+		this.is_idempotent = value;
 
-	getOtherConfig: function() {
-		return this.argumentsHandler( this.className, 'getOtherConfig', arguments );
-	},
+		return true;
+	}
 
-	getChartConfig: function() {
-		return this.argumentsHandler( this.className, 'getChartConfig', arguments );
-	},
-
-	argumentsHandler: function() {
+	argumentsHandler() {
 		var className = arguments[0];
 		var function_name = arguments[1];
 		var apiArgsAndResponseObject = arguments[2];
@@ -53,9 +55,9 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		return this.call( className, function_name, responseObject, apiArgs );
 
-	},
+	}
 
-	getOptionsCacheKey: function( api_args, key ) {
+	getOptionsCacheKey( api_args, key ) {
 
 		$.each( api_args, function( index, value ) {
 
@@ -69,16 +71,16 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		return key;
 
-	},
+	}
 
-	uploadFile: function( form_data, paramaters, responseObj ) {
+	uploadFile( form_data, paramaters, responseObj ) {
 		var message_id = TTUUID.generateUUID();
 		ProgressBar.showProgressBar( message_id );
 
 		//On IE 9
 		if ( typeof FormData == "undefined" ) {
 			form_data.attr( 'method', 'POST' );
-			form_data.attr( 'action', ServiceCaller.uploadURL + '?' + paramaters + '&' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID() );
+			form_data.attr( 'action', ServiceCaller.getURLByObjectType( 'upload' ) + '?' + paramaters + '&' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID() );
 			form_data.attr( 'enctype', 'multipart/form-data' );
 
 			ProgressBar.changeProgressBarMessage( 'File Uploading' );
@@ -99,7 +101,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		ProgressBar.changeProgressBarMessage( 'File Uploading' );
 		$.ajax( {
-			url: ServiceCaller.uploadURL + '?' + paramaters + '&' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID(), //Server script to process data
+			url: ServiceCaller.getURLByObjectType( 'upload' ) + '?' + paramaters + '&' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID(), //Server script to process data
 			headers: {
 				//Handle CSRF tokens and related headers here.
 				'X-Client-ID': 'Browser-TimeTrex',
@@ -138,9 +140,9 @@ var ServiceCaller = Backbone.Model.extend( {
 			processData: false
 		} );
 
-	},
+	}
 
-	prettyPrintAPIArguments: function( apiArgs ) {
+	prettyPrintAPIArguments( apiArgs ) {
 		if ( apiArgs && apiArgs.json ) {
 			var retval = [];
 			var args = JSON.parse( apiArgs.json );
@@ -153,19 +155,19 @@ var ServiceCaller = Backbone.Model.extend( {
 		}
 
 		return null;
-	},
+	}
 
-	call: function( className, function_name, responseObject, apiArgs ) {
+	call( className, function_name, responseObject, apiArgs ) {
 		var $this = this;
 		var message_id;
-		var base_url = ServiceCaller.getURLWithSessionId( 'Class=' + className + '&Method=' + function_name + '&v=2' );
+		var base_url = ServiceCaller.getAPIURL( 'Class=' + className + '&Method=' + function_name + '&v=2' );
 		var url = base_url;
-		if ( LocalCacheData.all_url_args ) {
-			if ( LocalCacheData.all_url_args.hasOwnProperty( 'user_id' ) ) {
-				url = url + '&user_id=' + LocalCacheData.all_url_args.user_id;
+		if ( LocalCacheData.getAllURLArgs() ) {
+			if ( LocalCacheData.getAllURLArgs().hasOwnProperty( 'user_id' ) ) {
+				url = url + '&user_id=' + LocalCacheData.getAllURLArgs().user_id;
 			}
-			if ( LocalCacheData.all_url_args.hasOwnProperty( 'company_id' ) ) {
-				url = url + '&company_id=' + LocalCacheData.all_url_args.company_id;
+			if ( LocalCacheData.getAllURLArgs().hasOwnProperty( 'company_id' ) ) {
+				url = url + '&company_id=' + LocalCacheData.getAllURLArgs().company_id;
 			}
 		}
 		if ( Global.getStationID() ) {
@@ -281,6 +283,10 @@ var ServiceCaller = Backbone.Model.extend( {
 			url = url + '&MessageID=' + message_id;
 		}
 
+		if ( this.getIsIdempotent() == true ) {
+			url = url + '&idempotent=1';
+		}
+
 		if ( ServiceCaller.extra_url ) {
 			url = url + ServiceCaller.extra_url;
 		}
@@ -293,7 +299,6 @@ var ServiceCaller = Backbone.Model.extend( {
 		apiArgs = { json: JSON.stringify( apiArgs ) };
 
 		//Try to get a stack trace for each function call so if an error occurs we know exactly what triggered the call.
-		// IE11 doesn't support Error() like Firefox/Chrome/Edge do though, so skip the trace.
 		var stack_trace_str = null;
 		if ( typeof Error !== 'undefined' ) {
 			var stack_trace = ( new Error() );
@@ -302,7 +307,7 @@ var ServiceCaller = Backbone.Model.extend( {
 			} else {
 				stack_trace_str = null;
 			}
-			delete stack_trace;
+			stack_trace = null; // Previously null was 'delete' but not valid in JS strict mode.
 		}
 
 		var api_called_date = new Date();
@@ -312,7 +317,7 @@ var ServiceCaller = Backbone.Model.extend( {
 			api_called_date: api_called_date.toISOString(),
 			stack_trace: stack_trace_str
 		};
-		delete stack_trace_str;
+		stack_trace_str = null; // Previously null was 'delete' but not valid in JS strict mode.
 
 		if ( LocalCacheData.api_stack.length === 16 ) {
 			LocalCacheData.api_stack.pop();
@@ -375,9 +380,9 @@ var ServiceCaller = Backbone.Model.extend( {
 						console.groupEnd( api_trace_response_label );
 
 						console.groupEnd( api_trace_label );
-						delete api_trace_raw_request_label;
-						delete api_trace_response_label;
-						delete api_trace_label;
+						api_trace_raw_request_label = null; // Previously null was 'delete' but not valid in JS strict mode.
+						api_trace_response_label = null; // Previously null was 'delete' but not valid in JS strict mode.
+						api_trace_label = null; // Previously null was 'delete' but not valid in JS strict mode.
 					}
 
 					if ( !Global.isSet( result ) ) {
@@ -415,23 +420,27 @@ var ServiceCaller = Backbone.Model.extend( {
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'SESSION' ) {
 						//Debug.Text('API returned session expired: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						LocalCacheData.cleanNecessaryCache(); //make sure the cache is cleared when session is expired
-						ServiceCaller.cancelAllError = true;
+						ServiceCaller.cancel_all_error = true;
 						LocalCacheData.login_error_string = $.i18n._( 'Session expired, please login again.' );
 						Global.clearSessionCookie(); //This helps skip other API calls or prevent the UI from thinking we are still logged in.
 						if ( window.location.href == Global.getBaseURL() + '#!m=' + 'Login' ) {
 							// Prevent a partially loaded login screen when SessionID cookie is set but not valid on server.
-							window.location.reload();
+							//   However if the session is expired on the server, and the user tries to navigate to some other page,
+							//   there could be multiple API calls queued up, which causes this reload() to be triggered many times,
+							//   and network requests to be aborted, which triggers error messages. Disable the reload for now as in theory it shouldn't be needed.
+							//   This reload also gets rid of the "Session expired, please login again" error message, which is not ideal.
+							//window.location.reload();
 						} else {
-							var paths = Global.getBaseURL().replace( ServiceCaller.rootURL, '' ).split( '/' );
+							var paths = Global.getBaseURL().replace( ServiceCaller.root_url, '' ).split( '/' );
 							if ( paths.indexOf( 'quick_punch' ) > 0 ) {
 								Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + 'QuickPunchLogin' );
 							} else if ( paths.indexOf( 'portal' ) > 0 ) {
-								if ( LocalCacheData.all_url_args.company_id ) {
+								if ( LocalCacheData.getAllURLArgs().company_id ) {
 									LocalCacheData.setPortalLoginUser( null );
-									Global.setURLToBrowser( Global.getBaseURL() + '#!m=PortalJobVacancy&company_id=' + LocalCacheData.all_url_args.company_id );
+									Global.setURLToBrowser( Global.getBaseURL() + '#!m=PortalJobVacancy&company_id=' + LocalCacheData.getAllURLArgs().company_id );
 								}
 							} else {
-								if ( !LocalCacheData.all_url_args.company_id ) {
+								if ( !LocalCacheData.getAllURLArgs().company_id ) {
 									Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + 'Login' );
 								}
 							}
@@ -444,7 +453,7 @@ var ServiceCaller = Backbone.Model.extend( {
 						//Before the location.replace because after that point we can't be sure of execution.
 						TTPromise.resolve( 'ServiceCaller', message_id );
 						//replace instead of assignment to ensure that the DOWN_FOR_MAINTENANCE page does not end up in the back button history.
-						window.location.replace( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'html5/DownForMaintenance.php?exception=DOWN_FOR_MAINTENANCE' );
+						window.location.replace( ServiceCaller.root_url + LocalCacheData.loginData.base_url + 'html5/DownForMaintenance.php?exception=DOWN_FOR_MAINTENANCE' );
 						return;
 					} else {
 						//Debug.Text('API returned result: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
@@ -481,13 +490,13 @@ var ServiceCaller = Backbone.Model.extend( {
 						ProgressBar.removeProgressBar( message_id );
 					}
 
-					if ( ServiceCaller.cancelAllError ) {
+					if ( ServiceCaller.cancel_all_error ) {
 						return;
 					}
 
 					Debug.Text( 'AJAX Request Error: ' + errorThrown + ' Message: ' + textStatus + ' HTTP Code: ' + jqXHR.status, 'ServiceCaller.js', 'ServiceCaller', 'call', 10 );
 					if ( jqXHR.responseText && jqXHR.responseText.indexOf( 'User not authenticated' ) >= 0 ) {
-						ServiceCaller.cancelAllError = true;
+						ServiceCaller.cancel_all_error = true;
 
 						LocalCacheData.login_error_string = $.i18n._( 'Session timed out, please login again.' );
 
@@ -534,14 +543,70 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		return apiReturnHandler;
 	}
-} );
+}
 
-ServiceCaller.getURLWithSessionId = function( rest_url ) {
-	if ( getCookie( 'js_debug' ) ) {
-		return ServiceCaller.baseUrl + '?' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID() + '&' + rest_url;
-	} else {
-		return ServiceCaller.baseUrl + '?' + rest_url;
+ServiceCaller.getAPIURL = function( rest_url ) {
+	return ServiceCaller.base_url + ServiceCaller.base_api_url + '?' + rest_url;
+};
+
+ServiceCaller.getURLByObjectType = function( object_type ) {
+	var append_csrf = false;
+	var append_cache_buster = false;
+
+	var retval = null;
+
+	var base_url = ServiceCaller.base_url + 'interface/send_file.php?api=1';
+
+	switch ( object_type.toLowerCase() ) {
+		case 'upload':
+			retval = ServiceCaller.base_url + 'interface/upload_file.php'
+			append_csrf = false;
+			break;
+		case 'import_csv_example':
+			retval = ServiceCaller.base_url + 'interface/html5/views/wizard/import_csv/'
+			append_csrf = false;
+			break;
+		case 'file_download':
+			retval = base_url; //Must allow for appending '&object_type=...' on the end.
+			append_csrf = true;
+			break;
+		case 'company_logo':
+			retval = base_url + '&object_type=company_logo';
+			append_csrf = true;
+			append_cache_buster = true;
+			break;
+		case 'invoice_config':
+			retval = base_url + '&object_type=invoice_config';
+			append_csrf = true;
+			break;
+		case 'user_photo':
+			retval = base_url + '&object_type=user_photo';
+			append_csrf = true;
+			break;
+
+		case 'primary_company_logo':
+			retval = base_url + '&object_type=primary_company_logo';
+			break;
+		case 'smcopyright':
+			retval = base_url + '&object_type=smcopyright';
+			break;
+		case 'copyright':
+			retval = base_url + '&object_type=copyright';
+			break;
+		default:
+			break;
 	}
+
+	//Append CSRF-Token.
+	if ( append_csrf == true ) {
+		retval += '&X-CSRF-Token=' + getCookie( 'CSRF-Token' );
+	}
+
+	if ( append_cache_buster == true ) {
+		retval += '&t=' + new Date().getTime();
+	}
+
+	return retval;
 };
 
 //Abort in-flight AJAX calls on logout.
@@ -558,28 +623,8 @@ ServiceCaller.abortAll = function() {
 	} );
 };
 
-ServiceCaller.hosts = null;
-
-ServiceCaller.baseUrl = null;
-
-ServiceCaller.fileDownloadURL = null;
-
-ServiceCaller.uploadURL = null;
-
-ServiceCaller.companyLogo = null;
-
-ServiceCaller.mainCompanyLogo = null;
-
-ServiceCaller.poweredByLogo = null;
-
-ServiceCaller.staticURL = null;
-
-ServiceCaller.rootURL = null;
-
-ServiceCaller.sessionID = '';
-
-ServiceCaller.cancelAllError = false;
-
-ServiceCaller.ozUrl = false;
-
+ServiceCaller.base_url = null;
+ServiceCaller.base_api_url = null;
+ServiceCaller.root_url = null;
+ServiceCaller.cancel_all_error = false;
 ServiceCaller.extra_url = false;

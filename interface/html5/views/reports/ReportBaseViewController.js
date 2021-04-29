@@ -1,4 +1,7 @@
-class ReportBaseViewController extends BaseViewController {
+import { BaseViewController } from '@/views/BaseViewController';
+import { Global } from '@/global/Global';
+
+export class ReportBaseViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			view_file: '',
@@ -576,7 +579,7 @@ class ReportBaseViewController extends BaseViewController {
 			api_class: TTAPI.APIUserReportData,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER_REPORT_DATA,
+			layout_name: 'global_user_report_data',
 			default_args: { filter_data: { script: this.script_name } },
 			navigation_mode: true,
 			show_search_inputs: true,
@@ -595,7 +598,7 @@ class ReportBaseViewController extends BaseViewController {
 		// Template
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'template', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.templates_array ) );
+		form_item_input.setSourceData( $this.templates_array );
 		this.addEditFieldToColumn( $.i18n._( 'Template' ), form_item_input, tab0_column1 );
 
 		//Tab 1 start
@@ -607,7 +610,7 @@ class ReportBaseViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			allow_multiple_selection: true,
 			key: 'value',
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			allow_drag_to_order: true,
 			set_empty: true,
 			field: 'setup_field'
@@ -619,13 +622,13 @@ class ReportBaseViewController extends BaseViewController {
 		//Page Orientation
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'page_orientation', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.page_orientation_array ) );
+		form_item_input.setSourceData( $this.page_orientation_array );
 		this.addEditFieldToColumn( $.i18n._( 'Page Orientation' ), form_item_input, tab1_column1 );
 
 		//Font Size
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'font_size', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.font_size_array ) );
+		form_item_input.setSourceData( $this.font_size_array );
 		this.addEditFieldToColumn( $.i18n._( 'Font Size' ), form_item_input, tab1_column1 );
 
 		//Disable Grand Total
@@ -641,7 +644,7 @@ class ReportBaseViewController extends BaseViewController {
 		//Auto-Refresh
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'auto_refresh', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.auto_refresh_array ) );
+		form_item_input.setSourceData( $this.auto_refresh_array );
 		this.addEditFieldToColumn( $.i18n._( 'Auto-Refresh' ), form_item_input, tab1_column1 );
 
 		//Maximum Pages
@@ -661,13 +664,13 @@ class ReportBaseViewController extends BaseViewController {
 		//Display
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'display_mode', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.chart_display_mode_array ) );
+		form_item_input.setSourceData( $this.chart_display_mode_array );
 		this.addEditFieldToColumn( $.i18n._( 'Display' ), form_item_input, tab2_column1 );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.chart_type_array ) );
+		form_item_input.setSourceData( $this.chart_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab2_column1 );
 
 		//Chart Sub-Totals
@@ -1434,45 +1437,45 @@ class ReportBaseViewController extends BaseViewController {
 				case 'exclude_reviewer_user_id':
 				case 'job_applicant_interviewer_user_id':
 				case 'job_application_interviewer_user_id':
-					widget = this.getTComboBox( field, ALayoutIDs.USER, TTAPI.APIUser );
+					widget = this.getTComboBox( field, 'global_user', TTAPI.APIUser );
 					break;
 				case 'user_title_id':
-					widget = this.getTComboBox( field, ALayoutIDs.USER_TITLE, TTAPI.APIUserTitle );
+					widget = this.getTComboBox( field, 'global_user_title', TTAPI.APIUserTitle );
 					break;
 				case 'payroll_remittance_agency_id':
-					widget = this.getTComboBox( field, ALayoutIDs.PAYROLL_REMITTANCE_AGENCY, TTAPI.APIPayrollRemittanceAgency );
+					widget = this.getTComboBox( field, 'global_payroll_remittance_agency', TTAPI.APIPayrollRemittanceAgency );
 					break;
 				case 'legal_entity_id':
-					widget = this.getTComboBox( field, ALayoutIDs.LEGAL_ENTITY, TTAPI.APILegalEntity );
+					widget = this.getTComboBox( field, 'global_legal_entity', TTAPI.APILegalEntity );
 					break;
 				case 'default_branch_id':
 				case 'schedule_branch_id':
 				case 'punch_branch_id':
 
-					widget = this.getTComboBox( field, ALayoutIDs.BRANCH, TTAPI.APIBranch );
+					widget = this.getTComboBox( field, 'global_branch', TTAPI.APIBranch );
 					break;
 				case 'default_department_id':
 				case 'schedule_department_id':
 				case 'punch_department_id':
-					widget = this.getTComboBox( field, ALayoutIDs.DEPARTMENT, TTAPI.APIDepartment );
+					widget = this.getTComboBox( field, 'global_department', TTAPI.APIDepartment );
 					break;
 				case 'default_job_id':
 				case 'punch_job_id':
 				case 'include_job_id':
 				case 'exclude_job_id':
-					widget = this.getTComboBox( field, ALayoutIDs.JOB, TTAPI.APIJob );
+					widget = this.getTComboBox( field, 'global_job', TTAPI.APIJob );
 					break;
 				case 'default_job_item_id':
 				case 'punch_job_item_id':
 				case 'include_job_item_id':
 				case 'exclude_job_item_id':
-					widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, TTAPI.APIJobItem );
+					widget = this.getTComboBox( field, 'global_job_item', TTAPI.APIJobItem );
 					break;
 				case 'absence_policy_id':
-					widget = this.getTComboBox( field, ALayoutIDs.ABSENCES_POLICY, TTAPI.APIAbsencePolicy );
+					widget = this.getTComboBox( field, 'global_absences', TTAPI.APIAbsencePolicy );
 					break;
 				case 'currency_id':
-					widget = this.getTComboBox( field, ALayoutIDs.CURRENCY, TTAPI.APICurrency );
+					widget = this.getTComboBox( field, 'global_currency', TTAPI.APICurrency );
 					break;
 				case 'include_no_data_rows':
 				case 'exclude_ytd_adjustment':
@@ -1480,54 +1483,54 @@ class ReportBaseViewController extends BaseViewController {
 					widget = this.getCheckBox( field );
 					break;
 				case 'accrual_policy_id':
-					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY, TTAPI.APIAccrualPolicy );
+					widget = this.getTComboBox( field, 'global_accrual', TTAPI.APIAccrualPolicy );
 					break;
 				case 'pay_period_id':
-					widget = this.getTComboBox( field, ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
+					widget = this.getTComboBox( field, 'global_Pay_period', TTAPI.APIPayPeriod );
 					break;
 				case 'job_id':
 					if ( ( Global.getProductEdition() >= 20 ) ) {
-						widget = this.getTComboBox( field, ALayoutIDs.JOB, TTAPI.APIJob );
+						widget = this.getTComboBox( field, 'global_job', TTAPI.APIJob );
 					}
 					break;
 				case 'job_item_id':
 					if ( ( Global.getProductEdition() >= 20 ) ) {
-						widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, TTAPI.APIJobItem );
+						widget = this.getTComboBox( field, 'global_job_item', TTAPI.APIJobItem );
 					}
 					break;
 				case 'expense_policy_id':
-					widget = this.getTComboBox( field, ALayoutIDs.EXPENSE_POLICY, TTAPI.APIExpensePolicy );
+					widget = this.getTComboBox( field, 'global_expense_policy', TTAPI.APIExpensePolicy );
 					break;
 				case 'pay_stub_entry_account_id':
-					widget = this.getTComboBox( field, ALayoutIDs.PAY_STUB_ACCOUNT, TTAPI.APIPayStubEntryAccount );
+					widget = this.getTComboBox( field, 'global_PayStubAccount', TTAPI.APIPayStubEntryAccount );
 					break;
 				case 'product_id':
 				case 'exclude_product_id':
 				case 'include_product_id':
-					widget = this.getTComboBox( field, ALayoutIDs.PRODUCT, TTAPI.APIProduct );
+					widget = this.getTComboBox( field, 'global_product', TTAPI.APIProduct );
 					break;
 				case 'job_client_id':
 				case 'exclude_client_id':
 				case 'include_client_id':
-					widget = this.getTComboBox( field, ALayoutIDs.CLIENT, TTAPI.APIClient );
+					widget = this.getTComboBox( field, 'global_client', TTAPI.APIClient );
 					break;
 				case 'company_deduction_id':
-					widget = this.getTComboBox( field, ALayoutIDs.COMPANY_DEDUCTION, TTAPI.APICompanyDeduction );
+					widget = this.getTComboBox( field, 'global_deduction', TTAPI.APICompanyDeduction );
 					break;
 				case 'qualification_id':
-					widget = this.getTComboBox( field, ALayoutIDs.QUALIFICATION, TTAPI.APIQualification );
+					widget = this.getTComboBox( field, 'global_qualification', TTAPI.APIQualification );
 					break;
 				case 'kpi_id':
-					widget = this.getTComboBox( field, ALayoutIDs.KPI, TTAPI.APIKPI );
+					widget = this.getTComboBox( field, 'global_kpi', TTAPI.APIKPI );
 					break;
 				case 'job_applicant_id':
-					widget = this.getTComboBox( field, ALayoutIDs.JOB_APPLICANT, TTAPI.APIJobApplicant );
+					widget = this.getTComboBox( field, 'global_job_applicant', TTAPI.APIJobApplicant );
 					break;
 				case 'job_vacancy_id':
-					widget = this.getTComboBox( field, ALayoutIDs.JOB_VACANCY, TTAPI.APIJobVacancy );
+					widget = this.getTComboBox( field, 'global_job_vacancy', TTAPI.APIJobVacancy );
 					break;
 				case 'accrual_policy_account_id':
-					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY_ACCOUNT, TTAPI.APIAccrualPolicyAccount );
+					widget = this.getTComboBox( field, 'global_accrual_policy_account', TTAPI.APIAccrualPolicyAccount );
 					break;
 
 				default:
@@ -1561,7 +1564,7 @@ class ReportBaseViewController extends BaseViewController {
 		widget = widget.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			set_empty: true,
 			field: field
 		} );
@@ -1602,7 +1605,7 @@ class ReportBaseViewController extends BaseViewController {
 			allow_drag_to_order: true,
 			allow_multiple_selection: true,
 			set_empty: true,
-			layout_name: ALayoutIDs.SORT_COLUMN
+			layout_name: 'global_sort_columns'
 		} );
 
 		return widget;
@@ -1620,7 +1623,7 @@ class ReportBaseViewController extends BaseViewController {
 			field: field,
 			set_empty: true,
 			allow_multiple_selection: allowMultiple,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			key: 'value'
 		} );
 
@@ -2066,7 +2069,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( 'license_expiry_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_3', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_3', 'global_pay_period_schedule', TTAPI.APIPayPeriodSchedule );
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2107,7 +2110,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( 'license_expiry_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id_3', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
+			var pay_period = $this.getTComboBox( 'pay_period_id_3', 'global_Pay_period', TTAPI.APIPayPeriod );
 
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2245,7 +2248,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( 'education_graduate_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_4', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_4', 'global_pay_period_schedule', TTAPI.APIPayPeriodSchedule );
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2286,7 +2289,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( 'education_graduate_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id_4', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
+			var pay_period = $this.getTComboBox( 'pay_period_id_4', 'global_Pay_period', TTAPI.APIPayPeriod );
 
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2424,7 +2427,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( 'skill_expiry_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_2', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_2', 'global_pay_period_schedule', TTAPI.APIPayPeriodSchedule );
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2465,7 +2468,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( 'skill_expiry_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id_2', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
+			var pay_period = $this.getTComboBox( 'pay_period_id_2', 'global_Pay_period', TTAPI.APIPayPeriod );
 
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2603,7 +2606,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( 'membership_renewal_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_1', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_1', 'global_pay_period_schedule', TTAPI.APIPayPeriodSchedule );
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2644,7 +2647,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( 'membership_renewal_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id_1', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
+			var pay_period = $this.getTComboBox( 'pay_period_id_1', 'global_Pay_period', TTAPI.APIPayPeriod );
 
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2777,7 +2780,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( field, time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id', 'global_pay_period_schedule', TTAPI.APIPayPeriodSchedule );
 			pay_period.attr( 'time_period_key', field );
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2817,7 +2820,7 @@ class ReportBaseViewController extends BaseViewController {
 			$this.initSourceData( field, time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
+			var pay_period = $this.getTComboBox( 'pay_period_id', 'global_Pay_period', TTAPI.APIPayPeriod );
 			pay_period.attr( 'time_period_key', field );
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -3159,8 +3162,8 @@ class ReportBaseViewController extends BaseViewController {
 		this.doFormIFrameCall( post_data );
 
 		var source = 'Excel'; // Backup value in case the url sm does not exist.
-		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm ) {
-			source = LocalCacheData.all_url_args.sm + '@Excel';
+		if ( LocalCacheData.getAllURLArgs() && LocalCacheData.getAllURLArgs().sm ) {
+			source = LocalCacheData.getAllURLArgs().sm + '@Excel';
 		}
 		$().TFeedback( {
 			source: source,
@@ -3362,7 +3365,7 @@ class ReportBaseViewController extends BaseViewController {
 //			this.doFormIFrameCall( post_data );
 //		}
 		if ( key === 'html' ) {
-			var url = ServiceCaller.getURLWithSessionId( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name + '&v=2' );
+			var url = ServiceCaller.getAPIURL( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name + '&v=2' );
 			if ( Global.getStationID() ) {
 				url = url + '&StationID=' + Global.getStationID();
 			}
@@ -3372,7 +3375,7 @@ class ReportBaseViewController extends BaseViewController {
 			var refresh_request = '<script>';
 			refresh_request += 'var timeout_handler;';
 			refresh_request += 'function remainTime() {';
-			refresh_request += '	if ( auto_refresh_time >= 0 ) {';
+			refresh_request += '	if ( auto_refresh_time && auto_refresh_time >= 0 ) {';
 			refresh_request += '		if ( auto_refresh_time == 0 ) {';
 			refresh_request += '			clearTimeout( timeout_handler );';
 			refresh_request += '			startRefresh();';
@@ -3406,15 +3409,18 @@ class ReportBaseViewController extends BaseViewController {
 				onResult: function( res ) {
 					var result = res.getResult();
 					if ( result ) {
-						result = result + refresh_request;
-						if ( new_window ) {
-							var w = window.open();
-							w.document.writeln( result );
-							w.document.close();
-						} else if ( result ) {
-							IndexViewController.openWizard( 'ReportViewWizard', result );
-
-							ProgressBar.closeOverlay();
+						if ( Global.isEmpty( result ) === false ) {
+							result = result + refresh_request;
+							if ( new_window ) {
+								var w = window.open();
+								w.document.writeln( result );
+								w.document.close();
+							} else if ( result ) {
+								IndexViewController.openWizard( 'ReportViewWizard', result );
+								ProgressBar.closeOverlay();
+							}
+						} else {
+							TAlertManager.showAlert( $.i18n._( 'NO DATA MATCHES CRITERIA', LocalCacheData.getApplicationName() ), $.i18n._( 'NOTICE' ) );
 						}
 					} else {
 						TAlertManager.showErrorAlert( res );
@@ -3429,6 +3435,8 @@ class ReportBaseViewController extends BaseViewController {
 						UserGenericStatusWindowController.open( retval, LocalCacheData.getLoginUser().id, function() {
 						} );
 						ProgressBar.closeOverlay();
+					} else {
+						TAlertManager.showAlert( $.i18n._( 'NO DATA MATCHES CRITERIA', LocalCacheData.getApplicationName() ), $.i18n._( 'NOTICE' ) );
 					}
 				}
 			} );
@@ -3437,8 +3445,8 @@ class ReportBaseViewController extends BaseViewController {
 			ProgressBar.closeOverlay();
 
 			var source = 'PDF'; // Backup value in case the url sm does not exist.
-			if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm ) {
-				source = LocalCacheData.all_url_args.sm + '@PDF';
+			if ( LocalCacheData.getAllURLArgs() && LocalCacheData.getAllURLArgs().sm ) {
+				source = LocalCacheData.getAllURLArgs().sm + '@PDF';
 			}
 			$().TFeedback( {
 				source: source,
@@ -3452,7 +3460,7 @@ class ReportBaseViewController extends BaseViewController {
 		var args = this.getPostReportJson( true );
 		var post_data = { 0: { filter_data: args }, 1: true, 2: key };
 		var pay_stub_api = TTAPI.APIPayStub;
-		var url = ServiceCaller.getURLWithSessionId( 'Class=' + pay_stub_api.className + '&Method=' + 'get' + pay_stub_api.key_name );
+		var url = ServiceCaller.getAPIURL( 'Class=' + pay_stub_api.className + '&Method=' + 'get' + pay_stub_api.key_name );
 		Global.APIFileDownload( pay_stub_api.className, pay_stub_api.key_name, post_data, url );
 	}
 
@@ -3461,7 +3469,7 @@ class ReportBaseViewController extends BaseViewController {
 
 	doFormIFrameCall( postData ) {
 
-		var url = ServiceCaller.getURLWithSessionId( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name );
+		var url = ServiceCaller.getAPIURL( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name );
 
 		Global.APIFileDownload( this.api.className, this.api.key_name, postData, url );
 	}

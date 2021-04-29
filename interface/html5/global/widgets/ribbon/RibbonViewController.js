@@ -1,11 +1,21 @@
-RibbonViewController = Backbone.View.extend( {
+import { TTBackboneView } from '@/views/TTBackboneView';
+import { Global } from '@/global/Global';
 
-	el: '#ribbon_view_container', //Must set el here and can only set string, so events can work
-	user_api: null,
+export class RibbonViewController extends TTBackboneView {
 
-	subMenuNavMap: null,
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#ribbon_view_container', //Must set el here and can only set string, so events can work
+			user_api: null,
+			subMenuNavMap: null
+		} );
 
-	initialize: function( options ) {
+		super( options );
+	}
+
+	initialize( options ) {
+		super.initialize( options );
+
 		// TopMenuManager should be initialized before render to avoid possible race condition.
 		// Error: TypeError: TopMenuManager.ribbon_view_controller is null in /interface/html5/framework/jquery.min.js?v=10.5.0-20170331-081453 line 2 > eval line 218
 
@@ -13,9 +23,9 @@ RibbonViewController = Backbone.View.extend( {
 		var $this = this;
 
 		$this.render();
-	},
+	}
 
-	onMenuSelect: function( e, ui ) {
+	onMenuSelect( e, ui ) {
 		return;
 		// No longer used because we only support a single context menu now.
 		// if ( TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) >= 0 ) {
@@ -25,9 +35,9 @@ RibbonViewController = Backbone.View.extend( {
 		// if ( TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) >= 0 ) {
 		// 	$( e.target ).parent().addClass( 'context-menu-active' );
 		// }
-	},
+	}
 
-	onSubMenuNavClick: function( target, id ) {
+	onSubMenuNavClick( target, id ) {
 		var $this = this;
 		var sub_menu = this.subMenuNavMap[id];
 		if ( LocalCacheData.openRibbonNaviMenu ) {
@@ -60,9 +70,9 @@ RibbonViewController = Backbone.View.extend( {
 			$( target ).append( box );
 		}
 
-	},
+	}
 
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 		Global.closeEditViews( function() {
 			if ( id === 'AffordableCareReport' && !( Global.getProductEdition() >= 15 ) ) {
 				TAlertManager.showAlert( Global.getUpgradeMessage() );
@@ -72,11 +82,11 @@ RibbonViewController = Backbone.View.extend( {
 			}
 		} );
 
-	},
+	}
 
 	//FIXME: Stops punch inout from being able to exit via the menu system except on items with dropdowns
 	//Does not trigger on Report menu items with dropdowns (see the right event)
-	onSubMenuClick: function( id ) {
+	onSubMenuClick( id ) {
 		var $this = this;
 		//#2342 see onCancelClick in BaseViewController and Gloabl.closeEditViews.
 
@@ -84,9 +94,9 @@ RibbonViewController = Backbone.View.extend( {
 			$this.setSelectSubMenu( id );
 			$this.openSelectView( id );
 		} );
-	},
+	}
 
-	buildRibbonMenus: function() {
+	buildRibbonMenus() {
 		var $this = this;
 		this.subMenuNavMap = {};
 		var ribbon_menu_array = TopMenuManager.ribbon_menus;
@@ -115,24 +125,20 @@ RibbonViewController = Backbone.View.extend( {
 
 				var len2 = ribbon_sub_menu_array.length;
 				for ( var y = 0; y < len2; y++ ) {
-
 					var ribbon_sub_menu = ribbon_sub_menu_array[y];
-
 					var sub_menu_ui_node = $( '<li><div class="ribbon-sub-menu-icon" id="' + ribbon_sub_menu.get( 'id' ) + '"><img src="' + ribbon_sub_menu.get( 'icon' ) + '" ><span class="ribbon-label">' + ribbon_sub_menu.get( 'label' ) + '</span></div></li>' );
 
 					if ( ribbon_sub_menu.get( 'type' ) === RibbonSubMenuType.NAVIGATION ) {
-
 						if ( ribbon_sub_menu.get( 'items' ).length > 0 ) {
 							sub_menu_ui_nodes.append( sub_menu_ui_node );
 							sub_menu_ui_node.children().eq( 0 ).addClass( 'ribbon-sub-menu-nav-icon' );
 							$this.subMenuNavMap[ribbon_sub_menu.get( 'id' )] = ribbon_sub_menu;
 
-							sub_menu_ui_node.click( function( e ) {
-								var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+							sub_menu_ui_node.click( Global.debounce( function SubMenuNavClickEvent( e ) {
+								var id = $( this ).find( '.ribbon-sub-menu-icon' ).attr( 'id' );
 								$this.onSubMenuNavClick( this, id );
-							} );
+							}, Global.calcDebounceWaitTimeBasedOnNetwork(), true ) );
 						}
-
 					} else {
 						sub_menu_ui_nodes.append( sub_menu_ui_node );
 
@@ -140,7 +146,7 @@ RibbonViewController = Backbone.View.extend( {
 						sub_menu_ui_node.click( Global.debounce( function RibbonMenuSubMenuClickEvent( e ) {
 							var id = $( this ).find( '.ribbon-sub-menu-icon' ).attr( 'id' );
 							$this.onSubMenuClick( id );
-						}, 500, true ) );
+						}, Global.calcDebounceWaitTimeBasedOnNetwork(), true ) );
 					}
 				}
 
@@ -162,9 +168,9 @@ RibbonViewController = Backbone.View.extend( {
 
 		this.setRibbonMenuVisibility();
 
-	},
+	}
 
-	setRibbonMenuVisibility: function() {
+	setRibbonMenuVisibility() {
 		// Set Employee tab visibility
 
 		var tab_array = ['companyMenu', 'employeeMenu', 'payrollMenu'];
@@ -188,9 +194,9 @@ RibbonViewController = Backbone.View.extend( {
 //			  employee_tab.parent().hide();
 //		  }
 
-	},
+	}
 
-	render: function() {
+	render() {
 		// Error: TypeError: $(...).tabs is not a function in /interface/html5/framework/jquery.min.js?v=8.0.6-20150417-104146 line 2 > eval line 205
 		if ( !this.el ) {
 			return;
@@ -201,7 +207,7 @@ RibbonViewController = Backbone.View.extend( {
 		var $this = this;
 		$( this.el ).tabs( {
 			// No longer used because we only support a single context menu now.
-			// activate: function( e, ui ) {
+			// activate( e, ui ) {
 			// 	$this.onMenuSelect( e, ui );
 			// }
 		} );
@@ -211,7 +217,7 @@ RibbonViewController = Backbone.View.extend( {
 		this.setSelectSubMenu( TopMenuManager.selected_sub_menu_id );
 
 		$( '#leftLogo' ).attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/images/logo.png' ) );
-		$( '#rightLogo' ).attr( 'src', ServiceCaller.companyLogo + '&t=' + new Date().getTime() );
+		$( '#rightLogo' ).attr( 'src', ServiceCaller.getURLByObjectType( 'company_logo' ) );
 
 		if ( LocalCacheData.getLoginUserPreference() ) {
 			$( '#leftLogo' ).unbind( 'click' ).bind( 'click', function() {
@@ -221,9 +227,9 @@ RibbonViewController = Backbone.View.extend( {
 
 			} );
 		}
-	},
+	}
 
-	setSelectMenu: function( name ) {
+	setSelectMenu( name ) {
 		// if ( name ) {
 		// 	var index = $(this.el).find('#ribbon a[ref=' + name + ']').parent().index();
 		// 	//$(this.el).tabs({'selected': index});
@@ -240,9 +246,9 @@ RibbonViewController = Backbone.View.extend( {
 			$( this.el ).tabs( 'option', 'active', index );
 		}
 		TopMenuManager.selected_menu_id = name;
-	},
+	}
 
-	openSelectView: function( name ) {
+	openSelectView( name ) {
 		Global.setUINotready();
 		switch ( name ) {
 			case 'ImportCSV':
@@ -350,9 +356,9 @@ RibbonViewController = Backbone.View.extend( {
 					TopMenuManager.goToView( TopMenuManager.selected_sub_menu_id );
 				}
 		}
-	},
+	}
 
-	setSelectSubMenu: function( name ) {
+	setSelectSubMenu( name ) {
 		switch ( name ) {
 			case 'InOut':
 			case 'UserDefault':
@@ -400,14 +406,14 @@ RibbonViewController = Backbone.View.extend( {
 
 		}
 
-	},
+	}
 
-	doLogout: function() {
+	doLogout() {
 		//Don't wait for result of logout in case of slow or disconnected internet. Just clear local cookies and move on.
 		var current_user_api = TTAPI.APIAuthentication;
 		if ( typeof current_user_api.Logout !== 'undefined' ) { //Fix JS exception: Uncaught TypeError: current_user_api.Logout is not a function -- Which can occur when offline and clicking Logout.
 			current_user_api.Logout( {
-				onResult: function() {
+				onResult() {
 				}
 			} );
 		}
@@ -434,12 +440,12 @@ RibbonViewController = Backbone.View.extend( {
 
 		return;
 	}
-} );
 
-RibbonViewController.loadView = function() {
-	Global.topContainer().css( 'display', 'block' );
-	var result = Global.loadPageSync( 'global/widgets/ribbon/RibbonView.html' );
-	var template = _.template( result );
-	Global.topContainer().html( template );
+	static loadView() {
+		Global.topContainer().css( 'display', 'block' );
+		var result = Global.loadPageSync( 'global/widgets/ribbon/RibbonView.html' );
+		var template = _.template( result );
+		Global.topContainer().html( template );
 
-};
+	}
+}

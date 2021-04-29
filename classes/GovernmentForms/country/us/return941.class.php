@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -73,8 +73,7 @@ class GovernmentForms_US_RETURN941 extends GovernmentForms_US {
 		return true;
 	}
 
-	function _outputXML() {
-
+	function _outputXML( $type = null ) {
 		$xml = new SimpleXMLElement( '<ReturnData xsi:schemaLocation="http://www.irs.gov/efile ReturnData941.xsd" xmlns="http://www.irs.gov/efile" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"></ReturnData>' ); //IRS940 must be wrapped in <ReturnData></ReturnData>
 		$xml->addAttribute( 'documentCount', 0 );                                                                                                                                                                          // The number of return documents in the return.
 
@@ -106,7 +105,7 @@ class GovernmentForms_US_RETURN941 extends GovernmentForms_US {
 		return true;
 	}
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		return false;
 	}
 }

@@ -1,13 +1,17 @@
-class PunchesViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImage';
+
+export class PunchesViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#punches_view_container',
 
-			_required_files: {
-				10: ['TImage'],
-				15: ['leaflet-timetrex']
-			},
+			// _required_files: {
+			// 	10: ['TImage'],
+			// 	15: ['leaflet-timetrex']
+			// },
 			// TODO: breakdown leaflet-timetrex so only the convert functions are needed in ViewControllers.
+
+			old_type_status: {},
 
 			user_api: null,
 			user_group_api: null,
@@ -125,6 +129,18 @@ class PunchesViewController extends BaseViewController {
 		return false;
 	}
 
+	transferUIValidate( p_id ) {
+
+		if ( !p_id ) {
+			p_id = 'punch';
+		}
+
+		if ( PermissionManager.validate( p_id, 'edit_transfer' ) ) {
+			return true;
+		}
+		return false;
+	}
+
 	noteUIValidate( p_id ) {
 
 		if ( !p_id ) {
@@ -194,6 +210,12 @@ class PunchesViewController extends BaseViewController {
 			this.show_bad_quantity_ui = true;
 		} else {
 			this.show_bad_quantity_ui = false;
+		}
+
+		if ( this.transferUIValidate() ) {
+			this.show_transfer_ui = true;
+		} else {
+			this.show_transfer_ui = false;
 		}
 
 		if ( this.noteUIValidate() ) {
@@ -284,7 +306,7 @@ class PunchesViewController extends BaseViewController {
 			api_class: TTAPI.APIPunch,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PUNCH,
+			layout_name: 'global_punch',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -307,7 +329,7 @@ class PunchesViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user_id'
@@ -339,11 +361,19 @@ class PunchesViewController extends BaseViewController {
 		form_item_input.TRangePicker( { field: 'punch_dates', validation_field: 'date_stamp' } );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', null, true );
 
+		//Transfer
+		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
+		form_item_input.TCheckbox( { field: 'transfer' } );
+		this.addEditFieldToColumn( $.i18n._( 'Transfer' ), form_item_input, tab_punch_column1, '', null, true );
+		if ( this.show_transfer_ui == false || this.is_add == false ) {
+			this.detachElement( 'transfer' );
+		}
+
 		// Punch
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
@@ -368,20 +398,26 @@ class PunchesViewController extends BaseViewController {
 		// In/Out
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab_punch_column1 );
 
 		// Branch
-
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'branch_id'
+			field: 'branch_id',
+			addition_source_function: ( function( target, source_data ) {
+				return $this.onSourceDataCreate( target, source_data );
+			} ),
+			added_items: [
+				{ value: TTUUID.not_exist_id, label: Global.default_item },
+				{ value: 'ffffffff-ffff-ffff-ffff-000000000002', label: $.i18n._( '-- Current Shift --' ) }
+			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_punch_column1, '', null, true );
 
@@ -396,10 +432,17 @@ class PunchesViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'department_id'
+			field: 'department_id',
+			addition_source_function: ( function( target, source_data ) {
+				return $this.onSourceDataCreate( target, source_data );
+			} ),
+			added_items: [
+				{ value: TTUUID.not_exist_id, label: Global.default_item },
+				{ value: 'ffffffff-ffff-ffff-ffff-000000000002', label: $.i18n._( '-- Current Shift --' ) }
+			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_punch_column1, '', null, true );
 
@@ -415,16 +458,22 @@ class PunchesViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
-
 					if ( val ) {
 						job_coder.setValue( val.manual_id );
 					}
 				} ),
-				field: 'job_id'
+				field: 'job_id',
+				addition_source_function: ( function( target, source_data ) {
+					return $this.onSourceDataCreate( target, source_data );
+				} ),
+				added_items: [
+					{ value: TTUUID.not_exist_id, label: Global.default_item },
+					{ value: 'ffffffff-ffff-ffff-ffff-000000000002', label: $.i18n._( '-- Current Shift --' ) }
+				]
 			} );
 
 			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
@@ -447,16 +496,22 @@ class PunchesViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
 					if ( val ) {
 						job_item_coder.setValue( val.manual_id );
 					}
-
 				} ),
-				field: 'job_item_id'
+				field: 'job_item_id',
+				addition_source_function: ( function( target, source_data ) {
+					return $this.onSourceDataCreate( target, source_data );
+				} ),
+				added_items: [
+					{ value: TTUUID.not_exist_id, label: Global.default_item },
+					{ value: 'ffffffff-ffff-ffff-ffff-000000000002', label: $.i18n._( '-- Current Shift --' ) }
+				]
 			} );
 
 			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
@@ -537,7 +592,7 @@ class PunchesViewController extends BaseViewController {
 			accuracy.TText( { field: 'position_accuracy' } );
 			label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Accuracy' ) + ':</span>' );
 
-			var map_icon = $( '<img class="widget-h-box-mapIcon" src="framework/leaflet/images/marker-icon-red.png" >' );
+			var map_icon = $( '<img class="widget-h-box-mapIcon" src="framework/leaflet/images/marker-icon-red.png" >' ); // TODO, fix image location so that its not in a library folder incase library removed.
 
 			this.location_wrapper = $( '<div class="widget-h-box-mapLocationWrapper"></div>' );
 			widgetContainer.append( map_icon );
@@ -571,6 +626,14 @@ class PunchesViewController extends BaseViewController {
 
 		} );
 
+		//Split Punch Control
+		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
+		form_item_input.TCheckbox( { field: 'split_punch_control' } );
+		this.addEditFieldToColumn( $.i18n._( 'Split Existing Punches' ), form_item_input, tab_punch_column1, '', null, true );
+		if ( this.is_add == false ) {
+			this.detachElement( 'split_punch_control' );
+		}
+
 		//Punch Image
 		form_item_input = Global.loadWidgetByName( FormItemType.IMAGE );
 		form_item_input.TImage( { field: 'punch_image' } );
@@ -580,6 +643,32 @@ class PunchesViewController extends BaseViewController {
 			this.detachElement( 'punch_image' );
 			this.detachElement( 'user_id' );
 		}
+	}
+
+	onSourceDataCreate( target, source_data ) {
+		var display_columns = target.getDisplayColumns();
+		var first_item = {};
+		var second_item = {};
+
+		$.each( display_columns, function( index, content ) {
+			first_item.id = TTUUID.not_exist_id;
+			first_item[content.name] = Global.default_item;
+
+			second_item.id = 'ffffffff-ffff-ffff-ffff-000000000002';
+			second_item[content.name] = $.i18n._( '-- Current Shift --' );
+
+			return false;
+		} );
+
+		//Error: Object doesn't support property or method 'unshift' in /interface/html5/line 6953
+		if ( !source_data || $.type( source_data ) !== 'array' ) {
+			source_data = [];
+		}
+
+		source_data.unshift( second_item );
+		source_data.unshift( first_item );
+
+		return source_data;
 	}
 
 	//set widget disablebility if view mode or edit mode
@@ -631,6 +720,61 @@ class PunchesViewController extends BaseViewController {
 				}
 			}
 
+		}
+	}
+
+	onTransferChanged( initial_load ) {
+
+		var is_transfer = false;
+		if ( this.edit_view_ui_dic && this.edit_view_ui_dic['transfer'] && this.edit_view_ui_dic['transfer'].getValue() == true ) {
+			is_transfer = true;
+		}
+
+		// type_id_widget is undefined in interface/html5/framework/jquery.min.js?v=9.0.1-20151022-091549 line 2 > eval line 390
+		var type_id_widget = this.edit_view_ui_dic['type_id'];
+		var status_id_widget = this.edit_view_ui_dic['status_id'];
+		if ( is_transfer && type_id_widget && status_id_widget ) {
+
+			type_id_widget.setEnabled( false );
+			status_id_widget.setEnabled( false );
+
+			this.old_type_status.type_id = type_id_widget.getValue();
+			this.old_type_status.status_id = status_id_widget.getValue();
+
+			type_id_widget.setValue( 10 );
+			status_id_widget.setValue( 10 );
+
+			this.current_edit_record.type_id = 10;
+			this.current_edit_record.status_id = 10;
+
+		} else if ( type_id_widget && status_id_widget ) {
+			type_id_widget.setEnabled( true );
+			status_id_widget.setEnabled( true );
+
+			if ( this.old_type_status.hasOwnProperty( 'type_id' ) ) {
+				type_id_widget.setValue( this.old_type_status.type_id );
+				status_id_widget.setValue( this.old_type_status.status_id );
+
+				this.current_edit_record.type_id = this.old_type_status.type_id;
+				this.current_edit_record.status_id = this.old_type_status.status_id;
+			}
+
+		}
+
+		if ( is_transfer == true ) {
+			if ( this.original_note == '' ) {
+				this.original_note = this.current_edit_record.note;
+			} else {
+				this.original_note = this.edit_view_ui_dic.note.getValue();
+			}
+			this.edit_view_ui_dic.note.setValue( this.new_note ? this.new_note : '' );
+			this.current_edit_record.note = this.new_note ? this.new_note : '';
+
+		} else if ( typeof initial_load == 'undefined' || initial_load === false ) {
+
+			this.new_note = this.edit_view_ui_dic.note.getValue();
+			this.edit_view_ui_dic.note.setValue( this.original_note ? this.original_note : '' );
+			this.current_edit_record.note = this.original_note ? this.original_note : '';
 		}
 	}
 
@@ -803,7 +947,7 @@ class PunchesViewController extends BaseViewController {
 						var station_form_item = this.edit_view_form_item_dic['station_id'];
 						if ( this.current_edit_record['has_image'] ) {
 							this.attachElement( 'punch_image' );
-							widget.setValue( ServiceCaller.fileDownloadURL + '&object_type=punch_image&parent_id=' + this.current_edit_record.user_id + '&object_id=' + this.current_edit_record.id );
+							widget.setValue( ServiceCaller.getURLByObjectType( 'file_download' ) + '&object_type=punch_image&parent_id=' + this.current_edit_record.user_id + '&object_id=' + this.current_edit_record.id );
 
 						} else {
 							this.detachElement( 'punch_image' );
@@ -910,20 +1054,6 @@ class PunchesViewController extends BaseViewController {
 		return true;
 	}
 
-//	showNoResultCover() {
-//
-//		this.removeNoResultCover();
-//		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
-//		this.no_result_box.NoResultBox( {related_view_controller: this, is_new: false} );
-//		this.no_result_box.attr( 'id', this.ui_id + '_no_result_box' );
-//
-//		var grid_div = $( this.el ).find( '.grid-div' );
-//
-//		grid_div.append( this.no_result_box );
-//
-//		this.initRightClickMenu( RightClickMenuType.NORESULTBOX );
-//	},
-
 	buildOtherFieldUI( field, label ) {
 
 		if ( !this.edit_view_tab ) {
@@ -989,7 +1119,7 @@ class PunchesViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -997,7 +1127,7 @@ class PunchesViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
-				layout_name: ALayoutIDs.PAY_PERIOD,
+				layout_name: 'global_Pay_period',
 				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
@@ -1006,10 +1136,27 @@ class PunchesViewController extends BaseViewController {
 			} ),
 
 			new SearchField( {
+				label: $.i18n._( 'Start Date' ),
+				in_column: 1,
+				field: 'start_date',
+				basic_search: false,
+				adv_search: true,
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'End Date' ),
+				in_column: 1,
+				field: 'end_date',
+				basic_search: false,
+				adv_search: true,
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
+
+			new SearchField( {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				default_args: default_args,
 				api_class: TTAPI.APIUser,
 				multiple: true,
@@ -1025,31 +1172,7 @@ class PunchesViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
-
-			new SearchField( {
-				label: $.i18n._( 'Title' ),
-				in_column: 1,
-				field: 'title_id',
-				layout_name: ALayoutIDs.USER_TITLE,
-				api_class: TTAPI.APIUserTitle,
-				multiple: true,
-				basic_search: false,
-				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
-
-			new SearchField( {
-				label: $.i18n._( 'Group' ),
-				in_column: 1,
-				multiple: true,
-				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
-				tree_mode: true,
-				basic_search: true,
-				adv_search: true,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -1060,28 +1183,28 @@ class PunchesViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
 			new SearchField( {
-				label: $.i18n._( 'Default Branch' ),
+				label: $.i18n._( 'Group' ),
 				in_column: 2,
-				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
-				api_class: TTAPI.APIBranch,
 				multiple: true,
+				field: 'group_id',
+				layout_name: 'global_tree_column',
+				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
 			new SearchField( {
-				label: $.i18n._( 'Default Department' ),
+				label: $.i18n._( 'Title' ),
 				in_column: 2,
-				field: 'default_department_id',
-				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: TTAPI.APIDepartment,
+				field: 'title_id',
+				layout_name: 'global_user_title',
+				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1092,10 +1215,10 @@ class PunchesViewController extends BaseViewController {
 				label: $.i18n._( 'Punch Branch' ),
 				in_column: 2,
 				field: 'branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
-				basic_search: false,
+				basic_search: true,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
@@ -1104,7 +1227,31 @@ class PunchesViewController extends BaseViewController {
 				label: $.i18n._( 'Punch Department' ),
 				in_column: 2,
 				field: 'department_id',
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
+				api_class: TTAPI.APIDepartment,
+				multiple: true,
+				basic_search: true,
+				adv_search: true,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Default Branch' ),
+				in_column: 1,
+				field: 'default_branch_id',
+				layout_name: 'global_branch',
+				api_class: TTAPI.APIBranch,
+				multiple: true,
+				basic_search: false,
+				adv_search: true,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Default Department' ),
+				in_column: 1,
+				field: 'default_department_id',
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: false,
@@ -1116,7 +1263,7 @@ class PunchesViewController extends BaseViewController {
 				label: $.i18n._( 'Job' ),
 				in_column: 2,
 				field: 'job_id',
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJob : null,
 				multiple: true,
 				basic_search: false,
@@ -1128,7 +1275,7 @@ class PunchesViewController extends BaseViewController {
 				label: $.i18n._( 'Task' ),
 				in_column: 2,
 				field: 'job_item_id',
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJobItem : null,
 				multiple: true,
 				basic_search: false,
@@ -1140,7 +1287,7 @@ class PunchesViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -1152,7 +1299,7 @@ class PunchesViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -1271,8 +1418,10 @@ class PunchesViewController extends BaseViewController {
 			}
 
 			if ( !this.is_mass_editing ) {
-				var processed_punches_for_map = TTMapLib.TTConvertMapData.processPunchesFromViewController( punches, map_options );
-				IndexViewController.openEditView( this, 'Map', processed_punches_for_map );
+				import( /* webpackChunkName: "leaflet-timetrex" */ '@/framework/leaflet/leaflet-timetrex' ).then(( module )=>{
+					var processed_punches_for_map = module.TTConvertMapData.processPunchesFromViewController( punches, map_options );
+					IndexViewController.openEditView( this, 'Map', processed_punches_for_map );
+				}).catch( Global.importErrorHandler );
 			}
 		}
 	}
@@ -1761,7 +1910,11 @@ class PunchesViewController extends BaseViewController {
 				this.current_edit_record.punch_dates = [c_value];
 				break;
 			case 'punch_dates':
+				this.is_mass_adding = true;
 				this.setEditMenu();
+				break;
+			case 'transfer':
+				this.onTransferChanged();
 				break;
 			case 'job_id':
 				if ( ( Global.getProductEdition() >= 20 ) ) {

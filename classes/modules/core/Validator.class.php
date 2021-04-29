@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -165,11 +165,11 @@ class Validator {
 	/**
 	 * @param $label
 	 * @param $value
-	 * @param null $msg
+	 * @param $msg
 	 * @param $array
 	 * @return bool
 	 */
-	function inArrayValue( $label, $value, $msg = null, $array ) {
+	function inArrayValue( $label, $value, $msg, $array ) {
 		//Debug::text('Value: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		if ( is_array( $array ) && in_array( $value, array_values( $array ) ) ) {
@@ -184,11 +184,11 @@ class Validator {
 	/**
 	 * @param $label
 	 * @param $key
-	 * @param null $msg
+	 * @param $msg
 	 * @param $array
 	 * @return bool
 	 */
-	function inArrayKey( $label, $key, $msg = null, $array ) {
+	function inArrayKey( $label, $key, $msg, $array ) {
 		//Debug::text('Key: '. $key, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 		//Debug::Arr($array, 'isArrayKey Array:', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 		if ( is_array( $array ) && in_array( $key, array_keys( $array ) ) ) {
@@ -522,11 +522,11 @@ class Validator {
 	/**
 	 * @param $label
 	 * @param $value
-	 * @param null $msg
+	 * @param $msg
 	 * @param $bad_words
 	 * @return bool
 	 */
-	function isAllowedWords( $label, $value, $msg = null, $bad_words ) {
+	function isAllowedWords( $label, $value, $msg, $bad_words ) {
 		$words = explode( ' ', $value );
 		if ( is_array( $words ) ) {
 			foreach ( $words as $word ) {
@@ -546,11 +546,11 @@ class Validator {
 	/**
 	 * @param $label
 	 * @param $value
-	 * @param null $msg
+	 * @param $msg
 	 * @param $bad_words
 	 * @return bool
 	 */
-	function isAllowedValues( $label, $value, $msg = null, $bad_words ) {
+	function isAllowedValues( $label, $value, $msg, $bad_words ) {
 		foreach ( $bad_words as $bad_word ) {
 			if ( strtolower( $value ) == strtolower( $bad_word ) ) {
 				$this->Error( $label, $msg, $value );
@@ -1017,7 +1017,7 @@ class Validator {
 		global $config_vars;
 
 		//Require inside this function as HTMLPurifier is a huge file.
-		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'HTMLPurifier' . DIRECTORY_SEPARATOR . 'HTMLPurifier.standalone.php' );
+		require_once ( Environment::getBasePath() . 'vendor' . DIRECTORY_SEPARATOR . 'ezyang' . DIRECTORY_SEPARATOR . 'htmlpurifier' . DIRECTORY_SEPARATOR . 'library' . DIRECTORY_SEPARATOR . 'HTMLPurifier.auto.php' );
 
 		$config = HTMLPurifier_Config::createDefault();
 		if ( isset( $config_vars['cache']['enable'] ) && $config_vars['cache']['enable'] == true
@@ -1093,7 +1093,7 @@ class Validator {
 	 * @return array
 	 */
 	function getErrorsAndWarningsArray() {
-		return [ 'errors' => $this->errors, 'warnings' => $this->warnings ];
+		return [ 'errors' => $this->getErrorsArray(), 'warnings' => $this->getWarningsArray() ];
 	}
 
 	/**
@@ -1114,10 +1114,33 @@ class Validator {
 	}
 
 	/**
+	 * @param string $record_label_prefix
 	 * @return array
 	 */
-	function getErrorsArray() {
-		return $this->errors;
+	private function addRecordLabelPrefixToArray( $arr, $record_label_prefix = null ) {
+		$retarr = [];
+
+		if ( $record_label_prefix != '' ) {
+			$record_label_prefix .= ': '; //Add a colon separator.
+		}
+
+		if ( count( $arr ) > 0 ) {
+			foreach ( $arr as $label => $msgs ) {
+				foreach ( $msgs as $msg ) {
+					$retarr[$label][] = $record_label_prefix . $msg;
+				}
+			}
+		}
+
+		return $retarr;
+	}
+
+	/**
+	 * @param string $record_label_prefix
+	 * @return array
+	 */
+	function getErrorsArray( $record_label_prefix = null ) {
+		return $this->addRecordLabelPrefixToArray( $this->errors, $record_label_prefix );
 	}
 
 	/**
@@ -1197,7 +1220,7 @@ class Validator {
 	 * @return bool
 	 */
 	final function isError( $label = null ) {
-		if ( $label != null ) {
+		if ( is_string( $label ) && $label != '' ) {
 			return $this->hasError( $label );
 		} else if ( $this->num_errors > 0 ) {
 			Debug::Arr( $this->errors, 'Errors', __FILE__, __LINE__, __METHOD__, $this->verbosity );
@@ -1241,7 +1264,7 @@ class Validator {
 
 		//If label is NULL, assume we don't actually want to trigger an error.
 		//This is good for just using the check functions for other purposes.
-		if ( $label != '' ) {
+		if ( (string)$label != '' ) {
 			$this->errors[$label][] = $msg;
 
 			$this->num_errors++;
@@ -1257,10 +1280,11 @@ class Validator {
 	//
 
 	/**
+	 * @param string $record_label_prefix
 	 * @return array
 	 */
-	function getWarningsArray() {
-		return $this->warnings;
+	function getWarningsArray( $record_label_prefix = null ) {
+		return $this->addRecordLabelPrefixToArray( $this->warnings, $record_label_prefix );
 	}
 
 	/**
@@ -1268,7 +1292,7 @@ class Validator {
 	 * @return bool
 	 */
 	final function isWarning( $label = null ) {
-		if ( $label != null ) {
+		if ( is_string( $label ) && $label != '' ) {
 			return $this->hasWarning( $label );
 		} else if ( $this->num_warnings > 0 ) {
 			Debug::Arr( $this->warnings, 'Warnings', __FILE__, __LINE__, __METHOD__, $this->verbosity );
@@ -1310,7 +1334,7 @@ class Validator {
 	function Warning( $label, $msg, $value = '' ) {
 		Debug::text( 'Validation Warning: Label: ' . $label . ' Value: "' . $value . '" Msg: ' . $msg, __FILE__, __LINE__, __METHOD__, $this->verbosity );
 
-		if ( $label != '' ) {
+		if ( (string)$label != '' ) {
 			$this->warnings[$label][] = $msg;
 
 			$this->num_warnings++;

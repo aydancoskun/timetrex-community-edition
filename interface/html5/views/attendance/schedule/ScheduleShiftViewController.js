@@ -1,4 +1,4 @@
-class ScheduleShiftViewController extends BaseViewController {
+export class ScheduleShiftViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#schedule_shift_view_container',
@@ -295,7 +295,7 @@ class ScheduleShiftViewController extends BaseViewController {
 			api_class: TTAPI.APISchedule,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.SCHEDULE,
+			layout_name: 'global_schedule_schedule',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -319,7 +319,7 @@ class ScheduleShiftViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: !this.checkOpenPermission(),
 			set_special_empty: true,
@@ -338,7 +338,7 @@ class ScheduleShiftViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.schedule_status_array ) );
+		form_item_input.setSourceData( $this.schedule_status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_schedule_column1 );
 
 		// Date
@@ -376,7 +376,7 @@ class ScheduleShiftViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APISchedulePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.SCHEDULE_POLICY,
+			layout_name: 'global_schedule',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'schedule_policy_id'
@@ -389,7 +389,7 @@ class ScheduleShiftViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'absence_policy_id'
@@ -423,10 +423,16 @@ class ScheduleShiftViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'branch_id'
+			field: 'branch_id',
+			addition_source_function: ( function( target, source_data ) {
+				return $this.onSourceDataCreate( target, source_data );
+			} ),
+			added_items: [
+				{ value: TTUUID.not_exist_id, label: Global.default_item },
+			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_schedule_column1, '', null, true );
 
@@ -441,10 +447,16 @@ class ScheduleShiftViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'department_id'
+			field: 'department_id',
+			addition_source_function: ( function( target, source_data ) {
+				return $this.onSourceDataCreate( target, source_data );
+			} ),
+			added_items: [
+				{ value: TTUUID.not_exist_id, label: Global.default_item },
+			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_schedule_column1, '', null, true );
 
@@ -459,16 +471,21 @@ class ScheduleShiftViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
-
 					if ( val ) {
 						job_coder.setValue( val.manual_id );
 					}
 				} ),
-				field: 'job_id'
+				field: 'job_id',
+				addition_source_function: ( function( target, source_data ) {
+					return $this.onSourceDataCreate( target, source_data );
+				} ),
+				added_items: [
+					{ value: TTUUID.not_exist_id, label: Global.default_item },
+				]
 			} );
 
 			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
@@ -491,16 +508,21 @@ class ScheduleShiftViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
-
 					if ( val ) {
 						job_item_coder.setValue( val.manual_id );
 					}
 				} ),
-				field: 'job_item_id'
+				field: 'job_item_id',
+				addition_source_function: ( function( target, source_data ) {
+					return $this.onSourceDataCreate( target, source_data );
+				} ),
+				added_items: [
+					{ value: TTUUID.not_exist_id, label: Global.default_item },
+				]
 			} );
 
 			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
@@ -529,6 +551,25 @@ class ScheduleShiftViewController extends BaseViewController {
 		} else {
 			this.attachElement( 'total_time' );
 		}
+	}
+
+	onSourceDataCreate( target, source_data ) {
+		var display_columns = target.getDisplayColumns();
+		var first_item = {};
+
+		$.each( display_columns, function( index, content ) {
+			first_item.id = TTUUID.not_exist_id;
+			first_item[content.name] = Global.default_item;
+			return false;
+		} );
+
+		//Error: Object doesn't support property or method 'unshift' in /interface/html5/line 6953
+		if ( !source_data || $.type( source_data ) !== 'array' ) {
+			source_data = [];
+		}
+		source_data.unshift( first_item );
+
+		return source_data;
 	}
 
 	setEditViewWidgetsMode() {
@@ -663,7 +704,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -671,7 +712,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -686,12 +727,29 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
-				layout_name: ALayoutIDs.PAY_PERIOD,
+				layout_name: 'global_Pay_period',
 				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Start Date' ),
+				in_column: 1,
+				field: 'start_date',
+				basic_search: false,
+				adv_search: true,
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'End Date' ),
+				in_column: 1,
+				field: 'end_date',
+				basic_search: false,
+				adv_search: true,
+				form_item_type: FormItemType.DATE_PICKER
 			} ),
 
 			new SearchField( {
@@ -701,7 +759,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -709,7 +767,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 1,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: false,
@@ -722,7 +780,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				in_column: 1,
 				field: 'default_department_id',
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: false,
@@ -736,7 +794,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_ids',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
@@ -747,7 +805,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.JOB_TITLE,
+				layout_name: 'global_job_title',
 				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
@@ -759,7 +817,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Job' ),
 				in_column: 2,
 				field: 'job_id',
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJob : null,
 				multiple: true,
 				basic_search: false,
@@ -771,7 +829,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Task' ),
 				in_column: 2,
 				field: 'job_item_id',
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJobItem : null,
 				multiple: true,
 				basic_search: false,
@@ -783,7 +841,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Schedule Branch' ),
 				in_column: 2,
 				field: 'branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
@@ -796,7 +854,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Schedule Department' ),
 				in_column: 2,
 				field: 'department_id',
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
@@ -809,7 +867,7 @@ class ScheduleShiftViewController extends BaseViewController {
 				label: $.i18n._( 'Schedule Policy' ),
 				in_column: 2,
 				field: 'schedule_policy_id',
-				layout_name: ALayoutIDs.SCHEDULE_POLICY,
+				layout_name: 'global_schedule',
 				api_class: TTAPI.APISchedulePolicy,
 				multiple: true,
 				basic_search: true,

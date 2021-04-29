@@ -1,4 +1,4 @@
-class ForgotPasswordWizardController extends BaseWizardController {
+export class ForgotPasswordWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg'

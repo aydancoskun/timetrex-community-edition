@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -38,7 +38,7 @@
 ini_set( 'max_execution_time', 86400 );
 ini_set( 'memory_limit', '1024M' );
 
-if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 	require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
@@ -53,19 +53,19 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	echo $help_output;
 } else {
 	if ( in_array( '-s', $argv ) ) {
-		$data['suffix'] = trim( $argv[ ( array_search( '-s', $argv ) + 1 ) ] );
+		$data['suffix'] = trim( $argv[( array_search( '-s', $argv ) + 1 )] );
 	} else {
 		$data['suffix'] = '1';
 	}
 
 	if ( in_array( '-n', $argv ) ) {
-		$data['random_users'] = (int)trim( $argv[ ( array_search( '-n', $argv ) + 1 ) ] );
+		$data['random_users'] = (int)trim( $argv[( array_search( '-n', $argv ) + 1 )] );
 	} else {
 		$data['random_users'] = 0;
 	}
 
 	if ( in_array( '-date', $argv ) ) {
-		$data['date'] = trim( $argv[ ( array_search( '-date', $argv ) + 1 ) ] );
+		$data['date'] = trim( $argv[( array_search( '-date', $argv ) + 1 )] );
 	} else {
 		$data['date'] = time();
 	}
@@ -77,9 +77,9 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	}
 
 	if ( in_array( '-skip', $argv ) ) {
-		$skip = explode( ',', trim( $argv[ ( array_search( '-skip', $argv ) + 1 ) ] ) );
+		$skip = explode( ',', trim( $argv[( array_search( '-skip', $argv ) + 1 )] ) );
 	} else {
-		$skip = array();
+		$skip = [];
 	}
 
 	if ( $data['force'] === true ) {
@@ -103,11 +103,11 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 
 	$config_vars['other']['demo_mode'] = true;
-	$config_vars['other']['enable_plugins'] = false; //Disable plugins as they shouldn't be needed and likely just cause problems.
-	$config_vars['other']['disable_audit_log'] = true; //Disable audit logging during initial creation of data to help speed things up.
+	$config_vars['other']['enable_plugins'] = false;          //Disable plugins as they shouldn't be needed and likely just cause problems.
+	$config_vars['other']['disable_audit_log'] = true;        //Disable audit logging during initial creation of data to help speed things up.
 	$config_vars['other']['disable_audit_log_detail'] = true; //Disable audit logging during initial creation of data to help speed things up.
 
-	if ( DEMO_MODE == true OR $data['force'] === true ) {
+	if ( DEMO_MODE == true || $data['force'] === true ) {
 		SystemSettingListFactory::setSystemSetting( 'system_version', APPLICATION_VERSION );
 		SystemSettingListFactory::setSystemSetting( 'tax_engine_version', '1.1.0' );
 		SystemSettingListFactory::setSystemSetting( 'tax_data_version', date( 'Ymd' ) );
@@ -120,13 +120,14 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$dd->setDate( TTDate::getMiddleDayEpoch( TTDate::strtotime( $data['date'] ) ) ); //Always use middle day epoch so its consistent across runs on the same day.
 		$dd->setMaxRandomUsers( $data['random_users'] );
 		$dd->setUserNamePostFix( $data['suffix'] );
+		$dd->setRandomSeed( (int)( $dd->getDate() + $dd->getUserNamePostFix() ) );
 
 		if ( is_array( $skip ) ) {
 			foreach ( $skip as $skip_object ) {
-				if ( isset( $dd->create_data[ $skip_object ] ) ) {
+				if ( isset( $dd->create_data[$skip_object] ) ) {
 					Debug::Text( '  Skipping Object: ' . $skip_object, __FILE__, __LINE__, __METHOD__, 10 );
 					echo "  Skipping Object: " . $skip_object . "\n";
-					$dd->create_data[ $skip_object ] = false;
+					$dd->create_data[$skip_object] = false;
 				}
 			}
 		}

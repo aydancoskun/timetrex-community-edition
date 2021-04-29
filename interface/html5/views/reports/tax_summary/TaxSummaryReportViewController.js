@@ -1,4 +1,4 @@
-class TaxSummaryReportViewController extends ReportBaseViewController {
+export class TaxSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 

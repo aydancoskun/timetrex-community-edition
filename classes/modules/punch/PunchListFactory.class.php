@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -595,6 +595,64 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
+	}
+
+	function getCompletePunchControlIdByUserIdAndEpoch( $user_id, $epoch, $maximum_shift_time = null ) {
+		if ( $user_id == '' ) {
+			return false;
+		}
+
+		if ( $epoch == '' ) {
+			return false;
+		}
+
+		if ( $maximum_shift_time == '' ) {
+			$maximum_shift_time = $this->getPayPeriodMaximumShiftTime( $user_id, $maximum_shift_time );
+		}
+
+		$pcf = new PunchControlFactory();
+
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'time_stamp1_start' => $this->db->BindTimeStamp( $epoch ),
+				'time_stamp1_end' => $this->db->BindTimeStamp( ( $epoch - $maximum_shift_time ) ),
+				'time_stamp2' => $this->db->BindTimeStamp( $epoch ),
+		];
+
+		//Find a punch immediately before the current epoch (within maximum shift time),
+		//  then using that punch_control_id (within the same punch pair) find a punch immediately after the current epoch.
+		//  This is required to make sure we find a complete punch pair that encapsulates the current epoch.
+		$query = '		
+						SELECT pf_b.punch_control_id 
+						FROM ' . $this->getTable() . ' as pf_b
+						WHERE pf_b.punch_control_id = 					
+								(
+								SELECT	pf.punch_control_id as punch_control_id
+								FROM	' . $this->getTable() . ' as pf
+								LEFT JOIN '. $pcf->getTable() .' as pcf ON ( pf.punch_control_id = pcf.id )
+								WHERE
+									pcf.user_id = ?
+									AND pf.time_stamp < ? AND pf.time_stamp > ?
+									AND ( pf.deleted = 0 AND pcf.deleted = 0 )
+								ORDER BY pf.time_stamp desc, pf.status_id asc, pf.punch_control_id, pf.id				
+								LIMIT 1 																	
+								)
+						AND pf_b.time_stamp > ?	
+						AND ( pf_b.deleted = 0 )																						
+					';
+
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+		$rows = $this->db->getCol( $query, $ph );
+
+		if ( count( $rows ) == 1 ) {
+			$retval = $rows[0];
+			Debug::Text( '  Found complete Punch Control ID: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+			return $retval;
+		} else {
+			Debug::Text( '  Incorrect number of rows found: '. count( $rows ), __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return false;
 	}
 
 	/**
@@ -2468,16 +2526,10 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			$query .= ( isset( $filter_data['exclude_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'b.job_item_id', $filter_data['exclude_job_item_id'], 'not_uuid_list', $ph ) : null;
 		}
 
-		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
-			$ph[] = $this->db->BindDate( (int)$filter_data['start_date'] );
-			$query .= ' AND b.date_stamp >= ?';
-		}
-		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
-			$ph[] = $this->db->BindDate( (int)$filter_data['end_date'] );
-			$query .= ' AND b.date_stamp <= ?';
-		}
-
 		$query .= ( isset( $filter_data['date_stamp'] ) ) ? $this->getWhereClauseSQL( 'b.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : null;
+		$query .= ( isset( $filter_data['start_date'] ) ) ? $this->getWhereClauseSQL( 'b.date_stamp', TTDate::parseDateTime( $filter_data['start_date'] ), 'start_datestamp', $ph ) : null;
+		$query .= ( isset( $filter_data['end_date'] ) ) ? $this->getWhereClauseSQL( 'b.date_stamp', TTDate::parseDateTime( $filter_data['end_date'] ), 'end_datestamp', $ph ) : null;
+
 		$query .= ( isset( $filter_data['time_stamp'] ) ) ? $this->getWhereClauseSQL( 'a.time_stamp', $filter_data['time_stamp'], 'date_range_timestamp', $ph ) : null;
 
 		$query .= ( isset( $filter_data['created_date'] ) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : null;

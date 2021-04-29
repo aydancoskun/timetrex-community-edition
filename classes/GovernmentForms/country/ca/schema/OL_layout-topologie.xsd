@@ -2,15 +2,19 @@
 
 <!--
 Description	OL Layout Topologie (T5013) - Common Record Layout
-Last updated 	Ocotber 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:olsbr="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/olsbr/1-0-1">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:olsbr="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/olsbr/1-0-1"
+xmlns:olT661="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/olT661/1-0-0"
+>
 	<xsd:include schemaLocation="simple.xsd"/>
 	<xsd:include schemaLocation="complex.xsd"/>
 	<xsd:include schemaLocation="t5013.xsd"/>
 	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/olsbr/1-0-1" schemaLocation="t5013main.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/olT661/1-0-0" schemaLocation="T661.xsd"/>
 	<!-- @@@@    Common Record Layout     @@@@ -->
 	<xsd:element name="Submission" type="SubmissionType"/>
 	<xsd:complexType name="SubmissionType">
@@ -18,6 +22,7 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="T619" type="TransmitterType"/>
 			<xsd:element ref="T5013SlipAndSummary" minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:element ref="olsbr:OLSBRT5013Data" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="olT661:OLT661Data" minOccurs="0" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<xsd:complexType name="TransmitterType">

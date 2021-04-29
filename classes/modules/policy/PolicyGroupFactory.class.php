@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -307,7 +307,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setRegularTimePolicy( $ids ) {
-		Debug::text( 'Setting Regular Time Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Setting Regular Time Policy IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 100, $this->getID(), $ids );
 	}
@@ -324,7 +324,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setOverTimePolicy( $ids ) {
-		Debug::text( 'Setting OverTime Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Setting OverTime Policy IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 110, $this->getID(), $ids );
 	}
@@ -392,7 +392,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setMealPolicy( $ids ) {
-		Debug::text( 'Setting Meal Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Setting Meal Policy IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 150, $this->getID(), $ids );
 	}
@@ -409,7 +409,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setBreakPolicy( $ids ) {
-		Debug::text( 'Setting Break Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Setting Break Policy IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 160, $this->getID(), $ids );
 	}
@@ -426,7 +426,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setAbsencePolicy( $ids ) {
-		Debug::text( 'Setting Absence Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Setting Absence Policy IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 170, $this->getID(), (array)$ids );
 	}
@@ -443,7 +443,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setHolidayPolicy( $ids ) {
-		Debug::text( 'Setting Holiday Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Setting Holiday Policy IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 180, $this->getID(), (array)$ids );
 	}
@@ -460,7 +460,7 @@ class PolicyGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setExpensePolicy( $ids ) {
-		Debug::text( 'Setting Expense Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Setting Expense Policy IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 200, $this->getID(), (array)$ids );
 	}

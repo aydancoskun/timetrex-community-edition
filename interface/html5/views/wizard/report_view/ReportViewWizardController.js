@@ -1,4 +1,4 @@
-class ReportViewWizardController extends BaseWizardController {
+export class ReportViewWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#report-view-wizard'
@@ -36,8 +36,8 @@ class ReportViewWizardController extends BaseWizardController {
 		LocalCacheData.current_open_wizard_controller = null;
 
 		var source = 'View'; // Backup value in case the url sm does not exist.
-		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm ) {
-			source = LocalCacheData.all_url_args.sm + '@View';
+		if ( LocalCacheData.getAllURLArgs() && LocalCacheData.getAllURLArgs().sm ) {
+			source = LocalCacheData.getAllURLArgs().sm + '@View';
 		}
 		$().TFeedback( {
 			source: source,

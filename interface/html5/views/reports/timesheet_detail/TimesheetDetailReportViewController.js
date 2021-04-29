@@ -1,4 +1,4 @@
-class TimesheetDetailReportViewController extends ReportBaseViewController {
+export class TimesheetDetailReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {} );
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -429,7 +429,7 @@ class UserWageFactory extends Factory {
 
 		$retval = Misc::MoneyRound( $hourly_wage, 2, ( ( is_object( $this->getUserObject() ) && is_object( $this->getUserObject()->getCurrencyObject() ) ) ? $this->getUserObject()->getCurrencyObject() : null ) );
 
-		//return Misc::MoneyFormat($hourly_wage, FALSE);
+		//return Misc::MoneyRound($hourly_wage);
 		//Format in APIUserWage() instead, as this gets passed back into setHourlyRate() and if in a locale that use comma decimal symbol, it will fail.
 
 		return $retval;
@@ -510,7 +510,7 @@ class UserWageFactory extends Factory {
 		//  It can still return something like (float)42.3, which still needs to be formatted of course.
 		$retval = (float)Misc::MoneyRound( $hourly_wage, 2, ( ( is_object( $this->getUserObject() ) && is_object( $this->getUserObject()->getCurrencyObject() ) ) ? $this->getUserObject()->getCurrencyObject() : null ) );
 
-		//return Misc::MoneyFormat($hourly_wage, FALSE);
+		//return Misc::MoneyRound($hourly_wage);
 		//Format in APIUserWage() instead, as this gets passed back into setHourlyRate() and if in a locale that use comma decimal symbol, it will fail.
 
 		return $retval;

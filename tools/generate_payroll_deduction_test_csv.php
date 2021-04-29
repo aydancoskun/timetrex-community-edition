@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -38,7 +38,7 @@ require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPAR
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'classes/payroll_deduction/PayrollDeduction.class.php' );
 
-if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: generate_payroll_deduction_test_csv.php [country_code] [date]\n";
 	echo $help_output;
 } else {
@@ -50,16 +50,16 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 	$province_arr['US']['00'] = 'NONE';//Make an option for Federal only.
 
-	if ( !isset( $province_arr[ $country ] ) ) {
+	if ( !isset( $province_arr[$country] ) ) {
 		echo "Country does not have any province/states.\n";
 	}
-	ksort( $province_arr[ $country ] );
+	ksort( $province_arr[$country] );
 
 
 	$pay_periods = 26;
-	$static_test_data = array(
-			'CA' => array(
-					'income'           => array(
+	$static_test_data = [
+			'CA' => [
+					'income'           => [
 							192, //5000/year
 							384, //10000/year
 							961, //25000/year
@@ -67,12 +67,12 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 							3846, //100000,
 							6223, //180000, //Should be in the middle of the BPAF brackets.
 							9615, //250000
-					),
-					'federal_claim'    => array(0, 100), //Use lowest non-zero value.
-					'provincial_claim' => array(0, 100), //Use lowest non-zero value.
-			),
-			'US' => array(
-					'income'                   => array(
+					],
+					'federal_claim'    => [ 0, 100 ], //Use lowest non-zero value.
+					'provincial_claim' => [ 0, 100 ], //Use lowest non-zero value.
+			],
+			'US' => [
+					'income'                   => [
 							192, //5000/year
 							384, //10000/year
 							961, //25000/year
@@ -80,25 +80,25 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 							3846, //100000,
 							9615, //250000
 							76923, //2000000 (For states with higher tax brackets)
-					),
+					],
 
 					//2020 Federal W2 variables.
-					'filing_status'            => array(10, 20, 40), //Federal filing statuses.
-					'federal_form_w4_version'  => array(2019, 2020),
-					'federal_claim_dependents' => array(0, 2500, 5000),
-					'federal_other_income'     => array(0, 10000),
-					'federal_other_deductions' => array(0, 1000),
+					'filing_status'            => [ 10, 20, 40 ], //Federal filing statuses.
+					'federal_form_w4_version'  => [ 2019, 2020 ],
+					'federal_claim_dependents' => [ 0, 2500, 5000 ],
+					'federal_other_income'     => [ 0, 10000 ],
+					'federal_other_deductions' => [ 0, 1000 ],
 
-					'allowance' => array(0, 1, 2, 3, 5),
-			),
-	);
+					'allowance' => [ 0, 1, 2, 3, 5 ],
+			],
+	];
 
-	$test_data = array();
+	$test_data = [];
 
-	if ( $country != '' AND isset( $province_arr[ $country ] ) AND $effective_date != '' ) {
-		foreach ( $province_arr[ $country ] as $province_code => $province ) {
+	if ( $country != '' && isset( $province_arr[$country] ) && $effective_date != '' ) {
+		foreach ( $province_arr[$country] as $province_code => $province ) {
 			//echo "Province: $province_code\n";
-			$raw_result = array();
+			$raw_result = [];
 
 			$pd_obj = new PayrollDeduction( $country, $province_code );
 
@@ -108,7 +108,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 					$raw_result = $pd_obj->obj->getDataFromRateArray( $effective_date, $pd_obj->obj->state_income_tax_rate_options );
 				}
 
-				$result = array();
+				$result = [];
 				foreach ( $raw_result as $raw_filing_status => $row_a ) {
 					foreach ( $row_a as $row ) {
 						$row['status'] = ( $raw_filing_status == 0 ) ? 10 : $raw_filing_status;
@@ -120,14 +120,13 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 				if ( count( $result ) == 0 ) {
 					//Use static test rates.
 
-					$test_data[ $country ][ $province_code ] = $static_test_data[ $country ];
+					$test_data[$country][$province_code] = $static_test_data[$country];
 					if ( $province_code != '00' ) {
-						$test_data[ $country ][ $province_code ]['filing_status'] = array(10); //No tax brackets, only use a single filing status.
-						$test_data[ $country ][ $province_code ]['allowance'] = array(0); //No tax brackets, only use 0 for allowances as it likely doesn't matter.
+						$test_data[$country][$province_code]['filing_status'] = [ 10 ]; //No tax brackets, only use a single filing status.
 					}
 				} else {
 					//Always include the same income brackets for testing, AS WELL as one to test each individual bracket.
-					$test_data[ $country ][ $province_code ] = $static_test_data[ $country ];
+					$test_data[$country][$province_code] = $static_test_data[$country];
 
 					$i = 1;
 					$prev_income = null;
@@ -138,18 +137,18 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 						$income = round( ( $tax_row['income'] / $pay_periods ) );
 						$variance = round( ( 100 / $pay_periods ) );
 
-						if ( $prev_income == null OR $prev_income > $income ) {
+						if ( $prev_income == null || $prev_income > $income ) {
 							//echo "First bracket! $country $province ".$tax_row['income']." T: ". ($tax_row['income']-$variance) ."\n";
-							$test_data[ $country ][ $province_code ]['income'][] = ( $income - $variance );
-							$test_data[ $country ][ $province_code ]['filing_status'][] = $tax_row['status'];
+							$test_data[$country][$province_code]['income'][] = ( $income - $variance );
+							$test_data[$country][$province_code]['filing_status'][] = $tax_row['status'];
 						}
 
-						$test_data[ $country ][ $province_code ]['income'][] = ( $income + $variance );
-						$test_data[ $country ][ $province_code ]['filing_status'][] = $tax_row['status'];
-						$test_data[ $country ][ $province_code ]['allowance'] = $static_test_data[ $country ]['allowance'];
+						$test_data[$country][$province_code]['income'][] = ( $income + $variance );
+						$test_data[$country][$province_code]['filing_status'][] = $tax_row['status'];
+						$test_data[$country][$province_code]['allowance'] = $static_test_data[$country]['allowance'];
 
-						$test_data[ $country ][ $province_code ]['income'] = array_unique( $test_data[ $country ][ $province_code ]['income'] );
-						$test_data[ $country ][ $province_code ]['filing_status'] = array_unique( $test_data[ $country ][ $province_code ]['filing_status'] );
+						$test_data[$country][$province_code]['income'] = array_unique( $test_data[$country][$province_code]['income'] );
+						$test_data[$country][$province_code]['filing_status'] = array_unique( $test_data[$country][$province_code]['filing_status'] );
 
 						$prev_income = $income;
 						$prev_status = $tax_row['status'];
@@ -160,19 +159,19 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 				}
 
 				if ( $province_code != '00' ) {
-					$test_data[ $country ][ $province_code ]['federal_form_w4_version'] = array(2020);
-					$test_data[ $country ][ $province_code ]['federal_claim_dependents'] = array(0);
-					$test_data[ $country ][ $province_code ]['federal_other_income'] = array(0);
-					$test_data[ $country ][ $province_code ]['federal_other_deductions'] = array(0);
+					$test_data[$country][$province_code]['federal_form_w4_version'] = [ 2020 ];
+					$test_data[$country][$province_code]['federal_claim_dependents'] = [ 0 ];
+					$test_data[$country][$province_code]['federal_other_income'] = [ 0 ];
+					$test_data[$country][$province_code]['federal_other_deductions'] = [ 0 ];
 				}
 
-				foreach ( $test_data[ $country ][ $province_code ]['filing_status'] as $filing_status ) {
-					foreach ( $test_data[ $country ][ $province_code ]['allowance'] as $allowance ) {
-						foreach ( $test_data[ $country ][ $province_code ]['federal_form_w4_version'] as $federal_form_w4_version ) {
-							foreach ( $test_data[ $country ][ $province_code ]['federal_claim_dependents'] as $federal_claim_dependents ) {
-								foreach ( $test_data[ $country ][ $province_code ]['federal_other_income'] as $federal_other_income ) {
-									foreach ( $test_data[ $country ][ $province_code ]['federal_other_deductions'] as $federal_other_deductions ) {
-										foreach ( $test_data[ $country ][ $province_code ]['income'] as $income ) {
+				foreach ( $test_data[$country][$province_code]['filing_status'] as $filing_status ) {
+					foreach ( $test_data[$country][$province_code]['allowance'] as $allowance ) {
+						foreach ( $test_data[$country][$province_code]['federal_form_w4_version'] as $federal_form_w4_version ) {
+							foreach ( $test_data[$country][$province_code]['federal_claim_dependents'] as $federal_claim_dependents ) {
+								foreach ( $test_data[$country][$province_code]['federal_other_income'] as $federal_other_income ) {
+									foreach ( $test_data[$country][$province_code]['federal_other_deductions'] as $federal_other_deductions ) {
+										foreach ( $test_data[$country][$province_code]['income'] as $income ) {
 											$pd_obj = new PayrollDeduction( $country, ( ( $province_code == '00' ) ? 'AK' : $province_code ) ); //Valid state is needed to calculate something, even for just federal numbers.
 											$pd_obj->setDate( $effective_date );
 											$pd_obj->setAnnualPayPeriods( $pay_periods );
@@ -210,7 +209,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 											//flush();
 											//ob_flush();
 
-											$retarr[] = array(
+											$retarr[] = [
 													'country'                  => $country,
 													'province'                 => $province_code,
 													'date'                     => date( 'm/d/y', $effective_date ),
@@ -224,7 +223,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 													'gross_income'             => $income,
 													'federal_deduction'        => Misc::MoneyRound( $pd_obj->getFederalPayPeriodDeductions() ),
 													'provincial_deduction'     => Misc::MoneyRound( $pd_obj->getStatePayPeriodDeductions() ),
-											);
+											];
 										}
 									}
 								}
@@ -233,16 +232,16 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 					}
 				}
 			} else if ( $country == 'CA' ) { //Canada
-				$result = array();
+				$result = [];
 				if ( isset( $pd_obj->obj->provincial_income_tax_rate_options ) ) {
 					$result = $pd_obj->obj->getDataFromRateArray( $effective_date, $pd_obj->obj->provincial_income_tax_rate_options );
 				}
 
 				if ( count( $result ) == 0 ) {
 					//Use static test rates.
-					$test_data[ $country ][ $province_code ] = $static_test_data[ $country ];
+					$test_data[$country][$province_code] = $static_test_data[$country];
 				} else {
-					$test_data[ $country ][ $province_code ] = $static_test_data[ $country ];
+					$test_data[$country][$province_code] = $static_test_data[$country];
 
 					$i = 1;
 					$prev_income = null;
@@ -257,16 +256,16 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 						$income = round( $tax_row['income'] / $pay_periods );
 						$variance = round( 100 / $pay_periods );
 
-						if ( $prev_income == null OR $prev_income > $income ) {
+						if ( $prev_income == null || $prev_income > $income ) {
 							//echo "First bracket! $country $province ".$tax_row['income']." T: ". ($tax_row['income']-$variance) ."\n";
-							$test_data[ $country ][ $province_code ]['income'][] = $income - $variance;
+							$test_data[$country][$province_code]['income'][] = $income - $variance;
 						}
 
-						$test_data[ $country ][ $province_code ]['income'][] = $income + $variance;
-						$test_data[ $country ][ $province_code ]['federal_claim'] = $static_test_data[ $country ]['federal_claim'];
-						$test_data[ $country ][ $province_code ]['provincial_claim'] = $static_test_data[ $country ]['provincial_claim'];
+						$test_data[$country][$province_code]['income'][] = $income + $variance;
+						$test_data[$country][$province_code]['federal_claim'] = $static_test_data[$country]['federal_claim'];
+						$test_data[$country][$province_code]['provincial_claim'] = $static_test_data[$country]['provincial_claim'];
 
-						$test_data[ $country ][ $province_code ]['income'] = array_unique( $test_data[ $country ][ $province_code ]['income'] );
+						$test_data[$country][$province_code]['income'] = array_unique( $test_data[$country][$province_code]['income'] );
 
 						$prev_income = $income;
 						$prev_status = ( isset( $tax_row['status'] ) ) ? $tax_row['status'] : null;
@@ -276,9 +275,9 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 					}
 				}
 
-				foreach ( $test_data[ $country ][ $province_code ]['provincial_claim'] as $provincial_claim ) {
-					foreach ( $test_data[ $country ][ $province_code ]['federal_claim'] as $federal_claim ) {
-						foreach ( $test_data[ $country ][ $province_code ]['income'] as $income ) {
+				foreach ( $test_data[$country][$province_code]['provincial_claim'] as $provincial_claim ) {
+					foreach ( $test_data[$country][$province_code]['federal_claim'] as $federal_claim ) {
+						foreach ( $test_data[$country][$province_code]['income'] as $income ) {
 							$pd_obj = new PayrollDeduction( $country, $province_code );
 							$pd_obj->setDate( $effective_date );
 							$pd_obj->setAnnualPayPeriods( $pay_periods );
@@ -298,7 +297,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 							$pd_obj->setGrossPayPeriodIncome( $income );
 
-							$retarr[] = array(
+							$retarr[] = [
 									'country'              => $country,
 									'province'             => $province_code,
 									'date'                 => date( 'm/d/y', $effective_date ),
@@ -308,7 +307,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 									'gross_income'         => $income,
 									'federal_deduction'    => Misc::MoneyRound( $pd_obj->getFederalPayPeriodDeductions() ),
 									'provincial_deduction' => Misc::MoneyRound( $pd_obj->getProvincialPayPeriodDeductions() ),
-							);
+							];
 						}
 					}
 				}
@@ -318,7 +317,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		//generate column array.
 		$column_keys = array_keys( $retarr[0] );
 		foreach ( $column_keys as $column_key ) {
-			$columns[ $column_key ] = $column_key;
+			$columns[$column_key] = $column_key;
 		}
 
 		//var_dump($test_data);

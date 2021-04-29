@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,6 +48,52 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
 		//Constants are calculated strange from the Government, just use their values. Remember to add all constant values from bottom to top together for each bracket. ie: 16 + 37 + 63 + 95, ...
+		20210101 => [
+				10 => [
+						[ 'income' => 1088, 'rate' => 1.5, 'constant' => 0 ],
+						[ 'income' => 2176, 'rate' => 2.0, 'constant' => 16 ],
+						[ 'income' => 3264, 'rate' => 2.5, 'constant' => 38 ],
+						[ 'income' => 4352, 'rate' => 3.0, 'constant' => 65 ],
+						[ 'income' => 5440, 'rate' => 3.5, 'constant' => 98 ],
+						[ 'income' => 6528, 'rate' => 4.0, 'constant' => 136 ],
+						[ 'income' => 7616, 'rate' => 4.5, 'constant' => 180 ],
+						[ 'income' => 8704, 'rate' => 5.0, 'constant' => 229 ],
+						[ 'income' => 8704, 'rate' => 5.4, 'constant' => 283 ],
+				],
+				20 => [
+						[ 'income' => 1088, 'rate' => 1.5, 'constant' => 0 ],
+						[ 'income' => 2176, 'rate' => 2.0, 'constant' => 16 ],
+						[ 'income' => 3264, 'rate' => 2.5, 'constant' => 38 ],
+						[ 'income' => 4352, 'rate' => 3.0, 'constant' => 65 ],
+						[ 'income' => 5440, 'rate' => 3.5, 'constant' => 98 ],
+						[ 'income' => 6528, 'rate' => 4.0, 'constant' => 136 ],
+						[ 'income' => 7616, 'rate' => 4.5, 'constant' => 180 ],
+						[ 'income' => 8704, 'rate' => 5.0, 'constant' => 229 ],
+						[ 'income' => 8704, 'rate' => 5.4, 'constant' => 283 ],
+				],
+				30 => [
+						[ 'income' => 1088, 'rate' => 1.5, 'constant' => 0 ],
+						[ 'income' => 2176, 'rate' => 2.0, 'constant' => 16 ],
+						[ 'income' => 3264, 'rate' => 2.5, 'constant' => 38 ],
+						[ 'income' => 4352, 'rate' => 3.0, 'constant' => 65 ],
+						[ 'income' => 5440, 'rate' => 3.5, 'constant' => 98 ],
+						[ 'income' => 6528, 'rate' => 4.0, 'constant' => 136 ],
+						[ 'income' => 7616, 'rate' => 4.5, 'constant' => 180 ],
+						[ 'income' => 8704, 'rate' => 5.0, 'constant' => 229 ],
+						[ 'income' => 8704, 'rate' => 5.4, 'constant' => 283 ],
+				],
+				40 => [
+						[ 'income' => 1088, 'rate' => 1.5, 'constant' => 0 ],
+						[ 'income' => 2176, 'rate' => 2.0, 'constant' => 16 ],
+						[ 'income' => 3264, 'rate' => 2.5, 'constant' => 38 ],
+						[ 'income' => 4352, 'rate' => 3.0, 'constant' => 65 ],
+						[ 'income' => 5440, 'rate' => 3.5, 'constant' => 98 ],
+						[ 'income' => 6528, 'rate' => 4.0, 'constant' => 136 ],
+						[ 'income' => 7616, 'rate' => 4.5, 'constant' => 180 ],
+						[ 'income' => 8704, 'rate' => 5.0, 'constant' => 229 ],
+						[ 'income' => 8704, 'rate' => 5.4, 'constant' => 283 ],
+				],
+		],
 		20200101 => [
 				10 => [
 						[ 'income' => 1073, 'rate' => 1.5, 'constant' => 0 ],
@@ -297,6 +343,14 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
+			20210101 => [
+					'standard_deduction' => [
+							'10' => 12550.00,
+							'20' => 12550.00,
+							'30' => 25100.00,
+							'40' => 18800.00,
+					],
+			],
 			20200101 => [
 					'standard_deduction' => [
 							'10' => 12400.00,

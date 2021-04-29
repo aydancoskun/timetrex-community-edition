@@ -1,4 +1,4 @@
-class OtherFieldViewController extends BaseViewController {
+export class OtherFieldViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#other_field_view_container',
@@ -62,7 +62,7 @@ class OtherFieldViewController extends BaseViewController {
 			api_class: TTAPI.APIOtherField,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.OTHER_FIELD,
+			layout_name: 'global_other_field',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -82,7 +82,7 @@ class OtherFieldViewController extends BaseViewController {
 		// Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_custom_field_column1, '' );
 
 		// Other ID1
@@ -170,7 +170,7 @@ class OtherFieldViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 1,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -182,7 +182,7 @@ class OtherFieldViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 1,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

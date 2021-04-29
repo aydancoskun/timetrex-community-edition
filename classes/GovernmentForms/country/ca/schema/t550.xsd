@@ -1,0 +1,756 @@
+<?xml version="1.0"?>
+
+<!--
+Description		T550 Return Data Element Types
+Last updated 	N/A
+Version#:		1.16 (version #.yy)
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:complexType name="T550Type">
+		<xsd:annotation>
+			<xsd:documentation>This is the XML schema for filing of contract lists to satisfy the registration requirement of the respective sections of the Income Tax Act for Retirement Savings Plans (RSP) or Retirement Income Funds(RIF).
+	- mandatory 
+	- one</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="filerName">
+				<xsd:annotation>
+					<xsd:documentation>Name of the company submitting the contract lists. 
+	- only one 
+	- maximum 120 characters 
+	- alpha numeric characters</xsd:documentation>
+				</xsd:annotation>	
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="120"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="submissionDate">
+				<xsd:annotation>
+					<xsd:documentation>The date you are submitting the listing.
+- mandatory 
+- only one 
+- maximum 20 characters
+- only valid dates </xsd:documentation>
+				</xsd:annotation>		
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:date">
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="contactPerson">
+				<xsd:annotation>
+					<xsd:documentation>Name of the contact person authorized as contact for the listing.
+- mandatory 
+- only one 
+- maximum 100 characters 
+- alpha numeric characters</xsd:documentation>
+				</xsd:annotation>					
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="100"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="contactPhone"  minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>Phone number of person given as contact for the specimen.
+- optional
+- only one
+- maximum 10 characters
+- numeric only
+- no white spaces</xsd:documentation>
+				</xsd:annotation>				
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="10"/>
+						<xsd:whiteSpace value="collapse"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="filerAddress1">
+				<xsd:annotation>
+					<xsd:documentation>The mailing address of the company filing the listings.
+- mandatory
+- only one
+- maximum length 60 characters
+- minimum length 1 characters
+- white spaces preserved </xsd:documentation>
+				</xsd:annotation>					
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="60"/>
+						<xsd:whiteSpace value="preserve"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="filerAddress2" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>The continuation of the mailing address of the company filing the listings. To be used when address 1 is insufficient to provide a complete mailing address.
+- optional
+- only one
+- maximum length 60 characters
+- white spaces preserved </xsd:documentation>
+				</xsd:annotation>			
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="60"/>
+						<xsd:whiteSpace value="preserve"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="filerCity">
+				<xsd:annotation>
+					<xsd:documentation>The city of of the company filing the listings.
+- mandatory
+- only one
+- maximum length 60 characters
+- white spaces preserved </xsd:documentation>
+				</xsd:annotation>					
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="60"/>
+						<xsd:whiteSpace value="preserve"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="filerProvince">
+				<xsd:annotation>
+					<xsd:documentation>The province code of the company filing the listings. Use 'ZZ' for a non - Canadian mailing address.
+- mandatory
+- only one
+- restricted list, enumeration provided
+- alpha numeric characters</xsd:documentation>
+				</xsd:annotation>					
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:enumeration value="AB"/>
+						<xsd:enumeration value="BC"/>
+						<xsd:enumeration value="MB"/>
+						<xsd:enumeration value="NB"/>
+						<xsd:enumeration value="NL"/>
+						<xsd:enumeration value="NT"/>
+						<xsd:enumeration value="NS"/>
+						<xsd:enumeration value="NU"/>
+						<xsd:enumeration value="ON"/>
+						<xsd:enumeration value="PE"/>
+						<xsd:enumeration value="QC"/>
+						<xsd:enumeration value="SK"/>
+						<xsd:enumeration value="YT"/>
+						<xsd:enumeration value="ZZ"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="filerPostalCode" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>The postal code of the company filing the listings.  Do not include a postal code element for non-Canadian address.
+- optional
+- only one
+- maximum 6 characters
+- no white spaces
+- alpha numeric characters</xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="6"/>
+						<xsd:whiteSpace value="collapse"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="specimen" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation>Each specimen plan is defined seperately.  More than one specimen plan may be submitted.
+- mandatory
+- one or more</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="issuerName">
+							<xsd:annotation>
+								<xsd:documentation>Name of issuer or carrier.
+- mandatory 
+- only one 
+- maximum 250 characters
+- alpha numeric characters</xsd:documentation>
+							</xsd:annotation>				
+								<xsd:simpleType>
+									<xsd:restriction base="xsd:string">
+										<xsd:minLength value="1"/>
+										<xsd:maxLength value="250"/>
+									</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="specimenName">
+							<xsd:annotation>
+								<xsd:documentation>Full name of the specimen plan or fund.
+		- mandatory
+		- only one
+		- maximum 250 characters
+		- alpha numeric characters</xsd:documentation>
+							</xsd:annotation>
+							<xsd:simpleType>
+								<xsd:restriction base="xsd:string">
+									<xsd:minLength value="1"/>
+									<xsd:maxLength value="250"/>
+								</xsd:restriction>
+							</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="specimenNumber">
+							<xsd:annotation>
+								<xsd:documentation>Specimen plan or fund number issued by CRA.  Format for RSP is RSP 0999-999 or RSP 0999-9999 and for RIF 9999. Do not include L designations or French prefixes.
+		- mandatory
+		- only one
+		- maximum 13 characters
+		- alpha numeric characters
+		- white spaces preserved</xsd:documentation>	
+							</xsd:annotation>
+							<xsd:simpleType>
+								<xsd:restriction base="xsd:string">
+									<xsd:minLength value="1"/>
+									<xsd:maxLength value="13"/>
+									<xsd:whiteSpace value="preserve"/>
+								</xsd:restriction>
+							</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="contractYear">
+							<xsd:annotation>
+								<xsd:documentation>The calendar year the new contracts or arrangements were entered into.
+	- mandatory
+	- only one
+	- maximum 4 characters
+	- type integer numeric characters</xsd:documentation>
+							</xsd:annotation>
+							<xsd:simpleType>
+								<xsd:restriction base="xsd:integer">
+									<xsd:minInclusive value="1"/>
+									<xsd:maxInclusive value="9999"/>
+								</xsd:restriction>
+							</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="contractCount">
+							<xsd:annotation>
+								<xsd:documentation>Number of contracts or arrangements listed under the specimen
+	- mandatory
+	- only one
+	- type integer numeric characters</xsd:documentation>
+							</xsd:annotation>
+							<xsd:simpleType>
+								<xsd:restriction base="xsd:integer">
+									<xsd:minInclusive value="1"/>
+								</xsd:restriction>
+							</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="contract" maxOccurs="unbounded">
+							<xsd:annotation>
+								<xsd:documentation>One contract is issued for each annuitant.
+		- mandatory
+		- one or more- </xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="contractNumber">
+										<xsd:annotation>
+											<xsd:documentation>Unique identifier for the specific contract as issued by the Issuer.
+					- mandatory
+					- only one
+					- maximum length 20 characters
+					- no white spaces </xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:minLength value="1"/>
+												<xsd:maxLength value="20"/>
+												<xsd:whiteSpace value="collapse"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantSIN">
+										<xsd:annotation>
+											<xsd:documentation>The social insurance number of the annuitant.  No substitutes are acceptable.
+					- mandatory
+					- only one
+					- maximum length 9 characters
+					- minimum length 9 characters
+					- no white spaces </xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:whiteSpace value="collapse"/>
+												<xsd:length value="9"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantSalutation" minOccurs="0">
+										<xsd:annotation>
+											<xsd:documentation>The salutation for the annuitant.
+					- optional
+					- only one
+					- maximum length 5 characters
+					- alpha numeric characters</xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="5"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantFirstName">
+										<xsd:annotation>
+											<xsd:documentation>The first name of the annuitant.
+					- mandatory
+					- only one
+					- minimum length 1 characters
+					- maximum length 40 characters
+					- white spaces preserved</xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:minLength value="1"/>
+												<xsd:maxLength value="40"/>
+												<xsd:whiteSpace value="preserve"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantLastName">
+										<xsd:annotation>
+											<xsd:documentation>The last name of the annuitant.
+					- mandatory
+					- only one
+					- minimum length 1 characters
+					- maximum length 40 characters
+					- white spaces preserved </xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:minLength value="1"/>
+												<xsd:maxLength value="40"/>
+												<xsd:whiteSpace value="preserve"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantAddress1">
+										<xsd:annotation>
+											<xsd:documentation>The mailing address of the annuitant, excluding the City and Postal Code.
+					- mandatory
+					- only one
+					- minimum length 1 characters
+					- maximum length 60 characters
+					- white spaces preserved </xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:minLength value="1"/>
+												<xsd:maxLength value="60"/>
+												<xsd:whiteSpace value="preserve"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantAddress2" minOccurs="0">
+										<xsd:annotation>
+											<xsd:documentation>The continuation of the mailing address of the annuitant.  To be used when address 1 is insufficient to provide a complete mailing address.
+					- optional
+					- only one
+					- minimum length 1 characters
+					- maximum length 60 characters
+					- white spaces preserved </xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="60"/>
+												<xsd:whiteSpace value="preserve"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantCity">
+										<xsd:annotation>
+											<xsd:documentation>The city of the annuitant as a continuation of the mailing address.
+					- mandatory
+					- only one
+					- maximum length 60 characters
+					- white spaces preserved </xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:minLength value="1"/>
+												<xsd:maxLength value="60"/>
+												<xsd:whiteSpace value="preserve"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantProvince">
+										<xsd:annotation>
+											<xsd:documentation>The province of the annuitant as a continuation of the mailing address.  Use 'ZZ' for a non - Canadian mailing address.
+					- mandatory
+					- only one
+					- restricted list, enumeration provided
+					- alpha numeric characters</xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:minLength value="1"/>
+												<xsd:enumeration value="AB"/>
+												<xsd:enumeration value="BC"/>
+												<xsd:enumeration value="MB"/>
+												<xsd:enumeration value="NB"/>
+												<xsd:enumeration value="NL"/>
+												<xsd:enumeration value="NT"/>
+												<xsd:enumeration value="NS"/>
+												<xsd:enumeration value="NU"/>
+												<xsd:enumeration value="ON"/>
+												<xsd:enumeration value="PE"/>
+												<xsd:enumeration value="QC"/>
+												<xsd:enumeration value="SK"/>
+												<xsd:enumeration value="YT"/>
+												<xsd:enumeration value="ZZ"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+									<xsd:element name="annuitantPostalCode" minOccurs="0">
+										<xsd:annotation>
+											<xsd:documentation>The postal code of the annuitant as a continuation of the mailing address.  Do not include a postal code element for non-Canadian address.
+					- optional
+					- only one
+					- maximum 6 characters
+					- alpha numeric characters
+					- no white spaces</xsd:documentation>
+										</xsd:annotation>
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:whiteSpace value="collapse"/>
+												<xsd:maxLength value="6"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:element>
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="char8Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="8"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="otherDataType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="A"/>
+			<xsd:enumeration value="M"/>
+			<xsd:enumeration value="O"/>
+			<xsd:enumeration value="a"/>
+			<xsd:enumeration value="m"/>
+			<xsd:enumeration value="o"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="transNbrType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="(MM|mm)\d{6}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="indicator1-4Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[1-4]{1}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="int6Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{1,6}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="languageType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="E"/>
+			<xsd:enumeration value="F"/>
+			<xsd:enumeration value="e"/>
+			<xsd:enumeration value="f"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="Line2Type">
+		<xsd:all>
+			<xsd:element name="l1_nm" type="char30Type"/>
+			<xsd:element name="l2_nm" type="char30Type" minOccurs="0"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="CanadaAddressType">
+		<xsd:all>
+			<xsd:element name="addr_l1_txt" type="char30Type" minOccurs="0"/>
+			<xsd:element name="addr_l2_txt" type="char30Type" minOccurs="0"/>
+			<xsd:element name="cty_nm" type="char28Type" minOccurs="0"/>
+			<xsd:element name="prov_cd" type="provinceStateType" minOccurs="0"/>
+			<xsd:element name="cntry_cd" type="countryType" minOccurs="0"/>
+			<xsd:element name="pstl_cd" type="pcType" minOccurs="0"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="ContactType">
+		<xsd:all>
+			<xsd:element name="cntc_nm" type="char22Type"/>
+			<xsd:element name="cntc_area_cd" type="numeric3Type"/>
+			<xsd:element name="cntc_phn_nbr" type="phoneType"/>
+			<xsd:element name="cntc_extn_nbr" type="int5Type" minOccurs="0"/>
+			<xsd:element name="cntc_email_area" type="char60Type" minOccurs="1"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:simpleType name="char30Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="30"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char28Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="28"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="provinceType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ON"/>
+			<xsd:enumeration value="on"/>
+			<xsd:enumeration value="On"/>
+			<xsd:enumeration value="NS"/>
+			<xsd:enumeration value="ns"/>
+			<xsd:enumeration value="Ns"/>
+			<xsd:enumeration value="PE"/>
+			<xsd:enumeration value="pe"/>
+			<xsd:enumeration value="Pe"/>
+			<xsd:enumeration value="NB"/>
+			<xsd:enumeration value="nb"/>
+			<xsd:enumeration value="Nb"/>
+			<xsd:enumeration value="QC"/>
+			<xsd:enumeration value="qc"/>
+			<xsd:enumeration value="Qc"/>
+			<xsd:enumeration value="MB"/>
+			<xsd:enumeration value="mb"/>
+			<xsd:enumeration value="Mb"/>
+			<xsd:enumeration value="MA"/>
+			<xsd:enumeration value="ma"/>
+			<xsd:enumeration value="Ma"/>
+			<xsd:enumeration value="SK"/>
+			<xsd:enumeration value="sk"/>
+			<xsd:enumeration value="Sk"/>
+			<xsd:enumeration value="SA"/>
+			<xsd:enumeration value="sa"/>
+			<xsd:enumeration value="Sa"/>
+			<xsd:enumeration value="AB"/>
+			<xsd:enumeration value="ab"/>
+			<xsd:enumeration value="Ab"/>
+			<xsd:enumeration value="AL"/>
+			<xsd:enumeration value="al"/>
+			<xsd:enumeration value="Al"/>
+			<xsd:enumeration value="BC"/>
+			<xsd:enumeration value="bc"/>
+			<xsd:enumeration value="Bc"/>
+			<xsd:enumeration value="NT"/>
+			<xsd:enumeration value="nt"/>
+			<xsd:enumeration value="Nt"/>
+			<xsd:enumeration value="YT"/>
+			<xsd:enumeration value="yt"/>
+			<xsd:enumeration value="Yt"/>
+			<xsd:enumeration value="NL"/>
+			<xsd:enumeration value="nl"/>
+			<xsd:enumeration value="Nl"/>
+			<xsd:enumeration value="NF"/>
+			<xsd:enumeration value="nf"/>
+			<xsd:enumeration value="Nf"/>
+			<xsd:enumeration value="LB"/>
+			<xsd:enumeration value="lb"/>
+			<xsd:enumeration value="Lb"/>
+			<xsd:enumeration value="PQ"/>
+			<xsd:enumeration value="pq"/>
+			<xsd:enumeration value="Pq"/>
+			<xsd:enumeration value="QU"/>
+			<xsd:enumeration value="qu"/>
+			<xsd:enumeration value="Qu"/>
+			<xsd:enumeration value="NU"/>
+			<xsd:enumeration value="nu"/>
+			<xsd:enumeration value="Nu"/>
+			<xsd:enumeration value="NN"/>
+			<xsd:enumeration value="nn"/>
+			<xsd:enumeration value="Nn"/>
+			<xsd:enumeration value="US"/>
+			<xsd:enumeration value="us"/>
+			<xsd:enumeration value="Us"/>
+			<xsd:enumeration value="ZZ"/>
+			<xsd:enumeration value="zz"/>
+			<xsd:enumeration value="Zz"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="provinceStateType">
+		<xsd:union memberTypes="provinceType stateType"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="stateType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="AL"/>
+			<xsd:enumeration value="al"/>
+			<xsd:enumeration value="NV"/>
+			<xsd:enumeration value="nv"/>
+			<xsd:enumeration value="AK"/>
+			<xsd:enumeration value="ak"/>
+			<xsd:enumeration value="NH"/>
+			<xsd:enumeration value="nh"/>
+			<xsd:enumeration value="AZ"/>
+			<xsd:enumeration value="az"/>
+			<xsd:enumeration value="NJ"/>
+			<xsd:enumeration value="nj"/>
+			<xsd:enumeration value="AR"/>
+			<xsd:enumeration value="ar"/>
+			<xsd:enumeration value="NM"/>
+			<xsd:enumeration value="nm"/>
+			<xsd:enumeration value="CA"/>
+			<xsd:enumeration value="ca"/>
+			<xsd:enumeration value="NY"/>
+			<xsd:enumeration value="ny"/>
+			<xsd:enumeration value="CO"/>
+			<xsd:enumeration value="co"/>
+			<xsd:enumeration value="NC"/>
+			<xsd:enumeration value="nc"/>
+			<xsd:enumeration value="CT"/>
+			<xsd:enumeration value="ct"/>
+			<xsd:enumeration value="ND"/>
+			<xsd:enumeration value="nd"/>
+			<xsd:enumeration value="DE"/>
+			<xsd:enumeration value="de"/>
+			<xsd:enumeration value="OH"/>
+			<xsd:enumeration value="oh"/>
+			<xsd:enumeration value="DC"/>
+			<xsd:enumeration value="dc"/>
+			<xsd:enumeration value="OK"/>
+			<xsd:enumeration value="ok"/>
+			<xsd:enumeration value="FL"/>
+			<xsd:enumeration value="fl"/>
+			<xsd:enumeration value="OR"/>
+			<xsd:enumeration value="or"/>
+			<xsd:enumeration value="GA"/>
+			<xsd:enumeration value="ga"/>
+			<xsd:enumeration value="PA"/>
+			<xsd:enumeration value="pa"/>
+			<xsd:enumeration value="HI"/>
+			<xsd:enumeration value="hi"/>
+			<xsd:enumeration value="RI"/>
+			<xsd:enumeration value="ri"/>
+			<xsd:enumeration value="ID"/>
+			<xsd:enumeration value="id"/>
+			<xsd:enumeration value="SC"/>
+			<xsd:enumeration value="sc"/>
+			<xsd:enumeration value="IL"/>
+			<xsd:enumeration value="il"/>
+			<xsd:enumeration value="SD"/>
+			<xsd:enumeration value="sd"/>
+			<xsd:enumeration value="IN"/>
+			<xsd:enumeration value="in"/>
+			<xsd:enumeration value="TN"/>
+			<xsd:enumeration value="tn"/>
+			<xsd:enumeration value="IA"/>
+			<xsd:enumeration value="ia"/>
+			<xsd:enumeration value="TX"/>
+			<xsd:enumeration value="tx"/>
+			<xsd:enumeration value="KS"/>
+			<xsd:enumeration value="ks"/>
+			<xsd:enumeration value="UT"/>
+			<xsd:enumeration value="ut"/>
+			<xsd:enumeration value="KY"/>
+			<xsd:enumeration value="ky"/>
+			<xsd:enumeration value="VT"/>
+			<xsd:enumeration value="vt"/>
+			<xsd:enumeration value="LA"/>
+			<xsd:enumeration value="la"/>
+			<xsd:enumeration value="VA"/>
+			<xsd:enumeration value="va"/>
+			<xsd:enumeration value="ME"/>
+			<xsd:enumeration value="me"/>
+			<xsd:enumeration value="WA"/>
+			<xsd:enumeration value="wa"/>
+			<xsd:enumeration value="MD"/>
+			<xsd:enumeration value="md"/>
+			<xsd:enumeration value="WV"/>
+			<xsd:enumeration value="wv"/>
+			<xsd:enumeration value="MA"/>
+			<xsd:enumeration value="ma"/>
+			<xsd:enumeration value="WI"/>
+			<xsd:enumeration value="wi"/>
+			<xsd:enumeration value="MI"/>
+			<xsd:enumeration value="mi"/>
+			<xsd:enumeration value="WY"/>
+			<xsd:enumeration value="wy"/>
+			<xsd:enumeration value="MN"/>
+			<xsd:enumeration value="mn"/>
+			<xsd:enumeration value="MS"/>
+			<xsd:enumeration value="ms"/>
+			<xsd:enumeration value="MO"/>
+			<xsd:enumeration value="mo"/>
+			<xsd:enumeration value="MT"/>
+			<xsd:enumeration value="mt"/>
+			<xsd:enumeration value="NE"/>
+			<xsd:enumeration value="ne"/>
+			<xsd:enumeration value="PR"/>
+			<xsd:enumeration value="pr"/>
+			<xsd:enumeration value="AS"/>
+			<xsd:enumeration value="as"/>
+			<xsd:enumeration value="FM"/>
+			<xsd:enumeration value="fm"/>
+			<xsd:enumeration value="GU"/>
+			<xsd:enumeration value="gu"/>
+			<xsd:enumeration value="MH"/>
+			<xsd:enumeration value="mh"/>
+			<xsd:enumeration value="MP"/>
+			<xsd:enumeration value="mp"/>
+			<xsd:enumeration value="PW"/>
+			<xsd:enumeration value="pw"/>
+			<xsd:enumeration value="VI"/>
+			<xsd:enumeration value="vi"/>
+			<xsd:enumeration value="ZZ"/>
+			<xsd:enumeration value="zz"/>
+		</xsd:restriction>
+	</xsd:simpleType>	
+	<xsd:simpleType name="countryType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\p{L}{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="pcType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="10"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char22Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="22"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="numeric3Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="phoneType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{3}-\d{4}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="int5Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{1,5}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="char60Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="60"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	
+</xsd:schema>

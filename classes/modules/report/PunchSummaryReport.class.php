@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -853,13 +853,13 @@ class PunchSummaryReport extends Report {
 							'bad_quantity'                => $p_obj->getColumn( 'bad_quantity' ),
 							'note'                        => $p_obj->getColumn( 'note' ),
 							'total_time'                  => $p_obj->getColumn( 'total_time' ),
-							'total_time_wage'             => Misc::MoneyFormat( bcmul( TTDate::getHours( $p_obj->getColumn( 'total_time' ) ), $hourly_rate ), false ),
-							'total_time_wage_burden'      => Misc::MoneyFormat( bcmul( TTDate::getHours( $p_obj->getColumn( 'total_time' ) ), bcmul( $hourly_rate, bcdiv( $p_obj->getColumn( 'labor_burden_percent' ), 100 ) ) ), false ),
-							'total_time_wage_with_burden' => Misc::MoneyFormat( bcmul( TTDate::getHours( $p_obj->getColumn( 'total_time' ) ), bcmul( $hourly_rate, bcadd( bcdiv( $p_obj->getColumn( 'labor_burden_percent' ), 100 ), 1 ) ) ), false ),
+							'total_time_wage'             => Misc::MoneyRound( bcmul( TTDate::getHours( $p_obj->getColumn( 'total_time' ) ), $hourly_rate ) ),
+							'total_time_wage_burden'      => Misc::MoneyRound( bcmul( TTDate::getHours( $p_obj->getColumn( 'total_time' ) ), bcmul( $hourly_rate, bcdiv( $p_obj->getColumn( 'labor_burden_percent' ), 100 ) ) ) ),
+							'total_time_wage_with_burden' => Misc::MoneyRound( bcmul( TTDate::getHours( $p_obj->getColumn( 'total_time' ) ), bcmul( $hourly_rate, bcadd( bcdiv( $p_obj->getColumn( 'labor_burden_percent' ), 100 ), 1 ) ) ) ),
 							'actual_total_time'           => $p_obj->getColumn( 'actual_total_time' ),
 							'actual_total_time_diff'      => $actual_time_diff,
-							'actual_total_time_wage'      => Misc::MoneyFormat( bcmul( TTDate::getHours( $p_obj->getColumn( 'actual_total_time' ) ), $hourly_rate ), false ),
-							'actual_total_time_diff_wage' => Misc::MoneyFormat( bcmul( TTDate::getHours( $actual_time_diff ), $hourly_rate ) ),
+							'actual_total_time_wage'      => Misc::MoneyRound( bcmul( TTDate::getHours( $p_obj->getColumn( 'actual_total_time' ) ), $hourly_rate ) ),
+							'actual_total_time_diff_wage' => Misc::MoneyRound( bcmul( TTDate::getHours( $actual_time_diff ), $hourly_rate ) ),
 							'other_id1'                   => $p_obj->getColumn( 'other_id1' ),
 							'other_id2'                   => $p_obj->getColumn( 'other_id2' ),
 							'other_id3'                   => $p_obj->getColumn( 'other_id3' ),
@@ -877,7 +877,7 @@ class PunchSummaryReport extends Report {
 							'out_longitude'               => null,
 							'out_latitude'                => null,
 							'user_wage_id'                => $p_obj->getColumn( 'user_wage_id' ),
-							'hourly_rate'                 => Misc::MoneyFormat( $hourly_rate, false ),
+							'hourly_rate'                 => Misc::MoneyRound( $hourly_rate ),
 							'tainted'                     => 0,
 							'tainted_status'              => null,
 							'in_station_type'             => null,

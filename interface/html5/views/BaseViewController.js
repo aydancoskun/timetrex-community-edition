@@ -1,7 +1,15 @@
+import { TTBackboneView } from '@/views/TTBackboneView';
+import { TTAPI } from '@/services/TimeTrexClientAPI';
+import { FormItemType, WidgetNamesDic } from '@/global/widgets/search_panel/FormItemType'; // TODO: duplicated in merged js files.
+import '@/global/widgets/paging/Paging2.js';
+
+window.FormItemType = FormItemType; // TODO: Eventually refactor to import only where these are used.
+window.WidgetNamesDic = WidgetNamesDic; // TODO: Eventually refactor to import only where these are used.
+
 /* jshint ignore:start */
 
 //Don't check this file for now. Too many issues.
-class BaseViewController extends TTBackboneView {
+export class BaseViewController extends TTBackboneView {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			real_this: null, //For super call in second level sub class
@@ -145,7 +153,7 @@ class BaseViewController extends TTBackboneView {
 
 			enable_validation: true,
 
-			_required_files: null,
+			// _required_files: null,
 
 			tab_model: null, //Tab definitions and a map to their callbacks.
 
@@ -154,10 +162,10 @@ class BaseViewController extends TTBackboneView {
 		super( options );
 	}
 
-	getRequiredFiles() {
-		//override in child class
-		return [];
-	}
+	// getRequiredFiles() {
+	// 	//override in child class
+	// 	return [];
+	// }
 
 	/**
 	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
@@ -165,29 +173,31 @@ class BaseViewController extends TTBackboneView {
 	 *
 	 * @returns {Array}
 	 */
-	filterRequiredFiles() {
-		var retval = [];
-		var required_files;
-
-		if ( typeof this._required_files == 'object' ) {
-			required_files = this._required_files;
-		} else {
-			required_files = this.getRequiredFiles();
-		}
-
-		if ( required_files && required_files[0] ) {
-			retval = required_files;
-		} else {
-			for ( var edition_id in required_files ) {
-				if ( Global.getProductEdition() >= edition_id ) {
-					retval = retval.concat( required_files[edition_id] );
-				}
-			}
-		}
-
-		Debug.Arr( retval, 'RETVAL', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 10 );
-		return retval;
-	}
+	// filterRequiredFiles() {
+	// 	Debug.Warn( 'Deprecated requirejs function. Replace usage immediately with webpack loaders.', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 2 );
+	//
+	// 	var retval = [];
+	// 	var required_files;
+	//
+	// 	if ( typeof this._required_files == 'object' ) {
+	// 		required_files = this._required_files;
+	// 	} else {
+	// 		required_files = this.getRequiredFiles();
+	// 	}
+	//
+	// 	if ( required_files && required_files[0] ) {
+	// 		retval = required_files;
+	// 	} else {
+	// 		for ( var edition_id in required_files ) {
+	// 			if ( Global.getProductEdition() >= edition_id ) {
+	// 				retval = retval.concat( required_files[edition_id] );
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	Debug.Arr( retval, 'RETVAL', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 10 );
+	// 	return retval;
+	// }
 
 	preInit() {
 		//override in child class
@@ -206,8 +216,12 @@ class BaseViewController extends TTBackboneView {
 
 		var $this = this;
 		this.layout_changed = false;
-		var required_files = this.filterRequiredFiles();
-		require( required_files, function() {
+		// var required_files = this.filterRequiredFiles();
+
+		// __non_webpack_require__( required_files, function() { // This is to prevent conflict with the Webpack Node require calls.
+		// Debug.Warn( 'Deprecated requirejs function. Replace usage immediately with webpack loaders.', 'BaseViewController.js', 'BaseViewController', 'initialize', 2 );
+
+		setTimeout(function() { // #2662 This setTimeout is essential in keeping the code flow the same as when this code block has a requirejs callback. Otherwise it causes issues in many areas like Audit logs going blank, as the subview postInit function is called before its set in afterLoadView().
 
 			$this.preInit( options );
 
@@ -294,7 +308,7 @@ class BaseViewController extends TTBackboneView {
 
 			TTPromise.resolve( 'BaseViewController', 'initialize' );
 			TTPromise.resolve( 'init', 'init' );
-		} );
+		}, 1);
 	}
 
 	init() {
@@ -953,23 +967,19 @@ class BaseViewController extends TTBackboneView {
 					sub_menu_ui_node.addClass( 'disable-image' );
 					this.context_menu_array.push( sub_menu_ui_node );
 					if ( ribbon_sub_menu.get( 'type' ) === RibbonSubMenuType.NAVIGATION ) {
-
 						sub_menu_ui_node.children().eq( 0 ).addClass( 'ribbon-sub-menu-nav-icon' );
 						$this.subMenuNavMap[ribbon_sub_menu.get( 'id' )] = ribbon_sub_menu;
 
-						sub_menu_ui_node.click( function( e ) {
-							var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+						sub_menu_ui_node.click( Global.debounce( function SubMenuNavClickEvent( e ) {
+							var id = $( this ).find( '.ribbon-sub-menu-icon' ).attr( 'id' );
 							$this.onSubMenuNavClick( this, id );
-						} );
-
+						}, Global.calcDebounceWaitTimeBasedOnNetwork(), true ) );
 					} else {
-						//defend empty block error when comments following codes
-
-						sub_menu_ui_node.click( function( e ) {
-							var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+						//Debounce to help prevent double clicks.
+						sub_menu_ui_node.click( Global.debounce( function ContextMenuClickEvent( e ) {
+							var id = $( this ).find( '.ribbon-sub-menu-icon' ).attr( 'id' );
 							$this.onContextMenuClick( this );
-						} );
-
+						}, Global.calcDebounceWaitTimeBasedOnNetwork(), true ) ); //333 * 1.5 = 500ms. Debounce on at least 1.5x the round-trip ping time. Because a user on a really slow connection could click Save 1s apart and the packets could arrive close to each other and cause duplicate request errors still.
 					}
 
 					sub_menu_ui_nodes.append( sub_menu_ui_node );
@@ -1096,18 +1106,19 @@ class BaseViewController extends TTBackboneView {
 		}
 
 		ProgressBar.showOverlay();
-		//this flag is turned off in ProgressBarManager::closeOverlay, or 1 second whichever happens first
+		//This flag is turned off in ProgressBarManager::closeOverlay, or 2 seconds whichever happens first. Use 2 seconds as overseas users could see intermittant 2 second latencies and double click Save icons.
 		if ( window.clickProcessing == true ) {
 			return;
 		} else {
 			window.clickProcessing = true;
 			window.clickProcessingHandle = window.setTimeout( function() {
+				//FIXME: Check to see if the progress bar is visible because a API call is taking a long time, and if so keep the overlay up longer.
 				if ( window.clickProcessing == true ) {
 					window.clickProcessing = false;
 					ProgressBar.closeOverlay();
 					TTPromise.wait();
 				}
-			}, 1000 );
+			}, Global.calcDebounceWaitTimeBasedOnNetwork( 2000 ) );
 		}
 
 		//Debug.Text( 'Context Menu Click: '+ id, 'BaseViewController.js', 'BaseViewController', 'onContextMenuClick', 10 );
@@ -1663,6 +1674,7 @@ class BaseViewController extends TTBackboneView {
 			};
 		}
 
+		//current_api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		return current_api['set' + current_api.key_name]( record, false, ignoreWarning, callback );
 	}
 
@@ -1918,7 +1930,9 @@ class BaseViewController extends TTBackboneView {
 				retval = record;
 			}
 		} else {
-			if ( this.is_viewing && this.current_edit_record && this.current_edit_record.id ) {
+			//Check for is_viewing and is_edit as the state may have changed from viewing to editing immediately before it got here.
+			//  Test this with: Attendance -> TimeSheet, Edit Punch, click Station field to view the station, then click "Edit" icon.
+			if ( ( this.is_viewing || this.is_edit ) && this.current_edit_record && this.current_edit_record.id ) {
 				retval = this.current_edit_record.id;
 			} else if ( grid_selected_length > 0 ) {
 				retval = grid_selected_id_array[0];
@@ -2020,6 +2034,8 @@ class BaseViewController extends TTBackboneView {
 	_continueDoCopy( copyIds ) {
 		var $this = this;
 		ProgressBar.showOverlay();
+
+		//$this.api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		$this.api['copy' + $this.api.key_name]( copyIds, {
 			onResult: function( result ) {
 				$this.onCopyResult( result );
@@ -3766,14 +3782,14 @@ class BaseViewController extends TTBackboneView {
 	}
 
 	switchToProperTab() {
-		if ( LocalCacheData.all_url_args &&
-			LocalCacheData.all_url_args.hasOwnProperty( 'tab' ) &&
-			LocalCacheData.all_url_args.tab.length > 0 &&
+		if ( LocalCacheData.getAllURLArgs() &&
+			LocalCacheData.getAllURLArgs().hasOwnProperty( 'tab' ) &&
+			LocalCacheData.getAllURLArgs().tab.length > 0 &&
 			LocalCacheData.current_open_primary_controller.viewId === this.viewId ) {
 
 			var target_node = this.edit_view_tab.find( '.edit-view-tab-bar-label' ).children().filter( function() {
 				var value = $( this ).text().replace( /\/|\s+/g, '' );
-				return value === LocalCacheData.all_url_args.tab;
+				return value === LocalCacheData.getAllURLArgs().tab;
 			} );
 
 			var target_index = 0;
@@ -4298,8 +4314,8 @@ class BaseViewController extends TTBackboneView {
 		//If there is a action in url, add it back. So we have correct url when set tabs urls
 		//This caused a bug where whenever saving a punch on Attendance ->TimeSheet, it would re-open the edit view, same with navigating between weeks, or even deleting punches in some cases.
 		//This need to put under reSetUrl and need clean url_agrs until it set from onViewChange in router again
-		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.a ) {
-			LocalCacheData.current_doing_context_action = LocalCacheData.all_url_args.a;
+		if ( LocalCacheData.getAllURLArgs() && LocalCacheData.getAllURLArgs().a ) {
+			LocalCacheData.current_doing_context_action = LocalCacheData.getAllURLArgs().a;
 		}
 
 		this.sub_log_view_controller = null;
@@ -4318,7 +4334,7 @@ class BaseViewController extends TTBackboneView {
 		if ( this.canSetURL() ) {
 			var args = '#!m=' + this.viewId;
 			Global.setURLToBrowser( Global.getBaseURL() + args );
-			LocalCacheData.all_url_args = IndexViewController.instance.router.buildArgDic( args.split( '&' ) );
+			LocalCacheData.setAllURLArgs( Global.buildArgDic( args.split( '&' ) ) );
 		}
 	}
 
@@ -5489,12 +5505,12 @@ class BaseViewController extends TTBackboneView {
 				var show_search = false;
 				var key;
 
-				if ( search_field.get( 'layout_name' ) !== ALayoutIDs.OPTION_COLUMN && search_field.get( 'layout_name' ) !== ALayoutIDs.TREE_COLUMN ) {
+				if ( search_field.get( 'layout_name' ) !== 'global_option_column' && search_field.get( 'layout_name' ) !== 'global_tree_column' ) {
 					show_search = true;
 					key = 'id';
 				} else {
 
-					if ( search_field.get( 'layout_name' ) === ALayoutIDs.TREE_COLUMN ) {
+					if ( search_field.get( 'layout_name' ) === 'global_tree_column' ) {
 						key = 'id';
 					} else {
 						key = 'value';
@@ -5570,6 +5586,10 @@ class BaseViewController extends TTBackboneView {
 				} );
 
 				break;
+			default:
+				alert('ERROR: Form type does not exist: '+ form_type);
+				debugger;
+				break;
 		}
 
 		return input;
@@ -5622,7 +5642,7 @@ class BaseViewController extends TTBackboneView {
 			allow_drag_to_order: true,
 			allow_multiple_selection: true,
 			set_empty: true,
-			layout_name: ALayoutIDs.SORT_COLUMN
+			layout_name: 'global_sort_columns'
 		} );
 
 		form_item_label.text( $.i18n._( 'Sort By' ) + ':' );
@@ -5705,7 +5725,7 @@ class BaseViewController extends TTBackboneView {
 				var len = layouts_array.length;
 				for ( var i = 0; i < len; i++ ) {
 					var item = layouts_array[i];
-					this.previous_saved_layout_selector.append( '<option value="' + item.id + '">' + item.name + '</option>' );
+					this.previous_saved_layout_selector.append( $( '<option value="' + item.id + '"></option>' ).text( item.name ) );
 				}
 
 				$( this.previous_saved_layout_selector.find( 'option' ) ).filter( function() {
@@ -6615,15 +6635,15 @@ class BaseViewController extends TTBackboneView {
 		if ( this.sub_view_mode ) {
 			return;
 		}
-		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm && !LocalCacheData.current_open_edit_only_controller ) {
+		if ( LocalCacheData.getAllURLArgs() && LocalCacheData.getAllURLArgs().sm && !LocalCacheData.current_open_edit_only_controller ) {
 
-			if ( LocalCacheData.all_url_args.sm.indexOf( 'Report' ) < 0 ) {
-				IndexViewController.openEditView( this, LocalCacheData.all_url_args.sm, LocalCacheData.all_url_args.sid );
+			if ( LocalCacheData.getAllURLArgs().sm.indexOf( 'Report' ) < 0 ) {
+				IndexViewController.openEditView( this, LocalCacheData.getAllURLArgs().sm, LocalCacheData.getAllURLArgs().sid );
 			} else {
-				IndexViewController.openReport( this, LocalCacheData.all_url_args.sm );
+				IndexViewController.openReport( this, LocalCacheData.getAllURLArgs().sm );
 
-				if ( LocalCacheData.all_url_args.sid ) {
-					LocalCacheData.default_edit_id_for_next_open_edit_view = LocalCacheData.all_url_args.sid;
+				if ( LocalCacheData.getAllURLArgs().sid ) {
+					LocalCacheData.default_edit_id_for_next_open_edit_view = LocalCacheData.getAllURLArgs().sid;
 				}
 			}
 
@@ -8092,7 +8112,7 @@ BaseViewController.loadView = function( view_id ) {
 			case 'Login':
 				$( 'body' ).addClass( 'login-bg' );
 				$( 'body' ).removeClass( 'application-bg' );
-				Global.loadViewSource( view_id, view_id + 'View.css' );
+				// Global.loadViewSource( view_id, view_id + 'View.css' ); // #2833 Login CSS was being loaded twice. Now only loaded in the index.php file for speed.
 				args = {
 					secure_login: $.i18n._( 'Secure Login' ),
 					user_name: $.i18n._( 'User Name' ),

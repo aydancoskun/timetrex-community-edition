@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,13 +35,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
+class MealBreakPolicyTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -61,6 +61,12 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		$dd->createUserWageGroups( $this->company_id );
 
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
+
+		$this->branch_ids[] = $dd->createBranch( $this->company_id, 10 );
+		$this->branch_ids[] = $dd->createBranch( $this->company_id, 20 );
+
+		$this->department_ids[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->department_ids[] = $dd->createDepartment( $this->company_id, 20 );
 
 		$this->createPayPeriodSchedule();
 		$this->createPayPeriods();
@@ -89,14 +95,10 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	function createPayPeriodSchedule() {
@@ -237,6 +239,10 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 						'bad_quantity' => $udt_obj->getBadQuantity(),
 
 						'hourly_rate'  => $udt_obj->getHourlyRate(),
+
+						'start_time_stamp' => $udt_obj->getStartTimeStamp(),
+						'end_time_stamp'   => $udt_obj->getEndTimeStamp(),
+
 						//Override only shows for SYSTEM override columns...
 						//Need to check Worked overrides too.
 						'tmp_override' => $udt_obj->getOverride(),
@@ -247,7 +253,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		return $date_totals;
 	}
 
-	function createMealPolicy( $company_id, $type, $pay_code_id = 0 ) {
+	function createMealPolicy( $company_id, $type, $pay_code_id = 0, $allocation_type_id = 10 ) {
 		if ( $pay_code_id == 0 ) {
 			$pay_code_id = $this->policy_ids['pay_code'][100];
 		}
@@ -298,6 +304,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 				break;
 		}
 
+		$mpf->setAllocationType( $allocation_type_id );
+
 		if ( $mpf->isValid() ) {
 			$insert_id = $mpf->Save();
 			Debug::Text( 'Meal Policy ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -311,7 +319,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	function createBreakPolicy( $company_id, $type ) {
+	function createBreakPolicy( $company_id, $type, $allocation_type_id = 10 ) {
 		$bpf = new BreakPolicyFactory();
 		$bpf->setCompany( $company_id );
 
@@ -392,6 +400,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
 				break;
 		}
+
+		$bpf->setAllocationType( $allocation_type_id );
 
 		if ( $bpf->isValid() ) {
 			$insert_id = $bpf->Save();
@@ -1001,6 +1011,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		//This tests a bug found that preventing regular time from being calculated when using a Contributing Shift Policy using Type=200 (Must Start and End), and a 30min auto-meal break active after 7.25hrs.
+		require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'PremiumPolicyTest.php');
 		$pp_test_obj = new PremiumPolicyTest();
 		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
 
@@ -1081,6 +1092,708 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
 		$this->assertEquals( 100, $udt_arr[$date_epoch][4]['type_id'] );
 		$this->assertEquals( -1080, $udt_arr[$date_epoch][4]['total_time'] );
+
+		//Make sure no other hours
+		$this->assertCount( 5, $udt_arr[$date_epoch] );
+
+		return true;
+	}
+
+
+
+	/**
+	 * @group MealBreakPolicy_testAutoDeductMealPolicyAtActiveTimeAllocationA
+	 */
+	function testAutoDeductMealPolicyAtActiveTimeAllocationA() {
+		global $dd;
+
+		require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'PremiumPolicyTest.php');
+		$pp_test_obj = new PremiumPolicyTest();
+		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
+
+		$this->policy_ids['regular'][100] = $dd->createRegularTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][100], $this->policy_ids['pay_code'][100] );
+
+
+		$policy_ids['meal'][] = $this->createMealPolicy( $this->company_id, 120, $this->policy_ids['pay_code'][190], 100 ); //100=At Active Time Allocation.
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								$policy_ids['meal'], //Meal
+								null, //Exception
+								null, //Holiday
+								null, //OT
+								null, //Premium
+								null, //Round
+								[ $this->user_id ], //Users
+								null, //Break
+								null, //Accrual
+								null, //Expense
+								null, //Absence
+								[ $this->policy_ids['regular'][100] ] //Regular
+		);
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 5:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => 0,
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8 * 3600 ) );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( ( 8 * 3600 ), $udt_arr[$date_epoch][1]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( -3600, $udt_arr[$date_epoch][2]['total_time'] );
+
+
+		//Make sure no other hours
+		$this->assertCount( 3, $udt_arr[$date_epoch] );
+
+		return true;
+	}
+
+	/**
+	 * @group MealBreakPolicy_testAutoDeductMealPolicyAtActiveTimeAllocationB
+	 */
+	function testAutoDeductMealPolicyAtActiveTimeAllocationB() {
+		global $dd;
+
+		require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'PremiumPolicyTest.php');
+		$pp_test_obj = new PremiumPolicyTest();
+		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
+
+		$this->policy_ids['regular'][100] = $dd->createRegularTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][100], $this->policy_ids['pay_code'][100] );
+
+
+		$policy_ids['meal'][] = $this->createMealPolicy( $this->company_id, 120, $this->policy_ids['pay_code'][190], 100 ); //100=At Active Time Allocation.
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								$policy_ids['meal'], //Meal
+								null, //Exception
+								null, //Holiday
+								null, //OT
+								null, //Premium
+								null, //Round
+								[ $this->user_id ], //Users
+								null, //Break
+								null, //Accrual
+								null, //Expense
+								null, //Absence
+								[ $this->policy_ids['regular'][100] ] //Regular
+		);
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+		$date_epoch2 = TTDate::getBeginDayEpoch( ( $date_epoch + 86400 + 3601 ) );
+		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 2:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[0],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 2:00PM' ), //Transfer right at the lunch active after time.
+							  strtotime( $date_stamp . ' 6:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[1],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][1]['branch_id'] );
+		$this->assertEquals( ( 3 * 3600 ), $udt_arr[$date_epoch][1]['total_time'] );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][2]['branch_id'] );
+		$this->assertEquals( ( 6 * 3600 ), $udt_arr[$date_epoch][2]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][3]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:00PM' ), $udt_arr[$date_epoch][3]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 3:00PM' ), $udt_arr[$date_epoch][3]['end_time_stamp'] );
+		$this->assertEquals( -3600, $udt_arr[$date_epoch][3]['total_time'] );
+
+		//Make sure no other hours
+		$this->assertCount( 4, $udt_arr[$date_epoch] );
+
+		return true;
+	}
+
+	/**
+	 * @group MealBreakPolicy_testAutoDeductMealPolicyAtActiveTimeAllocationB2
+	 */
+	function testAutoDeductMealPolicyAtActiveTimeAllocationB2() {
+		global $dd;
+
+		require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'PremiumPolicyTest.php');
+		$pp_test_obj = new PremiumPolicyTest();
+		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
+
+		$this->policy_ids['regular'][100] = $dd->createRegularTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][100], $this->policy_ids['pay_code'][100] );
+
+
+		$policy_ids['meal'][] = $this->createMealPolicy( $this->company_id, 120, $this->policy_ids['pay_code'][190], 100 ); //100=At Active Time Allocation.
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								$policy_ids['meal'], //Meal
+								null, //Exception
+								null, //Holiday
+								null, //OT
+								null, //Premium
+								null, //Round
+								[ $this->user_id ], //Users
+								null, //Break
+								null, //Accrual
+								null, //Expense
+								null, //Absence
+								[ $this->policy_ids['regular'][100] ] //Regular
+		);
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 3:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[0],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 3:00PM' ), //Transfer right at the lunch active after time.
+							  strtotime( $date_stamp . ' 6:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[1],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][1]['branch_id'] );
+		$this->assertEquals( ( 3 * 3600 ), $udt_arr[$date_epoch][1]['total_time'] );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][2]['branch_id'] );
+		$this->assertEquals( ( 6 * 3600 ), $udt_arr[$date_epoch][2]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][3]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:00PM' ), $udt_arr[$date_epoch][3]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 3:00PM' ), $udt_arr[$date_epoch][3]['end_time_stamp'] );
+		$this->assertEquals( -3600, $udt_arr[$date_epoch][3]['total_time'] );
+
+		//Make sure no other hours
+		$this->assertCount( 4, $udt_arr[$date_epoch] );
+
+		return true;
+	}
+
+	/**
+	 * @group MealBreakPolicy_testAutoDeductMealPolicyAtActiveTimeAllocationB3
+	 */
+	function testAutoDeductMealPolicyAtActiveTimeAllocationB3() {
+		global $dd;
+
+		require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'PremiumPolicyTest.php');
+		$pp_test_obj = new PremiumPolicyTest();
+		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
+
+		$this->policy_ids['regular'][100] = $dd->createRegularTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][100], $this->policy_ids['pay_code'][100] );
+
+
+		$policy_ids['meal'][] = $this->createMealPolicy( $this->company_id, 120, $this->policy_ids['pay_code'][190], 100 ); //100=At Active Time Allocation.
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								$policy_ids['meal'], //Meal
+								null, //Exception
+								null, //Holiday
+								null, //OT
+								null, //Premium
+								null, //Round
+								[ $this->user_id ], //Users
+								null, //Break
+								null, //Accrual
+								null, //Expense
+								null, //Absence
+								[ $this->policy_ids['regular'][100] ] //Regular
+		);
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 2:30PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[0],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 2:30PM' ), //Transfer right at the lunch active after time.
+							  strtotime( $date_stamp . ' 6:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[1],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][1]['branch_id'] );
+		$this->assertEquals( ( 3 * 3600 ), $udt_arr[$date_epoch][1]['total_time'] );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][2]['branch_id'] );
+		$this->assertEquals( ( 6 * 3600 ), $udt_arr[$date_epoch][2]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][3]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:00PM' ), $udt_arr[$date_epoch][3]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:30PM' ), $udt_arr[$date_epoch][3]['end_time_stamp'] );
+		$this->assertEquals( -1800, $udt_arr[$date_epoch][3]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][4]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:30PM' ), $udt_arr[$date_epoch][4]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 3:00PM' ), $udt_arr[$date_epoch][4]['end_time_stamp'] );
+		$this->assertEquals( -1800, $udt_arr[$date_epoch][4]['total_time'] );
+
+		//Make sure no other hours
+		$this->assertCount( 5, $udt_arr[$date_epoch] );
+
+		return true;
+	}
+
+	/**
+	 * @group MealBreakPolicy_testAutoDeductMealPolicyAtActiveTimeAllocationB4
+	 */
+	function testAutoDeductMealPolicyAtActiveTimeAllocationB4() {
+		global $dd;
+
+		require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'PremiumPolicyTest.php');
+		$pp_test_obj = new PremiumPolicyTest();
+		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
+
+		$this->policy_ids['regular'][100] = $dd->createRegularTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][100], $this->policy_ids['pay_code'][100] );
+
+
+		$policy_ids['meal'][] = $this->createMealPolicy( $this->company_id, 120, $this->policy_ids['pay_code'][190], 100 ); //100=At Active Time Allocation.
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								$policy_ids['meal'], //Meal
+								null, //Exception
+								null, //Holiday
+								null, //OT
+								null, //Premium
+								null, //Round
+								[ $this->user_id ], //Users
+								null, //Break
+								null, //Accrual
+								null, //Expense
+								null, //Absence
+								[ $this->policy_ids['regular'][100] ] //Regular
+		);
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 2:59PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[0],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 2:59PM' ), //Transfer right at the lunch active after time.
+							  strtotime( $date_stamp . ' 6:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[1],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][1]['branch_id'] );
+		$this->assertEquals( ( 3 * 3600 ), $udt_arr[$date_epoch][1]['total_time'] );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][2]['branch_id'] );
+		$this->assertEquals( ( 6 * 3600 ), $udt_arr[$date_epoch][2]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][3]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:00PM' ), $udt_arr[$date_epoch][3]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:59PM' ), $udt_arr[$date_epoch][3]['end_time_stamp'] );
+		$this->assertEquals( -3540, $udt_arr[$date_epoch][3]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][4]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:59PM' ), $udt_arr[$date_epoch][4]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 3:00PM' ), $udt_arr[$date_epoch][4]['end_time_stamp'] );
+		$this->assertEquals( -60, $udt_arr[$date_epoch][4]['total_time'] );
+
+		//Make sure no other hours
+		$this->assertCount( 5, $udt_arr[$date_epoch] );
+
+		return true;
+	}
+
+	/**
+	 * @group MealBreakPolicy_testAutoDeductMealPolicyAtActiveTimeAllocationC
+	 */
+	function testAutoDeductMealPolicyAtActiveTimeAllocationC() {
+		global $dd;
+
+		require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'PremiumPolicyTest.php');
+		$pp_test_obj = new PremiumPolicyTest();
+		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
+
+		$this->policy_ids['regular'][100] = $dd->createRegularTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][100], $this->policy_ids['pay_code'][100] );
+
+
+		$policy_ids['meal'][] = $this->createMealPolicy( $this->company_id, 120, $this->policy_ids['pay_code'][190], 100 ); //100=At Active Time Allocation.
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								$policy_ids['meal'], //Meal
+								null, //Exception
+								null, //Holiday
+								null, //OT
+								null, //Premium
+								null, //Round
+								[ $this->user_id ], //Users
+								null, //Break
+								null, //Accrual
+								null, //Expense
+								null, //Absence
+								[ $this->policy_ids['regular'][100] ] //Regular
+		);
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 2:15PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[0],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 2:15PM' ), //Transfer right after the lunch active after time, but only for less than the total lunch time, so it gets zero'd out completely.
+							  strtotime( $date_stamp . ' 2:50PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[1],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 2:50PM' ), //Transfer right after the lunch active after time, but only for less than the total lunch time, so it gets zero'd out completely.
+							  strtotime( $date_stamp . ' 3:15PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[0],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 3:15PM' ), //Transfer right after the lunch active after time, but only for less than the total lunch time, so it gets zero'd out completely.
+							  strtotime( $date_stamp . ' 6:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[1],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][1]['branch_id'] );
+		$this->assertEquals( ( 0.25 * 3600 ), $udt_arr[$date_epoch][1]['total_time'] );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][2]['branch_id'] );
+		$this->assertEquals( ( 2.75 * 3600 ), $udt_arr[$date_epoch][2]['total_time'] );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][3]['branch_id'] );
+		$this->assertEquals( ( 6 * 3600 ), $udt_arr[$date_epoch][3]['total_time'] );
+
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][4]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:15PM' ), $udt_arr[$date_epoch][4]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:50PM' ), $udt_arr[$date_epoch][4]['end_time_stamp'] );
+		$this->assertEquals( ( -2100 ), $udt_arr[$date_epoch][4]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][5]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][5]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:00PM' ), $udt_arr[$date_epoch][5]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:15PM' ), $udt_arr[$date_epoch][5]['end_time_stamp'] );
+		$this->assertEquals( ( -0.25 * 3600 ), $udt_arr[$date_epoch][5]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][6]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][6]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:50PM' ), $udt_arr[$date_epoch][6]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 3:00PM' ), $udt_arr[$date_epoch][6]['end_time_stamp'] );
+		$this->assertEquals( ( -600 ), $udt_arr[$date_epoch][6]['total_time'] );
+
+		//Make sure no other hours
+		$this->assertCount( 7, $udt_arr[$date_epoch] );
+
+		return true;
+	}
+
+	/**
+	 * @group MealBreakPolicy_testAutoDeductMealPolicyAtActiveTimeAllocationD
+	 */
+	function testAutoDeductMealPolicyAtActiveTimeAllocationD() {
+		global $dd;
+
+		require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'PremiumPolicyTest.php');
+		$pp_test_obj = new PremiumPolicyTest();
+		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
+
+		$this->policy_ids['regular'][100] = $dd->createRegularTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][100], $this->policy_ids['pay_code'][100] );
+
+
+		$policy_ids['meal'][] = $this->createMealPolicy( $this->company_id, 120, $this->policy_ids['pay_code'][190], 100 ); //100=At Active Time Allocation.
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								$policy_ids['meal'], //Meal
+								null, //Exception
+								null, //Holiday
+								null, //OT
+								null, //Premium
+								null, //Round
+								[ $this->user_id ], //Users
+								null, //Break
+								null, //Accrual
+								null, //Expense
+								null, //Absence
+								[ $this->policy_ids['regular'][100] ] //Regular
+		);
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 12:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[0],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 12:00PM' ), //Transfer right at the lunch active after time.
+							  strtotime( $date_stamp . ' 2:30PM' ), //More than 6hrs, but less than 6hrs + 60min lunch. Should switch into Proportional Distribution automatically.
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => $this->branch_ids[1],
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 5.5 * 3600 ) );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][1]['branch_id'] );
+		$this->assertEquals( ( 7615 ), $udt_arr[$date_epoch][1]['total_time'] );
+		//Regular Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][2]['branch_id'] );
+		$this->assertEquals( ( 12185 ), $udt_arr[$date_epoch][2]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( $this->branch_ids[0], $udt_arr[$date_epoch][3]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:00PM' ), $udt_arr[$date_epoch][3]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:36:55PM' ), $udt_arr[$date_epoch][3]['end_time_stamp'] );
+		$this->assertEquals( -2215, $udt_arr[$date_epoch][3]['total_time'] );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( $this->branch_ids[1], $udt_arr[$date_epoch][4]['branch_id'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 2:36:55PM' ), $udt_arr[$date_epoch][4]['start_time_stamp'] );
+		$this->assertEquals( strtotime( $date_stamp . ' 3:00PM' ), $udt_arr[$date_epoch][4]['end_time_stamp'] );
+		$this->assertEquals( -1385, $udt_arr[$date_epoch][4]['total_time'] );
 
 		//Make sure no other hours
 		$this->assertCount( 5, $udt_arr[$date_epoch] );

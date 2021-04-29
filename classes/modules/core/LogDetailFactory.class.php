@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -147,7 +147,7 @@ class LogDetailFactory extends Factory {
 		//per day. The issue though is its nice to know exactly what data was originally added, then what was edited, and what was finally deleted.
 		//We may need to remove logging for added data, but leave it for edit/delete, so we know exactly what data was deleted.
 		if ( !in_array( $action_id, [ 10, 20, 30, 31, 40 ] ) ) {
-			Debug::text( 'Invalid Action ID: ' . $action_id, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'Not logging detail audit records for Action ID: ' . $action_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 			return false;
 		}

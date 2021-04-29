@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1132,7 +1132,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 	}
 
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
@@ -1162,8 +1162,7 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 		return true;
 	}
 
-	function _outputXML() {
-
+	function _outputXML( $type = null ) {
 		if ( is_object( $this->getXMLObject() ) ) {
 			$xml = $this->getXMLObject();
 		} else {

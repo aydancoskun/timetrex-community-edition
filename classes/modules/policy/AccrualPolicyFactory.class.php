@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1018,7 +1018,7 @@ class AccrualPolicyFactory extends Factory {
 		$milestone_obj = false;
 
 		if ( !is_object( $modifier_obj ) ) {
-			$modifier_obj = $this->getAccrualPolicyUserModifierObject( $u_obj );
+			$modifier_obj = $this->getAccrualPolicyUserModifierObject( $u_obj ); /** @var AccrualPolicyUserModifierFactory $modifier_obj */
 		}
 
 		//Cache milestones to speed up getting projected balances.
@@ -1031,13 +1031,17 @@ class AccrualPolicyFactory extends Factory {
 			$worked_time = null;
 			$milestone_rollover_date = null;
 
-			foreach ( $this->milestone_objs[$this->getID()] as $apm_obj ) {
+			foreach ( $this->milestone_objs[$this->getID()] as $apm_obj ) { /** @var AccrualPolicyMilestoneFactory $apm_obj */
 				if ( is_object( $modifier_obj ) ) {
 					$apm_obj = $modifier_obj->getAccrualPolicyMilestoneObjectAfterModifier( $apm_obj );
+					if ( $apm_obj->getLengthOfService() === false || empty( $apm_obj->getAccrualRate() ) ) {
+						Debug::Text( '  MileStone after modifier has no length of service or accrual rate, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
+						continue;
+					}
 				}
 
 				if ( $apm_obj->getLengthOfServiceUnit() == 50 && $apm_obj->getLengthOfService() > 0 ) {
-					Debug::Text( '  MileStone is in Hours...', __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( '  MileStone is by Hours...', __FILE__, __LINE__, __METHOD__, 10 );
 					//Hour based
 					if ( $worked_time == null ) {
 						//Get users worked time.
@@ -1053,7 +1057,7 @@ class AccrualPolicyFactory extends Factory {
 						Debug::Text( '  Skipping Milestone...', __FILE__, __LINE__, __METHOD__, 10 );
 					}
 				} else {
-					Debug::Text( '  MileStone is in Days...', __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( '  MileStone is by Calendar (days)...', __FILE__, __LINE__, __METHOD__, 10 );
 					//Calendar based
 					$milestone_rollover_date = $apm_obj->getLengthOfServiceDate( $this->getMilestoneRolloverDate( $u_obj, $modifier_obj ) );
 

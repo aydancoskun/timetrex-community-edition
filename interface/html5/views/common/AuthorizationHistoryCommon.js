@@ -1,4 +1,4 @@
-AuthorizationHistory = {
+export var AuthorizationHistory = {
 
 	/**
 	 * There's only 4 steps for ading auth history to a view file:

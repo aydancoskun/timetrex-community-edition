@@ -1,4 +1,4 @@
-class ExceptionSummaryReportViewController extends ReportBaseViewController {
+export class ExceptionSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 

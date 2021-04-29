@@ -1,4 +1,4 @@
-class PayCodeViewController extends BaseViewController {
+export class PayCodeViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#pay_code_view_container',
@@ -68,7 +68,7 @@ class PayCodeViewController extends BaseViewController {
 			api_class: TTAPI.APIPayCode,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_CODE,
+			layout_name: 'global_pay_code',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -108,19 +108,19 @@ class PayCodeViewController extends BaseViewController {
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_code_column1 );
 		/*
 		 // Pay Type
 		 form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		 form_item_input.TComboBox( {field: 'pay_type_id', set_empty: false} );
-		 form_item_input.setSourceData( Global.addFirstItemToArray( $this.pay_type_array ) );
+		 form_item_input.setSourceData( $this.pay_type_array );
 		 this.addEditFieldToColumn( $.i18n._( 'Pay Type' ), form_item_input, tab_pay_code_column1 );
 
 		 // Wage Source
 		 form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		 form_item_input.TComboBox( {field: 'wage_source_type_id', set_empty: false} );
-		 form_item_input.setSourceData( Global.addFirstItemToArray( $this.wage_source_type_array ) );
+		 form_item_input.setSourceData( $this.wage_source_type_array );
 		 this.addEditFieldToColumn( $.i18n._( 'Wage Source' ), form_item_input, tab_pay_code_column1 );
 
 		 //Wage Source Contributing Shift
@@ -128,7 +128,7 @@ class PayCodeViewController extends BaseViewController {
 		 form_item_input.AComboBox( {
 		 api_class: TTAPI.APIContributingShiftPolicy,
 		 allow_multiple_selection: false,
-		 layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+		 layout_name: 'global_contributing_shift_policy',
 		 show_search_inputs: true,
 		 set_empty: true,
 		 field: 'wage_source_contributing_shift_policy_id'} );
@@ -139,7 +139,7 @@ class PayCodeViewController extends BaseViewController {
 		 form_item_input.AComboBox( {
 		 api_class: TTAPI.APIContributingShiftPolicy,
 		 allow_multiple_selection: false,
-		 layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+		 layout_name: 'global_contributing_shift_policy',
 		 show_search_inputs: true,
 		 set_empty: true,
 		 field: 'time_source_contributing_shift_policy_id'} );
@@ -150,7 +150,7 @@ class PayCodeViewController extends BaseViewController {
 		 form_item_input.AComboBox( {
 		 api_class: TTAPI.APIWageGroup,
 		 allow_multiple_selection: false,
-		 layout_name: ALayoutIDs.WAGE_GROUP,
+		 layout_name: 'global_wage_group',
 		 show_search_inputs: true,
 		 set_empty: true,
 		 field: 'wage_group_id'} );
@@ -166,7 +166,7 @@ class PayCodeViewController extends BaseViewController {
 		 form_item_input.AComboBox( {
 		 api_class: TTAPI.APIAccrualPolicy,
 		 allow_multiple_selection: false,
-		 layout_name: ALayoutIDs.ACCRUAL_POLICY,
+		 layout_name: 'global_accrual',
 		 show_search_inputs: true,
 		 set_empty: true,
 		 field: 'accrual_policy_id'} );
@@ -177,7 +177,7 @@ class PayCodeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+			layout_name: 'global_pay_formula_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_formula_policy_id',
@@ -193,7 +193,7 @@ class PayCodeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_stub_entry_account_id'
@@ -223,7 +223,7 @@ class PayCodeViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -231,7 +231,7 @@ class PayCodeViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Formula Policy' ),
 				in_column: 1,
 				field: 'pay_formula_policy_id',
-				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+				layout_name: 'global_pay_formula_policy',
 				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
@@ -243,7 +243,7 @@ class PayCodeViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Stub Account' ),
 				in_column: 2,
 				field: 'pay_stub_entry_account_id',
-				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				layout_name: 'global_PayStubAccount',
 				api_class: TTAPI.APIPayStubEntryAccount,
 				multiple: true,
 				basic_search: true,
@@ -255,7 +255,7 @@ class PayCodeViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -267,7 +267,7 @@ class PayCodeViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

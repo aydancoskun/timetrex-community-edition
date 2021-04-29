@@ -1,15 +1,21 @@
-class UserPhotoWizardController extends BaseWizardController {
+import '@/global/widgets/filebrowser/TImageBrowser';
+import '@/global/widgets/filebrowser/CameraBrowser';
+import '@/global/widgets/filebrowser/TImageAdvBrowser';
+import '@/global/widgets/filebrowser/TImage';
+import '@/global/widgets/filebrowser/TImageCutArea';
+
+export class UserPhotoWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg',
 
-			_required_files: [
-				'TImageBrowser', //only in the upload wizard
-				'CameraBrowser', //only in the upload wizard
-				'TImageAdvBrowser',//only in the upload wizard
-				'TImage',//only in the upload wizard
-				'TImageCutArea'//only in the upload wizard
-			]
+			// _required_files: [
+			// 	'TImageBrowser', //only in the upload wizard
+			// 	'CameraBrowser', //only in the upload wizard
+			// 	'TImageAdvBrowser',//only in the upload wizard
+			// 	'TImage',//only in the upload wizard
+			// 	'TImageCutArea'//only in the upload wizard
+			// ]
 
 		} );
 

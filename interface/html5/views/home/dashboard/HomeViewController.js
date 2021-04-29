@@ -1,9 +1,13 @@
-class HomeViewController extends TTBackboneView {
+import jQueryBridget from 'jquery-bridget';
+import Masonry from 'masonry-layout';
+import { TTBackboneView } from '@/views/TTBackboneView';
+
+export class HomeViewController extends TTBackboneView {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.home-view',
 
-			_required_files: ['jquery.masonry', 'jquery-bridget'],
+			// _required_files: ['jquery.masonry', 'jquery-bridget'],
 			user_generic_data_api: null,
 			context_menu_array: null,
 			viewId: null,
@@ -25,23 +29,23 @@ class HomeViewController extends TTBackboneView {
 	 *
 	 * @returns {Array}
 	 */
-	filterRequiredFiles() {
-		var retval = [];
-		var required_files = this._required_files;
-
-		if ( required_files && required_files[0] ) {
-			retval = required_files;
-		} else {
-			for ( var edition_id in required_files ) {
-				if ( Global.getProductEdition() >= edition_id ) {
-					retval = retval.concat( required_files[edition_id] );
-				}
-			}
-		}
-
-		Debug.Arr( retval, 'RETVAL', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 10 );
-		return retval;
-	}
+	// filterRequiredFiles() {
+	// 	var retval = [];
+	// 	var required_files = this._required_files;
+	//
+	// 	if ( required_files && required_files[0] ) {
+	// 		retval = required_files;
+	// 	} else {
+	// 		for ( var edition_id in required_files ) {
+	// 			if ( Global.getProductEdition() >= edition_id ) {
+	// 				retval = retval.concat( required_files[edition_id] );
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	Debug.Arr( retval, 'RETVAL', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 10 );
+	// 	return retval;
+	// }
 
 	initialize( options ) {
 		Global.setUINotready();
@@ -51,34 +55,34 @@ class HomeViewController extends TTBackboneView {
 
 		super.initialize( options );
 
-		require( this.filterRequiredFiles(), function( Masonry, jQueryBridget ) {
+		// require( this.filterRequiredFiles(), function( Masonry, jQueryBridget ) {
 
-			$this.viewId = 'Home';
-			TopMenuManager.selected_menu_id = 'Home';
-			LocalCacheData.current_open_primary_controller = $this;
-			$this.user_generic_data_api = TTAPI.APIUserGenericData;
-			$this.api_dashboard = TTAPI.APIDashboard;
+		$this.viewId = 'Home';
+		TopMenuManager.selected_menu_id = 'Home';
+		LocalCacheData.current_open_primary_controller = $this;
+		$this.user_generic_data_api = TTAPI.APIUserGenericData;
+		$this.api_dashboard = TTAPI.APIDashboard;
 
-			jQueryBridget( 'masonry', Masonry, $ );
-			$this.dashboard_container = $( '.dashboard-container:visible' );
-			$this.initMasonryDone = false;
-			$this.initContextMenu();
-			$this.initDashBoard();
-			$this.setViewHeight();
-			$this.autoOpenEditOnlyViewIfNecessary();
+		jQueryBridget( 'masonry', Masonry, $ );
+		$this.dashboard_container = $( '.dashboard-container:visible' );
+		$this.initMasonryDone = false;
+		$this.initContextMenu();
+		$this.initDashBoard();
+		$this.setViewHeight();
+		$this.autoOpenEditOnlyViewIfNecessary();
 
-			TTPromise.resolve( 'BaseViewController', 'initialize' );
-		} );
+		TTPromise.resolve( 'BaseViewController', 'initialize' );
+		// } );
 	}
 
 	autoOpenEditOnlyViewIfNecessary() {
-		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm && !LocalCacheData.current_open_edit_only_controller ) {
-			if ( LocalCacheData.all_url_args.sm.indexOf( 'Report' ) < 0 ) {
-				IndexViewController.openEditView( this, LocalCacheData.all_url_args.sm, LocalCacheData.all_url_args.sid );
+		if ( LocalCacheData.getAllURLArgs() && LocalCacheData.getAllURLArgs().sm && !LocalCacheData.current_open_edit_only_controller ) {
+			if ( LocalCacheData.getAllURLArgs().sm.indexOf( 'Report' ) < 0 ) {
+				IndexViewController.openEditView( this, LocalCacheData.getAllURLArgs().sm, LocalCacheData.getAllURLArgs().sid );
 			} else {
-				IndexViewController.openReport( this, LocalCacheData.all_url_args.sm );
-				if ( LocalCacheData.all_url_args.sid ) {
-					LocalCacheData.default_edit_id_for_next_open_edit_view = LocalCacheData.all_url_args.sid;
+				IndexViewController.openReport( this, LocalCacheData.getAllURLArgs().sm );
+				if ( LocalCacheData.getAllURLArgs().sid ) {
+					LocalCacheData.default_edit_id_for_next_open_edit_view = LocalCacheData.getAllURLArgs().sid;
 				}
 			}
 		}
@@ -458,7 +462,7 @@ class HomeViewController extends TTBackboneView {
 		$this.dashlet_controller_dic = {};
 		this.user_generic_data_api.getUserGenericData( {
 			filter_data: {
-				script: ALayoutIDs.DASHBOARD,
+				script: 'global_dashboard',
 				deleted: false
 			}
 		}, {
@@ -482,7 +486,7 @@ class HomeViewController extends TTBackboneView {
 			$this.removeNoResultCover();
 			$this.user_generic_data_api.getUserGenericData( {
 				filter_data: {
-					script: ALayoutIDs.DASHBOARD_ORDER,
+					script: 'global_dashboard_order',
 					name: 'order_data',
 					deleted: false
 				}
@@ -755,7 +759,7 @@ class HomeViewController extends TTBackboneView {
 			arg = this.order_data;
 		} else {
 			arg.name = 'order_data';
-			arg.script = ALayoutIDs.DASHBOARD_ORDER;
+			arg.script = 'global_dashboard_order';
 			arg.is_default = true;
 			arg.data = new_order;
 		}

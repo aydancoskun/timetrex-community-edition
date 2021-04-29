@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -106,6 +106,53 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
+			20190101 => [
+						  'standard_deduction_rate'    => 0,
+						  'standard_deduction_maximum' => [
+								  '10' => [
+									  //1 = Income
+									  //2 = Reduce By
+									  //3 = Reduce by for every amount over the prev income level.
+									  //4 = Previous Income
+									  0 => [ 23499, 2500, 0, 0, 0 ],
+									  1 => [ 33000, 2500, 25, 500, 23499 ],
+									  2 => [ 33000, 2000, 0, 0, 33000 ],
+								  ],
+								  '20' => [
+										  0 => [ 23499, 7500, 0, 0, 0 ],
+										  1 => [ 33000, 7500, 175, 500, 23499 ],
+										  2 => [ 33000, 4000, 0, 0, 33000 ],
+								  ],
+								  '30' => [
+										  0 => [ 23499, 2500, 0, 0, 0 ],
+										  1 => [ 33000, 2500, 25, 500, 23499 ],
+										  2 => [ 33000, 2000, 0, 0, 33000 ],
+								  ],
+								  '40' => [
+										  0 => [ 23499, 4700, 0, 0, 0 ],
+										  1 => [ 33000, 4700, 135, 500, 23499 ],
+										  2 => [ 33000, 2000, 0, 0, 33000 ],
+								  ],
+								  '50' => [
+										  0 => [ 10749, 3750, 0, 0, 0 ],
+										  1 => [ 15500, 3750, 88, 250, 10749 ],
+										  2 => [ 15500, 2000, 0, 0, 15500 ],
+								  ],
+						  ],
+						  'personal_deduction'         => [
+								  '10' => 1500,
+								  '20' => 3000,
+								  '30' => 0,
+								  '40' => 3000,
+								  '50' => 1500,
+						  ],
+
+						  'dependant_allowance' => [
+								  0 => [ 20000, 1000 ],
+								  1 => [ 100000, 500 ],
+								  2 => [ 100000, 300 ],
+						  ],
+			],
 			20130709 => [ //09-Jul-13 (was 13-Jul-09)
 						  'standard_deduction_rate'    => 0,
 						  'standard_deduction_maximum' => [

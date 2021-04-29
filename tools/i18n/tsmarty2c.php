@@ -28,11 +28,11 @@
  *
  * If a parameter is a directory, the template files within will be parsed.
  *
- * @package	smarty-gettext
- * @version	$Id$
- * @link	http://smarty-gettext.sf.net/
- * @author	Sagi Bashari <sagi@boom.org.il>
- * @copyright 2004-2005 Sagi Bashari
+ * @package    smarty-gettext
+ * @version    $Id$
+ * @link       http://smarty-gettext.sf.net/
+ * @author     Sagi Bashari <sagi@boom.org.il>
+ * @copyright  2004-2005 Sagi Bashari
  */
 
 if ( PHP_SAPI != 'cli' ) {
@@ -42,32 +42,31 @@ if ( PHP_SAPI != 'cli' ) {
 
 
 // smarty open tag
-$ldq = preg_quote('{');
+$ldq = preg_quote( '{' );
 
 // smarty close tag
-$rdq = preg_quote('}');
+$rdq = preg_quote( '}' );
 
 // smarty command
-$cmd = preg_quote('t');
+$cmd = preg_quote( 't' );
 
 // extensions of smarty files, used when going through a directory
-$extensions = array('tpl');
+$extensions = [ 'tpl' ];
 
 // "fix" string - strip slashes, escape and convert new lines to \n
-function fs($str)
-{
-	$str = stripslashes($str);
-	$str = str_replace('"', '\"', $str);
-	$str = str_replace("\n", '\n', $str);
+function fs( $str ) {
+	$str = stripslashes( $str );
+	$str = str_replace( '"', '\"', $str );
+	$str = str_replace( "\n", '\n', $str );
+
 	return $str;
 }
 
 // rips gettext strings from $file and prints them in C format
-function do_file($file)
-{
-	$content = @file_get_contents($file);
+function do_file( $file ) {
+	$content = @file_get_contents( $file );
 
-	if (empty($content)) {
+	if ( empty( $content ) ) {
 		return;
 	}
 
@@ -79,14 +78,14 @@ function do_file($file)
 			$matches
 	);
 
-	for ($i=0; $i < count($matches[0]); $i++) {
+	for ( $i = 0; $i < count( $matches[0] ); $i++ ) {
 		// TODO: add line number
 		echo "/* $file */\n"; // credit: Mike van Lammeren 2005-02-14
 
-		if (preg_match('/plural\s*=\s*["\']?\s*(.[^\"\']*)\s*["\']?/', $matches[2][$i], $match)) {
-			echo 'ngettext("'.fs($matches[3][$i]).'","'.fs($match[1]).'",x);'."\n";
+		if ( preg_match( '/plural\s*=\s*["\']?\s*(.[^\"\']*)\s*["\']?/', $matches[2][$i], $match ) ) {
+			echo 'ngettext("' . fs( $matches[3][$i] ) . '","' . fs( $match[1] ) . '",x);' . "\n";
 		} else {
-			echo 'gettext("'.fs($matches[3][$i]).'");'."\n";
+			echo 'gettext("' . fs( $matches[3][$i] ) . '");' . "\n";
 		}
 
 		echo "\n";
@@ -94,24 +93,23 @@ function do_file($file)
 }
 
 // go through a directory
-function do_dir($dir)
-{
-	$d = dir($dir);
+function do_dir( $dir ) {
+	$d = dir( $dir );
 
-	while (false !== ($entry = $d->read())) {
-		if ($entry == '.' || $entry == '..') {
+	while ( false !== ( $entry = $d->read() ) ) {
+		if ( $entry == '.' || $entry == '..' ) {
 			continue;
 		}
 
-		$entry = $dir.'/'.$entry;
+		$entry = $dir . '/' . $entry;
 
-		if (is_dir($entry)) { // if a directory, go through it
-			do_dir($entry);
+		if ( is_dir( $entry ) ) { // if a directory, go through it
+			do_dir( $entry );
 		} else { // if file, parse only if extension is matched
-			$pi = pathinfo($entry);
+			$pi = pathinfo( $entry );
 
-			if (isset($pi['extension']) && in_array($pi['extension'], $GLOBALS['extensions'])) {
-				do_file($entry);
+			if ( isset( $pi['extension'] ) && in_array( $pi['extension'], $GLOBALS['extensions'] ) ) {
+				do_file( $entry );
 			}
 		}
 	}
@@ -119,11 +117,11 @@ function do_dir($dir)
 	$d->close();
 }
 
-for ($ac=1; $ac < $_SERVER['argc']; $ac++) {
-	if (is_dir($_SERVER['argv'][$ac])) { // go through directory
-		do_dir($_SERVER['argv'][$ac]);
+for ( $ac = 1; $ac < $_SERVER['argc']; $ac++ ) {
+	if ( is_dir( $_SERVER['argv'][$ac] ) ) { // go through directory
+		do_dir( $_SERVER['argv'][$ac] );
 	} else { // do file
-		do_file($_SERVER['argv'][$ac]);
+		do_file( $_SERVER['argv'][$ac] );
 	}
 }
 

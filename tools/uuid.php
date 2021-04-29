@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,7 +37,7 @@
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: uuid.php [integer_to_convert]\n";
 	echo $help_output;
 } else {
@@ -127,8 +127,8 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		}
 		unset( $uuid_arr, $unique_uuid_arr );
 	} else {
-		if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
-			$integer = $argv[ $last_arg ];
+		if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' ) {
+			$integer = $argv[$last_arg];
 		} else {
 			$integer = 0;
 		}

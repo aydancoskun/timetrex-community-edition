@@ -1,4 +1,4 @@
-class PayPeriodScheduleViewController extends BaseViewController {
+export class PayPeriodScheduleViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#pay_period_schedule_view_container', //Must set el here and can only set string, so events can work
@@ -322,7 +322,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 				id: this.script_name + '_navigation',
 				api_class: TTAPI.APIPayPeriodSchedule,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
+				layout_name: 'global_pay_period_schedule',
 				navigation_mode: true,
 				show_search_inputs: true
 			} );
@@ -366,7 +366,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_period_schedule_column1 );
 
 		// Primary
@@ -384,14 +384,14 @@ class PayPeriodScheduleViewController extends BaseViewController {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_array ) );
+		form_item_input.setSourceData( $this.transaction_date_array );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Start Day of Month' ), form_item_input, tab_pay_period_schedule_column1, '', widgetContainer, true );
 
 		// Transaction Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'primary_transaction_day_of_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_array ) );
+		form_item_input.setSourceData( $this.transaction_date_array );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Day Of Month' ), form_item_input, tab_pay_period_schedule_column1, '', null, true );
 
 		// Secondary
@@ -408,14 +408,14 @@ class PayPeriodScheduleViewController extends BaseViewController {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_array ) );
+		form_item_input.setSourceData( $this.transaction_date_array );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Start Day of Month' ), form_item_input, tab_pay_period_schedule_column1, '', widgetContainer, true );
 
 		// Transaction Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'secondary_transaction_day_of_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_array ) );
+		form_item_input.setSourceData( $this.transaction_date_array );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Day Of Month' ), form_item_input, tab_pay_period_schedule_column1, '', null, true );
 
 		// Annual Pay Periods
@@ -433,7 +433,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.pay_period_starts_on_array ) );
+		form_item_input.setSourceData( $this.pay_period_starts_on_array );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Starts On' ), form_item_input, tab_pay_period_schedule_column1, '', widgetContainer, true );
 
 		// Transaction Date
@@ -445,7 +445,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_array ) );
+		form_item_input.setSourceData( $this.transaction_date_array );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Date' ), form_item_input, tab_pay_period_schedule_column1, '', widgetContainer, true );
 
 		// Transaction Always on Business Day
@@ -453,7 +453,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 
 		form_item_input.TComboBox( { field: 'transaction_date_bd' } );
 
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_business_day_array ) );
+		form_item_input.setSourceData( $this.transaction_date_business_day_array );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Always on Business Day' ), form_item_input, tab_pay_period_schedule_column1, '', null, true );
 
 		//Create Initial Pay Periods From
@@ -467,7 +467,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user'
@@ -487,14 +487,14 @@ class PayPeriodScheduleViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'start_week_day_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.start_week_day_array ) );
+		form_item_input.setSourceData( $this.start_week_day_array );
 		this.addEditFieldToColumn( $.i18n._( 'Overtime Week' ), form_item_input, tab_advanced_column1, '' );
 
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
+		form_item_input.setSourceData( $this.time_zone_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Zone' ), form_item_input, tab_advanced_column1 );
 
 		// Minimum Time-Off Between Shifts
@@ -517,7 +517,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'shift_assigned_day_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.shift_assigned_day_array ) );
+		form_item_input.setSourceData( $this.shift_assigned_day_array );
 		this.addEditFieldToColumn( $.i18n._( 'Assign Shifts To' ), form_item_input, tab_advanced_column1 );
 
 		// TimeSheet Verification
@@ -529,7 +529,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'timesheet_verify_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.timesheet_verify_type_array ) );
+		form_item_input.setSourceData( $this.timesheet_verify_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'TimeSheet Verification' ), form_item_input, tab_advanced_column1 );
 
 		// Verification Window Starts
@@ -572,7 +572,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -586,7 +586,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -597,7 +597,7 @@ class PayPeriodScheduleViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

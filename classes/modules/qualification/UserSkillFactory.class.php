@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -292,9 +292,9 @@ class UserSkillFactory extends Factory {
 	 * @return bool|float|int
 	 */
 	function calcExperience() {
-		if ( $this->getFirstUsedDate() != '' ) {
+		if ( !empty( $this->getFirstUsedDate() ) ) {
 			$last_used_date = $this->getLastUsedDate();
-			if ( $this->getLastUsedDate() == '' ) {
+			if ( empty( $this->getLastUsedDate() ) ) {
 				$last_used_date = TTDate::getEndDayEpoch( time() );
 			}
 

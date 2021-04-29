@@ -58,7 +58,7 @@ class bitmask {
 	function _set_mask_array() {
 		unset($this->mask_array);
 		for ($c = (strlen($this->bin_mask) - 1); $c >= 0; $c--) {
-			$this->mask_array[] = $this->bin_mask{$c};
+			$this->mask_array[] = $this->bin_mask[$c];
 		}
 	}
 
@@ -72,7 +72,7 @@ class bitmask {
 	* @desc Check if the bit at position $bitnum is set.
 	*/
 	function bit_isset($bitnum) {
-		return ($this->bin_mask{(strlen($this->bin_mask) - 1 - $bitnum)})?true:false;
+		return ($this->bin_mask[(strlen($this->bin_mask) - 1 - $bitnum)])?true:false;
 	}
 
 	/**

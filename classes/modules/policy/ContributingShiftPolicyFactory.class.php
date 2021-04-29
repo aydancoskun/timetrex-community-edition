@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1651,7 +1651,7 @@ class ContributingShiftPolicyFactory extends Factory {
 			);
 		}
 		// Shift Type
-		if ( $this->getIncludeShiftType() != '' ) {
+		if ( !empty( $this->getIncludeShiftType() ) ) {
 			$this->Validator->inArrayKey( 'include_shift_type_id',
 										  $this->getIncludeShiftType(),
 										  TTi18n::gettext( 'Incorrect Shift Type' ),
@@ -1699,7 +1699,7 @@ class ContributingShiftPolicyFactory extends Factory {
 			);
 		}
 		// Task Selection Type
-		if ( $this->getJobItemSelectionType() != '' ) {
+		if ( !empty( $this->getJobItemSelectionType() ) ) {
 			$this->Validator->inArrayKey( 'job_item_selection_type_id',
 										  $this->getJobItemSelectionType(),
 										  TTi18n::gettext( 'Incorrect Task Selection Type' ),
@@ -1707,7 +1707,7 @@ class ContributingShiftPolicyFactory extends Factory {
 			);
 		}
 		// Include Schedule Shift Type
-		if ( $this->getIncludeScheduleShiftType() != '' ) {
+		if ( !empty( $this->getIncludeScheduleShiftType() ) ) {
 			$this->Validator->inArrayKey( 'include_schedule_shift_type_id',
 										  $this->getIncludeScheduleShiftType(),
 										  TTi18n::gettext( 'Incorrect Include Schedule Shift Type' ),

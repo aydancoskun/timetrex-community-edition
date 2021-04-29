@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -249,7 +249,7 @@ class APIPunch extends APIFactory {
 			return [ $validator, $validator_stats, $key, $save_result ];
 		};
 
-		list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
+		list( $validator, $validator_stats, $key, $save_result ) = $this->getMainClassObject()->RetryTransaction( $transaction_function );
 
 		return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 	}
@@ -341,7 +341,7 @@ class APIPunch extends APIFactory {
 					$data['punch_time'] = TTDate::strtotime( $prev_punch_obj->getTimeStamp() );
 				}
 
-				Debug::Text( '  Final punch default data... Type ID: ' . $data['type_id'] . ' Time: ' . TTDate::getDATE( 'DATE+TIME', $data['punch_time'] ), __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( '  Final punch default data... Type ID: ' . $data['type_id'] . ' Status ID: '. $data['status_id'] .' Time: ' . TTDate::getDATE( 'DATE+TIME', $data['punch_time'] ), __FILE__, __LINE__, __METHOD__, 10 );
 			}
 			unset( $plf, $prev_punch_obj );
 		}
@@ -444,6 +444,10 @@ class APIPunch extends APIFactory {
 	function getPunch( $data = null, $disable_paging = false ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check( 'punch', 'enabled' )
 				|| !( $this->getPermissionObject()->Check( 'punch', 'view' ) || $this->getPermissionObject()->Check( 'punch', 'view_own' ) || $this->getPermissionObject()->Check( 'punch', 'view_child' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -532,13 +536,17 @@ class APIPunch extends APIFactory {
 			return $this->returnHandler( false );
 		}
 
-		if ( $this->getCurrentUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
-			return $this->getPermissionObject()->PermissionDenied( false, TTi18n::getText( 'Employee status must be Active to modify punches' ) );
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( !$this->getPermissionObject()->Check( 'punch', 'enabled' )
 				|| !( $this->getPermissionObject()->Check( 'punch', 'edit' ) || $this->getPermissionObject()->Check( 'punch', 'edit_own' ) || $this->getPermissionObject()->Check( 'punch', 'edit_child' ) || $this->getPermissionObject()->Check( 'punch', 'add' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
+		}
+
+		if ( $this->getCurrentUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
+			return $this->getPermissionObject()->PermissionDenied( false, TTi18n::getText( 'Employee status must be Active to modify punches' ) );
 		}
 
 		if ( $validate_only == true ) {
@@ -558,7 +566,7 @@ class APIPunch extends APIFactory {
 		if ( is_array( $data ) && $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
-			$transaction_function = function () use ( $data, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
+			$transaction_function = function () use ( $data, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $total_records, $permission_children_ids ) {
 				$lf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $lf */
 				if ( $validate_only == false ) {                  //Only switch into serializable mode when actually saving the record.
 					$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing incorrect calculations in user_date_total table.
@@ -722,8 +730,10 @@ class APIPunch extends APIFactory {
 
 					if ( $is_valid == false ) {
 						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+
 						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
-						$validator[$key] = $this->setValidationArray( $primary_validator, $lf, ( ( isset( $pcf ) ) ? $pcf->Validator : false ) );
+
+						$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf, ( ( isset( $pcf ) ) ? $pcf->Validator : false ) ], ( ( $total_records > 1 && is_object( $lf->getUserObject() ) ) ? $lf->getUserObject()->getFullName() : null ) );
 					} else if ( $validate_only == true ) {
 						//Always fail transaction when valididate only is used, as	is saved to different tables immediately.
 						$lf->FailTransaction();
@@ -771,7 +781,7 @@ class APIPunch extends APIFactory {
 				$retry_max_attempts = 3;
 			}
 
-			list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function, $retry_max_attempts );
+			list( $validator, $validator_stats, $key, $save_result ) = $this->getMainClassObject()->RetryTransaction( $transaction_function, $retry_max_attempts );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -793,6 +803,10 @@ class APIPunch extends APIFactory {
 			return $this->returnHandler( false );
 		}
 
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check( 'punch', 'enabled' )
 				|| !( $this->getPermissionObject()->Check( 'punch', 'delete' ) || $this->getPermissionObject()->Check( 'punch', 'delete_own' ) || $this->getPermissionObject()->Check( 'punch', 'delete_child' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -810,7 +824,7 @@ class APIPunch extends APIFactory {
 		if ( is_array( $data ) && $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
-			$transaction_function = function () use ( $data, $validator_stats, $validator, $save_result, $permission_children_ids ) {
+			$transaction_function = function () use ( $data, $validator_stats, $validator, $save_result, $total_records, $permission_children_ids ) {
 				$lf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $lf */
 				$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing incorrect calculations in user_date_total table.
 				$lf->StartTransaction();
@@ -879,7 +893,7 @@ class APIPunch extends APIFactory {
 
 						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-						$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+						$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf, ( ( isset( $pcf ) ) ? $pcf->Validator : false ) ], ( ( $total_records > 1 && is_object( $lf->getUserObject() ) ) ? $lf->getUserObject()->getFullName() : null ) );
 					}
 
 					//$lf->CommitTransaction();
@@ -916,7 +930,7 @@ class APIPunch extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
-			list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
+			list( $validator, $validator_stats, $key, $save_result ) = $this->getMainClassObject()->RetryTransaction( $transaction_function );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}

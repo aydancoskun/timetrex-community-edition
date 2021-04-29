@@ -1,4 +1,4 @@
-class PermissionWizardController extends BaseWizardController {
+export class PermissionWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg',
@@ -54,7 +54,7 @@ class PermissionWizardController extends BaseWizardController {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var permission = this.getAComboBox( null, true, ALayoutIDs.OPTION_COLUMN, 'permission', false, 'value' );
+				var permission = this.getAComboBox( null, true, 'global_option_column', 'permission', false, 'value' );
 
 				form_item_label.text( $.i18n._( 'Permissions' ) + ': ' );
 				form_item_input_div.append( permission );
@@ -77,7 +77,7 @@ class PermissionWizardController extends BaseWizardController {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var modules = this.getAComboBox( null, true, ALayoutIDs.OPTION_COLUMN, 'section_group', false, 'value' );
+				var modules = this.getAComboBox( null, true, 'global_option_column', 'section_group', false, 'value' );
 
 				form_item_label.text( $.i18n._( 'Modules' ) + ': ' );
 				form_item_input_div.append( modules );
@@ -95,7 +95,7 @@ class PermissionWizardController extends BaseWizardController {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var sub_modules = this.getAComboBox( null, true, ALayoutIDs.OPTION_COLUMN, 'section', false, 'value' );
+				var sub_modules = this.getAComboBox( null, true, 'global_option_column', 'section', false, 'value' );
 
 				form_item_label.text( $.i18n._( 'Sub-Modules' ) + ': ' );
 				form_item_input_div.append( sub_modules );

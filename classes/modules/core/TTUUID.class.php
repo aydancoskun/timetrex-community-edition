@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -84,13 +84,15 @@ class TTUUID {
 
 		// 7 bit micro-time using real microsecond precision, as both microtime(1) and array_sum(explode(' ', microtime())) are limited by php.ini precision
 		$split_time = explode( ' ', microtime( false ) );
-		$time_micro_second = $split_time[1] . substr( $split_time[0], 2, 6 );                                                                    //Remove precision on the microsecond portion.
 
 		//On 32bit PHP installs (especially Windows), the microtime() resolution isn't high enough (only 1/64 of a second) and can cause many UUID duplicates in tight loops. Supplement the timer with a counter instead.
+		//  Need to increment the "sec" portion of microtime( false ) before combining it with the msec portion below so it stays within a 32-bit integer.
 		if ( PHP_INT_SIZE === 4 ) { //32bit
-			$time_micro_second += self::$uuid_counter;
+			$split_time[1] += self::$uuid_counter;
 			self::$uuid_counter++;
 		}
+
+		$time_micro_second = $split_time[1] . substr( $split_time[0], 2, 6 );                                                                    //Remove precision on the microsecond portion.
 
 		// Convert to 56-bit integer (7 bytes), enough to store micro time is enough up to 4253-05-31 22:20:37
 		$time = base_convert( $time_micro_second, 10, 16 );
@@ -99,54 +101,10 @@ class TTUUID {
 		$uuid = str_pad( $time, 14, '0', STR_PAD_LEFT ) . bin2hex( openssl_random_pseudo_bytes( 3 ) );
 
 		//Add separators so its human readable.
-		$uuid = substr( $uuid, 0, 8 ) . '-' . substr( $uuid, 7, 4 ) . '-' . substr( $uuid, 11, 4 ) . '-' . substr( $uuid, 15, 4 ) . '-' . $seed; //$seed could be replaced by: substr( $uuid, 16, 12 )
+		$uuid = substr( $uuid, 0, 8 ) . '-' . substr( $uuid, 8, 4 ) . '-' . substr( $uuid, 12, 4 ) . '-' . substr( $uuid, 16, 4 ) . '-' . $seed; //$seed could be replaced by: substr( $uuid, 20, 12 )
 
-		return $uuid;
-	}
-
-	/**
-	 * Create an ORDERED UUID https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/
-	 * @param null $seed
-	 * @return string
-	 */
-	static function generateUUIDOld( $seed = null ) {
-		if ( $seed == null || strlen( $seed ) !== 12 ) {
-			$seed = self::getSeed( true );
-		}
-
-		/**
-		 * Get time since Gregorian calendar reform in 100ns intervals
-		 * This is exceedingly difficult because of PHP's (and pack()'s)
-		 * integer size limits.
-		 * Note that this will never be more accurate than to the microsecond.
-		 */
-
-		//On 32bit PHP installs, the microtime() resolution isn't high enough (only 1/64 of a second) and can cause many UUID duplicates in tight loops. Suppliment the timer with a counter instead.
-		if ( PHP_INT_SIZE === 4 ) { //32bit
-			$time = ( microtime( true ) + ( self::$uuid_counter / 100000 ) ) * 10000000 + 0x01b21dd213814000;
-			self::$uuid_counter++;
-		} else { //64bit
-			$time = microtime( true ) * 10000000 + 0x01b21dd213814000;
-		}
-
-		// Convert time to a string representation without any decimal places, and not scientific notation. Using sprintf is slightly faster than substr( $time, 0, strpos( $time, '.' ) )
-		$time = sprintf( '%.0F', $time );
-
-		// And now to a 64-bit binary representation
-		$time = pack( 'H*', str_pad( base_convert( $time, 10, 16 ), 16, '0', STR_PAD_LEFT ) );
-
-		// Reorder bytes to their proper locations in the UUID. Append random clock sequence to end.
-		$uuid = $time[4] . $time[5] . $time[6] . $time[7] . $time[2] . $time[3] . $time[0] . $time[1] . openssl_random_pseudo_bytes( 2 );
-
-		// set variant
-		$uuid[8] = chr( ord( $uuid[8] ) & 63 | 128 );
-		// set version
-		$uuid[6] = chr( ord( $uuid[6] ) & 63 | 16 );
-
-		$uuid = bin2hex( $uuid );
-
-		//create an ORDERED UUID https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/
-		$uuid = substr( $uuid, 12, 4 ) . substr( $uuid, 8, 4 ) . '-' . substr( $uuid, 0, 4 ) . '-' . substr( $uuid, 4, 4 ) . '-' . substr( $uuid, 16, 4 ) . '-' . $seed;
+		//For testing, the two strings should match exactly.
+		//var_dump($uuid.$seed, str_replace( '-', '', $retval) );
 
 		return $uuid;
 	}
@@ -255,7 +213,7 @@ class TTUUID {
 	 * @return string
 	 */
 	static function convertStringToUUID( $str ) {
-		$str = str_pad( $str,  32, 'f', STR_PAD_LEFT ); //Make sure there is at least enough data to make a full 32 char UUID.
+		$str = str_pad( str_replace( '-', '', $str ),  32, 'f', STR_PAD_LEFT ); //Make sure there is at least enough data to make a full 32 char UUID.
 
 		$retval = substr( $str, 0, 8 ) . '-' . substr( $str, 8, 4 ) . '-' . substr( $str, 12, 4 ) . '-' . substr( $str, 16, 4 ) . '-' . substr( $str, 20, 12 );
 

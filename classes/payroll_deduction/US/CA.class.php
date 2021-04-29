@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,12 +41,62 @@
 class PayrollDeduction_US_CA extends PayrollDeduction_US {
 	/*
 															10 => 'Single',
-															20 => 'Married - Spouse Works',
+															20 => 'Married - Spouse Works',  //Dual Income
 															30 => 'Married - Spouse does not Work',
 															40 => 'Head of Household',
 	*/
 
 	var $state_income_tax_rate_options = [
+			20210101 => [
+					10 => [
+							[ 'income' => 8932, 'rate' => 1.1, 'constant' => 0 ],
+							[ 'income' => 21175, 'rate' => 2.2, 'constant' => 98.25 ],
+							[ 'income' => 33421, 'rate' => 4.4, 'constant' => 367.60 ],
+							[ 'income' => 46394, 'rate' => 6.6, 'constant' => 906.42 ],
+							[ 'income' => 58634, 'rate' => 8.8, 'constant' => 1762.64 ],
+							[ 'income' => 299508, 'rate' => 10.23, 'constant' => 2839.76 ],
+							[ 'income' => 359407, 'rate' => 11.33, 'constant' => 27481.17 ],
+							[ 'income' => 599012, 'rate' => 12.43, 'constant' => 34267.73 ],
+							[ 'income' => 1000000, 'rate' => 13.53, 'constant' => 64050.63 ],
+							[ 'income' => 1000000, 'rate' => 14.63, 'constant' => 118304.31 ],
+					],
+					20 => [
+							[ 'income' => 8932, 'rate' => 1.1, 'constant' => 0 ],
+							[ 'income' => 21175, 'rate' => 2.2, 'constant' => 98.25 ],
+							[ 'income' => 33421, 'rate' => 4.4, 'constant' => 367.60 ],
+							[ 'income' => 46394, 'rate' => 6.6, 'constant' => 906.42 ],
+							[ 'income' => 58634, 'rate' => 8.8, 'constant' => 1762.64 ],
+							[ 'income' => 299508, 'rate' => 10.23, 'constant' => 2839.76 ],
+							[ 'income' => 359407, 'rate' => 11.33, 'constant' => 27481.17 ],
+							[ 'income' => 599012, 'rate' => 12.43, 'constant' => 34267.73 ],
+							[ 'income' => 1000000, 'rate' => 13.53, 'constant' => 64050.63 ],
+							[ 'income' => 1000000, 'rate' => 14.63, 'constant' => 118304.31 ],
+					],
+					30 => [
+							[ 'income' => 17864, 'rate' => 1.1, 'constant' => 0 ],
+							[ 'income' => 42350, 'rate' => 2.2, 'constant' => 196.50 ],
+							[ 'income' => 66842, 'rate' => 4.4, 'constant' => 735.19 ],
+							[ 'income' => 92788, 'rate' => 6.6, 'constant' => 1812.84 ],
+							[ 'income' => 117268, 'rate' => 8.8, 'constant' => 3525.28 ],
+							[ 'income' => 599016, 'rate' => 10.23, 'constant' => 5679.52 ],
+							[ 'income' => 718814, 'rate' => 11.33, 'constant' => 54962.34 ],
+							[ 'income' => 1000000, 'rate' => 12.43, 'constant' => 68535.45 ],
+							[ 'income' => 1198024, 'rate' => 13.53, 'constant' => 103486.87 ],
+							[ 'income' => 1198024, 'rate' => 14.63, 'constant' => 130279.52 ],
+					],
+					40 => [ //These are different than 30 above.
+							[ 'income' => 17867, 'rate' => 1.1, 'constant' => 0 ],
+							[ 'income' => 42353, 'rate' => 2.2, 'constant' => 196.64 ],
+							[ 'income' => 54597, 'rate' => 4.4, 'constant' => 735.13 ],
+							[ 'income' => 67569, 'rate' => 6.6, 'constant' => 1273.87 ],
+							[ 'income' => 79812, 'rate' => 8.8, 'constant' => 2130.02 ],
+							[ 'income' => 407329, 'rate' => 10.23, 'constant' => 3207.40 ],
+							[ 'income' => 488796, 'rate' => 11.33, 'constant' => 36712.39 ],
+							[ 'income' => 814658, 'rate' => 12.43, 'constant' => 45942.60 ],
+							[ 'income' => 1000000, 'rate' => 13.53, 'constant' => 86447.25 ],
+							[ 'income' => 1000000, 'rate' => 14.63, 'constant' => 111524.02 ],
+					],
+			],
 			20200101 => [
 					10 => [
 							[ 'income' => 8809, 'rate' => 1.1, 'constant' => 0 ],
@@ -791,6 +841,31 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
+			20210101 => [
+				//Standard Deduction Table
+				'standard_deduction' => [
+					//First entry is 0,1 allowance, second is for 2 or more.
+					'10' => [ 4601, 4601 ],
+					'20' => [ 4601, 4601 ],
+					'30' => [ 4601, 9202 ],
+					'40' => [ 9202, 9202 ],
+				],
+				//Exemption Allowance Table - Annual amount for 1 allowance.
+				'allowance'          => [
+						'10' => 136.40,
+						'20' => 136.40,
+						'30' => 136.40,
+						'40' => 136.40,
+				],
+				//Low Income Exemption Table
+				'minimum_income'     => [
+					//First entry is 0,1 allowance, 2nd is 2 or more.
+					'10' => [ 15267, 15267 ],
+					'20' => [ 15267, 15267 ],
+					'30' => [ 15267, 30534 ],
+					'40' => [ 30534, 30534 ],
+				],
+			],
 			20200101 => [
 				//Standard Deduction Table
 				'standard_deduction' => [

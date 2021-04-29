@@ -1,3 +1,5 @@
+import '@/framework/widgets/color-picker/color-picker';
+
 ( function( $ ) {
 
 	$.fn.TColorPicker = function( options ) {

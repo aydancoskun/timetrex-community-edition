@@ -1,4 +1,4 @@
-class GeneratePayStubWizardController extends BaseWizardController {
+export class GeneratePayStubWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg'
@@ -45,7 +45,7 @@ class GeneratePayStubWizardController extends BaseWizardController {
 				var form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
 				var form_item_label = form_item.find( '.form-item-label' );
 				var form_item_input_div = form_item.find( '.form-item-input-div' );
-				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, 'global_Pay_period', 'pay_period_id' );
 				a_combobox.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 					$this.saveCurrentStep();
 					$this.onPayPeriodChange( true );
@@ -119,7 +119,7 @@ class GeneratePayStubWizardController extends BaseWizardController {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) );
 
-				a_combobox = this.getAComboBox( TTAPI.APIUser, true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( TTAPI.APIUser, true, 'global_user', 'user_id', true );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -195,10 +195,11 @@ class GeneratePayStubWizardController extends BaseWizardController {
 		if ( type_id == 5 ) {
 			transaction_date = this.stepsDataDic[2].carry_forward_to_date;
 			cal_pay_stub_amendment = true;
-		} else if ( type_id == 20 ) {
+		} else {
 			transaction_date = this.stepsDataDic[2].transaction_date;
 		}
 
+		api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		api.generatePayStubs( pay_period_ids, user_ids, cal_pay_stub_amendment, run_id, type_id, transaction_date, { onResult: onDoneResult } );
 
 		function onDoneResult( result ) {
@@ -245,6 +246,9 @@ class GeneratePayStubWizardController extends BaseWizardController {
 		var newest_pay_period = this.getNewestPayPeriod( this.selected_pay_periods );
 		if ( current_step_data.type_id == 20 ) {
 			current_step_ui['run_id_row'].show();
+		}
+
+		if ( current_step_data.type_id != 5 ) {
 			current_step_ui['transaction_date_row'].show();
 			if ( !refresh ) {
 				if ( current_step_data.transaction_date ) {
@@ -252,11 +256,11 @@ class GeneratePayStubWizardController extends BaseWizardController {
 				} else {
 					current_step_ui['transaction_date'].setValue( newest_pay_period ? Global.strToDateTime( newest_pay_period.transaction_date ).format() : null );
 				}
-
 			} else {
 				current_step_ui['transaction_date'].setValue( newest_pay_period ? Global.strToDateTime( newest_pay_period.transaction_date ).format() : null );
 			}
 		}
+
 		if ( current_step_data.type_id == 5 ) {
 			current_step_ui['carry_forward_to_date_row'].show();
 			if ( !refresh ) {
@@ -304,7 +308,7 @@ class GeneratePayStubWizardController extends BaseWizardController {
 			onResult: function( result ) {
 				$this.selected_pay_periods = result.getResult();
 				var status_id_array = $this.buildPayPeriodStatusIdArray( $this.selected_pay_periods );
-				api.getOptions( 'type', status_id_array, {
+				api.getOptions( 'payroll_run_type', status_id_array, {
 					onResult: function( result ) {
 						var result_data = result.getResult();
 						var type_array = Global.buildRecordArray( result_data );

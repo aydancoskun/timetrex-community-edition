@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpStatementHasEmptyBodyInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -562,10 +562,10 @@ class SetupPresets extends Factory {
 								'company_id'     => $this->getCompany(),
 								'status_id'      => 10,
 								'type_id'        => 20,
-								'name'           => strtoupper( $province ) . ' - District Income Tax',
+								'name'           => strtoupper( $province ) . ' - Local Income Tax',
 								'ps_order'       => 206,
 								'debit_account'  => '',
-								'credit_account' => 'District Withholding' . $gl_account_payable_suffix, //2192
+								'credit_account' => 'Local Withholding' . $gl_account_payable_suffix, //2192
 						]
 				);
 			}
@@ -2417,20 +2417,10 @@ class SetupPresets extends Factory {
 					unset( $form_940_config );
 
 					//
-					//Form 1099-Misc
+					//Form 1099-NEC
 					//
-					$form_1099m_config = [
-							'l4' => [ //Federal Income Tax Withheld (Box 4)
-									  'include_pay_stub_entry_account' => [
-											  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'US - Federal Income Tax' ),
-									  ],
-									  'exclude_pay_stub_entry_account' => [],
-							],
-							'l6' => [ //Medicare and Health Care Payments (Box 6)
-									  'include_pay_stub_entry_account' => [],
-									  'exclude_pay_stub_entry_account' => [],
-							],
-							'l7' => [ //Wages (Box 7)
+					$form_1099nec_config = [
+							'l1' => [ //Wages (Box 1)
 									  'include_pay_stub_entry_account' => [
 											  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 40, 'Total Gross' ),
 									  ],
@@ -2441,11 +2431,18 @@ class SetupPresets extends Factory {
 											  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 									  ],
 							],
+
+							'l4' => [ //Federal Income Tax Withheld (Box 4)
+									  'include_pay_stub_entry_account' => [
+											  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'US - Federal Income Tax' ),
+									  ],
+									  'exclude_pay_stub_entry_account' => [],
+							],
 					];
 
-					Debug::Arr( $form_1099m_config, '1099M TaxForm Config: ' . $country, __FILE__, __LINE__, __METHOD__, 10 );
-					$this->createUserReportData( $this->getCompany(), TTNew( 'Form1099MiscReport' ), $form_1099m_config );
-					unset( $form_1099m_config );
+					Debug::Arr( $form_1099nec_config, '1099NEC TaxForm Config: ' . $country, __FILE__, __LINE__, __METHOD__, 10 );
+					$this->createUserReportData( $this->getCompany(), TTNew( 'Form1099NecReport' ), $form_1099nec_config );
+					unset( $form_1099nec_config );
 
 					if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 						//
@@ -2594,13 +2591,16 @@ class SetupPresets extends Factory {
 				}
 				unset( $rsalf );
 
+				$primary_identification = null;
+				$secondary_identification = null;
+				$tertiary_identification = null;
+
 				if ( $country != '' && $province == '' ) {
 					$agency_arr = $praf->getOptions( 'agency', [ 'type_id' => 10, 'country' => strtoupper( $country ), 'province' => '00', 'district' => '00' ] );
 
 					if ( isset( $agency_arr ) && is_array( $agency_arr ) ) {
 						foreach ( $agency_arr as $agency_id => $agency_type_name ) {
 							$status_id = 10; //Enabled
-							$primary_identification = null;
 
 							$always_week_day_id = 2; //Next business day. Both US and Canada allow due dates to be delayed if they land on a weekend or legal holiday.
 
@@ -2608,7 +2608,7 @@ class SetupPresets extends Factory {
 							//Use just first 5 chars: '10:CA:00:00:0010'
 							switch ( substr( $agency_id, 0, 5 ) ) {
 								case '10:CA': //Canada
-									//Because CRA allows for provincial holidays, make sure they are created first.
+									//Because CRA allows for *some* provincial holidays, make sure they are created first.
 									//  Since this is executed at the country level and provincial holidays may not be created yet.
 									$this->RecurringHolidays( $country, $le_obj->getProvince() );
 
@@ -2617,10 +2617,12 @@ class SetupPresets extends Factory {
 											$this->RecurringHolidaysByRegion( $country, $le_obj->getProvince(), 100 ) //Include provincially recognized holidays by the CRA - Since this is only called when no province is specified, we need to use the province from the legal entity.
 									);
 
-									if ( ( isset( $config_vars['other']['demo_mode'] ) && $config_vars['other']['demo_mode'] == true ) ) {
+									if ( defined( 'UNIT_TEST_MODE' ) && UNIT_TEST_MODE === true ) {
+										$primary_identification = '123456789RP0001';
+									} else if ( isset( $config_vars['other']['demo_mode'] ) && $config_vars['other']['demo_mode'] == true ) {
 										$primary_identification = rand( 100000000, 999999999 ) . 'RP0001';
 									}
-									break;
+								break;
 								case '10:US': //US
 									if ( $agency_id == '10:US:00:00:0100' ) { //Centers for Medicare & Medical Services (CMS.gov)
 										$status_id = 20;                      //Disabled by default.
@@ -2630,8 +2632,12 @@ class SetupPresets extends Factory {
 											$this->RecurringHolidaysByRegion( $country, $province, 100 ) //Include Gov't Holidays
 									);
 
-									if ( ( isset( $config_vars['other']['demo_mode'] ) && $config_vars['other']['demo_mode'] == true ) ) {
+									if ( defined( 'UNIT_TEST_MODE' ) && UNIT_TEST_MODE === true ) {
+										$primary_identification = '12-3456789';
+										$tertiary_identification = 'EF123456';
+									} else if ( isset( $config_vars['other']['demo_mode'] ) && $config_vars['other']['demo_mode'] == true ) {
 										$primary_identification = rand( 10, 99 ) . '-' . rand( 1000000, 9999999 );
+										$tertiary_identification = 'EF'. rand( 100000, 999999 );
 									}
 									break;
 								default: //This is COUNTRY specific only, below is Province/State.
@@ -2654,6 +2660,8 @@ class SetupPresets extends Factory {
 											'recurring_holiday_policy_id'  => $recurring_holiday_ids,
 											'contact_user_id'              => $this->getUser(),
 											'primary_identification'       => $primary_identification,
+											'secondary_identification'     => $secondary_identification,
+											'tertiary_identification'      => $tertiary_identification,
 									]
 							);
 
@@ -2690,6 +2698,10 @@ class SetupPresets extends Factory {
 									}
 
 									$recurring_holiday_ids = $this->RecurringHolidaysByRegion( $country, $province, 10 ); //Include Gov't Holidays
+
+									if ( defined( 'UNIT_TEST_MODE' ) && UNIT_TEST_MODE === true ) {
+										$primary_identification = ( ord( $province ) - 26 ) . '112233';
+									}
 									break;
 								default:
 									$recurring_holiday_ids = $this->RecurringHolidaysByRegion( $country, $province, 10 ); //Include Gov't Holidays
@@ -2713,6 +2725,9 @@ class SetupPresets extends Factory {
 											'always_week_day_id'           => $always_week_day_id,
 											'recurring_holiday_policy_id'  => $recurring_holiday_ids,
 											'contact_user_id'              => $this->getUser(),
+											'primary_identification'       => $primary_identification,
+											'secondary_identification'     => $secondary_identification,
+											'tertiary_identification'      => $tertiary_identification,
 									]
 							);
 
@@ -4560,7 +4575,7 @@ class SetupPresets extends Factory {
 												'country'                        => strtoupper( $country ),
 												'province'                       => strtoupper( $province ),
 												'district'                       => 'NYC',
-												'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - District Income Tax' ),
+												'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - Local Income Tax' ),
 												'user_value1'                    => 10, //Single
 												'user_value2'                    => 0, //0 Allowances
 												'include_pay_stub_entry_account' => [ $psea_obj->getTotalGross() ],
@@ -4587,7 +4602,7 @@ class SetupPresets extends Factory {
 												'country'                        => strtoupper( $country ),
 												'province'                       => strtoupper( $province ),
 												'district'                       => 'Yonkers',
-												'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - District Income Tax' ),
+												'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - Local Income Tax' ),
 												'user_value1'                    => 10, //Single
 												'user_value2'                    => 0, //0 Allowances
 												'include_pay_stub_entry_account' => [ $psea_obj->getTotalGross() ],
@@ -10108,8 +10123,8 @@ class SetupPresets extends Factory {
 
 								//Averaging
 								'average_time_days'                => 28, //Days to average time over (4 weeks)
-								'average_time_worked_days'         => false, //Only days worked
-								'average_days'                     => 20, //Divsor for average formula. X * 5% is the same as X / 20.
+								'average_time_worked_days'         => true, //Only days worked
+								'average_days'                     => 0, //Divsor for average formula. X * 5% is the same as X / 20.
 
 								'minimum_time' => 0,
 								'maximum_time' => 0,
@@ -10117,8 +10132,8 @@ class SetupPresets extends Factory {
 								'include_paid_absence_time'             => false,
 								'absence_policy_id'                     => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 								'recurring_holiday_id'                  => (array)$this->RecurringHolidaysByRegion( $country, $province ),
-								'contributing_shift_policy_id'          => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + Paid Absence' ), //Was: 'Regular Time + OT + Paid Absence'
-								'eligible_contributing_shift_policy_id' => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + OT + Paid Absence' ),
+								'contributing_shift_policy_id'          => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time' ), //Was: 'Regular Time + OT + Paid Absence', then on Nov 1st 2020 changed to: Regular Time, as Vacation and Holiday Pay was excluded. Meal/Breaks are already included in Regular Time by default.
+								'eligible_contributing_shift_policy_id' => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + OT' ), //Was: 'Regular Time + OT + Paid Absence'
 						]
 				);
 			}

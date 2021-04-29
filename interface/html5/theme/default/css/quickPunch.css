@@ -31,6 +31,75 @@ body {
 	max-width: 500px;
 }
 
+#topContainer, #bottomContainer {
+	display: none;
+}
+
+/* Start - #2844 Styles added from application.css to apply during initial loading. */
+/* TODO: Check if ALL these styles are needed, some may be redundant. */
+
+.loading-view {
+	position: fixed;
+	width: 652px;
+	height: 477px;
+	-webkit-animation: fadi 0.25s 1;
+	-moz-animation: fadi 0.25s 1;
+	top: 50%;
+	left: 50%;
+	margin: -238.5px 0 0 -326px;
+}
+
+.loading-view .progress-bar {
+	left: 230px;
+	position: absolute;
+	top: 300px;
+	width: 200px;
+	height: 12px;
+	background-color: #eaeaea;
+}
+
+progress::-webkit-progress-bar {
+	background-color: #eaeaea;
+}
+
+progress::-webkit-progress-value {
+	background: #eaeaea;
+	background: -moz-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #57beff), color-stop(100%, #12a3ff));
+	background: -webkit-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -o-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -ms-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: linear-gradient(to bottom, #57beff 0%, #12a3ff 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#57beff', endColorstr='#12a3ff', GradientType=0);
+
+}
+
+progress::-moz-progress-bar {
+	background: #eaeaea;
+	background: -moz-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #57beff), color-stop(100%, #12a3ff));
+	background: -webkit-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -o-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -ms-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: linear-gradient(to bottom, #57beff 0%, #12a3ff 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#57beff', endColorstr='#12a3ff', GradientType=0);
+
+}
+
+.loading-view .progress-label {
+	color: #ffffff;
+	left: 293px;
+	position: absolute;
+	top: 320px;
+}
+
+.quick-punch-login .loading-view .progress-label {
+	background: #ffffff;
+	color: #000000;
+}
+
+/* End - #2844 Styles added from application.css to apply during initial loading. */
+
 .navbar-punch-login {
 	margin: 0 -15px 0 -15px;
 }

@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,19 +35,15 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class MiscTest extends PHPUnit_Framework_TestCase {
-	public function setUp() {
+class MiscTest extends PHPUnit\Framework\TestCase {
+	public function setUp(): void {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		TTi18n::setLocale( 'en_US', LC_ALL, true ); //This fixes problems with NumberFormat when the locale is changed and not changed back.
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	/**
@@ -1046,16 +1042,18 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 * @group testRemoteHTTP
 	 */
 	function testRemoteHTTP() {
+		global $config_vars;
+
 		$url = 'www.timetrex.com/blank.html';
 
 		$header_size = (int)Misc::getRemoteHTTPFileSize( 'http://' . $url );
 		$this->assertEquals( 30, (int)$header_size ); //30 Bytes.
 
 		$header_size = (int)Misc::getRemoteHTTPFileSize( 'https://' . $url );
-		$this->assertEquals( 30, (int)$header_size );                   //30 Bytes.
+		$this->assertEquals( 30, (int)$header_size ); //30 Bytes.
 
 
-		$temp_file_name = tempnam( '/tmp/', 'unit_test_http_' );
+		$temp_file_name = tempnam( $config_vars['cache']['dir'], 'unit_test_http_' );
 		$size = Misc::downloadHTTPFile( 'http://' . $url, $temp_file_name );
 		//Debug::Text( ' Temp File Name: '. $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( (int)$size, (int)$header_size );           //Make sure the downloaded size matches the header size too.
@@ -1063,7 +1061,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( filesize( $temp_file_name ), (int)$size ); //30 Bytes.
 		unlink( $temp_file_name );
 
-		$temp_file_name = tempnam( '/tmp/', 'unit_test_http_' );
+		$temp_file_name = tempnam( $config_vars['cache']['dir'], 'unit_test_http_' );
 		//Debug::Text( ' Temp File Name: '. $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 		$size = (int)Misc::downloadHTTPFile( 'https://' . $url, $temp_file_name );
 		$this->assertEquals( (int)$size, (int)$header_size );           //Make sure the downloaded size matches the header size too.
@@ -1082,7 +1080,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 
 
 		//Test downloading to a directory without permissions, or one that doesn't exist.
-		$temp_file_name = '/root' . tempnam( '/tmp/', 'unit_test_http_' );
+		$temp_file_name = '/root' . tempnam( $config_vars['cache']['dir'], 'unit_test_http_' );
 		Debug::Text( ' Temp File Name: ' . $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 		$retval = Misc::downloadHTTPFile( 'https://' . $url, $temp_file_name );
 
@@ -1277,6 +1275,27 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 0 ], Misc::getAmountAroundLimit( 0, 100, 100 ) );
 
+		//Test with negative amounts around the limit.
+		$this->assertEquals( [ 'adjusted_amount' => 10, 'under_limit' => 0, 'over_limit' => 1 ], Misc::getAmountAroundLimit( 11, 90, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => -11, 'under_limit' => 21, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -11, 90, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => -10, 'under_limit' => 15, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -10, 95, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => -5, 'under_limit' => 5, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -10, 105, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -10, 110, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 10 ], Misc::getAmountAroundLimit( -10, 120, 100 ) );
+
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -11, 111, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 10 ], Misc::getAmountAroundLimit( -10, 120, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => -11, 'under_limit' => 11, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -11, 100, 100 ) );
+
+		$this->assertEquals( [ 'adjusted_amount' => 10, 'under_limit' => 0, 'over_limit' => 1 ], Misc::getAmountAroundLimit( 11, 90, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -1, 101, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => -1, 'under_limit' => 1, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -1, 100, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => 1, 'under_limit' => 0, 'over_limit' => 9 ], Misc::getAmountAroundLimit( 10, 99, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 8 ], Misc::getAmountAroundLimit( -1, 109, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 3 ], Misc::getAmountAroundLimit( -5, 108, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => -2, 'under_limit' => 2, 'over_limit' => 0 ], Misc::getAmountAroundLimit( -5, 103, 100 ) );
+		$this->assertEquals( [ 'adjusted_amount' => 2, 'under_limit' => 0, 'over_limit' => 3 ], Misc::getAmountAroundLimit( 5, 98, 100 ) );
+
 
 		//Test an example that may be used in a report to ensure the YTD amount never exceeds the limit.
 		$ytd_amount = 0;
@@ -1320,6 +1339,76 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 99 ], $tmp_amount_around_limit_arr );
 		$ytd_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
 		$this->assertEquals( 100, $ytd_amount );
+
+
+		//Test an example that may be used in a report to ensure the YTD amount never exceeds the limit. Include negative amounts too.
+		$ytd_amount = 0;
+		$ytd_adjusted_amount = 0;
+
+		$current_amount = 0;
+		$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $current_amount, $ytd_amount, 100 );
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 100, 'over_limit' => 0 ], $tmp_amount_around_limit_arr );
+		$ytd_amount += $current_amount;
+		$ytd_adjusted_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
+		$this->assertEquals( 0, $ytd_amount );
+		$this->assertEquals( 0, $ytd_adjusted_amount );
+
+
+		$current_amount = 10;
+		$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $current_amount, $ytd_amount, 100 );
+		$this->assertEquals( [ 'adjusted_amount' => 10, 'under_limit' => 90, 'over_limit' => 0 ], $tmp_amount_around_limit_arr );
+		$ytd_amount += $current_amount;
+		$ytd_adjusted_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
+		$this->assertEquals( 10, $ytd_amount );
+		$this->assertEquals( 10, $ytd_adjusted_amount );
+
+		$current_amount = 50;
+		$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $current_amount, $ytd_amount, 100 );
+		$this->assertEquals( [ 'adjusted_amount' => 50, 'under_limit' => 40, 'over_limit' => 0 ], $tmp_amount_around_limit_arr );
+		$ytd_amount += $current_amount;
+		$ytd_adjusted_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
+		$this->assertEquals( 60, $ytd_amount );
+		$this->assertEquals( 60, $ytd_adjusted_amount );
+
+		$current_amount = 30;
+		$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $current_amount, $ytd_amount, 100 );
+		$this->assertEquals( [ 'adjusted_amount' => 30, 'under_limit' => 10, 'over_limit' => 0 ], $tmp_amount_around_limit_arr );
+		$ytd_amount += $current_amount;
+		$ytd_adjusted_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
+		$this->assertEquals( 90, $ytd_amount );
+		$this->assertEquals( 90, $ytd_adjusted_amount );
+
+		$current_amount = -10;
+		$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $current_amount, $ytd_amount, 100 );
+		$this->assertEquals( [ 'adjusted_amount' => -10, 'under_limit' => 20, 'over_limit' => 0 ], $tmp_amount_around_limit_arr );
+		$ytd_amount += $current_amount;
+		$ytd_adjusted_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
+		$this->assertEquals( 80, $ytd_amount );
+		$this->assertEquals( 80, $ytd_adjusted_amount );
+
+		$current_amount = 30;
+		$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $current_amount, $ytd_amount, 100 );
+		$this->assertEquals( [ 'adjusted_amount' => 20, 'under_limit' => 0, 'over_limit' => 10 ], $tmp_amount_around_limit_arr );
+		$ytd_amount += $current_amount;
+		$ytd_adjusted_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
+		$this->assertEquals( 110, $ytd_amount );
+		$this->assertEquals( 100, $ytd_adjusted_amount );
+
+		$current_amount = -5;
+		$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $current_amount, $ytd_amount, 100 );
+		$this->assertEquals( [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => 5 ], $tmp_amount_around_limit_arr );
+		$ytd_amount += $current_amount;
+		$ytd_adjusted_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
+		$this->assertEquals( 105, $ytd_amount );
+		$this->assertEquals( 100, $ytd_adjusted_amount );
+
+		$current_amount = -10;
+		$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $current_amount, $ytd_amount, 100 );
+		$this->assertEquals( [ 'adjusted_amount' => -5, 'under_limit' => 5, 'over_limit' => 0 ], $tmp_amount_around_limit_arr );
+		$ytd_amount += $current_amount;
+		$ytd_adjusted_amount += $tmp_amount_around_limit_arr['adjusted_amount'];
+		$this->assertEquals( 95, $ytd_amount );
+		$this->assertEquals( 95, $ytd_adjusted_amount );
 	}
 
 	/**
@@ -1424,7 +1513,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @group testUUID
 	 */
-	function testUUID() {
+	function testUUIDUniqueness() {
 		//Make sure UUIDs are unique at least across 1 million tight iterations.
 		$max = 1000000;
 		for ( $i = 0; $i < $max; $i++ ) {
@@ -1437,9 +1526,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testTruncateUUID
+	 * @group testUUIDTruncate
 	 */
-	function testTruncateUUID() {
+	function testUUIDTruncate() {
 		//Make sure UUIDs converted from INTs still get the most unique UUID data first.
 		$this->assertEquals( '000000192136', TTUUID::truncateUUID( TTUUID::getConversionPrefix() . '-000000192136', 12, false ) );
 		$this->assertEquals( '000000191922', TTUUID::truncateUUID( TTUUID::getConversionPrefix() . '-000000191922', 12, false ) );
@@ -1451,9 +1540,9 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group testParsingUUID
+	 * @group testUUIDParsing
 	 */
-	function testParsingUUID() {
+	function testUUIDParsing() {
 		//Make sure UUIDs converted from INTs still get the most unique UUID data first.
 		$this->assertEquals( '11e7b349-9af4-7bc0-af20-999999191922', TTUUID::castUUID( ' 11e7b349-9af4-7bc0-af20-999999191922 ' ) );
 		$this->assertEquals( '11e7b349-9af4-7bc0-af20-999999191922', TTUUID::castUUID( '11e7b349-9af4-7bc0-af20-999999191922' ) );
@@ -1799,6 +1888,120 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 1000, convertHumanSizeToBytes( '1K' ) );
 		$this->assertEquals( 1000000, convertHumanSizeToBytes( '1M' ) );
 		$this->assertEquals( 1000000000, convertHumanSizeToBytes( '1G' ) );
+	}
+
+	/**
+	 * @group testFilesDelete
+	 */
+	function testFilesDelete() {
+		//Check to make sure all files listed in files.delete don't exist, as they should already be deleted or this should be a fresh GIT checkout.
+		// This ensures that a files isn't added to files.delete that is still in GIT.
+		$file_list = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'files.delete';
+
+		if ( file_exists( $file_list ) ) {
+			$file_list_data = file_get_contents( $file_list );
+			$files = explode( "\n", $file_list_data );
+			unset( $file_list_data );
+			if ( is_array( $files ) ) {
+				foreach ( $files as $file ) {
+					if ( $file != '' ) {
+						$file = Environment::getBasePath() . str_replace( [ '/', '\\' ], DIRECTORY_SEPARATOR, $file ); //Prefix base path to all files.
+						$this->assertEquals( false, file_exists( $file ), 'File still exists in GIT: '. $file );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * @group testMimeType
+	 */
+	function testMimeType() {
+		$this->assertEquals( 'text/x-php', Misc::getMimeType( __FILE__ ) );
+		$this->assertEquals( 'image/jpeg', Misc::getMimeType( Environment::getBasePath() .'/interface/images/powered_by.jpg' ) );
+	}
+
+	/**
+	 * @group testComposerPackages
+	 */
+	function testComposerPackages() {
+		//Non-Pear packages
+		$this->assertEquals( true, class_exists('Browser') );
+		require_once ( Environment::getBasePath() . 'vendor' . DIRECTORY_SEPARATOR . 'cbschuld' . DIRECTORY_SEPARATOR . 'browser.php' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Browser.php' );
+		$this->assertEquals( true, class_exists('Browser') );
+
+
+		//
+		// Composer PEAR packages. These should not need to be required() first, but should still work if they are.
+		//
+		$this->assertEquals( true, class_exists('PEAR') );
+		require_once( 'PEAR.php' );
+		$this->assertEquals( true, class_exists('PEAR') );
+
+		$this->assertEquals( true, class_exists('Mail') );
+		$this->assertEquals( true, class_exists('Mail_mime') );
+		$this->assertEquals( true, class_exists('Mail_mimePart') );
+		$this->assertEquals( true, class_exists('MIME_Type') );
+
+		//
+		//PEAR packages in classes/pear/  -- Make sure they don't conflict with Composer packages.
+		//  *NOTE* These need to be manually required and can't use the autoloader directly.
+		$this->assertEquals( false, class_exists('System_SharedMemory') );
+		require_once( 'System/SharedMemory.php' );
+		$this->assertEquals( true, class_exists('System_SharedMemory') );
+
+		$this->assertEquals( false, class_exists('HTTP_Download') );
+		require_once( 'HTTP/Download.php' );
+		$this->assertEquals( true, class_exists('HTTP_Download') );
+
+		$this->assertEquals( false, class_exists('Config') );
+		require_once( 'Config.php' );
+		$this->assertEquals( true, class_exists('Config') );
+
+		$this->assertEquals( false, class_exists('Numbers_Words') );
+		require_once( 'Numbers/Words.php' );
+		$this->assertEquals( true, class_exists('Numbers_Words') );
+
+		$this->assertEquals( false, class_exists('Validate') );
+		require_once('Validate.php');
+		$this->assertEquals( true, class_exists('Validate') );
+
+		$this->assertEquals( false, class_exists('Validate_Finance_CreditCard') );
+		require_once('Validate/Finance/CreditCard.php');
+		$this->assertEquals( true, class_exists('Validate_Finance_CreditCard') );
+
+		$this->assertEquals( false, class_exists('Payment_Process') );
+		require_once( 'Payment/Process.php' );
+		$this->assertEquals( true, class_exists('Payment_Process') );
+	}
+
+	/**
+	 * @group testOptionGetByFuzzyValue
+	 */
+	function testOptionGetByFuzzyValue() {
+		$options = [
+				10 => 'Active',
+				20 => 'Inactive',
+				30 => 'Leave - Maternity',
+				40 => 'Leave - Illness',
+		];
+
+		$this->assertEquals( [ 0 => 10 ], Option::getByFuzzyValue( 'A', $options ) );
+		$this->assertEquals( [ 0 => 10 ], Option::getByFuzzyValue( 'Activ', $options ) );
+		$this->assertEquals( [ 0 => 10 ], Option::getByFuzzyValue( 'Active', $options ) );
+		$this->assertEquals( [ 0 => 10 ], Option::getByFuzzyValue( 'Active|', $options ) );
+		$this->assertEquals( [ 0 => 10 ], Option::getByFuzzyValue( '"Active"', $options ) );
+		$this->assertEquals( false, Option::getByFuzzyValue( '"Act"', $options ) );
+		$this->assertEquals( false, Option::getByFuzzyValue( '"Aktive"', $options ) ); //Exact match, so ignore metaphone and fail this match.
+		$this->assertEquals( [ 0 => 10 ], Option::getByFuzzyValue( 'Aktive', $options ) ); //Metaphone match
+		$this->assertEquals( [ 0 => 10 ], Option::getByFuzzyValue( 'Aktiv', $options ) ); //Metaphone ending wildcard match.
+
+		$this->assertEquals( [ 0 => 30, 1 => 40 ], Option::getByFuzzyValue( 'Leave', $options ) );
+		$this->assertEquals( [ 0 => 30, 1 => 40 ], Option::getByFuzzyValue( 'Leeve', $options ) ); //Metaphone ending wildcard match.
+		$this->assertEquals( [ 0 => 40 ], Option::getByFuzzyValue( 'Leave - Illness', $options ) );
+		$this->assertEquals( false, Option::getByFuzzyValue( 'Leave|', $options ) );
+		$this->assertEquals( [ 0 => 40 ], Option::getByFuzzyValue( 'Leave*Illness', $options ) );
+		$this->assertEquals( [ 0 => 40 ], Option::getByFuzzyValue( 'Leave%Illness', $options ) );
 	}
 }
 

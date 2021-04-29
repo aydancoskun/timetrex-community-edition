@@ -1,4 +1,4 @@
-class QualificationViewController extends BaseViewController {
+export class QualificationViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#qualification_view_container',
@@ -75,7 +75,7 @@ class QualificationViewController extends BaseViewController {
 			api_class: TTAPI.APIQualification,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.QUALIFICATION,
+			layout_name: 'global_qualification',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -103,7 +103,7 @@ class QualificationViewController extends BaseViewController {
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_qualification_column1 );
 
 		//Group
@@ -112,17 +112,17 @@ class QualificationViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			set_empty: true,
 			field: 'group_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.qualification_group_array ) );
+		form_item_input.setSourceData( $this.qualification_group_array );
 		this.addEditFieldToColumn( $.i18n._( 'Qualification Group' ), form_item_input, tab_qualification_column1 );
 
 		//Visibility Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'visibility_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.visibility_type_array ) );
+		form_item_input.setSourceData( $this.visibility_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Visibility' ), form_item_input, tab_qualification_column1 );
 
 		// Description
@@ -161,7 +161,7 @@ class QualificationViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -170,7 +170,7 @@ class QualificationViewController extends BaseViewController {
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
@@ -184,7 +184,7 @@ class QualificationViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -195,7 +195,7 @@ class QualificationViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -203,7 +203,7 @@ class QualificationViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -215,7 +215,7 @@ class QualificationViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

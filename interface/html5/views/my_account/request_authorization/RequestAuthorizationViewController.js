@@ -1,4 +1,4 @@
-class RequestAuthorizationViewController extends RequestViewCommonController {
+export class RequestAuthorizationViewController extends RequestViewCommonController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#request_authorization_view_container',
@@ -729,7 +729,7 @@ class RequestAuthorizationViewController extends RequestViewCommonController {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -744,7 +744,7 @@ class RequestAuthorizationViewController extends RequestViewCommonController {
 				field: 'type_id',
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -774,7 +774,7 @@ class RequestAuthorizationViewController extends RequestViewCommonController {
 				basic_search: true,
 				adv_search: false,
 				set_any: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -782,7 +782,7 @@ class RequestAuthorizationViewController extends RequestViewCommonController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -794,7 +794,7 @@ class RequestAuthorizationViewController extends RequestViewCommonController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

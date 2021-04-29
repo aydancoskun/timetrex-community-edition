@@ -1,4 +1,4 @@
-class PayStubSummaryReportViewController extends ReportBaseViewController {
+export class PayStubSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 

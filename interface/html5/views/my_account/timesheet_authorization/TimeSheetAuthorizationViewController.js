@@ -1,4 +1,4 @@
-class TimeSheetAuthorizationViewController extends BaseViewController {
+export class TimeSheetAuthorizationViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#timesheet_authorization_view_container',
@@ -785,7 +785,7 @@ class TimeSheetAuthorizationViewController extends BaseViewController {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -797,7 +797,7 @@ class TimeSheetAuthorizationViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
-				layout_name: ALayoutIDs.PAY_PERIOD,
+				layout_name: 'global_Pay_period',
 				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
@@ -813,7 +813,7 @@ class TimeSheetAuthorizationViewController extends BaseViewController {
 				field: 'hierarchy_level',
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -821,7 +821,7 @@ class TimeSheetAuthorizationViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -833,7 +833,7 @@ class TimeSheetAuthorizationViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -927,7 +927,7 @@ class TimeSheetAuthorizationViewController extends BaseViewController {
 			api_class: TTAPI.APIPayPeriodTimeSheetVerify,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_PERIOD,
+			layout_name: 'global_Pay_period',
 			navigation_mode: true,
 			show_search_inputs: true,
 			extendDataProcessWhenSearch: this.processResultData

@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,14 +37,14 @@
 
 //Each Year:
 //  Copy testcases/payroll_deduction/CAPayrollDeductionCRATest2019.csv to the new year. Clear out all lines but the header.
-//  Update below "$this->year = 2020;" to the new year.
+//  Update below "$this->year = 2021;" to the new year.
 //  Run: ./run_selenium.sh --filter CAPayrollDeductionCRACompareTest::testCRAToCSVFile <-- This will add lines to the above CSV file once its complete.
 //  Run: ./run_selenium.sh --filter CAPayrollDeductionCRACompareTest::testCRAFromCSVFile <-- This will test the PDOC numbers against our own.
 
 /**
  * @group CAPayrollDeductionCRACompareTest
  */
-class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestCase {
+class CAPayrollDeductionCRACompareTest extends PHPUnit\Extensions\Selenium2TestCase {
 	private $default_wait_timeout = 4000;//100000;
 
 	function waitUntilByXPath( $xpath, $timeout = null ) {
@@ -66,7 +66,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 		}, $timeout );
 	}
 
-	public function setUp() {
+	public function setUp(): void {
 		global $selenium_config;
 		$this->selenium_config = $selenium_config;
 
@@ -74,7 +74,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 
 		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
 
-		$this->year = 2020;
+		$this->year = 2021;
 
 		$this->tax_table_file = dirname( __FILE__ ) . '/../payroll_deduction/CAPayrollDeductionTest' . $this->year . '.csv';
 		$this->cra_deduction_test_csv_file = dirname( $this->tax_table_file ) . DIRECTORY_SEPARATOR . 'CAPayrollDeductionCRATest' . $this->year . '.csv';
@@ -88,14 +88,10 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 		$this->setHost( $selenium_config['host'] );
 		$this->setBrowser( $selenium_config['browser'] );
 		$this->setBrowserUrl( $selenium_config['default_url'] );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	function CRAPayrollDeductionOnlineCalculator( $args = [] ) {
@@ -116,15 +112,14 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 				$this->url( $url );
 
 
-				//$this->waitForElementPresent( '/html/body/main/div[1]/div[7]/p/a[1]' ); //waitForElementPresent doesn't exist.
-				$this->waitUntilByXPath( '/html/body/main/div[1]/div[8]/p/a[1]' );
-				$ae = $this->byXPath( '/html/body/main/div[1]/div[8]/p/a[1]' );
+				//Click "I Accept"
+				$this->waitUntilByXPath( '//a[contains(.,\'I accept\')]' );
+				$ae = $this->byXPath( '//a[contains(.,\'I accept\')]' );
 				Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 				$ae->click();
 
 				$this->waitUntilByXPath( '//*[@id="welcome_button_next"]' );
 				$ae = $this->byXPath( '//*[@id="welcome_button_next"]' );
-				//$ae = $this->byId( "goStep1" );
 				Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 				$ae->click();
 			} else {
@@ -319,7 +314,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 	}
 
 	public function mf( $amount ) {
-		return Misc::MoneyFormat( $amount, false );
+		return Misc::MoneyRound( $amount );
 	}
 
 	function testCRAToCSVFile() {
@@ -441,10 +436,10 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 
 				$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), $this->mf( $row['gross_income'] ) );
 				if ( $row['federal_deduction'] != '' ) {
-					$this->assertEquals( (float)$this->mf( $row['federal_deduction'] ), (float)$this->mf( $pd_obj->getFederalPayPeriodDeductions() ), null, 0.015 ); //0.015=Allowed Delta
+					$this->assertEqualsWithDelta( (float)$this->mf( $row['federal_deduction'] ), (float)$this->mf( $pd_obj->getFederalPayPeriodDeductions() ), 0.015, 'I: '. $i .' Gross Income: '. $row['gross_income'] .' Province: '. $row['province'] .' Federal Claim: '. $row['federal_claim'] ); //0.015=Allowed Delta
 				}
 				if ( $row['provincial_deduction'] != '' ) {
-					$this->assertEquals( (float)$this->mf( $row['provincial_deduction'] ), (float)$this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), null, 0.015 ); //0.015=Allowed Delta
+					$this->assertEqualsWithDelta( (float)$this->mf( $row['provincial_deduction'] ), (float)$this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), 0.015, 'I: '. $i .' Gross Income: '. $row['gross_income'] .' Province: '. $row['province'] .' Provincial Claim: '. $row['provincial_claim'] ); //0.015=Allowed Delta
 				}
 			}
 

@@ -44,12 +44,12 @@ define('VALIDATE_SPACE',        '\s');
 define('VALIDATE_ALPHA_LOWER',  'a-z');
 define('VALIDATE_ALPHA_UPPER',  'A-Z');
 define('VALIDATE_ALPHA',        VALIDATE_ALPHA_LOWER . VALIDATE_ALPHA_UPPER);
-define('VALIDATE_EALPHA_LOWER', VALIDATE_ALPHA_LOWER . 'áéíóúàèìòùäëïöüâêîôûñçþæðå');
-define('VALIDATE_EALPHA_UPPER', VALIDATE_ALPHA_UPPER . 'ÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÑÇÞÆÐÅ');
+define('VALIDATE_EALPHA_LOWER', VALIDATE_ALPHA_LOWER . 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+define('VALIDATE_EALPHA_UPPER', VALIDATE_ALPHA_UPPER . 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
 define('VALIDATE_EALPHA',       VALIDATE_EALPHA_LOWER . VALIDATE_EALPHA_UPPER);
 define('VALIDATE_PUNCTUATION',  VALIDATE_SPACE . '\.,;\:&"\'\?\!\(\)');
 define('VALIDATE_NAME',         VALIDATE_EALPHA . VALIDATE_SPACE . "'");
-define('VALIDATE_STREET',       VALIDATE_NAME . "/\\ºª\.");
+define('VALIDATE_STREET',       VALIDATE_NAME . "/\\ï¿½ï¿½\.");
 
 /**
  * Validation class
@@ -116,7 +116,7 @@ class Validate
         }
         return true;
     }
-    
+
     /**
      * Converting a string to UTF-7 (RFC 2152)
      *
@@ -152,7 +152,7 @@ class Validate
                     } else {
                         $return .= $char;
                     }
-                } elseif (($i == strlen($string) || 
+                } elseif (($i == strlen($string) ||
                             !((ord($char) >= 0x7F)) || (ord($char) <= 0x1F))) {
                     if ($state != 1) {
                         $return .= $utf7[ord($char)];
@@ -449,9 +449,9 @@ class Validate
 
         $date_len = strlen($format);
         for ($i = 0; $i < $date_len; $i++) {
-            $c = $format{$i};
+            $c = $format[$i];
             if ($c == '%') {
-                $next = $format{$i + 1};
+                $next = $format[$i + 1];
                 switch ($next) {
                     case 'j':
                     case 'd':

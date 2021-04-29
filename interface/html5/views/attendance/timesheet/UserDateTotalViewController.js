@@ -1,4 +1,4 @@
-class UserDateTotalViewController extends BaseViewController {
+export class UserDateTotalViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_date_total_view_container', //Must set el here and can only set string, so events can work
@@ -559,7 +559,7 @@ class UserDateTotalViewController extends BaseViewController {
 			api_class: TTAPI.APIUserDateTotal,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.WAGE,
+			layout_name: 'global_wage',
 			show_search_inputs: true,
 			navigation_mode: true
 		} );
@@ -597,7 +597,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'object_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( this.getProperObjectType() ) );
+		form_item_input.setSourceData( this.getProperObjectType() );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_user_date_total_column1 );
 
 		//Regular Policy
@@ -605,7 +605,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRegularTimePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
+			layout_name: 'global_regular_time',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'regular_policy_id'
@@ -618,7 +618,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'absence_policy_id'
@@ -631,7 +631,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIOverTimePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.OVER_TIME_POLICY,
+			layout_name: 'global_over_time',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'overtime_policy_id'
@@ -644,7 +644,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPremiumPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PREMIUM_POLICY,
+			layout_name: 'global_premium',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'premium_policy_id'
@@ -657,7 +657,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIMealPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.MEAL_POLICY,
+			layout_name: 'global_meal',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'meal_policy_id'
@@ -670,7 +670,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBreakPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BREAK_POLICY,
+			layout_name: 'global_break',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'break_policy_id'
@@ -683,7 +683,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_CODE,
+			layout_name: 'global_pay_code',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_code_id'
@@ -696,7 +696,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch_id'
@@ -713,7 +713,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department_id'
@@ -732,7 +732,7 @@ class UserDateTotalViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -764,7 +764,7 @@ class UserDateTotalViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -807,7 +807,7 @@ class UserDateTotalViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			show_search_inputs: true,
 			field: 'currency_id',
 			set_empty: true

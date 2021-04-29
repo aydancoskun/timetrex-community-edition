@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -230,7 +230,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 			}
 		}
 
-		$additional_order_fields = [ 'type_id', 'status_id' ];
+		$additional_order_fields = [ 'type_id', 'status_id', 'kpi_group' ];
 
 		$sort_column_aliases = [
 				'type'   => 'type_id',
@@ -251,13 +251,17 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 
 		$uf = new UserFactory();
 		$cgmf = new CompanyGenericMapFactory();
-		//$kgf = new KPIGroupFactory();
+		$kgf = new KPIGroupFactory();
+
 		$ph = [
 				'company_id' => TTUUID::castUUID( $company_id ),
 		];
 
+		$kpi_group_all_label = TTi18n::getText( '-- All --' );
+
 		$query = '
-					select DISTINCT a.*, 
+					select DISTINCT a.*,
+					x.kpi_group as kpi_group, 
 					y.first_name as created_by_first_name, 
 					y.middle_name as created_by_middle_name, 
 					y.last_name as created_by_last_name, 
@@ -268,6 +272,14 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 						LEFT JOIN ' . $cgmf->getTable() . ' as b ON ( a.id = b.object_id AND b.company_id = a.company_id AND b.object_type_id = 2020 )
 						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+						LEFT JOIN (
+								SELECT 	a.id, 
+										string_agg( CASE WHEN b.map_id = \'ffffffff-ffff-ffff-ffff-ffffffffffff\' THEN \''. $kpi_group_all_label .'\' ELSE c.name END, \', \' ) as kpi_group 
+								FROM '. $this->getTable() .' as a 
+								LEFT JOIN '. $cgmf->getTable() .' as b ON ( a.id = b.object_id AND b.company_id = a.company_id AND b.object_type_id = 2020 ) 
+								LEFT JOIN '. $kgf->getTable() .' as c ON ( b.map_id = c.id ) 
+								GROUP BY a.id						
+						) as x ON ( a.id = x.id )
 					where a.company_id = ?
 					';
 		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
@@ -315,6 +327,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $this;
 	}

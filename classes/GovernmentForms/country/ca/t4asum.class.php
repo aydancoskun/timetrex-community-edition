@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -552,7 +552,7 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 		return $this->l82_diff;
 	}
 
-	function _outputXML() {
+	function _outputXML( $type = null ) {
 		if ( is_object( $this->getXMLObject() ) ) {
 			$xml = $this->getXMLObject();
 		} else {
@@ -591,7 +591,7 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 
 			if ( is_array( $phone_arr ) ) {
 				$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_area_cd', $phone_arr[0] );
-				$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_phn_nbr', $phone_arr[1] . '-' . $phone_arr[2] );
+				$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_phn_nbr', $phone_arr[1] ); //NOTE: filterPhone() returns two segments, rather than 3 like it does in other classes.
 				//$xml->Return->T4A->T4ASummary->CNTC->addChild( 'cntc_extn_nbr', '' );
 			}
 
@@ -614,7 +614,7 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 		return true;
 	}
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 

@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,7 +35,7 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class ExceptionTest extends PHPUnit_Framework_TestCase {
+class ExceptionTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
@@ -63,7 +63,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 			'future_dates'        => false, //Calculates dates in the future.
 	];
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -101,16 +101,10 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		//$this->deleteAllSchedules();
-
-		return true;
 	}
 
 	function getPayStubAccountLinkArray() {
@@ -351,6 +345,15 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									'severity_id'  => 20,
 									'grace'        => 300,
 									'watch_window' => 3600,
+							],
+					];
+					break;
+				case 'S9': //Normal
+					$data['exceptions'] = [
+							$type => [
+									'active'       => true,
+									'severity_id'  => 20,
+									'grace'        => 300,
 							],
 					];
 					break;
@@ -2088,6 +2091,208 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$this->calculateExceptions( $date_epoch );
 		$exception_arr = $this->getExceptions( $date_epoch );
 		$this->assertArrayHasKey( 'S6', $exception_arr );
+
+		return true;
+	}
+
+	/**
+	 * @group Punch_testExceptionOverWeeklyScheduledTimeA
+	 */
+	function testExceptionOverWeeklyScheduledTimeA() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+		$exception_policy_id = $this->createExceptionPolicy( 'S9' );
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								null,
+								$exception_policy_id,
+								null,
+								null,
+								null,
+								null,
+								[ $this->user_id ] );
+
+		//Always start with a proper punch on the previous day, as that can affect the exception.
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( time() ), -1, 'day' );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
+		$this->createSchedule( $this->user_id, $date_epoch, [
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => ' 8:00AM',
+				'end_time'           => '5:00PM',
+		] );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 5:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => 0,
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
+		//print_r($punch_arr);
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
+
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($punch_arr);
+		//Total Time
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
+		$this->assertEquals( 28800, $udt_arr[$date_epoch][0]['total_time'] );
+
+
+		//
+		// Test exception for today.
+		//
+		$date_epoch = TTDate::getMiddleDayEpoch( time() );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, [
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => ' 8:00AM',
+				'end_time'           => '5:00PM',
+		] );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 5:30PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => 0,
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+		$this->deleteExceptions( $date_epoch ); //Exceptions could be calculated above, so delete them here.
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
+		//print_r($punch_arr);
+
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] ); //Make sure today has two punches.
+
+		//Calculate exceptions, and check to make sure the proper ones exist.
+		$this->calculateExceptions( $date_epoch );
+		$exception_arr = $this->getExceptions( $date_epoch );
+		$this->assertArrayHasKey( 'S9', $exception_arr );
+
+		return true;
+	}
+
+	/**
+	 * @group Punch_testExceptionOverWeeklyScheduledTimeB
+	 */
+	function testExceptionOverWeeklyScheduledTimeB() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+		$exception_policy_id = $this->createExceptionPolicy( 'S9' );
+
+		//Create Policy Group
+		$dd->createPolicyGroup( $this->company_id,
+								null,
+								$exception_policy_id,
+								null,
+								null,
+								null,
+								null,
+								[ $this->user_id ] );
+
+		//Always start with a proper punch on the previous day, as that can affect the exception.
+		$date_epoch = TTDate::incrementDate( TTDate::getMiddleDayEpoch( time() ), -1, 'day' );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
+		$this->createSchedule( $this->user_id, $date_epoch, [
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => ' 8:00AM',
+				'end_time'           => '5:00PM',
+		] );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 5:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => 0,
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
+		//print_r($punch_arr);
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
+
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($punch_arr);
+		//Total Time
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
+		$this->assertEquals( 28800, $udt_arr[$date_epoch][0]['total_time'] );
+
+
+		//
+		// Test exception for today.
+		//
+		$date_epoch = TTDate::getMiddleDayEpoch( time() );
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$this->createSchedule( $this->user_id, $date_epoch, [
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => ' 8:00AM',
+				'end_time'           => '5:00PM',
+		] );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 8:00AM' ),
+							  strtotime( $date_stamp . ' 5:00PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => 0,
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+		$this->deleteExceptions( $date_epoch ); //Exceptions could be calculated above, so delete them here.
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
+		//print_r($punch_arr);
+
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] ); //Make sure today has two punches.
+
+		//Calculate exceptions, and check to make sure the proper ones exist.
+		$this->calculateExceptions( $date_epoch );
+		$exception_arr = $this->getExceptions( $date_epoch );
+		$this->assertEmpty( $exception_arr ); //No exceptions.
 
 		return true;
 	}

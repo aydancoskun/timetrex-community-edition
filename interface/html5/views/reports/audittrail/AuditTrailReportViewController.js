@@ -1,4 +1,4 @@
-class AuditTrailReportViewController extends ReportBaseViewController {
+export class AuditTrailReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {} );
 

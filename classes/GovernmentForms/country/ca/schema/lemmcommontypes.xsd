@@ -2,12 +2,13 @@
 
 <!--
 Description	Common Simple, Complex and Element Types for INFODEC returns
-Last updated 	October 2015
-Version#:	1.18 (version #.yy)
+Last updated 	september 2020
+Version#:	1.19 (version #.yy)
 Revision History:
 Mar 2013	Initial creation to allow new Infodec schemas to follow the new CRA XML standard.
 Apr 2014	Updated to include common types used for PartXVIII return.
 May 2015	Updated to include common types used for T3 special returns.
+May 2019	Updated to include common types used for T2202 return.
 -->
 
 <xsd:schema xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" 
@@ -103,6 +104,16 @@ May 2015	Updated to include common types used for T3 special returns.
 	<xsd:simpleType name="BNRootType">
 		<xsd:restriction base="sdt:NumberType">
 			<xsd:pattern value="\d{9}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- Added for T2202 -->
+	<xsd:simpleType name="BNRZType">
+		<xsd:annotation>
+			<xsd:documentation>Root = 999999999, Program ID = RZ, Account # = 9999</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="\d{9}(RZ)\d{4}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 
@@ -235,6 +246,16 @@ May 2015	Updated to include common types used for T3 special returns.
 		</xsd:restriction>
 	</xsd:simpleType>
 
+	<!-- Added for T2202 -->
+	<xsd:simpleType name="ZeroToTwelveCountType">
+		<xsd:restriction base="sdt:CountType">
+			<xsd:pattern value="\d{1,2}"/>
+			<xsd:minInclusive value="0"/>
+			<xsd:maxInclusive value="12"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+
 	<xsd:simpleType name="Precision6PercentType">
 		<xsd:restriction base="sdt:PercentType">
 			<xsd:totalDigits value="9"></xsd:totalDigits>
@@ -316,6 +337,20 @@ May 2015	Updated to include common types used for T3 special returns.
 	<xsd:simpleType name="OneToFourCodeType">
 		<xsd:restriction base="sdt:CodeType">
 			<xsd:pattern value="[1-4]{1}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- Added for T2202 -->
+	<xsd:simpleType name="OneToFiveCodeType">
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:pattern value="[1-5]{1}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- Added for T2202 -->
+	<xsd:simpleType name="OneToSixCodeType">
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:pattern value="[1-6]{1}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 
@@ -433,7 +468,7 @@ May 2015	Updated to include common types used for T3 special returns.
 			</xsd:restriction>
 		</xsd:simpleContent>
 	</xsd:complexType>
-	
+
 	<xsd:complexType name="Length1to1309TextType">
 		<xsd:simpleContent>
 			<xsd:restriction base="sdt:TextType">
@@ -536,6 +571,18 @@ May 2015	Updated to include common types used for T3 special returns.
 		</xsd:sequence>
 	</xsd:complexType>
 
+        <!-- Added for T2202 return -->
+	<xsd:complexType name="RequiredLine1AddressType">
+		<xsd:sequence>
+			<xsd:element ref="AddressLine1Text"/>						
+			<xsd:element ref="AddressLine2Text"	minOccurs="0"/> 						
+			<xsd:element ref="CityName" 		minOccurs="0"/>
+			<xsd:element ref="ProvinceStateCode"	minOccurs="0"/> 						
+			<xsd:element ref="CountryCode"		minOccurs="0"/> 						
+			<xsd:element ref="PostalZipCode" 	minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
 	<xsd:complexType name="IndividualNameType">
 		<xsd:sequence>
 			<xsd:element ref="FamilyName"/>
@@ -628,6 +675,13 @@ May 2015	Updated to include common types used for T3 special returns.
 			<xsd:element ref="Day"/>
 		</xsd:sequence>
 	</xsd:complexType>
+
+	<!-- Added for T2202 -->
+	<xsd:simpleType name="YYMMType">
+		<xsd:restriction base="sdt:NumberType">
+			<xsd:pattern value="\d{2}(0[1-9]|1[012])"/>
+		</xsd:restriction>
+	</xsd:simpleType>
 
 	<!--                                                        -->
 	<!-- Element definistions                                   -->

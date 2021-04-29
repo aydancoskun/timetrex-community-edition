@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -572,13 +572,8 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			$retval = bcadd( bcmul( bcsub( $annual_taxable_income, $federal_rate_income ), $rate ), $federal_constant );
 
 			if ( $this->getDate() >= 20200101 && $this->getFederalFormW4Version() == 2020 ) {  //See Form W4 Version check above as well.
-				$additional_deduction = 0;
-				if ( $this->getFederalAdditionalDeduction() > 0 ) {
-					$additional_deduction = bcmul( $this->getFederalAdditionalDeduction(), $this->getAnnualPayPeriods() ); //Federal Deduction amount from 2020 W4 is *PER PAY PERIOD*
-				}
-
-				Debug::text( 'Claimed Dependent Amount: ' . $this->getFederalClaimDependents() . ' Additional Deduction: ' . $additional_deduction, __FILE__, __LINE__, __METHOD__, 10 );
-				$retval = bcsub( bcadd( $retval, $additional_deduction ), $this->getFederalClaimDependents() );
+				Debug::text( '  Claimed Dependent Amount: ' . $this->getFederalClaimDependents(), __FILE__, __LINE__, __METHOD__, 10 );
+				$retval = bcsub( $retval, $this->getFederalClaimDependents() );
 			}
 
 			if ( $retval < 0 ) {
@@ -588,8 +583,18 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			$retval = 0;
 		}
 
-		Debug::text( 'RetVal: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+		//Additional deduction must be added at the very end, even if annual income is less than 0.
+		if ( $this->getDate() >= 20200101 && $this->getFederalFormW4Version() == 2020 ) {  //See Form W4 Version check above as well.
+			$additional_deduction = 0;
+			if ( $this->getFederalAdditionalDeduction() > 0 ) {
+				$additional_deduction = bcmul( $this->getFederalAdditionalDeduction(), $this->getAnnualPayPeriods() ); //Federal Deduction amount from 2020 W4 is *PER PAY PERIOD*
+			}
 
+			Debug::text( '  Additional Deduction: ' . $additional_deduction, __FILE__, __LINE__, __METHOD__, 10 );
+			$retval = bcadd( $retval, $additional_deduction );
+		}
+
+		Debug::text( 'RetVal: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 		return $retval;
 	}
 
@@ -635,7 +640,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		$maximum_contribution = $this->getSocialSecurityMaximumContribution( $type );
 		$ytd_contribution = $this->getYearToDateSocialSecurityContribution();
 
-		Debug::text( 'Rate: ' . $rate . ' YTD Contribution: ' . $ytd_contribution, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Rate: ' . $rate . ' YTD Contribution: ' . $ytd_contribution .' Max Contribution: '. $maximum_contribution, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$amount = bcmul( $pay_period_income, $rate );
 		$max_amount = bcsub( $maximum_contribution, $ytd_contribution );
@@ -665,7 +670,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		$maximum_contribution = $this->getSocialSecurityMaximumContribution( $type );
 		$ytd_contribution = $this->getYearToDateSocialSecurityContribution();
 
-		Debug::text( 'Rate: ' . $rate . ' YTD Contribution: ' . $ytd_contribution, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Rate: ' . $rate . ' YTD Contribution: ' . $ytd_contribution .' Max Contribution: '. $maximum_contribution, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$amount = bcmul( $pay_period_income, $rate );
 		$max_amount = bcsub( $maximum_contribution, $ytd_contribution );

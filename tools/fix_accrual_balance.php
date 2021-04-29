@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,7 +37,7 @@
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
+if ( $argc < 1 || ( isset( $argv[1] ) && in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) ) {
 	$help_output = "Usage: fix_accrual_balance.php [options] [company_id]\n";
 	$help_output .= "    -timesheet		Recalculate Accrual Policies\n";
 	$help_output .= "    -balance		Recalculate Accrual Balances\n";
@@ -73,8 +73,8 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 		$dry_run = false;
 	}
 
-	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' AND TTUUID::isUUID( $argv[ $last_arg ] ) ) {
-		$company_id = $argv[ $last_arg ];
+	if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' && TTUUID::isUUID( $argv[$last_arg] ) ) {
+		$company_id = $argv[$last_arg];
 	}
 
 
@@ -95,7 +95,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 	$clf->getAll();
 	if ( $clf->getRecordCount() > 0 ) {
 		foreach ( $clf as $c_obj ) {
-			if ( isset( $company_id ) AND $company_id != '' AND $company_id != $c_obj->getId() ) {
+			if ( isset( $company_id ) && $company_id != '' && $company_id != $c_obj->getId() ) {
 				continue;
 			}
 
@@ -163,7 +163,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 				if ( $recalc_timesheet == true ) {
 					echo ' Recalculating TimeSheet Balances...' . "\n";
 
-					$flags = array(
+					$flags = [
 							'meal'              => false,
 							'undertime_absence' => true, //Needs to calculate undertime absences, otherwise it won't update accruals.
 							'break'             => false,
@@ -182,7 +182,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 
 							//Calculate policies for future dates.
 							'future_dates'        => false, //Calculates dates in the future.
-					);
+					];
 
 					//Get all absence policies, then find their pay formula to see if its linked to an accrual.
 					$aplf = new AbsencePolicyListFactory();
@@ -192,7 +192,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 					if ( $aplf->getRecordCount() > 0 ) {
 						foreach ( $aplf as $ap_obj ) {
 							$pf_obj = $ap_obj->getPayFormulaPolicyObject();
-							if ( is_object( $pf_obj ) AND $pf_obj->getAccrualPolicyAccount() > 0 AND is_object( $pf_obj->getAccrualPolicyAccountObject() ) AND $pf_obj->getAccrualRate() != 0 ) {
+							if ( is_object( $pf_obj ) && $pf_obj->getAccrualPolicyAccount() > 0 && is_object( $pf_obj->getAccrualPolicyAccountObject() ) && $pf_obj->getAccrualRate() != 0 ) {
 								Debug::text( 'Found Absence Policy linked to Accrual: ' . $ap_obj->getName() . ' Accrual Account ID: ' . $pf_obj->getAccrualPolicyAccountObject()->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 
 								$ulf = new UserListFactory();
@@ -241,11 +241,11 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 											foreach ( $udtlf as $udt_obj ) {
 												Debug::text( '  UDT ID: ' . $udt_obj->getId() . ' User: ' . $user_obj->getUsername() . ' Date: ' . TTDate::getDate( 'DATE', $udt_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10 );
 												if ( $recalc == true ) {
-													if ( is_object( $udt_obj->getPayPeriodObject() ) AND $udt_obj->getPayPeriodObject()->getIsLocked() ) {
+													if ( is_object( $udt_obj->getPayPeriodObject() ) && $udt_obj->getPayPeriodObject()->getIsLocked() ) {
 														echo ' Pay Period is Locked: ' . $udt_obj->getPayPeriodObject()->getID() . "... Unlocking...\n";
-														$pay_period_status_ids[ $udt_obj->getPayPeriodObject()->getID() ] = $udt_obj->getPayPeriodObject()->getStatus();
+														$pay_period_status_ids[$udt_obj->getPayPeriodObject()->getID()] = $udt_obj->getPayPeriodObject()->getStatus();
 														if ( $udt_obj->getPayPeriodObject()->getStatus() == 20 ) { //Closed
-															$udt_obj->getPayPeriodObject()->setStatus( 30 ); //Post Adjustment
+															$udt_obj->getPayPeriodObject()->setStatus( 30 );       //Post Adjustment
 														} else {
 															$udt_obj->getPayPeriodObject()->setStatus( 10 ); //Open
 														}

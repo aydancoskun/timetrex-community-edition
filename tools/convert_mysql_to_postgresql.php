@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,7 +44,7 @@ require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPAR
 */
 
 
-if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: convert_mysql_to_postgresql.php [data]\n";
 	$help_output .= " [data] = 'truncate'\n";
 	echo $help_output;
@@ -52,13 +52,13 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	//Handle command line arguments
 	$last_arg = count( $argv ) - 1;
 
-	if ( isset( $db ) AND is_object( $db ) AND strncmp( $db->databaseType, 'mysql', 5 ) != 0 ) {
+	if ( isset( $db ) && is_object( $db ) && strncmp( $db->databaseType, 'mysql', 5 ) != 0 ) {
 		echo "ERROR: This script must be run on MySQL only!";
 		exit( 255 );
 	}
 
-	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
-		$type = trim( strtolower( $argv[ $last_arg ] ) );
+	if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' ) {
+		$type = trim( strtolower( $argv[$last_arg] ) );
 
 		$dict = NewDataDictionary( $db );
 		$tables = $dict->MetaTables();

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -2021,13 +2021,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$config['sort'][] = [ 'date_stamp' => 'asc' ];
 				Debug::Arr( $config, 'CMS PBJ Config Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				if ( is_object( $this->getUserObject() ) && is_object( $this->getUserObject()->getCompanyObject() ) && $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
-					Debug::Text( 'Using Job Detail Report...', __FILE__, __LINE__, __METHOD__, 10 );
-					$jar = TTNew( 'JobDetailReport' ); /** @var JobDetailReport $jar */
-				} else {
-					Debug::Text( 'Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10 );
-					$jar = TTNew( 'TimesheetDetailReport' ); /** @var TimesheetDetailReport $jar */
-				}
+				Debug::Text( 'Using PBJ Detail Report...', __FILE__, __LINE__, __METHOD__, 10 );
+				$jar = TTNew( 'PBJDetailReport' ); /** @var PBJDetailReport $jar */
 				$jar->setAPIMessageID( $this->getAPIMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
 				$jar->setPermissionObject( $this->getPermissionObject() );

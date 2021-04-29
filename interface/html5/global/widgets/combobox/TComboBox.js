@@ -256,23 +256,19 @@
 			}
 
 			source_data = val;
-			var option_array = [];
-
-			if ( $.isArray( val ) ) {
-				var len = val.length;
-				for ( var i = 0; i < len; i++ ) {
-					option_array.push( '<option value="' + val[i][valueKey] + '">' + val[i][labelKey] + '</option>' );
-					// $( this ).append( '<option value="' + item[valueKey] + '">' + item[labelKey] + '</option>' );
-				}
-			} else {
-				for ( var j in val ) {
-					// $( this ).append( '<option value="' + j + '">' + val[j] + '</option>' );
-					option_array.push( '<option value="' + j + '">' + val[j] + '</option>' );
-				}
-			}
+			//var option_array = [];
 
 			if ( $( this )[0] ) {
-				$( this )[0].innerHTML = option_array.join( '' );
+				if ( $.isArray( val ) ) {
+					var len = val.length;
+					for ( var i = 0; i < len; i++ ) {
+						$( this ).append( $( '<option value="' + val[i][valueKey] + '"></option>' ).text( val[i][labelKey] ) );
+					}
+				} else {
+					for ( var j in val ) {
+						$( this ).append( $( '<option value="' + j + '"></option>' ).text( val[j] ) );
+					}
+				}
 			}
 
 			if ( set_select_item_when_set_source_data ) {

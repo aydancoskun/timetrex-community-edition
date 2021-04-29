@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -126,6 +126,7 @@ class APIInstall extends APIFactory {
 						'php_version'       => $install_obj->getPHPVersion(),
 						'check_php_version' => $install_obj->checkPHPVersion(),
 				];
+				$retval['php_int_size'] = $install_obj->checkPHPINTSize();
 
 				$retval['database_engine'] = $install_obj->checkDatabaseType();
 				$retval['bcmath'] = $install_obj->checkBCMATH();
@@ -145,7 +146,6 @@ class APIInstall extends APIFactory {
 				$retval['safe_mode'] = $install_obj->checkPHPSafeMode();
 				$retval['disabled_functions'] = [ 'check_disabled_functions' => $install_obj->checkPHPDisabledFunctions(), 'disabled_function_list' => $install_obj->getCriticalDisabledFunctionList() ];
 				$retval['allow_fopen_url'] = $install_obj->checkPHPAllowURLFopen();
-				$retval['magic_quotes'] = $install_obj->checkPHPMagicQuotesGPC();
 				$retval['disk_space'] = $install_obj->checkDiskSpace();
 				$retval['memory_limit'] = [
 						'check_php_memory_limit' => $install_obj->checkPHPMemoryLimit(),

@@ -1,4 +1,6 @@
-class ImportCSVWizardController extends BaseWizardController {
+import '@/global/widgets/filebrowser/TImageBrowser';
+
+export class ImportCSVWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg',
@@ -17,7 +19,7 @@ class ImportCSVWizardController extends BaseWizardController {
 
 			column_map_data: null, //Used to build grid data
 
-			_required_files: ['TImageBrowser']
+			// _required_files: ['TImageBrowser']
 		} );
 
 		super( options );
@@ -66,7 +68,7 @@ class ImportCSVWizardController extends BaseWizardController {
 
 					var current_step_ui = $this.stepsWidgetDic[$this.current_step];
 					var current_value = current_step_ui.import_class.getValue().toLowerCase();
-					var url = ServiceCaller.import_csv_emample + 'import_' + current_value + '_example.csv';
+					var url = ServiceCaller.getURLByObjectType( 'import_csv_example' ) + 'import_' + current_value + '_example.csv';
 					window.open( url, '_blank' );
 				} );
 
@@ -745,6 +747,7 @@ class ImportCSVWizardController extends BaseWizardController {
 				import_data = this.stepsDataDic[3].import_data;
 				import_options = this.stepsDataDic[4];
 
+				this.api_import.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 				this.api_import.import( import_data, import_options, false, {
 					onResult: function( result ) {
 

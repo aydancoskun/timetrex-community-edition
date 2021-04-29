@@ -1,4 +1,6 @@
-class PayrollRemittanceAgencyEventWizardStepReview extends WizardStep {
+import { WizardStep } from '@/global/widgets/wizard/WizardStep';
+
+export class PayrollRemittanceAgencyEventWizardStepReview extends WizardStep {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			name: 'review',
@@ -11,11 +13,8 @@ class PayrollRemittanceAgencyEventWizardStepReview extends WizardStep {
 	}
 
 	init() {
-		var $this = this;
-		require( this._required_files, function() {
-			$this.api = TTAPI.APIPayrollRemittanceAgencyEvent;
-			$this.render();
-		} );
+		this.api = TTAPI.APIPayrollRemittanceAgencyEvent;
+		this.render();
 	}
 
 	getPreviousStepName() {
@@ -101,23 +100,23 @@ class PayrollRemittanceAgencyEventWizardStepReview extends WizardStep {
 						$.i18n._( 'In the event that the W2 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
 					);
 					break;
-				case 'F1099MISC':
+				case 'F1099NEC':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
 						Icons.tax_reports,
 						$.i18n._( 'Summary Report' ),
 						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 
-					$this.addButton( 'Government1099Misc',
+					$this.addButton( 'Government1099Nec',
 						Icons.view_detail,
-						$.i18n._( '1099-MISC Forms' ),
-						$.i18n._( 'Generate 1099-MISC forms to review and verify that all necessary boxes are properly filled out.' )
+						$.i18n._( '1099-NEC Forms' ),
+						$.i18n._( 'Generate 1099-NEC forms to review and verify that all necessary boxes are properly filled out.' )
 					);
 
-					$this.addButton( '1099MiscFormSetup',
+					$this.addButton( '1099NecFormSetup',
 						Icons.save_setup,
 						$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
-						$.i18n._( 'In the event that the 1099-MISC report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
+						$.i18n._( 'In the event that the 1099-NEC report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
 					);
 					break;
 				case 'F940':
@@ -258,22 +257,22 @@ class PayrollRemittanceAgencyEventWizardStepReview extends WizardStep {
 						break;
 				}
 				break;
-			case 'F1099MISC':
+			case 'F1099NEC':
 				switch ( icon ) {
-					case 'Government1099Misc':
-						Global.loadScript( 'views/reports/form1099/Form1099MiscReportViewController', function() {
+					case 'Government1099Nec':
+						Global.loadScript( 'views/reports/form1099/Form1099NecReportViewController', function() {
 							$this.getWizardObject().getReport( 'pdf_form_government' );
 						} );
 						break;
 					case 'taxReportsIcon_new_window':
-						this.getWizardObject().showHTMLReport( 'Form1099MiscReport', true );
+						this.getWizardObject().showHTMLReport( 'Form1099NecReport', true );
 						break;
 					case 'taxReportsIcon':
-						this.getWizardObject().showHTMLReport( 'Form1099MiscReport' );
+						this.getWizardObject().showHTMLReport( 'Form1099NecReport' );
 						break;
-					case '1099MiscFormSetup':
+					case '1099NecFormSetup':
 						this.getWizardObject().minimize();
-						IndexViewController.openReport( LocalCacheData.current_open_primary_controller, 'Form1099MiscReport', null, 'FormSetup' );
+						IndexViewController.openReport( LocalCacheData.current_open_primary_controller, 'Form1099NecReport', null, 'FormSetup' );
 						break;
 				}
 				break;

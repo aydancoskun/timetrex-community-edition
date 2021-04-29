@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,14 +35,14 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
+class AccrualPolicyTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 	protected $pay_stub_account_link_arr = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -73,16 +73,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		//$this->deleteAllSchedules();
-
-		return true;
 	}
 
 	function createPayPeriodSchedule() {
@@ -1858,6 +1852,42 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
 		$this->assertEquals( 201600, $accrual_balance );
+	}
+
+	/**
+	 * @group AccrualPolicy_testMonthlyCalendarAccrualwithRolloverC4
+	 * @noinspection PhpInconsistentReturnPointsInspection
+	 */
+	function testMonthlyCalendarAccrualwithRolloverC4() {
+		global $dd;
+
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return true;
+		}
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 500, $accrual_policy_account_id );
+		$dd->createPolicyGroup( $this->company_id,
+								null,
+								null,
+								null,
+								null,
+								null,
+								null,
+								[ $this->user_id ],
+								null,
+								[ $accrual_policy_id ] );
+
+		//Test UserModifier values.
+		$this->createAccrualPolicyUserModifier( $accrual_policy_id, $this->user_id, strtotime( '+10 months', $hire_date ), 0 ); //Accrual modifier at 0, should stop any accrual from occurring.
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+37 months', $current_epoch ), 1 );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( 0, $accrual_balance );
 	}
 
 	/**

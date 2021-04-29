@@ -1,4 +1,4 @@
-class ContributingShiftPolicyViewController extends BaseViewController {
+export class ContributingShiftPolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#contributing_shift_policy_view_container',
@@ -109,7 +109,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			api_class: TTAPI.APIContributingShiftPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.OVER_TIME_POLICY,
+			layout_name: 'global_over_time',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -145,7 +145,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIContributingPayCodePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
+			layout_name: 'global_contributing_pay_code_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'contributing_pay_code_policy_id'
@@ -261,7 +261,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 		// Holidays
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'include_holiday_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.include_holiday_type_array ) );
+		form_item_input.setSourceData( $this.include_holiday_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Holidays' ), form_item_input, tab_date_criteria_column1 );
 
 		// Holiday Policies
@@ -269,7 +269,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIHolidayPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.HOLIDAY_POLICY,
+			layout_name: 'global_holiday',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'holiday_policy'
@@ -279,7 +279,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 		// Include Shift Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'include_shift_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.include_shift_type_array ) );
+		form_item_input.setSourceData( $this.include_shift_type_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Between above start/end times)' ) + '</span>' );
@@ -304,7 +304,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'branch_selection_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.branch_selection_type_array ) );
+		form_item_input.setSourceData( $this.branch_selection_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -317,7 +317,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch'
@@ -344,7 +344,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'department_selection_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.department_selection_type_array ) );
+		form_item_input.setSourceData( $this.department_selection_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -357,7 +357,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department'
@@ -385,7 +385,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_group_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_group_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_group_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -398,12 +398,12 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				tree_mode: true,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				set_empty: true,
 				field: 'job_group'
 			} );
 
-			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_group_array ) );
+			form_item_input_1.setSourceData( $this.job_group_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 
@@ -417,7 +417,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -430,7 +430,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'job'
@@ -454,7 +454,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_item_group_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_group_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_item_group_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -467,12 +467,12 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				tree_mode: true,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				set_empty: true,
 				field: 'job_item_group'
 			} );
 
-			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_item_group_array ) );
+			form_item_input_1.setSourceData( $this.job_item_group_array );
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 			v_box.append( form_item );
 
@@ -484,7 +484,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_item_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_item_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -497,7 +497,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'job_item'
@@ -702,7 +702,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Contributing Pay Code' ),
 				in_column: 1,
 				field: 'contributing_pay_code_policy_id',
-				layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
+				layout_name: 'global_contributing_pay_code_policy',
 				api_class: TTAPI.APIContributingPayCodePolicy,
 				multiple: true,
 				basic_search: true,
@@ -714,7 +714,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -726,7 +726,7 @@ class ContributingShiftPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

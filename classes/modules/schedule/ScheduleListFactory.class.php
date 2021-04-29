@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -553,6 +553,13 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 				//If the Start/Stop window is large (ie: 6-8hrs) we need to find the closest schedule.
 				$schedule_diff = $s_obj->inScheduleDifference( $epoch );
+
+				//If its an absent shift, weight the schedule difference to at least that of the start/stop window so we prefer working shifts by that are within that amount of time. Almost like a reverse start/stop window.
+				//   See PunchFactory::getDefaultPunchSettings() for more comments on this.
+				if ( $s_obj->getStatus() == 20 ) { //20=Absent
+					$schedule_diff += $s_obj->getStartStopWindow();
+				}
+
 				if ( $schedule_diff === 0 ) {
 					Debug::text( ' Within schedule times. ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -946,8 +953,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 										&& TTDate::isTimeOverLap( strtotime( $row['start_time'] ), strtotime( $row['end_time'] ), strtotime( $rs_row['start_time'] ), strtotime( $rs_row['end_time'] ) )
 										&& ( $row['branch_id'] == $rs_row['branch_id'] || ( $rs_row['branch_id'] == TTUUID::getNotExistID() && ( $row['branch_id'] == TTUUID::getZeroID() || $rs_row['default_branch_id'] == $row['default_branch_id'] ) ) || ( $row['branch_id'] == TTUUID::getNotExistID() && $rs_row['branch_id'] == $row['default_branch_id'] ) )
 										&& ( $row['department_id'] == $rs_row['department_id'] || ( $rs_row['department_id'] == TTUUID::getNotExistID() && ( $row['department_id'] == TTUUID::getZeroID() || $rs_row['default_department_id'] == $row['default_department_id'] ) ) || ( $row['department_id'] == TTUUID::getNotExistID() && $rs_row['department_id'] == $row['default_department_id'] ) )
-										&& ( $row['job_id'] == $rs_row['job_id'] || ( $rs_row['job_id'] == TTUUID::getNotExistID() && ( $row['job_id'] == TTUUID::getZeroID() || $rs_row['job_id'] == $row['default_job_id'] ) ) || ( $row['job_id'] == TTUUID::getNotExistID() && $rs_row['job_id'] == $row['default_job_id'] ) )
-										&& ( $row['job_item_id'] == $rs_row['job_item_id'] || ( $rs_row['job_item_id'] == TTUUID::getNotExistID() && ( $row['job_item_id'] == TTUUID::getZeroID() || $rs_row['job_item_id'] == $row['default_job_item_id'] ) ) || ( $row['job_item_id'] == TTUUID::getNotExistID() && $rs_row['job_item_id'] == $row['default_job_item_id'] ) )
+										&& ( $row['job_id'] == $rs_row['job_id'] || ( $rs_row['job_id'] == TTUUID::getNotExistID() && ( $row['job_id'] == TTUUID::getZeroID() || $rs_row['default_job_id'] == $row['default_job_id'] ) ) || ( $row['job_id'] == TTUUID::getNotExistID() && $rs_row['job_id'] == $row['default_job_id'] ) )
+										&& ( $row['job_item_id'] == $rs_row['job_item_id'] || ( $rs_row['job_item_id'] == TTUUID::getNotExistID() && ( $row['job_item_id'] == TTUUID::getZeroID() || $rs_row['default_job_item_id'] == $row['default_job_item_id'] ) ) || ( $row['job_item_id'] == TTUUID::getNotExistID() && $rs_row['job_item_id'] == $row['default_job_item_id'] ) )
 								) {
 									//Debug::Text( '  Committed Shift overrides Recurring Shift: ' . $row['id'] . '[' . $row['layer_order'] . '] ( Start: ' . TTDate::getDate( 'DATE+TIME', $row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $row['end_time'] ) . ') That overlaps recurring shift: ' . $rs_row['id'] . ' ( Start: ' . TTDate::getDate( 'DATE+TIME', $rs_row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $rs_row['end_time'] ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
 									$recurring_schedules[$row['user_id']][$row_iso_date_stamp][$rs_key] = $row;
@@ -1749,8 +1756,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$query .= ( isset( $filter_data['date_stamp'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : null;
-		$query .= ( isset( $filter_data['start_date'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['start_date'], 'start_datestamp', $ph ) : null;
-		$query .= ( isset( $filter_data['end_date'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['end_date'], 'end_datestamp', $ph ) : null;
+		$query .= ( isset( $filter_data['start_date'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', TTDate::parseDateTime( $filter_data['start_date'] ), 'start_datestamp', $ph ) : null;
+		$query .= ( isset( $filter_data['end_date'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', TTDate::parseDateTime( $filter_data['end_date'] ), 'end_datestamp', $ph ) : null;
 
 		$query .= ( isset( $filter_data['start_time'] ) ) ? $this->getWhereClauseSQL( 'a.start_time', $filter_data['start_time'], 'start_timestamp', $ph ) : null;
 		$query .= ( isset( $filter_data['end_time'] ) ) ? $this->getWhereClauseSQL( 'a.end_time', $filter_data['end_time'], 'end_timestamp', $ph ) : null;

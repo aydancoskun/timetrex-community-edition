@@ -1,4 +1,7 @@
-class HeaderViewController extends TTBackboneView {
+import { TTBackboneView } from '@/views/TTBackboneView';
+import { ServiceCaller } from '@/services/ServiceCaller';
+
+export class HeaderViewController extends TTBackboneView {
 	constructor( options = {} ) {
 		_.defaults( options, {} );
 
@@ -15,7 +18,7 @@ class HeaderViewController extends TTBackboneView {
 	}
 
 	render() {
-		var url = ServiceCaller.mainCompanyLogo;
+		var url = ServiceCaller.getURLByObjectType( 'primary_company_logo' );
 		if ( this.tpl ) {
 			this.setElement( this.tpl( { company_logo: url } ) );
 		}

@@ -1,4 +1,4 @@
-class RemittanceDestinationAccountViewController extends BaseViewController {
+export class RemittanceDestinationAccountViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#remittance_destination_account_view_container',
@@ -550,7 +550,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 			api_class: TTAPI.APIRemittanceDestinationAccount,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT,
+			layout_name: 'global_remittance_destination_account',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -568,7 +568,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			layout_name: 'global_legal_entity',
 			field: 'legal_entity_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -580,7 +580,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			field: 'user_id',
 			set_empty: true, //Must be true for when administrators add payment methods under Employee -> Payment Methods.
 			show_search_inputs: true
@@ -595,7 +595,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
 		// Name
@@ -613,7 +613,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 		//TYPE
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
 		// Remittance Source Account
@@ -621,7 +621,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRemittanceSourceAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
+			layout_name: 'global_remittance_source_account',
 			field: 'remittance_source_account_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -634,7 +634,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			field: 'currency_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -644,13 +644,13 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 		// Priority
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'priority' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.priority_array ) );
+		form_item_input.setSourceData( $this.priority_array );
 		this.addEditFieldToColumn( $.i18n._( 'Priority' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
 		// Amount TYPE
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'amount_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.amount_type_array ) );
+		form_item_input.setSourceData( $this.amount_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Amount Type' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
 		//Amount
@@ -671,7 +671,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'value1_2', validation_field: 'value1' } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.ach_transaction_type_array ) );
+			form_item_input.setSourceData( $this.ach_transaction_type_array );
 			this.addEditFieldToColumn( $.i18n._( 'Account Type' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 			// Value2
@@ -735,7 +735,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				layout_name: 'global_legal_entity',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -746,7 +746,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -757,7 +757,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
+				layout_name: 'global_remittance_source_account',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -767,7 +767,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -777,7 +777,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -788,14 +788,14 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.CURRENCY,
+				layout_name: 'global_currency',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Created By' ),
 				in_column: 3,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -808,7 +808,7 @@ class RemittanceDestinationAccountViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 3,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

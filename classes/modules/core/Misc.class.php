@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -192,7 +192,7 @@ class Misc {
 						$retarr[$group_by_key_val][$key] = $val;
 					} else if ( !in_array( $key, $ignore_elements ) ) {
 						if ( isset( $retarr[$group_by_key_val][$key] ) ) {
-							$retarr[$group_by_key_val][$key] = Misc::MoneyFormat( bcadd( $retarr[$group_by_key_val][$key], $val ), false );
+							$retarr[$group_by_key_val][$key] = Misc::MoneyRound( bcadd( $retarr[$group_by_key_val][$key], $val ) );
 							//Debug::text(' Adding Value: '. $val .' For: '. $retarr[$group_by_key_val][$key], __FILE__, __LINE__, __METHOD__, 10);
 						} else {
 							//Debug::text(' Setting Value: '. $val, __FILE__, __LINE__, __METHOD__, 10);
@@ -271,7 +271,7 @@ class Misc {
 					}
 				}
 
-				if ( $preserve ) {
+				if ( $preserve == true ) {
 					$r[$key] = $value;
 				} else {
 					$r[] = $value;
@@ -282,6 +282,25 @@ class Misc {
 		}
 
 		return $r;
+	}
+
+	/**
+	 * Flattens an array by only a single level, ie: [ 'level1' => [ 0 => [ 'key' => 'val' ] ] ] becomes: [ 0 => [ 'key' => 'val' ] ]
+	 * @param $array
+	 * @return array
+	 */
+	static function flattenArrayOneLevel( $array ) {
+		$retarr = [];
+
+		if ( is_array( $array ) && !empty($array) ) {
+			foreach( $array as $key => $value ) {
+				if ( is_array( $value ) ) {
+					$retarr = $retarr + $value; //Merge array and maintain indexes.
+				}
+			}
+		}
+
+		return $retarr;
 	}
 
 	/*
@@ -895,7 +914,7 @@ class Misc {
 	 */
 	static function getAfterDecimal( $float, $format_number = true ) {
 		if ( $format_number == true ) {
-			$float = Misc::MoneyFormat( $float, false );
+			$float = Misc::MoneyRound( $float );
 		}
 
 		//Locale agnostic, so we can handle decimal separators that are commas.
@@ -1080,34 +1099,6 @@ class Misc {
 	 */
 	static function AdjustXY( $coord, $adjust_coord ) {
 		return ( $coord + $adjust_coord );
-	}
-
-	/**
-	 * Static class, static function. avoid PHP strict error.
-	 * @param $file_name
-	 * @param $num
-	 * @param bool $print_text
-	 * @param int $height
-	 * @return bool
-	 */
-	static function writeBarCodeFile( $file_name, $num, $print_text = true, $height = 60 ) {
-		if ( !class_exists( 'Image_Barcode' ) ) {
-			require_once( Environment::getBasePath() . '/classes/Image_Barcode/Barcode.php' );
-		}
-
-		ob_start();
-		$ib = new Image_Barcode();
-		$ib->draw( $num, 'code128', 'png', false, $print_text, $height );
-		$ob_contents = ob_get_contents();
-		ob_end_clean();
-
-		if ( @file_put_contents( $file_name, $ob_contents ) > 0 ) {
-			//echo "Writing file successfull<Br>\n";
-			return true;
-		} else {
-			//echo "Error writing file<Br>\n";
-			return false;
-		}
 	}
 
 	/**
@@ -1425,47 +1416,47 @@ class Misc {
 		}
 	}
 
-	/**
-	 * @param $lf
-	 * @param $filter_data
-	 * @param $file_pointer
-	 * @return bool
-	 * @noinspection PhpUndefinedConstantInspection
-	 */
-	static function ExportListFactory2XML( $lf, $filter_data, $file_pointer ) {
-		require_once( Environment::getBasePath() . 'classes/pear/XML/Serializer.php' );
-
-		$serializer = new XML_Serializer( [
-												  XML_SERIALIZER_OPTION_INDENT        => '  ',
-												  XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-												  'linebreak'                         => "\n",
-												  'typeHints'                         => true,
-												  'encoding'                          => 'UTF-8',
-												  'rootName'                          => get_parent_class( $lf ),
-										  ]
-		);
-
-		$lf->getByCompanyId( $filter_data['company_id'] );
-		if ( $lf->getRecordCount() > 0 ) {
-			Debug::Text( 'Exporting ' . $lf->getRecordCount() . ' rows...', __FILE__, __LINE__, __METHOD__, 10 );
-			foreach ( $lf as $obj ) {
-				if ( isset( $obj->data ) ) {
-					$result = $serializer->serialize( $obj->data );
-					bzwrite( $file_pointer, $result . "\n" );
-					//Debug::Arr($result, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-				} else {
-					Debug::Text( 'Object \'data\' variable does not exist, cant export...', __FILE__, __LINE__, __METHOD__, 10 );
-				}
-			}
-			unset( $result, $obj, $serializer );
-		} else {
-			Debug::Text( 'No rows to export...', __FILE__, __LINE__, __METHOD__, 10 );
-
-			return false;
-		}
-
-		return true;
-	}
+	///**
+	// * @param $lf
+	// * @param $filter_data
+	// * @param $file_pointer
+	// * @return bool
+	// * @noinspection PhpUndefinedConstantInspection
+	// */
+	//static function ExportListFactory2XML( $lf, $filter_data, $file_pointer ) {
+	//	require_once( Environment::getBasePath() . 'classes/pear/XML/Serializer.php' );
+	//
+	//	$serializer = new XML_Serializer( [
+	//											  XML_SERIALIZER_OPTION_INDENT        => '  ',
+	//											  XML_SERIALIZER_OPTION_RETURN_RESULT => true,
+	//											  'linebreak'                         => "\n",
+	//											  'typeHints'                         => true,
+	//											  'encoding'                          => 'UTF-8',
+	//											  'rootName'                          => get_parent_class( $lf ),
+	//									  ]
+	//	);
+	//
+	//	$lf->getByCompanyId( $filter_data['company_id'] );
+	//	if ( $lf->getRecordCount() > 0 ) {
+	//		Debug::Text( 'Exporting ' . $lf->getRecordCount() . ' rows...', __FILE__, __LINE__, __METHOD__, 10 );
+	//		foreach ( $lf as $obj ) {
+	//			if ( isset( $obj->data ) ) {
+	//				$result = $serializer->serialize( $obj->data );
+	//				bzwrite( $file_pointer, $result . "\n" );
+	//				//Debug::Arr($result, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+	//			} else {
+	//				Debug::Text( 'Object \'data\' variable does not exist, cant export...', __FILE__, __LINE__, __METHOD__, 10 );
+	//			}
+	//		}
+	//		unset( $result, $obj, $serializer );
+	//	} else {
+	//		Debug::Text( 'No rows to export...', __FILE__, __LINE__, __METHOD__, 10 );
+	//
+	//		return false;
+	//	}
+	//
+	//	return true;
+	//}
 
 	/**
 	 * @param $arr
@@ -1554,7 +1545,6 @@ class Misc {
 		} else {
 			//Attempt to detect mime type with PEAR MIME class.
 			if ( $buffer == false && file_exists( $file_name ) ) {
-				require_once( Environment::getBasePath() . '/classes/pear/MIME/Type.php' );
 				$retval = MIME_Type::autoDetect( $file_name );
 				if ( is_object( $retval ) ) { //MimeType failed.
 					//Attempt to detect mime type manually when finfo extension and PEAR Mime Type is not installed (windows)
@@ -2052,7 +2042,6 @@ class Misc {
 					curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, true );
 					curl_setopt( $curl, CURLOPT_RETURNTRANSFER, false ); // Set return transfer to false
 					curl_setopt( $curl, CURLOPT_BINARYTRANSFER, true );
-					curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
 					curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 10 );
 					curl_setopt( $curl, CURLOPT_TIMEOUT, 0 ); //Never timeout
 					curl_setopt( $curl, CURLOPT_FILE, $fp );  // Write data to local file
@@ -2073,7 +2062,7 @@ class Misc {
 
 					return false;
 				} else {
-					Debug::Arr( error_get_last(), 'ERROR: Unable to open file for download/writing, likely permission problem?: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( 'ERROR: Unable to open file for download/writing, likely permission problem?: ' . $file_name .' Error: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 
 					return false;
 				}
@@ -2086,7 +2075,7 @@ class Misc {
 			Debug::Text( 'Using PHP streams for HTTP...', __FILE__, __LINE__, __METHOD__, 10 );
 			$retval = @file_put_contents( $file_name, fopen( $url, 'r' ) );
 			if ( $retval === false ) {
-				Debug::Arr( error_get_last(), 'ERROR: Unable to save/download file, likely permission or network access problem?: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( 'ERROR: Unable to save/download file, likely permission or network access problem?: ' . $file_name .' Error: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 			}
 
 			return $retval;
@@ -2535,19 +2524,20 @@ class Misc {
 				continue;
 			}
 
-			$full = $dir->path . DIRECTORY_SEPARATOR . $file;
+			$full_file_name = $dir->path . DIRECTORY_SEPARATOR . $file;
 
-			if ( $exclude_regex_filter != '' && preg_match( '/' . $exclude_regex_filter . '/i', $full ) == 1 ) {
+			if ( $exclude_regex_filter != '' && preg_match( '/' . $exclude_regex_filter . '/i', $full_file_name ) == 1 ) {
 				continue;
 			}
 
-			if ( is_dir( $full ) && $recursive == true ) {
-				$result = self::cleanDir( $full, $recursive, $del_dirs, $del_dirs, $exclude_regex_filter );
-			} else if ( is_file( $full ) ) {
-				$result = @unlink( $full );
-				if ( $result == false ) {
-					Debug::Text( '  Failed Deleting: ' . $full, __FILE__, __LINE__, __METHOD__, 10 );
-				}
+			if ( is_dir( $full_file_name ) && $recursive == true ) {
+				$result = self::cleanDir( $full_file_name, $recursive, $del_dirs, $del_dirs, $exclude_regex_filter );
+			} else if ( is_file( $full_file_name ) ) {
+				//$result = @unlink( $full_file_name );
+				//if ( $result == false ) {
+				//	Debug::Text( '  Failed Deleting: ' . $full_file_name, __FILE__, __LINE__, __METHOD__, 10 );
+				//}
+				$result = Misc::unlink(  $full_file_name ); //Use our own unlink function so it does a rename before delete on Windows.
 			}
 		}
 		$dir->close();
@@ -2558,6 +2548,32 @@ class Misc {
 		}
 
 		clearstatcache(); //Clear any stat cache when done.
+
+		return $result;
+	}
+
+	/**
+	 * Unlink (Delete) a file.
+	 * @param $file_name
+	 * @return bool
+	 */
+	static function unlink( $file_name ) {
+		if ( !is_file( $file_name ) ) {
+			return false;
+		}
+
+		//On Windows, unlink() is async, therefore rename the file first before deleting it,
+		//That will allow a new file with the original file name to immediately be put in its place without triggering an "access denied" or "file exists" error.
+		if ( PHP_OS == 'WINNT' ) {
+			$tmp_file_name = $file_name . str_replace( '.', '', uniqid( '_pending_del_', true ) );
+			rename( $file_name, $tmp_file_name );
+			$file_name = $tmp_file_name; //So it can be deleted below.
+		}
+
+		$result = @unlink( $file_name );
+		if ( $result == false ) {
+			Debug::Text( '  Failed Deleting: ' . $file_name .' Reason: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+		}
 
 		return $result;
 	}
@@ -3192,6 +3208,9 @@ class Misc {
 
 		$result = is_email( $email, $check_dns, $error_level );
 		if ( $return_raw_result === true ) {
+			if ( $result !== ISEMAIL_VALID ) {
+				Debug::Text( 'Result Code: ' . $result, __FILE__, __LINE__, __METHOD__, 10 );
+			}
 			return $result;
 		} else {
 			if ( $result === ISEMAIL_VALID ) {
@@ -3273,7 +3292,7 @@ class Misc {
 		$retval = false;
 
 		if ( !class_exists( 'Browser', false ) ) {
-			require_once( Environment::getBasePath() . '/classes/other/Browser.php' );
+			require_once ( Environment::getBasePath() . 'vendor' . DIRECTORY_SEPARATOR . 'cbschuld' . DIRECTORY_SEPARATOR . 'browser.php' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Browser.php' );
 		}
 
 		$browser = new Browser( $useragent );
@@ -3284,13 +3303,15 @@ class Misc {
 			return false;
 		}
 
-		//This is for the full web interface - Need full ES6 support: https://caniuse.com/#feat=es6
-		//IE (All Versions))
+		//This is for the full web interface - Need full ES6 support: https://caniuse.com/#feat=es6 *and* Webpack Terser needs to fully support it too.
+		//IE (All Versions)
 		//Edge < 15 - https://en.wikipedia.org/wiki/Microsoft_Edge
 		//Firefox < 54 (52 is latest version on Windows XP)
-		//Chrome < 51 (49 is latest version on Windows XP)
-		//Safari < 10 - https://en.wikipedia.org/wiki/Safari_version_history
-		//Opera < 38 (Chrome v46) - https://help.opera.com/en/opera-version-history/
+		//Chrome < 55 (49 is latest version on Windows XP)
+		//Safari < 10.1 - https://en.wikipedia.org/wiki/Safari_version_history (v10 supports ES6 mostly, but v10 & v11 have incompatibilities with Terser unless work arounds are used)
+		//Opera < 42 (Chrome v55) - https://help.opera.com/en/opera-version-history/
+		//
+		// iOS v10 (Safari v10) [Oldest device is about iPhone 7]
 		if ( $browser->isMobile() == false && $browser->isTablet() == false ) { //Firefox on iOS has versions are much lower than on Android or iOS. ie: v28
 			if ( $browser->getBrowser() == Browser::BROWSER_IE ) { //All versions of IE.
 				$retval = true;
@@ -3304,19 +3325,31 @@ class Misc {
 				$retval = true;
 			}
 
-			if ( $browser->getBrowser() == Browser::BROWSER_CHROME && version_compare( $browser->getVersion(), 51, '<' ) ) {
+			if ( $browser->getBrowser() == Browser::BROWSER_CHROME && version_compare( $browser->getVersion(), 55, '<' ) ) {
 				$retval = true;
 			}
 
-			if ( $browser->getBrowser() == Browser::BROWSER_SAFARI && version_compare( $browser->getVersion(), 10, '<' ) ) {
+			if ( $browser->getBrowser() == Browser::BROWSER_SAFARI && version_compare( $browser->getVersion(), 10.1, '<' ) ) {
 				$retval = true;
 			}
 
-			if ( $browser->getBrowser() == Browser::BROWSER_OPERA && version_compare( $browser->getVersion(), 38, '<' ) ) {
+			if ( $browser->getBrowser() == Browser::BROWSER_OPERA && version_compare( $browser->getVersion(), 42, '<' ) ) {
 				$retval = true;
 			}
 		} else {
-			if ( $browser->getBrowser() == Browser::BROWSER_SAFARI && version_compare( $browser->getVersion(), 10, '<' ) ) {
+			if ( $browser->getBrowser() == Browser::BROWSER_SAFARI && version_compare( $browser->getVersion(), 10, '<' ) ) { //Different Safari versions on iOS vs. Desktop.
+				$retval = true;
+			}
+
+			if ( $browser->getBrowser() == Browser::BROWSER_CHROME && version_compare( $browser->getVersion(), 55, '<' ) ) {
+				$retval = true;
+			}
+
+			if ( $browser->getBrowser() == Browser::BROWSER_FIREFOX && version_compare( $browser->getVersion(), 54, '<' ) ) {
+				$retval = true;
+			}
+
+			if ( $browser->getBrowser() == Browser::BROWSER_SAMSUNG && version_compare( $browser->getVersion(), 6.2, '<' ) ) {
 				$retval = true;
 			}
 
@@ -3324,7 +3357,7 @@ class Misc {
 			//  Mozilla/5.0 (iPad; CPU OS 9_3_5 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/13G36
 			//  Mozilla/5.0 (iPad; CPU OS 9_3_5 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G36 Safari/601.1
 			if ( ( $browser->getBrowser() == Browser::BROWSER_IPAD || $browser->getBrowser() == Browser::BROWSER_IPHONE || $browser->getBrowser() == Browser::BROWSER_IPOD ) ) {
-				if ( $browser->getVersion() == 'unknown' || version_compare( $browser->getVersion(), 10, '<' ) ) {
+				if ( $browser->getVersion() == 'unknown' || version_compare( $browser->getVersion(), 10, '<' ) ) { //Different Safari versions on iOS vs. Desktop.
 					$retval = true;
 				}
 			}
@@ -3353,7 +3386,7 @@ class Misc {
 		$retval = false;
 
 		if ( !class_exists( 'Browser', false ) ) {
-			require_once( Environment::getBasePath() . '/classes/other/Browser.php' );
+			require_once ( Environment::getBasePath() . 'vendor' . DIRECTORY_SEPARATOR . 'cbschuld' . DIRECTORY_SEPARATOR . 'browser.php' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Browser.php' );
 		}
 
 		$browser = new Browser( $useragent );
@@ -3369,7 +3402,7 @@ class Misc {
 	 * @param null $useragent
 	 * @return bool|string
 	 */
-	static function detectMobileBrowser( $useragent = null ) {
+	static function detectMobileBrowser( $useragent = null, $return_platform = false ) {
 		if ( $useragent == '' ) {
 			if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
 				$useragent = $_SERVER['HTTP_USER_AGENT'];
@@ -3378,17 +3411,26 @@ class Misc {
 			}
 		}
 
-		//Mobile Browsers: We just need to know if they are WAP or HTML5 for now.
 		$retval = false;
 
 		if ( !class_exists( 'Browser', false ) ) {
-			require_once( Environment::getBasePath() . '/classes/other/Browser.php' );
+			require_once ( Environment::getBasePath() . 'vendor' . DIRECTORY_SEPARATOR . 'cbschuld' . DIRECTORY_SEPARATOR . 'browser.php' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Browser.php' );
 		}
 
 		$browser = new Browser( $useragent );
 
 		if ( $browser->isMobile() == true || $browser->isTablet() == true ) {
-			$retval = true;
+			if ( $return_platform == true ) {
+				if ( $browser->getPlatform() == Browser::PLATFORM_IPHONE || $browser->getPlatform() == Browser::PLATFORM_IPAD || $browser->getPlatform() == Browser::PLATFORM_IPOD  ) {
+					$retval = 'ios';
+				} elseif ( $browser->getPlatform() == Browser::PLATFORM_ANDROID ) {
+					$retval = 'android';
+				} else {
+					$retval = true;
+				}
+			} else {
+				$retval = true;
+			}
 		}
 
 		Debug::Text( 'User Agent: ' . $useragent . ' Retval: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
@@ -3522,10 +3564,52 @@ class Misc {
 		if ( isset( $_GET['v'] ) && $_GET['v'] != '' ) { //Is v=X the API version or the User Agent (App) version? This does not appear to be used on recent production app versions.
 			return $_GET['v'];
 		} else if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && $_SERVER['HTTP_USER_AGENT'] != '' ) {
-			return substr( $_SERVER['HTTP_USER_AGENT'], ( stripos( $_SERVER['HTTP_USER_AGENT'], 'App: v' ) + 6 ) );
+			$parsed_user_agent = Misc::parseMobileAppUserAgent();
+			if ( isset( $parsed_user_agent['app_version'] ) ) {
+				return $parsed_user_agent['app_version'];
+			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * @return false|mixed|string
+	 */
+	static function parseMobileAppUserAgent( $user_agent = null ) {
+		if ( $user_agent == '' ) {
+			$user_agent = $_SERVER['HTTP_USER_AGENT'];
+		}
+
+		$retarr = [];
+
+		if ( $user_agent != '' && preg_match( '/App: v([\d]{1,2}\.[\d]{1,2}\.[\d]{1,2})(; StationType: (\d{2}); OS: (.*); OSVersion: (.*); OSArch: (.*); DeviceModel: (.*))*/i', $user_agent, $matches ) == 1 ) {
+			if ( isset($matches[1]) ) {
+				$retarr['app_version'] = $matches[1];
+			}
+
+			if ( isset($matches[3]) ) {
+				$retarr['station_type'] = $matches[3];
+			}
+
+			if ( isset($matches[4]) ) {
+				$retarr['os_type'] = strtolower( $matches[4] );
+			}
+
+			if ( isset($matches[5]) ) {
+				$retarr['os_version'] = $matches[5];
+			}
+
+			if ( isset($matches[6]) ) {
+				$retarr['os_arch'] = strtolower( $matches[6] );
+			}
+
+			if ( isset($matches[7]) ) {
+				$retarr['device_model'] = strtolower( $matches[7] );
+			}
+		}
+
+		return $retarr;
 	}
 
 	/**
@@ -3618,6 +3702,8 @@ class Misc {
 		$version_string[] = 'Key:';
 		$version_string[] = ( isset( $system_settings ) && isset( $system_settings['registration_key'] ) ) ? $system_settings['registration_key'] : 'N/A';
 		$version_string[] = 'Version: ' . APPLICATION_VERSION;
+		$version_string[] = '('. ( ( isset( $system_settings ) && isset( $system_settings['system_version_install_date'] ) ) ? TTDate::getDate('DATE+TIME', $system_settings['system_version_install_date'] ) : 'N/A' ) .')';
+		$version_string[] = 'Production Mode: ' . (int)PRODUCTION;
 
 		return implode( ' ', $version_string );
 	}
@@ -3691,17 +3777,20 @@ class Misc {
 	 * @param bool $province
 	 * @param bool $postal_code
 	 * @param bool $country
-	 * @param bool $condensed
+	 * @param string $format
 	 * @return string
 	 */
-	static function formatAddress( $name, $address1 = false, $address2 = false, $city = false, $province = false, $postal_code = false, $country = false, $condensed = false ) {
+	static function formatAddress( $name, $address1 = false, $address2 = false, $city = false, $province = false, $postal_code = false, $country = false, $format = null ) {
+		$format = strtolower( $format );
+
 		$retarr = [];
 		$city_arr = [];
 		if ( $name != '' ) {
 			$retarr[] = $name;
 		}
 
-		if ( $condensed == true ) { //Try to reduce the number of lines the address appears on for tight spaces like checks or windowed envelopes.
+
+		if ( $format == 'multiline_condensed' ) { //Try to reduce the number of lines the address appears on for tight spaces like checks or windowed envelopes.
 			$address = '';
 			if ( $address1 != '' ) {
 				$address = $address1;
@@ -3743,7 +3832,11 @@ class Misc {
 			$retarr[] = $country;
 		}
 
-		return implode( "\n", $retarr );
+		if ( $format == 'oneline' ) {
+			return implode( ' ', $retarr );
+		} else {
+			return implode( "\n", $retarr );
+		}
 	}
 
 	/**
@@ -3900,9 +3993,22 @@ class Misc {
 				$retarr = [ 'adjusted_amount' => $current_amount, 'under_limit' => bcsub( $ytd_amount_limit, bcadd( $ytd_amount, $current_amount ) ), 'over_limit' => 0 ];
 			}
 		} elseif ( $ytd_amount == $ytd_amount_limit ) {
-			$retarr = array( 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => $current_amount );
+			if ( $current_amount >= 0 ) {
+				$retarr = [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => $current_amount ];
+			} else {
+				$retarr = [ 'adjusted_amount' => $current_amount, 'under_limit' => abs( $current_amount ), 'over_limit' => 0 ];
+			}
 		} elseif ( $ytd_amount > $ytd_amount_limit ) {
-			$retarr = array( 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => bcsub( $ytd_amount, $ytd_amount_limit ) );
+			if ( $current_amount >= 0 ) {
+				$retarr = array( 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => bcsub( $ytd_amount, $ytd_amount_limit ) );
+			} else {
+				$ytd_amount_under_ytd_amount_limit = bcadd( $current_amount, $ytd_amount );
+				if ( $ytd_amount_under_ytd_amount_limit < $ytd_amount_limit ) {
+					$retarr = [ 'adjusted_amount' => bcsub( bcadd( $ytd_amount, $current_amount ), $ytd_amount_limit ), 'under_limit' => abs( bcsub( bcadd( $ytd_amount, $current_amount ), $ytd_amount_limit ) ), 'over_limit' => 0 ];
+				} else {
+					$retarr = [ 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => bcsub( bcadd( $ytd_amount, $current_amount ), $ytd_amount_limit ) ];
+				}
+			}
 		}
 
 		return $retarr;
@@ -3943,6 +4049,12 @@ class Misc {
 	 * @throws Exception
 	 */
 	static function Retry( $function, $retry_max_attempts = 3, $retry_sleep = 1, $continue_on_error = false ) { //When changing function definition, also see APIFactory->RetryTransaction()
+		// Help mitigate function injection attacks due to the variable function call below $transaction_function() -- If we always insist on a closure its harder for an attacker to pass in phpinfo() as the function to call for example.
+		if ( !$function instanceof Closure ) {
+			Debug::text( 'ERROR: Retry function is not a closure, unable to execute!', __FILE__, __LINE__, __METHOD__, 10 );
+			return null;
+		}
+
 		$tmp_sleep = ( $retry_sleep * 1000000 );
 		$retry_attempts = 0;
 		while ( $retry_attempts < $retry_max_attempts ) {

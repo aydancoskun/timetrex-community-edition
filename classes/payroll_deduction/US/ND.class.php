@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,32 @@
 class PayrollDeduction_US_ND extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
+			20210101 => [
+					10 => [
+							[ 'income' => 6275, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 46800, 'rate' => 1.10, 'constant' => 0 ],
+							[ 'income' => 104375, 'rate' => 2.04, 'constant' => 445.78 ],
+							[ 'income' => 210950, 'rate' => 2.27, 'constant' => 1620.31 ],
+							[ 'income' => 451275, 'rate' => 2.64, 'constant' => 4039.56 ],
+							[ 'income' => 451275, 'rate' => 2.90, 'constant' => 10384.14 ],
+					],
+					20 => [
+							[ 'income' => 12550, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 46400, 'rate' => 1.10, 'constant' => 0 ],
+							[ 'income' => 94325, 'rate' => 2.04, 'constant' => 372.35 ],
+							[ 'income' => 137125, 'rate' => 2.27, 'constant' => 1350.02 ],
+							[ 'income' => 235050, 'rate' => 2.64, 'constant' => 2321.58 ],
+							[ 'income' => 235050, 'rate' => 2.90, 'constant' => 4906.80 ],
+					],
+					40 => [ //Added in 01-Jan-2021 - Head of Household
+							[ 'income' => 9400, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 63700, 'rate' => 1.10, 'constant' => 0 ],
+							[ 'income' => 149600, 'rate' => 2.04, 'constant' => 597.30 ],
+							[ 'income' => 236350, 'rate' => 2.27, 'constant' => 2349.66 ],
+							[ 'income' => 454400, 'rate' => 2.64, 'constant' => 4318.89 ],
+							[ 'income' => 454400, 'rate' => 2.90, 'constant' => 10075.41 ],
+					],
+			],
 			20200101 => [
 					10 => [
 							[ 'income' => 6200, 'rate' => 0, 'constant' => 0 ],
@@ -350,6 +376,7 @@ class PayrollDeduction_US_ND extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
+			//01-Jan-21 - No Change.
 			20200101 => [
 					'allowance' => 4300,
 			],
@@ -390,9 +417,24 @@ class PayrollDeduction_US_ND extends PayrollDeduction_US {
 			],
 	];
 
+	function getStatePayPeriodDeductionRoundedValue( $amount ) {
+		if ( $this->getDate() >= 20210101 ) { //ND was always supposed to round to nearest dollar, but we weren't doing it prior to 2021.
+			return $this->RoundNearestDollar( $amount );
+		}
+
+		return $amount;
+	}
+
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
-		$state_allowance = $this->getStateAllowanceAmount();
+
+		//01-Jan-2021 - They changed their formula to be slighly more based off the Federal W4 for 2020 and after.
+		if ( $this->getDate() >= 20210101 && $this->getFederalFormW4Version() == 2020 ) {
+			$state_allowance = 0;
+		} else {
+			//Only consider allowances if the Federal Form W4 is before 2020.
+			$state_allowance = $this->getStateAllowanceAmount();
+		}
 
 		$income = bcsub( $annual_income, $state_allowance );
 

@@ -1,4 +1,6 @@
-EmbeddedMessage = {
+import linkifyStr from 'linkifyjs/string';
+
+export var EmbeddedMessage = {
 	message_control_api: null,
 	/**
 	 * Initializes embedded messages with a call to EmbeddedMessage.init()
@@ -50,7 +52,9 @@ EmbeddedMessage = {
 						edit_view_ui_dic['from'].setValue( from );
 
 						edit_view_ui_dic['subject'].setValue( Global.htmlDecode( currentItem.subject ) );
-						edit_view_ui_dic['body'].setValue( Global.htmlDecode( currentItem.body ) );
+						// The function setValue is not used on the body to avoid double encoding issues on the content as linkify (parses links in text) already handles that.
+						edit_view_ui_dic['body'].html( Global.htmlDecode( currentItem.body ).linkify( { nl2br: true, className: 'linkified' } ) );
+						edit_view_ui_dic['body'].setResizeEvent();
 
 						var cloneMessageControl = $( edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.embedded-message-template' ) ).clone();
 						cloneMessageControl.removeClass( 'embedded-message-template' );

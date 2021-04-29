@@ -1,4 +1,4 @@
-class UserMembershipViewController extends BaseViewController {
+export class UserMembershipViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_membership_view_container',
@@ -185,7 +185,7 @@ class UserMembershipViewController extends BaseViewController {
 			api_class: TTAPI.APIUserMembership,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER_Membership,
+			layout_name: 'global_user_membership',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -207,7 +207,7 @@ class UserMembershipViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			field: 'user_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -227,7 +227,7 @@ class UserMembershipViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIQualification,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.QUALIFICATION,
+			layout_name: 'global_qualification',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualification_id'
@@ -243,7 +243,7 @@ class UserMembershipViewController extends BaseViewController {
 		// Ownership
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'ownership_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.ownership_array ) );
+		form_item_input.setSourceData( $this.ownership_array );
 		this.addEditFieldToColumn( $.i18n._( 'Ownership' ), form_item_input, tab_membership_column1 );
 
 		// Currency
@@ -251,7 +251,7 @@ class UserMembershipViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			field: 'currency_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -297,7 +297,7 @@ class UserMembershipViewController extends BaseViewController {
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -309,7 +309,7 @@ class UserMembershipViewController extends BaseViewController {
 				label: $.i18n._( 'Currency' ),
 				in_column: 1,
 				field: 'currency_id',
-				layout_name: ALayoutIDs.CURRENCY,
+				layout_name: 'global_currency',
 				api_class: TTAPI.APICurrency,
 				multiple: true,
 				basic_search: false,
@@ -321,7 +321,7 @@ class UserMembershipViewController extends BaseViewController {
 				label: $.i18n._( 'Membership' ),
 				in_column: 1,
 				field: 'qualification_id',
-				layout_name: ALayoutIDs.QUALIFICATION,
+				layout_name: 'global_qualification',
 				api_class: TTAPI.APIQualification,
 				multiple: true,
 				basic_search: true,
@@ -336,7 +336,7 @@ class UserMembershipViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -355,7 +355,7 @@ class UserMembershipViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
@@ -369,7 +369,7 @@ class UserMembershipViewController extends BaseViewController {
 				field: 'source_type_id',
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -397,7 +397,7 @@ class UserMembershipViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -409,7 +409,7 @@ class UserMembershipViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

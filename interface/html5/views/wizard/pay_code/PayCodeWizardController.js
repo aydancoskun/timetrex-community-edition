@@ -1,4 +1,4 @@
-class PayCodeWizardController extends BaseWizardController {
+export class PayCodeWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg'
@@ -48,7 +48,7 @@ class PayCodeWizardController extends BaseWizardController {
 
 				var first_hr = content_clone.find( '.first-hr' );
 				first_hr.find( '.wizard-item-label > span' ).text( $.i18n._( 'Select Source Pay Codes' ) + ': ' );
-				var a_combobox = this.getAComboBox( TTAPI.APIPayCode, true, ALayoutIDs.PAY_CODE, 'source_pay_code_ids' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayCode, true, 'global_pay_code', 'source_pay_code_ids' );
 				first_hr.find( '.wizard-item-widget' ).append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step][a_combobox.getField()] = a_combobox;
@@ -57,7 +57,7 @@ class PayCodeWizardController extends BaseWizardController {
 
 				var second_hr = content_clone.find( '.second-hr' );
 				second_hr.find( '.wizard-item-label > span' ).text( $.i18n._( 'Select Destination Pay Code' ) + ': ' );
-				a_combobox = this.getAComboBox( TTAPI.APIPayCode, false, ALayoutIDs.PAY_CODE, 'dest_pay_code_id' );
+				a_combobox = this.getAComboBox( TTAPI.APIPayCode, false, 'global_pay_code', 'dest_pay_code_id' );
 				second_hr.find( '.wizard-item-widget' ).append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step][a_combobox.getField()] = a_combobox;

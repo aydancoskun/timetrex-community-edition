@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -83,6 +83,12 @@ if ( TTDate::getTimeZone() == 'GMT' ) {
 
 	unset( $uplf, $most_common_time_zone, $install_obj, $tmp_config_vars, $write_config_result );
 }
+
+
+//Purge idempotent requests older than 24hrs.
+$irf_purge_query = 'DELETE FROM idempotent_request WHERE status_id = 20 AND response_date <= '. $db->qstr( $db->BindTimeStamp( ( time() - 86400 ) ) );
+$db->Execute( $irf_purge_query );
+unset( $irf_purge_query );
 
 
 //

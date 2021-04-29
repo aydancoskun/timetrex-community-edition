@@ -140,7 +140,7 @@
 				var len = layouts_array.length;
 				for ( var i = 0; i < len; i++ ) {
 					var item = layouts_array[i];
-					$( layout_selector ).append( '<option value="' + item.id + '">' + item.name + '</option>' );
+					$( layout_selector ).append( $( '<option value="' + item.id + '"></option>' ).text( item.name ) );
 				}
 
 				$( $( layout_selector ).find( 'option' ) ).filter( function() {

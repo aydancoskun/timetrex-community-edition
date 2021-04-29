@@ -1,4 +1,9 @@
-class QuickPunchLoginViewController extends QuickPunchBaseViewController {
+import { QuickPunchBaseViewController } from '@/views/quick_punch/QuickPunchBaseViewController';
+import { TTAPI } from '@/services/TimeTrexClientAPI';
+import { TTUUID } from '@/global/TTUUID';
+import { TAlertManager } from '@/global/TAlertManager';
+
+export class QuickPunchLoginViewController extends QuickPunchBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			events: {
@@ -20,19 +25,15 @@ class QuickPunchLoginViewController extends QuickPunchBaseViewController {
 		Global.contentContainer().html( this.$el );
 
 		this.checkForWebkitTextSecuritySupport();
-
-		var $this = this;
-		require( this.filterRequiredFiles(), function() {
-			$this.api = TTAPI.APIPunch;
-			$this.authentication_api = TTAPI.APIAuthentication;
-			$this.currentUser_api = TTAPI.APIAuthentication;
-			$this.user_preference_api = TTAPI.APIUserPreference;
-			$this.date_api = TTAPI.APITTDate;
-			$this.permission_api = TTAPI.APIPermission;
-			$this.edit_view_error_ui_dic = {};
-			LocalCacheData.all_url_args = {};
-			$this.render();
-		} );
+		this.api = TTAPI.APIPunch;
+		this.authentication_api = TTAPI.APIAuthentication;
+		this.currentUser_api = TTAPI.APIAuthentication;
+		this.user_preference_api = TTAPI.APIUserPreference;
+		this.date_api = TTAPI.APITTDate;
+		this.permission_api = TTAPI.APIPermission;
+		this.edit_view_error_ui_dic = {};
+		LocalCacheData.setAllURLArgs( {} );
+		this.render();
 	}
 
 	render() {
@@ -78,86 +79,92 @@ class QuickPunchLoginViewController extends QuickPunchBaseViewController {
 		var quick_punch_password = this.$( '#quick_punch_password' ).val();
 		this.login_btn.attr( 'disabled', 'disabled' );
 		this.clearErrorTips( true, true );
-		this.authentication_api.PunchLogin( quick_punch_id, quick_punch_password, {
-			onResult: function( raw_result ) {
-				if ( raw_result.isValid() ) {
-					var result = raw_result.getResult();
 
-					TTPromise.add( 'QPLogin', 'init' );
+		Global.refreshCSRFToken( function( e ) {
+			$this.authentication_api.PunchLogin( quick_punch_id, quick_punch_password, {
+				onResult: function( raw_result ) {
+					if ( raw_result.isValid() ) {
+						var result = raw_result.getResult();
 
-					TTPromise.add( 'QPLogin', 'CurrentStation' );
-					$this.getCurrentStation();
+						TTPromise.add( 'QPLogin', 'init' );
 
-					TTPromise.add( 'QPLogin', 'CurrentUser' );
-					$this.getCurrentUser();
+						TTPromise.add( 'QPLogin', 'CurrentStation' );
+						$this.getCurrentStation();
 
-					// LocalCacheData.setSessionID( result.SessionID );
-					setCookie( 'SessionID-QP', result.SessionID, { expires: 30, path: LocalCacheData.cookie_path } );
+						TTPromise.add( 'QPLogin', 'CurrentUser' );
+						$this.getCurrentUser();
 
-					TTPromise.add( 'QPLogin', 'Permissions' );
-					$this.permission_api.getPermissions( {
-						onResult: function( permissionRes ) {
-							var permission_result = permissionRes.getResult();
+						// LocalCacheData.setSessionID( result.SessionID );
+						setCookie( 'SessionID-QP', result.SessionID, {
+							expires: 30,
+							path: LocalCacheData.cookie_path
+						} );
 
-							if ( permission_result != false ) {
-								LocalCacheData.setPermissionData( permission_result );
-								TTPromise.resolve( 'QPLogin', 'Permissions' );
-							} else {
-								//User does not have any permissions.
-								Debug.Text( 'User does not have any permissions!', 'QuickPunchLoginController.js', 'QuickPunchViewController', 'getPermission', 10 );
-								TAlertManager.showAlert( $.i18n._( 'Unable to login due to permissions, please try again and if the problem persists contact customer support.' ), '', function() {
-									Global.Logout();
-									window.location.reload();
-								} );
-							}
-						}
-					} );
+						TTPromise.add( 'QPLogin', 'Permissions' );
+						$this.permission_api.getPermissions( {
+							onResult: function( permissionRes ) {
+								var permission_result = permissionRes.getResult();
 
-					TTPromise.add( 'QPLogin', 'CurrentCompany' );
-					$this.authentication_api.getCurrentCompany( {
-						onResult: function( current_company_result ) {
-							var com_result = current_company_result.getResult();
-
-							if ( com_result != false ) {
-								if ( com_result.is_setup_complete == 1 ) {
-									com_result.is_setup_complete = true;
+								if ( permission_result != false ) {
+									LocalCacheData.setPermissionData( permission_result );
+									TTPromise.resolve( 'QPLogin', 'Permissions' );
 								} else {
-									com_result.is_setup_complete = false;
+									//User does not have any permissions.
+									Debug.Text( 'User does not have any permissions!', 'QuickPunchLoginController.js', 'QuickPunchViewController', 'getPermission', 10 );
+									TAlertManager.showAlert( $.i18n._( 'Unable to login due to permissions, please try again and if the problem persists contact customer support.' ), '', function() {
+										Global.Logout();
+										window.location.reload();
+									} );
 								}
-
-								LocalCacheData.setCurrentCompany( com_result );
-								Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
-
-								if ( APIGlobal.pre_login_data.production == true && APIGlobal.pre_login_data.application_build != com_result.application_build ) {
-									Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
-									window.location.reload( true );
-								}
-
-								TTPromise.resolve( 'QPLogin', 'CurrentCompany' );
-							} else {
-								Debug.Text( 'Unable to get company information!', 'QuickPunchLoginController.js', 'QuickPunchViewController', 'getPermission', 10 );
-								TAlertManager.showAlert( $.i18n._( 'Unable to download required information, please check your network connection and try again. If the problem persists contact customer support.' ), '', function() {
-									Global.Logout();
-									window.location.reload();
-								} );
 							}
-						}
-					} );
+						} );
 
-					TTPromise.add( 'QPLogin', 'Locale' );
-					$this.getLocale();
+						TTPromise.add( 'QPLogin', 'CurrentCompany' );
+						$this.authentication_api.getCurrentCompany( {
+							onResult: function( current_company_result ) {
+								var com_result = current_company_result.getResult();
 
-					//When all QPLogin promises complete, forward to punch view
-					TTPromise.wait( 'QPLogin', null, function() {
-						$this.goToView();
-					} );
+								if ( com_result != false ) {
+									if ( com_result.is_setup_complete == 1 ) {
+										com_result.is_setup_complete = true;
+									} else {
+										com_result.is_setup_complete = false;
+									}
 
-					TTPromise.resolve( 'QPLogin', 'init' );
-				} else {
-					$this.setErrorTips( raw_result );
+									LocalCacheData.setCurrentCompany( com_result );
+									Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+
+									if ( APIGlobal.pre_login_data.production == true && APIGlobal.pre_login_data.application_build != com_result.application_build ) {
+										Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+										window.location.reload( true );
+									}
+
+									TTPromise.resolve( 'QPLogin', 'CurrentCompany' );
+								} else {
+									Debug.Text( 'Unable to get company information!', 'QuickPunchLoginController.js', 'QuickPunchViewController', 'getPermission', 10 );
+									TAlertManager.showAlert( $.i18n._( 'Unable to download required information, please check your network connection and try again. If the problem persists contact customer support.' ), '', function() {
+										Global.Logout();
+										window.location.reload();
+									} );
+								}
+							}
+						} );
+
+						TTPromise.add( 'QPLogin', 'Locale' );
+						$this.getLocale();
+
+						//When all QPLogin promises complete, forward to punch view
+						TTPromise.wait( 'QPLogin', null, function() {
+							$this.goToView();
+						} );
+
+						TTPromise.resolve( 'QPLogin', 'init' );
+					} else {
+						$this.setErrorTips( raw_result );
+					}
 				}
-			}
-		} );
+			} );
+		});
 	}
 
 	/* Checks if browser supports the use of -webkit-text-security, so we can obscure the password.

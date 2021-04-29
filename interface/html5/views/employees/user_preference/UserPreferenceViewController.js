@@ -1,4 +1,4 @@
-class UserPreferenceViewController extends BaseViewController {
+export class UserPreferenceViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_preference_view_container',
@@ -192,7 +192,7 @@ class UserPreferenceViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
@@ -203,7 +203,7 @@ class UserPreferenceViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -235,7 +235,7 @@ class UserPreferenceViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
@@ -245,7 +245,7 @@ class UserPreferenceViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
@@ -256,7 +256,7 @@ class UserPreferenceViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				field: 'default_department_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
@@ -268,7 +268,7 @@ class UserPreferenceViewController extends BaseViewController {
 				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.JOB_TITLE,
+				layout_name: 'global_job_title',
 				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
@@ -282,7 +282,7 @@ class UserPreferenceViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.COMBO_BOX
 			} ),
 			new SearchField( {
@@ -292,7 +292,7 @@ class UserPreferenceViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 
@@ -335,7 +335,7 @@ class UserPreferenceViewController extends BaseViewController {
 			id: this.script_name + '_navigation',
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -366,43 +366,43 @@ class UserPreferenceViewController extends BaseViewController {
 		// Language
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'language', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.language_array ) );
+		form_item_input.setSourceData( $this.language_array );
 		this.addEditFieldToColumn( $.i18n._( 'Language' ), form_item_input, tab_preference_column1 );
 
 		// Date Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'date_format', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.date_format_array ) );
+		form_item_input.setSourceData( $this.date_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Date Format' ), form_item_input, tab_preference_column1 );
 
 		// Time Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_format', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_format_array ) );
+		form_item_input.setSourceData( $this.time_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Format' ), form_item_input, tab_preference_column1 );
 
 		// Time Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_unit_format', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_unit_format_array ) );
+		form_item_input.setSourceData( $this.time_unit_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Units' ), form_item_input, tab_preference_column1 );
 
 		// Distance Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'distance_format', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.distance_format_array ) );
+		form_item_input.setSourceData( $this.distance_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Distance Units' ), form_item_input, tab_preference_column1 );
 
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
+		form_item_input.setSourceData( $this.time_zone_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Zone' ), form_item_input, tab_preference_column1 );
 
 		// Start Weeks on
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'start_week_day' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.start_week_day_array ) );
+		form_item_input.setSourceData( $this.start_week_day_array );
 		this.addEditFieldToColumn( $.i18n._( 'Calendar Starts On' ), form_item_input, tab_preference_column1 );
 
 		// Rows per page
@@ -413,7 +413,7 @@ class UserPreferenceViewController extends BaseViewController {
 		// Default Login Screen
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'default_login_screen' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.default_login_screen_array ) );
+		form_item_input.setSourceData( $this.default_login_screen_array );
 		this.addEditFieldToColumn( $.i18n._( 'Default Screen' ), form_item_input, tab_preference_column1 );
 
 		// Save TimeSheet State
@@ -468,7 +468,7 @@ class UserPreferenceViewController extends BaseViewController {
 		//// schedule icalendar type
 		//form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		//form_item_input.TComboBox( {field: 'schedule_icalendar_type_id' } );
-		//form_item_input.setSourceData( Global.addFirstItemToArray( $this.schedule_icalendar_type_array ) );
+		//form_item_input.setSourceData( $this.schedule_icalendar_type_array );
 		//this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_schedule_sync_column1, 'first-last' );
 		//
 		//// Calendar URL
@@ -691,7 +691,7 @@ class UserPreferenceViewController extends BaseViewController {
 		this.api['getScheduleIcalendarURL']( this.current_edit_record.user_name, this.current_edit_record.schedule_icalendar_type_id, {
 			onResult: function( result ) {
 				var result_data = result.getResult();
-				widget.setValue( ServiceCaller.rootURL + result_data, true );
+				widget.setValue( ServiceCaller.root_url + result_data, true );
 
 				widget.unbind( 'click' ); // First unbind all click events, otherwise, when we change the schedule icalendar type this will trigger several times click events.
 

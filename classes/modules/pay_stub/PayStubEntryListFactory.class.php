@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1479,7 +1479,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 								kk.id as payroll_remittance_agency_id,
 								aa.pay_stub_entry_name_id as pay_stub_entry_name_id,
 								ii.ps_order as ps_order,
-								avg(aa.rate) as rate,
+								( CASE WHEN sum(aa.units) != 0 THEN ( sum(aa.amount) / sum(aa.units) ) ELSE avg( aa.rate ) END ) as rate,
 								sum(aa.units) as units,
 								sum(aa.amount) as amount,
 								sum(aa.ytd_amount) as ytd_amount

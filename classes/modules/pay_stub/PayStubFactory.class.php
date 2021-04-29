@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -33,9 +33,6 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-
-require_once( 'Numbers/Words.php' );
-
 
 /**
  * @package Modules\PayStub
@@ -79,19 +76,42 @@ class PayStubFactory extends Factory {
 						//25 => TTi18n::gettext('Pending Payment'), //At least one transaction still pending
 						40  => TTi18n::gettext( 'Paid' ), //Change this to mean Paid (all transactions paid), but not yet visible to employees?
 						//50 => TTi18n::gettext('Complete'), //Paid and visible to employees. Also sends out emails. Closing the pay period changes to this state.
-						100 => TTi18n::gettext( 'Opening Balance (YTD)' ),
+						//100 => TTi18n::gettext( 'Opening Balance (YTD)' ), //Switched to TYPE instead.
 				];
 				break;
 			case 'type':
 				$retval = [
+						10  => TTi18n::gettext( 'Normal (In-Cycle)' ),
+						20  => TTi18n::gettext( 'Bonus/Correction (Out-of-Cycle)' ),
+						90  => TTi18n::gettext( 'Year-to-Date (YTD) Adjustment' ), //Not visible to employees, pay stubs must have a $0 net pay(?). Only includes pay stub amendments like Opening Balance, no Tax/Deductions.
+						100 => TTi18n::gettext( 'Opening Balance (YTD)' ),
+				];
+				break;
+			case 'payroll_run_type':
+				$retval = [
 						10 => TTi18n::gettext( 'Normal (In-Cycle)' ), //In-Cycle
 						20 => TTi18n::gettext( 'Bonus/Correction (Out-of-Cycle)' ), //Out-of-Cycle
+						90 => TTi18n::gettext( 'Year-to-Date (YTD) Adjustment' ), //Not visible to employees, pay stubs must have a $0 net pay(?). Only includes pay stub amendments like Opening Balance, no Tax/Deductions.
 				];
+
 				//$param should be the pay_period status_id.
 				if ( is_array( $param ) && count( array_unique( $param ) ) == 1 && end( $param ) == 30 ) {
 					$retval[5] = TTi18n::gettext( 'Post-Adjustment Carry-Forward' ); //Just generate PSA's in the next pay period.
 					ksort( $retval );
 				}
+
+				//How to determine if Opening Balance pay stubs still need to be generated?
+				//  Check to see if any normal pay stub is marked paid at anytime, if it is, then Opening Balances can't be generated.
+				global $current_company;
+				if ( is_object( $current_company ) ) {
+					$pslf = TTnew('PayStubListFactory');
+					$pslf->getByCompanyIdAndStatusIdAndTypeId( $current_company->getId(), 40, [ 10, 20 ], 1 ); //40=Paid
+					Debug::Text( '  Checking for paid, non-opening balance pay stubs to enable Opening Balance type... Found: '. $pslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $pslf->getRecordCount() == 0 ) {
+						$retval[100] = TTi18n::gettext( 'Opening Balance (YTD)' ); //Disables all Tax/Deductions and only uses pay stub amendments.
+					}
+				}
+
 				break;
 			case 'export_general_ledger':
 				$retval = [
@@ -725,6 +745,27 @@ class PayStubFactory extends Factory {
 	/**
 	 * @return bool
 	 */
+	function getEnableSyncPendingPayStubTransactionDates() {
+		if ( isset( $this->sync_pending_pay_stub_transaction_dates ) ) {
+			return $this->sync_pending_pay_stub_transaction_dates;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableSyncPendingPayStubTransactionDates( $bool ) {
+		$this->sync_pending_pay_stub_transaction_dates = (bool)$bool;
+
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableCalcYTD() {
 		if ( isset( $this->calc_ytd ) ) {
 			return $this->calc_ytd;
@@ -952,7 +993,7 @@ class PayStubFactory extends Factory {
 				} else {
 					$pay_stub2_entry_arr = [ 'amount' => 0, 'units' => 0 ];
 				}
-				Debug::Text( '  Entry ID: ' . $pay_stub_entry_id .' Pay Stub1: Amount: ' . $pay_stub1_entry_arr['amount'] . ' Units: '. $pay_stub1_entry_arr['units'] .' Pay Stub2: Amount: ' . $pay_stub2_entry_arr['amount'] .' Units: '. $pay_stub1_entry_arr['units'], __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( '  Entry ID: ' . $pay_stub_entry_id .' Pay Stub1: Amount: ' . $pay_stub1_entry_arr['amount'] . ' Units: '. $pay_stub1_entry_arr['units'] .' Pay Stub2: Amount: ' . $pay_stub2_entry_arr['amount'] .' Units: '. $pay_stub2_entry_arr['units'], __FILE__, __LINE__, __METHOD__, 10 );
 
 				if ( $pay_stub1_entry_arr['amount'] != $pay_stub2_entry_arr['amount'] ) {
 					//Generate PS Amendment.
@@ -965,7 +1006,12 @@ class PayStubFactory extends Factory {
 					$units_diff = abs( bcsub( $pay_stub1_entry_arr['units'], $pay_stub2_entry_arr['units'], 4 ) );                                                                                                                                                                                   //Allow units to be up to 4 decimal places, especially important for customers who don't round punches, as this could result in a slightly different amount than expected, especially if the rate is auto calculated below.
 					$amount_diff = Misc::MoneyRound( bcsub( $pay_stub1_entry_arr['amount'], $pay_stub2_entry_arr['amount'], 4 ), 2, ( ( is_object( $psaf->getUserObject() ) && is_object( $psaf->getUserObject()->getCurrencyObject() ) ) ? $psaf->getUserObject()->getCurrencyObject() : null ) ); //Set MIN decimals to 2 and max to the currency rounding.
 					Debug::Text( '    aFOUND DIFFERENCE of: Amount: ' . $amount_diff . ' Units: ' . $units_diff, __FILE__, __LINE__, __METHOD__, 10 );
-					if ( $units_diff > 0 ) {
+
+					//Try to avoid showing units/rate when the units difference is less than 0.0166 = 1min.
+					//  This can happen when a wage change occurs in the pay period so the previous pay stub had Units: 51.2667 and the new pay stub has two line items of Units: 34.0833 + 17.1833 = 51.2666
+					//  There could even be 3 or more line items, making the difference 0.0003+ too.
+					//  Unfortunately there no way around this, so instead just set some threshold value that when under we ignore units on pay stub amendments.
+					if ( $units_diff > 0.0166 ) {
 						//Re-calculate amount when units are involved, due to rounding issues.
 						//FIXME: However in the case of salaried employees, where there were no units previously, or no units after,
 						//don't use unit calculation to get the amount, just use the amount directly, as it could be different than what they expect.
@@ -985,7 +1031,8 @@ class PayStubFactory extends Factory {
 						$psaf->setAmount( $amount_diff );
 					}
 
-					$psaf->setDescription( 'Adjustment from Pay Period Ending: ' . TTDate::getDate( 'DATE', $pay_stub_2_end_date ) );
+					$psaf->setDescription( TTi18n::getText( 'Adjustment from Pay Period Ending') .': ' . TTDate::getDate( 'DATE', $pay_stub_2_end_date ) . ( ( isset( $pay_stub2_obj ) ) ? ' '. TTi18n::getText( 'Run' ). ': '. $pay_stub2_obj->getRun() : '' ) );
+					$psaf->setPrivateDescription( TTi18n::getText( 'Original Amount') .': '. Misc::MoneyRound( $pay_stub2_entry_arr['amount'] ) .' '. TTi18n::getText( 'Corrected Amount') .': '. Misc::MoneyRound( $pay_stub1_entry_arr['amount'] ) .' '. TTi18n::getText( 'Difference') .': '. Misc::MoneyRound( $amount_diff ) );
 
 					$psaf->setEffectiveDate( TTDate::getBeginDayEpoch( $ps_amendment_date ) );
 
@@ -1363,7 +1410,7 @@ class PayStubFactory extends Factory {
 		//Make sure they aren't setting a pay stub to OPEN if the pay period is closed.
 		if ( is_object( $this->getPayPeriodObject() ) ) {
 			if ( $this->getDeleted() == true ) {
-				if ( $this->getStatus() == 40 || $this->getStatus() == 100 ) {
+				if ( $this->getStatus() == 40 ) {
 					$this->Validator->isTrue( 'status_id',
 											  false,
 											  TTi18n::gettext( 'Unable to delete pay stubs that are marked as PAID' ) );
@@ -1419,6 +1466,8 @@ class PayStubFactory extends Factory {
 
 		//Check to see if they are changing the transaction date between years, as that can cause taxes to need to be recalculated
 		//  for example if they reached a tax limit in 2019, but it restarts in 2020, but they change the transaction date from 2020 back to 2019 without recalculating the pay stub.
+		//  **Note: If they are terminating an employee on say Dec 22nd, and the transaction date is normally Jan 1st of the next year, they would need to back-date the transaction date to pay earlier due to government requirements.
+		//          Because of this, we likely need to allow generating all in-cycle pay stubs with custom transaction dates.
 		$data_diff = $this->getDataDifferences();
 		if ( $this->isDataDifferent( 'transaction_date', $data_diff ) == true && $this->getGenericOldDataValue( 'transaction_date' ) != false && TTDate::getYear( $this->getTransactionDate() ) != TTDate::getYear( TTDate::strtotime( $this->getGenericOldDataValue( 'transaction_date' ) ) ) ) {
 			$this->Validator->isTrue( 'transaction_date',
@@ -1426,11 +1475,11 @@ class PayStubFactory extends Factory {
 									  TTi18n::gettext( 'Transaction Date cannot be modified to a different year as it would result in tax/deductions being incorrect' ) );
 		}
 
-		if ( $this->getDeleted() == false && $this->getStatus() == 100 && $this->getStartDate() != '' ) { //Opening Balance
+		if ( $this->getDeleted() == false && $this->getType() == 100 && $this->getStartDate() != '' ) { //Opening Balance
 			//Check for any earlier pay stubs so Opening Balance Pay Stubs must be first.
 			$pslf->getLastPayStubByUserIdAndStartDateAndRun( $this->getUser(), $this->getStartDate(), $this->getRun() );
 			if ( $pslf->getRecordCount() > 0 ) {
-				$this->Validator->isTrue( 'status_id',
+				$this->Validator->isTrue( 'type_id',
 										  false,
 										  TTi18n::gettext( 'Opening Balance Pay Stubs must not come after any other pay stub for this employee' ) );
 			}
@@ -1459,9 +1508,21 @@ class PayStubFactory extends Factory {
 		if ( $this->isNew() == false ) {
 			//Make sure the pay stub math adds up.
 			Debug::Text( 'Validate: checkEarnings...', __FILE__, __LINE__, __METHOD__, 10 );
-			$this->Validator->isTrue( 'earnings',
-									  $this->checkNoEarnings(),
-									  TTi18n::gettext( 'No Earnings, employee may not have any hours for this pay period, or their wage may not be set' ) );
+
+			//Allow YTD Adjustment pay stubs to not have any earnings, as they aren't shown to employees anyways.
+			if ( $this->getType() == 90 ) { //90=YTD Adjustment.
+				$this->Validator->isTrue( 'net_pay',
+										  $this->checkZeroNetPay(),
+										  TTi18n::gettext( 'Net Pay for Year-to-Date Adjustment pay stubs must be $0.00. Consider generating a Bonus/Correction pay stub instead.' ) );
+
+				$this->Validator->isTrue( 'earnings',
+										  ( ( $this->getTotalEntries() > 0 ) ? true : false ),
+										  TTi18n::gettext( 'No pay stub amendments to process, skipping...' ) );
+			} else {
+				$this->Validator->isTrue( 'earnings',
+										  $this->checkNoEarnings(),
+										  TTi18n::gettext( 'No Earnings, employee may not have any hours for this pay period, or their wage may not be set' ) );
+			}
 
 			$this->Validator->isTrue( 'earnings',
 									  $this->checkEarnings(),
@@ -1477,7 +1538,7 @@ class PayStubFactory extends Factory {
 			if ( $this->Validator->isError( 'earnings' ) == false && $this->Validator->isError( 'deductions' ) == false && $this->Validator->isError( 'net_pay' ) == false ) {
 				$this->Validator->isTrue( 'net_pay',
 										  $this->checkNegativeNetPay(),
-										  TTi18n::gettext( 'Net Pay (%1) is a negative amount, deductions (%2) exceed earnings (%3)', [ Misc::MoneyFormat( $this->getNetPay(), false ), Misc::MoneyFormat( $this->getDeductions(), false ), Misc::MoneyFormat( $this->getGrossPay(), false ) ] ) );
+										  TTi18n::gettext( 'Net Pay (%1) is a negative amount, deductions (%2) exceed earnings (%3)', [ Misc::MoneyRound( $this->getNetPay() ), Misc::MoneyRound( $this->getDeductions() ), Misc::MoneyRound( $this->getGrossPay() ) ] ) );
 			}
 
 			Debug::Text( 'Validate: checkNetPay...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -1508,13 +1569,25 @@ class PayStubFactory extends Factory {
 		//Allow Opening Balance pay stubs to have no transactions.
 		// Only show transaction errors if their are actually earnings
 		if ( $this->Validator->isError( 'earnings' ) == false ) {
-			//Make sure if net pay is greater than zero, at least one transaction must exist.
-			//  Need to allow $0 net pay, pay stubs with no transactions though.
-			$net_pay_arr = $this->getNetPaySum();
-			if ( isset( $net_pay_arr['amount'] ) && $net_pay_arr['amount'] > 0 ) {
+			if ( $this->getType() == 100 ) { //Opening balance pay stub, no transactions should exist.
 				$this->Validator->isTrue( 'transactions',
-						( ( $this->getTotalTransactions() > 0 ) ? true : false ),
-										  TTi18n::gettext( 'No transactions exists, or employee does not have any pay methods' ) );
+						( ( $this->getTotalTransactions() == 0 ) ? true : false ),
+										  TTi18n::gettext( 'Transactions must not exist for opening balance pay stub' ) );
+			} else {
+				//Make sure if net pay is greater than zero, at least one transaction must exist.
+				//  Need to allow $0 net pay, pay stubs with no transactions though.
+				$net_pay_arr = $this->getNetPaySum();
+				if ( isset( $net_pay_arr['amount'] ) && $net_pay_arr['amount'] > 0 ) {
+					$this->Validator->isTrue( 'transactions',
+							( ( $this->getTotalTransactions() > 0 ) ? true : false ),
+											  TTi18n::gettext( 'No transactions exists, or employee does not have any pay methods' ) );
+				}
+
+				if ( $this->Validator->isError( 'transactions' ) == false && $this->Validator->isError( 'status_id' ) == false && $this->Validator->isError( 'earnings' ) == false && $this->Validator->isError( 'deductions' ) == false && $this->Validator->isError( 'net_pay' ) == false ) {
+					$this->Validator->isTrue( 'status_id',
+											  $this->checkTransactions(),
+											  TTi18n::gettext( 'Net pay doesn\'t match total of all pending or paid transactions' ) );
+				}
 			}
 
 			//Check if any transactions are PENDING state and that total of paid transactions matches net pay
@@ -1524,11 +1597,6 @@ class PayStubFactory extends Factory {
 										  TTi18n::gettext( 'This pay stub can\'t be marked paid as it has pending transactions' ) );
 			}
 
-			if ( $this->Validator->isError( 'transactions' ) == false && $this->Validator->isError( 'status_id' ) == false && $this->Validator->isError( 'earnings' ) == false && $this->Validator->isError( 'deductions' ) == false && $this->Validator->isError( 'net_pay' ) == false ) {
-				$this->Validator->isTrue( 'status_id',
-										  $this->checkTransactions(),
-										  TTi18n::gettext( 'Net pay doesn\'t match total of all pending or paid transactions' ) );
-			}
 		}
 
 		return $this->Validator->isValid();
@@ -1544,6 +1612,13 @@ class PayStubFactory extends Factory {
 		if ( $this->getEnableProcessEntries() == true ) {
 			if ( $this->savePayStubEntries() == false ) {
 				$this->FailTransaction(); //Fail transaction as one of the PS entries was not saved.
+			}
+		}
+
+		if ( $this->getEnableSyncPendingPayStubTransactionDates() == true ) {
+			if ( $this->syncPendingPayStubTransactionDates( $data_diff ) == true ) {
+				Debug::Text( 'Pay Stub Transaction Dates were syncd, enable processing transactions.', __FILE__, __LINE__, __METHOD__, 10 );
+				$this->setEnableProcessTransactions( true );
 			}
 		}
 
@@ -1606,7 +1681,7 @@ class PayStubFactory extends Factory {
 
 		//Loop through each entry in current pay stub, if they have
 		//a PS amendment ID assigned to them, change the status.
-		if ( isset( $this->tmp_data['current_pay_stub'] ) && is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
+		if ( isset( $this->tmp_data['current_pay_stub'] ) && isset( $this->tmp_data['current_pay_stub']['entries'] ) && is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
 			foreach ( $this->tmp_data['current_pay_stub']['entries'] as $entry_arr ) {
 				if ( isset( $entry_arr['pay_stub_amendment_id'] ) && $entry_arr['pay_stub_amendment_id'] != '' ) {
 					Debug::Text( 'aFound PS Amendments to change status on...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -1685,7 +1760,7 @@ class PayStubFactory extends Factory {
 
 		//Loop through each entry in current pay stub, if they have
 		//a User Expense ID assigned to them, change the status.
-		if ( isset( $this->tmp_data['current_pay_stub'] ) && is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
+		if ( isset( $this->tmp_data['current_pay_stub'] ) && isset( $this->tmp_data['current_pay_stub']['entries'] ) && is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
 			foreach ( $this->tmp_data['current_pay_stub']['entries'] as $entry_arr ) {
 				if ( isset( $entry_arr['user_expense_id'] ) && TTUUID::isUUID( $entry_arr['user_expense_id'] ) && $entry_arr['user_expense_id'] != TTUUID::getZeroID() ) {
 					Debug::Text( 'aFound User Expenses to change status on... ID: ' . $entry_arr['user_expense_id'], __FILE__, __LINE__, __METHOD__, 10 );
@@ -1937,11 +2012,20 @@ class PayStubFactory extends Factory {
 							$retarr['ytd_amount'] = bcadd( $retarr['ytd_amount'], $entry_arr['amount'] );
 							$retarr['ytd_units'] = bcadd( $retarr['ytd_units'], $entry_arr['units'] );
 						} else {
-							$retarr['rate'] = $entry_arr['rate']; //Can't add rate together, so just use the rate from the last line item.
 							$retarr['amount'] = bcadd( $retarr['amount'], $entry_arr['amount'] );
 							$retarr['units'] = bcadd( $retarr['units'], $entry_arr['units'] );
 							$retarr['ytd_amount'] = bcadd( $retarr['ytd_amount'], $entry_arr['ytd_amount'] );
 							$retarr['ytd_units'] = bcadd( $retarr['ytd_units'], $entry_arr['ytd_units'] );
+
+							//$retarr['rate'] = $entry_arr['rate']; //Can't add rate together, so what do we do, just use the rate from the last line item?
+							//If amount and units are specified, try to calculate the hourly rate based on those. This will essentially result in a weighted average hourly rate if multiple line items of different rates exist.
+							//  This should at least be more accurate than just using the last hourly rate.
+							//  However, if amount and units are not specified, ignore those line items when calculating the weighted average hourly rate, since they could just be a PS amendment or a retro pay that likely shouldn't affect it anyways?
+							if ( $retarr['amount'] != 0 && $retarr['units'] != 0 ) {
+								$retarr['rate'] = bcdiv( $retarr['amount'], $retarr['units'], 4 );
+							} else {
+								$retarr['rate'] = $entry_arr['rate'];
+							}
 						}
 					} //else { //Debug::text('Type ID: '. $type_id .' does not match: '. $entry_arr['pay_stub_entry_type_id'], __FILE__, __LINE__, __METHOD__, 10);
 				}
@@ -1952,11 +2036,20 @@ class PayStubFactory extends Factory {
 							$retarr['ytd_amount'] = bcadd( $retarr['ytd_amount'], $entry_arr['amount'] );
 							$retarr['ytd_units'] = bcadd( $retarr['ytd_units'], $entry_arr['units'] );
 						} else {
-							$retarr['rate'] = $entry_arr['rate']; //Can't add rate together, so just use the rate from the last line item.
 							$retarr['amount'] = bcadd( $retarr['amount'], $entry_arr['amount'] );
 							$retarr['units'] = bcadd( $retarr['units'], $entry_arr['units'] );
 							$retarr['ytd_amount'] = bcadd( $retarr['ytd_amount'], $entry_arr['ytd_amount'] );
 							$retarr['ytd_units'] = bcadd( $retarr['ytd_units'], $entry_arr['ytd_units'] );
+
+							//$retarr['rate'] = $entry_arr['rate']; //Can't add rate together, so just use the rate from the last line item.
+							//If amount and units are specified, try to calculate the hourly rate based on those. This will essentially result in a weighted average hourly rate if multiple line items of different rates exist.
+							//  This should at least be more accurate than just using the last hourly rate.
+							//  However, if amount and units are not specified, ignore those line items when calculating the weighted average hourly rate, since they could just be a PS amendment or a retro pay that likely shouldn't affect it anyways?
+							if ( $retarr['amount'] != 0 && $retarr['units'] != 0 ) {
+								$retarr['rate'] = bcdiv( $retarr['amount'], $retarr['units'], 4 );
+							} else {
+								$retarr['rate'] = $entry_arr['rate'];
+							}
 						}
 					}
 				}
@@ -2193,7 +2286,7 @@ class PayStubFactory extends Factory {
 	 * @return array|bool
 	 */
 	function prepareEntry( $pay_stub_entry_account_id, $amount, $units = null, $rate = null, $description = null, $ps_amendment_id = null, $ytd_amount = null, $ytd_units = null, $ytd_adjustment = false, $user_expense_id = null ) {
-		Debug::text( 'Prepare Entry: PSE Account ID: ' . $pay_stub_entry_account_id . ' Amount: ' . $amount . ' YTD Amount: ' . $ytd_amount . ' Pay Stub Amendment Id: ' . $ps_amendment_id . ' User Expense: ' . $user_expense_id, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Prepare Entry: PSE Account ID: ' . $pay_stub_entry_account_id . ' Amount: ' . $amount .' Rate: '. $rate .' Units: '. $units . ' YTD Amount: ' . $ytd_amount . ' Pay Stub Amendment Id: ' . $ps_amendment_id . ' User Expense: ' . $user_expense_id, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $pay_stub_entry_account_id == '' || TTUUID::isUUID( $pay_stub_entry_account_id ) == false || $pay_stub_entry_account_id == TTUUID::getZeroID() || $pay_stub_entry_account_id == TTUUID::getNotExistID() ) {
 			return false;
 		}
@@ -2542,7 +2635,7 @@ class PayStubFactory extends Factory {
 
 			foreach ( $this->tmp_data['previous_pay_stub']['entries'] as $key => $entry_arr ) {
 				//See if current pay stub entries have previous pay stub entries.
-				//Skip total entries, as they will be greated after anyways.
+				//Skip total entries, as they will be created after anyways.
 				if ( $entry_arr['pay_stub_entry_type_id'] != 40
 						&& isset( $this->tmp_data['current_pay_stub']['entries'] )
 						&& Misc::inArrayByKeyAndValue( $this->tmp_data['current_pay_stub']['entries'], 'pay_stub_entry_account_id', $entry_arr['pay_stub_entry_account_id'] ) == false ) {
@@ -2768,6 +2861,24 @@ class PayStubFactory extends Factory {
 	/**
 	 * @return bool|int|mixed
 	 */
+	function getEmployerDeductions() {
+		if ( $this->getPayStubEntryAccountLinkObject()->getTotalEmployeeDeduction() == TTUUID::getZeroID() ) {
+			return false;
+		}
+
+		$retarr = $this->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', null, $this->getPayStubEntryAccountLinkObject()->getTotalEmployerDeduction() );
+		Debug::Text( 'Employer Deductions: ' . $retarr['amount'], __FILE__, __LINE__, __METHOD__, 10 );
+
+		if ( $retarr['amount'] == '' ) {
+			$retarr['amount'] = 0;
+		}
+
+		return $retarr['amount'];
+	}
+
+	/**
+	 * @return bool|int|mixed
+	 */
 	function getNetPay() {
 		if ( $this->getPayStubEntryAccountLinkObject()->getTotalNetPay() == TTUUID::getZeroID() ) {
 			return false;
@@ -2873,6 +2984,40 @@ class PayStubFactory extends Factory {
 	}
 
 	/**
+	 * @return bool
+	 */
+	function checkZeroNetPay() {
+		$net_pay = $this->getNetPay();
+		Debug::Text( 'Check Zero Net Pay: Net Pay: ' . $net_pay, __FILE__, __LINE__, __METHOD__, 10 );
+
+		if ( $net_pay == 0 ) {
+			return true;
+		}
+
+		Debug::Text( 'Check Zero Net Pay: Returning false', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
+	}
+
+	/**
+	 * Returns total number of entries on the current pay stub.
+	 * @return int
+	 */
+	function getTotalEntries() {
+		$total = 0;
+
+		if ( isset( $this->tmp_data['current_pay_stub']['entries'] ) ) {
+			foreach( $this->tmp_data['current_pay_stub']['entries'] as $entry ) {
+				if ( $entry['pay_stub_entry_type_id'] != 40 ) { //Skip all total entries as many of those will be there no matter what.
+					$total++;
+				}
+			}
+		}
+
+		return $total;
+	}
+
+	/**
 	 * For the api to edit transactions ensure that you validate at the API before calling this method.
 	 * @param object $pst_obj
 	 * @return bool
@@ -2883,6 +3028,28 @@ class PayStubFactory extends Factory {
 		}
 
 		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function syncPendingPayStubTransactionDates( $data_diff ) {
+		$retval = false;
+		if ( $this->isDataDifferent( 'transaction_date', $data_diff ) == true ) {
+			$this->loadCurrentPayStubTransactions();
+			if ( $this->getTotalPendingTransactions() > 0 ) {
+				Debug::Text( 'Sync Pay Stub Transaction to Pending Transactions: ' . TTDate::getDate( 'DATE+TIME', $this->getTransactionDate() ), __FILE__, __LINE__, __METHOD__, 10 );
+				foreach ( $this->tmp_data['current_pay_stub']['transactions'] as $pst_obj ) {
+					//Syncing only if old pay stub transaction date matches current pay stub transaction transaction date. Allowing user to change indivual transaction dates without auto sync.
+					if ( $pst_obj->getStatus() == 10 && $this->getGenericOldDataValue( 'transaction_date' ) != false && TTDate::getMiddleDayEpoch( $pst_obj->getTransactionDate() ) == TTDate::getMiddleDayEpoch( TTDate::strtotime( $this->getGenericOldDataValue( 'transaction_date' ) ) ) ) { // 10 = pending
+						$pst_obj->setTransactionDate( $this->getTransactionDate() );
+						$retval = true;
+					}
+				}
+			}
+		}
+
+		return $retval;
 	}
 
 	/**
@@ -3290,6 +3457,8 @@ class PayStubFactory extends Factory {
 					$pdf->SetAutoPageBreak( false );
 
 					$pdf->SetFont( TTi18n::getPDFDefaultFont( $pay_stub_obj->getUserObject()->getUserPreferenceObject()->getLanguage(), $pay_stub_obj->getUserObject()->getCompanyObject()->getEncoding() ), '', 10 );
+
+					$net_pay_stub_account_entry_id = $pay_stub_obj->getPayStubEntryAccountLinkObject()->getTotalNetPay(); //Optimization.
 				}
 
 				$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
@@ -3330,7 +3499,7 @@ class PayStubFactory extends Factory {
 				$pdf->setXY( Misc::AdjustXY( 0, 20 ), Misc::AdjustXY( 0, 240 ) );
 
 				$status_text = null;
-				if ( $pay_stub_obj->getStatus() == 100 ) {
+				if ( $pay_stub_obj->getType() == 100 ) {
 					$status_text = TTi18n::gettext( 'OPENING BALANCE' );
 				}
 
@@ -3404,7 +3573,7 @@ class PayStubFactory extends Factory {
 
 				$pdf->setLineWidth( 0.25 );
 
-				if ( $pay_stub_obj->getStatus() == 100 ) {
+				if ( $pay_stub_obj->getType() == 100 ) {
 					$pdf->setXY( Misc::AdjustXY( 0, $adjust_x ), Misc::AdjustXY( 30, $adjust_y ) );
 					$pdf->SetFont( '', 'B', 35 );
 					$pdf->setTextColor( 255, 0, 0 );
@@ -3451,7 +3620,8 @@ class PayStubFactory extends Factory {
 					//If type is 40 (a total) and the amount is 0, skip it.
 					//In cases where the employee has no deductions at all, it won't be displayed on the pay stub.
 					// The != 0 check is only for TOTAL line items. If we use >= 0 instead we need to rework how netpay is displayed when no deductions exist.
-					if ( $type != 40 || ( $type == 40 && $pay_stub_entry->getAmount() != 0 ) ) {
+					if ( $type != 40 || ( $type == 40
+									&& ( $pay_stub_entry->getAmount() != 0 || ( isset( $net_pay_stub_account_entry_id ) && $pay_stub_entry->getPayStubEntryNameId() == $net_pay_stub_account_entry_id ) ) ) ) {
 						$pay_stub_entries[$type][] = [
 								'id'                     => $pay_stub_entry->getId(),
 								'pay_stub_entry_name_id' => $pay_stub_entry->getPayStubEntryNameId(),
@@ -4123,7 +4293,7 @@ class PayStubFactory extends Factory {
 				//
 				// Tax information.
 				//
-				$block_adjust_y = 211;
+				$block_adjust_y = 213;
 				$pdf->SetFont( '', '', 6 );
 				$pdf->setXY( Misc::AdjustXY( 0, $adjust_x ), Misc::AdjustXY( ( $block_adjust_y + 3 ), $adjust_y ) );
 
@@ -4198,7 +4368,7 @@ class PayStubFactory extends Factory {
 				// Pay Stub Footer
 				//
 
-				$block_adjust_y = 215;
+				$block_adjust_y = 217;
 				//Line
 				$pdf->setLineWidth( 1 );
 				$pdf->Line( Misc::AdjustXY( 0, $adjust_x ), Misc::AdjustXY( $block_adjust_y, $adjust_y ), Misc::AdjustXY( 185, $adjust_y ), Misc::AdjustXY( $block_adjust_y, $adjust_y ) );
@@ -4209,7 +4379,7 @@ class PayStubFactory extends Factory {
 				$pdf->setXY( Misc::AdjustXY( 0, $adjust_x ), Misc::AdjustXY( ( $block_adjust_y + 3 ), $adjust_y ) );
 				$pdf->Cell( 175, 5, TTi18n::gettext( 'NON NEGOTIABLE' ), $border, 0, 'C', false, '', 1 );
 
-				if ( $pay_stub_obj->getStatus() == 100 ) {
+				if ( $pay_stub_obj->getType() == 100 ) {
 					$pdf->setXY( Misc::AdjustXY( 0, $adjust_x ), Misc::AdjustXY( ( $block_adjust_y + 15 ), $adjust_y ) );
 					$pdf->SetFont( '', 'B', 35 );
 					$pdf->setTextColor( 255, 0, 0 );
@@ -4269,7 +4439,7 @@ class PayStubFactory extends Factory {
 				if ( $user_obj->getSIN() != '' ) {
 					$block_adjust_y = ( $block_adjust_y + 3 );
 					$pdf->setXY( Misc::AdjustXY( 75, $adjust_x ), Misc::AdjustXY( $block_adjust_y, $adjust_y ) );
-					$pdf->Cell( 100, 4, TTi18n::gettext( 'SIN / SSN' ) . ': ' . $user_obj->getSecureSIN(), $border, 1, 'R', false, '', 1 );
+					$pdf->Cell( 100, 4, TTi18n::gettext( 'SIN / SSN' ) . ': ' . $user_obj->getSecureSIN( null, true ), $border, 1, 'R', false, '', 1 ); //Force secure SIN always.
 				}
 
 
@@ -4279,7 +4449,7 @@ class PayStubFactory extends Factory {
 					$tainted_flag = '';
 				}
 
-				$block_adjust_y = 215;
+				$block_adjust_y = 217;
 				$pdf->setXY( Misc::AdjustXY( 75, $adjust_x ), Misc::AdjustXY( ( $block_adjust_y + 27.5 ), $adjust_y ) );
 				$pdf->Cell( 100, 4, TTi18n::gettext( 'Payroll Run #' ) . ': ' . str_pad( $pay_stub_obj->getRun(), 2, 0, STR_PAD_LEFT ), $border, 1, 'R', false, '', 1 );
 
@@ -4294,7 +4464,7 @@ class PayStubFactory extends Factory {
 				$pdf->setLineWidth( 0 );
 
 				$pdf->SetFont( '', '', 6 );
-				$pdf->setXY( Misc::AdjustXY( 0, $adjust_x ), Misc::AdjustXY( ( $block_adjust_y + 38 ), $adjust_y ) );
+				$pdf->setXY( Misc::AdjustXY( 0, $adjust_x ), Misc::AdjustXY( ( $block_adjust_y + 36 ), $adjust_y ) );
 				$pdf->Cell( 175, 1, TTi18n::getText( 'Pay Stub Generated by' ) . ' ' . APPLICATION_NAME . ' @ ' . TTDate::getDate( 'DATE+TIME', $pay_stub_obj->getCreatedDate() ), $border, 0, 'C', false, '', 1 );
 
 				unset( $pay_stub_entries, $pay_period_number );

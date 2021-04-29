@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -50,8 +50,8 @@ if ( ini_get( 'max_execution_time' ) < 1800 ) {
 	ini_set( 'max_execution_time', 1800 );
 }
 
-define( 'APPLICATION_VERSION', '12.4.2' );
-define( 'APPLICATION_VERSION_DATE', 1602658800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("14-Oct-2020")."\n\n";'
+define( 'APPLICATION_VERSION', '12.7.2' );
+define( 'APPLICATION_VERSION_DATE', 1617778800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("07-Apr-2021")."\n\n";'
 
 if ( strtoupper( substr( PHP_OS, 0, 3 ) ) == 'WIN' ) {
 	define( 'OPERATING_SYSTEM', 'WIN' );
@@ -368,12 +368,14 @@ function forceCacheHeaders( $file_name = null, $mtime = null, $etag = null ) {
 //See Authentication::checkValidCSRFToken() for more comments on how this is checked.
 function sendCSRFTokenCookie() {
 	$csrf_token = sha1( TTUUID::generateUUID() );
-	setcookie( 'CSRF-Token', $csrf_token . '-' . sha1( $csrf_token . TTPassword::getPasswordSalt() ), ( time() + 9999999 ), Environment::getCookieBaseURL( 'json' ), null, Misc::isSSL( true ), false ); //Must not be HTTP only, as javascript needs to read this. Really should send the "SameSite=strict" flag, however PHP v7.3 and older handle this in different ways: https://stackoverflow.com/questions/39750906/php-setcookie-samesite-strict
+	setcookie( 'CSRF-Token', $csrf_token . '-' . sha1( $csrf_token . TTPassword::getPasswordSalt() ), ( time() + 157680000 ), Environment::getCookieBaseURL(), null, Misc::isSSL( true ), false ); //Must not be HTTP only, as javascript needs to read this. Really should send the "SameSite=strict" flag, however PHP v7.3 and older handle this in different ways: https://stackoverflow.com/questions/39750906/php-setcookie-samesite-strict
+
+	return true;
 }
 
 /* @formatter:off */
 define('TT_PRODUCT_COMMUNITY', 10 ); define('TT_PRODUCT_PROFESSIONAL', 15 ); define('TT_PRODUCT_CORPORATE', 20 ); define('TT_PRODUCT_ENTERPRISE', 25 );
-function getTTProductEdition() { global $TT_PRODUCT_EDITION; if ( isset($TT_PRODUCT_EDITION) AND $TT_PRODUCT_EDITION > 0 ) { return $TT_PRODUCT_EDITION; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'expense'. DIRECTORY_SEPARATOR .'UserExpenseFactory.class.php') ) { return TT_PRODUCT_ENTERPRISE; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'job'. DIRECTORY_SEPARATOR .'JobFactory.class.php') ) { return TT_PRODUCT_CORPORATE; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'time_clock'. DIRECTORY_SEPARATOR .'TimeClock.class.php') ) { return TT_PRODUCT_PROFESSIONAL; } return TT_PRODUCT_COMMUNITY; }
+function getTTProductEdition() { global $TT_PRODUCT_EDITION; if ( isset($TT_PRODUCT_EDITION) && $TT_PRODUCT_EDITION > 0 ) { return $TT_PRODUCT_EDITION; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'expense'. DIRECTORY_SEPARATOR .'UserExpenseFactory.class.php') ) { return TT_PRODUCT_ENTERPRISE; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'job'. DIRECTORY_SEPARATOR .'JobFactory.class.php') ) { return TT_PRODUCT_CORPORATE; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'time_clock'. DIRECTORY_SEPARATOR .'TimeClock.class.php') ) { return TT_PRODUCT_PROFESSIONAL; } return TT_PRODUCT_COMMUNITY; }
 function getTTProductEditionName() { switch( getTTProductEdition() ) { case 15: $retval = 'Professional'; break; case 20: $retval = 'Corporate'; break; case 25: $retval = 'Enterprise'; break; default: $retval = 'Community'; break; } return $retval; }
 /* @formatter:on */
 
@@ -399,10 +401,12 @@ set_include_path(
 		PATH_SEPARATOR . Environment::getBasePath() . 'classes' .
 		PATH_SEPARATOR . Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'plugins' .
 		//PATH_SEPARATOR . get_include_path() . //Don't include system include path, as it can cause conflicts with other packages bundled with TimeTrex. However the bundled PEAR.php must check for class_exists('PEAR') to prevent conflicts with PHPUnit.
-		PATH_SEPARATOR . Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'pear' ); //Put PEAR path at the end so system installed PEAR is used first, this prevents require_once() from including PEAR from two directories, which causes a fatal error.
+		PATH_SEPARATOR . Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'pear' .
+		PATH_SEPARATOR . Environment::getBasePath() . 'vendor' . DIRECTORY_SEPARATOR . 'pear' . DIRECTORY_SEPARATOR . 'pear' ); //Put PEAR path at the end so system installed PEAR is used first, this prevents require_once() from including PEAR from two directories, which causes a fatal error.
 
 require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'Exception.class.php' );
 require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'Debug.class.php' );
+require_once( Environment::getBasePath() . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php' ); //Composer autoloader.
 																																																																																				/* @formatter:off */ /* REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT -- Please don't steal from hard working volunteers. */ if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>.' ); } /* @formatter:on */
 Debug::setEnable( (bool)$config_vars['debug']['enable'] );
 Debug::setEnableDisplay( (bool)$config_vars['debug']['enable_display'] );

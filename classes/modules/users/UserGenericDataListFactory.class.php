@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -192,6 +192,57 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $user_id UUID
+	 * @param $script
+	 * @param $name
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserGenericDataListFactory
+	 */
+	function getByUserIdAndScriptAndName( $user_id, $script, $name, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
+		}
+
+		if ( $script == '' ) {
+			return false;
+		} else {
+			$script = self::handleScriptName( $script );
+		}
+
+		if ( $name == '' ) {
+			return false;
+		}
+
+		if ( $order == null ) {
+			$order = [ 'is_default' => 'desc', 'name' => 'asc' ];
+			$strict = false;
+		} else {
+			$strict = true;
+		}
+
+		$ph = [
+				'user_id' => TTUUID::castUUID( $user_id ),
+				'script'  => TTi18n::strtolower( $script ),
+				'name'    => TTi18n::strtolower( $name ),
+		];
+
+		$query = '
+					select	*
+					from	' . $this->getTable() . '
+					where	user_id = ?
+						AND lower(script) = ?
+						AND lower(name) = ?
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 

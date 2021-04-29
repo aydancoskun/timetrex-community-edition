@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -62,27 +62,34 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 		$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
 		if ( $class_name != '' && in_array( $class_name, $valid_unauthenticated_classes ) && class_exists( $class_name ) ) {
 			$obj = new $class_name;
-			if ( method_exists( $obj, 'setAPIMessageID' ) ) {
-				$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
-			}
-			if ( $method != '' && method_exists( $obj, $method ) ) {
-				try {
-					$retval = call_user_func_array( [ $obj, $method ], (array)$arguments );
-					//If the function returns anything else, encode into JSON and return it.
-					//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
-					echo json_encode( $retval );
-					$json_error = getJSONError();
-					if ( $json_error !== false ) {
-						Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
-						echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+
+			if ( isWhiteListedAPICall( $obj, $method ) === true ) {
+				if ( method_exists( $obj, 'setAPIMessageID' ) ) {
+					$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
+				}
+				if ( $method != '' && method_exists( $obj, $method ) ) {
+					try {
+						$retval = call_user_func_array( [ $obj, $method ], (array)$arguments );
+						//If the function returns anything else, encode into JSON and return it.
+						//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+						echo json_encode( $retval );
+						$json_error = getJSONError();
+						if ( $json_error !== false ) {
+							Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
+							echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+						}
+					} catch ( ArgumentCountError $e ) {
+						echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', $e->getMessage() ) );
 					}
-				} catch ( ArgumentCountError $e ) {
-					echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', $e->getMessage() ) );
+				} else {
+					$validator = TTnew( 'Validator' ); /** @var Validator $validator */
+					Debug::text( 'Class: '. get_class( $obj ) .' Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
+					echo json_encode( $api_auth->returnHandler( false, 'SESSION', TTi18n::getText( 'Method %1 does not exist.', [ $validator->escapeHTML( $method ) ] ) ) );
 				}
 			} else {
 				$validator = TTnew( 'Validator' ); /** @var Validator $validator */
-				Debug::text( 'Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
-				echo json_encode( $api_auth->returnHandler( false, 'SESSION', TTi18n::getText( 'Method %1 does not exist.', [ $validator->escapeHTML( $method ) ] ) ) );
+				Debug::text( 'Class: '. get_class( $obj ) .' Method: ' . $method . ' is private!', __FILE__, __LINE__, __METHOD__, 10 );
+				echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 is private, unable to call.', [ $validator->escapeHTML( $method ) ] ) ) );
 			}
 		} else {
 			$validator = TTnew( 'Validator' ); /** @var Validator $validator */
@@ -124,33 +131,118 @@ function authenticatedInvokeService( $class_name, $method, $arguments, $message_
 			//Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id .' UserName: '. $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $class_name != '' && class_exists( $class_name ) ) {
 				$obj = new $class_name;
-				if ( method_exists( $obj, 'setAPIMessageID' ) ) {
-					$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
-				}
 
-				if ( $method != '' && method_exists( $obj, $method ) ) {
-					try {
-						$retval = call_user_func_array( [ $obj, $method ], (array)$arguments );
-						if ( $retval !== null ) {
-							if ( !is_object( $retval ) ) { //Make sure we never return a raw object to end-user, as too much information could be included in it.
-								echo json_encode( $retval );
-								$json_error = getJSONError();
-								if ( $json_error !== false ) {
-									Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
-									echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+				if ( isWhiteListedAPICall( $obj, $method ) === true ) {
+					if ( method_exists( $obj, 'setAPIMessageID' ) ) {
+						$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
+					}
+
+					if ( $method != '' && method_exists( $obj, $method ) ) {
+						try {
+							//Handle idempotent requests here. Make sure the content length is less than 5mb to avoid bloating the database too bad.
+							if ( TTUUID::isUUID( $message_id ) && ( isset( $_SERVER['CONTENT_LENGTH'] ) && $_SERVER['CONTENT_LENGTH'] <= 5000000 )
+									&& ( ( isset( $_GET['idempotent'] ) && (int)$_GET['idempotent'] == 1 && strtolower( substr( $method, 0, 3 ) ) != 'get' ) ) //Don't allow idempotent requests on get*() calls.
+							) {
+								$irf = new IdempotentRequestFactory();
+								$irf->setUser( $current_user->getId() );
+								$irf->setIdempotentKey( $obj->getAPIMessageId() );
+								$irf->setStatus( 10 ); //10=Processing
+								$irf->setRequestDate( microtime( true ) );
+								$irf->setRequestMethod( $_SERVER['REQUEST_METHOD'] );
+								$irf->setRequestBody( ( ( $irf->getRequestMethod() == 'GET' ) ? $_GET : $_POST ) );
+								$irf->setRequestURI( $_SERVER['REQUEST_URI'] );
+								if ( $irf->isValid() ) {
+									Debug::text( '  IDEMPOTENT: Enabled and saved! Key: '. $irf->getIdempotentKey(), __FILE__, __LINE__, __METHOD__, 10 );
+									$irf->Save( false, false );
+									if ( $irf->getIsExists() == true ) { //Check if the key already exists in the database.
+										function getOrWaitForIdempotentResponse( $key, $user_id ) {
+											$irlf = new IdempotentRequestListFactory();
+											$irlf->getByIdempotentKeyAndUserId( $key, $user_id );
+											if ( $irlf->getRecordCount() == 1 ) {
+												$ir_obj = $irlf->getCurrent();
+												if ( $ir_obj->getStatus() == 20 ) {
+													Debug::text( '  IDEMPOTENT: Found saved idempotent response...', __FILE__, __LINE__, __METHOD__, 10 );
+													return [ 'response_body' => $ir_obj->getResponseBody() ];
+												}
+											}
+
+											Debug::text( '  IDEMPOTENT: No saved idempotent response yet...', __FILE__, __LINE__, __METHOD__, 10 );
+											return false;
+										}
+
+										Debug::text( '  IDEMPOTENT: Idempotent Key already exists with Status: ' . $irf->getStatus(), __FILE__, __LINE__, __METHOD__, 10 );
+
+										$retry_sleep = 1; //Start at 0.5 seconds retry interval, then use expontential backoff, similar to retryTransaction()
+										$tmp_sleep = ( $retry_sleep * 1000000 );
+
+										$retry_attempts = 0;
+										$retry_max_attempts = 7; //max of 128 seconds delay.
+										while ( $retry_attempts < $retry_max_attempts ) {
+											$irf_response = getOrWaitForIdempotentResponse( $irf->getIdempotentKey(), $current_user->getId() );
+											if ( is_array( $irf_response ) && isset( $irf_response['response_body'] ) ) {
+												Debug::text( '  IDEMPOTENT: Sending saved idempotent response... Key: '. $irf->getIdempotentKey(), __FILE__, __LINE__, __METHOD__, 10 );
+												echo json_encode( $irf_response['response_body'] );
+												return true;
+											} else {
+												Debug::text( '    IDEMPOTENT: Sleeping for idempotent response before retry... Sleep: '. $tmp_sleep .' Attempt: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10 );
+												$random_sleep_interval = ( ceil( ( rand() / getrandmax() ) * ( ( $tmp_sleep * 0.33 ) * 2 ) - ( $tmp_sleep * 0.33 ) ) ); //+/- 33% of the sleep time.
+
+												if ( $retry_attempts < ( $retry_max_attempts - 1 ) ) { //Don't sleep on the last iteration as its serving no purpose.
+													usleep( $tmp_sleep + $random_sleep_interval );
+												}
+
+												$tmp_sleep = ( $tmp_sleep * 2 ); //Exponential back-off with 25% of retry sleep time as a random value.
+												$retry_attempts++;
+
+												continue;
+											}
+										}
+										unset( $retry_sleep, $tmp_sleep, $retry_attempts, $retry_max_attempts );
+
+										Debug::text( 'IDEMPOTENT: Response not found after maximum retry attempts, original request is likely still being processed!', __FILE__, __LINE__, __METHOD__, 10 );
+										echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Idempotent response not available yet, please try again' ) ) );
+										return true;
+									}
+								}
+							}
+
+							$retval = call_user_func_array( [ $obj, $method ], (array)$arguments );
+							if ( $retval !== null ) {
+								if ( !is_object( $retval ) ) { //Make sure we never return a raw object to end-user, as too much information could be included in it.
+									echo json_encode( $retval );
+									$json_error = getJSONError();
+									if ( $json_error !== false ) {
+										Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
+										echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+									} else {
+										//Save response for idempotent requests.
+										if ( isset( $irf ) && is_object( $irf ) ) {
+											$irf->setStatus( 20 );        //20=Completed
+											$irf->setResponseCode( 200 ); //200=OK
+											$irf->setResponseBody( $retval );
+											$irf->setResponseDate( microtime( true ) );
+											if ( $irf->isValid() ) {
+												$irf->Save();
+											}
+											unset( $irf );
+										}
+									}
+								} else {
+									Debug::text( 'OBJECT return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10 );
 								}
 							} else {
-								Debug::text( 'OBJECT return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10 );
+								Debug::text( 'NULL return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10 );
 							}
-						} else {
-							Debug::text( 'NULL return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10 );
+						} catch ( ArgumentCountError $e ) {
+							echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', $e->getMessage() ) );
 						}
-					} catch ( ArgumentCountError $e ) {
-						echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', $e->getMessage() ) );
+					} else {
+						Debug::text( 'Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
+						echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 does not exist.', [ $current_company->Validator->escapeHTML( $method ) ] ) ) );
 					}
 				} else {
-					Debug::text( 'Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
-					echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 does not exist.', [ $current_company->Validator->escapeHTML( $method ) ] ) ) );
+					Debug::text( 'Method: ' . $method . ' is private!', __FILE__, __LINE__, __METHOD__, 10 );
+					echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 is private, unable to call.', [ $current_company->Validator->escapeHTML( $method ) ] ) ) );
 				}
 			} else {
 				Debug::text( 'Class: ' . $class_name . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );

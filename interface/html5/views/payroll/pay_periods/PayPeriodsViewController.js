@@ -1,4 +1,4 @@
-class PayPeriodsViewController extends BaseViewController {
+export class PayPeriodsViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#pay_periods_view_container',
@@ -444,7 +444,7 @@ class PayPeriodsViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Period Schedule' ),
 				in_column: 1,
 				field: 'pay_period_schedule_id',
-				layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
+				layout_name: 'global_pay_period_schedule',
 				api_class: TTAPI.APIPayPeriodSchedule,
 				multiple: true,
 				basic_search: true,
@@ -457,7 +457,7 @@ class PayPeriodsViewController extends BaseViewController {
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -466,14 +466,14 @@ class PayPeriodsViewController extends BaseViewController {
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -484,7 +484,7 @@ class PayPeriodsViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -512,7 +512,7 @@ class PayPeriodsViewController extends BaseViewController {
 				id: this.script_name + '_navigation',
 				api_class: TTAPI.APIPayPeriod,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.PAY_PERIOD,
+				layout_name: 'global_Pay_period',
 				navigation_mode: true,
 				show_search_inputs: true
 			} );
@@ -534,7 +534,7 @@ class PayPeriodsViewController extends BaseViewController {
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_period_column1, '' );
 
 		// Pay Period Schedule
@@ -546,7 +546,7 @@ class PayPeriodsViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayPeriodSchedule,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
+			layout_name: 'global_pay_period_schedule',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_period_schedule_id'

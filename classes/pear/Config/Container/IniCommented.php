@@ -130,7 +130,7 @@ class Config_Container_IniCommented {
      * @access private
      */
     function _quoteAndCommaParser($text)
-    {   
+    {
         $text = trim($text);
         if ($text == '') {
             $emptyNode = array();
@@ -144,12 +144,12 @@ class Config_Container_IniCommented {
         $tokens['quote'] = array('"', '\\');
         $tokens['escape'] = false; // cycle
         $tokens['after_quote'] = array(',', ';');
-        
+
         // events
         $events['normal'] = array('"' => 'quote', ';' => 'comment', ',' => 'normal');
         $events['quote'] = array('"' => 'after_quote', '\\' => 'escape');
         $events['after_quote'] = array(',' => 'normal', ';' => 'comment');
-        
+
         // state stack
         $stack = array();
 
@@ -163,7 +163,7 @@ class Config_Container_IniCommented {
         $pos = 0; // position in $text
 
         do {
-            $char = $text{$pos};
+            $char = $text[$pos];
             $state = $this->_getQACEvent($stack);
 
             if ($tokens[$state]) {
@@ -267,7 +267,7 @@ class Config_Container_IniCommented {
         } while (++$pos < strlen($text));
         return $return;
     } // end func _quoteAndCommaParser
-    
+
     /**
      * Retrieve the state off of a state stack for the Quote and Comma Parser
      * @param  array  $stack    The parser state stack

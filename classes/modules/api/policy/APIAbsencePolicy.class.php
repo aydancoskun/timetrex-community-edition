@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -257,7 +257,7 @@ class APIAbsencePolicy extends APIFactory {
 				}
 				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$is_valid = $primary_validator->isValid( $ignore_warning );
+				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -284,7 +284,7 @@ class APIAbsencePolicy extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				} else if ( $validate_only == true ) {
 					$lf->FailTransaction();
 				}
@@ -370,7 +370,7 @@ class APIAbsencePolicy extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				}
 
 				$lf->CommitTransaction();
@@ -550,9 +550,9 @@ class APIAbsencePolicy extends APIFactory {
 						$available_dollar_balance = ( ( $pay_stub_entry_account_data['ytd_amount'] - $dollar_previous_amount ) - $udt_sum_arr['total_time_amount'] );
 
 						$dollar_retarr = [
-								'available_dollar_balance' => Misc::MoneyFormat( $available_dollar_balance, false ),
-								'current_dollar_amount'    => Misc::MoneyFormat( $dollar_amount, false ),
-								'remaining_dollar_balance' => Misc::MoneyFormat( ( $available_dollar_balance + $dollar_amount ), false ),
+								'available_dollar_balance' => Misc::MoneyRound( $available_dollar_balance ),
+								'current_dollar_amount'    => Misc::MoneyRound( $dollar_amount ),
+								'remaining_dollar_balance' => Misc::MoneyRound( ( $available_dollar_balance + $dollar_amount ) ),
 						];
 						Debug::Arr( $dollar_retarr, 'Dollar Amount: ' . $dollar_amount . ' Previous: ' . $dollar_previous_amount . ' Dollar Accrual: ', __FILE__, __LINE__, __METHOD__, 10 );
 					}

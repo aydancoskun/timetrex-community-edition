@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -783,11 +783,11 @@ class ScheduleSummaryReport extends Report {
 //						if ( $column == 'total_time' ) {
 //							$retval[ $i ][ $column ] = $partial_hour;
 //						} elseif ( $column == 'total_time_wage' ) {
-//							$retval[ $i ][ $column ] = Misc::MoneyFormat( bcmul( TTDate::getHours( $partial_hour ), $row['hourly_rate'] ), FALSE );
+//							$retval[ $i ][ $column ] = Misc::MoneyRound( bcmul( TTDate::getHours( $partial_hour ), $row['hourly_rate'] ) );
 //						} elseif ( $column == 'total_time_wage_burden' ) {
-//							$retval[ $i ][ $column ] = Misc::MoneyFormat( bcmul( TTDate::getHours( $partial_hour ), bcmul( $row['hourly_rate'], bcdiv( $row['labor_burden_percent'], 100 ) ) ), FALSE );
+//							$retval[ $i ][ $column ] = Misc::MoneyRound( bcmul( TTDate::getHours( $partial_hour ), bcmul( $row['hourly_rate'], bcdiv( $row['labor_burden_percent'], 100 ) ) ) );
 //						} elseif ( $column == 'total_time_wage_with_burden' ) {
-//							$retval[ $i ][ $column ] = Misc::MoneyFormat( bcmul( TTDate::getHours( $partial_hour ), bcmul( $row['hourly_rate'], bcadd( bcdiv( $row['labor_burden_percent'], 100 ), 1) ) ), FALSE );
+//							$retval[ $i ][ $column ] = Misc::MoneyRound( bcmul( TTDate::getHours( $partial_hour ), bcmul( $row['hourly_rate'], bcadd( bcdiv( $row['labor_burden_percent'], 100 ), 1) ) ) );
 //						} else {
 //							$retval[ $i ][ $column ] = ( $value / $total_hour_rows ); //Since we aggreate the user_date_total rows to min/max punch time, for anything other than worked time we can just divide it up between the min/max punch time for that row.
 //						}
@@ -874,9 +874,9 @@ class ScheduleSummaryReport extends Report {
 							'bad_quantity'         => $s_obj->getColumn( 'bad_quantity' ),
 
 							'total_time'                  => $s_obj->getColumn( 'total_time' ),
-							'total_time_wage'             => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), $hourly_rate ), false ), //This is also calculated in: splitDataByHoursWorked()
-							'total_time_wage_burden'      => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), bcmul( $hourly_rate, bcdiv( $s_obj->getColumn( 'user_labor_burden_percent' ), 100 ) ) ), false ), //This is also calculated in: splitDataByHoursWorked()
-							'total_time_wage_with_burden' => Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), bcmul( $hourly_rate, bcadd( bcdiv( $s_obj->getColumn( 'user_labor_burden_percent' ), 100 ), 1 ) ) ), false ), //This is also calculated in: splitDataByHoursWorked()
+							'total_time_wage'             => Misc::MoneyRound( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), $hourly_rate ) ), //This is also calculated in: splitDataByHoursWorked()
+							'total_time_wage_burden'      => Misc::MoneyRound( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), bcmul( $hourly_rate, bcdiv( $s_obj->getColumn( 'user_labor_burden_percent' ), 100 ) ) ) ), //This is also calculated in: splitDataByHoursWorked()
+							'total_time_wage_with_burden' => Misc::MoneyRound( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), bcmul( $hourly_rate, bcadd( bcdiv( $s_obj->getColumn( 'user_labor_burden_percent' ), 100 ), 1 ) ) ) ), //This is also calculated in: splitDataByHoursWorked()
 
 							'other_id1' => $s_obj->getColumn( 'other_id1' ),
 							'other_id2' => $s_obj->getColumn( 'other_id2' ),
@@ -903,7 +903,7 @@ class ScheduleSummaryReport extends Report {
 							'start_end_time'  => [ 'sort' => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'start_time' ) ), 86400 ) . TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'end_time' ) ), 86400 ), 'display' => TTDate::getDate( 'TIME', TTDate::strtotime( $s_obj->getColumn( 'start_time' ) ) ) . ' - '. TTDate::getDate( 'TIME',  TTDate::strtotime( $s_obj->getColumn( 'end_time' ) ) ) ],
 
 							'user_wage_id'         => $s_obj->getColumn( 'user_wage_id' ),
-							'hourly_rate'          => Misc::MoneyFormat( $hourly_rate, false ), //This is required in: splitDataByHoursWorked()
+							'hourly_rate'          => Misc::MoneyRound( $hourly_rate ), //This is required in: splitDataByHoursWorked()
 							'labor_burden_percent' => $s_obj->getColumn( 'user_labor_burden_percent' ), //This is required in: splitDataByHoursWorked()
 
 							'pay_period_start_date'       => strtotime( $s_obj->getColumn( 'pay_period_start_date' ) ),

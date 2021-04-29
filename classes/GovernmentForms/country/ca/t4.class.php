@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,9 +45,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 
 	public $template_offsets = [ -10, 0 ];
 
-	/*
-	public $payment_cutoff_amount = 7000; //Line5
-	*/
+	private $payroll_deduction_obj = null; //Prevent __set() from sticking this into the data property.
 
 	function getOptions( $name ) {
 		$retval = null;
@@ -769,7 +767,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 		return $value;
 	}
 
-	function _outputXML() {
+	function _outputXML( $type = null ) {
 		//Maps other income box codes to XML element names.
 		$other_box_code_map = [
 				30 => 'hm_brd_lodg_amt',
@@ -787,6 +785,10 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				42 => 'empt_cmsn_amt',
 				43 => 'cfppa_amt',
 				53 => 'dfr_sob_amt',
+				57 => 'empt_inc_amt_covid_prd1',
+				58 => 'empt_inc_amt_covid_prd2',
+				59 => 'empt_inc_amt_covid_prd3',
+				60 => 'empt_inc_amt_covid_prd4',
 				66 => 'elg_rtir_amt',
 				67 => 'nelg_rtir_amt',
 				68 => 'indn_elg_rtir_amt',
@@ -807,6 +809,8 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				84 => 'pub_trnst_pass',
 				85 => 'epaid_hlth_pln_amt',
 				86 => 'stok_opt_csh_out_eamt',
+				87 => 'vlntr_emergencyworker_xmpt_amt',
+				88 => 'indn_txmpt_sei_amt',
 		];
 
 		if ( is_object( $this->getXMLObject() ) ) {
@@ -817,9 +821,8 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 
 		$xml->Return->addChild( 'T4' );
 
-		$records = $this->getRecords();
+		$records = $this->handleMultipleForms( $this->getRecords() ); //Just like the paper form, only 6 other boxes are allowed per T4 record. If there is more, it must be split up onto other T4 records.
 		if ( is_array( $records ) && count( $records ) > 0 ) {
-
 			$e = 0;
 			foreach ( $records as $employee_data ) {
 				//Debug::Arr($employee_data, 'Employee Data: ', __FILE__, __LINE__, __METHOD__,10);
@@ -912,11 +915,17 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				}
 
 				$xml->Return->T4->T4Slip[$e]->addChild( 'OTH_INFO' ); //Other Income Fields
-				for ( $i = 0; $i <= 6; $i++ ) {
-					if ( isset( $this->{'other_box_' . $i . '_code'} ) && isset( $other_box_code_map[$this->{'other_box_' . $i . '_code'}] ) ) {
-						$xml->Return->T4->T4Slip[$e]->OTH_INFO->addChild( $other_box_code_map[$this->{'other_box_' . $i . '_code'}], $this->MoneyFormat( (float)$this->{'other_box_' . $i} ) );
+				for ( $i = 0; $i <= 5; $i++ ) { //Just like the paper form, only 6 other boxes are allowed per T4 record. If there is more, it must be split up onto other T4 records.
+					if ( isset( $this->{'other_box_' . $i . '_code'} ) ) {
+						if ( isset( $other_box_code_map[$this->{'other_box_' . $i . '_code'}] ) ) {
+							$xml->Return->T4->T4Slip[$e]->OTH_INFO->addChild( $other_box_code_map[$this->{'other_box_' . $i . '_code'}], $this->MoneyFormat( (float)$this->{'other_box_' . $i} ) );
+						} else {
+							Debug::Text( 'ERROR: Other Box Code is invalid and not mapped in the XSD! Code: '. $this->{'other_box_' . $i . '_code'}, __FILE__, __LINE__, __METHOD__, 10 );
+						}
 					}
 				}
+
+				$this->revertToOriginalDataState();
 
 				$e++;
 			}
@@ -925,7 +934,86 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 		return true;
 	}
 
-	function _outputPDF() {
+	//This takes a single employee record and moves other box data from fields 6, 7, 8, 9, ... into fields 0, 1.
+	// Because it changes the data, it can be run multiple times on the same input data.
+	function handleSevenOrMoreOtherBoxData( $data ) {
+		//Clear all variables that should be empty when generating multiple T4 forms. (everything except other boxes)
+		$data['l14'] = null;
+		$data['l22'] = null;
+		$data['l16'] = null;
+		$data['l17'] = null;
+		$data['l24'] = null;
+		$data['l26'] = null;
+		$data['l18'] = null;
+		$data['l44'] = null;
+		$data['l20'] = null;
+		$data['l46'] = null;
+		$data['l52'] = null;
+		$data['l50'] = null;
+
+		$data['l19'] = null;
+		$data['l27'] = null;
+
+		//Clear all variables for Other Boxes 0-5 (Boxes 1-6) which are displayed on the first page of the form.
+		for ( $n = 0; $n <= 5; $n++ ) {
+			$data['other_box_' . $n .'_code'] = null;
+			$data['other_box_' . $n] = null;
+		}
+
+		$data_changed = false;
+
+		//Copy non-NULL data from rows 6+ to rows 0-5.
+		$destination_position = 0;
+		for ( $n = 6; $n <= 23; $n++ ) { //Skip 0-5 range, and start on 7, as we always copy data in to the 0-6 range.
+			if ( !( ( !isset( $data['other_box_' . $n .'_code'] ) || $data['other_box_' . $n .'_code'] == null ) && ( !isset( $data['other_box_' . $n] ) || $data['other_box_' . $n] == null ) ) ) {
+				Debug::Text( 'Found 6+ Other Box, moving to position: ' . $destination_position, __FILE__, __LINE__, __METHOD__, 10 );
+
+				$data_changed = true;
+
+				$data['other_box_' . $destination_position .'_code'] = $data['other_box_' . $n .'_code'];
+				$data['other_box_' . $destination_position] = $data['other_box_' . $n];
+
+				$data['other_box_' . $n .'_code'] = null;
+				$data['other_box_' . $n] = null;
+
+				$destination_position++;
+				if ( $destination_position == 6 ) {
+					break;
+				}
+			}
+		}
+
+		if ( $data_changed == true ) {
+			return $data;
+		}
+
+		return false;
+	}
+
+	//This takes a single employee record that has three or more states/localities and splits them into multiple records to simplify generating the PDFs.
+	function handleMultipleForms( $records ) {
+		$tmp_records = [];
+		if ( is_array( $records ) && count( $records ) > 0 ) {
+			foreach ( $records as $employee_data ) {
+				$tmp_records[] = $employee_data;
+
+				$tmp_record = $employee_data;
+				do {
+					$tmp_record = $this->handleSevenOrMoreOtherBoxData( $tmp_record );
+					if ( is_array( $tmp_record ) ) {
+						$tmp_records[] = $tmp_record;
+					}
+				} while ( is_array( $tmp_record ) );
+			}
+		}
+
+		$this->clearRecords();
+		$this->setRecords( $tmp_records );
+
+		return $this->getRecords();
+	}
+
+	function _outputPDF( $type ) {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
@@ -950,7 +1038,8 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 		}
 
 		//Get location map, start looping over each variable and drawing
-		$records = $this->getRecords();
+		$records = $this->handleMultipleForms( $this->getRecords() );
+
 		if ( is_array( $records ) && count( $records ) > 0 ) {
 
 			$template_schema = $this->getTemplateSchema();
@@ -982,11 +1071,12 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 						$this->addPage( [ 'template_page' => 2 ] );
 					}
 				}
+
+				$this->revertToOriginalDataState();
+
 				$e++;
 			}
 		}
-
-		$this->clearRecords();
 
 		return true;
 	}

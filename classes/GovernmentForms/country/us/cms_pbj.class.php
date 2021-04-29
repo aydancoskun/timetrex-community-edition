@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -79,7 +79,7 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 	}
 
 
-	function _outputXML() {
+	function _outputXML( $type = null ) {
 		$xml = new SimpleXMLElement( '<nursingHomeData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nhpbj_4_00_0.xsd"></nursingHomeData>' );
 		$this->setXMLObject( $xml );
 
@@ -193,6 +193,8 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 								//Default to Non-Exempt as that is most common.
 								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild( 'payTypeCode', ( (int)$this->pbj_pay_type_code == 0 ) ? 2 : (int)$this->pbj_pay_type_code );
 
+								$this->revertToOriginalDataState();
+
 								$h++;
 							}
 						}
@@ -206,7 +208,7 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 		return true;
 	}
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		return false;
 	}
 }

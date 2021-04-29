@@ -1,4 +1,4 @@
-class AbsencePolicyViewController extends BaseViewController {
+export class AbsencePolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#absence_policy_view_container',
@@ -48,7 +48,7 @@ class AbsencePolicyViewController extends BaseViewController {
 			api_class: TTAPI.APIAbsencePolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -85,7 +85,7 @@ class AbsencePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_CODE,
+			layout_name: 'global_pay_code',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_code_id'
@@ -97,7 +97,7 @@ class AbsencePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+			layout_name: 'global_pay_formula_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_formula_policy_id',
@@ -181,7 +181,7 @@ class AbsencePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Code' ),
 				in_column: 1,
 				field: 'pay_code_id',
-				layout_name: ALayoutIDs.PAY_CODE,
+				layout_name: 'global_pay_code',
 				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
@@ -193,7 +193,7 @@ class AbsencePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Formula Policy' ),
 				in_column: 1,
 				field: 'pay_formula_policy_id',
-				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+				layout_name: 'global_pay_formula_policy',
 				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
@@ -205,7 +205,7 @@ class AbsencePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -217,7 +217,7 @@ class AbsencePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

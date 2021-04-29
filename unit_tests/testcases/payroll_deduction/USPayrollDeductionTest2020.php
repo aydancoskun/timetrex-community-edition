@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,10 +37,10 @@
 /**
  * @group USPayrollDeductionTest2020
  */
-class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
+class USPayrollDeductionTest2020 extends PHPUnit\Framework\TestCase {
 	public $company_id = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
@@ -50,18 +50,14 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$this->company_id = PRIMARY_COMPANY_ID;
 
 		TTDate::setTimeZone( 'Etc/GMT+8' ); //Force to non-DST timezone. 'PST' isnt actually valid.
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	public function mf( $amount ) {
-		return Misc::MoneyFormat( $amount, false );
+		return Misc::MoneyRound( $amount );
 	}
 
 	public function MatchWithinMarginOfError( $source, $destination, $error = 0 ) {
@@ -137,10 +133,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 				$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), $this->mf( $row['gross_income'] ) );
 				if ( $row['federal_deduction'] != '' ) {
-					$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), $this->MatchWithinMarginOfError( $this->mf( $row['federal_deduction'] ), $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), 0.01 ) );
+					$this->assertEqualsWithDelta( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), $this->mf( $row['federal_deduction'] ), 0.01 );
 				}
 				if ( $row['provincial_deduction'] != '' ) {
-					$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), $this->mf( $row['provincial_deduction'] ) );
+					$this->assertEqualsWithDelta( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), $this->mf( $row['provincial_deduction'] ), 0.01 );
 				}
 			}
 
@@ -273,9 +269,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
-		$this->assertEquals( '9615', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9615.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2228.90', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_2020_Test2020W4SingleJob1() {
@@ -303,9 +299,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
-		$this->assertEquals( '9615', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9615.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2228.90', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //2228.90
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_2020_Test2020W4TwoJobs1() {
@@ -333,9 +329,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
-		$this->assertEquals( '9615', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9615.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2797.08', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_2020_Test2020W4OneJobWithDependents1() {
@@ -363,9 +359,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
-		$this->assertEquals( '9615', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9615.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2132.75', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_2020_Test2020W4OneJobWithOtherIncome1() {
@@ -393,9 +389,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
-		$this->assertEquals( '9615', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9615.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2363.52', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_2020_Test2020W4OneJobWithDeductions1() {
@@ -423,9 +419,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
-		$this->assertEquals( '9615', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9615.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2161.60', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_2020_Test2020W4OneJobWithAdditionalDeduction1() {
@@ -453,9 +449,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
-		$this->assertEquals( '9615', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9615.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2228.90', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //2128.90 + 100
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -484,9 +480,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '166.17', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 214 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -515,9 +511,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '166.17', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 166 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -546,9 +542,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '395.30', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 395 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -577,9 +573,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '290.91', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 291 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -608,9 +604,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '362.21', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 362 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -639,9 +635,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '235.90', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 236 based on 2020 W4 standard withholding tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -670,9 +666,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '211.23', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 212 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -701,9 +697,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '176.10', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 177 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -732,9 +728,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '395.30', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 395 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -763,9 +759,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '290.91', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 291 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -794,9 +790,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '362.21', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 362 based on tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	//Examples from 15-T publication.
@@ -825,9 +821,9 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
-		$this->assertEquals( '1925', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1925.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '274.04', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //Should be about 236 based on 2020 W4 standard withholding tax tables.
-		$this->assertEquals( '0', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_ID_2020a_Test1() {
@@ -851,8 +847,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1212 );
 
-		$this->assertEquals( '1212', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
-		$this->assertEquals( '10', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '1212.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '10.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_ID_2020a_Test2() {
@@ -876,8 +872,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000 );
 
-		$this->assertEquals( '1000', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
-		$this->assertEquals( '11', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '11.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
 	function testUS_LA_2020a_Test1() {
@@ -902,7 +898,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 700 );
 
-		$this->assertEquals( '700', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '700.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '20.35', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
@@ -928,7 +924,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 4600 );
 
-		$this->assertEquals( '4600', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '4600.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '167.92', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
@@ -954,7 +950,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( '576.92', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '44.10', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
-		$this->assertEquals( '37.15', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
+		$this->assertEquals( '37.18', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 		$this->assertEquals( '35.77', $this->mf( $pd_obj->getEmployeeSocialSecurity() ) );
 	}
 
@@ -979,7 +975,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 2127 );
 
-		$this->assertEquals( '2127', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '2127.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '57.73', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
@@ -1029,7 +1025,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1890 );
 
-		$this->assertEquals( '1890', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1890.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '81.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) ); //80.85
 	}
 
@@ -1054,7 +1050,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1890 );
 
-		$this->assertEquals( '1890', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1890.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '46.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) ); //46.23
 	}
 

@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,14 +35,14 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class Form941ReportTest extends PHPUnit_Framework_TestCase {
+class Form941ReportTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 	protected $pay_stub_account_link_arr = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -89,14 +89,10 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	function getPayStubAccountLinkArray() {
@@ -372,7 +368,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 2901.54, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 15308.14, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 45324.27, $form_objs->objs[0]->l6 );
 		$this->assertEquals( -0.04, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 45324.23, $form_objs->objs[0]->l10 );
@@ -460,7 +456,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 4062.14, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 361.14, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 8496.28, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 50518.63, $form_objs->objs[0]->l6 );
 		$this->assertEquals( -0.03, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 50518.60, $form_objs->objs[0]->l10 );
@@ -658,7 +654,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 1337.10, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 7054.37, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 18165.57, $form_objs->objs[0]->l6 );
 		$this->assertEquals( 0.03, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 18165.60, $form_objs->objs[0]->l10 );
@@ -746,7 +742,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 1871.94, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 9876.12, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 25431.80, $form_objs->objs[0]->l6 );
 		$this->assertEquals( 0.04, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 25431.84, $form_objs->objs[0]->l10 );
@@ -834,7 +830,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 1604.52, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 4362.68, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 17696.12, $form_objs->objs[0]->l6 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l7 ); //Since the user reached the social security maximum contribution, we have to back out the fractions of the cent from previous quarters, at least to within 0.01.
 		$this->assertEquals( 17696.12, $form_objs->objs[0]->l10 );
@@ -1030,7 +1026,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 7546.13, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 541.90, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 24567.63, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 118239.66, $form_objs->objs[0]->l6 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 118239.66, $form_objs->objs[0]->l10 );
@@ -1160,7 +1156,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 2901.54, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 15308.14, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 45324.27, $form_objs->objs[0]->l6 );
 		$this->assertEquals( -0.04, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 45324.23, $form_objs->objs[0]->l10 );
@@ -1267,7 +1263,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 4062.14, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 361.14, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 8496.28, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 50518.63, $form_objs->objs[0]->l6 );
 		$this->assertEquals( -0.03, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 50518.60, $form_objs->objs[0]->l10 );
@@ -1501,18 +1497,18 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 'March', $report_output[2]['date_month'] );
 		$this->assertEquals( 4021.22, $report_output[2]['wages'] );
 		$this->assertEquals( 501.78, $report_output[2]['income_tax'] );
-		$this->assertEquals( 405.56, $report_output[2]['social_security_tax_total'] );
+		$this->assertEquals( 452.10, $report_output[2]['social_security_tax_total'] );
 		$this->assertEquals( 116.60, $report_output[2]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[2]['additional_medicare_tax'] );
-		$this->assertEquals( 1023.94, $report_output[2]['total_tax'] );
+		$this->assertEquals( 1070.48, $report_output[2]['total_tax'] );
 
 		//Total
 		$this->assertEquals( 10053.20, $report_output[3]['wages'] );
 		$this->assertEquals( 1254.49, $report_output[3]['income_tax'] );
-		$this->assertEquals( 1153.52, $report_output[3]['social_security_tax_total'] );
+		$this->assertEquals( 1200.06, $report_output[3]['social_security_tax_total'] );
 		$this->assertEquals( 291.50, $report_output[3]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[3]['additional_medicare_tax'] );
-		$this->assertEquals( 2699.51, $report_output[3]['total_tax'] );
+		$this->assertEquals( 2746.05, $report_output[3]['total_tax'] );
 
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -1527,12 +1523,12 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 10053.20, $form_objs->objs[0]->l2 );
 		$this->assertEquals( 1254.49, $form_objs->objs[0]->l3 );
 		$this->assertEquals( 9251.00, $form_objs->objs[0]->l5a );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l5ai );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l5aii );
+		$this->assertEquals( 500.30, $form_objs->objs[0]->l5ai );
+		$this->assertEquals( 250.30, $form_objs->objs[0]->l5aii );
 		$this->assertEquals( 51.60, $form_objs->objs[0]->l5b );
 		$this->assertEquals( 10053.20, $form_objs->objs[0]->l5c );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d );
-		$this->assertEquals( 1445.02, $form_objs->objs[0]->l7z );
+		$this->assertEquals( 1491.56, $form_objs->objs[0]->l7z );
 		$this->assertEquals( 1538.10, $form_objs->objs[0]->l5_actual_deducted );
 		$this->assertEquals( true, $form_objs->objs[0]->l15b );
 		$this->assertEquals( false, $form_objs->objs[0]->l16_month1 );
@@ -1542,41 +1538,41 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		//$this->assertEquals( $form_objs->objs[0]->l16_month_total, $form_objs->objs[0]->l12 );
 
 		$this->assertEquals( 1147.12, $form_objs->objs[0]->l5a2 );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l5ai2 );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l5aii2 );
+		$this->assertEquals( 31.02, $form_objs->objs[0]->l5ai2 );
+		$this->assertEquals( 15.52, $form_objs->objs[0]->l5aii2 );
 		$this->assertEquals( 6.40, $form_objs->objs[0]->l5b2 );
 		$this->assertEquals( 291.54, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
-		$this->assertEquals( 1445.06, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
-		$this->assertEquals( 2699.55, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 1491.60, $form_objs->objs[0]->l5e );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 2746.09, $form_objs->objs[0]->l6 );
 		$this->assertEquals( -0.04, $form_objs->objs[0]->l7 );
-		$this->assertEquals( 2699.51, $form_objs->objs[0]->l10 );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l11b );
+		$this->assertEquals( 2746.05, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 576.76, $form_objs->objs[0]->l11b );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l11d );
-		$this->assertEquals( 2699.51, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 576.76, $form_objs->objs[0]->l11d );
+		$this->assertEquals( 2169.29, $form_objs->objs[0]->l12 );
 		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l13c );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l13d );
-		$this->assertEquals( 2699.51, $form_objs->objs[0]->l13e );
-		$this->assertEquals( 2699.51, $form_objs->objs[0]->l13g );
+		$this->assertEquals( 259.50, $form_objs->objs[0]->l13c );
+		$this->assertEquals( 77.20, $form_objs->objs[0]->l13d );
+		$this->assertEquals( 2505.99, $form_objs->objs[0]->l13e );
+		$this->assertEquals( 2505.99, $form_objs->objs[0]->l13g );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
-		$this->assertEquals( 558.53, $form_objs->objs[1]->month1[25] );
-		$this->assertEquals( 558.53, $form_objs->objs[1]->month1_total );
+		$this->assertEquals( 0.00, $form_objs->objs[1]->month1[25] );
+		$this->assertEquals( 0.00, $form_objs->objs[1]->month1_total );
 
-		$this->assertEquals( 558.52, $form_objs->objs[1]->month2[8] );
+		$this->assertEquals( 540.29, $form_objs->objs[1]->month2[8] );
 		$this->assertEquals( 558.52, $form_objs->objs[1]->month2[22] );
-		$this->assertEquals( 1117.04, $form_objs->objs[1]->month2_total );
+		$this->assertEquals( 1098.81, $form_objs->objs[1]->month2_total );
 
 		$this->assertEquals( 558.51, $form_objs->objs[1]->month3[8] );
-		$this->assertEquals( 465.43, $form_objs->objs[1]->month3[22] );
-		$this->assertEquals( 1023.94, $form_objs->objs[1]->month3_total );
+		$this->assertEquals( 511.97, $form_objs->objs[1]->month3[22] );
+		$this->assertEquals( 1070.48, $form_objs->objs[1]->month3_total );
 
-		$this->assertEquals( 2699.51, $form_objs->objs[1]->total );
-		$this->assertEquals( $form_objs->objs[1]->total, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 2169.29, $form_objs->objs[1]->total );
+		$this->assertEquals( $form_objs->objs[1]->total, $form_objs->objs[0]->l12 );
 
 
 		//Generate Report for 2nd Quarter
@@ -1664,7 +1660,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 408.14, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
 		$this->assertEquals( 1827.56, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
 		$this->assertEquals( 3583.73, $form_objs->objs[0]->l6 );
 		$this->assertEquals( -0.06, $form_objs->objs[0]->l7 );
 		$this->assertEquals( 3583.67, $form_objs->objs[0]->l10 );
@@ -1674,9 +1670,9 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 3036.83, $form_objs->objs[0]->l12 );
 		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
 		$this->assertEquals( 5306.52, $form_objs->objs[0]->l13c );
-		$this->assertEquals( 441.07, $form_objs->objs[0]->l13d );
-		$this->assertEquals( 8784.42, $form_objs->objs[0]->l13e );
-		$this->assertEquals( 8784.42, $form_objs->objs[0]->l13g );
+		$this->assertEquals( 540.29, $form_objs->objs[0]->l13d );
+		$this->assertEquals( 8883.64, $form_objs->objs[0]->l13e );
+		$this->assertEquals( 8883.64, $form_objs->objs[0]->l13g );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
@@ -1734,10 +1730,10 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 'March', $report_output[2]['date_month'] );
 		$this->assertEquals( 4021.22, $report_output[2]['wages'] );
 		$this->assertEquals( 501.78, $report_output[2]['income_tax'] );
-		$this->assertEquals( 405.56, $report_output[2]['social_security_tax_total'] );
+		$this->assertEquals( 452.10, $report_output[2]['social_security_tax_total'] );
 		$this->assertEquals( 116.60, $report_output[2]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[2]['additional_medicare_tax'] );
-		$this->assertEquals( 1023.94, $report_output[2]['total_tax'] );
+		$this->assertEquals( 1070.48, $report_output[2]['total_tax'] );
 
 		$this->assertEquals( 'April', $report_output[3]['date_month'] );
 		$this->assertEquals( 4021.14, $report_output[3]['wages'] );
@@ -1767,10 +1763,10 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		//Total
 		$this->assertEquals( 24127.04, $report_output[6]['wages'] );
 		$this->assertEquals( 3010.66, $report_output[6]['income_tax'] );
-		$this->assertEquals( 2572.92, $report_output[6]['social_security_tax_total'] );
+		$this->assertEquals( 2619.46, $report_output[6]['social_security_tax_total'] );
 		$this->assertEquals( 699.60, $report_output[6]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[6]['additional_medicare_tax'] );
-		$this->assertEquals( 6283.18, $report_output[6]['total_tax'] );
+		$this->assertEquals( 6329.72, $report_output[6]['total_tax'] );
 
 		return true;
 	}
@@ -1907,18 +1903,18 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 'March', $report_output[2]['date_month'] );
 		$this->assertEquals( 40021.22, $report_output[2]['wages'] );
 		$this->assertEquals( 12006.43, $report_output[2]['income_tax'] );
-		$this->assertEquals( 4032.56, $report_output[2]['social_security_tax_total'] );
+		$this->assertEquals( 4497.60, $report_output[2]['social_security_tax_total'] );
 		$this->assertEquals( 1160.60, $report_output[2]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[2]['additional_medicare_tax'] );
-		$this->assertEquals( 17199.59, $report_output[2]['total_tax'] );
+		$this->assertEquals( 17664.63, $report_output[2]['total_tax'] );
 
 		//Total
 		$this->assertEquals( 100053.20, $report_output[3]['wages'] );
 		$this->assertEquals( 30016.13, $report_output[3]['income_tax'] );
-		$this->assertEquals( 11476.52, $report_output[3]['social_security_tax_total'] );
+		$this->assertEquals( 11941.56, $report_output[3]['social_security_tax_total'] );
 		$this->assertEquals( 2901.50, $report_output[3]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[3]['additional_medicare_tax'] );
-		$this->assertEquals( 44394.15, $report_output[3]['total_tax'] );
+		$this->assertEquals( 44859.19, $report_output[3]['total_tax'] );
 
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -1933,12 +1929,12 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 100053.20, $form_objs->objs[0]->l2 );
 		$this->assertEquals( 30016.13, $form_objs->objs[0]->l3 );
 		$this->assertEquals( 92501.00, $form_objs->objs[0]->l5a );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l5ai );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l5aii );
+		$this->assertEquals( 5000.30, $form_objs->objs[0]->l5ai );
+		$this->assertEquals( 2500.30, $form_objs->objs[0]->l5aii );
 		$this->assertEquals( 51.60, $form_objs->objs[0]->l5b );
 		$this->assertEquals( 100053.20, $form_objs->objs[0]->l5c );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d );
-		$this->assertEquals( 14378.02, $form_objs->objs[0]->l7z );
+		$this->assertEquals( 14843.06, $form_objs->objs[0]->l7z );
 		$this->assertEquals( 15308.10, $form_objs->objs[0]->l5_actual_deducted );
 		$this->assertEquals( true, $form_objs->objs[0]->l15b );
 		$this->assertEquals( false, $form_objs->objs[0]->l16_month1 );
@@ -1948,41 +1944,41 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		//$this->assertEquals( $form_objs->objs[0]->l16_month_total, $form_objs->objs[0]->l12 );
 
 		$this->assertEquals( 11470.12, $form_objs->objs[0]->l5a2 );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l5ai2 );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l5aii2 );
+		$this->assertEquals( 310.02, $form_objs->objs[0]->l5ai2 );
+		$this->assertEquals( 155.02, $form_objs->objs[0]->l5aii2 );
 		$this->assertEquals( 6.40, $form_objs->objs[0]->l5b2 );
 		$this->assertEquals( 2901.54, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
-		$this->assertEquals( 14378.06, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
-		$this->assertEquals( 44394.19, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 14843.10, $form_objs->objs[0]->l5e );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 44859.23, $form_objs->objs[0]->l6 );
 		$this->assertEquals( -0.04, $form_objs->objs[0]->l7 );
-		$this->assertEquals( 44394.15, $form_objs->objs[0]->l10 );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l11b );
+		$this->assertEquals( 44859.19, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 5738.26, $form_objs->objs[0]->l11b );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l11d );
-		$this->assertEquals( 44394.15, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 5738.26, $form_objs->objs[0]->l11d );
+		$this->assertEquals( 39120.93, $form_objs->objs[0]->l12 );
 		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l13c );
-		$this->assertEquals( 0.00, $form_objs->objs[0]->l13d );
-		$this->assertEquals( 44394.15, $form_objs->objs[0]->l13e );
-		$this->assertEquals( 44394.15, $form_objs->objs[0]->l13g );
+		$this->assertEquals( 1946.17, $form_objs->objs[0]->l13c );
+		$this->assertEquals( 707.22, $form_objs->objs[0]->l13d );
+		$this->assertEquals( 41774.32, $form_objs->objs[0]->l13e );
+		$this->assertEquals( 41774.32, $form_objs->objs[0]->l13g );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
-		$this->assertEquals( 9064.86, $form_objs->objs[1]->month1[25] );
-		$this->assertEquals( 9064.86, $form_objs->objs[1]->month1_total );
+		$this->assertEquals( 3326.60, $form_objs->objs[1]->month1[25] );
+		$this->assertEquals( 3326.60, $form_objs->objs[1]->month1_total );
 
 		$this->assertEquals( 9064.85, $form_objs->objs[1]->month2[8] );
 		$this->assertEquals( 9064.85, $form_objs->objs[1]->month2[22] );
 		$this->assertEquals( 18129.70, $form_objs->objs[1]->month2_total );
 
 		$this->assertEquals( 9064.84, $form_objs->objs[1]->month3[8] );
-		$this->assertEquals( 8134.75, $form_objs->objs[1]->month3[22] );
-		$this->assertEquals( 17199.59, $form_objs->objs[1]->month3_total );
+		$this->assertEquals( 8599.79, $form_objs->objs[1]->month3[22] );
+		$this->assertEquals( 17664.63, $form_objs->objs[1]->month3_total );
 
-		$this->assertEquals( 44394.15, $form_objs->objs[1]->total );
-		$this->assertEquals( $form_objs->objs[1]->total, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 39120.93, $form_objs->objs[1]->total );
+		$this->assertEquals( $form_objs->objs[1]->total, $form_objs->objs[0]->l12 );
 
 
 		//Generate Report for 2nd Quarter
@@ -2007,18 +2003,18 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 'April', $report_output[0]['date_month'] );
 		$this->assertEquals( 40021.14, $report_output[0]['wages'] );
 		$this->assertEquals( 12006.40, $report_output[0]['income_tax'] );
-		$this->assertEquals( 4032.55, $report_output[0]['social_security_tax_total'] );
+		$this->assertEquals( 3587.75, $report_output[0]['social_security_tax_total'] );
 		$this->assertEquals( 1160.60, $report_output[0]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[0]['additional_medicare_tax'] );
-		$this->assertEquals( 17199.55, $report_output[0]['total_tax'] );
+		$this->assertEquals( 16754.75, $report_output[0]['total_tax'] );
 
 		$this->assertEquals( 'May', $report_output[1]['date_month'] );
 		$this->assertEquals( 60031.62, $report_output[1]['wages'] );
 		$this->assertEquals( 18009.57, $report_output[1]['income_tax'] );
-		$this->assertEquals( 20.23, $report_output[1]['social_security_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[1]['social_security_tax_total'] );
 		$this->assertEquals( 1740.90, $report_output[1]['medicare_tax_total'] );
 		$this->assertEquals( 0.95, $report_output[1]['additional_medicare_tax'] );
-		$this->assertEquals( 19771.65, $report_output[1]['total_tax'] );
+		$this->assertEquals( 19751.42, $report_output[1]['total_tax'] );
 
 		$this->assertEquals( 'June', $report_output[2]['date_month'] );
 		$this->assertEquals( 40021.08, $report_output[2]['wages'] );
@@ -2031,10 +2027,10 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		//Total
 		$this->assertEquals( 140073.84, $report_output[3]['wages'] );
 		$this->assertEquals( 42022.35, $report_output[3]['income_tax'] );
-		$this->assertEquals( 4052.78, $report_output[3]['social_security_tax_total'] );
+		$this->assertEquals( 3587.75, $report_output[3]['social_security_tax_total'] );
 		$this->assertEquals( 4062.10, $report_output[3]['medicare_tax_total'] );
 		$this->assertEquals( 361.13, $report_output[3]['additional_medicare_tax'] );
-		$this->assertEquals( 50498.36, $report_output[3]['total_tax'] );
+		$this->assertEquals( 50033.33, $report_output[3]['total_tax'] );
 
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -2049,12 +2045,12 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 140073.84, $form_objs->objs[0]->l2 );
 		$this->assertEquals( 42022.35, $form_objs->objs[0]->l3 );
 		$this->assertEquals( 24999.43, $form_objs->objs[0]->l5a );
-		$this->assertEquals( 10326.83, $form_objs->objs[0]->l5ai );
-		$this->assertEquals( 5000.57, $form_objs->objs[0]->l5aii );
+		$this->assertEquals( 5326.51, $form_objs->objs[0]->l5ai );
+		$this->assertEquals( 2500.29, $form_objs->objs[0]->l5aii );
 		$this->assertEquals( 20.57, $form_objs->objs[0]->l5b );
 		$this->assertEquals( 140073.84, $form_objs->objs[0]->l5c );
 		$this->assertEquals( 40127.04, $form_objs->objs[0]->l5d );
-		$this->assertEquals( 8476.01, $form_objs->objs[0]->l7z );
+		$this->assertEquals( 8010.98, $form_objs->objs[0]->l7z );
 		$this->assertEquals( 8496.23, $form_objs->objs[0]->l5_actual_deducted );
 		$this->assertEquals( true, $form_objs->objs[0]->l15b );
 		$this->assertEquals( false, $form_objs->objs[0]->l16_month1 );
@@ -2064,42 +2060,42 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		//$this->assertEquals( $form_objs->objs[0]->l16_month_total, $form_objs->objs[0]->l12 );
 
 		$this->assertEquals( 3099.93, $form_objs->objs[0]->l5a2 );
-		$this->assertEquals( 640.26, $form_objs->objs[0]->l5ai2 );
-		$this->assertEquals( 310.04, $form_objs->objs[0]->l5aii2 );
+		$this->assertEquals( 330.24, $form_objs->objs[0]->l5ai2 );
+		$this->assertEquals( 155.02, $form_objs->objs[0]->l5aii2 );
 		$this->assertEquals( 2.55, $form_objs->objs[0]->l5b2 );
 		$this->assertEquals( 4062.14, $form_objs->objs[0]->l5c2 );
 		$this->assertEquals( 361.14, $form_objs->objs[0]->l5d2 );
-		$this->assertEquals( 8476.06, $form_objs->objs[0]->l5e );
-		$this->assertEquals( true, $form_objs->objs[0]->l4 );
-		$this->assertEquals( 50498.41, $form_objs->objs[0]->l6 );
-		$this->assertEquals( -0.05, $form_objs->objs[0]->l7 );
-		$this->assertEquals( 50498.36, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 8011.02, $form_objs->objs[0]->l5e );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 50033.37, $form_objs->objs[0]->l6 );
+		$this->assertEquals( -0.04, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 50033.33, $form_objs->objs[0]->l10 );
 		$this->assertEquals( 1551.24, $form_objs->objs[0]->l11b );
 		$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
 		$this->assertEquals( 1551.24, $form_objs->objs[0]->l11d );
-		$this->assertEquals( 48947.12, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 48482.09, $form_objs->objs[0]->l12 );
 		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
-		$this->assertEquals( 14486.08, $form_objs->objs[0]->l13c );
-		$this->assertEquals( 4041.16, $form_objs->objs[0]->l13d );
-		$this->assertEquals( 67474.36, $form_objs->objs[0]->l13e );
-		$this->assertEquals( 67474.36, $form_objs->objs[0]->l13g );
+		$this->assertEquals( 6801.60, $form_objs->objs[0]->l13c );
+		$this->assertEquals( 4950.40, $form_objs->objs[0]->l13d );
+		$this->assertEquals( 60234.09, $form_objs->objs[0]->l13e );
+		$this->assertEquals( 60234.09, $form_objs->objs[0]->l13g );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
 		$this->assertEquals( 7048.54, $form_objs->objs[1]->month1[5] );
-		$this->assertEquals( 8599.77, $form_objs->objs[1]->month1[19] );
-		$this->assertEquals( 15648.31, $form_objs->objs[1]->month1_total );
+		$this->assertEquals( 8154.97, $form_objs->objs[1]->month1[19] );
+		$this->assertEquals( 15203.51, $form_objs->objs[1]->month1_total );
 
-		$this->assertEquals( 6603.72, $form_objs->objs[1]->month2[3] );
+		$this->assertEquals( 6583.49, $form_objs->objs[1]->month2[3] );
 		$this->assertEquals( 6583.49, $form_objs->objs[1]->month2[17] );
 		$this->assertEquals( 6584.44, $form_objs->objs[1]->month2[31] );
-		$this->assertEquals( 19771.65, $form_objs->objs[1]->month2_total );
+		$this->assertEquals( 19751.42, $form_objs->objs[1]->month2_total );
 
 		$this->assertEquals( 6763.58, $form_objs->objs[1]->month3[14] );
 		$this->assertEquals( 6763.58, $form_objs->objs[1]->month3[28] );
 		$this->assertEquals( 13527.16, $form_objs->objs[1]->month3_total );
 
-		$this->assertEquals( 48947.12, $form_objs->objs[1]->total );
+		$this->assertEquals( 48482.09, $form_objs->objs[1]->total );
 		$this->assertEquals( $form_objs->objs[1]->total, $form_objs->objs[0]->l12 );
 
 
@@ -2139,26 +2135,26 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 'March', $report_output[2]['date_month'] );
 		$this->assertEquals( 40021.22, $report_output[2]['wages'] );
 		$this->assertEquals( 12006.43, $report_output[2]['income_tax'] );
-		$this->assertEquals( 4032.56, $report_output[2]['social_security_tax_total'] );
+		$this->assertEquals( 4497.60, $report_output[2]['social_security_tax_total'] );
 		$this->assertEquals( 1160.60, $report_output[2]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[2]['additional_medicare_tax'] );
-		$this->assertEquals( 17199.59, $report_output[2]['total_tax'] );
+		$this->assertEquals( 17664.63, $report_output[2]['total_tax'] );
 
 		$this->assertEquals( 'April', $report_output[3]['date_month'] );
 		$this->assertEquals( 40021.14, $report_output[3]['wages'] );
 		$this->assertEquals( 12006.40, $report_output[3]['income_tax'] );
-		$this->assertEquals( 4032.55, $report_output[3]['social_security_tax_total'] );
+		$this->assertEquals( 3587.74, $report_output[3]['social_security_tax_total'] );
 		$this->assertEquals( 1160.60, $report_output[3]['medicare_tax_total'] );
 		$this->assertEquals( 0.00, $report_output[3]['additional_medicare_tax'] );
-		$this->assertEquals( 17199.55, $report_output[3]['total_tax'] );
+		$this->assertEquals( 16754.74, $report_output[3]['total_tax'] );
 
 		$this->assertEquals( 'May', $report_output[4]['date_month'] );
 		$this->assertEquals( 60031.62, $report_output[4]['wages'] );
 		$this->assertEquals( 18009.57, $report_output[4]['income_tax'] );
-		$this->assertEquals( 20.23, $report_output[4]['social_security_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[4]['social_security_tax_total'] );
 		$this->assertEquals( 1740.90, $report_output[4]['medicare_tax_total'] );
 		$this->assertEquals( 0.95, $report_output[4]['additional_medicare_tax'] );
-		$this->assertEquals( 19771.65, $report_output[4]['total_tax'] );
+		$this->assertEquals( 19751.42, $report_output[4]['total_tax'] );
 
 		$this->assertEquals( 'June', $report_output[5]['date_month'] );
 		$this->assertEquals( 40021.08, $report_output[5]['wages'] );
@@ -2175,6 +2171,377 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 6963.60, $report_output[6]['medicare_tax_total'] );
 		$this->assertEquals( 361.13, $report_output[6]['additional_medicare_tax'] );
 		$this->assertEquals( 94892.51, $report_output[6]['total_tax'] );
+
+		return true;
+	}
+
+	/**
+	 * @group Form941Report_testSemiWeeklyDepositNegativeSocialSecurityWages
+	 */
+	function testSemiWeeklyDepositNegativeSocialSecurityWages() {
+		//1st Quarter - Stay below 200,000 medicare limit and 132,900 social security limit
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Advance' ), 20000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Health Benefits Plan' ), 1000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) ); //Health Plan Expenses - This should cause a negative SS wage
+
+
+		//2nd Quarter - Cross medicare and social security limit
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 21499.42, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 21499.44, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 11203.46, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Advance' ), 11499.48, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Health Benefits Plan' ), 1100.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) ); //Health Plan Expenses - This should cause a negative SS wage
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 11499.50, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.26, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 11499.52, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.25, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 11499.54, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.24, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 11499.56, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.23, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
+
+
+
+		//Extra pay period outside the 1st and 2nd quarter.
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 11499.58, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.22, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ) );
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Advance' ), 11499.60, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Health Benefits Plan' ), 1200.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ) ); //Health Plan Expenses - This should *not* cause a negative SS wage, since we are well past the maximum wage limit.
+
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 11499.62, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10.21, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ) );
+
+		$this->createPayStub();
+
+		//Generate Report for 1st Quarter
+		$report_obj = new Form941Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$form_config = $report_obj->getCompanyFormConfig();
+		$form_config['deposit_schedule'] = 20; //Semi-Weekly
+		$form_config['social_security_wages']['exclude_pay_stub_entry_account'] = array_merge( $form_config['social_security_wages']['exclude_pay_stub_entry_account'], [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Health Benefits Plan' ) ] );
+
+		$report_obj->setCompanyFormConfig( $form_config ); //Save form config for easy debugging.
+		$report_obj->setFormConfig( $report_obj->getCompanyFormConfig() );
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_1st_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_dump($report_output);
+
+		$this->assertEquals( 'January', $report_output[0]['date_month'] );
+		$this->assertEquals( 20010.68, $report_output[0]['wages'] );
+		$this->assertEquals( 6003.24, $report_output[0]['income_tax'] );
+		$this->assertEquals( 2481.32, $report_output[0]['social_security_tax_total'] );
+		$this->assertEquals( 580.30, $report_output[0]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[0]['additional_medicare_tax'] );
+		$this->assertEquals( 9064.86, $report_output[0]['total_tax'] );
+
+		$this->assertEquals( 'February', $report_output[1]['date_month'] );
+		$this->assertEquals( 40021.30, $report_output[1]['wages'] );
+		$this->assertEquals( 12006.46, $report_output[1]['income_tax'] );
+		$this->assertEquals( 4962.64, $report_output[1]['social_security_tax_total'] );
+		$this->assertEquals( 1160.60, $report_output[1]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[1]['additional_medicare_tax'] );
+		$this->assertEquals( 18129.70, $report_output[1]['total_tax'] );
+
+		$this->assertEquals( 'March', $report_output[2]['date_month'] );
+		$this->assertEquals( 20010.62, $report_output[2]['wages'] );
+		$this->assertEquals( 6003.22, $report_output[2]['income_tax'] );
+		$this->assertEquals( 2357.28, $report_output[2]['social_security_tax_total'] );
+		$this->assertEquals( 580.30, $report_output[2]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[2]['additional_medicare_tax'] );
+		$this->assertEquals( 8940.80, $report_output[2]['total_tax'] );
+
+		//Total
+		$this->assertEquals( 80042.60, $report_output[3]['wages'] );
+		$this->assertEquals( 24012.92, $report_output[3]['income_tax'] );
+		$this->assertEquals( 9801.24, $report_output[3]['social_security_tax_total'] );
+		$this->assertEquals( 2321.20, $report_output[3]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[3]['additional_medicare_tax'] );
+		$this->assertEquals( 36135.36, $report_output[3]['total_tax'] );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l1 );
+		$this->assertEquals( 80042.60, $form_objs->objs[0]->l2 );
+		$this->assertEquals( 24012.92, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 79042.30, $form_objs->objs[0]->l5a );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5ai );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5aii );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5b );
+		$this->assertEquals( 80042.60, $form_objs->objs[0]->l5c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d );
+		$this->assertEquals( 12122.44, $form_objs->objs[0]->l7z );
+		$this->assertEquals( 12246.48, $form_objs->objs[0]->l5_actual_deducted );
+		$this->assertEquals( true, $form_objs->objs[0]->l15b );
+		$this->assertEquals( false, $form_objs->objs[0]->l16_month1 );
+		$this->assertEquals( false, $form_objs->objs[0]->l16_month2 );
+		$this->assertEquals( false, $form_objs->objs[0]->l16_month3 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16_month_total );
+		//$this->assertEquals( $form_objs->objs[0]->l16_month_total, $form_objs->objs[0]->l12 );
+
+		$this->assertEquals( 9801.25, $form_objs->objs[0]->l5a2 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5ai2 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5aii2 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5b2 );
+		$this->assertEquals( 2321.24, $form_objs->objs[0]->l5c2 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
+		$this->assertEquals( 12122.49, $form_objs->objs[0]->l5e );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 36135.41, $form_objs->objs[0]->l6 );
+		$this->assertEquals( -0.05, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 36135.36, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11d );
+		$this->assertEquals( 36135.36, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l13c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l13d );
+		$this->assertEquals( 36135.36, $form_objs->objs[0]->l13e );
+		$this->assertEquals( 36135.36, $form_objs->objs[0]->l13g );
+
+		//Schedule B
+		//var_dump($form_objs->objs[1]->data);
+		$this->assertEquals( 9064.86, $form_objs->objs[1]->month1[25] );
+		$this->assertEquals( 9064.86, $form_objs->objs[1]->month1_total );
+
+		$this->assertEquals( 9064.85, $form_objs->objs[1]->month2[8] );
+		$this->assertEquals( 9064.85, $form_objs->objs[1]->month2[22] );
+		$this->assertEquals( 18129.70, $form_objs->objs[1]->month2_total );
+
+		$this->assertEquals( 9064.84, $form_objs->objs[1]->month3[8] );
+		$this->assertEquals( 0.00, $form_objs->objs[1]->month3[22] );
+		$this->assertEquals( 9064.84, $form_objs->objs[1]->month3_total );
+
+		$this->assertEquals( 36259.40, $form_objs->objs[1]->total );
+		//$this->assertEquals( $form_objs->objs[1]->total, $form_objs->objs[0]->l10 ); //Because the entire liability for a single pay period is negative, it will not match L10.
+
+
+		//Generate Report for 2nd Quarter
+		$report_obj = new Form941Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$report_obj->setFormConfig( $report_obj->getCompanyFormConfig() );
+
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_dates = TTDate::getTimePeriodDates( 'this_year_2nd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$report_config['time_period']['start_date'] = $report_dates['start_date'];
+		$report_config['time_period']['end_date'] = $report_dates['end_date'];
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_dump($report_output);
+
+		$this->assertEquals( 'April', $report_output[0]['date_month'] );
+		$this->assertEquals( 43019.43, $report_output[0]['wages'] );
+		$this->assertEquals( 13115.76, $report_output[0]['income_tax'] );
+		$this->assertEquals( 5334.40, $report_output[0]['social_security_tax_total'] );
+		$this->assertEquals( 1247.56, $report_output[0]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[0]['additional_medicare_tax'] );
+		$this->assertEquals( 19697.72, $report_output[0]['total_tax'] );
+
+		$this->assertEquals( 'May', $report_output[1]['date_month'] );
+		$this->assertEquals( 22723.49, $report_output[1]['wages'] );
+		$this->assertEquals( 5942.73, $report_output[1]['income_tax'] );
+		$this->assertEquals( 1343.94, $report_output[1]['social_security_tax_total'] );
+		$this->assertEquals( 658.98, $report_output[1]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[1]['additional_medicare_tax'] );
+		$this->assertEquals( 7945.65, $report_output[1]['total_tax'] );
+
+		$this->assertEquals( 'June', $report_output[2]['date_month'] );
+		$this->assertEquals( 23019.55, $report_output[2]['wages'] );
+		$this->assertEquals( 6046.34, $report_output[2]['income_tax'] );
+		$this->assertEquals( 0.00, $report_output[2]['social_security_tax_total'] );
+		$this->assertEquals( 667.56, $report_output[2]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[2]['additional_medicare_tax'] );
+		$this->assertEquals( 6713.90, $report_output[2]['total_tax'] );
+
+		//Total
+		$this->assertEquals( 88762.47, $report_output[3]['wages'] );
+		$this->assertEquals( 25104.83, $report_output[3]['income_tax'] );
+		$this->assertEquals( 6678.34, $report_output[3]['social_security_tax_total'] );
+		$this->assertEquals( 2574.10, $report_output[3]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[3]['additional_medicare_tax'] );
+		$this->assertEquals( 34357.27, $report_output[3]['total_tax'] );
+
+
+		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
+		$form_objs = $report_obj->getFormObject();
+		//var_dump($form_objs->objs[0]->data);
+
+		$this->assertObjectHasAttribute( 'objs', $form_objs );
+		$this->assertArrayHasKey( '0', $form_objs->objs );
+		$this->assertObjectHasAttribute( 'data', $form_objs->objs[0] );
+
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l1 );
+		$this->assertEquals( 88762.47, $form_objs->objs[0]->l2 );
+		$this->assertEquals( 25104.83, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 53857.70, $form_objs->objs[0]->l5a );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5ai );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5aii );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5b );
+		$this->assertEquals( 88762.47, $form_objs->objs[0]->l5c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d );
+		$this->assertEquals( 9252.44, $form_objs->objs[0]->l7z );
+		$this->assertEquals( 9128.42, $form_objs->objs[0]->l5_actual_deducted );
+		$this->assertEquals( true, $form_objs->objs[0]->l15b );
+		$this->assertEquals( false, $form_objs->objs[0]->l16_month1 );
+		$this->assertEquals( false, $form_objs->objs[0]->l16_month2 );
+		$this->assertEquals( false, $form_objs->objs[0]->l16_month3 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16_month_total );
+		//$this->assertEquals( $form_objs->objs[0]->l16_month_total, $form_objs->objs[0]->l12 );
+
+		$this->assertEquals( 6678.35, $form_objs->objs[0]->l5a2 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5ai2 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5aii2 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5b2 );
+		$this->assertEquals( 2574.11, $form_objs->objs[0]->l5c2 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5d2 );
+		$this->assertEquals( 9252.46, $form_objs->objs[0]->l5e );
+		$this->assertEquals( false, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 34357.29, $form_objs->objs[0]->l6 );
+		$this->assertEquals( -0.02, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 34357.27, $form_objs->objs[0]->l10 );
+		//$this->assertEquals( 1571.47, $form_objs->objs[0]->l11b );
+		//$this->assertEquals( 0.00, $form_objs->objs[0]->l11c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11d );
+		$this->assertEquals( 34357.27, $form_objs->objs[0]->l12 );
+		$this->assertEquals( $form_objs->objs[0]->l12, $form_objs->objs[0]->l13a );
+		//$this->assertEquals( 13797.34, $form_objs->objs[0]->l13c );
+		//$this->assertEquals( 4041.16, $form_objs->objs[0]->l13d );
+		$this->assertEquals( 34357.27, $form_objs->objs[0]->l13e );
+		$this->assertEquals( 34357.27, $form_objs->objs[0]->l13g );
+
+		//Schedule B
+		//var_dump($form_objs->objs[1]->data);
+		$this->assertEquals( 9848.86, $form_objs->objs[1]->month1[5] );
+		$this->assertEquals( 9848.86, $form_objs->objs[1]->month1[19] );
+		$this->assertEquals( 19697.72, $form_objs->objs[1]->month1_total );
+
+		$this->assertEquals( 4588.70, $form_objs->objs[1]->month2[3] );
+		$this->assertEquals( 0.00, $form_objs->objs[1]->month2[17] );
+		$this->assertEquals( 3356.95, $form_objs->objs[1]->month2[31] );
+		$this->assertEquals( 7945.65, $form_objs->objs[1]->month2_total );
+
+		$this->assertEquals( 3356.95, $form_objs->objs[1]->month3[14] );
+		$this->assertEquals( 3356.95, $form_objs->objs[1]->month3[28] );
+		$this->assertEquals( 6713.90, $form_objs->objs[1]->month3_total );
+
+		$this->assertEquals( 34357.27, $form_objs->objs[1]->total );
+		$this->assertEquals( $form_objs->objs[1]->total, $form_objs->objs[0]->l12 );
+
+
+		//Generate Report for entire year
+		$report_obj = new Form941Report();
+		$report_obj->setUserObject( $this->user_obj );
+		$report_obj->setPermissionObject( new Permission() );
+		$report_obj->setFormConfig( $report_obj->getCompanyFormConfig() );
+
+		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
+
+		$report_config['time_period']['time_period'] = 'custom_date';
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '30-Jun-2019' );
+		$report_obj->setConfig( $report_config );
+		//var_dump($report_config);
+
+		$report_output = $report_obj->getOutput( 'raw' );
+		//var_dump($report_output);
+
+		$this->assertEquals( 'January', $report_output[0]['date_month'] );
+		$this->assertEquals( 20010.68, $report_output[0]['wages'] );
+		$this->assertEquals( 6003.24, $report_output[0]['income_tax'] );
+		$this->assertEquals( 2481.32, $report_output[0]['social_security_tax_total'] );
+		$this->assertEquals( 580.30, $report_output[0]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[0]['additional_medicare_tax'] );
+		$this->assertEquals( 9064.86, $report_output[0]['total_tax'] );
+
+		$this->assertEquals( 'February', $report_output[1]['date_month'] );
+		$this->assertEquals( 40021.30, $report_output[1]['wages'] );
+		$this->assertEquals( 12006.46, $report_output[1]['income_tax'] );
+		$this->assertEquals( 4962.64, $report_output[1]['social_security_tax_total'] );
+		$this->assertEquals( 1160.60, $report_output[1]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[1]['additional_medicare_tax'] );
+		$this->assertEquals( 18129.70, $report_output[1]['total_tax'] );
+
+		$this->assertEquals( 'March', $report_output[2]['date_month'] );
+		$this->assertEquals( 20010.62, $report_output[2]['wages'] );
+		$this->assertEquals( 6003.22, $report_output[2]['income_tax'] );
+		$this->assertEquals( 2357.28, $report_output[2]['social_security_tax_total'] );
+		$this->assertEquals( 580.30, $report_output[2]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[2]['additional_medicare_tax'] );
+		$this->assertEquals( 8940.80, $report_output[2]['total_tax'] );
+
+		$this->assertEquals( 'April', $report_output[3]['date_month'] );
+		$this->assertEquals( 43019.43, $report_output[3]['wages'] );
+		$this->assertEquals( 13115.76, $report_output[3]['income_tax'] );
+		$this->assertEquals( 5334.40, $report_output[3]['social_security_tax_total'] );
+		$this->assertEquals( 1247.56, $report_output[3]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[3]['additional_medicare_tax'] );
+		$this->assertEquals( 19697.72, $report_output[3]['total_tax'] );
+
+		$this->assertEquals( 'May', $report_output[4]['date_month'] );
+		$this->assertEquals( 22723.49, $report_output[4]['wages'] );
+		$this->assertEquals( 5942.73, $report_output[4]['income_tax'] );
+		$this->assertEquals( 1343.94, $report_output[4]['social_security_tax_total'] );
+		$this->assertEquals( 658.98, $report_output[4]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[4]['additional_medicare_tax'] );
+		$this->assertEquals( 7945.65, $report_output[4]['total_tax'] );
+
+		$this->assertEquals( 'June', $report_output[5]['date_month'] );
+		$this->assertEquals( 23019.55, $report_output[5]['wages'] );
+		$this->assertEquals( 6046.34, $report_output[5]['income_tax'] );
+		$this->assertEquals( 0.00, $report_output[5]['social_security_tax_total'] );
+		$this->assertEquals( 667.56, $report_output[5]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[5]['additional_medicare_tax'] );
+		$this->assertEquals( 6713.90, $report_output[5]['total_tax'] );
+
+		//Total
+		$this->assertEquals( 168805.07, $report_output[6]['wages'] );
+		$this->assertEquals( 49117.75, $report_output[6]['income_tax'] );
+		$this->assertEquals( 16479.58, $report_output[6]['social_security_tax_total'] );
+		$this->assertEquals( 4895.30, $report_output[6]['medicare_tax_total'] );
+		$this->assertEquals( 0.00, $report_output[6]['additional_medicare_tax'] );
+		$this->assertEquals( 70492.63, $report_output[6]['total_tax'] );
 
 		return true;
 	}

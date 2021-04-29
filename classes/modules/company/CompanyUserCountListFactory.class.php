@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -313,7 +313,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 						date_stamp >= ?
 						AND date_stamp <= ? ';
 
-		$query .= ( isset( $filter_data['company_id'] ) ) ? $this->getWhereClauseSQL( 'company_id', $id, 'uuid_list', $ph ) : null;
+		$query .= $this->getWhereClauseSQL( 'company_id', $id, 'uuid_list', $ph );
 
 		$query .= ' group by company_id';
 

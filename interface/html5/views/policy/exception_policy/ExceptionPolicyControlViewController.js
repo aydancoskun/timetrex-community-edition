@@ -1,4 +1,4 @@
-class ExceptionPolicyControlViewController extends BaseViewController {
+export class ExceptionPolicyControlViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#exception_policy_control_view_container',
@@ -64,7 +64,7 @@ class ExceptionPolicyControlViewController extends BaseViewController {
 			api_class: TTAPI.APIExceptionPolicyControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.HIERARCHY,
+			layout_name: 'global_hierarchy',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -370,7 +370,7 @@ class ExceptionPolicyControlViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'severity_id', set_empty: false } );
 		this.setWidgetEnableBaseOnParentController( form_item_input );
-		form_item_input.setSourceData( Global.addFirstItemToArray( this.parent_controller.severity_array ) );
+		form_item_input.setSourceData( this.parent_controller.severity_array );
 		form_item_input.setValue( data.severity_id );
 		widgets[form_item_input.getField()] = form_item_input;
 		row.children().eq( 3 ).append( form_item_input );
@@ -612,7 +612,7 @@ class ExceptionPolicyControlViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -624,7 +624,7 @@ class ExceptionPolicyControlViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

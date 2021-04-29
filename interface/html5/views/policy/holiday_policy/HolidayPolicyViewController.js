@@ -1,4 +1,4 @@
-class HolidayPolicyViewController extends BaseViewController {
+export class HolidayPolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#holiday_policy_view_container',
@@ -69,7 +69,7 @@ class HolidayPolicyViewController extends BaseViewController {
 			api_class: TTAPI.APIHolidayPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.HOLIDAY_POLICY,
+			layout_name: 'global_holiday',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -110,14 +110,14 @@ class HolidayPolicyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_holiday_policy_column1 );
 
 		// Default Schedules Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'default_schedule_status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.default_schedule_status_array ) );
+		form_item_input.setSourceData( $this.default_schedule_status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Default Schedules Status' ), form_item_input, tab_holiday_policy_column1 );
 
 		// Recurring Holidays
@@ -125,7 +125,7 @@ class HolidayPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRecurringHoliday,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.RECURRING_HOLIDAY,
+			layout_name: 'global_recurring_holiday',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'recurring_holiday_id'
@@ -156,7 +156,7 @@ class HolidayPolicyViewController extends BaseViewController {
 
 		var form_item_worked_scheduled_days_combobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_worked_scheduled_days_combobox.TComboBox( { field: 'worked_scheduled_days' } );
-		form_item_worked_scheduled_days_combobox.setSourceData( Global.addFirstItemToArray( $this.worked_scheduled_days_array ) );
+		form_item_worked_scheduled_days_combobox.setSourceData( $this.worked_scheduled_days_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
@@ -176,7 +176,7 @@ class HolidayPolicyViewController extends BaseViewController {
 		// Default Schedules Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'shift_on_holiday_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.shift_on_holiday_type_array ) );
+		form_item_input.setSourceData( $this.shift_on_holiday_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'On the Holiday, the Employee' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// Employee Must Work at Least
@@ -191,7 +191,7 @@ class HolidayPolicyViewController extends BaseViewController {
 
 		form_item_worked_scheduled_days_combobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_worked_scheduled_days_combobox.TComboBox( { field: 'worked_after_scheduled_days' } );
-		form_item_worked_scheduled_days_combobox.setSourceData( Global.addFirstItemToArray( $this.worked_scheduled_days_array ) );
+		form_item_worked_scheduled_days_combobox.setSourceData( $this.worked_scheduled_days_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
@@ -213,7 +213,7 @@ class HolidayPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+			layout_name: 'global_contributing_shift_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'eligible_contributing_shift_policy_id'
@@ -235,7 +235,7 @@ class HolidayPolicyViewController extends BaseViewController {
 
 		var form_item_average_time_frequency_combobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_average_time_frequency_combobox.TComboBox( { field: 'average_time_frequency_type_id' } );
-		form_item_average_time_frequency_combobox.setSourceData( Global.addFirstItemToArray( $this.average_time_frequency_type_array ) );
+		form_item_average_time_frequency_combobox.setSourceData( $this.average_time_frequency_type_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
@@ -272,7 +272,7 @@ class HolidayPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+			layout_name: 'global_contributing_shift_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'contributing_shift_policy_id'
@@ -308,7 +308,7 @@ class HolidayPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRoundIntervalPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
+			layout_name: 'global_round_interval',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'round_interval_policy_id'
@@ -320,7 +320,7 @@ class HolidayPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'absence_policy_id'
@@ -439,7 +439,7 @@ class HolidayPolicyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -447,7 +447,7 @@ class HolidayPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -459,7 +459,7 @@ class HolidayPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

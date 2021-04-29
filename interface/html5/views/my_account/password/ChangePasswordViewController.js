@@ -1,4 +1,4 @@
-class ChangePasswordViewController extends BaseViewController {
+export class ChangePasswordViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			showPassword: null,

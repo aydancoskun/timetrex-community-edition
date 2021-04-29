@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -641,7 +641,7 @@ class GeneralLedgerSummaryReport extends Report {
 					if ( isset( $columns['pay_stub_account'] ) && $columns['pay_stub_account'] == true && isset( $columns['amount'] ) && $columns['amount'] == true ) {
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = [
 								'pay_stub_account' => ( isset( $pay_stub_account_columns[$pse_obj->getPayStubEntryNameId()] ) ) ? $pay_stub_account_columns[$pse_obj->getPayStubEntryNameId()] : '',
-								'amount'           => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), false ),
+								'amount'           => Misc::MoneyRound( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ) ),
 						];
 					} else {
 
@@ -660,7 +660,7 @@ class GeneralLedgerSummaryReport extends Report {
 											'account'        => trim( $debit_account ),
 											'debit_account'  => trim( $debit_account ),
 											'credit_account' => null,
-											'debit_amount'   => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), false ),
+											'debit_amount'   => Misc::MoneyRound( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ) ),
 											'credit_amount'  => null,
 									];
 								} else if ( $pse_obj->getAmount() < 0 ) {
@@ -670,7 +670,7 @@ class GeneralLedgerSummaryReport extends Report {
 											'debit_account'  => null,
 											'credit_account' => trim( $debit_account ),
 											'debit_amount'   => null,
-											'credit_amount'  => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs( $pse_obj->getAmount() ), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), false ),
+											'credit_amount'  => Misc::MoneyRound( $base_currency_obj->getBaseCurrencyAmount( abs( $pse_obj->getAmount() ), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ) ),
 									];
 								}
 							}
@@ -690,7 +690,7 @@ class GeneralLedgerSummaryReport extends Report {
 											'debit_account'  => null,
 											'credit_account' => trim( $credit_account ),
 											'debit_amount'   => null,
-											'credit_amount'  => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), false ),
+											'credit_amount'  => Misc::MoneyRound( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ) ),
 									];
 								} else if ( $pse_obj->getAmount() < 0 ) {
 									Debug::Text( 'Negative credit amount, switching to debit: ' . $pse_obj->getAmount() . ' Credit Account: ' . $credit_account . ' User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -698,7 +698,7 @@ class GeneralLedgerSummaryReport extends Report {
 											'account'        => trim( $credit_account ),
 											'debit_account'  => trim( $credit_account ),
 											'credit_account' => null,
-											'debit_amount'   => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs( $pse_obj->getAmount() ), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), false ),
+											'debit_amount'   => Misc::MoneyRound( $base_currency_obj->getBaseCurrencyAmount( abs( $pse_obj->getAmount() ), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ) ),
 											'credit_amount'  => null,
 									];
 								}
@@ -969,7 +969,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 				$account_arr = explode( ':', $key );
 
-				if ( isset( $account_arr[0] ) ) { //Branch
+				if ( isset( $account_arr[0] ) && $account_arr[0] != TTUUID::getZeroID() ) { //Branch
 					//Was 17
 					$replace_arr[29] = ( is_object( $branch_code_map[$account_arr[0]] ) ) ? $branch_code_map[$account_arr[0]]->getManualID() : null;
 					$replace_arr[30] = ( is_object( $branch_code_map[$account_arr[0]] ) ) ? $branch_code_map[$account_arr[0]]->getOtherID1() : null;
@@ -1147,8 +1147,11 @@ class GeneralLedgerSummaryReport extends Report {
 
 		//Handle cases where variables are replaced with nothing or invalid values.
 		//5010--99
-		$subject = str_replace( '--', '-', $subject );
+		//5010---99
+		//5010----99
+		$subject = preg_replace('/-+/', '-', $subject); //str_replace() won't work here as it has to replace all permutations of repeating hyphens.
 
+		//Remove leading and trailing hypens.
 		//-5010-99
 		//5010-99-
 		//-5010-99-

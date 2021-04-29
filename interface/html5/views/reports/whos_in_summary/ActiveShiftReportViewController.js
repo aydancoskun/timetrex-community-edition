@@ -1,4 +1,4 @@
-class ActiveShiftReportViewController extends ReportBaseViewController {
+export class ActiveShiftReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {} );
 

@@ -192,5 +192,6 @@ $global_table_map = [
 		'remittance_source_account'                => 'RemittanceSourceAccountFactory',
 		'remittance_destination_account'           => 'RemittanceDestinationAccountFactory',
 		'geo_fence'                                => 'GEOFenceFactory',
+		'idempotent_request'                       => 'IdempotentRequestFactory',
 ];
 ?>

@@ -1,4 +1,4 @@
-class AccrualPolicyAccountViewController extends BaseViewController {
+export class AccrualPolicyAccountViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#wage_group_view_container',
@@ -52,7 +52,7 @@ class AccrualPolicyAccountViewController extends BaseViewController {
 			api_class: TTAPI.APIAccrualPolicyAccount,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
+			layout_name: 'global_accrual_policy_account',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -108,7 +108,7 @@ class AccrualPolicyAccountViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -120,7 +120,7 @@ class AccrualPolicyAccountViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

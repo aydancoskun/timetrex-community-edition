@@ -1,8 +1,10 @@
-class UserTitleViewController extends BaseViewController {
-	constructor() {
-		super();
-		this.el = '#user_title_view_container';
-		this._required_files = [];
+export class UserTitleViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_title_view_container',
+		} );
+
+		super( options );
 	}
 
 	init( options ) {
@@ -48,7 +50,7 @@ class UserTitleViewController extends BaseViewController {
 			api_class: TTAPI.APIUserTitle,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER_TITLE,
+			layout_name: 'global_user_title',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -93,7 +95,7 @@ class UserTitleViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -105,7 +107,7 @@ class UserTitleViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

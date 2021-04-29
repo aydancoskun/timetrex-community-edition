@@ -1,4 +1,4 @@
-class LoginUserContactViewController extends BaseViewController {
+export class LoginUserContactViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			sex_array: null,
@@ -240,7 +240,7 @@ class LoginUserContactViewController extends BaseViewController {
 		// Gender
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'sex_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
+		form_item_input.setSourceData( $this.sex_array );
 		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_contact_information_column2 );
 
 		// Work Phone

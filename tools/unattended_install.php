@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,7 +41,7 @@ ignore_user_abort( true );
 ini_set( 'max_execution_time', 0 );
 ini_set( 'memory_limit', '1024M' ); //Just in case.
 
-if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
+if ( $argc < 1 || ( isset( $argv[1] ) && in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) ) {
 	$help_output = "Usage: unattended_install.php\n";
 	$help_output .= " [-f] = Force upgrade even if INSTALL mode is disabled.\n";
 	$help_output .= " [-u] = Default username to create.\n";
@@ -50,7 +50,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 	$last_arg = ( count( $argv ) - 1 );
 
 	if ( in_array( '-u', $argv ) ) {
-		$user_name = trim( $argv[ ( array_search( '-u', $argv ) + 1 ) ] );
+		$user_name = trim( $argv[( array_search( '-u', $argv ) + 1 )] );
 	} else {
 		$user_name = 'demoadmin';
 	}
@@ -149,7 +149,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 					$cf->setEnableAddRecurringHolidayPreset( true );
 					if ( $cf->isValid() ) {
 						$company_id = $cf->Save( false );
-						$install_obj->writeConfigFile( array('other' => array('primary_company_id' => $company_id)) );
+						$install_obj->writeConfigFile( [ 'other' => [ 'primary_company_id' => $company_id ] ] );
 
 						//Setup admin user.
 						$uf = TTnew( 'UserFactory' );
@@ -195,7 +195,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 
 						//Get Permission Control with highest level, assume its for Administrators and use it.
 						$pclf = TTnew( 'PermissionControlListFactory' );
-						$pclf->getByCompanyId( $company_id, null, null, null, array('level' => 'desc') );
+						$pclf->getByCompanyId( $company_id, null, null, null, [ 'level' => 'desc' ] );
 						if ( $pclf->getRecordCount() > 0 ) {
 							$pc_obj = $pclf->getCurrent();
 							if ( is_object( $pc_obj ) ) {

@@ -1,4 +1,4 @@
-class AccrualBalanceViewController extends BaseViewController {
+export class AccrualBalanceViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#accrual_balance_view_container',
@@ -86,7 +86,7 @@ class AccrualBalanceViewController extends BaseViewController {
 			api_class: TTAPI.APIAccrualBalance,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ACCRUAL_BALANCE,
+			layout_name: 'global_accrual_balance',
 			navigation_mode: true,
 			addition_source_function: function( target, data ) {
 				return $this.__createRowId( data );
@@ -123,7 +123,7 @@ class AccrualBalanceViewController extends BaseViewController {
 				in_column: 1,
 				default_args: default_args,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -138,7 +138,7 @@ class AccrualBalanceViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -146,7 +146,7 @@ class AccrualBalanceViewController extends BaseViewController {
 				label: $.i18n._( 'Accrual Account' ),
 				in_column: 1,
 				field: 'accrual_policy_account_id',
-				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
+				layout_name: 'global_accrual_policy_account',
 				api_class: TTAPI.APIAccrualPolicyAccount,
 				multiple: true,
 				basic_search: true,
@@ -158,7 +158,7 @@ class AccrualBalanceViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
@@ -170,7 +170,7 @@ class AccrualBalanceViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				in_column: 2,
 				field: 'default_department_id',
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
@@ -183,7 +183,7 @@ class AccrualBalanceViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,

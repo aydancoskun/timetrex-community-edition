@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1081,7 +1081,7 @@ class ROEFactory extends Factory {
 		Debug::Text( 'Pay Period ID: ' . $pay_period_id . ' End Date: ' . $this->getFinalPayStubEndDate(), __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( TTUUID::isUUID( $pay_period_id ) == false ) {
-			UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName( true ) . ' - ' . TTi18n::gettext( 'Pay Stub' ), 10, TTi18n::gettext( 'Pay Period is invalid!' ), null );
+			UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName( true ) . ' - ' . TTi18n::gettext( 'Pay Stub' ), 10, TTi18n::gettext( 'Pay Period is invalid' ), null );
 
 			return false;
 		}
@@ -1090,25 +1090,26 @@ class ROEFactory extends Factory {
 			//Find out if a pay stub is already generated for the pay period we are currently in.
 			//If it is, delete it so we can start from fresh
 			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
-			$pslf->getByUserIdAndPayPeriodId( $this->getUser(), $pay_period_id );
-
-			foreach ( $pslf as $pay_stub ) {
-				Debug::Text( 'Found Pay Stub ID: ' . $pay_stub->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-				//Do not delete PAID pay stubs!
-				if ( $pay_stub->getStatus() == 10 ) {
-					Debug::Text( 'Last Pay Stub Exists: ' . $pay_stub->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-					$pay_stub->setDeleted( true );
-					$pay_stub->Save();
+			$pslf->getByUserIdAndTypeIdAndPayPeriodId( $this->getUser(), 10, $pay_period_id ); //Only consider Normal In-Cycle pay stubs.
+			if ( $pslf->getRecordCount() == 1 ) { //Only delete pay stubs if there is a single one.
+				foreach ( $pslf as $pay_stub ) {
+					Debug::Text( 'Found Pay Stub ID: ' . $pay_stub->getId() .' Status: '. $pay_stub->getStatus(), __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $pay_stub->getStatus() != 40 ) { //Do not delete PAID pay stubs!
+						Debug::Text( '  Last Pay Stub Exists: ' . $pay_stub->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+						$pay_stub->setDeleted( true );
+						$pay_stub->Save();
+					}
 				}
 			}
 
 			//FIXME: Make sure user isn't already in-active! Otherwise pay stub won't generate.
 			//Check if pay stub is already generated as well, if it is, and marked paid, then
 			//we can't re-generate it, we need to skip this step.
-			Debug::Text( 'Calculating Pay Stub...', __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'Calculating Pay Stub... Pay Period ID: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10 );
 			$cps = new CalculatePayStub();
 			$cps->setUser( $this->getUser() );
 			$cps->setPayPeriod( $pay_period_id );
+			$cps->setType( 10 ); //Normal In-Cycle.
 			$cps->setEnablePostTerminationCalculation( true ); //Allow calculating pay stubs after termination date.
 			$cps->setTransactionDate( $this->getFinalPayStubTransactionDate() );
 			$cps->setRun( PayStubListFactory::getCurrentPayRun( $this->getUserObject()->getCompany(), $pay_period_id ) );

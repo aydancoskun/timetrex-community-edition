@@ -1,8 +1,10 @@
-class CompanyViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImageBrowser';
+import '@/global/widgets/filebrowser/TImageAdvBrowser';
+
+
+export class CompanyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
-			_required_files: ['TImage', 'TImageAdvBrowser'],
-
 			product_edition_array: null,
 			industry_array: null,
 			country_array: null,
@@ -155,7 +157,7 @@ class CompanyViewController extends BaseViewController {
 			}
 		}
 
-		this.file_browser.setImage( ServiceCaller.companyLogo );
+		this.file_browser.setImage( ServiceCaller.getURLByObjectType( 'company_logo' ) );
 
 		this.collectUIDataToCurrentEditRecord();
 
@@ -242,9 +244,8 @@ class CompanyViewController extends BaseViewController {
 	}
 
 	updateCompanyLogo() {
-		var d = new Date();
 		$( '#rightLogo' ).css( 'opacity', 0 );
-		$( '#rightLogo' ).attr( 'src', ServiceCaller.companyLogo + '&t=' + d.getTime() );
+		$( '#rightLogo' ).attr( 'src', ServiceCaller.getURLByObjectType( 'company_logo' ) );
 
 		$( '#rightLogo' ).on( 'load', function() {
 
@@ -372,7 +373,7 @@ class CompanyViewController extends BaseViewController {
 		// Product Edition
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'product_edition_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.product_edition_array ) );
+		form_item_input.setSourceData( $this.product_edition_array );
 		this.addEditFieldToColumn( $.i18n._( 'Product Edition' ), form_item_input, tab_company_column1, '' );
 
 		// Full Name
@@ -389,7 +390,7 @@ class CompanyViewController extends BaseViewController {
 		// Industry
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'industry_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.industry_array ) );
+		form_item_input.setSourceData( $this.industry_array );
 		this.addEditFieldToColumn( $.i18n._( 'Industry' ), form_item_input, tab_company_column1 );
 
 		// Business/Employer ID Number
@@ -417,13 +418,13 @@ class CompanyViewController extends BaseViewController {
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
+		form_item_input.setSourceData( $this.country_array );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_company_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'province' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_company_column1 );
 
 		//City
@@ -446,7 +447,7 @@ class CompanyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'admin_contact'
@@ -458,7 +459,7 @@ class CompanyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'billing_contact'
@@ -470,7 +471,7 @@ class CompanyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'support_contact'
@@ -485,7 +486,7 @@ class CompanyViewController extends BaseViewController {
 		// Terminated User Disable Login Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'terminated_user_disable_login_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.terminated_user_disable_login_type_array ) );
+		form_item_input.setSourceData( $this.terminated_user_disable_login_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Disable Terminated Employees' ), form_item_input, tab_company_column2, '' );
 
 		// Terminated User Disable Login After Days
@@ -509,7 +510,7 @@ class CompanyViewController extends BaseViewController {
 					onResult: function( result ) {
 
 						if ( result.toLowerCase() === 'true' ) {
-							$this.file_browser.setImage( ServiceCaller.companyLogo );
+							$this.file_browser.setImage( ServiceCaller.getURLByObjectType( 'company_logo' ) );
 							$this.updateCompanyLogo();
 						} else {
 							TAlertManager.showAlert( result, 'Error' );
@@ -527,7 +528,7 @@ class CompanyViewController extends BaseViewController {
 						onResult: function( result ) {
 
 							if ( result.toLowerCase() === 'true' ) {
-								$this.file_browser.setImage( ServiceCaller.companyLogo );
+								$this.file_browser.setImage( ServiceCaller.getURLByObjectType( 'company_logo' ) );
 								$this.updateCompanyLogo();
 							} else {
 								TAlertManager.showAlert( result, 'Error' );
@@ -571,7 +572,7 @@ class CompanyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'password_policy_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_policy_type_array ) );
+		form_item_input.setSourceData( $this.password_policy_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Password Policy' ), form_item_input, tab_password_policy_column1, '' );
 
 		// Minimum Permission Level
@@ -579,7 +580,7 @@ class CompanyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'password_minimum_permission_level' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_minimum_permission_level_array ) );
+		form_item_input.setSourceData( $this.password_minimum_permission_level_array );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Permission Level' ), form_item_input, tab_password_policy_column1 );
 
 		// Minimum Strength
@@ -587,7 +588,7 @@ class CompanyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'password_minimum_strength' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_minimum_strength_array ) );
+		form_item_input.setSourceData( $this.password_minimum_strength_array );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Strength' ), form_item_input, tab_password_policy_column1 );
 
 		// Minimum Length
@@ -637,7 +638,7 @@ class CompanyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'ldap_authentication_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.ldap_authentication_type_array ) );
+		form_item_input.setSourceData( $this.ldap_authentication_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'LDAP Authentication' ), form_item_input, tab_ldap_column1 );
 
 		// Server

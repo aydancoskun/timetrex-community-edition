@@ -1,4 +1,4 @@
-class PayStubAccountWizardController extends BaseWizardController {
+export class PayStubAccountWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg'
@@ -38,7 +38,7 @@ class PayStubAccountWizardController extends BaseWizardController {
 				form_item.css( 'margin-top', '15px' );
 				var form_item_label = form_item.find( '.form-item-label' );
 				var form_item_input_div = form_item.find( '.form-item-input-div' );
-				var a_combobox = this.getAComboBox( TTAPI.APIPayStubEntryAccount, true, ALayoutIDs.PAY_STUB_ACCOUNT, 'src_ids' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayStubEntryAccount, true, 'global_PayStubAccount', 'src_ids' );
 				form_item_label.text( $.i18n._( 'Source Pay Stub Account(s)' ) + ': ' );
 				form_item_input_div.append( a_combobox );
 				this.content_div.append( form_item );
@@ -48,7 +48,7 @@ class PayStubAccountWizardController extends BaseWizardController {
 				form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
-				a_combobox = this.getAComboBox( TTAPI.APIPayStubEntryAccount, false, ALayoutIDs.PAY_STUB_ACCOUNT, 'dst_id' );
+				a_combobox = this.getAComboBox( TTAPI.APIPayStubEntryAccount, false, 'global_PayStubAccount', 'dst_id' );
 				form_item_label.text( $.i18n._( 'Destination Pay Stub Account' ) + ': ' );
 				form_item_input_div.append( a_combobox );
 				this.content_div.append( form_item );

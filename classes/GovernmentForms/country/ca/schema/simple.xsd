@@ -2,8 +2,8 @@
 
 <!--
 Description	Definition of SimpleTypes
-Last updated 	October 
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -300,6 +300,9 @@ Version#:	1.18 (version #.yy)
 			<xsd:pattern value="\d{9}"/>
 		</xsd:restriction>
 	</xsd:simpleType>
+	<xsd:simpleType name="bn9AccntNbr15">
+		<xsd:union memberTypes="bnType bnRootType"/>
+	</xsd:simpleType>
 	<xsd:simpleType name="bnType">
 		<xsd:annotation>
 			<xsd:documentation>Root = 999999999, Program ID = AA, Account # = 9999</xsd:documentation>
@@ -498,7 +501,7 @@ Version#:	1.18 (version #.yy)
 		</xsd:restriction>
 	</xsd:simpleType>
 	<!--                                                                     -->
-	<!-- Decimal definitions (6,7,9,10,11,12,13,14)  -->
+	<!-- Decimal definitions (6,7,9,10,11,12,13,14,15,17)  -->
 	<!--                                                                     -->
 	<xsd:simpleType name="decimal6Type">
 		<xsd:restriction base="xsd:string">
@@ -587,6 +590,11 @@ Version#:	1.18 (version #.yy)
 			<xsd:pattern value="(-\d{0,13}\.\d{2}|\d{0,13}\.\d{2})|(-\d{0,13},\d{2}|\d{0,13},\d{2})"/>
 		</xsd:restriction>
 	</xsd:simpleType>
+	<xsd:simpleType name="signedDecimal17Type">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="(-\d{0,15}\.\d{2}|\d{0,15}\.\d{2})|(-\d{0,15},\d{2}|\d{0,15},\d{2})"/>
+		</xsd:restriction>
+	</xsd:simpleType>	
 	<!--                                                                                      		-->
 	<!-- Character definitions (1,3,10,12,15,20,22,28,30,60) 		-->
 	<!--                                                                                         	-->

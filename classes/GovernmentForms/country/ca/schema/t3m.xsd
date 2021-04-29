@@ -2,8 +2,8 @@
 
 <!--
 Description	T3M Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0">
@@ -33,7 +33,7 @@ Version#:	1.18 (version #.yy)
      			<xsd:extension base="T3SpecialIdentTypeBase">
        				<xsd:sequence>
 					<xsd:element ref="TrusteeLanguageCode" minOccurs="0"/>
-					<xsd:element ref="TrustFiscalPeriodEndDate"/>
+					<xsd:element ref="TrustFiscalPeriodEndDate" minOccurs="1"/>
 					<xsd:element ref="DeclaredTrustProvinceCode"/>
 					<xsd:element ref="TrustEffectiveDate"/>
 					<xsd:element ref="TrustExpiryDate" minOccurs="0"/>

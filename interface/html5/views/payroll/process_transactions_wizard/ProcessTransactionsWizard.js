@@ -1,4 +1,6 @@
-class ProcessTransactionsWizard extends Wizard {
+import { Wizard } from '@/global/widgets/wizard/Wizard';
+
+export class ProcessTransactionsWizard extends Wizard {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: $( '.process_transactions_wizard' ),
@@ -9,7 +11,7 @@ class ProcessTransactionsWizard extends Wizard {
 
 			wizard_id: 'ProcessTransactionsWizard',
 			_step_map: {
-				'home': {
+				'home': { // TODO: Webpack: Investigate how this works/does not work with Webpack
 					script_path: 'views/payroll/process_transactions_wizard/ProcessTransactionsWizardStepHome.js',
 					object_name: 'ProcessTransactionsWizardStepHome'
 				}

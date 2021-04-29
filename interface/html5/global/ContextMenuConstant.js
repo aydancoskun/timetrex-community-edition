@@ -296,3 +296,5 @@ Icons.job_applicant = 'job_applicant-35x35.png';
 Icons.pay_stub_transaction = 'direct_deposit-35x35.png';
 Icons.tax_reports = 'tax_reports-35x35.png';
 Icons.preferences = 'preferences-35x35.png';
+
+export { ContextMenuIconName, Icons };

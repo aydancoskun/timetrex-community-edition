@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -78,8 +78,8 @@ class TTMail {
 	 */
 	function getMimeObject() {
 		if ( $this->mime_obj == null ) {
-			require_once( 'Mail/mime.php' );
-			$this->mime_obj = @new Mail_Mime();
+			//require_once( 'Mail/mime.php' );
+			$this->mime_obj = @new Mail_mime();
 		}
 
 		return $this->mime_obj;
@@ -90,7 +90,7 @@ class TTMail {
 	 */
 	function getMailObject() {
 		if ( $this->mail_obj == null ) {
-			require_once( 'Mail.php' );
+			//require_once( 'Mail.php' );
 
 			//Determine if use Mail/SMTP, or SOAP.
 			$delivery_method = $this->getDeliveryMethod();

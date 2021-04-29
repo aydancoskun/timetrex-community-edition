@@ -1,4 +1,4 @@
-class PermissionControlViewController extends BaseViewController {
+export class PermissionControlViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#permission_control_view_container',
@@ -361,7 +361,7 @@ class PermissionControlViewController extends BaseViewController {
 			api_class: TTAPI.APIPermissionControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PERMISSION_CONTROL,
+			layout_name: 'global_permission_control',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -398,7 +398,7 @@ class PermissionControlViewController extends BaseViewController {
 		// Level
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'level' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.level_array ) );
+		form_item_input.setSourceData( $this.level_array );
 		this.addEditFieldToColumn( $.i18n._( 'Level' ), form_item_input, tab_permission_group_column1 );
 
 		//Employee
@@ -407,7 +407,7 @@ class PermissionControlViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user'
@@ -418,8 +418,8 @@ class PermissionControlViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_DROPDOWN );
 
-		var display_columns = ALayoutCache.getDefaultColumn( ALayoutIDs.OPTION_COLUMN ); //Get Default columns base on different layout name
-		display_columns = Global.convertColumnsTojGridFormat( display_columns, ALayoutIDs.OPTION_COLUMN ); //Convert to jQgrid format
+		var display_columns = ALayoutCache.getDefaultColumn( 'global_option_column' ); //Get Default columns base on different layout name
+		display_columns = Global.convertColumnsTojGridFormat( display_columns, 'global_option_column' ); //Convert to jQgrid format
 
 		form_item_input.ADropDown( {
 			field: 'permission',
@@ -491,7 +491,7 @@ class PermissionControlViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -503,7 +503,7 @@ class PermissionControlViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

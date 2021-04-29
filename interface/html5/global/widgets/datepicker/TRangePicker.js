@@ -269,11 +269,12 @@
 
 		};
 
-		var setEditViewDataDone = function() {
-			this._super( 'setEditViewDataDone' );
-			this.initInsideEditorData();
-
-		};
+		// Commented out due to its use of this._super (no longer valid in ES6 syntax) and it appears not to be used.
+		// var setEditViewDataDone = function() {
+		// 	this._super( 'setEditViewDataDone' );
+		// 	this.initInsideEditorData();
+		//
+		// };
 
 		var initInsideEditorData = function() {
 			var $this = this;

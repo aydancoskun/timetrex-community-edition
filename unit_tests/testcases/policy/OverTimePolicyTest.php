@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,14 +35,14 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
+class OverTimePolicyTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 	protected $pay_stub_account_link_arr = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -117,16 +117,10 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		//$this->deleteAllSchedules();
-
-		return true;
 	}
 
 	function getPayStubAccountLinkArray() {
@@ -1688,7 +1682,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][4]['start_time_stamp'], strtotime( $date_stamp . ' 4:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['end_time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['hourly_rate'], ( 1.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][4]['hourly_rate_with_burden'], false ), Misc::MoneyFormat( ( 1.5 * 21.50 * 1.135 ), false ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][4]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 1.5 * 21.50 * 1.135 ) ) ); //13.5%
 		//Overtime 2
 		$this->assertEquals( 30, $udt_arr[$date_epoch][3]['object_type_id'] );                                                                                       //OverTime
 		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $policy_ids['pay_code'][1] );
@@ -1704,7 +1698,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['start_time_stamp'], strtotime( $date_stamp . ' 6:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime( $date_stamp . ' 8:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['hourly_rate'], ( 2.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][2]['hourly_rate_with_burden'] ), Misc::MoneyFormat( ( 2.5 * 21.50 * 1.135 ) ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][2]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 2.5 * 21.50 * 1.135 ) ) ); //13.5%
 
 		//Make sure no other hours
 		$this->assertCount( 5, $udt_arr[$date_epoch] );
@@ -2098,7 +2092,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 8:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['hourly_rate'], ( 0 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][1]['hourly_rate_with_burden'], false ), Misc::MoneyFormat( ( 0 * 21.50 * 1.135 ), false ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][1]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 0 * 21.50 * 1.135 ) ) ); //13.5%
 
 		//Make sure no other hours
 		$this->assertCount( 2, $udt_arr[$date_epoch] );
@@ -2171,7 +2165,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 8:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['hourly_rate'], ( 1.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][1]['hourly_rate_with_burden'], false ), Misc::MoneyFormat( ( 1.5 * 21.50 * 1.135 ), false ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][1]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 1.5 * 21.50 * 1.135 ) ) ); //13.5%
 
 		//Make sure no other hours
 		$this->assertCount( 2, $udt_arr[$date_epoch] );
@@ -17686,7 +17680,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][4]['start_time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['end_time_stamp'], strtotime( $date_stamp . ' 9:00AM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['hourly_rate'], ( 1.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][4]['hourly_rate_with_burden'], false ), Misc::MoneyFormat( ( 1.5 * 21.50 * 1.135 ), false ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][4]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 1.5 * 21.50 * 1.135 ) ) ); //13.5%
 		//Overtime 2
 		$this->assertEquals( 30, $udt_arr[$date_epoch][3]['object_type_id'] );                                                                                       //OverTime
 		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $policy_ids['pay_code'][1] );
@@ -17702,7 +17696,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['start_time_stamp'], strtotime( $date_stamp . ' 10:00AM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['hourly_rate'], ( 2.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][2]['hourly_rate_with_burden'] ), Misc::MoneyFormat( ( 2.5 * 21.50 * 1.135 ) ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][2]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 2.5 * 21.50 * 1.135 ) ) ); //13.5%
 
 		//Make sure no other hours
 		$this->assertCount( 5, $udt_arr[$date_epoch] );
@@ -17785,7 +17779,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][3]['start_time_stamp'], strtotime( $date_stamp . ' 10:00AM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['end_time_stamp'], strtotime( $date_stamp . ' 1:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['hourly_rate'], ( 2.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][3]['hourly_rate_with_burden'] ), Misc::MoneyFormat( ( 2.5 * 21.50 * 1.135 ) ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][3]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 2.5 * 21.50 * 1.135 ) ) ); //13.5%
 		//Overtime 2 (>9)
 		$this->assertEquals( 30, $udt_arr[$date_epoch][4]['object_type_id'] );                                                                         //OverTime
 		$this->assertEquals( $udt_arr[$date_epoch][4]['pay_code_id'], $policy_ids['pay_code'][1] );
@@ -17801,7 +17795,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][5]['start_time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['end_time_stamp'], strtotime( $date_stamp . ' 9:00AM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['hourly_rate'], ( 1.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][5]['hourly_rate_with_burden'], false ), Misc::MoneyFormat( ( 1.5 * 21.50 * 1.135 ), false ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][5]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 1.5 * 21.50 * 1.135 ) ) ); //13.5%
 
 		//Make sure no other hours
 		$this->assertCount( 6, $udt_arr[$date_epoch] );
@@ -17899,7 +17893,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][3]['start_time_stamp'], strtotime( $date_stamp . ' 6:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['end_time_stamp'], strtotime( $date_stamp . ' 9:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['hourly_rate'], ( 2.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][3]['hourly_rate_with_burden'] ), Misc::MoneyFormat( ( 2.5 * 21.50 * 1.135 ) ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][3]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 2.5 * 21.50 * 1.135 ) ) ); //13.5%
 		//Overtime 2 (>9)
 		$this->assertEquals( 30, $udt_arr[$date_epoch][4]['object_type_id'] );                                                                         //OverTime
 		$this->assertEquals( $udt_arr[$date_epoch][4]['pay_code_id'], $policy_ids['pay_code'][1] );
@@ -17915,7 +17909,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][5]['start_time_stamp'], strtotime( $date_stamp . ' 4:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['end_time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['hourly_rate'], ( 1.5 * 21.50 ) );
-		$this->assertEquals( Misc::MoneyFormat( $udt_arr[$date_epoch][5]['hourly_rate_with_burden'], false ), Misc::MoneyFormat( ( 1.5 * 21.50 * 1.135 ), false ) ); //13.5%
+		$this->assertEquals( Misc::MoneyRound( $udt_arr[$date_epoch][5]['hourly_rate_with_burden'] ), Misc::MoneyRound( ( 1.5 * 21.50 * 1.135 ) ) ); //13.5%
 
 		//Make sure no other hours
 		$this->assertCount( 6, $udt_arr[$date_epoch] );
@@ -20848,14 +20842,14 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 1 * 3600 ) );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['start_time_stamp'], strtotime( $date_stamp . ' 12:00AM' ) );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), null, 3600 ); //3600 delta due to DST when run on 04-Nov-19
+		$this->assertEqualsWithDelta( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Holiday Absence -- Calculated by the Holiday Policy, so its less than the scheduled time.
 		$this->assertEquals( 25, $udt_arr[$date_epoch][1]['object_type_id'] );                                               //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 1 * 3600 ) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime( $date_stamp . ' 12:00AM' ) );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), null, 3600 ); //3600 delta due to DST when run on 04-Nov-19
+		$this->assertEqualsWithDelta( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Make sure no other hours
 		$this->assertCount( 2, $udt_arr[$date_epoch] );
@@ -20944,7 +20938,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( 8 * 3600 ) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['start_time_stamp'], strtotime( $date_stamp . ' 12:00AM' ) );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime( $date_stamp . ' 8:00AM' ), null, 3600 ); //3600 delta due to DST when run on 04-Nov-19
+		$this->assertEqualsWithDelta( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime( $date_stamp . ' 8:00AM' ), 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Make sure no other hours
 		$this->assertCount( 3, $udt_arr[$date_epoch] );
@@ -21033,7 +21027,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( 8 * 3600 ) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['start_time_stamp'], strtotime( $date_stamp . ' 12:00AM' ) );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime( $date_stamp . ' 8:00AM' ), null, 3600 ); //3600 delta due to DST when run on 04-Nov-19
+		$this->assertEqualsWithDelta( $udt_arr[$date_epoch][2]['end_time_stamp'], strtotime( $date_stamp . ' 8:00AM' ), 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Make sure no other hours
 		$this->assertCount( 3, $udt_arr[$date_epoch] );
@@ -21103,14 +21097,14 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 1 * 3600 ) );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['start_time_stamp'], strtotime( $date_stamp . ' 12:00AM' ) );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), null, 3600 ); //3600 delta due to DST when run on 04-Nov-19
+		$this->assertEqualsWithDelta( $udt_arr[$date_epoch][0]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//TimeSheet Absence -- Taken from the timesheet and overrides the schedule.
 		$this->assertEquals( 25, $udt_arr[$date_epoch][1]['object_type_id'] );                                               //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 1 * 3600 ) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime( $date_stamp . ' 12:00AM' ) );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), null, 3600 ); //3600 delta due to DST when run on 04-Nov-19
+		$this->assertEqualsWithDelta( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//Make sure no other hours
 		$this->assertCount( 2, $udt_arr[$date_epoch] );
@@ -21187,7 +21181,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 1 * 3600 ) );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['start_time_stamp'], strtotime( $date_stamp . ' 12:00AM' ) );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), null, 3600 ); //3600 delta due to DST when run on 04-Nov-19
+		$this->assertEqualsWithDelta( $udt_arr[$date_epoch][1]['end_time_stamp'], strtotime( $date_stamp . ' 1:00AM' ), 3600 ); //3600 delta due to DST when run on 04-Nov-19
 
 		//TimeSheet Absence -- Taken from the timesheet
 		$this->assertEquals( 25, $udt_arr[$date_epoch][2]['object_type_id'] );                                               //Absence

@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,8 +35,8 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class SQLTest extends PHPUnit_Framework_TestCase {
-	public function setUp() {
+class SQLTest extends PHPUnit\Framework\TestCase {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -61,14 +61,10 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	function getListFactoryClassList( $equal_parts = 1 ) {
@@ -350,7 +346,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 										case 'CompanyListFactory::getByPhoneID':
 											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
-												$this->assertEquals( false, $retarr ); //This will be FALSE
+												$this->assertEquals( false, ( ( is_object( $retarr ) ) ? ( ( $retarr->getRecordCount() == 0 ) ? false : true ) : $retarr ) ); //This will be FALSE
 											} else {
 												$this->assertNotEquals( false, $retarr );
 												$this->assertTrue( is_object( $retarr ), true );
@@ -358,14 +354,14 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 											break;
 										case 'MessageControlListFactory::getByCompanyIdAndObjectTypeAndObjectAndNotUser':
 											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
-											$this->assertEquals( false, $retarr ); //This will be FALSE, but it still executes a query.
+											$this->assertEquals( false, ( ( is_object( $retarr ) ) ? ( ( $retarr->getRecordCount() == 0 ) ? false : true ) : $retarr ) ); //This will be FALSE, but it still executes a query.
 											//$this->assertTrue( is_object($retarr), TRUE );
 											break;
 										case 'PayStubEntryListFactory::getByPayStubIdAndEntryNameId':
 											//FUZZ tests should return FALSE, otherwise they should be normal.
 											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
-												$this->assertEquals( false, $retarr ); //This will be FALSE
+												$this->assertEquals( false, ( ( is_object( $retarr ) ) ? ( ( $retarr->getRecordCount() == 0 ) ? false : true ) : $retarr ) ); //This will be FALSE
 											} else {
 												$this->assertNotEquals( false, $retarr );
 												$this->assertTrue( is_object( $retarr ), true );
@@ -1095,4 +1091,37 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 0, $uf->db->transOff );
 		$this->assertEquals( false, $uf->db->_transOK );
 	}
+
+	/**
+	 * @group SQL_testMaximumQueryLengthA
+	 */
+	function testMaximumQueryLengthA() {
+		$ulf = new UserListFactory();
+
+		//Build list of many UUIDs.
+		for( $i = 0; $i < 70000; $i++ ) { //65535 appears to be the max number of parameters for a WHERE IN clause in PostgreSQL.
+			$ids[] = TTUUID::generateUUID();
+		}
+
+		//This should fail with an exception.
+		try {
+			$ulf->getByIdAndCompanyId( $ids, TTUUID::getZeroID() );
+			$this->assertTrue( false, $ulf->getRecordCount() );
+		} catch ( Exception $e ) {
+			$this->assertTrue( true, $e->getMessage() );
+			$this->assertGreaterThan( 10, strlen( $e->getMessage() ) );
+			$this->assertEquals( -1, $e->getCode() );
+		}
+
+		//This should succeed with still a very high number.
+		$ids = array_slice( $ids, 0, 5000 );
+		try {
+			$ulf->getByIdAndCompanyId( $ids, TTUUID::getZeroID() );
+			$this->assertTrue( true, $ulf->getRecordCount() );
+		} catch ( Exception $e ) {
+			$this->assertTrue( false, $e->getMessage() );
+		}
+
+	}
+
 }

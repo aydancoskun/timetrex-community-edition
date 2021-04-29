@@ -1,11 +1,14 @@
-class TimeSheetViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImage';
+import { SwitchButtonIcon } from '@/global/widgets/switch_button/SwitchButton';
+
+export class TimeSheetViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#timesheet_view_container', //Must set el here and can only set string, so events can work
-			_required_files: {
-				10: ['TImage'],
-				15: ['leaflet-timetrex']
-			},
+			// _required_files: {
+			// 	10: ['TImage'],
+			// 	15: ['leaflet-timetrex']
+			// },
 			status_array: null,
 			type_array: null,
 			employee_nav: null,
@@ -588,10 +591,10 @@ class TimeSheetViewController extends BaseViewController {
 					case 'station_id':
 					case 'has_image':
 					case 'latitude':
+					case 'split_punch_control':
 						this.detachElement( key );
 						widget.css( 'opacity', 0 );
 						break;
-
 					case 'punch_dates':
 						if ( this.is_mass_adding ) {
 							this.attachElement( key );
@@ -754,7 +757,7 @@ class TimeSheetViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'src_object_id',
@@ -783,7 +786,7 @@ class TimeSheetViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
@@ -809,7 +812,7 @@ class TimeSheetViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab_punch_column1, '', null, true );
 
 		//Default Branch
@@ -818,7 +821,7 @@ class TimeSheetViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch_id'
@@ -841,7 +844,7 @@ class TimeSheetViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department_id'
@@ -866,7 +869,7 @@ class TimeSheetViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -904,7 +907,7 @@ class TimeSheetViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -1040,6 +1043,14 @@ class TimeSheetViewController extends BaseViewController {
 			}
 
 		} );
+
+		//Split Punch Control
+		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
+		form_item_input.TCheckbox( { field: 'split_punch_control' } );
+		this.addEditFieldToColumn( $.i18n._( 'Split Existing Punches' ), form_item_input, tab_punch_column1, '', null, true, true );
+		if ( this.is_mass_adding == false ) {
+			this.detachElement( 'split_punch_control' );
+		}
 
 		//Punch Image
 		form_item_input = Global.loadWidgetByName( FormItemType.IMAGE );
@@ -1426,11 +1437,13 @@ class TimeSheetViewController extends BaseViewController {
 			id: 'employee_navigation',
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			init_data_immediately: true,
 			default_args: default_args,
 			show_search_inputs: true,
 			always_include_columns: ['default_branch_id', 'default_department_id', 'default_job_id', 'default_job_item_id'],
+			width: 200,
+			is_static_width: true, //Use static width so the left/right navigation arrows don't move around based on the length of the employees name.
 			setRealValueCallBack: ( function( val ) {
 				$this.userValueSet( val );
 			} )
@@ -1772,6 +1785,8 @@ class TimeSheetViewController extends BaseViewController {
 					$this.clearViewLayoutCache();
 					$this.need_select_layout_name = layout_name;
 					$this.initLayout();
+				} else {
+					TAlertManager.showErrorAlert( res );
 				}
 
 			}
@@ -2996,7 +3011,7 @@ class TimeSheetViewController extends BaseViewController {
 				form_item_input.AComboBox( {
 					api_class: TTAPI.APIBranch,
 					width: 90,
-					layout_name: ALayoutIDs.BRANCH,
+					layout_name: 'global_branch',
 					show_search_inputs: true,
 					set_empty: true,
 					field: 'branch_id',
@@ -3021,7 +3036,7 @@ class TimeSheetViewController extends BaseViewController {
 				form_item_input.AComboBox( {
 					api_class: TTAPI.APIDepartment,
 					width: 90,
-					layout_name: ALayoutIDs.DEPARTMENT,
+					layout_name: 'global_department',
 					show_search_inputs: true,
 					set_empty: true,
 					field: 'department_id',
@@ -3046,7 +3061,7 @@ class TimeSheetViewController extends BaseViewController {
 				job_form_item_input.AComboBox( {
 					api_class: TTAPI.APIJob,
 					width: 90,
-					layout_name: ALayoutIDs.JOB,
+					layout_name: 'global_job',
 					show_search_inputs: true,
 					set_empty: true,
 					field: 'job_id',
@@ -3090,7 +3105,7 @@ class TimeSheetViewController extends BaseViewController {
 				form_item_input.AComboBox( {
 					api_class: TTAPI.APIJobItem,
 					width: 90,
-					layout_name: ALayoutIDs.JOB_ITEM,
+					layout_name: 'global_job_item',
 					show_search_inputs: true,
 					set_empty: true,
 					field: 'job_item_id',
@@ -3768,20 +3783,20 @@ class TimeSheetViewController extends BaseViewController {
 		switch ( LocalCacheData.current_doing_context_action ) {
 			case 'edit':
 				if ( LocalCacheData.edit_id_for_next_open_view ) {
-					this.onEditClick( LocalCacheData.edit_id_for_next_open_view, LocalCacheData.all_url_args.t );
+					this.onEditClick( LocalCacheData.edit_id_for_next_open_view, LocalCacheData.getAllURLArgs().t );
 					LocalCacheData.edit_id_for_next_open_view = null;
 				}
 
 				break;
 			case 'view':
 				if ( LocalCacheData.edit_id_for_next_open_view ) {
-					this.onViewClick( LocalCacheData.edit_id_for_next_open_view, LocalCacheData.all_url_args.t );
+					this.onViewClick( LocalCacheData.edit_id_for_next_open_view, LocalCacheData.getAllURLArgs().t );
 					LocalCacheData.edit_id_for_next_open_view = null;
 				}
 				break;
 			case 'new':
 				if ( !this.edit_view ) {
-					if ( LocalCacheData.all_url_args.t === 'absence' ) {
+					if ( LocalCacheData.getAllURLArgs().t === 'absence' ) {
 						this.absence_model = true;
 					} else {
 						this.absence_model = false;
@@ -4859,6 +4874,8 @@ class TimeSheetViewController extends BaseViewController {
 				}
 			}
 		} else if ( e.shiftKey && cells_array.length > 0 ) {
+			var status_id = cells_array[0].status_id; //Get status_id of first punch so we can defaults to that on new.
+
 			//cell.row_id is numeric here.
 			var start_row_index = parseInt( cells_array[0].row_id );
 			var start_cell_index = parseInt( cells_array[0].cell_index );
@@ -4945,6 +4962,7 @@ class TimeSheetViewController extends BaseViewController {
 							cell_index: c_index,
 							cell_val: cell_val,
 							punch: punch,
+							status_id: status_id,
 							related_punch: related_punch,
 							date: date_str,
 							time_stamp_num: time_stamp_num
@@ -5028,6 +5046,7 @@ class TimeSheetViewController extends BaseViewController {
 						cell_index: cell_index,
 						cell_val: cell_val,
 						punch: punch,
+						status_id: ( row && row.status_id ) ? row.status_id : null,
 						related_punch: related_punch,
 						date: date_str,
 						time_stamp_num: time_stamp_num
@@ -5102,7 +5121,6 @@ class TimeSheetViewController extends BaseViewController {
 					break;
 				}
 			}
-			//row = $this.timesheet_data_source[ (row_id) -1 ];
 
 			if ( row ) {
 				colModel = $this.grid.getGridParam( 'colModel' );
@@ -5958,6 +5976,7 @@ class TimeSheetViewController extends BaseViewController {
 				row.id = row_id_counter;
 				row_id_counter++;
 				row.punch_info = punch.status;
+				row.status_id = punch_status_id;
 				row.user_id = punch.user_id;
 				row[date_string] = punch.punch_time;
 				row[date_string + '_data'] = punch;
@@ -6212,7 +6231,7 @@ class TimeSheetViewController extends BaseViewController {
 				var len = layouts_array.length;
 				for ( var i = 0; i < len; i++ ) {
 					var item = layouts_array[i];
-					this.previous_saved_layout_selector.append( '<option value="' + item.id + '">' + item.name + '</option>' );
+					this.previous_saved_layout_selector.append( $( '<option value="' + item.id + '"></option>' ).text( item.name ) );
 				}
 
 				$( this.previous_saved_layout_selector.find( 'option' ) ).filter( function() {
@@ -6471,8 +6490,8 @@ class TimeSheetViewController extends BaseViewController {
 
 		//Error: TypeError: Cannot read property 'show_wage' of null
 		//just need to check that the variable exists before checking properties for the case of the LocalCacheData being empty
-		if ( Global.isSet( LocalCacheData.all_url_args ) && LocalCacheData.all_url_args.show_wage ) {
-			this.wage_btn.setValue( LocalCacheData.all_url_args.show_wage === '1' ? true : false );
+		if ( Global.isSet( LocalCacheData.getAllURLArgs() ) && LocalCacheData.getAllURLArgs().show_wage ) {
+			this.wage_btn.setValue( LocalCacheData.getAllURLArgs().show_wage === '1' ? true : false );
 		}
 
 		// Set Use Employee TimeSheet
@@ -6484,8 +6503,8 @@ class TimeSheetViewController extends BaseViewController {
 
 		//Error: TypeError: Cannot read property 'show_wage' of null
 		//just need to check that the variable exists before checking properties for the case of the LocalCacheData being empty
-		if ( Global.isSet( LocalCacheData.all_url_args ) && LocalCacheData.all_url_args.timezone ) {
-			this.timezone_btn.setValue( LocalCacheData.all_url_args.timezone === '1' ? true : false );
+		if ( Global.isSet( LocalCacheData.getAllURLArgs() ) && LocalCacheData.getAllURLArgs().timezone ) {
+			this.timezone_btn.setValue( LocalCacheData.getAllURLArgs().timezone === '1' ? true : false );
 		}
 
 		// Set punch mode
@@ -6507,9 +6526,9 @@ class TimeSheetViewController extends BaseViewController {
 			} else {
 				this.toggle_button.setValue( LocalCacheData.last_timesheet_selected_punch_mode );
 			}
-			if ( LocalCacheData.all_url_args.mode ) {
+			if ( LocalCacheData.getAllURLArgs().mode ) {
 				// Fix wrong value from url
-				this.toggle_button.setValue( LocalCacheData.all_url_args.mode === 'manual' ? 'manual' : 'punch' );
+				this.toggle_button.setValue( LocalCacheData.getAllURLArgs().mode === 'manual' ? 'manual' : 'punch' );
 			}
 		}
 
@@ -6521,8 +6540,8 @@ class TimeSheetViewController extends BaseViewController {
 			this.employee_nav.setValue( LocalCacheData.default_filter_for_next_open_view.user_id );
 			this.setDatePickerValue( LocalCacheData.default_filter_for_next_open_view.base_date );
 		} else {
-			if ( LocalCacheData.all_url_args.user_id ) {
-				this.employee_nav.setValue( LocalCacheData.all_url_args.user_id );
+			if ( LocalCacheData.getAllURLArgs().user_id ) {
+				this.employee_nav.setValue( LocalCacheData.getAllURLArgs().user_id );
 			} else if ( LocalCacheData.last_timesheet_selected_user ) {
 				this.employee_nav.setValue( LocalCacheData.last_timesheet_selected_user );
 			} else {
@@ -6566,13 +6585,13 @@ class TimeSheetViewController extends BaseViewController {
 			//var location = Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + default_date + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
 			var location = Global.getBaseURL() + '#!m=' + this.viewId + '&user_id=' + user_id + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
 
-			if ( LocalCacheData.all_url_args ) {
-				for ( var key in LocalCacheData.all_url_args ) {
+			if ( LocalCacheData.getAllURLArgs() ) {
+				for ( var key in LocalCacheData.getAllURLArgs() ) {
 					//if ( key === 'm' || key === 'date' || key === 'user_id' || key === 'show_wage' || key === 'mode' ) {
 					if ( key === 'm' || key === 'user_id' || key === 'show_wage' || key === 'timezone' || key === 'mode' ) {
 						continue;
 					}
-					location = location + '&' + key + '=' + LocalCacheData.all_url_args[key];
+					location = location + '&' + key + '=' + LocalCacheData.getAllURLArgs()[key];
 				}
 			}
 
@@ -6592,7 +6611,7 @@ class TimeSheetViewController extends BaseViewController {
 				label: $.i18n._( 'Punch Branch' ),
 				in_column: 1,
 				field: 'branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
@@ -6603,7 +6622,7 @@ class TimeSheetViewController extends BaseViewController {
 				label: $.i18n._( 'Punch Department' ),
 				field: 'department_id',
 				in_column: 1,
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
@@ -6614,7 +6633,7 @@ class TimeSheetViewController extends BaseViewController {
 				label: $.i18n._( 'Job' ),
 				in_column: 2,
 				field: 'job_id',
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJob : null,
 				multiple: true,
 				basic_search: ( this.show_job_item_ui && ( Global.getProductEdition() >= 20 ) ),
@@ -6626,7 +6645,7 @@ class TimeSheetViewController extends BaseViewController {
 				label: $.i18n._( 'Task' ),
 				in_column: 2,
 				field: 'job_item_id',
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJobItem : null,
 				multiple: true,
 				basic_search: ( this.show_job_item_ui && ( Global.getProductEdition() >= 20 ) ),
@@ -6717,7 +6736,7 @@ class TimeSheetViewController extends BaseViewController {
 		//var args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
 		var args = '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&timezone=' + this.timezone_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
 		Global.setURLToBrowser( Global.getBaseURL() + args );
-		LocalCacheData.all_url_args = IndexViewController.instance.router.buildArgDic( args.split( '&' ) );
+		LocalCacheData.setAllURLArgs( Global.buildArgDic( args.split( '&' ) ) );
 	}
 
 	onSaveAndContinue( ignoreWarning ) {
@@ -6733,6 +6752,7 @@ class TimeSheetViewController extends BaseViewController {
 			this.current_edit_record.punch_date = this.current_edit_record.punch_dates[0];
 		}
 
+		current_api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		current_api['set' + current_api.key_name]( this.current_edit_record, false, ignoreWarning, {
 			onResult: function( result ) {
 				if ( result.isValid() ) {
@@ -7241,8 +7261,10 @@ class TimeSheetViewController extends BaseViewController {
 				// TODO-future: Perhaps look at a future refactor/consolidation of all these?
 
 				if ( Global.isArray( punches ) ) {
-					var processed_punches_for_map = TTMapLib.TTConvertMapData.processPunchesFromViewController( punches, map_options );
-					IndexViewController.openEditView( this, 'Map', processed_punches_for_map );
+					import( /* webpackChunkName: "leaflet-timetrex" */ '@/framework/leaflet/leaflet-timetrex' ).then(( module )=>{
+						var processed_punches_for_map = module.TTConvertMapData.processPunchesFromViewController( punches, map_options );
+						IndexViewController.openEditView( this, 'Map', processed_punches_for_map );
+					}).catch( Global.importErrorHandler );
 				} else {
 					Debug.Text( 'ERROR: Either punches is not an array, or data is empty', 'TimeSheetViewController.js', 'TimeSheetViewController', 'onMapClick', 1 );
 					TAlertManager.showAlert( $.i18n._( 'Selected punches no longer exist, unable to map.' ) );
@@ -7403,12 +7425,7 @@ class TimeSheetViewController extends BaseViewController {
 
 			if ( this.select_cells_Array.length === 1 ) {
 				select_cell = this.select_cells_Array[0];
-
-				if ( select_cell.row_id % 2 !== 0 ) {
-					status_id = 10;
-				} else {
-					status_id = 20;
-				}
+				status_id = select_cell.status_id;
 
 				var select_date = Global.strToDate( this.start_date_picker.getValue() );
 				var new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() - 1 ) );
@@ -7424,7 +7441,15 @@ class TimeSheetViewController extends BaseViewController {
 						type_id = 10;
 					}
 				}
+			} else {
+				select_cell = this.select_cells_Array[0];
+				if ( select_cell && select_cell.status_id ) {
+					status_id = select_cell.status_id;
+				} else {
+					status_id = 10; //In
+				}
 			}
+
 			this.api['get' + this.api.key_name + 'DefaultData']( this.getSelectEmployee(),
 				date,
 				punch_control_id,
@@ -7451,26 +7476,6 @@ class TimeSheetViewController extends BaseViewController {
 							}
 						} else {
 							result_data.punch_date = $this.getSelectDate();
-							var select_cell_item = $this.select_cells_Array[0];
-							if ( select_cell_item ) {
-								if ( select_cell_item.row_id % 2 !== 0 ) {
-									result_data.status_id = 10;
-								} else {
-									result_data.status_id = 20;
-								}
-							}
-
-						}
-
-						// Set in or out base on first item select row
-						if ( $this.is_mass_adding ) {
-							var first_item = $this.select_cells_Array[0];
-
-							if ( !first_item || first_item.row_id % 2 !== 0 ) {
-								result_data.status_id = 10;
-							} else {
-								result_data.status_id = 20;
-							}
 						}
 
 						if ( doing_save_and_new ) {
@@ -7584,6 +7589,7 @@ class TimeSheetViewController extends BaseViewController {
 			}
 		}
 
+		current_api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		current_api['set' + current_api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				if ( result.isValid() ) {
@@ -7663,6 +7669,8 @@ class TimeSheetViewController extends BaseViewController {
 		}
 
 		this.clearNavigationData();
+
+		current_api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		current_api['set' + current_api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				if ( result.isValid() ) {
@@ -7822,6 +7830,7 @@ class TimeSheetViewController extends BaseViewController {
 			}
 		}
 
+		current_api.setIsIdempotent( true ); //Force to idempotent API call to avoid duplicate network requests from causing errors displayed to the user.
 		current_api['set' + current_api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 
@@ -7888,7 +7897,7 @@ class TimeSheetViewController extends BaseViewController {
 			if ( this.absence_model ) {
 				this.navigation.AComboBox( {
 					id: this.script_name + '_navigation',
-					layout_name: ALayoutIDs.ABSENCE
+					layout_name: 'global_absence'
 				} );
 
 				if ( this.absence_original_source ) {
@@ -7898,7 +7907,7 @@ class TimeSheetViewController extends BaseViewController {
 			} else {
 				this.navigation.AComboBox( {
 					id: this.script_name + '_navigation',
-					layout_name: ALayoutIDs.TIMESHEET
+					layout_name: 'global_timesheet'
 				} );
 
 				if ( this.full_timesheet_data ) {
@@ -8016,7 +8025,7 @@ class TimeSheetViewController extends BaseViewController {
 						var station_form_item = this.edit_view_form_item_dic['station_id'];
 						if ( this.current_edit_record['has_image'] ) {
 							this.attachElement( 'punch_image' );
-							widget.setValue( ServiceCaller.fileDownloadURL + '&object_type=punch_image&parent_id=' + this.current_edit_record.user_id + '&object_id=' + this.current_edit_record.id );
+							widget.setValue( ServiceCaller.getURLByObjectType( 'file_download' ) + '&object_type=punch_image&parent_id=' + this.current_edit_record.user_id + '&object_id=' + this.current_edit_record.id );
 
 						} else {
 							this.detachElement( 'punch_image' );

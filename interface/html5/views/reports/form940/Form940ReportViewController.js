@@ -1,4 +1,4 @@
-class Form940ReportViewController extends ReportBaseViewController {
+export class Form940ReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -98,11 +98,11 @@ class Form940ReportViewController extends ReportBaseViewController {
 			field: 'return_type',
 			set_empty: true,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			key: 'value'
 		} );
 
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.return_type_array ) );
+		form_item_input.setSourceData( $this.return_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type of Return' ), form_item_input, tab3_column1, '' );
 
 		//Exempt Payments
@@ -112,11 +112,11 @@ class Form940ReportViewController extends ReportBaseViewController {
 			field: 'exempt_payment',
 			set_empty: true,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			key: 'value'
 		} );
 
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.exempt_payment_array ) );
+		form_item_input.setSourceData( $this.exempt_payment_array );
 		this.addEditFieldToColumn( $.i18n._( 'Exempt Payment Types' ), form_item_input, tab3_column1 );
 
 		//Total Payments (Line 3)
@@ -127,7 +127,7 @@ class Form940ReportViewController extends ReportBaseViewController {
 		// form_item_input.AComboBox( {
 		// 	api_class: TTAPI.APIPayStubEntryAccount,
 		// 	allow_multiple_selection: true,
-		// 	layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+		// 	layout_name: 'global_PayStubAccount',
 		// 	show_search_inputs: true,
 		// 	set_empty: true,
 		// 	field: 'total_payments_include_pay_stub_entry_account'
@@ -144,7 +144,7 @@ class Form940ReportViewController extends ReportBaseViewController {
 		// form_item_input_1.AComboBox( {
 		// 	api_class: TTAPI.APIPayStubEntryAccount,
 		// 	allow_multiple_selection: true,
-		// 	layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+		// 	layout_name: 'global_PayStubAccount',
 		// 	show_search_inputs: true,
 		// 	set_empty: true,
 		// 	field: 'total_payments_exclude_pay_stub_entry_account'
@@ -164,7 +164,7 @@ class Form940ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'exempt_payments_include_pay_stub_entry_account'
@@ -181,7 +181,7 @@ class Form940ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'exempt_payments_exclude_pay_stub_entry_account'

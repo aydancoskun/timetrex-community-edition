@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,6 +48,20 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	var $original_filing_status = null;
 
 	var $state_income_tax_rate_options = [
+			20210101 => [
+					10 => [
+							[ 'income' => 3650, 'rate' => 4.75, 'constant' => 0 ],
+							[ 'income' => 9200, 'rate' => 6.75, 'constant' => 173.38 ],
+							[ 'income' => 125000, 'rate' => 8.75, 'constant' => 548 ],
+							[ 'income' => 125000, 'rate' => 9.9, 'constant' => 10680.50 ],
+					],
+					20 => [
+							[ 'income' => 7300, 'rate' => 4.75, 'constant' => 0 ],
+							[ 'income' => 18400, 'rate' => 6.75, 'constant' => 346.75 ],
+							[ 'income' => 250000, 'rate' => 8.75, 'constant' => 1096 ],
+							[ 'income' => 250000, 'rate' => 9.9, 'constant' => 21361 ],
+					],
+			],
 			20200101 => [
 					10 => [
 							[ 'income' => 3600, 'rate' => 4.75, 'constant' => 0 ],
@@ -203,7 +217,35 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
-			2020101  => [
+			20210101  => [
+					'standard_deduction'  => [
+							'10' => 2350,
+							'20' => 4700,
+					],
+					'allowance'           => 213,
+					'federal_tax_maximum' => 7050,
+					'phase_out'           => [
+							'10' => [
+									50000  => 7050,
+									125000 => 7050,
+									130000 => 5650,
+									135000 => 4200,
+									140000 => 2280,
+									145000 => 1400,
+									145000 => 0,
+							],
+							'20' => [
+									50000  => 7050,
+									250000 => 7050,
+									260000 => 5650,
+									270000 => 4200,
+									280000 => 2280,
+									290000 => 1400,
+									290000 => 0,
+							],
+					],
+			],
+			20200101  => [
 					'standard_deduction'  => [
 							'10' => 2315,
 							'20' => 4630,
@@ -231,7 +273,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 							],
 					],
 			],
-			2019101  => [
+			20190101  => [
 					'standard_deduction'  => [
 							'10' => 2270,
 							'20' => 4545,
@@ -259,7 +301,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 							],
 					],
 			],
-			2018101  => [
+			20180101  => [
 					'standard_deduction'  => [
 							'10' => 2215,
 							'20' => 4435,

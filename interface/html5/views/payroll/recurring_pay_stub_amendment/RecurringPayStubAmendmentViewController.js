@@ -1,4 +1,4 @@
-class RecurringPayStubAmendmentViewController extends BaseViewController {
+export class RecurringPayStubAmendmentViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#recurring_pay_stub_amendment_view_container',
@@ -184,7 +184,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 			api_class: TTAPI.APIRecurringPayStubAmendment,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.RECURRING_AMENDMENT,
+			layout_name: 'global_recurring_amendment',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -205,7 +205,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.filtered_status_array ) );
+		form_item_input.setSourceData( $this.filtered_status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_recurring_ps_amendment_column1, '' );
 
 		// Name
@@ -230,7 +230,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'frequency_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.frequency_array ) );
+		form_item_input.setSourceData( $this.frequency_array );
 		this.addEditFieldToColumn( $.i18n._( 'Frequency' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Start Date
@@ -250,7 +250,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user'
@@ -275,7 +275,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_stub_entry_name_id'
@@ -286,7 +286,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 		// Amount Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Amount Type' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Fixed
@@ -328,7 +328,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'percent_amount_entry_name_id'
@@ -362,7 +362,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -371,7 +371,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -380,7 +380,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 				field: 'frequency_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -388,7 +388,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -399,7 +399,7 @@ class RecurringPayStubAmendmentViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

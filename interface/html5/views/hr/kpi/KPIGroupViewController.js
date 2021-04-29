@@ -1,4 +1,4 @@
-class KPIGroupViewController extends BaseTreeViewController {
+export class KPIGroupViewController extends BaseTreeViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#kpi_group_view_container',

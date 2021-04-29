@@ -1,9 +1,12 @@
-class LegalEntityViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImage';
+import '@/global/widgets/filebrowser/TImageAdvBrowser';
+
+export class LegalEntityViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#legal_entity_view_container',
 
-			_required_files: ['TImage', 'TImageAdvBrowser'],
+			// _required_files: ['TImage', 'TImageAdvBrowser'],
 
 			status_array: null,
 			type_array: null,
@@ -246,7 +249,7 @@ class LegalEntityViewController extends BaseViewController {
 				api_class: TTAPI.APILegalEntity,
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				layout_name: 'global_legal_entity',
 				navigation_mode: true,
 				show_search_inputs: true
 			} );
@@ -269,19 +272,19 @@ class LegalEntityViewController extends BaseViewController {
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_legal_entity_column1, '' );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_legal_entity_column1, '' );
 
 		// Classification Code
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'classification_code' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.classification_code_array ) );
+		form_item_input.setSourceData( $this.classification_code_array );
 		this.addEditFieldToColumn( $.i18n._( 'Classification Code' ), form_item_input, tab_legal_entity_column1, '' );
 
 		// Legal Name
@@ -321,13 +324,13 @@ class LegalEntityViewController extends BaseViewController {
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
+		form_item_input.setSourceData( $this.country_array );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_legal_entity_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'province' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_legal_entity_column1 );
 
 		//Postcode
@@ -409,7 +412,7 @@ class LegalEntityViewController extends BaseViewController {
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'payment_services_status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.payment_services_status_array ) );
+		form_item_input.setSourceData( $this.payment_services_status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_payment_services_column1, '', null, true );
 
 		//User Name
@@ -486,7 +489,7 @@ class LegalEntityViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -556,7 +559,7 @@ class LegalEntityViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.COMBO_BOX
 			} ),
 			new SearchField( {
@@ -566,7 +569,7 @@ class LegalEntityViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -581,7 +584,7 @@ class LegalEntityViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 3,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -594,7 +597,7 @@ class LegalEntityViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 3,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

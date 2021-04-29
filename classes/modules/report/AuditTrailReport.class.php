@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -234,6 +234,8 @@ class AuditTrailReport extends Report {
 						}
 					}
 				}
+
+				$retval['date'] = 'time_stamp';
 				break;
 			case 'aggregates':
 				$retval = [];
@@ -432,7 +434,12 @@ class AuditTrailReport extends Report {
 			Debug::Text( ' Log Rows: ' . $llf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $llf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 			foreach ( $llf as $key => $l_obj ) {
-				$this->tmp_data['log'][$l_obj->getUser()][] = array_merge( (array)$l_obj->getObjectAsArray( $columns ), [ 'total_log' => 1 ] );
+				$tmp_user_data = array_merge( (array)$l_obj->getObjectAsArray( $columns ), [ 'total_log' => 1 ] );
+				if ( isset( $tmp_user_data['date'] ) ) {
+					$tmp_user_data['date'] = TTDate::parseDateTime( $tmp_user_data['date'] ); //Convert date to a epoch so we can sort by it.
+				}
+
+				$this->tmp_data['log'][$l_obj->getUser()][] = $tmp_user_data;
 
 				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}

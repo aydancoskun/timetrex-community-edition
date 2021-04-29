@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -73,15 +73,7 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 		return true;
 	}
 
-	function filterPhone( $value ) {
-		//Strip non-digits.
-		$value = $this->stripNonNumeric( $value );
-
-		return [ substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ) ];
-	}
-
-	function _outputXML() {
-
+	function _outputXML( $type = null ) {
 		$xml = new SimpleXMLElement( '<Return returnVersion="2012v3.0" xsi:schemaLocation="http://www.irs.gov/efile Return1040.xsd" xmlns:efile="http://www.irs.gov/efile" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"></Return>' ); //IRSW2 must be wrapped in <ReturnData></ReturnData>
 		$this->setXMLObject( $xml );
 
@@ -126,7 +118,7 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 		$xml->ReturnHeader->addChild( 'Timestamp', $this->return_created_timestamp ); // The date and time when the return was created
 		$xml->ReturnHeader->addChild( 'TaxYear', $this->year );
 		$xml->ReturnHeader->addChild( 'TaxPeriodBeginDate', $this->tax_period_begin_date ); //Tax Period Begin Date
-		$xml->ReturnHeader->addChild( 'TaxPeriodEndDate', $this->tax_period_end__date );    //Tax Period End Date
+		$xml->ReturnHeader->addChild( 'TaxPeriodEndDate', $this->tax_period_end_date );    //Tax Period End Date
 		$xml->ReturnHeader->addChild( 'SoftwareId', $this->software_id );                   // Software Identification
 		$xml->ReturnHeader->addChild( 'Originator' );
 		$xml->ReturnHeader->Originator->addChild( 'EFIN', $this->originator_efin );
@@ -157,7 +149,7 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 		return true;
 	}
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		return false;
 	}
 }

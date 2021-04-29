@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -149,6 +149,7 @@ class PunchFactory extends Factory {
 				'id' => 'ID',
 
 				'user_id'             => false, //This is coming from PunchControl factory.
+				'split_punch_control' => false, //Must come before transfer, so a punch control can be split to allow a transfer to occur.
 				'transfer'            => 'Transfer',
 				'type_id'             => 'Type',
 				'type'                => false,
@@ -422,8 +423,8 @@ class PunchFactory extends Factory {
 	 */
 	function setTransfer( $value, $time_stamp = null ) {
 		//If a timestamp is passed, check for the previous punch, if one does NOT exist, transfer can not be enabled.
-		if ( $value == true && $time_stamp != '' && $this->isNew() ) { //If the punch isn't a new one, always accept the transfer flag so we don't mistakenly round punches that are transfer punches when an administrator edits them.
-			$prev_punch_obj = $this->getPreviousPunchObject( $time_stamp );
+		if ( $value == true && $time_stamp != '' && $this->isNew() && $this->getEnableSplitPunchControl() == false ) { //If the punch isn't a new one, always accept the transfer flag so we don't mistakenly round punches that are transfer punches when an administrator edits them.
+			$prev_punch_obj = $this->getPreviousPunchObject( $time_stamp, $this->getUser(), true );
 			//Make sure we check that the previous punch wasn't an out punch from the last shift.
 			if ( !is_object( $prev_punch_obj ) || ( is_object( $prev_punch_obj ) && $prev_punch_obj->getStatus() == 20 ) ) {
 				Debug::Text( 'Previous punch does not exist, or it was an OUT punch, transfer cannot be enabled. EPOCH: ' . $time_stamp, __FILE__, __LINE__, __METHOD__, 10 );
@@ -1425,6 +1426,27 @@ class PunchFactory extends Factory {
 	/**
 	 * @return bool
 	 */
+	function getEnableSplitPunchControl() {
+		if ( isset( $this->split_punch_control ) ) {
+			return $this->split_punch_control;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableSplitPunchControl( $bool ) {
+		$this->split_punch_control = $bool;
+
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getScheduleWindowTime() {
 		return $this->getGenericTempDataValue( 'schedule_window_time' );
 	}
@@ -1706,6 +1728,43 @@ class PunchFactory extends Factory {
 			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 			$s_obj = $slf->getScheduleObjectByUserIdAndEpoch( $user_obj->getId(), $epoch );
 
+			//Try to handle cases where the employee forgets to punch in at 8AM then they punch at 5PM (as that should be the OUT punch) and it would become a 5PM IN punch instead.
+			// Then the next morning for their 8AM punch it thinks they are continuing their shift from yesterday, and the issue persists across multiple days.
+			//
+			// However we also need to handle cases where a schedule like this exists:
+			//   Absent: 1a - 8a Working: 8a - 5pm and the employee punches at 7:45AM, it should be a IN punch assigned to the working schedule, not assigned to the absent shift.
+			// 		This would exist if they had recurring schedules and swapped an employee from day shift to night shift (where they don't overlap)
+			//      and have to make one of them an absent (with no absence policy) to get it off the schedule.
+			// There is also the on-call case of:
+			//      Working: 8a - 5p, Absent (oncall): 5p - 8a, and the employee getting called in around 11p or around 6a?
+			//      We want to default branch/department/job/task to that of the oncall schedule not the working schedule if at all possible.
+			if ( is_object( $s_obj ) ) {
+				//Determine if we are closer to the schedule start time, or end time.
+				if ( abs( $epoch - $s_obj->getEndTime() ) < abs( $epoch - $s_obj->getStartTime() ) && abs( $epoch - $s_obj->getEndTime() ) <= $s_obj->getStartStopWindow() ) {
+					//Closer to end time.
+					Debug::Text( '    Current punch is closer to schedule end time and within the schedule start/stop window. Schedule: Start: ' . TTDate::getDate( 'DATE+TIME', $s_obj->getStartTime() ) .' End: ' . TTDate::getDate( 'DATE+TIME', $s_obj->getEndTime() ) .' Window: '. $s_obj->getStartStopWindow(), __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $is_previous_punch == false ) {
+						Debug::Text( '      NOTICE: No previous punch exists, defaulting to OUT.', __FILE__, __LINE__, __METHOD__, 10 );
+						$next_status_id = 20; //Out
+					} elseif ( isset( $prev_punch_obj ) && is_object( $prev_punch_obj ) && $prev_punch_obj->getTimeStamp() < ( $s_obj->getStartTime() - $s_obj->getStartStopWindow() ) && TTDate::getDayOfYear( $prev_punch_obj->getTimeStamp() ) != TTDate::getDayOfYear( $epoch ) ) {
+						Debug::Text( '      NOTICE: Previous punch exists before the schedule start time - window, assuming missed IN punch and defaulting to Out.', __FILE__, __LINE__, __METHOD__, 10 );
+						$next_status_id = 20; //Out
+						$prev_punch_obj = false; //Clear previous punch object so none of its data carries over to the current punch.
+					}
+				} else {
+					//Closer to start time.
+					Debug::Text( '    Current punch is closer to schedule start time and within the schedule start/stop window. Schedule: Start: ' . TTDate::getDate( 'DATE+TIME', $s_obj->getStartTime() ) .' End: ' . TTDate::getDate( 'DATE+TIME', $s_obj->getEndTime() ) .' Window: '. $s_obj->getStartStopWindow(), __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $is_previous_punch == false ) {
+						Debug::Text( '      NOTICE: No previous punch exists, defaulting to IN.', __FILE__, __LINE__, __METHOD__, 10 );
+						$next_status_id = 10; //In
+					} elseif ( isset( $prev_punch_obj ) && is_object( $prev_punch_obj ) && $prev_punch_obj->getTimeStamp() < ( $s_obj->getStartTime() - $s_obj->getStartStopWindow() ) && TTDate::getDayOfYear( $prev_punch_obj->getTimeStamp() ) != TTDate::getDayOfYear( $epoch ) ) {
+						Debug::Text( '      NOTICE: Previous punch exists before the schedule start time - window, assuming missed OUT punch and defaulting to IN.', __FILE__, __LINE__, __METHOD__, 10 );
+						$next_status_id = 10; //In
+						$prev_punch_obj = false; //Clear previous punch object so none of its data carries over to the current punch.
+					}
+				}
+			}
+
 			//Get all GEO fences that this coordinates fall within.
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 				$gflf = TTnew( 'GEOFenceListFactory' ); /** @var GEOFenceListFactory $gflf */
@@ -1838,6 +1897,7 @@ class PunchFactory extends Factory {
 						'job_item_id'      => TTUUID::castUUID( $job_item_id ),
 						'quantity'         => (float)$prev_punch_obj->getPunchControlObject()->getQuantity(),
 						'bad_quantity'     => (float)$prev_punch_obj->getPunchControlObject()->getBadQuantity(),
+						'status_id'        => (int)$prev_punch_obj->getNextStatus(),
 						'type_id'          => (int)$next_type,
 						'punch_control_id' => $prev_punch_obj->getNextPunchControlID(),
 						'other_id1'        => $prev_punch_obj->getPunchControlObject()->getOtherID1(),
@@ -1845,7 +1905,6 @@ class PunchFactory extends Factory {
 						'other_id3'        => $prev_punch_obj->getPunchControlObject()->getOtherID3(),
 						'other_id4'        => $prev_punch_obj->getPunchControlObject()->getOtherID4(),
 						'other_id5'        => $prev_punch_obj->getPunchControlObject()->getOtherID5(),
-						'status_id'        => (int)$prev_punch_obj->getNextStatus(),
 						'note'             => (string)$prev_punch_obj->getPunchControlObject()->getNote(), //Must be null.
 				];
 			}
@@ -1862,7 +1921,7 @@ class PunchFactory extends Factory {
 					'job_item_id'   => TTUUID::castUUID( $job_item_id ),
 					'quantity'      => 0,
 					'bad_quantity'  => 0,
-					'status_id'     => 10, //In
+					'status_id'     => ( ( isset($next_status_id) && $next_status_id != '' ) ? $next_status_id : 10 ), //In
 					'type_id'       => 10, //Normal
 					'note'          => '', //Must be null.
 					'other_id1'     => '',
@@ -2205,13 +2264,33 @@ class PunchFactory extends Factory {
 
 		if ( $this->getDeleted() == false ) {
 
+			if ( $this->isNew() && $this->getEnableSplitPunchControl() == true ) {
+				Debug::text( ' Split Punch Control to insert inbetween if needed...', __FILE__, __LINE__, __METHOD__, 10 );
+
+				$plf = TTNew('PunchListFactory');
+				$tmp_punch_control_id = $plf->getCompletePunchControlIdByUserIdAndEpoch( $this->getUser(), $this->getTimeStamp() );
+				if ( TTUUID::isUUID( $tmp_punch_control_id ) ) {
+					Debug::text( ' Found Punch Control ID to split: '. $tmp_punch_control_id, __FILE__, __LINE__, __METHOD__, 10 );
+					$is_punch_control_split = PunchControlFactory::splitPunchControl( $tmp_punch_control_id );
+					if ( $is_punch_control_split == true ) {
+						$this->setPunchControlID( false ); //Clear PunchControlID so findPunchControlId() will actually execute.
+						$this->setPunchControlID( $this->findPunchControlID() );
+						Debug::text( '   Split Punch Control ID: '. $tmp_punch_control_id .' Result: '. (int)$is_punch_control_split, __FILE__, __LINE__, __METHOD__, 10 );
+					}
+				} else {
+					Debug::text( '   No Punch Control to split...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+				unset( $plf, $tmp_punch_control_id, $is_punch_control_split );
+			}
+
 			if ( $this->isNew() && $this->getTransfer() == true && $this->getEnableAutoTransfer() == true ) {
 				Debug::text( ' Transfer is Enabled, automatic punch out of last punch pair...', __FILE__, __LINE__, __METHOD__, 10 );
 
 				//Use actual time stamp, not rounded timestamp. This should only be called on new punches as well, otherwise Actual Time Stamp could be incorrect.
-				$p_obj = $this->getPreviousPunchObject( $this->getActualTimeStamp() );
+				//$p_obj = $this->getPreviousPunchObject( $this->getActualTimeStamp() );
+				$p_obj = $this->getPreviousPunchObject( $this->getActualTimeStamp(), $this->getUser(), true ); //Ignore future punches, so mass adding transfer punches at the end of the day can still work.
 				if ( is_object( $p_obj ) ) {
-					Debug::text( ' Found Last Punch: ', __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::text( ' Found Last Punch: ID: '. $p_obj->getID() .' Timestamp: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 					if ( $p_obj->getStatus() == 10 ) {
 						Debug::text( ' Last Punch was in. Auto Punch Out now: ', __FILE__, __LINE__, __METHOD__, 10 );
@@ -2565,6 +2644,9 @@ class PunchFactory extends Factory {
 							if ( $this->getTransfer() == true ) {
 								$this->setEnableAutoTransfer( true );
 							}
+							break;
+						case 'split_punch_control':
+							$this->setEnableSplitPunchControl( $data[ $key ] );
 							break;
 						case 'time_stamp':
 							if ( method_exists( $this, $function ) ) {

@@ -425,7 +425,7 @@ class Net_Curl
     function execute()
     {
         // Create cURL handle if it hasn't already been created
-        if (!is_resource($this->_ch)) {
+		if (!is_resource($this->_ch) && !( ( is_object( $this->_ch ) && $this->_ch instanceOf CurlHandle ) ) ) {
             $result = $this->create();
             if (PEAR::isError($result)) {
                 return $result;
@@ -569,7 +569,7 @@ class Net_Curl
                     if ( class_exists('\CURLFile') AND is_object($val) ) {
                         $sets = null;
                         break;
-                    } elseif ( strlen($val) > 1 && $val{0} == '@') {
+                    } elseif ( strlen($val) > 1 && $val[0] == '@') {
                         $file = substr($val, 1);
                         if (is_file($file) && is_readable($file)) {
                             $sets = null;
@@ -691,7 +691,7 @@ class Net_Curl
      */
     function setOption($option, $value)
     {
-        if (is_resource($this->_ch)) {
+    	if ( is_resource($this->_ch) || ( ( is_object( $this->_ch ) && $this->_ch instanceOf CurlHandle ) ) ) {
             return curl_setopt($this->_ch, $option, $value);
         }
 
@@ -710,7 +710,7 @@ class Net_Curl
      */
     function getInfo()
     {
-        if (is_resource($this->_ch)) {
+		if ( is_resource($this->_ch) || ( ( is_object( $this->_ch ) && $this->_ch instanceOf CurlHandle ) ) ) {
             return curl_getinfo($this->_ch);
         }
 
@@ -736,7 +736,7 @@ class Net_Curl
         }
 
         $this->_ch = curl_init();
-        if (!is_resource($this->_ch)) {
+        if (!is_resource($this->_ch) && !( ( is_object( $this->_ch ) && $this->_ch instanceOf CurlHandle ) ) ) {
             return PEAR::raiseError('Could not initialize cURL handler');
         }
 
@@ -791,7 +791,7 @@ class Net_Curl
      */
     function close()
     {
-        if (is_resource($this->_ch)) {
+		if ( is_resource($this->_ch) || ( ( is_object( $this->_ch ) && $this->_ch instanceOf CurlHandle ) ) ) {
             curl_close($this->_ch);
         }
     }

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -123,8 +123,10 @@ class APICompany extends APIFactory {
 
 		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
+		$include_last_punch_time = ( isset( $data['filter_columns']['max_punch_time_stamp'] ) ) ? true : false;
+
 		$blf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $blf */
-		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
+		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'], $include_last_punch_time );
 		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $blf->getRecordCount() );
@@ -253,14 +255,20 @@ class APICompany extends APIFactory {
 				}
 				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$is_valid = $primary_validator->isValid( $ignore_warning );
+				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text( 'Attempting to save data...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					//Don't allow changing edition, status unless they can edit all companies, or its the primary company (for On-Site installs)
+					//  Need to consider the case of a On-Site Community Edition upgrading to Professional Edition, they need a way to change the Company product edition before 'company','edit' permissions will appear.
+					//     Just assume that whenever its the primary company we allow the product edition to change.
 					//if ( !( $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID OR $this->getPermissionObject()->Check('company', 'edit') ) ) {
-					if ( !( ( DEPLOYMENT_ON_DEMAND == true && $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID && $this->getPermissionObject()->Check( 'company', 'edit' ) )
-							|| ( DEPLOYMENT_ON_DEMAND == false && $this->getPermissionObject()->Check( 'company', 'edit' ) ) ) ) {
+					if ( !(
+							( DEPLOYMENT_ON_DEMAND == true && ( $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID && $this->getPermissionObject()->Check( 'company', 'edit' ) ) )
+							||
+							( DEPLOYMENT_ON_DEMAND == false && $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID )
+						  )
+					) {
 						unset( $row['product_edition_id'], $row['status_id'] );
 						if ( DEPLOYMENT_ON_DEMAND == true ) { //When On-Demand, prevent changing of company name unless its by a Master Admin.
 							unset( $row['name'] );
@@ -301,7 +309,7 @@ class APICompany extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				} else if ( $validate_only == true ) {
 					$lf->FailTransaction();
 				}
@@ -401,7 +409,7 @@ class APICompany extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				}
 
 				$lf->CommitTransaction();

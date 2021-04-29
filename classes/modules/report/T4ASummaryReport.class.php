@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -858,6 +858,8 @@ class T4ASummaryReport extends Report {
 						Debug::Text( '  Final Province of Employment: ' . $employment_province, __FILE__, __LINE__, __METHOD__, 10 );
 
 						$ee_data = [
+								'id'                  => (string)TTUUID::convertStringToUUID( md5( $row['user_id'] . $t4a->year ) . microtime( true ) ),
+								'user_id'             => (string)$row['user_id'],
 								'first_name'          => $user_obj->getFirstName(),
 								'middle_name'         => $user_obj->getMiddleName(),
 								'last_name'           => $user_obj->getLastName(),
@@ -940,7 +942,7 @@ class T4ASummaryReport extends Report {
 							if ( $format == 'pdf_form_publish_employee' ) {
 								// generate PDF for every employee and assign to each government document records
 								$this->getFormObject()->addForm( $t4a );
-								GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 102, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
+								GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 102, TTDate::getEndYearEpoch( $filter_data['start_date'] ), ( ( $t4a->countRecords() == 1 ) ? $this->getFormObject()->output( 'PDF', false ) : null ), ( ( $t4a->countRecords() == 1 ) ? $this->getFormObject()->serialize() : null ) );
 								$this->getFormObject()->clearForms();
 							}
 						} else {
@@ -954,115 +956,121 @@ class T4ASummaryReport extends Report {
 					$x++;
 				}
 
-				$this->getFormObject()->addForm( $t4a );
+				if ( $format != 'pdf_form_publish_employee' ) {
+					$this->getFormObject()->addForm( $t4a );
 
-				if ( $format == 'pdf_form_publish_employee' ) {
-					$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
+					if ( $t4a->countRecords() > 0 && ( $form_type == 'government' || $format == 'efile_xml' || $format == 'payment_services' ) ) {
+						//Handle T4ASummary
+						$t4as = $this->getT4ASumObject();
+						$t4as->setStatus( $setup_data['status_id'] );
+						$t4as->year = $t4a->year;
+						$t4as->payroll_account_number = $t4a->payroll_account_number;
 
-					return $user_generic_status_batch_id;
-				}
+						$t4as->company_name = $legal_entity_obj->getTradeName(); //T4As show Operating/Trade name on the forms.
+						$t4as->company_address1 = $legal_entity_obj->getAddress1();
+						$t4as->company_address2 = $legal_entity_obj->getAddress2();
+						$t4as->company_city = $legal_entity_obj->getCity();
+						$t4as->company_province = $legal_entity_obj->getProvince();
+						$t4as->company_postal_code = $legal_entity_obj->getPostalCode();
 
-				if ( $t4a->countRecords() > 0 && ( $form_type == 'government' || $format == 'efile_xml' || $format == 'payment_services' ) ) {
-					//Handle T4ASummary
-					$t4as = $this->getT4ASumObject();
-					$t4as->setStatus( $setup_data['status_id'] );
-					$t4as->year = $t4a->year;
-					$t4as->payroll_account_number = $t4a->payroll_account_number;
+						$t4as->l76 = $contact_user_obj->getFullName(); //Contact name.
+						$t4as->l78 = $contact_user_obj->getWorkPhone();
 
-					$t4as->company_name = $legal_entity_obj->getTradeName(); //T4As show Operating/Trade name on the forms.
-					$t4as->company_address1 = $legal_entity_obj->getAddress1();
-					$t4as->company_address2 = $legal_entity_obj->getAddress2();
-					$t4as->company_city = $legal_entity_obj->getCity();
-					$t4as->company_province = $legal_entity_obj->getProvince();
-					$t4as->company_postal_code = $legal_entity_obj->getPostalCode();
+						$total_row = Misc::ArrayAssocSum( $this->form_data['user'][$legal_entity_id] );
 
-					$t4as->l76 = $contact_user_obj->getFullName(); //Contact name.
-					$t4as->l78 = $contact_user_obj->getWorkPhone();
+						$t4as->l88 = $t4a->countRecords();
+						$t4as->l16 = ( isset( $total_row['pension'] ) ) ? $total_row['pension'] : null;
+						$t4as->l22 = ( isset( $total_row['income_tax'] ) ) ? $total_row['income_tax'] : null;
+						$t4as->l18 = ( isset( $total_row['lump_sum_payment'] ) ) ? $total_row['lump_sum_payment'] : null;
+						$t4as->l20 = ( isset( $total_row['self_employed_commission'] ) ) ? $total_row['self_employed_commission'] : null;
+						$t4as->l24 = ( isset( $total_row['annuities'] ) ) ? $total_row['annuities'] : null;
+						$t4as->l48 = ( isset( $total_row['service_fees'] ) ) ? $total_row['service_fees'] : null;
 
-					$total_row = Misc::ArrayAssocSum( $this->form_data['user'][$legal_entity_id] );
-
-					$t4as->l88 = $t4a->countRecords();
-					$t4as->l16 = ( isset( $total_row['pension'] ) ) ? $total_row['pension'] : null;
-					$t4as->l22 = ( isset( $total_row['income_tax'] ) ) ? $total_row['income_tax'] : null;
-					$t4as->l18 = ( isset( $total_row['lump_sum_payment'] ) ) ? $total_row['lump_sum_payment'] : null;
-					$t4as->l20 = ( isset( $total_row['self_employed_commission'] ) ) ? $total_row['self_employed_commission'] : null;
-					$t4as->l24 = ( isset( $total_row['annuities'] ) ) ? $total_row['annuities'] : null;
-					$t4as->l48 = ( isset( $total_row['service_fees'] ) ) ? $total_row['service_fees'] : null;
-
-					if ( isset( $setup_data['other_box'] ) ) {
-						foreach ( $setup_data['other_box'] as $key => $other_box_data ) {
-							//Debug::Text('zFound other box total for T4A Sum: '. $key .' Code: '. $other_box_data['box'], __FILE__, __LINE__, __METHOD__, 10);
-							if ( in_array( (int)$other_box_data['box'], [ 28, 30, 32, 34, 40, 42 ] ) ) {
-								//Debug::Text('Found other box total for T4A Sum: '. $key .' Code: '. $other_box_data['box'], __FILE__, __LINE__, __METHOD__, 10);
-								$object_var = 'l' . (int)$other_box_data['box'];
-								$t4as->$object_var = $total_row['other_box_' . $key];
-								unset( $object_var );
+						if ( isset( $setup_data['other_box'] ) ) {
+							foreach ( $setup_data['other_box'] as $key => $other_box_data ) {
+								//Debug::Text('zFound other box total for T4A Sum: '. $key .' Code: '. $other_box_data['box'], __FILE__, __LINE__, __METHOD__, 10);
+								if ( in_array( (int)$other_box_data['box'], [ 28, 30, 32, 34, 40, 42 ] ) ) {
+									//Debug::Text('Found other box total for T4A Sum: '. $key .' Code: '. $other_box_data['box'], __FILE__, __LINE__, __METHOD__, 10);
+									$object_var = 'l' . (int)$other_box_data['box'];
+									$t4as->$object_var = $total_row['other_box_' . $key];
+									unset( $object_var );
+								}
 							}
 						}
-					}
-					unset( $other_box_data, $key );
+						unset( $other_box_data, $key );
 
-					$total_other_deductions = Misc::MoneyFormat( Misc::sumMultipleColumns( $total_row, [ 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4' ] ), false );
-					$t4as->l101 = $total_other_deductions;
+						$total_other_deductions = Misc::MoneyRound( Misc::sumMultipleColumns( $total_row, [ 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4' ] ) );
+						$t4as->l101 = $total_other_deductions;
 
-					if ( isset( $setup_data['remittances_paid'] ) && $setup_data['remittances_paid'] != '' ) {
-						$t4as->l82 = (float)$setup_data['remittances_paid'];
-					} else {
-						$t4as->l82 = $total_row['income_tax'];
-					}
-
-					if ( $format == 'payment_services' ) {
-						$report_meta_data['t4as'] = [ 'total_employees' => $t4a->countRecords(), 'l22' => $t4as->l22 ];
-					}
-
-					$this->getFormObject()->addForm( $t4as );
-				}
-
-				if ( $t4a->countRecords() > 0 ) {
-					if ( $format == 'efile_xml' || $format == 'payment_services' ) {
-						$output_format = 'XML';
-						$file_name = 't4a_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.xml';
-						$mime_type = 'applications/octet-stream'; //Force file to download.
-					} else {
-						$output_format = 'PDF';
-						$file_name = 't4a_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.pdf';
-						$mime_type = $this->file_mime_type;
-					}
-
-					$file_output = $this->getFormObject()->output( $output_format );
-
-					//reset the file objects.
-					$this->clearFormObject();
-					$this->clearT4AObject();
-					$this->clearT619SumObject();
-					$this->clearT4ASumObject();
-
-					if ( !is_array( $file_output ) ) {
-						if ( $format == 'payment_services' ) {
-							$tmp_output['xml'] = $file_output;
-							$tmp_output['metadata'] = $report_meta_data;
-							$file_output = $tmp_output;
+						if ( isset( $setup_data['remittances_paid'] ) && $setup_data['remittances_paid'] != '' ) {
+							$t4as->l82 = (float)$setup_data['remittances_paid'];
+						} else {
+							$t4as->l82 = $total_row['income_tax'];
 						}
 
-						$file_arr[] = [ 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output ];
-						unset( $file_output );
-					} else {
-						return $file_output;
+						if ( $format == 'payment_services' ) {
+							$report_meta_data['t4as'] = [ 'total_employees' => $t4a->countRecords(), 'l22' => $t4as->l22 ];
+						}
+
+						$this->getFormObject()->addForm( $t4as );
 					}
-				} else {
-					return false; //No records.
+
+					if ( $t4a->countRecords() > 0 ) {
+						if ( $format == 'efile_xml' || $format == 'payment_services' ) {
+							$output_format = 'XML';
+							$file_name = 't4a_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.xml';
+							$mime_type = 'applications/octet-stream'; //Force file to download.
+						} else {
+							$output_format = 'PDF';
+							$file_name = 't4a_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.pdf';
+							$mime_type = $this->file_mime_type;
+						}
+
+						$file_output = $this->getFormObject()->output( $output_format );
+
+						//reset the file objects.
+						$this->clearFormObject();
+						$this->clearT4AObject();
+						$this->clearT619SumObject();
+						$this->clearT4ASumObject();
+
+						if ( !is_array( $file_output ) ) {
+							if ( $format == 'payment_services' ) {
+								$tmp_output['xml'] = $file_output;
+								$tmp_output['metadata'] = $report_meta_data;
+								$file_output = $tmp_output;
+							}
+
+							$file_arr[] = [ 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output ];
+							unset( $file_output );
+						} else {
+							return $file_output;
+						}
+					} else {
+						return false; //No records.
+					}
 				}
 			}
 		}
 
-		$zip_filename = explode( '.', $file_name );
-		if ( isset( $zip_filename[( count( $zip_filename ) - 1 )] ) ) {
-			$zip_filename = str_replace( '.', '', str_replace( $zip_filename[( count( $zip_filename ) - 1 )], '', $file_name ) ) . '.zip';
+		if ( $format == 'pdf_form_publish_employee' ) {
+			$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
+			return $user_generic_status_batch_id;
 		} else {
-			$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
-		}
+	        if ( isset( $file_name ) && $file_name != '' ) {
+				$zip_filename = explode( '.', $file_name );
+				if ( isset( $zip_filename[( count( $zip_filename ) - 1 )] ) ) {
+					$zip_filename = str_replace( '.', '', str_replace( $zip_filename[( count( $zip_filename ) - 1 )], '', $file_name ) ) . '.zip';
+				} else {
+					$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
+				}
 
-		return Misc::zip( $file_arr, $zip_filename, true );
+				return Misc::zip( $file_arr, $zip_filename, true );
+			}
+
+			Debug::Text( ' Returning FALSE!', __FILE__, __LINE__, __METHOD__, 10 );
+			return false;
+		}
 	}
 
 	/**

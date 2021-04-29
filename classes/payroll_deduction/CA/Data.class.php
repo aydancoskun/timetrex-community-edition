@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -49,6 +49,22 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Claim Code Basic Amounts
 	*/
 	var $basic_claim_code_options = [
+			20210101 => [ //01-Jan-2021:
+						  'CA' => [ 'min' => 12421, 'max' => 13808, 'phase_out_start' => 151978, 'phase_out_end' => 216511 ], //Federal - This is now phased out if net income is ~$150K or less, see Federal Basic Personal Amount (BPAF)
+						  'BC' => 11070,
+						  'AB' => 19369,
+						  'SK' => 16225,
+						  'MB' => 9936,
+						  'QC' => 0,
+						  'ON' => 10880,
+						  'NL' => 9536,
+						  'NB' => 10564,
+						  'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
+						  'PE' => 10500,
+						  'NT' => 15243,
+						  'YT' => [ 'min' => 12421, 'max' => 13808, 'phase_out_start' => 151978, 'phase_out_end' => 216511 ], //Federal - This is now phased out if net income is ~$150K or less, see Federal Basic Personal Amount (BPAF)
+						  'NU' => 16467,
+			],
 			20200701 => [ //01-Jul-2020:
 						  'CA' => [ 'min' => 12298, 'max' => 13229, 'phase_out_start' => 150473, 'phase_out_end' => 214368 ], //Federal - This is now phased out if net income is ~$150K or less, see Federal Basic Personal Amount (BPAF)
 						  'BC' => 10949,
@@ -423,6 +439,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		CPP settings
 	*/
 	var $cpp_options = [
+			20210101 => [ //2021
+						  'maximum_pensionable_earnings'  => 61600,
+						  'basic_exemption'               => 3500,
+						  'employee_rate'                 => 0.0545,
+						  'employee_maximum_contribution' => 3166.45,
+			],
 			20200101 => [ //2020
 						  'maximum_pensionable_earnings'  => 58700,
 						  'basic_exemption'               => 3500,
@@ -531,6 +553,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		EI settings
 	*/
 	var $ei_options = [
+			20210101 => [ //2021
+						  'maximum_insurable_earnings'    => 56300,
+						  'employee_rate'                 => 0.0158,
+						  'employee_maximum_contribution' => 889.54,
+						  'employer_rate'                 => 1.4,
+			],
 			20200101 => [ //2020
 						  'maximum_insurable_earnings'    => 54200,
 						  'employee_rate'                 => 0.0158,
@@ -636,9 +664,10 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	];
 
 	/*
-		Federal employment credit
+		Federal employment credit AKA: Canada Employment Amount (Variable: CEA)
 	*/
 	var $federal_employment_credit_options = [
+			20210101 => [ 'credit' => 1257 ],
 			20200101 => [ 'credit' => 1245 ],
 			20190101 => [ 'credit' => 1222 ],
 			20180101 => [ 'credit' => 1195 ],
@@ -660,6 +689,13 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal Income Tax Rates
 	*/
 	var $federal_income_tax_rate_options = [
+			20210101 => [
+					[ 'income' => 49020, 'rate' => 15, 'constant' => 0 ],
+					[ 'income' => 98040, 'rate' => 20.5, 'constant' => 2696 ],
+					[ 'income' => 151978, 'rate' => 26, 'constant' => 8088 ],
+					[ 'income' => 216511, 'rate' => 29, 'constant' => 12648 ],
+					[ 'income' => 216511, 'rate' => 33, 'constant' => 21308 ],
+			],
 			20200101 => [
 					[ 'income' => 48535, 'rate' => 15, 'constant' => 0 ],
 					[ 'income' => 97069, 'rate' => 20.5, 'constant' => 2669 ],

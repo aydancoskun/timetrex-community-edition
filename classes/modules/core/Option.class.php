@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -92,6 +92,7 @@ class Option {
 	}
 
 	/**
+	 * Tries to replicate Factory::handleSQLSyntax() or 'text_metaphone' matching in SQL.
 	 * @param $value
 	 * @param $options
 	 * @param bool $value_is_translated
@@ -112,22 +113,57 @@ class Option {
 			return false;
 		}
 
-		$retarr = Misc::findClosestMatch( $value, $options, 10, false );
-		//Debug::Arr($retarr, 'RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
+		//
+		//Try to replicate a SQL search from Factory::handleSQLSyntax().
+		//
 
-		/*
-		//Convert SQL search value ie: 'test%test%' to a regular expression.
-		$value = str_replace('%', '.*', $value);
+		$value = str_replace( '*', '%', $value ); //Switch to consistent more SQL like syntax with % wildcards.
 
-		foreach( $options as $key => $option_value ) {
-			if ( preg_match('/^'.$value.'$/i', $option_value) ) {
-				$retarr[] = $key;
-			}
+		if ( $value != '' && strpos( $value, '%' ) === false && ( strpos( $value, '|' ) === false && strpos( $value, '"' ) === false ) ) {
+			$value .= '%';
 		}
-		*/
 
-		if ( isset( $retarr ) ) {
-			return $retarr;
+		$flags_exact_match = false;
+		if ( strpos( $value, '"' ) !== false ) {
+			$flags_exact_match = true;
+		}
+
+		$flags_exact_end = false;
+		if ( strpos( $value, '|' ) !== false || strpos( $value, '"' ) !== false ) {
+			$flags_exact_end = true;
+		}
+
+		//Now that the flags are set above, get rid of special chars to prepare for regex.
+		$value = str_replace( [ '"', '|' ], '', $value );
+
+		//Help prevent regex attack vectors, like backtracking DDOS.
+		// Don't allow any brackets (ie: (), [] ), as to avoid mismatched brackets causing regex compilation errors.
+		$value = preg_replace( '/[^A-Za-z0-9-\.\ %\|]/', '', $value );
+
+		$regex_retarr = preg_grep( '/^' . str_replace( [ '%' ], [ '.*' ], $value ) . ( ( $flags_exact_end == true ) ? '$' : '' ) . '/i', $options );
+		if ( !is_array( $regex_retarr ) ) {
+			$regex_retarr = []; //Empty array.
+		}
+
+		if ( $flags_exact_match === false ) { //Skip metaphone match when using exact match.
+			//Metaphone match -- Need to strip all special operator characters as they are no good with metaphone anyways.
+			$metaphone_retarr = preg_grep( '/^' . metaphone( $value ) . ( ( $flags_exact_end == true ) ? '$' : '' ) . '/i', array_map( 'metaphone', $options ) );
+			if ( !is_array( $metaphone_retarr ) ) {
+				$metaphone_retarr = []; //Empty array.
+			}
+		} else {
+			$metaphone_retarr = []; //Empty array.
+		}
+
+		$retarr = ( $regex_retarr + $metaphone_retarr ); //Merge while keeping array keys.
+
+		if ( empty( $retarr ) == false ) {
+			arsort( $retarr );
+
+			//Debug::Arr( $search_arr, 'Search Str: '. $search_str .' Search Array: ', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr( $retarr, 'Matches: ', __FILE__, __LINE__, __METHOD__, 10);
+
+			return array_keys( $retarr );
 		}
 
 		return false;

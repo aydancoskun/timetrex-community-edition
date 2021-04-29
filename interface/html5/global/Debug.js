@@ -13,7 +13,7 @@ Debug.Arr = function( arr, text, file, class_name, function_name, verbosity ) {
 	}
 };
 
-Debug.Text = function( text, file, class_name, function_name, verbosity ) {
+Debug.Text = function( text, file, class_name, function_name, verbosity, type ) {
 	if ( this.getEnable() && verbosity <= this.getVerbosity() ) {
 		var time = ( '00000' + Debug.getExecutionTime() ).slice( -5 );
 		var output = ' DEBUG [' + time + 'ms] ';
@@ -32,8 +32,26 @@ Debug.Text = function( text, file, class_name, function_name, verbosity ) {
 			}
 			output += text + ' ';
 		}
-		console.info( output );
+
+		// Highlight the debug text if its a Warn or Error type. See Debug.Error and Debug.Warn
+		if( type == 'error' ) {
+			console.info( '%c' + output, 'background:#fde5e8; color:#ff0000; padding:4px;' );
+		} else if ( type == 'warn' ) {
+			console.info( '%c' + output, 'background:#fdedd8; color:#ff7700; padding:4px;' );
+		} else {
+			console.info( output );
+		}
 	}
+};
+
+Debug.Error = function( text, file, class_name, function_name, verbosity ) {
+	// Suggested use is Debug.Error at verbosity level 1, 2 or 10.
+	Debug.Text( text, file, class_name, function_name, verbosity, 'error' );
+};
+
+Debug.Warn = function( text, file, class_name, function_name, verbosity ) {
+	// Suggested use is Debug.Warn at verbosity level 2 or 10.
+	Debug.Text( text, file, class_name, function_name, verbosity, 'warn' );
 };
 
 // Used to temporarily highlight text and values during development. Default can be level 1 as function use should be temporary, and not committed in code
@@ -124,7 +142,7 @@ Debug.closePanel = function() {
 // Press CTRL+ALT+SHIFT+F12 to show the panel.
 Debug.showPanel = function() {
 	//need to check for dependencies before running this code due to Debug.js being loaded statically in the doc head.
-	if ( typeof $ != 'undefined' && typeof Global != 'undefined' && typeof ProgressBar != 'undefined' && typeof ie != 'undefined' ) {
+	if ( typeof $ != 'undefined' && typeof Global != 'undefined' && typeof ProgressBar != 'undefined' ) {
 		//we can be sure jquery is loaded.
 		if ( $( '#tt_debug_console' ).length > 0 ) {
 			$( '#tt_debug_console' ).remove();
@@ -146,7 +164,7 @@ Debug.showPanel = function() {
 		}
 	} else {
 		setTimeout( function() {
-			console.log( 'debugger waiting on dependancies' );
+			console.log( 'Debugger is waiting on dependancies to load before showing panel...' );
 			Debug.showPanel();
 		}, 500 );
 	}

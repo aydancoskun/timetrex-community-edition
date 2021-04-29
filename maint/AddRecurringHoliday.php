@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -62,7 +62,7 @@ foreach ( $hplf as $hp_obj ) {
 			$rhlf->getById( $recurring_holiday_id );
 			if ( $rhlf->getRecordCount() == 1 ) {
 				$rh_obj = $rhlf->getCurrent();
-				Debug::Text( 'Found Recurring Holiday: ' . $rh_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( 'Found Recurring Holiday: ' . $rh_obj->getName() .' ID: '. $rh_obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
 
 				$next_holiday_date = $rh_obj->getNextDate( $epoch );
 				Debug::Text( 'Next Holiday Date: ' . TTDate::getDate( 'DATE+TIME', $next_holiday_date ), __FILE__, __LINE__, __METHOD__, 10 );

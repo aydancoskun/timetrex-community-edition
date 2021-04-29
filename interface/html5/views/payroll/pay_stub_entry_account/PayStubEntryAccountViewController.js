@@ -1,4 +1,4 @@
-class PayStubEntryAccountViewController extends BaseViewController {
+export class PayStubEntryAccountViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#pay_stub_entry_account_view_container',
@@ -131,7 +131,7 @@ class PayStubEntryAccountViewController extends BaseViewController {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -152,14 +152,14 @@ class PayStubEntryAccountViewController extends BaseViewController {
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_account_column1, '' );
 
 		//Type
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_stub_account_column1 );
 
 		//Name
@@ -188,7 +188,7 @@ class PayStubEntryAccountViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'accrual_pay_stub_entry_account_id'
@@ -201,7 +201,7 @@ class PayStubEntryAccountViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'accrual_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.accrual_type_array ) );
+		form_item_input.setSourceData( $this.accrual_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Type' ), form_item_input, tab_pay_stub_account_column1, '', null, true );
 
 		// Debit Account
@@ -238,7 +238,7 @@ class PayStubEntryAccountViewController extends BaseViewController {
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -263,7 +263,7 @@ class PayStubEntryAccountViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -274,7 +274,7 @@ class PayStubEntryAccountViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

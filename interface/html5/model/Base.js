@@ -1,12 +1,9 @@
-var Base = Backbone.Model.extend( {
+export class Base extends Backbone.Model {
 
-	defaults: {},
+	constructor( options = {} ) {
+		_.defaults( options, {
+		} );
 
-	fromJSONToAttributes: function( data ) {
-		var handler = this;
-		handler.set( data );
-
-		return handler;
+		super( options );
 	}
-
-} );
+}

@@ -1,4 +1,4 @@
-class CurrencyViewController extends BaseViewController {
+export class CurrencyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#currency_view_container',
@@ -67,7 +67,7 @@ class CurrencyViewController extends BaseViewController {
 			api_class: TTAPI.APICurrency,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -91,14 +91,14 @@ class CurrencyViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_currency_column1, '' );
 
 		// ISO Currency
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'iso_code' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.iso_codes_array ) );
+		form_item_input.setSourceData( $this.iso_codes_array );
 		this.addEditFieldToColumn( $.i18n._( 'ISO Currency' ), form_item_input, tab_currency_column1 );
 
 		//Name
@@ -138,7 +138,7 @@ class CurrencyViewController extends BaseViewController {
 		// Decimal Places
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'round_decimal_places' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.round_decimal_places_array ) );
+		form_item_input.setSourceData( $this.round_decimal_places_array );
 		this.addEditFieldToColumn( $.i18n._( 'Decimal Places' ), form_item_input, tab_currency_column1, '' );
 	}
 
@@ -199,7 +199,7 @@ class CurrencyViewController extends BaseViewController {
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -217,14 +217,14 @@ class CurrencyViewController extends BaseViewController {
 				field: 'iso_code',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -236,7 +236,7 @@ class CurrencyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

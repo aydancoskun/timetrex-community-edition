@@ -1,4 +1,6 @@
-class DashletController extends TTBackboneView {
+import { TTBackboneView } from '@/views/TTBackboneView';
+
+export class DashletController extends TTBackboneView {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			data: null,

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -53,8 +53,43 @@ class PayrollDeduction_US_NY_YONKERS extends PayrollDeduction_US_NY {
 	*/
 
 	var $district_income_tax_rate_options = [
+			//Often the same as New York State (NYS) tables.
+			20210101 => [
+					10 => [
+							[ 'income' => 8500, 'rate' => 4.0, 'constant' => 0 ],
+							[ 'income' => 11700, 'rate' => 4.5, 'constant' => 340 ],
+							[ 'income' => 13900, 'rate' => 5.25, 'constant' => 484 ],
+							[ 'income' => 21400, 'rate' => 5.90, 'constant' => 600 ],
+							[ 'income' => 80650, 'rate' => 5.97, 'constant' => 1042 ],
+							[ 'income' => 96800, 'rate' => 6.33, 'constant' => 4579 ],
+							[ 'income' => 107650, 'rate' => 7.38, 'constant' => 5602 ],
+							[ 'income' => 157650, 'rate' => 7.88, 'constant' => 6402 ],
+							[ 'income' => 215400, 'rate' => 6.83, 'constant' => 10342 ],
+							[ 'income' => 265400, 'rate' => 9.59, 'constant' => 14287 ],
+							[ 'income' => 1077550, 'rate' => 7.35, 'constant' => 19082 ],
+							[ 'income' => 1127550, 'rate' => 52.08, 'constant' => 78775 ],
+							[ 'income' => 1127550, 'rate' => 9.62, 'constant' => 104815 ],
+					],
+					20 => [
+							[ 'income' => 8500, 'rate' => 4.0, 'constant' => 0 ],
+							[ 'income' => 11700, 'rate' => 4.5, 'constant' => 340 ],
+							[ 'income' => 13900, 'rate' => 5.25, 'constant' => 484 ],
+							[ 'income' => 21400, 'rate' => 5.90, 'constant' => 600 ],
+							[ 'income' => 80650, 'rate' => 5.97, 'constant' => 1042 ],
+							[ 'income' => 96800, 'rate' => 6.33, 'constant' => 4579 ],
+							[ 'income' => 107650, 'rate' => 7.28, 'constant' => 5602 ],
+							[ 'income' => 157650, 'rate' => 7.78, 'constant' => 6391 ],
+							[ 'income' => 211550, 'rate' => 7.99, 'constant' => 10281 ],
+							[ 'income' => 323200, 'rate' => 6.83, 'constant' => 14588 ],
+							[ 'income' => 373200, 'rate' => 10.71, 'constant' => 22214 ],
+							[ 'income' => 1077550, 'rate' => 7.35, 'constant' => 27569 ],
+							[ 'income' => 2155350, 'rate' => 7.65, 'constant' => 79338 ],
+							[ 'income' => 2205350, 'rate' => 94.54, 'constant' => 161790 ],
+							[ 'income' => 2205350, 'rate' => 9.62, 'constant' => 209060 ],
+					],
+			],
 			20200101 => [
-					10 => [ //Often the same as New York State (NYS) tables.
+					10 => [
 							[ 'income' => 8500, 'rate' => 4.0, 'constant' => 0 ],
 							[ 'income' => 11700, 'rate' => 4.5, 'constant' => 340 ],
 							[ 'income' => 13900, 'rate' => 5.25, 'constant' => 484 ],
@@ -379,6 +414,7 @@ class PayrollDeduction_US_NY_YONKERS extends PayrollDeduction_US_NY {
 	];
 
 	var $district_options = [
+		//2021 - No Change
 		//2020 - No Change
 		//2019 - No Change
 		//2018 - No Change

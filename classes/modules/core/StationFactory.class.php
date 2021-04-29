@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -309,6 +309,46 @@ class StationFactory extends Factory {
 				if ( $parent == 0 ) {
 					$retval = $retval[$parent];
 				}
+				break;
+			case 'face_recognition_match_threshold':
+				$retval = [
+						'-1000-0'   => TTi18n::gettext( '-- Default --' ),
+						'-1001-99.1'   => TTi18n::gettext( '1 (Least Accurate, Easiest)' ),
+						'-1002-99.2'   => TTi18n::gettext( '2' ),
+						'-1003-99.3'   => TTi18n::gettext( '3' ),
+						'-1004-99.4'   => TTi18n::gettext( '4' ),
+						'-1005-99.5'   => TTi18n::gettext( '5' ),
+						'-1006-99.6'   => TTi18n::gettext( '6 (Recommended)' ),
+						'-1007-99.7'   => TTi18n::gettext( '7' ),
+						'-1008-99.8'   => TTi18n::gettext( '8' ),
+						'-1009-99.9'   => TTi18n::gettext( '9' ),
+						'-1010-100'    => TTi18n::gettext( '10 (Most Accurate, Hardest)' ),
+				];
+				break;
+			case 'face_recognition_required_matches':
+				$retval = [
+						'-1000-0'   => TTi18n::gettext( '-- Default --' ),
+						'-1001-1'   => TTi18n::gettext( '1 (Least Accurate, Fastest)' ), //Takes around 0.1 seconds to obtain.
+						'-1002-2'   => TTi18n::gettext( '2' ),
+						'-1003-3'   => TTi18n::gettext( '3 (Recommended)' ), //Takes around 0.5 seconds to obtain.
+						'-1004-4'   => TTi18n::gettext( '4' ),
+						'-1005-5'   => TTi18n::gettext( '5' ),
+						'-1006-6'   => TTi18n::gettext( '6' ),
+						'-1007-7'   => TTi18n::gettext( '7' ),
+						'-1008-8'   => TTi18n::gettext( '8' ),
+						'-1009-9'   => TTi18n::gettext( '9' ),
+						'-1010-10'  => TTi18n::gettext( '10' ), //Takes around 1.5 seconds to obtain.
+						'-1011-11'  => TTi18n::gettext( '11' ),
+						'-1012-12'  => TTi18n::gettext( '12' ),
+						'-1013-13'  => TTi18n::gettext( '13' ),
+						'-1014-14'  => TTi18n::gettext( '14' ),
+						'-1015-15'  => TTi18n::gettext( '15' ),
+						'-1016-16'  => TTi18n::gettext( '16' ),
+						'-1017-17'  => TTi18n::gettext( '17' ),
+						'-1018-18'  => TTi18n::gettext( '18' ),
+						'-1019-19'  => TTi18n::gettext( '19' ),
+						'-1020-20'  => TTi18n::gettext( '20 (Most Accurate, Slowest)' ), //Takes around 3 seconds to obtain.
+				];
 				break;
 			case 'columns':
 				$retval = [
@@ -2385,32 +2425,32 @@ class StationFactory extends Factory {
 		if ( $this->getUserValue2() != '' ) {
 			$this->Validator->isLength( 'user_value_2',
 										$this->getUserValue2(),
-										TTi28n::gettext( 'User Value 2 is invalid' ),
-										2, 255
+										TTi18n::gettext( 'User Value 2 is invalid' ),
+										1, 255
 			);
 		}
 		// User Value 3
 		if ( $this->getUserValue3() != '' ) {
 			$this->Validator->isLength( 'user_value_3',
 										$this->getUserValue3(),
-										TTi38n::gettext( 'User Value 3 is invalid' ),
-										3, 255
+										TTi18n::gettext( 'User Value 3 is invalid' ),
+										1, 255
 			);
 		}
 		// User Value 4
 		if ( $this->getUserValue4() != '' ) {
 			$this->Validator->isLength( 'user_value_4',
 										$this->getUserValue4(),
-										TTi48n::gettext( 'User Value 4 is invalid' ),
-										4, 255
+										TTi18n::gettext( 'User Value 4 is invalid' ),
+										1, 255
 			);
 		}
 		// User Value 5
 		if ( $this->getUserValue5() != '' ) {
 			$this->Validator->isLength( 'user_value_5',
 										$this->getUserValue5(),
-										TTi58n::gettext( 'User Value 5 is invalid' ),
-										5, 255
+										TTi18n::gettext( 'User Value 5 is invalid' ),
+										1, 255
 			);
 		}
 		if ( $this->getAllowedDate() != '' ) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,8 @@
 class GovernmentForms_Base {
 
 	public $debug = false;
+	public $metadata = null;    //Metadata about the form itself, such as the
+	public $original_data = null; //Original object data before any record processing has been performed. So we can revert back to a "clean" state at any point.
 	public $data = null;        //Form data is stored here in an array.
 	public $records = [];       //Store multiple records here to process on a single form. ie: T4's where two employees can be on a single page.
 	public $records_total = []; //Total for all records.
@@ -48,15 +50,20 @@ class GovernmentForms_Base {
 	public $class_directory = null;
 
 	/*
+	 * XML related variables
+	 */
+	public $xml_object = null; //Prevent __set() from sticking this into the data property.
+
+	/*
 	 * PDF related variables
 	 */
-	public $pdf_object = null;
+	public $pdf_object = null; //Prevent __set() from sticking this into the data property.
 	public $template_index = [];
 	public $current_template_index = null;
 
-	public $page_margins = [ 0, 43 ];    //x, y - 43pt = 15mm Absolute margins that affect all drawing and templates.
-	public $page_offsets = [ 0, 0 ];     //x, y - Only affects drawing.
-	public $template_offsets = [ 0, 0 ]; //x, y - Only affects templates.
+	public $page_margins = [ 0, 0 ];    //x, y - 43pt = 15mm Absolute margins that affect all drawing and templates.
+	public $page_offsets = [ 0, 0 ];     //x, y - Only affects drawing fields within the template.
+	public $template_offsets = [ 0, 0 ]; //x, y - Only affects placement of the template on the page.
 
 	public $temp_page_offsets = [ 0, 0 ]; //x, y - Only affects drawing and is reset based on page_offets above.
 
@@ -85,7 +92,9 @@ class GovernmentForms_Base {
 		return $this->class_directory;
 	}
 
-	function Output( $type ) {
+	function Output( $type, $clear_records = true ) {
+		$this->saveOriginDataState();
+
 		$this->calculate(); //Run all calculation functions prior to outputting anything.
 		switch ( strtolower( $type ) ) {
 			case 'pdf':
@@ -95,14 +104,36 @@ class GovernmentForms_Base {
 				$retval = $this->_outputXML( $type );
 				break;
 			case 'efile':
-				$retval = $this->_outputEFILE();
+				$retval = $this->_outputEFILE( $type );
 				break;
 			default:
 				$retval = false;
 				break;
 		}
 
+		if ( $clear_records == true ) {
+			$this->clearRecords(); //This also calls revertToOriginalDataState()
+		} else {
+			$this->revertToOriginalDataState();
+		}
+
 		return $retval;
+	}
+
+	function saveOriginDataState() {
+		$this->original_data = $this->data;
+
+		return true;
+	}
+
+	function revertToOriginalDataState() {
+		if ( isset( $this->original_data ) ) {
+			if ( !defined( 'UNIT_TEST_MODE' ) || UNIT_TEST_MODE === false ) {
+				$this->data = $this->original_data;
+			}
+		}
+
+		return true;
 	}
 
 	function getRecords() {
@@ -159,6 +190,7 @@ class GovernmentForms_Base {
 
 	function clearRecords() {
 		$this->records = [];
+		$this->revertToOriginalDataState();
 	}
 
 	function countRecords() {
@@ -175,6 +207,37 @@ class GovernmentForms_Base {
 
 	function getRecordsTotal() {
 		return $this->records_total;
+	}
+
+	/**
+	 * Serializes the object to an array for storing in the DB and later retrieval. Especially important for handling correction reports like W2C.
+	 * @return false|string
+	 */
+	function serialize( $clear_records = true ) {
+		//Don't include $this->records here, as all the object properties from the records gets put into $this->data
+		$retval = [ 'metadata' => [ 'class' => get_class( $this ), 'object_data' => $this->metadata, 'tt_version' => APPLICATION_VERSION ], 'data' => $this->data, 'records' => $this->getRecords() ];
+
+		if ( $clear_records == true ) {
+			$this->clearRecords();
+		}
+
+		//*NOTE: This should not be serialized to JSON here, as we may need to allow other formats, so just return an array.
+		return $retval;
+	}
+
+	/**
+	 * Unserializes a array into the form itself.
+	 * @return false|string
+	 */
+	function unserialize( $data ) {
+		if ( is_array( $data ) && isset( $data['metadata'] ) ) {
+			$this->data = $data['data'];
+			$this->setRecords( $data['records'] );
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/*
@@ -257,14 +320,22 @@ class GovernmentForms_Base {
 	 *
 	 */
 	public function formatSSN( $value ) {
-		$value = substr_replace( $value, '-', 3, 0 );
-		$value = substr_replace( $value, '-', 6, 0 );
+		if ( $value != '' ) {
+			$value = substr_replace( $value, '-', 3, 0 );
+			$value = substr_replace( $value, '-', 6, 0 );
 
-		return $value;
+			return $value;
+		}
+
+		return null;
 	}
 
 	public function formatEIN( $value ) {
-		return substr_replace( $value, '-', 2, 0 );
+		if ( $value != '' ) {
+			return substr_replace( $value, '-', 2, 0 );
+		}
+
+		return null;
 	}
 
 	/*
@@ -729,7 +800,6 @@ class GovernmentForms_Base {
 		}
 		$this->current_template_index = $schema['template_page'];
 
-
 		return true;
 	}
 
@@ -753,7 +823,7 @@ class GovernmentForms_Base {
 	//  This separates calculating values from the drawing process, so we can easily pull out calculated values before anything is drawn, as other forms may need that data.
 	function calculate() {
 		//Get location map, start looping over each variable and drawing
-		$template_schema = $this->getTemplateSchema();
+		$template_schema = ( method_exists( $this, 'getTemplateSchema') ) ? $this->getTemplateSchema() : false;
 		if ( is_array( $template_schema ) ) {
 			foreach ( $template_schema as $field => $schema ) {
 				//If custom function is defined, pass off to that immediate.
@@ -909,7 +979,7 @@ class GovernmentForms_Base {
 	 *
 	 */
 	function __set( $name, $value ) {
-		$template_schema = $this->getTemplateSchema();
+		$template_schema = ( method_exists( $this, 'getTemplateSchema') ) ? $this->getTemplateSchema() : false;
 		if ( is_array( $template_schema ) && isset( $template_schema[$name]['function']['prefilter'] ) ) {
 			$filter_function = $template_schema[$name]['function']['prefilter'];
 			if ( $filter_function != '' ) {

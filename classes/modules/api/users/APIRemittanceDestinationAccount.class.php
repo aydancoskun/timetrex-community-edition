@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -259,7 +259,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 				}
 				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$is_valid = $primary_validator->isValid( $ignore_warning );
+				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 					unset( $lf->data['legal_entity_id'] );
@@ -284,7 +284,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				} else if ( $validate_only == true ) {
 					$lf->FailTransaction();
 				}
@@ -378,7 +378,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				}
 
 				$lf->CommitTransaction();

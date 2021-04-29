@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,9 @@ class TimeTrexClientAPI {
 	protected $base_url = 'https://demo.timetrex.com/api/json/api.php';
 	protected $session_id = null;
 	protected $session_hash = null; //Used to determine if we need to login again because the URL or Session changed.
+
+	protected $idempotent_key = null;
+
 	protected $class_factory = null;
 	protected $class_factory_method = null;
 
@@ -52,6 +55,7 @@ class TimeTrexClientAPI {
 	protected $soap_obj = null; //Persistent SOAP object.
 
 	protected $curl_obj = null; //Persistent CURL object.
+	protected $response_headers = []; //CURL response headers.
 
 	/**
 	 * TimeTrexClientAPI constructor.
@@ -80,8 +84,6 @@ class TimeTrexClientAPI {
 		$this->setURL( $url );
 		$this->setSessionId( $session_id );
 		$this->setClass( $class );
-
-		return true;
 	}
 
 	/**
@@ -106,6 +108,40 @@ class TimeTrexClientAPI {
 	 */
 	function getProtocol() {
 		return $this->protocol;
+	}
+
+	/**
+	 * When set to FALSE, idempotent requests are disabled. Otherwise they are enabled by default.
+	 * @param $value
+	 * @return bool
+	 */
+	function setIdempotentKey( $value ) {
+		if ( is_bool( $value ) ) {
+			$this->idempotent_key = $value;
+		} elseif ( is_string( $value ) && !empty( $value ) ) {
+			$this->idempotent_key = strtolower( $value );
+		}
+
+		return true;
+	}
+
+	/**
+	 * @return string
+	 */
+	function getIdempotentKey() {
+		return $this->idempotent_key;
+	}
+
+	function handleCurlResponseHeaders( $curl, $header ) {
+		$len = strlen( $header );
+		$header = explode( ':', $header, 2 );
+		if ( count( $header ) < 2 ) { // ignore invalid headers
+			return $len;
+		}
+
+		$this->response_headers[strtolower( trim( $header[0] ) )][] = trim( $header[1] );
+
+		return $len;
 	}
 
 	/**
@@ -182,7 +218,7 @@ class TimeTrexClientAPI {
 				curl_setopt( $retval, CURLOPT_FOLLOWLOCATION, 1 );
 				curl_setopt( $retval, CURLOPT_COOKIELIST, null ); //Enables curl_getinfo() to get a list of cookies
 				//curl_setopt( $retval, CURLINFO_HEADER_OUT, true ); //Enables "curl_getinfo( $this->curl_obj, CURLINFO_HEADER_OUT )" to show the raw HTTP request for debugging.
-
+				curl_setopt( $retval, CURLOPT_HEADERFUNCTION, array( &$this, 'handleCurlResponseHeaders' ) ); //NOTE: These need to be cleared before each curl_exec() call.
 
 				//Send SessionID as a cookie rather than on the URL to increase safety just a little bit more.
 				//  Overwrite above set SessionID in case we need to force it to something else.
@@ -232,6 +268,26 @@ class TimeTrexClientAPI {
 	}
 
 	/**
+	 * Basic UUID generator that does not require any 3rd party libraries.
+	 * @param null $data
+	 * @return string
+	 * @throws Exception
+	 */
+	function generateUUID( $data = null ) {
+		// Generate 16 bytes (128 bits) of random data or use the data passed into the function.
+		$data = ( empty( $data ) ? random_bytes( 16 ) : $data );
+
+		// Set version to 0100
+		$data[6] = chr( ord( $data[6] ) & 0x0f | 0x40 );
+
+		// Set bits 6-7 to 10
+		$data[8] = chr( ord( $data[8] ) & 0x3f | 0x80 );
+
+		// Output the 36 character UUID.
+		return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
+	}
+
+	/**
 	 * @return string
 	 */
 	function buildURL() {
@@ -244,6 +300,18 @@ class TimeTrexClientAPI {
 		if ( $this->getProtocol() == 'soap' && $this->session_id != '' ) {
 			$url_pieces[] = 'SessionID=' . $this->session_id;
 		}
+
+		if ( !empty( $this->getIdempotentKey() ) ) {
+			$url_pieces[] = 'MessageID=' . $this->getIdempotentKey();
+			$url_pieces[] = 'idempotent=1';
+		} else {
+			//Enable idempotent requests by default.
+			$url_pieces[] = 'MessageID=' . $this->generateUUID();
+			if ( $this->getIdempotentKey() !== false ) {
+				$url_pieces[] = 'idempotent=1';
+			}
+		}
+
 
 		if ( strpos( $this->base_url, '?' ) === false ) {
 			$url_separator = '?';
@@ -443,11 +511,11 @@ class TimeTrexClientAPI {
 	 * @param $password
 	 * @return bool
 	 */
-	function registerAPIKey( $user_name, $password ) {
+	function registerAPIKey( $user_name, $password, $end_point = null ) {
 		$this->session_id = $this->session_hash = null; //Don't set old session ID on URL.
 
 		$this->setClass( 'Authentication' );
-		$retval = $this->call( 'registerAPIKey', [ $user_name, $password ] );
+		$retval = $this->call( 'registerAPIKey', [ $user_name, $password, $end_point ] );
 		if ( is_object( $retval ) && $retval->isValid() ) {
 			$retval = $retval->getResult();
 			if ( !is_array( $retval ) && $retval != false ) {
@@ -504,7 +572,23 @@ class TimeTrexClientAPI {
 					curl_setopt( $connection_obj, CURLOPT_POSTFIELDS, $post_data );
 				}
 
-				$retval = json_decode( curl_exec( $connection_obj ), true );
+				$this->response_headers = []; //Reset headers prior to each call.
+				$http_result = curl_exec( $connection_obj );
+
+				//Check if the server is trying to get us to download a file.
+				if ( isset( $this->response_headers['content-disposition'][0] ) && stripos( $this->response_headers['content-disposition'][0], 'attachment' ) !== false ) {
+					$retval = $http_result;
+				} else {
+					//Check to see if its valid JSON, and if not return the raw result. This is needed for downloading files like PDFs and such, as they are just saw with raw binary data in a file download format.
+					$json_retval = json_decode( $http_result, true );
+					if ( json_last_error() == JSON_ERROR_NONE ) {
+						$retval = $json_retval;
+					} else {
+						$retval = $http_result;
+					}
+				}
+				unset( $http_result, $json_retval );
+
 				//curl_close( $connection_obj ); //If the connection is closed, we can't get the cookie information from it.
 			}
 

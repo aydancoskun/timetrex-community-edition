@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,14 +40,14 @@
  * weird xpath examples:
  * // //*[starts-with(@id, 'ceil_')]
  */
-class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
+class TTSeleniumGlobal extends PHPUnit\Extensions\Selenium2TestCase {
 
 	private $default_wait_timeout = 4000;//100000;
 
 	public $width = 1440;
 	public $height = 900;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $selenium_config;
 		$this->selenium_config = $selenium_config;
 
@@ -61,14 +61,10 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		$this->setBrowserUrl( $selenium_config['default_url'] );
 
 		$this->setDesiredCapabilities( [ 'chromeOptions' => [ 'args' => [ '--incognito' ], ] ] ); //Use incognito mode to help prevent caching between sessions and saving passwords and such.
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	function Login( $user, $pass ) {

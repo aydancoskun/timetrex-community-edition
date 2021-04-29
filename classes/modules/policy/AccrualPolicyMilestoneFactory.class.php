@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -175,24 +175,25 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	function getLengthOfServiceDate( $milestone_rollover_date ) {
 		switch ( $this->getLengthOfServiceUnit() ) {
 			case 10: //Days
-				$unit_str = 'Days';
+				$unit_str = 'day';
 				break;
 			case 20: //Weeks
-				$unit_str = 'Weeks';
+				$unit_str = 'week';
 				break;
 			case 30: //Months
-				$unit_str = 'Months';
+				$unit_str = 'month';
 				break;
 			case 40: //Years
-				$unit_str = 'Years';
+				$unit_str = 'year';
 				break;
 		}
 
 		if ( isset( $unit_str ) ) {
 			//There appears to be a bug in PHP strtotime() where '+10.00 years' does not work, but '+10 years' or '+10.01 years' does.
 			//Therefore to work around this issue always cast the length of service to a float.
-			$retval = TTDate::getBeginDayEpoch( strtotime( '+' . (float)$this->getLengthOfService() . ' ' . $unit_str, $milestone_rollover_date ) );
-			Debug::text( 'MileStone Rollover Days based on Length Of Service: ' . TTDate::getDate( 'DATE+TIME', $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+			//$retval = TTDate::getBeginDayEpoch( strtotime( '+' . (float)$this->getLengthOfService() . ' ' . $unit_str, $milestone_rollover_date ) );
+			$retval = TTDate::getBeginDayEpoch( TTDate::incrementDate( $milestone_rollover_date, (float)$this->getLengthOfService(), $unit_str ) );
+			Debug::text( 'New MileStone Rollover Date: ' . TTDate::getDate( 'DATE+TIME', $retval ) .' Base on Length of Service: '. (float)$this->getLengthOfService() .' Unit: '. $unit_str .' Original Date: '. TTDate::getDate( 'DATE+TIME', $milestone_rollover_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $retval;
 		}

@@ -1,4 +1,4 @@
-class UserDefaultViewController extends BaseViewController {
+export class UserDefaultViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -254,7 +254,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			layout_name: 'global_legal_entity',
 			show_search_inputs: true,
 //			set_empty: true,
 			field: 'legal_entity_id'
@@ -267,7 +267,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPermissionControl,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PERMISSION_CONTROL,
+			layout_name: 'global_permission_control',
 			set_empty: true,
 			show_search_inputs: true,
 			field: 'permission_control_id'
@@ -279,7 +279,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPermissionControl,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PERMISSION_CONTROL,
+			layout_name: 'global_permission_control',
 			set_empty: true,
 			show_search_inputs: true,
 			field: 'terminated_permission_control_id'
@@ -291,7 +291,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayPeriodSchedule,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
+			layout_name: 'global_pay_period_schedule',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_period_schedule_id'
@@ -303,7 +303,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPolicyGroup,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.POLICY_GROUP,
+			layout_name: 'global_policy_group',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'policy_group_id'
@@ -316,7 +316,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'currency_id'
@@ -330,7 +330,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUserTitle,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.JOB_TITLE,
+			layout_name: 'global_job_title',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'title_id'
@@ -355,7 +355,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'default_branch_id'
@@ -368,7 +368,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'default_department_id'
@@ -394,14 +394,14 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
+		form_item_input.setSourceData( $this.country_array );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_contact_info_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'province' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'Province / State' ), form_item_input, tab_contact_info_column1 );
 
 		//Work Phone
@@ -436,43 +436,43 @@ class UserDefaultViewController extends BaseViewController {
 		// Language
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'language', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.language_array ) );
+		form_item_input.setSourceData( $this.language_array );
 		this.addEditFieldToColumn( $.i18n._( 'Language' ), form_item_input, tab_employee_preference_column1, '' );
 
 		// Date Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'date_format', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.date_format_array ) );
+		form_item_input.setSourceData( $this.date_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Date Format' ), form_item_input, tab_employee_preference_column1 );
 
 		// Time Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_format', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_format_array ) );
+		form_item_input.setSourceData( $this.time_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Format' ), form_item_input, tab_employee_preference_column1 );
 
 		// Time Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_unit_format', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_unit_format_array ) );
+		form_item_input.setSourceData( $this.time_unit_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Units' ), form_item_input, tab_employee_preference_column1 );
 
 		// Distance Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'distance_format', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.distance_format_array ) );
+		form_item_input.setSourceData( $this.distance_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Distance Units' ), form_item_input, tab_employee_preference_column1 );
 
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
+		form_item_input.setSourceData( $this.time_zone_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Zone' ), form_item_input, tab_employee_preference_column1 );
 
 		// Start Weeks on
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'start_week_day' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.start_week_day_array ) );
+		form_item_input.setSourceData( $this.start_week_day_array );
 		this.addEditFieldToColumn( $.i18n._( 'Calendar Starts On' ), form_item_input, tab_employee_preference_column1 );
 
 		// Rows per page
@@ -529,7 +529,7 @@ class UserDefaultViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			field: 'company_deduction',
-			layout_name: ALayoutIDs.COMPANY_DEDUCTION,
+			layout_name: 'global_deduction',
 			api_class: TTAPI.APICompanyDeduction,
 			allow_multiple_selection: true,
 			set_empty: true

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -120,7 +120,7 @@ class APISchedule extends APIFactory {
 		}
 
 		if ( is_array( $schedule_arr ) && count( $schedule_arr ) > 0 ) {
-			$schedule_arr = call_user_func_array( 'array_merge', (array)$schedule_arr ); //Flattens the array by one level, to remove the ISO date keys.
+			$schedule_arr = Misc::flattenArrayOneLevel( (array)$schedule_arr ); //Flattens the array by one level, to remove the ISO date keys.
 
 			//Merge the few fields from $schedule_arr data into the existing $retarr otherwise we overwrite all the default branch/department/job/task data obtained above.
 			$retarr = array_merge( $retarr, Misc::arrayCommonValuesForEachKey( $schedule_arr, [ 'start_time', 'end_time', 'schedule_policy_id' ] ) );
@@ -462,7 +462,7 @@ class APISchedule extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
-				$transaction_function = function () use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
+				$transaction_function = function () use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $total_records, $permission_children_ids ) {
 					$primary_validator = new Validator();
 
 					$lf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $lf */
@@ -516,7 +516,7 @@ class APISchedule extends APIFactory {
 					}
 					Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-					$is_valid = $primary_validator->isValid( $ignore_warning );
+					$is_valid = $primary_validator->isValid();
 					if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 
 						$row['company_id'] = $this->getCurrentCompanyObject()->getId();     //This prevents a validation error if company_id is FALSE.
@@ -543,9 +543,10 @@ class APISchedule extends APIFactory {
 
 					if ( $is_valid == false ) {
 						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+
 						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-						$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+						$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ], ( $total_records > 1 && is_object( $lf->getUserObject() ) ? $lf->getUserObject()->getFullName() : null ) );
 					} else if ( $validate_only == true ) {
 						$lf->FailTransaction();
 					}
@@ -556,7 +557,7 @@ class APISchedule extends APIFactory {
 					return [ $validator, $validator_stats, $key, $save_result ];
 				};
 
-				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
+				list( $validator, $validator_stats, $key, $save_result ) = $this->getMainClassObject()->RetryTransaction( $transaction_function );
 
 				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
@@ -605,7 +606,7 @@ class APISchedule extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $id ) {
-				$transaction_function = function () use ( $data, $validator_stats, $validator, $save_result, $key, $id, $permission_children_ids ) {
+				$transaction_function = function () use ( $data, $validator_stats, $validator, $save_result, $key, $total_records, $id, $permission_children_ids ) {
 					$primary_validator = new Validator();
 					$lf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $lf */
 					$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing incorrect calculations in user_date_total table.
@@ -655,7 +656,7 @@ class APISchedule extends APIFactory {
 
 						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-						$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+						$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ], ( $total_records > 1 && is_object( $lf->getUserObject() ) ? $lf->getUserObject()->getFullName() : null ) );
 					}
 
 					$lf->CommitTransaction();
@@ -664,7 +665,7 @@ class APISchedule extends APIFactory {
 					return [ $validator, $validator_stats, $key, $save_result ];
 				};
 
-				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
+				list( $validator, $validator_stats, $key, $save_result ) = $this->getMainClassObject()->RetryTransaction( $transaction_function );
 
 				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}

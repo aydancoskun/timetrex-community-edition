@@ -155,6 +155,16 @@
 
 		} );
 
+		// Sets data as modified when a widget triggers onFormItemChange.
+		// Some inside editor widgets bind their own formItemChange and to prevent unintended interactions we only set data changed.
+		$this.bind( 'formItemChange', function( e, target ) {
+			// Fix issue #2885: Error: Uncaught TypeError: o.parent_controller.setIsChanged is not a function.
+			// This was happening in TimeSheet -> New Punch and opening the inside editor for dates and changing a date.
+			if ( typeof $this.parent_controller.setIsChanged === 'function' ) {
+				$this.parent_controller.setIsChanged( target );
+			}
+		} );
+
 		return this;
 
 	};

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,6 +44,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 	public $pdf_template = '941worksheet1.pdf';
 
 	public $credit_percent = 0.50; //Multiplier for Line 1d
+	public $retention_credit_percent = 0.70; //Multiplier for Line 3d
 	public $employer_medicare_rate = 0.0145; //1.45%
 
 	public function getTemplateSchema( $name = null ) {
@@ -55,8 +56,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'value'         => '(Rev. ' . $this->year . ')',
 					'on_background' => true,
 					'coordinates'   => [
-							'x'          => 512,
-							'y'          => 752,
+							'x'          => 498,
+							'y'          => 766,
 							'h'          => 12,
 							'w'          => 60,
 							'halign'     => 'L',
@@ -73,8 +74,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 124,
+							'x'      => 433,
+							'y'      => 156,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -84,8 +85,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 136,
+							'x'      => 433,
+							'y'      => 166,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -96,8 +97,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL1C', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 148,
+							'x'      => 433,
+							'y'      => 177,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -108,8 +109,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL1D', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 159,
+							'x'      => 433,
+							'y'      => 188,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -119,8 +120,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 182,
+							'x'      => 433,
+							'y'      => 211,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -131,8 +132,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL1F', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 194,
+							'x'      => 433,
+							'y'      => 222,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -142,8 +143,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 210,
+							'x'      => 433,
+							'y'      => 238,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -154,8 +155,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL1H', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 222,
+							'x'      => 503,
+							'y'      => 249,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -165,8 +166,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 233,
+							'x'      => 433,
+							'y'      => 260,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -176,8 +177,19 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 245,
+							'x'      => 433,
+							'y'      => 272,
+							'h'      => 10,
+							'w'      => 45,
+							'halign' => 'C',
+					],
+			],
+			'l1ji' => [
+					'page'          => 1,
+					'template_page' => 1,
+					'coordinates'   => [
+							'x'      => 433,
+							'y'      => 282,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -188,8 +200,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL1K', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 261,
+							'x'      => 503,
+							'y'      => 297,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -200,8 +212,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL1L', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 278,
+							'x'      => 503,
+							'y'      => 308,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -213,8 +225,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 306,
+							'x'      => 433,
+							'y'      => 336,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -224,8 +236,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 330,
+							'x'      => 433,
+							'y'      => 359,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -236,8 +248,20 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2Aii', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 341,
+							'x'      => 433,
+							'y'      => 370,
+							'h'      => 10,
+							'w'      => 45,
+							'halign' => 'C',
+					],
+			],
+			'l2aiii' => [
+					'page'          => 1,
+					'template_page' => 1,
+					'function'      => [ 'calc' => 'calcL2Aii', 'draw' => [ 'drawNormal' ] ],
+					'coordinates'   => [
+							'x'      => 433,
+							'y'      => 385,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -247,8 +271,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 358,
+							'x'      => 433,
+							'y'      => 402,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -259,8 +283,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2C', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 375,
+							'x'      => 433,
+							'y'      => 418,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -271,8 +295,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2D', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 386,
+							'x'      => 503,
+							'y'      => 429,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -282,8 +306,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 397,
+							'x'      => 433,
+							'y'      => 439,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -293,8 +317,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 421,
+							'x'      => 433,
+							'y'      => 462,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -305,19 +329,32 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2Eii', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 433,
+							'x'      => 433,
+							'y'      => 474,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
 					],
 			],
+			'l2eiii' => [
+					'page'          => 1,
+					'template_page' => 1,
+					'function'      => [ 'calc' => 'calcL2Eii', 'draw' => [ 'drawNormal' ] ],
+					'coordinates'   => [
+							'x'      => 433,
+							'y'      => 490,
+							'h'      => 10,
+							'w'      => 45,
+							'halign' => 'C',
+					],
+			],
+
 			'l2f' => [
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 449,
+							'x'      => 433,
+							'y'      => 506,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -328,8 +365,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2G', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 466,
+							'x'      => 433,
+							'y'      => 521,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -340,8 +377,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2H', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 477,
+							'x'      => 503,
+							'y'      => 532,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -352,8 +389,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2I', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 489,
+							'x'      => 503,
+							'y'      => 544,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -364,8 +401,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2J', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 506,
+							'x'      => 503,
+							'y'      => 559,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -376,8 +413,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL2k', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 522,
+							'x'      => 503,
+							'y'      => 575,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -389,8 +426,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 556,
+							'x'      => 433,
+							'y'      => 607,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -400,8 +437,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 573,
+							'x'      => 433,
+							'y'      => 622,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -410,9 +447,10 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3c' => [
 					'page'          => 1,
 					'template_page' => 1,
+					'function'      => [ 'calc' => 'calcL3C', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 600,
+							'x'      => 433,
+							'y'      => 634,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -421,9 +459,10 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 			'l3d' => [
 					'page'          => 1,
 					'template_page' => 1,
+					'function'      => [ 'calc' => 'calcL3D', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 627,
+							'x'      => 503,
+							'y'      => 645,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -434,8 +473,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL3E', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 638,
+							'x'      => 433,
+							'y'      => 656,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -446,8 +485,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL3F', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 650,
+							'x'      => 433,
+							'y'      => 671,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -458,8 +497,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL3G', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 661,
+							'x'      => 433,
+							'y'      => 683,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -470,8 +509,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL3H', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 678,
+							'x'      => 503,
+							'y'      => 698,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -482,32 +521,8 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 					'template_page' => 1,
 					'function'      => [ 'calc' => 'calcL3I', 'draw' => [ 'drawNormal' ] ],
 					'coordinates'   => [
-							'x'      => 445,
-							'y'      => 689,
-							'h'      => 10,
-							'w'      => 45,
-							'halign' => 'C',
-					],
-			],
-			'l3j' => [
-					'page'          => 1,
-					'template_page' => 1,
-					'function'      => [ 'calc' => 'calcL3J', 'draw' => [ 'drawNormal' ] ],
-					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 706,
-							'h'      => 10,
-							'w'      => 45,
-							'halign' => 'C',
-					],
-			],
-			'l3k' => [
-					'page'          => 1,
-					'template_page' => 1,
-					'function'      => [ 'calc' => 'calcL3K', 'draw' => [ 'drawNormal' ] ],
-					'coordinates'   => [
-							'x'      => 514,
-							'y'      => 722,
+							'x'      => 503,
+							'y'      => 715,
 							'h'      => 10,
 							'w'      => 45,
 							'halign' => 'C',
@@ -547,7 +562,7 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 	}
 
 	function calcL1K( $value = null, $schema = null ) {
-		$this->l1k = $this->MoneyFormat( bcadd( $this->l1i, $this->l1j ) );
+		$this->l1k = $this->MoneyFormat( bcadd( $this->l1i, bcadd( $this->l1j, $this->l1ji ) ) );
 
 		return $this->l1k;
 	}
@@ -613,49 +628,49 @@ class GovernmentForms_US_941WorkSheet1 extends GovernmentForms_US {
 		return $this->l2k;
 	}
 
+	function calcL3C( $value = null, $schema = null ) {
+		$this->l3c = $this->MoneyFormat( bcadd( $this->l3a, $this->l3b ) );
+
+		return $this->l3c;
+	}
+
+	function calcL3D( $value = null, $schema = null ) {
+		$this->l3d = $this->MoneyFormat( bcmul( $this->l3c, $this->retention_credit_percent ) );
+
+		return $this->l3d;
+	}
+
 	function calcL3E( $value = null, $schema = null ) {
-		$this->l3e = $this->MoneyFormat( bcadd( $this->l3a, bcadd( $this->l3b, bcadd( $this->l3c, $this->l3d ) ) ) );
+		$this->l3e = $this->MoneyFormat( $this->l1l );
 
 		return $this->l3e;
 	}
 
 	function calcL3F( $value = null, $schema = null ) {
-		$this->l3f = $this->MoneyFormat( bcmul( $this->l3e, $this->credit_percent ) );
+		$this->l3f = $this->MoneyFormat( $this->l2j );
 
 		return $this->l3f;
 	}
 
 	function calcL3G( $value = null, $schema = null ) {
-		$this->l3g = $this->MoneyFormat( $this->l1l );
+		$this->l3g = $this->MoneyFormat( bcsub( $this->l3e, $this->l3f ) );
 
 		return $this->l3g;
 	}
 
 	function calcL3H( $value = null, $schema = null ) {
-		$this->l3h = $this->MoneyFormat( $this->l2j );
+		$this->l3h = min( $this->l3d, $this->l3g );
 
 		return $this->l3h;
 	}
 
 	function calcL3I( $value = null, $schema = null ) {
-		$this->l3i = $this->MoneyFormat( bcsub( $this->l3g, $this->l3h ) );
+		$this->l3i = $this->MoneyFormat( bcsub( $this->l3d, $this->l3h ) );
 
 		return $this->l3i;
 	}
 
-	function calcL3J( $value = null, $schema = null ) {
-		$this->l3j = min( $this->l3f, $this->l3i );
-
-		return $this->l3j;
-	}
-
-	function calcL3k( $value = null, $schema = null ) {
-		$this->l3k = $this->MoneyFormat( bcsub( $this->l3f, $this->l3j ) );
-
-		return $this->l3k;
-	}
-
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 

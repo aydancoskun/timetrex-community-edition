@@ -1,62 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit    backupGlobals="false"
-            backupStaticAttributes="true"
-            bootstrap="BootStrap.php"
-            cacheTokens="true"
-            colors="false"
-            convertErrorsToExceptions="true"
-            convertNoticesToExceptions="true"
-            convertWarningsToExceptions="true"
-            forceCoversAnnotation="false"
-            mapTestClassNameToCoveredClassName="false"
-            printerClass="PHPUnit_TextUI_ResultPrinter"
-            processIsolation="false"
-            stopOnError="false"
-            failOnWarning="true"
-            stopOnFailure="false"
-            stopOnIncomplete="false"
-            stopOnSkipped="false"
-            testSuiteLoaderClass="PHPUnit_Runner_StandardTestSuiteLoader"
-            strict="false"
-            verbose="false">
-
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         backupGlobals="false"
+         backupStaticAttributes="true"
+         bootstrap="BootStrap.php"
+         colors="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         forceCoversAnnotation="false"
+         processIsolation="false"
+         stopOnError="false"
+         failOnWarning="true"
+         stopOnFailure="false"
+         stopOnIncomplete="false"
+         stopOnSkipped="false"
+         verbose="false"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+    <coverage/>
     <testsuites>
-
-        <testsuite name="Other">
-          <directory suffix=".php">testcases/other/</directory>
+        <testsuite name="TimeTrex">
+            <directory suffix=".php">testcases</directory>
+            <exclude>**/selenium</exclude>
         </testsuite>
-
-        <testsuite name="Payroll Deduction">
-          <directory suffix=".php">testcases/payroll_deduction/</directory>
-        </testsuite>
-
-        <testsuite name="Paystub">
-          <directory suffix=".php">testcases/paystub/</directory>
-        </testsuite>
-
-        <testsuite name="Policy">
-          <directory suffix=".php">testcases/policy/</directory>
-        </testsuite>
-
-        <testsuite name="Expense">
-          <directory suffix=".php">testcases/expense/</directory>
-        </testsuite>
-
-        <testsuite name="User Review">
-          <directory suffix=".php">testcases/kpi/</directory>
-        </testsuite>
-
-        <testsuite name="Job Application">
-          <directory suffix=".php">testcases/recruitment/</directory>
-        </testsuite>
-
-        <testsuite name="i18n">
-            <directory suffix=".php">testcases/i18n/</directory>
-        </testsuite>
-
-        <testsuite name="Reports">
-            <directory suffix=".php">testcases/report/</directory>
-        </testsuite>
-
     </testsuites>
 </phpunit>

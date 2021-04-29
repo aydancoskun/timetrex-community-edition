@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,14 +35,14 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
+class PayStubCalculationTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 	protected $pay_stub_account_link_arr = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -60,7 +60,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->currency_id[30] = $dd->createCurrency( $this->company_id, 30 );
 		$this->currency_id[40] = $dd->createCurrency( $this->company_id, 40 );
 
-		$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
+		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
 		$dd->createPayStubAccount( $this->company_id );
 		$this->createPayStubAccounts();
@@ -142,16 +142,10 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		//$this->deleteAllSchedules();
-
-		return true;
 	}
 
 	function deleteUserWage( $user_id ) {
@@ -690,10 +684,10 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach ( $pself as $pse_obj ) {
 				$ps_entry_arr[$pse_obj->getPayStubEntryNameId()][] = [
-						'rate'       => $pse_obj->getRate(),
-						'units'      => $pse_obj->getUnits(),
-						'amount'     => $pse_obj->getAmount(),
-						'ytd_amount' => $pse_obj->getYTDAmount(),
+						'rate'       => Misc::MoneyRound( $pse_obj->getRate() ),
+						'units'      => Misc::MoneyRound( $pse_obj->getUnits() ),
+						'amount'     => Misc::MoneyRound( $pse_obj->getAmount() ),
+						'ytd_amount' => Misc::MoneyRound( $pse_obj->getYTDAmount() ),
 				];
 			}
 		}
@@ -998,9 +992,12 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$pslf = new PayStubListFactory();
 		$pslf->getByUserIdAndPayPeriodId( $this->user_id, $pay_period_id );
 		if ( $pslf->getRecordCount() > 0 ) {
-			return $pslf->getCurrent()->getId();
+			$retval = $pslf->getCurrent()->getId();
+			Debug::Text( '  Found Pay Stub ID: '. $retval, __FILE__, __LINE__, __METHOD__, 10 );
+			return $retval;
 		}
 
+		Debug::Text( 'ERROR: Pay Stub not found! User ID: '. $this->user_id .' Pay Period ID: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10 );
 		return false;
 	}
 
@@ -1230,6 +1227,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 			$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 			//var_dump($pse_accounts);
 			//var_dump($pse_arr);
+			$this->assertTrue( is_array( $pse_arr ), 'Pay Stub was not created!' );
 
 			$this->assertEquals( '2408.00', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
 			$this->assertEquals( '2408.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
@@ -1313,7 +1311,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 			//Custom formula deductions.
 			$this->assertEquals( '5.50', $pse_arr[$pse_accounts['test_custom_formula']][0]['amount'] );
-			$this->assertEquals( '5.500', $pse_arr[$pse_accounts['test_custom_formula']][0]['ytd_amount'] );
+			$this->assertEquals( '5.50', $pse_arr[$pse_accounts['test_custom_formula']][0]['ytd_amount'] );
 
 			$this->assertEquals( '12.51', $pse_arr[$pse_accounts['test_custom_formula_1']][0]['amount'] );
 			$this->assertEquals( '12.51', $pse_arr[$pse_accounts['test_custom_formula_1']][0]['ytd_amount'] );
@@ -1695,6 +1693,49 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->createUserSalaryWage( $this->user_id, 10000, TTDate::incrementDate( $this->pay_period_objs[0]->getStartDate(), -1, 'day' ) );
 
 		//$this->addPayStubAmendments();
+
+		//When run on Community Edition, custom formula Tax/Deductions don't exist, so emulate those manually.
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			$psaf = new PayStubAmendmentFactory();
+			$psaf->setUser( $this->user_id );
+			$psaf->setPayStubEntryNameId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Other2' ) );
+			$psaf->setStatus( 50 ); //Active
+			$psaf->setType( 10 );
+			$psaf->setAmount( 5.50 );
+			$psaf->setDescription( 'Emulate Custom Formula' );
+			$psaf->setEffectiveDate( $this->pay_period_objs[0]->getStartDate() );
+			$psaf->setAuthorized( true );
+			if ( $psaf->isValid() ) {
+				$psaf->Save();
+			}
+
+			$psaf = new PayStubAmendmentFactory();
+			$psaf->setUser( $this->user_id );
+			$psaf->setPayStubEntryNameId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Custom1' ) );
+			$psaf->setStatus( 50 ); //Active
+			$psaf->setType( 10 );
+			$psaf->setAmount( 12.51 );
+			$psaf->setDescription( 'Emulate Custom Formula' );
+			$psaf->setEffectiveDate( $this->pay_period_objs[0]->getStartDate() );
+			$psaf->setAuthorized( true );
+			if ( $psaf->isValid() ) {
+				$psaf->Save();
+			}
+
+			$psaf = new PayStubAmendmentFactory();
+			$psaf->setUser( $this->user_id );
+			$psaf->setPayStubEntryNameId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Custom2' ) );
+			$psaf->setStatus( 50 ); //Active
+			$psaf->setType( 10 );
+			$psaf->setAmount( 69.05 );
+			$psaf->setDescription( 'Emulate Custom Formula' );
+			$psaf->setEffectiveDate( $this->pay_period_objs[0]->getStartDate() );
+			$psaf->setAuthorized( true );
+			if ( $psaf->isValid() ) {
+				$psaf->Save();
+			}
+		}
+
 		$this->createPayStub();
 
 		$pse_accounts = [
@@ -1714,22 +1755,22 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$pst_arr = $this->getPayStubTransactionArray( $pay_stub_id );
 		//var_dump($pst_arr);
 
+		//Different calculations due to custom formula Tax/Deductions.
 		$this->assertEquals( '2294.88', $pst_arr[0]['amount'] );
-		$this->assertEquals( $pst_arr[0]['currency_id'], $this->currency_id[10] );
+		$this->assertEquals( $pst_arr[0]['currency_id'], $this->currency_id[10] ); //USD
 		$this->assertEquals( '1.0000000000', $pst_arr[0]['currency_rate'] );
 
 		$this->assertEquals( '500.70', $pst_arr[1]['amount'] );
-		$this->assertEquals( $pst_arr[1]['currency_id'], $this->currency_id[20] );
+		$this->assertEquals( $pst_arr[1]['currency_id'], $this->currency_id[20] ); //CAD
 		$this->assertEquals( '0.8333333333', $pst_arr[1]['currency_rate'] );
 
 		$this->assertEquals( '813.644', $pst_arr[2]['amount'] );
-		$this->assertEquals( $pst_arr[2]['currency_id'], $this->currency_id[30] );
+		$this->assertEquals( $pst_arr[2]['currency_id'], $this->currency_id[30] ); //EUR
 		$this->assertEquals( '0.7692307692', $pst_arr[2]['currency_rate'] );
 
 		$this->assertEquals( '8140449.95', $pst_arr[3]['amount'] );
-		$this->assertEquals( $pst_arr[3]['currency_id'], $this->currency_id[40] );
+		$this->assertEquals( $pst_arr[3]['currency_id'], $this->currency_id[40] ); //MXN (Pesos)
 		$this->assertEquals( '0.0001025115', $pst_arr[3]['currency_rate'] );
-
 
 		$this->assertCount( 4, $pst_arr );
 
@@ -2090,6 +2131,230 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2019' ) ) );
 		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2019' ) ) );
 		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2019' ) ) );
+
+		return true;
+	}
+
+	/**
+	 * @group PayStubCalculation_testCompanyDeductionLengthOfServiceBracketsA
+	 */
+	function testCompanyDeductionLengthOfServiceBracketsA() {
+		$cdf_a = new CompanyDeductionFactory();
+		$cdf_a->setCompany( $this->company_id );
+		$cdf_a->setLegalEntity( $this->legal_entity_id );
+		$cdf_a->setStatus( 10 ); //Enabled
+		$cdf_a->setType( 10 ); //Tax
+		$cdf_a->setName( 'Vacation Accrual 0 -> 4.999' );
+		$cdf_a->setCalculation( 10 ); //Percent
+		$cdf_a->setCalculationOrder( 100 );
+		$cdf_a->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Vacation Accrual' ) );
+		$cdf_a->setMinimumLengthOfServiceUnit( 40 );
+		$cdf_a->setMinimumLengthOfService( 0 );
+		$cdf_a->setMaximumLengthOfServiceUnit( 40 );
+		$cdf_a->setMaximumLengthOfService( 4.999 );
+		$cdf_a->preSave(); //Calculates the  setMinimumLengthOfServiceDays(), setMaximumLengthOfServiceDays()
+
+
+		$cdf_b = new CompanyDeductionFactory();
+		$cdf_b->setCompany( $this->company_id );
+		$cdf_b->setLegalEntity( $this->legal_entity_id );
+		$cdf_b->setStatus( 10 ); //Enabled
+		$cdf_b->setType( 10 ); //Tax
+		$cdf_b->setName( 'Vacation Accrual 5 -> 9.999' );
+		$cdf_b->setCalculation( 10 ); //Percent
+		$cdf_b->setCalculationOrder( 100 );
+		$cdf_b->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Vacation Accrual' ) );
+		$cdf_b->setMinimumLengthOfServiceUnit( 40 );
+		$cdf_b->setMinimumLengthOfService( 5 );
+		$cdf_b->setMaximumLengthOfServiceUnit( 40 );
+		$cdf_b->setMaximumLengthOfService( 9.999 );
+		$cdf_b->preSave(); //Calculates the setMinimumLengthOfServiceDays(), setMaximumLengthOfServiceDays()
+
+
+		$udf = new UserDeductionFactory();
+		$udf->setUser( $this->user_id );
+		$udf->setLengthOfServiceDate( strtotime( '15-Jul-2010' ) );
+		$udf->setStartDate( '' );
+		$udf->setEndDate( '' );
+
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '14-Jul-2010' ) ) ); //Before length of service date, its consider true if it starts on 0.
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '15-Jul-2010' ) ) ); //Right on length of service date.
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2010' ) ) ); //One day after length of service date.
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2011' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2012' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2013' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2014' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '14-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '15-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2016' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2017' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2018' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2019' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2020' ) ) );
+
+
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Jul-2010' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Jul-2010' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2010' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2011' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2012' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2013' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2014' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Jul-2014' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Jul-2014' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2016' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2017' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2018' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2019' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Jul-2020' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Jul-2020' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2020' ) ) );
+
+		return true;
+	}
+
+	/**
+	 * @group PayStubCalculation_testCompanyDeductionLengthOfServiceBracketsB
+	 */
+	function testCompanyDeductionLengthOfServiceBracketsB() {
+		$cdf_a = new CompanyDeductionFactory();
+		$cdf_a->setCompany( $this->company_id );
+		$cdf_a->setLegalEntity( $this->legal_entity_id );
+		$cdf_a->setStatus( 10 ); //Enabled
+		$cdf_a->setType( 10 ); //Tax
+		$cdf_a->setName( 'Vacation Accrual 0 -> 5' );
+		$cdf_a->setCalculation( 10 ); //Percent
+		$cdf_a->setCalculationOrder( 100 );
+		$cdf_a->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Vacation Accrual' ) );
+		$cdf_a->setMinimumLengthOfServiceUnit( 40 );
+		$cdf_a->setMinimumLengthOfService( 0 );
+		$cdf_a->setMaximumLengthOfServiceUnit( 40 );
+		$cdf_a->setMaximumLengthOfService( 5 );
+		$cdf_a->preSave(); //Calculates the  setMinimumLengthOfServiceDays(), setMaximumLengthOfServiceDays()
+
+
+		$cdf_b = new CompanyDeductionFactory();
+		$cdf_b->setCompany( $this->company_id );
+		$cdf_b->setLegalEntity( $this->legal_entity_id );
+		$cdf_b->setStatus( 10 ); //Enabled
+		$cdf_b->setType( 10 ); //Tax
+		$cdf_b->setName( 'Vacation Accrual 5 -> 10' );
+		$cdf_b->setCalculation( 10 ); //Percent
+		$cdf_b->setCalculationOrder( 100 );
+		$cdf_b->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Vacation Accrual' ) );
+		$cdf_b->setMinimumLengthOfServiceUnit( 40 );
+		$cdf_b->setMinimumLengthOfService( 5 );
+		$cdf_b->setMaximumLengthOfServiceUnit( 40 );
+		$cdf_b->setMaximumLengthOfService( 10 );
+		$cdf_b->preSave(); //Calculates the setMinimumLengthOfServiceDays(), setMaximumLengthOfServiceDays()
+
+
+		$udf = new UserDeductionFactory();
+		$udf->setUser( $this->user_id );
+		$udf->setLengthOfServiceDate( strtotime( '15-Jul-2010' ) );
+		$udf->setStartDate( '' );
+		$udf->setEndDate( '' );
+
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '14-Jul-2010' ) ) ); //Before length of service date, its consider true if it starts on 0.
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '15-Jul-2010' ) ) ); //Right on length of service date.
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2010' ) ) ); //One day after length of service date.
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2011' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2012' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2013' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2014' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '14-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '15-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2016' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2017' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2018' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2019' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '16-Jul-2020' ) ) );
+
+
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Jul-2010' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Jul-2010' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2010' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2011' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2012' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2013' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2014' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Jul-2014' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Jul-2014' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2016' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2017' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2018' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2019' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Jul-2020' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Jul-2020' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '16-Jul-2020' ) ) );
+
+		return true;
+	}
+
+	/**
+	 * @group PayStubCalculation_testCompanyDeductionLengthOfServiceBracketsC
+	 */
+	function testCompanyDeductionLengthOfServiceBracketsC() {
+		$cdf_a = new CompanyDeductionFactory();
+		$cdf_a->setCompany( $this->company_id );
+		$cdf_a->setLegalEntity( $this->legal_entity_id );
+		$cdf_a->setStatus( 10 ); //Enabled
+		$cdf_a->setType( 10 ); //Tax
+		$cdf_a->setName( 'Vacation Accrual 0 -> 7.999' );
+		$cdf_a->setCalculation( 10 ); //Percent
+		$cdf_a->setCalculationOrder( 100 );
+		$cdf_a->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Vacation Accrual' ) );
+		$cdf_a->setMinimumLengthOfServiceUnit( 40 );
+		$cdf_a->setMinimumLengthOfService( 0 );
+		$cdf_a->setMaximumLengthOfServiceUnit( 40 );
+		$cdf_a->setMaximumLengthOfService( 7.999 );
+		$cdf_a->preSave(); //Calculates the  setMinimumLengthOfServiceDays(), setMaximumLengthOfServiceDays()
+
+
+		$cdf_b = new CompanyDeductionFactory();
+		$cdf_b->setCompany( $this->company_id );
+		$cdf_b->setLegalEntity( $this->legal_entity_id );
+		$cdf_b->setStatus( 10 ); //Enabled
+		$cdf_b->setType( 10 ); //Tax
+		$cdf_b->setName( 'Vacation Accrual 8 -> 12' );
+		$cdf_b->setCalculation( 10 ); //Percent
+		$cdf_b->setCalculationOrder( 100 );
+		$cdf_b->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'Vacation Accrual' ) );
+		$cdf_b->setMinimumLengthOfServiceUnit( 40 );
+		$cdf_b->setMinimumLengthOfService( 8 );
+		$cdf_b->setMaximumLengthOfServiceUnit( 40 );
+		$cdf_b->setMaximumLengthOfService( 11.999 );
+		$cdf_b->preSave(); //Calculates the setMinimumLengthOfServiceDays(), setMaximumLengthOfServiceDays()
+
+
+		$udf = new UserDeductionFactory();
+		$udf->setUser( $this->user_id );
+		$udf->setLengthOfServiceDate( strtotime( '14-Feb-2013' ) );
+		$udf->setStartDate( '' );
+		$udf->setEndDate( '' );
+
+
+
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '12-Feb-2021' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, strtotime( '13-Feb-2021' ) ) );
+		$this->assertEquals( true, $cdf_a->isActiveLengthOfService( $udf, 1613275199 ) ); //Sat, 13 Feb 2021 23:59:59 -0400
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '14-Feb-2021' ) ) );
+		$this->assertEquals( false, $cdf_a->isActiveLengthOfService( $udf, strtotime( '15-Feb-2021' ) ) );
+
+
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '12-Feb-2021' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, strtotime( '13-Feb-2021' ) ) );
+		$this->assertEquals( false, $cdf_b->isActiveLengthOfService( $udf, 1613275199 ) ); //Sat, 13 Feb 2021 23:59:59 -0400
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '14-Feb-2021' ) ) );
+		$this->assertEquals( true, $cdf_b->isActiveLengthOfService( $udf, strtotime( '15-Feb-2021' ) ) );
 
 		return true;
 	}

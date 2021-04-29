@@ -32,6 +32,11 @@
 
 			val = Global.decodeCellValue( val );
 			$this.html( ( val ) );
+
+			this.setResizeEvent();
+		};
+
+		this.setResizeEvent = function() {
 			$this.height( 'auto' );
 
 			//Set label size if there is new lines in contents

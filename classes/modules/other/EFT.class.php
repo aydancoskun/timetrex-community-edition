@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1836,6 +1836,8 @@ class EFT_File_Format_105 Extends EFT {
 class EFT_File_Format_ACH Extends EFT {
 	/*
 	Google: nacha 94 byte file format OR International ACH (IAT) NACHA File Formats
+	        Official NACHE file format: https://www.firstmid.com/wp-content/uploads/2014/02/2013-Corporate-Rules-and-Guidelines.pdf
+			Intersting blog post from Gusto who uses Silicon Valley Bank: https://engineering.gusto.com/how-ach-works-a-developer-perspective-part-2/
 
 		File Header Record
 			Batch Header Record
@@ -1931,8 +1933,8 @@ class EFT_File_Format_ACH Extends EFT {
 		}
 
 		$line[] = $this->padRecord( strtoupper( $this->getOriginatorShortName() ), 16, 'AN' ); //Company Short Name
-		$line[] = $this->padRecord( $discretionary_data, 20, 'AN' );                                            //Discretionary Data
-		$line[] = $this->padRecord( $business_number, 10, 'N' );                               //Company Identification - Recommend IRS Federal Tax ID Number
+		$line[] = $this->padRecord( $discretionary_data, 20, 'AN' );                           //Discretionary Data
+		$line[] = $this->padRecord( $business_number, 10, 'AN' );                              //Company Identification - Recommend IRS Federal Tax ID Number
 		$line[] = $this->padRecord( $service_code, 3, 'AN' );                                  //Standard Entry Class. (PPD, CCD, CTX, TEL, WEB)
 		$line[] = $this->padRecord( $entry_description, 10, 'AN' );                            //Entry Description
 		$line[] = $this->padRecord( date( 'ymd', $this->getFileCreationDate() ), 6, 'N' );     //Date
@@ -1972,7 +1974,7 @@ class EFT_File_Format_ACH Extends EFT {
 		$line[] = $this->padRecord( substr( str_pad( $hash, 10, 0, STR_PAD_LEFT ), -10 ), 10, 'N' ); //Entry hash. If it exceeds 10 digits, use just the last 10.
 		$line[] = $this->padRecord( $this->removeDecimal( $batch_debit_amount ), 12, 'N' );          //Debit Total
 		$line[] = $this->padRecord( $this->removeDecimal( $batch_credit_amount ), 12, 'N' );         //Credit Total
-		$line[] = $this->padRecord( $this->getBusinessNumber(), 10, 'N' );                           //Company Identification - Recommend IRS Federal Tax ID Number
+		$line[] = $this->padRecord( $this->getBusinessNumber(), 10, 'AN' );                          //Company Identification - Recommend IRS Federal Tax ID Number
 		$line[] = $this->padRecord( '', 19, 'AN' );                                                  //Blank
 		$line[] = $this->padRecord( '', 6, 'AN' );                                                   //Blank
 		$line[] = $this->padRecord( $this->getInitialEntryNumber(), 8, 'N' );                        //First 8 digits of InitialEntryNumber, which needs to match the beginning part of InitialEntry column of '6' records below. Used to be Originating ID or Originating Bank Transit
@@ -2051,15 +2053,21 @@ class EFT_File_Format_ACH Extends EFT {
 
 				//Transaction code used to default to 22 (checkings account) always.
 				$transaction_type = substr( $record->getInstitution(), 0, 2 );
-				if ( (int)$transaction_type == 0 ) { //Institution defaults to '000' if its not set, so assume its a checkings account in that case.
-					$transaction_type = 22;
+				if ( $record->getType() == 'D' ) { //Debit
+					// “27” (Demand Debit),
+					// “37” (Savings Debit)
+					if ( in_array( (int)$transaction_type, [ 27, 37 ], true ) == false ) { //Institution defaults to '000' if its not set, so assume its a checkings account in that case.
+						$transaction_type = 27;
+					}
+				} else { //Credit
+					// “22” (Demand Credit),
+					// “32” (Savings Credit),
+					if ( in_array( (int)$transaction_type, [ 22, 32 ], true ) == false ) { //Institution defaults to '000' if its not set, so assume its a checkings account in that case.
+						$transaction_type = 22;
+					}
 				}
 
-				if ( $record->getType() == 'D' ) {
-					$transaction_type = 27; //Checking Account Debit.
-				}
-
-				$line[] = $this->padRecord( $transaction_type, 2, 'N' ); //Transaction code - 22=Deposit destined for checking account, 32=Deposit destined for savings account
+				$line[] = $this->padRecord( $transaction_type, 2, 'N' ); //Transaction code - 22=Deposit(Credit) destined for checking account, 32=Deposit(Credit) destined for savings account, 27=Withdraw(Debit) from Checking Account, 37=Withdraw(Debit) from Savings Account
 
 				$line[] = $this->padRecord( substr( $record->getTransit(), 0, 8 ), 8, 'N' );                                                                               //Transit
 				$line[] = $this->padRecord( substr( $record->getTransit(), 8, 1 ), 1, 'N' );                                                                               //Check Digit

@@ -1,4 +1,4 @@
-class EthnicGroupViewController extends BaseViewController {
+export class EthnicGroupViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#ethnic_group_view_container',
@@ -52,7 +52,7 @@ class EthnicGroupViewController extends BaseViewController {
 			api_class: TTAPI.APIEthnicGroup,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ETHNIC_GROUP,
+			layout_name: 'global_ethnic_group',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -96,7 +96,7 @@ class EthnicGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -108,7 +108,7 @@ class EthnicGroupViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

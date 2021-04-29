@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,39 @@ define( 'TIMETREX_SOAP_API', true );
 require_once( '../../includes/global.inc.php' );
 require_once( '../../includes/API.inc.php' );
 Header( 'Content-Type: application/xml; charset=utf-8' );
+
+//Use this class to intercept the SOAP calls and get the class/method that is being called.
+class TTSoapServerHandler {
+	private $obj = null;
+
+	public function __construct( $class_name ) {
+		$this->obj = TTnew( $class_name );
+
+		return true;
+	}
+
+	public function __call( $method, $params ) {
+		Debug::text( 'TTSoapServerHandler Call: Class: ' . get_class( $this->obj ) . ' Method: ' . $method, __FILE__, __LINE__, __METHOD__, 10 );
+
+		if ( isWhiteListedAPICall( $this->obj, $method ) == true ) {
+			if ( method_exists( $this->obj, $method ) ) {
+				return call_user_func_array( [ $this->obj, $method ], $params );
+			} else {
+				$api_auth = new APIAuthentication();
+				$validator = TTnew( 'Validator' ); /** @var Validator $validator */
+				Debug::text( 'Class: ' . get_class( $this->obj ) . ' Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
+
+				return $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 does not exist.', [ $validator->escapeHTML( $method ) ] ) );
+			}
+		} else {
+			$api_auth = new APIAuthentication();
+			$validator = TTnew( 'Validator' ); /** @var Validator $validator */
+			Debug::text( 'Class: ' . get_class( $this->obj ) . ' Method: ' . $method . ' is private!', __FILE__, __LINE__, __METHOD__, 10 );
+
+			return $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 is private, unable to call.', [ $validator->escapeHTML( $method ) ] ) );
+		}
+	}
+}
 
 $class_prefix = 'API';
 $class_name = false;
@@ -87,10 +120,8 @@ if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['othe
 
 					if ( is_object( $current_company ) ) {
 						Debug::text( 'Handling SOAP Call To API Factory: ' . $class_name . ' UserName: ' . $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10 );
-						$soap_server->setClass( $class_name );
-						//$soap_server->setPersistence( SOAP_PERSISTENCE_SESSION );
+						$soap_server->setObject( new TTSoapServerHandler( $class_name ) );
 						$soap_server->handle();
-						//var_dump( $_SESSION );
 					} else {
 						Debug::text( 'Failed to get Company Object!', __FILE__, __LINE__, __METHOD__, 10 );
 					}
@@ -105,8 +136,7 @@ if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['othe
 			TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
 
 			Debug::text( 'User not authenticated! Session likely timed out.', __FILE__, __LINE__, __METHOD__, 10 );
-			//$soap_server->fault( 9900, 'Session timed out, please login again.');
-			$soap_server->setClass( 'APIAuthentication' ); //Allow checking isLoggedIn() and logging in again here.
+			$soap_server->setObject( new TTSoapServerHandler( 'APIAuthentication' ) );
 			$soap_server->handle(); //PHP appears to exit in this function if there is an error.
 		}
 	} else {
@@ -115,7 +145,7 @@ if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['othe
 		Debug::text( 'SOAP UnAuthenticated!', __FILE__, __LINE__, __METHOD__, 10 );
 		$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
 		if ( $class_name != '' && in_array( $class_name, $valid_unauthenticated_classes ) && class_exists( $class_name ) ) {
-			$soap_server->setClass( $class_name );
+			$soap_server->setObject( new TTSoapServerHandler( $class_name ) );
 			$soap_server->handle(); //PHP appears to exit in this function if there is an error.
 		} else {
 			Debug::text( 'Class: ' . $class_name . ' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10 );

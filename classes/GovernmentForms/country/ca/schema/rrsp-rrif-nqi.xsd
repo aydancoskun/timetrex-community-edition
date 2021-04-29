@@ -2,8 +2,8 @@
 
 <!--
 Description	RRSP/RRIF Non-Qualified Investment Return Complex and Element Types
-Last updated 	October 
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" 

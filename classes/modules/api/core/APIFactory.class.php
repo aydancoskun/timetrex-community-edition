@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -327,37 +327,6 @@ abstract class APIFactory {
 	}
 
 	/**
-	 * downloaded a result_set as a csv.
-	 * @param string $format
-	 * @param string $file_name
-	 * @param array $result
-	 * @param array $filter_columns
-	 * @return array|bool
-	 */
-	function exportRecords( $format, $file_name, $result, $filter_columns ) {
-		if ( isset( $result[0] ) && is_array( $result[0] ) && is_array( $filter_columns ) && count( $filter_columns ) > 0 ) {
-			$columns = Misc::arrayIntersectByKey( array_keys( $filter_columns ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
-
-			$file_extension = $format;
-			$mime_type = 'application/' . $format;
-			$output = '';
-
-			if ( $format == 'csv' ) {
-				$output = Misc::Array2CSV( $result, $columns, false );
-			}
-
-			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
-			if ( $output !== false ) {
-				Misc::APIFileDownload( $file_name . '.' . $file_extension, $mime_type, $output );
-			} else {
-				return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'ERROR: No data to export...' ) );
-			}
-		}
-
-		return $this->returnHandler( true ); //No records returned.
-	}
-
-	/**
 	 * @return string
 	 */
 	function getNextInsertID() {
@@ -365,29 +334,10 @@ abstract class APIFactory {
 	}
 
 	/**
-	 * Pass-thru to Factory class.
-	 * @param $transaction_function
-	 * @param int $retry_max_attempts
-	 * @param int $retry_sleep
-	 * @return mixed
-	 */
-	function RetryTransaction( $transaction_function, $retry_max_attempts = 4, $retry_sleep = 1 ) {
-		return $this->getMainClassObject()->RetryTransaction( $transaction_function, $retry_max_attempts, $retry_sleep );
-	}
-
-	/**
 	 * @return array
 	 */
 	function getPermissionChildren() {
 		return $this->getPermissionObject()->getPermissionHierarchyChildren( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId() );
-		/*
-		$hlf = TTnew( 'HierarchyListFactory' );
-		$permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId(), 100 );
-
-		Debug::Arr($permission_children_ids, 'Permission Child IDs: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		return $permission_children_ids;
-		*/
 	}
 
 	/**
@@ -537,26 +487,6 @@ abstract class APIFactory {
 	}
 
 	/**
-	 * Bridge to main class getOptions factory.
-	 * @param bool $name
-	 * @param string|int $parent
-	 * @return array|bool
-	 */
-	function getOptions( $name = false, $parent = null ) {
-		if ( $name != '' ) {
-			if ( method_exists( $this->getMainClassObject(), 'getOptions' ) ) {
-				return $this->getMainClassObject()->getOptions( $name, $parent );
-			} else {
-				Debug::Text( 'getOptions() function does not exist for object: ' . get_class( $this->getMainClassObject() ), __FILE__, __LINE__, __METHOD__, 10 );
-			}
-		} else {
-			Debug::Text( 'ERROR: Name not provided, unable to return data...', __FILE__, __LINE__, __METHOD__, 10 );
-		}
-
-		return false;
-	}
-
-	/**
 	 * Bridge to main class getVariableToFunctionMap factory.
 	 * @param string $name
 	 * @param string|int $parent
@@ -598,7 +528,11 @@ abstract class APIFactory {
 				//  This is used by TimeTrexPaymentServices API, since it doesn't use warnings.
 				if ( !isset( $validation_row['error'] ) && !isset( $validation_row['warning'] ) ) {
 					foreach ( $validation_row as $tmp_validation_error_label_b => $validation_error_msg ) {
-						$validator->Error( $tmp_validation_error_label_b, $validation_error_msg[0] );
+						if ( is_array( $validation_error_msg ) && isset( $validation_error_msg[0] ) ) {
+							$validator->Error( $tmp_validation_error_label_b, $validation_error_msg[0] );
+						} else {
+							$validator->Error( $tmp_validation_error_label_b, $validation_error_msg );
+						}
 					}
 				}
 			}
@@ -608,68 +542,38 @@ abstract class APIFactory {
 	}
 
 	/**
-	 * @param string $primary_validator   UUID
-	 * @param string $secondary_validator UUID
-	 * @param bool $tertiary_validator
+	 * @param Validator[] $validator_obj_arr Array of Validator objects.
+	 * @param string $record_label           Prefix for record label if performing a mass function to differentiate one record from another.
 	 * @return array|bool
 	 */
-	function setValidationArray( $primary_validator, $secondary_validator, $tertiary_validator = false ) {
-		//Handle primary validator first
+	function setValidationArray( $validator_obj_arr, $record_label = null ) {
+		//Handle validator array objects in order.
 		$validator = [];
 
-		//Sometimes a Factory object is passed in, so we have to pull the ->Validator property from that if it happens.
-		if ( is_a( $primary_validator, 'Validator' ) == false && isset( $primary_validator->Validator ) && is_a( $primary_validator->Validator, 'Validator' ) ) {
-			$primary_validator = $primary_validator->Validator;
+		if ( !is_array( $validator_obj_arr ) ) {
+			$validator_obj_arr = [ $validator_obj_arr ];
 		}
 
-		if ( is_a( $secondary_validator, 'Validator' ) == false && isset( $secondary_validator->Validator ) && is_a( $secondary_validator->Validator, 'Validator' ) ) {
-			$secondary_validator = $secondary_validator->Validator;
-		}
-
-		if ( is_a( $tertiary_validator, 'Validator' ) == false && isset( $tertiary_validator->Validator ) && is_a( $tertiary_validator->Validator, 'Validator' ) ) {
-			$tertiary_validator = $tertiary_validator->Validator;
-		}
-
-		if ( $this->getProtocolVersion() == 1 ) { //Don't return any warnings and therefore don't put errors in its own array element.
-			if ( $primary_validator->isError() === true ) {
-				$validator = $primary_validator->getErrorsArray();
-			} else {
-				//Check secondary validator for errors.
-				if ( $secondary_validator->isError() === true ) {
-					$validator = $secondary_validator->getErrorsArray();
-				} else {
-					//Check tertiary validator for errors.
-					if ( $tertiary_validator->isError() === true ) {
-						$validator = $tertiary_validator->getErrorsArray();
-					}
-				}
+		foreach ( $validator_obj_arr as $key => $validator_obj ) {
+			//Sometimes a Factory object is passed in, so we have to pull the ->Validator property from that if it happens.
+			if ( is_a( $validator_obj, 'Validator' ) == false && isset( $validator_obj->Validator ) && is_a( $validator_obj->Validator, 'Validator' ) ) {
+				$validator_obj = $validator_obj->Validator;
 			}
-		} else {
-			if ( $primary_validator->isError() === true ) {
-				$validator['error'] = $primary_validator->getErrorsArray();
+
+			if ( $this->getProtocolVersion() == 1 ) { //Don't return any warnings and therefore don't put errors in its own array element.
+				if ( $validator_obj->isError() === true ) {
+					$validator = $validator_obj->getErrorsArray( $record_label );
+					break;
+				}
 			} else {
-				//Check for primary validator warnings next.
-				if ( $primary_validator->isWarning() === true ) {
-					$validator['warning'] = $primary_validator->getWarningsArray();
+				if ( $validator_obj->isError() === true ) {
+					$validator['error'] = $validator_obj->getErrorsArray( $record_label );
+					break;
 				} else {
-					//Check secondary validator for errors.
-					if ( $secondary_validator->isError() === true ) {
-						$validator['error'] = $secondary_validator->getErrorsArray();
-					} else {
-						//Check secondary validator for warnings.
-						if ( $secondary_validator->isWarning() === true ) {
-							$validator['warning'] = $secondary_validator->getWarningsArray();
-						} else {
-							//Check tertiary validator for errors.
-							if ( $tertiary_validator->isError() === true ) {
-								$validator['error'] = $tertiary_validator->getErrorsArray();
-							} else {
-								//Check tertiary validator for warnings.
-								if ( $tertiary_validator->isWarning() === true ) {
-									$validator['warning'] = $tertiary_validator->getWarningsArray();
-								}
-							}
-						}
+					//Check for primary validator warnings next.
+					if ( $validator_obj->isWarning() === true ) {
+						$validator['warning'] = $validator_obj->getWarningsArray( $record_label );
+						break;
 					}
 				}
 			}
@@ -681,7 +585,6 @@ abstract class APIFactory {
 
 		return false;
 	}
-
 
 	/**
 	 * @param object|bool $validator
@@ -702,6 +605,67 @@ abstract class APIFactory {
 			return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), $validator, $validator_stats, $user_generic_status_batch_id );
 		}
 	}
-}
 
+	//
+	// **IMPORTANT** Functions below this are the only functions that are designed to be called remotely from the API, and therefore should be whitelisted.
+	//               These need to be added to API.inc.php in isWhiteListedAPICall()
+	//
+
+	/**
+	 * Bridge to main class getOptions factory.
+	 * @param bool $name
+	 * @param string|int $parent
+	 * @return array|bool
+	 */
+	function getOptions( $name = false, $parent = null ) {
+		if ( $name != '' ) {
+			if ( method_exists( $this->getMainClassObject(), 'getOptions' ) ) {
+				return $this->getMainClassObject()->getOptions( $name, $parent );
+			} else {
+				Debug::Text( 'getOptions() function does not exist for object: ' . get_class( $this->getMainClassObject() ), __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		} else {
+			Debug::Text( 'ERROR: Name not provided, unable to return data...', __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Download a result_set as a csv.
+	 * @param string $format
+	 * @param string $file_name
+	 * @param array $result
+	 * @param array $filter_columns
+	 * @return array|bool
+	 */
+	function exportRecords( $format, $file_name, $result, $filter_columns ) {
+		if ( isset( $result[0] ) && is_array( $result[0] ) && is_array( $filter_columns ) && count( $filter_columns ) > 0 ) {
+			$columns = Misc::arrayIntersectByKey( array_keys( $filter_columns ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
+
+			$file_extension = $format;
+			$mime_type = 'application/' . $format;
+			$output = '';
+
+			if ( $format == 'csv' ) {
+				$output = Misc::Array2CSV( $result, $columns, false );
+			}
+
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
+			if ( $output !== false ) {
+				Misc::APIFileDownload( $file_name . '.' . $file_extension, $mime_type, $output );
+			} else {
+				return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'ERROR: No data to export...' ) );
+			}
+		}
+
+		return $this->returnHandler( true ); //No records returned.
+	}
+
+	//
+	// **IMPORTANT** Functions above this are the only functions that are designed to be called remotely from the API, and therefore should be whitelisted.
+	//               These need to be added to API.inc.php in isWhiteListedAPICall()
+	//
+
+}
 ?>

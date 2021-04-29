@@ -1,19 +1,20 @@
-var RibbonSubMenu = Base.extend( {
+import { Base } from '@/model/Base';
 
-	defaults: {
-		label: null,
-		id: null,
-		icon: null,
-		group: null,
-		visible: null,
-		type: null,
-		items: null, //For Nav Type
-		permission: null,
-		permission_result: true
-	},
+export class RibbonSubMenu extends Base {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			label: null,
+			id: null,
+			icon: null,
+			group: null,
+			visible: null,
+			type: null,
+			items: null, //For Nav Type
+			permission: null,
+			permission_result: true
+		} );
 
-	constructor: function() {
-		this._super( 'constructor', arguments[0] );
+		super( options );
 
 		if ( !this.get( 'type' ) ) {
 			this.set( 'type', RibbonSubMenuType.NORMAL );
@@ -27,9 +28,9 @@ var RibbonSubMenu = Base.extend( {
 			this.get( 'group' ).get( 'sub_menus' ).push( this );
 		}
 	}
-} );
+}
 
-var RibbonSubMenuType = ( function() {
+export var RibbonSubMenuType = ( function() {
 	var normal = '1';
 	var nav = '2';
 

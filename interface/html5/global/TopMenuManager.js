@@ -1,3 +1,8 @@
+// Import Note: TopMenuManager has more imports, which are done in an alternative way, defined in webpack.config.js rules section.
+// The alternative way was purely for understanding webpack and various options. Can also be refactored if needed to import the normal way.
+
+import { Icons } from './ContextMenuConstant';
+
 var TopMenuManager = function() {
 
 };
@@ -1657,10 +1662,10 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		} );
 	}
 
-	if ( PermissionManager.checkTopLevelPermission( 'Form1099MiscReport' ) ) {
+	if ( PermissionManager.checkTopLevelPermission( 'Form1099NecReport' ) ) {
 		var form_1099 = new RibbonSubMenuNavItem( {
-			label: $.i18n._( 'Form 1099-Misc' ),
-			id: 'Form1099MiscReport',
+			label: $.i18n._( 'Form 1099-NEC' ),
+			id: 'Form1099NecReport',
 			nav: tax_reports
 		} );
 	}

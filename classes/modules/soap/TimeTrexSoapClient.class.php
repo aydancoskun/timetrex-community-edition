@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -364,6 +364,10 @@ class TimeTrexSoapClient {
 		$tt_version_data['schema_version']['C'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_C' );
 		$tt_version_data['schema_version']['D'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_D' );
 		$tt_version_data['schema_version']['T'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_T' );
+
+		if ( empty( $tt_version_data['system_version'] ) ) { //Just in case the version was not set in the system setting table for some reason.
+			$tt_version_data['system_version'] = APPLICATION_VERSION;
+		}
 
 		if ( isset( $_SERVER['SERVER_SOFTWARE'] ) ) {
 			$server_software = $_SERVER['SERVER_SOFTWARE'];

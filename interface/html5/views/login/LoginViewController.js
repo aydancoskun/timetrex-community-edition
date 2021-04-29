@@ -1,4 +1,4 @@
-class LoginViewController extends BaseViewController {
+export class LoginViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#loginViewContainer', //Must set el here and can only set string, so events can work
@@ -47,6 +47,7 @@ class LoginViewController extends BaseViewController {
 		Global.bottomContainer().css( 'display', 'none' );
 		Global.contentContainer().removeClass( 'content-container-after-login' );
 		Global.topContainer().removeClass( 'top-container-after-login' );
+		$( '.hide-in-login' ).hide(); // hide left + top navigation menu after logout
 
 		var login_data = LocalCacheData.getLoginData();
 
@@ -94,7 +95,7 @@ class LoginViewController extends BaseViewController {
 	}
 
 	onQuickPunchClick() {
-		window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'html5/quick_punch' );
+		window.open( ServiceCaller.root_url + LocalCacheData.loginData.base_url + 'html5/quick_punch' );
 	}
 
 	onLoginBtnClick( e ) {
@@ -120,39 +121,42 @@ class LoginViewController extends BaseViewController {
 		var cr_text = $( "\x23\x6C\x6F\x67\x69\x6E\x5F\x63\x6F\x70\x79\x5F\x72\x69\x67\x68\x74\x5F\x69\x6E\x66\x6F" ).text();
 		var _0xee93 = ["\x6F\x6E\x6C\x6F\x61\x64", "\x74\x6F\x74\x61\x6C", "\x43\x6F\x70\x79\x72\x69\x67\x68\x74\x20", "\x69\x6E\x64\x65\x78\x4F\x66", "\x6F\x72\x67\x61\x6E\x69\x7A\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x6C\x6F\x67\x69\x6E\x44\x61\x74\x61", "\x41\x6C\x6C\x20\x52\x69\x67\x68\x74\x73\x20\x52\x65\x73\x65\x72\x76\x65\x64", "\x45\x52\x52\x4F\x52\x3A\x20\x54\x68\x69\x73\x20\x69\x6E\x73\x74\x61\x6C\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20", "\x61\x70\x70\x6C\x69\x63\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x20\x69\x73\x20\x69\x6E\x20\x76\x69\x6F\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20\x74\x68\x65\x20\x6C\x69\x63\x65\x6E\x73\x65\x20\x61\x67\x72\x65\x65\x6D\x65\x6E\x74\x21", "\x73\x68\x6F\x77\x41\x6C\x65\x72\x74", "\x67\x65\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x48\x65\x61\x64\x65\x72", "\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68", "\x54\x69\x6D\x65\x54\x72\x65\x78", "\x23\x70\x6F\x77\x65\x72\x65\x64\x5F\x62\x79", "\x6E\x61\x74\x75\x72\x61\x6C\x57\x69\x64\x74\x68", "\x6E\x61\x74\x75\x72\x61\x6C\x48\x65\x69\x67\x68\x74"];
 		if ( ( !$( _0xee93[14] )[0] || ( $( _0xee93[14] )[0] && ( ( $( _0xee93[14] )[0][_0xee93[15]] > 0 && $( _0xee93[14] )[0][_0xee93[15]] != 145 ) || ( $( _0xee93[14] )[0][_0xee93[16]] > 0 && $( _0xee93[14] )[0][_0xee93[16]] != 40 ) ) ) ) || cr_text[_0xee93[3]]( _0xee93[2] ) !== 0 || LocalCacheData[_0xee93[5]][_0xee93[8]][_0xee93[3]]( _0xee93[13] ) !== 0 || cr_text[_0xee93[3]]( _0xee93[13] ) !== 17 ) {
-			Global.sendErrorReport( ( _0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + ' iw: ' + ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[15]] : 0 ) + ' ih: ' + ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[16]] : 0 ) + ' c: ' + cr_text[_0xee93[3]]( _0xee93[2] ) + ' ' + cr_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.rootURL, '', '', '' );
+			Global.sendErrorReport( ( _0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + ' iw: ' + ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[15]] : 0 ) + ' ih: ' + ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[16]] : 0 ) + ' c: ' + cr_text[_0xee93[3]]( _0xee93[2] ) + ' ' + cr_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.root_url, '', '', '' );
 		}
 
 		if ( this.authentication_api ) {
-			this.authentication_api.login( user_name, password, {
-				onResult: function( e ) {
-					if ( LocalCacheData.loadViewRequiredJSReady ) {
-						Debug.Text( 'Login Success (first try)', null, null, 'onLoginBtnClick', 10 );
-						$this.onLoginSuccess( e );
-					} else {
-						var timeout_count = 0;
-						var auto_login_timer = setInterval( function() {
-							if ( timeout_count == 100 ) {
-								clearInterval( auto_login_timer );
-								TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
-								Debug.Text( 'Login Failure', null, null, 'onLoginBtnClick', 10 );
-								return;
-							}
-							timeout_count = timeout_count + 1;
-							if ( LocalCacheData.loadViewRequiredJSReady ) {
-								$this.onLoginSuccess( e );
-								Debug.Text( 'Login Success after retry: ' + timeout_count, null, null, 'onLoginBtnClick', 10 );
-								clearInterval( auto_login_timer );
-							}
-						}, 600 );
-					}
-				},
-				onError: function( e ) {
-					Debug.Text( 'Login Error...', null, null, 'onLoginBtnClick', 10 );
-					$this.doing_login = false;
-				},
-				delegate: this
-			} );
+			//Check to make sure a CSRF token cookie exists, if not refresh it.
+			Global.refreshCSRFToken( function( e ) {
+				$this.authentication_api.login( user_name, password, {
+					onResult: function( e ) {
+						if ( LocalCacheData.loadViewRequiredJSReady ) {
+							Debug.Text( 'Login Success (first try)', null, null, 'onLoginBtnClick', 10 );
+							$this.onLoginSuccess( e );
+						} else {
+							var timeout_count = 0;
+							var auto_login_timer = setInterval( function() {
+								if ( timeout_count == 100 ) {
+									clearInterval( auto_login_timer );
+									TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
+									Debug.Text( 'Login Failure', null, null, 'onLoginBtnClick', 10 );
+									return;
+								}
+								timeout_count = timeout_count + 1;
+								if ( LocalCacheData.loadViewRequiredJSReady ) {
+									$this.onLoginSuccess( e );
+									Debug.Text( 'Login Success after retry: ' + timeout_count, null, null, 'onLoginBtnClick', 10 );
+									clearInterval( auto_login_timer );
+								}
+							}, 600 );
+						}
+					},
+					onError: function( e ) {
+						Debug.Text( 'Login Error...', null, null, 'onLoginBtnClick', 10 );
+						$this.doing_login = false;
+					},
+					delegate: this
+				} )
+			});
 		}
 	}
 
@@ -194,7 +198,7 @@ class LoginViewController extends BaseViewController {
 			$this.doing_login = false;
 		} else {
 
-			ServiceCaller.cancelAllError = false;
+			ServiceCaller.cancel_all_error = false;
 			LocalCacheData.setSessionID( result );
 			setCookie( Global.getSessionIDKey(), result );
 
@@ -446,7 +450,7 @@ class LoginViewController extends BaseViewController {
 	}
 
 	forgotPasswordClick() {
-		//window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'ForgotPassword.php' );
+		//window.open( ServiceCaller.root_url + LocalCacheData.loginData.base_url + 'ForgotPassword.php' );
 		IndexViewController.openWizard( 'ForgotPasswordWizard', null, function() {
 			TAlertManager.showAlert( $.i18n._( 'An email has been sent to you with instructions on how to change your password.' ) );
 		} );
@@ -540,7 +544,7 @@ class LoginViewController extends BaseViewController {
 
 		$( '#companyLogo' ).hide();
 		$( '#companyLogo' ).css( 'opacity', 0 );
-		$( '#companyLogo' ).attr( 'src', ServiceCaller.mainCompanyLogo );
+		$( '#companyLogo' ).attr( 'src', ServiceCaller.getURLByObjectType( 'primary_company_logo' ) );
 
 		$( '#companyLogo' ).on( 'load', function() {
 			if ( $( this ).height() > 78 ) {
@@ -563,7 +567,7 @@ class LoginViewController extends BaseViewController {
 
 		var powered_by_img = $( '#powered_by' );
 		powered_by_img.show();
-		powered_by_img.attr( 'src', ServiceCaller.login_page_powered_by_logo );
+		powered_by_img.attr( 'src', ServiceCaller.getURLByObjectType( 'copyright' ) );
 		powered_by_img.attr( 'alt', LocalCacheData.loginData.application_name + ' Workforce Management Software' );
 		var powered_by_link = $( '<a target="_blank" href="https://' + LocalCacheData.getLoginData().organization_url + '"></a>' );
 		powered_by_link.addClass( 'powered-by-img-seo' );
@@ -620,12 +624,12 @@ class LoginViewController extends BaseViewController {
 
 		} );
 
-		if ( LocalCacheData.all_url_args.user_name ) {
-			username_input.val( LocalCacheData.all_url_args.user_name );
+		if ( LocalCacheData.getAllURLArgs().user_name ) {
+			username_input.val( LocalCacheData.getAllURLArgs().user_name );
 		}
 
-		if ( LocalCacheData.all_url_args.password ) {
-			passwordInput.val( LocalCacheData.all_url_args.password );
+		if ( LocalCacheData.getAllURLArgs().password ) {
+			passwordInput.val( LocalCacheData.getAllURLArgs().password );
 		}
 
 		Global.moveCookiesToNewPath();
@@ -634,6 +638,7 @@ class LoginViewController extends BaseViewController {
 
 	cleanWhenUnloadView( callBack ) {
 		$( '#loginViewContainer' ).remove();
+		$( '#login-bg_animal' ).css( 'background-image', '' ); // Remove animals after login, as they can show through on main UI left navbar.
 		Global.setVirtualDeviceViewport( 'desktop' ); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
 		super.cleanWhenUnloadView( callBack );
 	}
@@ -647,9 +652,60 @@ class LoginViewController extends BaseViewController {
 				station_id = station_id_arr.join( '' );
 			}
 		}
-		var seed = parseInt( moment().week() + '' + station_id );
-		var random_image_number = Math.floor( ( Math.abs( Math.sin( seed ) ) * seed ) % 2 ) + 1; // seeded random
-		$( '#login-bg_animal' ).css( 'background-image', 'url(\'theme/default/images/login_animals_' + random_image_number + '.png\')' );
+
+		var season_images_arr = {
+			'all': 7,
+			'newyear': 2,
+			'valintine': 4,
+			'easter': 3,
+			'stpatrick': 4,
+			'halloween': 4,
+			'xmas': 5,
+		};
+
+		var season;
+
+		var month_of_year = ( moment().month() + 1 ); //0 based
+		var day_of_month = moment().date();
+		if ( ( month_of_year == 12 && day_of_month >= 30 ) || ( month_of_year == 1 && day_of_month <= 15 ) ) { //New Year: Jan 1: Dec 30 -> Jan 15
+			season = 'newyear';
+		} else if ( month_of_year == 2 && day_of_month >= 10 && day_of_month <= 15 ) { //Valintine: Feb 14: 10 - 15
+			season = 'valintine';
+		} else if ( ( month_of_year == 3 && day_of_month >= 25 ) || ( month_of_year == 4 && day_of_month <= 25 ) ) { //Easter: Mar 25 to Apr 25 each year. 2021=Apr 4, 2022=Apr 17, 2023=Apr 9
+			season = 'easter';
+		} else if ( month_of_year == 5 && day_of_month >= 15 && day_of_month <= 18 ) { //St Patrick: Mar 17: 15 - 18
+			season = 'stpatrick';
+		} else if ( month_of_year == 10 && day_of_month >= 25 && day_of_month <= 31 ) { //Halloween: Oct 31: 25 - 31
+			season = 'halloween';
+		// } else if ( month_of_year == 11 && day_of_month >= 19 && day_of_month <= 26 ) { //Thanks Giving (US): Nov. 25: 19 - 26
+		// 	season = 'thanksgiving'  ;
+		} else if ( month_of_year == 12 && day_of_month >= 10 && day_of_month <= 29 ) { //Xmas: Dec 25: 10 - 29
+			season = 'xmas';
+		} else {
+			season = 'all';
+		}
+
+		//If we are in any special season, then seed based on the day of of month, so it could change every day. Otherwise only change it every week.
+		var date_seed = day_of_month;
+		if ( season == 'all' ) {
+			date_seed = moment().week();
+		}
+
+		if ( Debug.getEnable() == true ) {
+			season = Object.keys(season_images_arr)[Math.floor( Math.random() * ( Object.keys(season_images_arr).length - 1 ) )];
+			var seed = parseInt( Math.random() * 100 ); //For testing without the station_id stickiness.
+		} else {
+			var seed = parseInt( date_seed + ( season.charCodeAt( 0 ) - 97 ) + station_id ); //Convert season to numeric only.
+		}
+
+		var season_total_images = season_images_arr[season];
+		var random_image_number = Math.floor( ( Math.abs( Math.sin( seed ) ) * seed ) % season_total_images ) + 1; // seeded random
+
+		var bg_image = 'theme/default/images/login_animals_' + season + '_' + random_image_number + '.png';
+		bg_image = bg_image.replace( 'all_', '' ); //When using all season images, remove 'all_' from the file names.
+		Debug.Text( 'Background Animal Image: ' + bg_image + ' Season: ' + season + ' Seed: ' + seed +' Total: '+ season_total_images, 'LoginViewController.js', '', 'renderAnimalsForBackground', 10 );
+
+		$( '#login-bg_animal' ).css( 'background-image', 'url(\'' + bg_image + '\')' );
 	}
 
 }

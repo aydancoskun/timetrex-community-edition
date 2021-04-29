@@ -3,12 +3,13 @@
 <!--
 Description	Common Simple, Complex and Element Types for T3 Special returns
 Contact: 	CRA
-Last updated 	Ocotber 2018
-Version#:	1.18 (version #.yy)
+Last updated 	June 2020
+Version#:	4.20 (version #.yy)
 Revision History:
-May 2015	Initial Creation.
-Oct 2016	Schema changes for T3D, T3P and T3RI
-Apr 2017	Schema changes for T3 general
+May  2015	Initial Creation.
+Oct  2016	Schema changes for T3D, T3P and T3RI
+Apr  2017	Schema changes for T3 general
+June 2020   Schema changes for T3P
 -->
 
 <xsd:schema xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" 
@@ -200,12 +201,12 @@ Apr 2017	Schema changes for T3 general
 		</xsd:sequence>
 	</xsd:complexType>
 
-	<!-- T3 special tax summary: non negative payable and balance amount -->
+	<!-- T3 special tax summary: non negative payable or paid amount -->
 	<xsd:complexType name="T3SpecialTaxSummaryTypeIV">
 		<xsd:sequence>
 			<xsd:element name="TotalAcquireCorporationShareTaxPayableAmount" type="Decimal15AmountType" minOccurs="0"/>
-			<xsd:element ref="TrustAccountPaidAmount" minOccurs="0"/>
-			<xsd:element name="TrustAccountBalanceAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TrustAccountPaidAmount" type="Decimal15AmountType" minOccurs="0"/>
+			<xsd:element name="TrustAccountBalanceAmount" type="SignedDecimal15AmountType" minOccurs="0"/>
 		</xsd:sequence>
 	</xsd:complexType>
 

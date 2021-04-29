@@ -1,4 +1,4 @@
-class PremiumPolicyViewController extends BaseViewController {
+export class PremiumPolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#premium_policy_view_container',
@@ -108,7 +108,7 @@ class PremiumPolicyViewController extends BaseViewController {
 			api_class: TTAPI.APIPremiumPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PREMIUM_POLICY,
+			layout_name: 'global_premium',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -148,7 +148,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_premium_policy_column1 );
 
 		//Hours/Pay Criteria
@@ -181,7 +181,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		//Min/Max Time Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'min_max_time_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.min_max_time_type_array ) );
+		form_item_input.setSourceData( $this.min_max_time_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Min/Max Time Resets' ), form_item_input, tab_premium_policy_column1 );
 
 		//Include Partial Punches
@@ -194,7 +194,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+			layout_name: 'global_contributing_shift_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			set_default: true,
@@ -207,7 +207,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_CODE,
+			layout_name: 'global_pay_code',
 			show_search_inputs: true,
 			set_default: true,
 			set_empty: true,
@@ -220,7 +220,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+			layout_name: 'global_pay_formula_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_formula_policy_id',
@@ -379,7 +379,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'include_holiday_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.include_holiday_type_array ) );
+		form_item_input.setSourceData( $this.include_holiday_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Holidays' ), form_item_input, tab_date_criteria_column1, '' );
 
 		// Tab2 start
@@ -398,7 +398,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'branch_selection_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.branch_selection_type_array ) );
+		form_item_input.setSourceData( $this.branch_selection_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
@@ -411,7 +411,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch'
@@ -439,7 +439,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'department_selection_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.department_selection_type_array ) );
+		form_item_input.setSourceData( $this.department_selection_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
@@ -452,7 +452,7 @@ class PremiumPolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department'
@@ -481,7 +481,7 @@ class PremiumPolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_group_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_group_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_group_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
@@ -494,12 +494,12 @@ class PremiumPolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				tree_mode: true,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				set_empty: true,
 				field: 'job_group'
 			} );
 
-			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_group_array ) );
+			form_item_input_1.setSourceData( $this.job_group_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Selection' ) );
 
@@ -513,7 +513,7 @@ class PremiumPolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
@@ -526,7 +526,7 @@ class PremiumPolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'job'
@@ -545,7 +545,7 @@ class PremiumPolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_item_group_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_group_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_item_group_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
@@ -558,12 +558,12 @@ class PremiumPolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				tree_mode: true,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				set_empty: true,
 				field: 'job_item_group'
 			} );
 
-			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_item_group_array ) );
+			form_item_input_1.setSourceData( $this.job_item_group_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Selection' ) );
 
@@ -578,7 +578,7 @@ class PremiumPolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_item_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_item_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
@@ -591,7 +591,7 @@ class PremiumPolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'job_item'
@@ -1012,7 +1012,7 @@ class PremiumPolicyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -1020,7 +1020,7 @@ class PremiumPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Code' ),
 				in_column: 1,
 				field: 'pay_code_id',
-				layout_name: ALayoutIDs.PAY_CODE,
+				layout_name: 'global_pay_code',
 				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
@@ -1032,7 +1032,7 @@ class PremiumPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Formula Policy' ),
 				in_column: 1,
 				field: 'pay_formula_policy_id',
-				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+				layout_name: 'global_pay_formula_policy',
 				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
@@ -1044,7 +1044,7 @@ class PremiumPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -1056,7 +1056,7 @@ class PremiumPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

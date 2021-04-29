@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,22 @@
 class PayrollDeduction_US_VT extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
+			20210101 => [
+					10 => [
+							[ 'income' => 3175, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 44125, 'rate' => 3.35, 'constant' => 0 ],
+							[ 'income' => 102375, 'rate' => 6.6, 'constant' => 1371.83 ],
+							[ 'income' => 210125, 'rate' => 7.6, 'constant' => 5216.33 ],
+							[ 'income' => 210125, 'rate' => 8.75, 'constant' => 13405.33 ],
+					],
+					20 => [
+							[ 'income' => 9525, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 77925, 'rate' => 3.35, 'constant' => 0 ],
+							[ 'income' => 174875, 'rate' => 6.6, 'constant' => 2291.40 ],
+							[ 'income' => 261475, 'rate' => 7.6, 'constant' => 8690.10 ],
+							[ 'income' => 261475, 'rate' => 8.75, 'constant' => 15271.70 ],
+					],
+			],
 			20200101 => [
 					10 => [
 							[ 'income' => 3125, 'rate' => 0, 'constant' => 0 ],
@@ -274,6 +290,9 @@ class PayrollDeduction_US_VT extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
+			20210101 => [
+					'allowance' => 4400,
+			],
 			20200101 => [
 					'allowance' => 4350,
 			],

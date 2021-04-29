@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -156,6 +156,14 @@ class PayrollDeduction_US_MD extends PayrollDeduction_US {
 	//We will need to have the county tax rate passed into this class so the proper calculations can be made.
 	//
 	var $state_options = [
+			20200101 => [
+						  'standard_deduction' => [
+								  'minimum' => 1550,
+								  'maximum' => 2300,
+								  'rate'    => 0.15, //percent
+						  ],
+						  'allowance'          => 3200,
+			],
 			20180601 => [ //01-Jun-2018
 						  'standard_deduction' => [
 								  'minimum' => 1500,

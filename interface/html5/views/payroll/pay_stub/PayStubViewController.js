@@ -1,4 +1,6 @@
-class PayStubViewController extends BaseViewController {
+import { Decimal } from 'decimal.js';
+
+export class PayStubViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#pay_stub_view_container',
@@ -1018,7 +1020,7 @@ class PayStubViewController extends BaseViewController {
 					width: 132,
 					is_static_width: 132,
 					allow_multiple_selection: false,
-					layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+					layout_name: 'global_PayStubAccount',
 					show_search_inputs: true,
 					set_empty: true,
 					field: 'pay_stub_entry_name_id'
@@ -2010,7 +2012,7 @@ class PayStubViewController extends BaseViewController {
 			api_class: TTAPI.APIPayStub,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB,
+			layout_name: 'global_pay_stub',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -2036,7 +2038,7 @@ class PayStubViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: false,
 			field: 'user_id'
@@ -2046,13 +2048,13 @@ class PayStubViewController extends BaseViewController {
 		// Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.filtered_status_array ) );
+		form_item_input.setSourceData( $this.filtered_status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_stub_column1 );
 
 		// Currency
@@ -2061,7 +2063,7 @@ class PayStubViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'currency_id'
@@ -2074,7 +2076,7 @@ class PayStubViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayPeriod,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_PERIOD,
+			layout_name: 'global_Pay_period',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_period_id'
@@ -2526,7 +2528,7 @@ class PayStubViewController extends BaseViewController {
 				form_item_remittance_destination_account_input.AComboBox( {
 					api_class: TTAPI.APIRemittanceDestinationAccount,
 					allow_multiple_selection: false,
-					layout_name: ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT,
+					layout_name: 'global_remittance_destination_account',
 					show_search_inputs: true,
 					set_empty: true,
 					field: 'remittance_destination_account_id',
@@ -2560,7 +2562,7 @@ class PayStubViewController extends BaseViewController {
 				// Transaction Status - writable
 				var form_item_status_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 				form_item_status_input.TComboBox( { field: 'status_id', set_empty: false } );
-				form_item_status_input.setSourceData( Global.addFirstItemToArray( $this.parent_controller.transaction_status_array ) );
+				form_item_status_input.setSourceData( $this.parent_controller.transaction_status_array );
 				form_item_status_input.setValue( data.status_id ? data.status_id : '' );
 				form_item_status_input.setEnabled( ( LocalCacheData.current_doing_context_action == 'copy_as_new' ) );
 				form_item_status_input.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
@@ -2685,7 +2687,7 @@ class PayStubViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2695,7 +2697,7 @@ class PayStubViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2705,14 +2707,14 @@ class PayStubViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
-				layout_name: ALayoutIDs.PAY_PERIOD,
+				layout_name: 'global_Pay_period',
 				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
@@ -2726,14 +2728,14 @@ class PayStubViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -2744,7 +2746,7 @@ class PayStubViewController extends BaseViewController {
 				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 1,
-				layout_name: ALayoutIDs.JOB_TITLE,
+				layout_name: 'global_job_title',
 				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
@@ -2755,7 +2757,7 @@ class PayStubViewController extends BaseViewController {
 				label: $.i18n._( 'Currency' ),
 				field: 'currency_id',
 				in_column: 1,
-				layout_name: ALayoutIDs.CURRENCY,
+				layout_name: 'global_currency',
 				api_class: TTAPI.APICurrency,
 				multiple: true,
 				basic_search: false,
@@ -2767,7 +2769,7 @@ class PayStubViewController extends BaseViewController {
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
@@ -2777,7 +2779,7 @@ class PayStubViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
@@ -2788,7 +2790,7 @@ class PayStubViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				field: 'default_department_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
@@ -2802,7 +2804,7 @@ class PayStubViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.COMBO_BOX
 			} ),
 			new SearchField( {
@@ -2812,7 +2814,7 @@ class PayStubViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2828,7 +2830,7 @@ class PayStubViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -2840,7 +2842,7 @@ class PayStubViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

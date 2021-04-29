@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,15 +37,15 @@
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: set_admin_permissions.php [user_name]\n";
 	echo $help_output;
 } else {
 	//Handle command line arguments
 	$last_arg = count( $argv ) - 1;
 
-	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
-		$user_name = $argv[ $last_arg ];
+	if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' ) {
+		$user_name = $argv[$last_arg];
 		//Get user_id from user_name
 		$ulf = new UserListFactory();
 		$ulf->getByUserName( $user_name );
@@ -59,7 +59,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			$pf->StartTransaction();
 
 			//Apply all preset flags, including 0 => "system"
-			$preset_flags = array_merge( array(0), array_keys( $pf->getOptions( 'preset_flags' ) ) );
+			$preset_flags = array_merge( [ 0 ], array_keys( $pf->getOptions( 'preset_flags' ) ) );
 
 			$pcf = new PermissionControlFactory();
 			$pcf->setCompany( $u_obj->getCompany() );
@@ -69,7 +69,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			if ( $pcf->isValid() ) {
 				$pcf_id = $pcf->Save( false );
 
-				$pcf->setUser( array($u_obj->getId()) );
+				$pcf->setUser( [ $u_obj->getId() ] );
 
 				$pcf->Save();
 

@@ -1,4 +1,4 @@
-class LoginUserPreferenceViewController extends BaseViewController {
+export class LoginUserPreferenceViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -15,6 +15,10 @@ class LoginUserPreferenceViewController extends BaseViewController {
 			start_week_day_array: null,
 
 			schedule_icalendar_type_array: null,
+
+			saved_schedules: null,
+
+			selected_schedule_uri_fragment: null,
 
 			date_api: null,
 			currentUser_api: null,
@@ -38,6 +42,9 @@ class LoginUserPreferenceViewController extends BaseViewController {
 		this.date_api = TTAPI.APITTDate;
 		this.currentUser_api = TTAPI.APIAuthentication;
 		this.user_preference_api = TTAPI.APIUserPreference;
+		this.generic_user_data_api = TTAPI.APIUserGenericData;
+		this.saved_schedules = [];
+		this.selected_schedule_uri_fragment = '';
 
 		this.render();
 
@@ -127,6 +134,26 @@ class LoginUserPreferenceViewController extends BaseViewController {
 		} );
 	}
 
+	getSavedScheduleSearchAndLayout( callBack ) {
+		var data = {};
+		data.filter_data = { script: 'ScheduleView', deleted: false };
+
+		this.generic_user_data_api.getUserGenericData( data, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+
+				// Remove -- Default -- (multiple languages) option from list as it can change everytime a user searches and is not relevant.
+				for ( var i = result_data.length - 1; i >= 0; i-- ) {
+					if ( result_data[i].name === BaseViewController.default_layout_name ) {
+						result_data.splice( i, 1 );
+					}
+				}
+
+				callBack( result_data );
+			}
+		} );
+	}
+
 	setCurrentEditRecordData() {
 
 		//Set current edit record data to all widgets
@@ -162,24 +189,33 @@ class LoginUserPreferenceViewController extends BaseViewController {
 
 			$this.initOptions( function( result ) {
 
-				$this.getUserPreferenceData( function( result ) {
+				$this.getSavedScheduleSearchAndLayout( function( result ) {
 
-					$this.buildContextMenu();
-
-					if ( !$this.edit_view ) {
-						$this.initEditViewUI( 'LoginUserPreference', 'LoginUserPreferenceEditView.html' );
+					$this.saved_schedules.push( { value: 0, label: $.i18n._( 'My Schedule (Default)' ) } );
+					for ( var i = 0; i < result.length; i++ ) {
+						$this.saved_schedules.push( { value: result[i].id, label: result[i].name } );
 					}
 
-					if ( !result.id ) {
-						result.first_name = LocalCacheData.loginUser.first_name;
-						result.last_name = LocalCacheData.loginUser.last_name;
-						result.user_id = LocalCacheData.loginUser.id;
-					}
+					$this.getUserPreferenceData( function( result ) {
 
-					// Waiting for the API returns data to set the current edit record.
-					$this.current_edit_record = result;
+						$this.buildContextMenu();
 
-					$this.initEditView();
+						if ( !$this.edit_view ) {
+							$this.initEditViewUI( 'LoginUserPreference', 'LoginUserPreferenceEditView.html' );
+						}
+
+						if ( !result.id ) {
+							result.first_name = LocalCacheData.loginUser.first_name;
+							result.last_name = LocalCacheData.loginUser.last_name;
+							result.user_id = LocalCacheData.loginUser.id;
+						}
+
+						// Waiting for the API returns data to set the current edit record.
+						$this.current_edit_record = result;
+
+						$this.initEditView();
+
+					} );
 
 				} );
 
@@ -198,6 +234,10 @@ class LoginUserPreferenceViewController extends BaseViewController {
 
 		if ( key === 'schedule_icalendar_type_id' ) {
 			this.onStatusChange();
+			this.setCalendarURL();
+		} else if ( key === 'schedule_saved_search' ) {
+			this.onSavedScheduleChange( target.getValue(), target.getLabel() );
+			this.setCalendarURL();
 		}
 
 		if ( !doNotValidate ) {
@@ -208,6 +248,7 @@ class LoginUserPreferenceViewController extends BaseViewController {
 	onStatusChange() {
 
 		if ( this.current_edit_record.schedule_icalendar_type_id == 0 ) {
+			this.detachElement( 'schedule_saved_search' );
 			this.detachElement( 'calendar_url' );
 			this.detachElement( 'schedule_icalendar_alarm1_working' );
 			this.detachElement( 'schedule_icalendar_alarm2_working' );
@@ -221,6 +262,7 @@ class LoginUserPreferenceViewController extends BaseViewController {
 
 		} else {
 			this.setCalendarURL();
+			this.attachElement( 'schedule_saved_search' );
 			this.attachElement( 'calendar_url' );
 			this.attachElement( 'schedule_icalendar_alarm1_working' );
 			this.attachElement( 'schedule_icalendar_alarm2_working' );
@@ -236,15 +278,24 @@ class LoginUserPreferenceViewController extends BaseViewController {
 		this.editFieldResize();
 	}
 
+	onSavedScheduleChange( value, label ) {
+		if ( value === 0 ) {
+			this.selected_schedule_uri_fragment = '';
+		} else {
+			this.selected_schedule_uri_fragment = label;
+		}
+	}
+
 	setCalendarURL( widget ) {
 
 		if ( !Global.isSet( widget ) ) {
 			widget = this.edit_view_ui_dic['calendar_url'];
 		}
-		this.api['getScheduleIcalendarURL']( this.current_edit_record.user_name, this.current_edit_record.schedule_icalendar_type_id, {
+
+		this.api['getScheduleIcalendarURL']( this.current_edit_record.user_name, this.current_edit_record.schedule_icalendar_type_id, this.selected_schedule_uri_fragment, {
 			onResult: function( result ) {
 				var result_data = result.getResult();
-				widget.setValue( ServiceCaller.rootURL + result_data );
+				widget.setValue( ServiceCaller.root_url + result_data );
 
 				widget.unbind( 'click' ); // First unbind all click events, otherwise, when we change the schedule icalendar type this will trigger several times click events.
 
@@ -350,37 +401,37 @@ class LoginUserPreferenceViewController extends BaseViewController {
 		// Language
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'language' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.language_array ) );
+		form_item_input.setSourceData( $this.language_array );
 		this.addEditFieldToColumn( $.i18n._( 'Language' ), form_item_input, tab_preferences_column1 );
 
 		// Date Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'date_format' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.date_format_array ) );
+		form_item_input.setSourceData( $this.date_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Date Format' ), form_item_input, tab_preferences_column1 );
 
 		// Time Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_format' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_format_array ) );
+		form_item_input.setSourceData( $this.time_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Format' ), form_item_input, tab_preferences_column1 );
 
 		// Time Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_unit_format' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_unit_format_array ) );
+		form_item_input.setSourceData( $this.time_unit_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Time Units' ), form_item_input, tab_preferences_column1 );
 
 		// Distance Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'distance_format' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.distance_format_array ) );
+		form_item_input.setSourceData( $this.distance_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Distance Units' ), form_item_input, tab_preferences_column1 );
 
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
+		form_item_input.setSourceData( $this.time_zone_array );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		var autodetect_tz_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px; height: 25px;\' type=\'button\' value=\'' + $.i18n._( 'Auto-Detect' ) + '\'></input>' );
@@ -395,7 +446,7 @@ class LoginUserPreferenceViewController extends BaseViewController {
 		// Start Weeks on
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'start_week_day' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.start_week_day_array ) );
+		form_item_input.setSourceData( $this.start_week_day_array );
 		this.addEditFieldToColumn( $.i18n._( 'Calendar Starts On' ), form_item_input, tab_preferences_column1 );
 
 		// Rows per page
@@ -406,7 +457,7 @@ class LoginUserPreferenceViewController extends BaseViewController {
 		// Default Login Screen
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'default_login_screen' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.default_login_screen_array ) );
+		form_item_input.setSourceData( $this.default_login_screen_array );
 		this.addEditFieldToColumn( $.i18n._( 'Default Screen' ), form_item_input, tab_preferences_column1 );
 
 		// Save TimeSheet State
@@ -464,14 +515,29 @@ class LoginUserPreferenceViewController extends BaseViewController {
 		// Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'schedule_icalendar_type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.schedule_icalendar_type_array ) );
+		form_item_input.setSourceData( $this.schedule_icalendar_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_schedule_synchronization_column1, '' );
+
+		// Saved Schedule View
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'schedule_saved_search' } );
+		form_item_input.setSourceData( $this.saved_schedules );
+		this.addEditFieldToColumn( $.i18n._( 'Schedule Saved Search' ), form_item_input, tab_schedule_synchronization_column1, '', null, true, false, 'schedule_saved_search' );
 
 		// Calendar URL
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'calendar_url' } );
 		form_item_input.addClass( 'link' );
-		this.addEditFieldToColumn( $.i18n._( 'Calendar URL' ), form_item_input, tab_schedule_synchronization_column1, '', null, true );
+
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var copy_icon = $( ' <img style="margin-left: 5px; cursor: pointer; width: 20px; height: 20px;" src="' + Global.getRealImagePath( 'css/global/widgets/ribbon/icons/' + Icons.copy ) + '">' );
+		copy_icon.click( function() {
+			$this.copyCalendarUrl();
+		} );
+
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( copy_icon );
+		this.addEditFieldToColumn( $.i18n._( 'Calendar URL' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
 
 		// Shifts Scheduled to Work
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
@@ -564,6 +630,20 @@ class LoginUserPreferenceViewController extends BaseViewController {
 		widgetContainer.append( label );
 
 		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
+	}
+
+	copyCalendarUrl() {
+		var calendar_url = this.edit_view_ui_dic['calendar_url'][0];
+
+		// Create a temporary textarea to copy text from as cannot use select() on a span.
+		var text_area = document.createElement( 'textarea' );
+		text_area.value = calendar_url.textContent;
+		document.body.appendChild( text_area );
+		text_area.select();
+		document.execCommand( 'Copy' );
+		text_area.remove();
+
+		TAlertManager.showAlert( $.i18n._( 'Calendar URL copied to clipboard.' ) );
 	}
 
 }

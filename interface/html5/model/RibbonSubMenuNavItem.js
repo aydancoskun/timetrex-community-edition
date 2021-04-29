@@ -1,17 +1,15 @@
-var RibbonSubMenuNavItem = Base.extend( {
+import { Base } from '@/model/Base';
 
-	defaults: {
-		label: null,
-		id: null,
-		nav: null
-	},
-
-	constructor: function() {
-
-		this._super( 'constructor', arguments[0] );
+export class RibbonSubMenuNavItem extends Base {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			label: null,
+			id: null,
+			nav: null
+		} );
+		super( options );
 
 		this.get( 'nav' ).get( 'items' ).push( this );
-
 	}
 
-} );
+}

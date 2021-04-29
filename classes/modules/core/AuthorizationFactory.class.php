@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -868,9 +868,10 @@ class AuthorizationFactory extends Factory {
 		if ( $this->getDeleted() === false
 				&& $this->isFinalAuthorization() === false
 				&& $this->isValidParent() === false ) {
+			//FYI: This error may occur on timesheet authorization if the timesheet cannot be verified because pending requests or critical severity exceptions exist. Though it should display a proper validation message to that affect instead.
 			$this->Validator->isTrue( 'parent',
 									  false,
-									  TTi18n::gettext( 'Employee authorizing this object is not a parent of it' ) );
+									  TTi18n::gettext( 'Employee authorizing this object is not a superior in the hierarchy that controls it' ) );
 
 			return false;
 		}

@@ -1,3 +1,5 @@
+import { ServiceCaller } from '@/services/ServiceCaller';
+
 class TimeTrexClientAPI extends ServiceCaller {
 	constructor( class_name, key_name ) {
 		super();
@@ -17,7 +19,7 @@ class TimeTrexClientAPI extends ServiceCaller {
 			get( target, property_key ) {
 				if ( property_key in target ) {
 					return target[property_key];
-				} else if ( typeof target.__noSuchMethod__ == "function" ) {
+				} else if ( typeof target.__noSuchMethod__ == 'function' ) {
 					return function( ...args ) {
 						return target.__noSuchMethod__.call( target, property_key, args );
 					};
@@ -40,5 +42,5 @@ const tt_api_class_handler = {
 	},
 };
 
-const TTAPI = new Proxy( tt_api_target, tt_api_class_handler );
+export const TTAPI = new Proxy( tt_api_target, tt_api_class_handler );
 

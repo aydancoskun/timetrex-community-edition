@@ -1,9 +1,12 @@
-class GridTestViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImage';
+import '@/global/widgets/filebrowser/TImageAdvBrowser';
+
+export class GridTestViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#grid_test_view_container',
 
-			_required_files: ['TImage', 'TImageAdvBrowser'],
+			// _required_files: ['TImage', 'TImageAdvBrowser'],
 
 			user_api: null,
 			user_group_api: null,

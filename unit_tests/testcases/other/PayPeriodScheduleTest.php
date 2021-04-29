@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,13 +34,10 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-/**
- * @group PayPeriodSchedule
- */
-class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
+class PayPeriodScheduleTest extends PHPUnit\Framework\TestCase {
 	public $company_id = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		TTDate::setTimeZone( 'America/Vancouver', true );
@@ -54,14 +51,10 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	function deleteAllSchedules() {
@@ -121,6 +114,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		return false;
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testHireAdjustedPayPeriodNumberA
+	 */
 	//Test adjusted pay period numbers based on the employees hire date. So if they are hired on pay period 40 of the year,
 	//it is now 1/13 for that employee, but restarts to 1/52 for the following year.
 	function testHireAdjustedPayPeriodNumberA() {
@@ -290,6 +286,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testHireAdjustedPayPeriodNumberB
+	 */
 	function testHireAdjustedPayPeriodNumberB() {
 		//	Anchor: 01-May-04
 		//	Primary: 27-May-04 w/LDOM
@@ -447,6 +446,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testHireAdjustedPayPeriodNumberC
+	 */
 	function testHireAdjustedPayPeriodNumberC() {
 		//	Anchor: 01-May-04
 		//	Primary: 27-May-04 w/LDOM
@@ -568,6 +570,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testWeekly
+	 */
 	//Weekly
 	function testWeekly() {
 
@@ -794,6 +799,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		}
 	*/
 
+	/**
+	 * @group PayPeriodSchedule_testWeeklyB
+	 */
 	//Test while PP start time is ignored. See above once its added again.
 	function testWeeklyB() {
 		TTDate::setTimeFormat( 'g:i A T' );
@@ -862,6 +870,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testBiWeekly
+	 */
 	//Bi-Weekly
 	function testBiWeekly() {
 
@@ -951,7 +962,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
-	//Bi-Weekly
+	/**
+	 * @group PayPeriodSchedule_testBiWeeklyB
+	 */
 	function testBiWeeklyB() {
 
 		//	Anchor: 01-Nov-04
@@ -1040,6 +1053,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testBiWeeklyC
+	 */
 	//Test the DST changes in 2007, for the full year.
 	function testBiWeeklyC() {
 
@@ -1295,6 +1311,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 1, $ret_obj->getCurrentPayPeriodNumber( $ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate() ), '1- Pay Period Number' );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testBiWeeklyD
+	 */
 	//Test years that have 27 pay periods (ie: 2015) when pay period ends on a Sunday, pays on a Thursday
 	function testBiWeeklyD() {
 		$ret_obj = $this->createPayPeriodSchedule( 200, //BiWeekly (27)
@@ -1502,6 +1521,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 27, $ret_obj->getCurrentPayPeriodNumber( $ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate() ), '1- Pay Period Number' );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testSemiMonthly
+	 */
 	function testSemiMonthly() {
 		//	Anchor: 01-Jan-04
 		//	Primary: 15-Jan-04
@@ -1695,6 +1717,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testSemiMonthlyB
+	 */
 	function testSemiMonthlyB() {
 		//	Anchor: 24-Apr-04
 		//	Primary: 08-May-04
@@ -1799,6 +1824,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testSemiMonthlyC
+	 */
 	function testSemiMonthlyC() {
 		//	Anchor: 24-Apr-04
 		//	Primary: 08-May-04
@@ -1899,6 +1927,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testSemiMonthlyD
+	 */
 	function testSemiMonthlyD() {
 		//	Anchor: 08-May-04
 		//	Primary: 22-May-04
@@ -1999,6 +2030,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testSemiMonthlyE
+	 */
 	function testSemiMonthlyE() {
 		//	Anchor: 08-May-04
 		//	Primary: 22-May-04
@@ -2142,6 +2176,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testMonthly
+	 */
 	function testMonthly() {
 		//	Anchor: 01-May-04
 		//	Primary: 27-May-04 w/LDOM
@@ -2272,6 +2309,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testMonthlyB
+	 */
 	//Test month pay period on the 15th of each month.
 	function testMonthlyB() {
 		//	Anchor: 01-May-04
@@ -2331,6 +2371,9 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		unset( $next_end_date );
 	}
 
+	/**
+	 * @group PayPeriodSchedule_testMonthlyC
+	 */
 	function testMonthlyC() {
 		//	Anchor: 01-May-09
 		//	Primary: 27-May-09 w/LDOM
@@ -2459,7 +2502,6 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 
 		unset( $next_end_date );
 	}
-
 }
 
 ?>

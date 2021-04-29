@@ -1,4 +1,4 @@
-class UserDateTotalParentViewController extends BaseViewController {
+export class UserDateTotalParentViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_date_total_parent_view_container',
@@ -63,7 +63,7 @@ class UserDateTotalParentViewController extends BaseViewController {
 
 			$this.current_edit_record = {
 				date: date_str,
-				user_id: LocalCacheData.all_url_args.user_id,
+				user_id: LocalCacheData.getAllURLArgs().user_id,
 				date_stamp: date_stamp
 			};
 			TTPromise.wait( 'UserDateTotalParent', 'init', function() {

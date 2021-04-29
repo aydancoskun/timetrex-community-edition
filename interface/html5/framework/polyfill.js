@@ -1,3 +1,4 @@
+// Removing this now, as we no longer support IE11, and we already use ES6 classes which also need modern support.
 /*
  * Polyfill file to allow use of modern JS functions in browsers which do not support them, such as IE11.
  * For each Polyfill, try to note which browser/ES version it is targetted at.

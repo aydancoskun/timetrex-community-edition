@@ -14,8 +14,6 @@ As Of Date      Name	                        Path	                              
 12-Sep-2018     leaflet-routing-machine	        interface/html5/framework/leaflet/leaflet-routing-machine	                3.2.11	    3.2.11	        ISC	    http://www.liedman.net/leaflet-routing-machine/ **We override leaflet and leaflet-routing-machine, so can't use minified code.
 17-Oct-2018     leaflet-markercluster           interface/html5/framework/leaflet/leaflet-markercluster                     1.4.1       1.4.1           MIT     https://github.com/Leaflet/Leaflet.markercluster
 
-11-Apr-2018     autolinker	                    interface/html5/framework/autolinker/Autolinker.min.js	                    1.6.2	    1.6.2	        MIT	    https://github.com/gregjacobs/Autolinker.js
-12-Sep-2018     pdfjs	                        interface/html5/framework/pdfjs	                                            1.9.426     1.9.426	        Apache	https://mozilla.github.io/pdf.js/getting_started/#download
 16-Nov-2019     qunit	                        interface/html5/framework/qunit/qunit.js	                                2.9.2	    2.9.2           MIT	    https://qunitjs.com/
 16-Nov-2019     rightclickmenu	                interface/html5/framework/rightclickmenu/rightclickmenu.js	                2.7.0       2.9.0           MIT 	http://swisnl.github.io/jQuery-contextMenu/index.html **Has Custom Modifications!
 16-Nov-2019     tinymce	                        interface/html5/framework/tinymce/tinymce.min.js	                        4.9.6	    4.9.6           LGPL    https://www.tinymce.com/download/
@@ -25,7 +23,7 @@ As Of Date      Name	                        Path	                              
 16-Nov-2019     html5shiv	                    interface/html5/framework/html5shiv.min.js	                                3.7.3	    3.7.3	        MIT     https://github.com/aFarkas/html5shiv
 16-Nov-2019     interact.min.js	                interface/html5/framework/interact.min.js	                                1.7.1	    1.7.1	        ASIS	interactjs.io (Don't think this is being used anymore)
 16-Nov-2019     masonry	                        interface/html5/framework/masonry.min.js	                                4.2.2	    4.2.2	        MIT	    http://masonry.desandro.com
-13-Apr-2018     measurement	                    interface/html5/framework/measurement.js	                                0.1	        0.1	            ??	    https://github.com/Philzen/measurement.js
+13-Apr-2018     measurement	                    interface/html5/framework/measurement.js	                                0.1	        0.1	            ??	    https://github.com/Philzen/measurement.js **Has TT customizations!
 16-Nov-2019     moment	                        interface/html5/framework/moment.min.js	                                    2.24.0	    2.24.0	        MIT	    https://momentjs.com/
 16-Nov-2019     nanobar	                        interface/html5/framework/nanobar.min.js	                                0.4.2   	0.4.2	        MIT	    https://github.com/jacoborus/nanobar
 16-Nov-2019     r	                            interface/html5/framework/r.js	                                            2.3.6	    2.3.6	        BSD	    https://github.com/requirejs/r.js

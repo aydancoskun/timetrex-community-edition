@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -123,6 +123,7 @@ class TaxSummaryReport extends Report {
 				$retval = array_merge(
 						TTDate::getReportDateOptions( 'hire', TTi18n::getText( 'Hire Date' ), 13, false ),
 						TTDate::getReportDateOptions( 'termination', TTi18n::getText( 'Termination Date' ), 14, false ),
+						TTDate::getReportDateOptions( 'birth', TTi18n::getText( 'Birth Date' ), 15, false ),
 						TTDate::getReportDateOptions( 'transaction', TTi18n::getText( 'Transaction Date' ), 16, true )
 				);
 				break;
@@ -195,6 +196,7 @@ class TaxSummaryReport extends Report {
 					'-1070-country'             => TTi18n::gettext( 'Country' ),
 					'-1075-postal_code'         => TTi18n::gettext( 'Postal Code' ),
 					'-1078-home_phone'          => TTi18n::gettext( 'Home Phone' ),
+					'-1079-home_email'          => TTi18n::gettext( 'Home Email' ),
 					'-1080-user_group'          => TTi18n::gettext( 'Group' ),
 					'-1090-default_branch'      => TTi18n::gettext( 'Default Branch' ),
 					'-1100-default_department'  => TTi18n::gettext( 'Default Department' ),
@@ -252,7 +254,7 @@ class TaxSummaryReport extends Report {
 					'-3010-company_deduction_rate' => TTi18n::gettext( 'Tax/Deduction Rate' ),
 				];
 
-				$retval = array_merge( $retval, $this->getOptions( 'pay_stub_account_amount_columns' ) );
+				$retval = array_merge( $retval, $this->getOptions( 'pay_stub_account_amount_columns', [ 'include_ytd_amount' => true ] ) );
 				ksort( $retval );
 
 				break;
@@ -261,36 +263,67 @@ class TaxSummaryReport extends Report {
 				//Get all pay stub accounts
 				$retval = [];
 
-				$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
-				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, [ 10, 20, 30, 40, 50, 60, 65, 80 ] );
-				if ( $psealf->getRecordCount() > 0 ) {
-					$type_options = $psealf->getOptions( 'type' );
-					foreach ( $type_options as $key => $val ) {
-						$type_options[$key] = str_replace( [ 'Employee', 'Employer', 'Deduction', 'Miscellaneous', 'Total' ], [ 'EE', 'ER', 'Ded', 'Misc', '' ], $val );
+				if ( is_object( $this->getUserObject() ) ) {
+					$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
+					$pseallf->getByCompanyId( $this->getUserObject()->getCompany() );
+					if ( $pseallf->getRecordCount() > 0 ) {
+						$pseal_obj = $pseallf->getCurrent();
+
+						$default_linked_columns = [
+								$pseal_obj->getTotalGross(),
+								$pseal_obj->getTotalNetPay(),
+								$pseal_obj->getTotalEmployeeDeduction(),
+								$pseal_obj->getTotalEmployerDeduction(),
+						];
+					} else {
+						$default_linked_columns = [];
 					}
+					unset( $pseallf, $pseal_obj );
 
-					$i = 0;
-					foreach ( $psealf as $psea_obj ) {
-						//Need to make the PSEA_ID a string so we can array_merge it properly later.
-						if ( $psea_obj->getType() == 40 ) { //Total accounts.
-							$prefix = null;
-						} else {
-							$prefix = $type_options[$psea_obj->getType()] . ' - ';
+					$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
+					$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, [ 10, 20, 30, 40, 50, 60, 65, 80 ] );
+					if ( $psealf->getRecordCount() > 0 ) {
+						$type_options = $psealf->getOptions( 'type' );
+						foreach ( $type_options as $key => $val ) {
+							$type_options[$key] = str_replace( [ 'Employee', 'Employer', 'Deduction', 'Miscellaneous', 'Total' ], [ 'EE', 'ER', 'Ded', 'Misc', '' ], $val );
 						}
 
-						$retval['-3' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PA:' . $psea_obj->getID()] = $prefix . $psea_obj->getName();
+						$i = 0;
+						foreach ( $psealf as $psea_obj ) {
+							//Need to make the PSEA_ID a string so we can array_merge it properly later.
+							if ( $psea_obj->getType() == 40 ) { //Total accounts.
+								$prefix = null;
+							} else {
+								$prefix = $type_options[$psea_obj->getType()] . ' - ';
+							}
 
-						if ( $psea_obj->getType() == 10 ) { //Earnings only can see units.
-							$retval['-4' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PR:' . $psea_obj->getID()] = $prefix . $psea_obj->getName() . ' [' . TTi18n::getText( 'Rate' ) . ']';
-							$retval['-5' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PU:' . $psea_obj->getID()] = $prefix . $psea_obj->getName() . ' [' . TTi18n::getText( 'Units' ) . ']';
+							$retval['-3' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PA:' . $psea_obj->getID()] = $prefix . $psea_obj->getName();
+
+							if ( $psea_obj->getType() == 10 ) { //Earnings only can see units.
+								$retval['-4' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PR:' . $psea_obj->getID()] = $prefix . $psea_obj->getName() . ' [' . TTi18n::getText( 'Rate' ) . ']';
+								$retval['-5' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PU:' . $psea_obj->getID()] = $prefix . $psea_obj->getName() . ' [' . TTi18n::getText( 'Units' ) . ']';
+							}
+
+							//Add units for Total Gross so they can get a total number of hours/units that way too.
+							if ( $psea_obj->getType() == 40 && isset( $default_linked_columns[0] ) && $default_linked_columns[0] == $psea_obj->getID() ) {
+								$retval['-5' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PU:' . $psea_obj->getID()] = $prefix . $psea_obj->getName() . ' [' . TTi18n::getText( 'Units' ) . ']';
+							}
+
+							if ( isset( $params['include_ytd_amount'] ) ) { //This is used for Tax/Deduction Custom Formulas.
+								if ( $psea_obj->getType() != 50 ) { //Accruals, display balance/YTD amount.
+									$retval['-6' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PY:' . $psea_obj->getID()] = $prefix . $psea_obj->getName() . ' [' . TTi18n::getText( 'YTD' ) . ']';
+								}
+							}
+
+							if ( $psea_obj->getType() == 50 ) { //Accruals, display balance/YTD amount.
+								$retval['-6' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PY:' . $psea_obj->getID()] = $prefix . $psea_obj->getName() . ' [' . TTi18n::getText( 'Balance' ) . ']';
+							}
+
+							$i++;
 						}
-
-						if ( $psea_obj->getType() == 50 ) { //Accruals, display balance/YTD amount.
-							$retval['-6' . str_pad( $i, 3, 0, STR_PAD_LEFT ) . '-PY:' . $psea_obj->getID()] = $prefix . $psea_obj->getName() . ' [' . TTi18n::getText( 'Balance' ) . ']';
-						}
-
-						$i++;
 					}
+				} else {
+					Debug::Text( ' WARNING: UserObject not defined, unable to get pay stub accounts...', __FILE__, __LINE__, __METHOD__, 10 );
 				}
 				break;
 			case 'pay_stub_account_unit_columns':
@@ -321,10 +354,8 @@ class TaxSummaryReport extends Report {
 						}
 					}
 				}
-				$retval['verified_time_sheet_date'] = 'time_stamp';
 				break;
 			case 'grand_total_metadata':
-				//Make sure all jobs are sum'd
 				$retval['aggregate'] = [];
 				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) ) ) );
 				if ( is_array( $dynamic_columns ) ) {
@@ -333,7 +364,7 @@ class TaxSummaryReport extends Report {
 							default:
 								if ( strpos( $column, '_hourly_rate' ) !== false || strpos( $column, '_rate' ) !== false || substr( $column, 0, 2 ) == 'PR' || $column == 'company_deduction_rate' ) {
 									$retval['aggregate'][$column] = 'avg';
-								} else if ( strpos( $column, '_ytd' ) !== false ) {
+								} else if ( strpos( $column, '_ytd' ) !== false ) { //YTD Amounts for just sub-total and grand total still use sum() rather than max()
 									$retval['aggregate'][$column] = 'sum';
 								} else {
 									$retval['aggregate'][$column] = 'sum';
@@ -343,7 +374,6 @@ class TaxSummaryReport extends Report {
 				}
 				break;
 			case 'sub_total_by_metadata':
-				//Make sure task estimates are sum'd.
 				$retval['aggregate'] = [];
 				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) ) ) );
 				if ( is_array( $dynamic_columns ) ) {
@@ -352,7 +382,7 @@ class TaxSummaryReport extends Report {
 							default:
 								if ( strpos( $column, '_hourly_rate' ) !== false || strpos( $column, '_rate' ) !== false || substr( $column, 0, 2 ) == 'PR' || $column == 'company_deduction_rate' ) {
 									$retval['aggregate'][$column] = 'avg';
-								} else if ( strpos( $column, '_ytd' ) !== false ) {
+								} else if ( strpos( $column, '_ytd' ) !== false ) { //YTD Amounts for just sub-total and grand total still use sum() rather than max()
 									$retval['aggregate'][$column] = 'sum';
 								} else {
 									$retval['aggregate'][$column] = 'sum';
@@ -370,7 +400,7 @@ class TaxSummaryReport extends Report {
 							default:
 								if ( strpos( $column, '_hourly_rate' ) !== false || strpos( $column, '_rate' ) !== false || substr( $column, 0, 2 ) == 'PR' || $column == 'company_deduction_rate' ) {
 									$retval['aggregate'][$column] = 'avg';
-								} else if ( strpos( $column, '_ytd' ) !== false ) {
+								} else if ( strpos( $column, '_ytd' ) !== false || substr( $column, 0, 2 ) == 'PY' ) { //YTD Amounts must use "max()" when grouping rather than sum()
 									$retval['aggregate'][$column] = 'max';
 								} else {
 									$retval['aggregate'][$column] = 'sum';
@@ -378,9 +408,6 @@ class TaxSummaryReport extends Report {
 						}
 					}
 				}
-
-				$retval['verified_time_sheet'] = 'first';
-				$retval['verified_time_sheet_date'] = 'first';
 				break;
 			case 'templates':
 				$retval = [
@@ -706,11 +733,6 @@ class TaxSummaryReport extends Report {
 	 * @return bool
 	 */
 	function addPayStubEntry( $cd_obj, $pse_obj, $user_deduction_data ) {
-		//If the deduction amount has no where to go, just exit early as its essentially disabled.
-		if ( empty( $tax_withheld_psea_ids ) == false ) {
-			return true;
-		}
-
 		$company_deduction_id = $cd_obj->getId();
 		$remittance_agency_id = $cd_obj->getPayrollRemittanceAgency();
 
@@ -718,11 +740,15 @@ class TaxSummaryReport extends Report {
 		$deduction_exclude_psea_ids = $cd_obj->exclude_psea_ids; //These should already be from getExpandedPayStubEntryAccountIDs()
 		$tax_withheld_psea_ids = $cd_obj->tax_withheld_psea_ids;
 
+		//If the deduction amount has no where to go, just exit early as its essentially disabled.
+		if ( empty( $tax_withheld_psea_ids ) == true ) {
+			return true;
+		}
+
 		$user_id = $pse_obj->getColumn( 'user_id' );
 		$date_stamp = TTDate::strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ); //Should match PayStubSummary, RemittanceSummary, TaxSummary, GeneralLedgerSummaryReport, etc... $date_stamp too.
 		$run_id = $pse_obj->getColumn( 'pay_stub_run_id' );
 		$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
-
 
 		//If the CompanyDeduction pay stub account does not match this current PSE PayStubEntryAccount, then check if the user is assigned to the CompanyDeduction, and if not we can return early as it doesn't apply to them.
 		//  This helps in cases where employees work in multiple states and may have absence time in their resident state, preventing subject wages from being calculated on the absence earnings in foriegn states.
@@ -956,7 +982,7 @@ class TaxSummaryReport extends Report {
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), [ 'province' => true, 'hire_date' => true, 'termination_date' => true, 'title_id' => true ] ) );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), [ 'province' => true, 'hire_date' => true, 'termination_date' => true, 'birth_date' => true, 'title_id' => true ] ) );
 			$this->tmp_data['user'][$u_obj->getId()]['total_user'] = 1;
 			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
@@ -973,12 +999,10 @@ class TaxSummaryReport extends Report {
 		//Company Deduction data for joining...
 		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $company_deduction_filter_data );
-
 		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $cdlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach ( $cdlf as $key => $cd_obj ) {
 				$this->tmp_data['company_deduction'][$cd_obj->getId()] = Misc::addKeyPrefix( 'company_deduction_', (array)$cd_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'payroll_remittance_agency_id' => true ] ) );
-
 				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 		}
@@ -998,6 +1022,8 @@ class TaxSummaryReport extends Report {
 		if ( isset( $this->tmp_data['pay_stub_entry'] ) ) {
 			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
+			$column_keys = array_keys( $this->getColumnDataConfig() );
+
 			//foreach( $this->tmp_data['pay_stub_entry'] as $date_stamp => $level_1 ) {
 			foreach ( $this->tmp_data['pay_stub_entry'] as $remittance_agency_id => $level_0 ) {
 				foreach ( $this->tmp_data['pay_stub_entry'][$remittance_agency_id] as $company_deduction_id => $level_1 ) {
@@ -1008,15 +1034,21 @@ class TaxSummaryReport extends Report {
 									$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, false, $this->getUserObject(), [ 'pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date'] ] );
 
 									if ( isset( $this->tmp_data['user'][$user_id]['hire_date'] ) ) {
-										$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), false, $this->getUserObject() );
+										$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), false, $this->getUserObject(), null, $column_keys );
 									} else {
 										$hire_date_columns = [];
 									}
 
 									if ( isset( $this->tmp_data['user'][$user_id]['termination_date'] ) ) {
-										$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), false, $this->getUserObject() );
+										$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), false, $this->getUserObject(), null, $column_keys );
 									} else {
 										$termination_date_columns = [];
+									}
+
+									if ( isset( $this->tmp_data['user'][$user_id]['birth_date'] ) ) {
+										$birth_date_columns = TTDate::getReportDates( 'birth', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['birth_date'] ), false, $this->getUserObject(), null, $column_keys );
+									} else {
+										$birth_date_columns = [];
 									}
 
 									$processed_data = [
@@ -1037,7 +1069,7 @@ class TaxSummaryReport extends Report {
 										$tmp_payroll_remittance_agency = [];
 									}
 
-									$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_company_deduction, $tmp_payroll_remittance_agency, $row, $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
+									$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_company_deduction, $tmp_payroll_remittance_agency, $row, $date_columns, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );
 
 									$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 									$key++;
@@ -1085,7 +1117,7 @@ class TaxSummaryReport extends Report {
 
 				$retarr = [
 						'object'               => __CLASS__,
-						'user_success_message' => TTi18n::gettext( 'Payment submitted successfully for $%1', [ Misc::MoneyFormat( $amount_due ) ] ),
+						'user_success_message' => TTi18n::gettext( 'Payment submitted successfully for $%1', [ Misc::MoneyRound( $amount_due ) ] ),
 						'agency_report_data'   => [
 								'total_employees' => ( isset( $last_row['total_user'] ) ) ? (int)$last_row['total_user'] : null,
 								'subject_wages'   => ( isset( $last_row['subject_wages'] ) ) ? $last_row['subject_wages'] : null,

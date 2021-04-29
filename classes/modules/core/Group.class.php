@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -218,8 +218,6 @@ class Group {
 						if ( !isset( $retarr[$group_by_key_val][$key] ) ) {
 							$retarr[$group_by_key_val][$key] = $val;
 						}
-					} else if ( isset( $aggregate_cols[$key] ) ) {
-						$retarr[$group_by_key_val][$key][] = $val;
 					} // else { //Ignore data that isn't in grouping or aggregate.
 				}
 
@@ -318,7 +316,12 @@ class Group {
 	 * @return mixed
 	 */
 	static function MinNotNull( $values ) {
-		return @min( array_diff( array_map( 'intval', $values ), [ 0 ] ) ); //If array() OR array(0) is passed in it could cause a PHP warning for min()
+		$arr_diff = array_diff( array_map( 'intval', $values ), [ 0 ] );
+		if ( count($arr_diff) > 0 ) {
+			return min( $arr_diff );
+		}
+
+		return false;
 	}
 
 }

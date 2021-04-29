@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,10 +34,7 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-/**
- * @group UserReview
- */
-class UserReviewTest extends PHPUnit_Framework_TestCase {
+class UserReviewTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $currency_id = null;
@@ -50,7 +47,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 	//protected $user_expense_id = NULL;
 
-	public function setUp() {
+	public function setUp(): void {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -77,16 +74,11 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
-
 
 	function createKPIGroup( $company_id, $type, $parent_id = 0 ) {
 		$kgf = TTnew( 'KPIGroupFactory' ); /** @var KPIGroupFactory $kgf */
@@ -222,7 +214,6 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function getKPIArrayByGroupId( $id ) {
-
 		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$klf->getByCompanyIDAndGroupID( $this->company_id, $id );
 		if ( $klf->getRecordCount() > 0 ) {
@@ -265,7 +256,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		return false;
 	}
 
-
+	/**
+	 * @group UserReview_testKPIA
+	 */
 	function testKPIA() {
 		// Test Scale Rating type
 		global $dd;
@@ -330,6 +323,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		return true;
 	}
 
+	/**
+	 * @group UserReview_testKPIB
+	 */
 	function testKPIB() {
 		global $dd;
 
@@ -390,6 +386,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		return true;
 	}
 
+	/**
+	 * @group UserReview_testKPIC
+	 */
 	function testKPIC() {
 		// Test text KPI type
 		global $dd;
@@ -425,6 +424,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		return true;
 	}
 
+	/**
+	 * @group UserReview_testEditKPI
+	 */
 	function testEditKPI() {
 		global $dd;
 		$kpi_group_id = $this->createKPIGroup( $this->company_id, 40 );
@@ -505,7 +507,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		return true;
 	}
 
-
+	/**
+	 * @group UserReview_testDeleteKPI
+	 */
 	function testDeleteKPI() {
 		global $dd;
 		$kpi_group_ids[] = $this->createKPIGroup( $this->company_id, 10 );
@@ -606,7 +610,6 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		return true;
 	}
-
 }
 
 ?>

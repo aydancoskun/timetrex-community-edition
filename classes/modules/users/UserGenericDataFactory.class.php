@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,8 @@
 class UserGenericDataFactory extends Factory {
 	protected $table = 'user_generic_data';
 	protected $pk_sequence_name = 'user_generic_data_id_seq'; //PK Sequence name
+
+	public $name_validator_regex = '/^[a-zA-Z0-9-_ ,\.\'()\[\]|\x{0080}-\x{FFFF}]{1,250}$/iu';
 
 	/**
 	 * @param $data
@@ -263,6 +265,11 @@ class UserGenericDataFactory extends Factory {
 										  TTi18n::gettext( 'Name already exists' )
 				);
 			}
+			$this->Validator->isRegEx( 'name',
+									   $this->getName(),
+									   TTi18n::gettext( 'Incorrect characters in name' ),
+									   $this->name_validator_regex
+			);
 
 			//
 			// ABOVE: Validation code moved from set*() functions.

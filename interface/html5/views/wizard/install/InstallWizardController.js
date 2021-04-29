@@ -1,4 +1,4 @@
-class InstallWizardController extends BaseWizardController {
+export class InstallWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.install-wizard',
@@ -31,8 +31,8 @@ class InstallWizardController extends BaseWizardController {
 		this.wizard_id = 'InstallWizard';
 		this.api = TTAPI.APIInstall;
 		ServiceCaller.extra_url = '&disable_db=1';
-		if ( _.size( LocalCacheData.all_url_args ) > 0 ) {
-			var url_args = LocalCacheData.all_url_args;
+		if ( _.size( LocalCacheData.getAllURLArgs() ) > 0 ) {
+			var url_args = LocalCacheData.getAllURLArgs();
 			this.current_step = url_args.a;
 			this.external_installer = url_args.external_installer;
 		} else {
@@ -477,10 +477,6 @@ class InstallWizardController extends BaseWizardController {
 					this.addEditFieldToColumn( $.i18n._( 'ALLOW_FOPEN_URL Turned Off' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-					form_item_input.TText( { field: 'magic_quotes' } );
-					this.addEditFieldToColumn( $.i18n._( 'Magic Quotes GPC Turned Off' ), form_item_input, requirements_column2, '', null, true, true );
-
-					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( { field: 'disk_space' } );
 					this.addEditFieldToColumn( $.i18n._( 'Disk Space' ), form_item_input, requirements_column2, '', null, true, true );
 
@@ -504,6 +500,10 @@ class InstallWizardController extends BaseWizardController {
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( { field: 'system_timezone' } );
 					this.addEditFieldToColumn( $.i18n._( 'System TimeZone' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( { field: 'php_int_size' } );
+					this.addEditFieldToColumn( $.i18n._( 'PHP 64-bit Support' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( { field: 'base_dir' } );
@@ -704,7 +704,7 @@ class InstallWizardController extends BaseWizardController {
 				// Industry
 				form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 				form_item_input.TComboBox( { field: 'industry_id' } );
-				form_item_input.setSourceData( Global.addFirstItemToArray( this.stepsDataDic[this.current_step]['industry_options'] ) );
+				form_item_input.setSourceData( this.stepsDataDic[this.current_step]['industry_options'] );
 				this.addEditFieldToColumn( $.i18n._( 'Industry' ), form_item_input, company_column1 );
 
 				// Address (Line 1)
@@ -725,7 +725,7 @@ class InstallWizardController extends BaseWizardController {
 				// Country
 				form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 				form_item_input.TComboBox( { field: 'country' } );
-				form_item_input.setSourceData( Global.addFirstItemToArray( this.stepsDataDic[this.current_step]['country_options'] ) );
+				form_item_input.setSourceData( this.stepsDataDic[this.current_step]['country_options'] );
 				this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, company_column1 );
 
 				// Province / State
@@ -800,7 +800,7 @@ class InstallWizardController extends BaseWizardController {
 				// System timezone
 				form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 				form_item_input.TComboBox( { field: 'time_zone' } );
-				form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
+				form_item_input.setSourceData( $this.time_zone_array );
 				this.addEditFieldToColumn( $.i18n._( 'Server Time Zone' ), form_item_input, systemSettings_column1 );
 
 				systemSettings.show();
@@ -821,7 +821,7 @@ class InstallWizardController extends BaseWizardController {
 				// database type
 				form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 				form_item_input.TComboBox( { field: 'type' } );
-				form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+				form_item_input.setSourceData( $this.type_array );
 				this.addEditFieldToColumn( $.i18n._( 'Database Type' ), form_item_input, databaseConfig_column1 );
 
 				// host name
@@ -1075,7 +1075,7 @@ class InstallWizardController extends BaseWizardController {
 					onResult: function( res ) {
 						if ( res.isValid() ) {
 							widgets.province.setSourceData( [] );
-							widgets.province.setSourceData( Global.addFirstItemToArray( res.getResult() ) );
+							widgets.province.setSourceData( res.getResult() );
 						}
 					}
 				} );
@@ -1271,7 +1271,7 @@ class InstallWizardController extends BaseWizardController {
 				this.api.getProvinceOptions( country, {
 					onResult: function( res ) {
 						if ( res.isValid() ) {
-							widgets.province.setSourceData( Global.addFirstItemToArray( res.getResult() ) );
+							widgets.province.setSourceData( res.getResult() );
 							widgets.province.setValue( stepData['province'] );
 						}
 						ProgressBar.closeOverlay();
@@ -1316,6 +1316,14 @@ class InstallWizardController extends BaseWizardController {
 							} else if ( stepData[key].check_php_version == 2 ) {
 								widget.html( $.i18n._( 'Unsupported' ) + ' (v' + stepData[key].php_version + ')' );
 								widget.addClass( 'dataWarning' );
+							}
+							break;
+						case 'php_int_size':
+							if ( stepData[key] == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Invalid (Only 32-bit)' ) );
+								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'database_engine':
@@ -1462,14 +1470,6 @@ class InstallWizardController extends BaseWizardController {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
 								widget.html( $.i18n._( 'ALLOW_FOPEN_URL is Off. (Please enable it in php.ini)' ) );
-								widget.addClass( 'dataError' );
-							}
-							break;
-						case 'magic_quotes':
-							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._( 'OK' ) );
-							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'MAGIC_QUOTES_GPC is On. (Please disable it in php.ini)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;

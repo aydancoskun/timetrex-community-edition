@@ -1,4 +1,6 @@
-class ScheduleViewController extends BaseViewController {
+import { SwitchButtonIcon } from '@/global/widgets/switch_button/SwitchButton';
+
+export class ScheduleViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#schedule_view_container', //Must set el here and can only set string, so events can work
@@ -341,6 +343,7 @@ class ScheduleViewController extends BaseViewController {
 		var $this = this;
 		$this.getAllLayouts( function() {
 			$this.setSelectLayout();
+			$this.search( true, true ); //Make sure we setDefaultMenu is TRUE so autoOpenEditViewIfNecessary() is called.
 		} );
 	}
 
@@ -1820,6 +1823,13 @@ class ScheduleViewController extends BaseViewController {
 
 			$this.absence_policy_api.getAbsencePolicy( args, {
 				onResult: function( task_result ) {
+
+					// Returning early to help mitigate #2889 - "Error: Uncaught TypeError: Cannot set property 'absence_policy_id' of null"
+					// This can happen when the user saves or leaves the page before the API call is completed.
+					if ( $this.current_edit_record === null || $this.current_edit_record === undefined ) {
+						return;
+					}
+
 					var data = task_result.getResult();
 
 					if ( data.length > 0 ) {
@@ -2351,7 +2361,7 @@ class ScheduleViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: !this.checkOpenPermission(),
 			set_open: this.checkOpenPermission(),
@@ -2370,7 +2380,7 @@ class ScheduleViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: !this.checkOpenPermission(),
 			set_open: this.checkOpenPermission(),
@@ -2390,7 +2400,7 @@ class ScheduleViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_schedule_column1 );
 
 		//Date
@@ -2424,7 +2434,7 @@ class ScheduleViewController extends BaseViewController {
 
 		form_item_input.AComboBox( {
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			show_search_inputs: false,
 			set_empty: true,
 			field: 'start_dates'
@@ -2456,7 +2466,7 @@ class ScheduleViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APISchedulePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.SCHEDULE_POLICY,
+			layout_name: 'global_schedule',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'schedule_policy_id'
@@ -2469,7 +2479,7 @@ class ScheduleViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'absence_policy_id'
@@ -2503,7 +2513,7 @@ class ScheduleViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch_id',
@@ -2529,7 +2539,7 @@ class ScheduleViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department_id',
@@ -2555,7 +2565,7 @@ class ScheduleViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -2594,7 +2604,7 @@ class ScheduleViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: ( function( val ) {
@@ -3473,6 +3483,8 @@ class ScheduleViewController extends BaseViewController {
 					$this.clearViewLayoutCache();
 					$this.need_select_layout_name = layout_name;
 					$this.initLayout();
+				} else {
+					TAlertManager.showErrorAlert( res );
 				}
 
 			}
@@ -3608,15 +3620,12 @@ class ScheduleViewController extends BaseViewController {
 
 		var display_columns = this.buildDisplayColumns( layout_data.display_columns );
 
-		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.mode ) {
-			$this.setToggleButtonValue( LocalCacheData.all_url_args.mode );
+		if ( Global.isSet( layout_data.mode ) ) {
+			$this.setToggleButtonValue( layout_data.mode.toLowerCase() );
+		} else if ( LocalCacheData.getAllURLArgs() && LocalCacheData.getAllURLArgs().mode ) {
+			$this.setToggleButtonValue( LocalCacheData.getAllURLArgs().mode );
 		} else {
-			if ( Global.isSet( layout_data.mode ) ) {
-				$this.setToggleButtonValue( layout_data.mode.toLowerCase() );
-
-			} else {
-				$this.setToggleButtonValue( ScheduleViewControllerMode.WEEK );
-			}
+			$this.setToggleButtonValue( ScheduleViewControllerMode.WEEK );
 		}
 
 		// if ( Global.isSet( layout_data.strictRange ) ) {
@@ -3648,7 +3657,7 @@ class ScheduleViewController extends BaseViewController {
 			var len = layouts_array.length;
 			for ( var i = 0; i < len; i++ ) {
 				var item = layouts_array[i];
-				this.previous_saved_layout_selector.append( '<option value="' + item.id + '">' + item.name + '</option>' );
+				this.previous_saved_layout_selector.append( $( '<option value="' + item.id + '"></option>' ).text( item.name ) );
 			}
 			$( this.previous_saved_layout_selector.find( 'option' ) ).filter( function() {
 				return $( this ).attr( 'value' ) === $this.select_layout.id;
@@ -3672,8 +3681,6 @@ class ScheduleViewController extends BaseViewController {
 		this.filter_data = this.select_layout.data.filter_data;
 
 		this.setSearchPanelFilter( true );
-
-		this.search( true, true ); //Make sure we setDefaultMenu is TRUE so autoOpenEditViewIfNecessary() is called.
 	}
 
 	getMode() {
@@ -3699,7 +3706,7 @@ class ScheduleViewController extends BaseViewController {
 
 		var strict = this.strict_range_btn.getValue();
 
-		if ( use_date_picker_date || !this.end_date ) {
+		if ( use_date_picker_date || !this.end_date || ( setDefaultMenu === undefined && use_date_picker_date === undefined ) ) {
 			start_date_string = this.start_date_picker.getValue();
 
 			if ( mode === ScheduleViewControllerMode.YEAR ) {
@@ -6865,8 +6872,8 @@ class ScheduleViewController extends BaseViewController {
 	// 		if ( mode ) {
 	// 			window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date + '&mode=' + mode;
 	// 		} else {
-	// 			if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.mode ) {
-	// 				$this.setToggleButtonValue( LocalCacheData.all_url_args.mode );
+	// 			if ( LocalCacheData.getAllURLArgs() && LocalCacheData.getAllURLArgs().mode ) {
+	// 				$this.setToggleButtonValue( LocalCacheData.getAllURLArgs().mode );
 	// 				mode = this.getMode();
 	// 				window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date + '&mode=' + mode;
 	// 			} else {
@@ -6889,7 +6896,7 @@ class ScheduleViewController extends BaseViewController {
 			args = '#!m=' + this.viewId;
 			Global.setURLToBrowser( Global.getBaseURL() + args );
 		}
-		LocalCacheData.all_url_args = IndexViewController.instance.router.buildArgDic( args.split( '&' ) );
+		LocalCacheData.setAllURLArgs( Global.buildArgDic( args.split( '&' ) ) );
 	}
 
 	setURL() {
@@ -7050,6 +7057,27 @@ class ScheduleViewController extends BaseViewController {
 			//$this.setDateUrl();
 			$this.clearSelection();
 			$this.search( false, true );
+		} );
+
+		//Overwrite event listener on layout selector to prevent wrong start date issues by passing true on user_date_picker_date in search().
+		$( this.search_panel.find( '#layout_selector' ) ).off( 'change' ).on( 'change', function() {
+			$this.layout_changed = true;
+
+			var selectId = $this.search_panel.find( '#layout_selector' ).find( 'option:selected' ).attr( 'value' );
+			var layouts_array = $this.search_panel.getLayoutsArray();
+			var len = layouts_array.length;
+			for ( var i = 0; i < len; i++ ) {
+				var item = layouts_array[i];
+
+				if ( item.id == selectId ) {
+					$this.select_layout = item;
+					$this.setSelectLayout();
+					$this.search( false, true );
+					break;
+				}
+
+			}
+			Global.triggerAnalyticsNavigationOther( 'searchpanel:layout_change', 'click', $this.viewId );
 		} );
 
 		//Create action switch buttons
@@ -7504,7 +7532,7 @@ class ScheduleViewController extends BaseViewController {
 					multiple: true,
 					basic_search: true,
 					adv_search: true,
-					layout_name: ALayoutIDs.OPTION_COLUMN,
+					layout_name: 'global_option_column',
 					form_item_type: FormItemType.AWESOME_BOX
 				} ),
 
@@ -7512,7 +7540,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Schedule Branch' ),
 					in_column: 1,
 					field: 'schedule_branch_ids',
-					layout_name: ALayoutIDs.BRANCH,
+					layout_name: 'global_branch',
 					api_class: TTAPI.APIBranch,
 					multiple: true,
 					basic_search: true,
@@ -7525,7 +7553,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Schedule Department' ),
 					in_column: 1,
 					field: 'department_ids',
-					layout_name: ALayoutIDs.DEPARTMENT,
+					layout_name: 'global_department',
 					api_class: TTAPI.APIDepartment,
 					multiple: true,
 					basic_search: true,
@@ -7538,7 +7566,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Default Branch' ),
 					in_column: 1,
 					field: 'default_branch_ids',
-					layout_name: ALayoutIDs.BRANCH,
+					layout_name: 'global_branch',
 					api_class: TTAPI.APIBranch,
 					multiple: true,
 					basic_search: false,
@@ -7551,7 +7579,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Default Department' ),
 					in_column: 1,
 					field: 'default_department_ids',
-					layout_name: ALayoutIDs.DEPARTMENT,
+					layout_name: 'global_department',
 					api_class: TTAPI.APIDepartment,
 					multiple: true,
 					basic_search: false,
@@ -7565,7 +7593,7 @@ class ScheduleViewController extends BaseViewController {
 					in_column: 2,
 					multiple: true,
 					field: 'group_ids',
-					layout_name: ALayoutIDs.TREE_COLUMN,
+					layout_name: 'global_tree_column',
 					tree_mode: true,
 					basic_search: true,
 					adv_search: true,
@@ -7576,7 +7604,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Title' ),
 					field: 'title_id',
 					in_column: 2,
-					layout_name: ALayoutIDs.JOB_TITLE,
+					layout_name: 'global_job_title',
 					api_class: TTAPI.APIUserTitle,
 					multiple: true,
 					basic_search: true,
@@ -7588,7 +7616,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Job' ),
 					in_column: 2,
 					field: 'job_id',
-					layout_name: ALayoutIDs.JOB,
+					layout_name: 'global_job',
 					api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJob : null,
 					multiple: true,
 					basic_search: false,
@@ -7600,7 +7628,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Task' ),
 					in_column: 2,
 					field: 'job_item_id',
-					layout_name: ALayoutIDs.JOB_ITEM,
+					layout_name: 'global_job_item',
 					api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJobItem : null,
 					multiple: true,
 					basic_search: false,
@@ -7612,7 +7640,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Recurring Template' ),
 					field: 'recurring_schedule_template_control_id',
 					in_column: 2,
-					layout_name: ALayoutIDs.RECURRING_SCHEDULE_CONTROL,
+					layout_name: 'global_recurring_schedule_control',
 					api_class: TTAPI.APIRecurringScheduleTemplateControl,
 					multiple: true,
 					basic_search: false,
@@ -7624,7 +7652,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Absence Policy' ),
 					field: 'absence_policy_id',
 					in_column: 3,
-					layout_name: ALayoutIDs.ABSENCES_POLICY,
+					layout_name: 'global_absences',
 					api_class: TTAPI.APIAbsencePolicy,
 					multiple: true,
 					basic_search: false,
@@ -7636,7 +7664,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Include Employees' ),
 					in_column: 3,
 					field: 'include_user_ids',
-					layout_name: ALayoutIDs.USER,
+					layout_name: 'global_user',
 					api_class: TTAPI.APIUser,
 					multiple: true,
 					basic_search: false,
@@ -7652,7 +7680,7 @@ class ScheduleViewController extends BaseViewController {
 					label: $.i18n._( 'Exclude Employees' ),
 					in_column: 3,
 					field: 'exclude_user_ids',
-					layout_name: ALayoutIDs.USER,
+					layout_name: 'global_user',
 					api_class: TTAPI.APIUser,
 					multiple: true,
 					basic_search: false,
@@ -7676,7 +7704,7 @@ class ScheduleViewController extends BaseViewController {
 					multiple: true,
 					basic_search: true,
 					adv_search: false,
-					layout_name: ALayoutIDs.OPTION_COLUMN,
+					layout_name: 'global_option_column',
 					form_item_type: FormItemType.AWESOME_BOX
 				} ) );
 
@@ -7687,7 +7715,7 @@ class ScheduleViewController extends BaseViewController {
 						label: $.i18n._( 'Schedule Branch' ),
 						in_column: 1,
 						field: 'schedule_branch_ids',
-						layout_name: ALayoutIDs.BRANCH,
+						layout_name: 'global_branch',
 						api_class: TTAPI.APIBranch,
 						multiple: true,
 						basic_search: true,
@@ -7703,7 +7731,7 @@ class ScheduleViewController extends BaseViewController {
 						label: $.i18n._( 'Schedule Department' ),
 						in_column: 1,
 						field: 'department_ids',
-						layout_name: ALayoutIDs.DEPARTMENT,
+						layout_name: 'global_department',
 						api_class: TTAPI.APIDepartment,
 						multiple: true,
 						basic_search: true,
@@ -7720,7 +7748,7 @@ class ScheduleViewController extends BaseViewController {
 			// 			label: $.i18n._( 'Job' ),
 			// 			in_column: 2,
 			// 			field: 'job_id',
-			// 			layout_name: ALayoutIDs.JOB,
+			// 			layout_name: 'global_job',
 			// 			api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJob : null,
 			// 			multiple: true,
 			// 			basic_search: true,
@@ -7735,7 +7763,7 @@ class ScheduleViewController extends BaseViewController {
 			// 			label: $.i18n._( 'Task' ),
 			// 			in_column: 2,
 			// 			field: 'job_item_id',
-			// 			layout_name: ALayoutIDs.JOB_ITEM,
+			// 			layout_name: 'global_job_item',
 			// 			api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJobItem : null,
 			// 			multiple: true,
 			// 			basic_search: true,

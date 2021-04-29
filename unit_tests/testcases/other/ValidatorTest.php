@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,10 +35,10 @@
  ********************************************************************************/
 
 /**
- * @group DateTime
+ * @group ValidatorTest
  */
-class ValidatorTest extends PHPUnit_Framework_TestCase {
-	public function setUp() {
+class ValidatorTest extends PHPUnit\Framework\TestCase {
+	public function setUp(): void {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		TTDate::setTimeZone( 'Etc/GMT+8', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
@@ -47,14 +47,10 @@ class ValidatorTest extends PHPUnit_Framework_TestCase {
 		//This is needed for testTimeZone() to work with the load balancer.
 		global $db;
 		$db->Execute( 'SELECT 1' );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	function testValidatorIsFloat() {

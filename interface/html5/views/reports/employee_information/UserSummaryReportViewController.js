@@ -1,4 +1,4 @@
-class UserSummaryReportViewController extends ReportBaseViewController {
+export class UserSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 

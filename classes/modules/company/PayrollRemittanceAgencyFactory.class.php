@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -65,7 +65,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 				$retval = [
 						10 => TTi18n::gettext( 'Federal' ),
 						20 => TTi18n::gettext( 'Provincial/State' ),
-						30 => TTi18n::gettext( 'District/Local' ),
+						30 => TTi18n::gettext( 'Local (City/District/County)' ),
 						40 => TTi18n::gettext( '3rd Party' ),
 				];
 				break;
@@ -92,6 +92,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 				$val = $this->parseAgencyID( $params['agency_id'] );
 				$type_id = $val['type_id'];
 				$country = $val['country'];
+				$province = $val['province'];
 				$id = $val['id'];
 
 				switch ( $type_id ) {
@@ -110,7 +111,42 @@ class PayrollRemittanceAgencyFactory extends Factory {
 						break;
 					case 20: //Province/State
 						if ( $country == 'US' && (int)$id == 10 ) {
-							$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'State ID #' ), 'tertiary_identification' => TTi18n::gettext( 'eFile User ID' ) ];
+							switch ( $province ) { // See: http://kb.drakesoftware.com/Site/Browse/W2-State-eFiling-in-CWU
+								//case 'CO': //Does not seem to require State Control Number - https://www.colorado.gov/pacific/sites/default/files/Withholding6.pdf
+								//case 'KS':
+								//case 'VT': //Does not require State Control Number - https://tax.vermont.gov/sites/tax/files/documents/GB-1118.pdf
+								//	$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'State ID #' ), 'secondary_identification' => TTi18n::gettext( 'State Control Code' ) ];
+								//	break;
+								case 'IA':
+									$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'Withholding Permit #' ), 'secondary_identification' => TTi18n::gettext( 'Business eFile Number (BEN)' ), ];
+									break;
+								case 'IN':
+									$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'Taxpayer ID (TID) (13 Digits)' ) ];
+									break;
+								case 'ME':
+									$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'Withholding Account Number' ) ];
+									break;
+								case 'MN':
+									$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'Tax ID Number' ) ];
+									break;
+								case 'NJ':
+									$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'Taxpayer Identification Number' ) ];
+									break;
+								case 'WI':
+									$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'Tax Account Number' ) ];
+									break;
+								//case 'DC':  -- Not 100% certain about these, so allow ID field to be entered still.
+								//case 'GA':
+								//case 'KY':
+								//case 'NE':
+								//case 'ND':
+								//case 'UT':
+								//	$agency_labels[$params['agency_id']] = []; //No State Employer Tax ID, uses FEIN instead most likely?
+								//	break;
+								default:
+									$agency_labels[$params['agency_id']] = [ 'primary_identification' => TTi18n::gettext( 'State ID #' ) ]; //, 'tertiary_identification' => TTi18n::gettext( 'eFile User ID' ) ];
+									break;
+							}
 						}
 
 						break;

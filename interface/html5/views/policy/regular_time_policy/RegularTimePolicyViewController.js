@@ -1,4 +1,4 @@
-class RegularTimePolicyViewController extends BaseViewController {
+export class RegularTimePolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#regular_time_policy_view_container',
@@ -96,7 +96,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 			api_class: TTAPI.APIRegularTimePolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
+			layout_name: 'global_regular_time',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -133,7 +133,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+			layout_name: 'global_contributing_shift_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'contributing_shift_policy_id'
@@ -145,7 +145,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_CODE,
+			layout_name: 'global_pay_code',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_code_id'
@@ -157,7 +157,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+			layout_name: 'global_pay_formula_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_formula_policy_id',
@@ -191,7 +191,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'branch_selection_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.branch_selection_type_array ) );
+		form_item_input.setSourceData( $this.branch_selection_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -204,7 +204,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.BRANCH,
+			layout_name: 'global_branch',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch'
@@ -231,7 +231,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'department_selection_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.department_selection_type_array ) );
+		form_item_input.setSourceData( $this.department_selection_type_array );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -244,7 +244,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department'
@@ -273,7 +273,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_group_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_group_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_group_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -286,12 +286,12 @@ class RegularTimePolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				tree_mode: true,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				set_empty: true,
 				field: 'job_group'
 			} );
 
-			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_group_array ) );
+			form_item_input_1.setSourceData( $this.job_group_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 
@@ -305,7 +305,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -318,7 +318,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				api_class: TTAPI.APIJob,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.JOB,
+				layout_name: 'global_job',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'job'
@@ -342,7 +342,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_item_group_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_group_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_item_group_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -355,12 +355,12 @@ class RegularTimePolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				tree_mode: true,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				set_empty: true,
 				field: 'job_item_group'
 			} );
 
-			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_item_group_array ) );
+			form_item_input_1.setSourceData( $this.job_item_group_array );
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 			v_box.append( form_item );
 
@@ -372,7 +372,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'job_item_selection_type_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_selection_type_array ) );
+			form_item_input.setSourceData( $this.job_item_selection_type_array );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
@@ -385,7 +385,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 			form_item_input_1.AComboBox( {
 				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.JOB_ITEM,
+				layout_name: 'global_job_item',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'job_item'
@@ -545,7 +545,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Code' ),
 				in_column: 1,
 				field: 'pay_code_id',
-				layout_name: ALayoutIDs.PAY_CODE,
+				layout_name: 'global_pay_code',
 				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
@@ -557,7 +557,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Formula Policy' ),
 				in_column: 1,
 				field: 'pay_formula_policy_id',
-				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+				layout_name: 'global_pay_formula_policy',
 				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
@@ -569,7 +569,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -581,7 +581,7 @@ class RegularTimePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

@@ -18,7 +18,7 @@
  *    }
  *
  */
-var RateLimit = function() {
+export var RateLimit = function() {
 };
 
 //attributes

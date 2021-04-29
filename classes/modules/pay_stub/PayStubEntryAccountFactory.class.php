@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,7 @@ class PayStubEntryAccountFactory extends Factory {
 	protected $table = 'pay_stub_entry_account';
 	protected $pk_sequence_name = 'pay_stub_entry_account_id_seq'; //PK Sequence name
 
+	var $pay_stub_entry_account_link_obj = null;
 
 	/**
 	 * @param $name
@@ -170,6 +171,25 @@ class PayStubEntryAccountFactory extends Factory {
 	}
 
 	/**
+	 * @return bool|null
+	 */
+	function getPayStubEntryAccountLinkObject() {
+		if ( is_object( $this->pay_stub_entry_account_link_obj ) ) {
+			return $this->pay_stub_entry_account_link_obj;
+		} else {
+			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
+			$pseallf->getByCompanyId( $this->getCompany() );
+			if ( $pseallf->getRecordCount() > 0 ) {
+				$this->pay_stub_entry_account_link_obj = $pseallf->getCurrent();
+
+				return $this->pay_stub_entry_account_link_obj;
+			}
+
+			return false;
+		}
+	}
+
+	/**
 	 * @return bool|mixed
 	 */
 	function getCompany() {
@@ -231,8 +251,8 @@ class PayStubEntryAccountFactory extends Factory {
 		$psalf = new PayStubAmendmentListFactory();
 
 		$ph = [
-				'pay_stub_account_id'  => $id,
-				'pay_stub_account_idb' => $id,
+				'pay_stub_account_id'  => (string)$id,
+				'pay_stub_account_idb' => (string)$id,
 		];
 
 		$query = '
@@ -245,6 +265,53 @@ class PayStubEntryAccountFactory extends Factory {
 					select	a.id
 					from	' . $psalf->getTable() . ' as a
 					where	a.pay_stub_entry_name_id = ? AND a.deleted = 0
+					LIMIT 1';
+
+		$retval = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $retval, 'In Use... ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+
+		if ( $retval === false ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check to see if this PS account is linked in the PayStubEntryAccountLink so we can prevent it from being deleted if it is.
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isInPSEAccountLink( $id ) {
+		$id = (string)$id; //UUID
+
+		$pseal_obj = $this->getPayStubEntryAccountLinkObject();
+		if ( is_object( $pseal_obj ) ) {
+			if ( in_array( $id, [ (string)$pseal_obj->getTotalGross(), (string)$pseal_obj->getTotalEmployeeDeduction(), (string)$pseal_obj->getTotalEmployerDeduction(), (string)$pseal_obj->getTotalNetPay() ], true ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check to see if this PS account is linked by another PS account as an accrual.
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function isInPSEAccountAccrual( $id ) {
+		$psealf = new PayStubEntryAccountListFactory();
+
+		$ph = [
+				'pay_stub_account_id' => (string)$id,
+		];
+
+		$query = '
+					select	a.id
+					from	' . $psealf->getTable() . ' as a
+					where	a.accrual_pay_stub_entry_account_id = ?
+						AND ( a.deleted = 0 )
 					LIMIT 1';
 
 		$retval = $this->db->GetOne( $query, $ph );
@@ -561,6 +628,18 @@ class PayStubEntryAccountFactory extends Factory {
 		}
 
 		if ( $this->getDeleted() == true ) {
+			if ( $this->getType() == 40 ) { //40=Total
+				$this->Validator->isTRUE( 'in_use',
+						( $this->isInPSEAccountLink( $this->getId() ) == true ? false : true ),
+										  TTi18n::gettext( 'This pay stub account is currently desiginated as a critical system account, unable to delete' ) );
+			}
+
+			if ( $this->getType() == 50 ) { //50=Accrual
+				$this->Validator->isTRUE( 'in_use',
+						( $this->isInPSEAccountAccrual( $this->getId() ) == true ? false : true ),
+										  TTi18n::gettext( 'This pay stub account is currently linked to others as an accrual account, unable to delete' ) );
+			}
+
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
 			// The isInUse() check in preSave() already looks for pay stubs, pay stub amendments, and if those exist it should never get here.
 			$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
@@ -568,7 +647,7 @@ class PayStubEntryAccountFactory extends Factory {
 			if ( $pclf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
 										  false,
-										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by pay codes' ) );
+										  TTi18n::gettext( 'This account is currently in use' ) . ' ' . TTi18n::gettext( 'by pay codes' ) );
 			}
 
 			$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
@@ -576,7 +655,7 @@ class PayStubEntryAccountFactory extends Factory {
 			if ( $cdlf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
 										  false,
-										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by Tax/Deductions' ) );
+										  TTi18n::gettext( 'This account is currently in use' ) . ' ' . TTi18n::gettext( 'by Tax/Deductions' ) );
 			}
 		}
 

@@ -2,8 +2,9 @@
 
 <!--
 Description	T5013 Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020:
+				Add notes for financial details field code 226, 227, 228, 229, 230, 231, 232, 233, 234, 235 
+Version#:	1.17 (version #.yy)
 -->
 
 <xsd:schema xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" 
@@ -229,6 +230,17 @@ Version#:	1.18 (version #.yy)
         property (QXP)    
 224     Prior year reserves from qualified small business corporation shares (QSBCS)    - not a multi-jurisdictional field
 225     Current year reserves from qualified small business corporation shares (QSBCS)  - not a multi-jurisdictional field
+226     Amount repaid pursuant to a legal obligation (for Canadian exploration expenses)  - not a multi-jurisdictional field
+227     Amount repaid pursuant to a legal obligation (for Canadian development expenses)  - not a multi-jurisdictional field
+228     Amount repaid pursuant to a legal obligation (for Canadian oil and gas property expenses)  - not a multi-jurisdictional field
+229     Amount receivable (for Canadian exploration expenses)  - not a multi-jurisdictional field
+230     Amount receivable (for Canadian development expenses)  - not a multi-jurisdictional field
+231     Amount receivable (for Canadian oil and gas property expenses)  - not a multi-jurisdictional field
+232     Proceeds of disposition (for Canadian development expenses)  - not a multi-jurisdictional field
+233     Proceeds of disposition (for Canadian oil and gas property expenses)  - not a multi-jurisdictional field
+234     Accelerated Canadian development expenses  - not a multi-jurisdictional field
+235     Accelerated Canadian oil and gas property expenses  - not a multi-jurisdictional field
+236     Canadian journalism labour tax credit                                           - not a multi - jurisdictional field
 
 			</xsd:documentation> 
 		</xsd:annotation>

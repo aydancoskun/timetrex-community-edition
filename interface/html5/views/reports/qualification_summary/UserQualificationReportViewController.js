@@ -1,4 +1,4 @@
-class UserQualificationReportViewController extends ReportBaseViewController {
+export class UserQualificationReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 

@@ -1,4 +1,4 @@
-class SavedReportViewController extends BaseViewController {
+export class SavedReportViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#saved_report_view_container',
@@ -193,7 +193,7 @@ class SavedReportViewController extends BaseViewController {
 				case 'AccrualBalanceSummaryReport':
 				case 'ActiveShiftReport':
 				case 'AuditTrailReport':
-				case 'Form1099MiscReport':
+				case 'Form1099NecReport':
 				case 'Form940Report':
 				case 'Form941Report':
 				case 'FormW2Report':
@@ -265,7 +265,7 @@ class SavedReportViewController extends BaseViewController {
 				api_class: TTAPI.APIUserReportData,
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.SAVED_REPORT,
+				layout_name: 'global_user_report_data',
 				navigation_mode: true,
 				show_search_inputs: true
 			} );
@@ -334,7 +334,7 @@ class SavedReportViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -346,7 +346,7 @@ class SavedReportViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

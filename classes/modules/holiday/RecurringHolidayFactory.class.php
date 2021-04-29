@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -509,11 +509,15 @@ class RecurringHolidayFactory extends Factory {
 			}
 		}
 
-		$holiday_epoch = TTDate::getNearestWeekDay( $holiday_epoch, $this->getAlwaysOnWeekDay() );
+		if ( is_numeric( $holiday_epoch ) ) {
+			$holiday_epoch = TTDate::getNearestWeekDay( $holiday_epoch, $this->getAlwaysOnWeekDay() );
 
-		Debug::text( 'Next Date for: ' . $this->getName() . ' is: ' . TTDate::getDate( 'DATE+TIME', $holiday_epoch ), __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'Next Date for: ' . $this->getName() . ' is: ' . TTDate::getDate( 'DATE+TIME', $holiday_epoch ), __FILE__, __LINE__, __METHOD__, 10 );
+			return $holiday_epoch;
+		}
 
-		return $holiday_epoch;
+		Debug::text( '  Unable to get next date for holiday!', __FILE__, __LINE__, __METHOD__, 10 );
+		return false;
 	}
 
 	/**

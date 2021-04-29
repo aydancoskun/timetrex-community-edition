@@ -1,4 +1,4 @@
-class T4SummaryReportViewController extends ReportBaseViewController {
+export class T4SummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -132,7 +132,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab3_column1 );
 
 		//Employment Income (Box 14)
@@ -143,7 +143,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'income_include_pay_stub_entry_account'
@@ -160,7 +160,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'income_exclude_pay_stub_entry_account'
@@ -180,7 +180,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'tax_include_pay_stub_entry_account'
@@ -197,7 +197,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'tax_exclude_pay_stub_entry_account'
@@ -217,7 +217,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'employee_cpp_include_pay_stub_entry_account'
@@ -234,7 +234,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'employee_cpp_exclude_pay_stub_entry_account'
@@ -254,7 +254,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'employer_cpp_include_pay_stub_entry_account'
@@ -271,7 +271,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'employer_cpp_exclude_pay_stub_entry_account'
@@ -291,7 +291,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'employee_ei_include_pay_stub_entry_account'
@@ -308,7 +308,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'employee_ei_exclude_pay_stub_entry_account'
@@ -328,7 +328,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'employer_ei_include_pay_stub_entry_account'
@@ -345,7 +345,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'employer_ei_exclude_pay_stub_entry_account'
@@ -365,7 +365,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'ei_earnings_include_pay_stub_entry_account'
@@ -382,7 +382,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'ei_earnings_exclude_pay_stub_entry_account'
@@ -402,7 +402,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'cpp_earnings_include_pay_stub_entry_account'
@@ -419,7 +419,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'cpp_earnings_exclude_pay_stub_entry_account'
@@ -439,7 +439,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'union_dues_include_pay_stub_entry_account'
@@ -456,7 +456,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'union_dues_exclude_pay_stub_entry_account'
@@ -476,7 +476,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'rpp_include_pay_stub_entry_account'
@@ -493,7 +493,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'rpp_exclude_pay_stub_entry_account'
@@ -513,7 +513,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'charity_include_pay_stub_entry_account'
@@ -530,7 +530,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'charity_exclude_pay_stub_entry_account'
@@ -550,7 +550,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pension_adjustment_include_pay_stub_entry_account'
@@ -567,7 +567,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pension_adjustment_exclude_pay_stub_entry_account'
@@ -594,7 +594,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_0_include_pay_stub_entry_account'
@@ -611,7 +611,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_0_exclude_pay_stub_entry_account'
@@ -648,7 +648,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_1_include_pay_stub_entry_account'
@@ -665,7 +665,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_1_exclude_pay_stub_entry_account'
@@ -702,7 +702,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_2_include_pay_stub_entry_account'
@@ -719,7 +719,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_2_exclude_pay_stub_entry_account'
@@ -756,7 +756,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_3_include_pay_stub_entry_account'
@@ -773,7 +773,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_3_exclude_pay_stub_entry_account'
@@ -810,7 +810,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_4_include_pay_stub_entry_account'
@@ -827,7 +827,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_4_exclude_pay_stub_entry_account'
@@ -864,7 +864,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_5_include_pay_stub_entry_account'
@@ -881,7 +881,7 @@ class T4SummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'box_5_exclude_pay_stub_entry_account'

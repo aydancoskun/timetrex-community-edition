@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1450,9 +1450,9 @@ return [
 									],
 							],
 
-							'F1099MISC' => [
-									'form_code'        => '1099-MISC',
-									'form_name'        => TTi18n::getText( '1099-MISC Annual Filing' ),
+							'F1099NEC' => [
+									'form_code'        => '1099-NEC',
+									'form_name'        => TTi18n::getText( '1099-NEC Annual Filing' ),
 									'form_description' => TTi18n::getText( 'Miscellaneous Income' ),
 									'note'             => '',
 									'tax_codes'        => [ 'INCOME', 'SS', 'MEDICARE' ],

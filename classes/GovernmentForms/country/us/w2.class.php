@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,6 +37,11 @@
 
 include_once( 'US.class.php' );
 
+/*
+Concise list to all the states W2 eFile Format Specifications:
+	https://www.realtaxtools.com/state-w2-efile-frequently-asked-questions/
+*/
+
 /**
  * @package GovernmentForms
  */
@@ -44,9 +49,9 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 	public $xml_schema = '1040/IndividualIncomeTax/Common/IRSW2/IRSW2.xsd';
 	public $pdf_template = 'w2.pdf';
 
-	public $page_margins = [ 0, 50 ];    //Adjust to fit in two windowed evelope.
-	public $template_offsets = [ 0, 0 ]; //x, y - Only affects templates.
+	public $page_margins = [ 0, 5 ];    //**NOTE: When printing be sure turn *off* "Fit to Page" or any scaling: x, y - 43pt = 15mm Absolute margins that affect all drawing and templates.
 
+	private $payroll_deduction_obj = null; //Prevent __set() from sticking this into the data property.
 
 	function getOptions( $name ) {
 		$retval = null;
@@ -244,8 +249,8 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				],
 				'trade_name'      => [
 						'coordinates' => [
-								'x'      => 38,
-								'y'      => 92,
+								'x'      => 48,  //Make sure there is enough spacing to fit in double windowed envelope with buffer.
+								'y'      => 102, //Make sure there is enough spacing to fit in double windowed envelope with buffer.
 								'h'      => 15,
 								'w'      => 280,
 								'halign' => 'L',
@@ -254,8 +259,8 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				'company_address' => [
 						'function'    => [ 'draw' => [ 'filterCompanyAddress', 'drawNormal' ] ],
 						'coordinates' => [
-								'x'      => 38,
-								'y'      => 107,
+								'x'      => 48,
+								'y'      => 117,
 								'h'      => 48,
 								'w'      => 280,
 								'halign' => 'L',
@@ -280,7 +285,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 
 				'first_name'  => [
 						'coordinates' => [
-								'x'      => 38,
+								'x'      => 48,
 								'y'      => 189,
 								'h'      => 15,
 								'w'      => 122,
@@ -290,7 +295,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				'middle_name' => [
 						'function'    => [ 'draw' => [ 'filterMiddleName', 'drawNormal' ] ],
 						'coordinates' => [
-								'x'      => 162,
+								'x'      => 152,
 								'y'      => 189,
 								'h'      => 15,
 								'w'      => 10,
@@ -299,7 +304,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				],
 				'last_name'   => [
 						'coordinates' => [
-								'x'      => 175,
+								'x'      => 185,
 								'y'      => 189,
 								'h'      => 15,
 								'w'      => 127,
@@ -309,8 +314,8 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				'address'     => [
 						'function'    => [ 'draw' => [ 'filterAddress', 'drawNormal' ] ],
 						'coordinates' => [
-								'x'      => 38,
-								'y'      => 205,
+								'x'      => 48,  //Make sure there is enough spacing to fit in double windowed envelope with buffer.
+								'y'      => 225, //Make sure there is enough spacing to fit in double windowed envelope with buffer.
 								'h'      => 68,
 								'w'      => 280,
 								'halign' => 'L',
@@ -982,147 +987,282 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		return false;
 	}
 
-	function _compileRA() {
-		$line[] = 'RA';                                                                                                                                               //RA Record
-		$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                                                                                   //EIN
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->efile_user_id ), 8, 'AN' );                                                                   //User ID
-		$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                    //Software Vendor code
-		$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                    //Blank
-		$line[] = '0';                                                                                                                                                //Resub
-		$line[] = $this->padRecord( '', 6, 'AN' );                                                                                                                    //Blank
-		$line[] = '98';                                                                                                                                               //Software Code
-		$line[] = $this->padRecord( $this->trade_name, 57, 'AN' );                                                                                                    //Company Name
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address2 ), 22, 'AN' );                                                               //Company Location Address
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN' );                                                               //Company Delivery Address
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN' );                                                                   //Company City
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN' );                                                                   //Company State
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN' );                                                                //Company Zip Code
-		$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                    //Company Zip Code Extension
-		$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                    //Blank
-		$line[] = $this->padRecord( '', 23, 'AN' );                                                                                                                   //Foreign State/Province
-		$line[] = $this->padRecord( '', 15, 'AN' );                                                                                                                   //Foreign Postal Code
-		$line[] = $this->padRecord( '', 2, 'AN' );                                                                                                                    //Company Country, fill with blanks if its the US
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->trade_name ), 57, 'AN' );                                                                     //Submitter organization.
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( ( $this->company_address2 != '' ) ? $this->company_address2 : $this->company_address1 ), 22, 'AN' ); //Submitter Location Address
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN' );                                                               //Submitter Delivery Address
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN' );                                                                   //Submitter City
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN' );                                                                   //Submitter State
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN' );                                                                //Submitter Zip Code
-		$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                    //Submitter Zip Code Extension
-		$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                    //Blank
-		$line[] = $this->padRecord( '', 23, 'AN' );                                                                                                                   //Submitter Foreign State/Province
-		$line[] = $this->padRecord( '', 15, 'AN' );                                                                                                                   //Submitter Foreign Postal Code
-		$line[] = $this->padRecord( '', 2, 'AN' );                                                                                                                    //Submitter Country, fill with blanks if its the US
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->contact_name ), 27, 'AN' );                                                                   //Contact Name
-		$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_phone ), 15, 'AN' );                                                                       //Contact Phone
-		$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_phone_ext ), 5, 'AN' );                                                                    //Contact Phone Ext
-		$line[] = $this->padRecord( '', 3, 'AN' );                                                                                                                    //Blank
-		$line[] = $this->padRecord( $this->contact_email, 40, 'AN' );                                                                                                 //Contact Email
-		$line[] = $this->padRecord( '', 3, 'AN' );                                                                                                                    //Blank
-		$line[] = $this->padRecord( '', 10, 'AN' );                                                                                                                   //Contact Fax
-		$line[] = $this->padRecord( '', 1, 'AN' );                                                                                                                    //Blank
-		$line[] = $this->padRecord( 'L', 1, 'AN' );                                                                                                                   //PreParers Code
-		$line[] = $this->padRecord( '', 12, 'AN' );                                                                                                                   //Blank
+	function _compileRA() { //RA (Submitter) Record
+		if ( in_array( strtoupper( $this->efile_state ), [ 'AL' ] ) ) { //Skip for eFiling in these states.
+			return false;
+		}
+
+		$line[] = 'RA';                                                                                                                                                        //RA Record
+
+		Debug::Text( 'RA Record State: ' . $this->efile_state, __FILE__, __LINE__, __METHOD__, 10 );
+		switch ( strtolower( $this->efile_state ) ) {
+			case 'ny': //New York
+				$efile_user_id = null;
+				$is_resub = null;
+
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                                                                                     //EIN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $efile_user_id ), 8, 'AN' );                                                                           //User ID
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                      //Software Vendor code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( $is_resub, 1, 'AN' );                                                                                                               //Resub
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                                                                                      //Software Code
+				$line[] = $this->padRecord( '', 57, 'AN' );                                                                                                                     //Company Name
+				$line[] = $this->padRecord( '', 22, 'AN' );                                                                                                                     //Company Location Address
+				$line[] = $this->padRecord( '', 22, 'AN' );                                                                                                                     //Company Delivery Address
+				$line[] = $this->padRecord( '', 22, 'AN' );                                                                                                                     //Company City
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                                                                                      //Company State
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                      //Company Zip Code
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                      //Company Zip Code Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                                                                                     //Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                                                                                     //Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                                                                                      //Company Country, fill with blanks if its the US
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->trade_name ), 57, 'AN' );                                                                       //Submitter organization.
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( ( $this->company_address2 != '' ) ? $this->company_address2 : $this->company_address1 ), 22, 'AN' );   //Submitter Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN' );                                                                 //Submitter Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN' );                                                                     //Submitter City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN' );                                                                     //Submitter State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN' );                                                                  //Submitter Zip Code
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                      //Submitter Zip Code Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                                                                                     //Submitter Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                                                                                     //Submitter Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                                                                                      //Submitter Country, fill with blanks if its the US
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->contact_name ), 27, 'AN' );                                                                     //Contact Name
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_phone ), 15, 'AN' );                                                                         //Contact Phone
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_phone_ext ), 5, 'AN' );                                                                      //Contact Phone Ext
+				$line[] = $this->padRecord( '', 3, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( $this->contact_email, 40, 'AN' );                                                                                                   //Contact Email
+				$line[] = $this->padRecord( '', 3, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_fax ), 10, 'AN' );                                                                           //Contact Fax
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                                                                                      //PreParers Code
+				$line[] = $this->padRecord( '', 12, 'AN' );                                                                                                                     //Blank
+				break;
+			default:
+				$is_resub = 0;
+
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                                                                                     //EIN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->efile_user_id ), 8, 'AN' );                                                                     //User ID
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                      //Software Vendor code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( $is_resub, 1, 'AN' );                                                                                                               //Resub
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( '98', 2, 'AN' );                                                                                                                    //Software Code
+				$line[] = $this->padRecord( $this->trade_name, 57, 'AN' );                                                                                                      //Company Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address2 ), 22, 'AN' );                                                                 //Company Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN' );                                                                 //Company Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN' );                                                                     //Company City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN' );                                                                     //Company State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN' );                                                                  //Company Zip Code
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                      //Company Zip Code Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                                                                                     //Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                                                                                     //Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                                                                                      //Company Country, fill with blanks if its the US
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->trade_name ), 57, 'AN' );                                                                       //Submitter organization.
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( ( $this->company_address2 != '' ) ? $this->company_address2 : $this->company_address1 ), 22, 'AN' );   //Submitter Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN' );                                                                 //Submitter Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN' );                                                                     //Submitter City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN' );                                                                     //Submitter State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN' );                                                                  //Submitter Zip Code
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                                                                                      //Submitter Zip Code Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                                                                                     //Submitter Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                                                                                     //Submitter Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                                                                                      //Submitter Country, fill with blanks if its the US
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->contact_name ), 27, 'AN' );                                                                     //Contact Name
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_phone ), 15, 'AN' );                                                                         //Contact Phone
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_phone_ext ), 5, 'AN' );                                                                      //Contact Phone Ext
+				$line[] = $this->padRecord( '', 3, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( $this->contact_email, 40, 'AN' );                                                                                                   //Contact Email
+				$line[] = $this->padRecord( '', 3, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_fax ), 10, 'AN' );                                                                           //Contact Fax
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                                                                                      //Blank
+				$line[] = $this->padRecord( 'L', 1, 'AN' );                                                                                                                     //PreParers Code
+				$line[] = $this->padRecord( '', 12, 'AN' );                                                                                                                     //Blank
+				break;
+		}
 
 		$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+
+		if ( $this->debug == false && strlen( $retval ) != 512 ) {
+			Debug::Text( 'ERROR! RA Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
+		}
+
 		Debug::Text( 'RA Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
-	function _compileRE() {
-		$line[] = 'RE';                                                                                 //RE Record [1-2]
-		$line[] = $this->padRecord( $this->stripNonNumeric( $this->year ), 4, 'N' );                    //Tax Year [3-6]
-		$line[] = $this->padRecord( '', 1, 'AN' );                                                      //Agent Indicator [7-8]
-		$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                     //EIN [9-17]
-		$line[] = $this->padRecord( '', 9, 'AN' );                                                      //Agent for EIN
-		$line[] = $this->padRecord( '0', 1, 'N' );                                                      //Terminating Business
-		$line[] = $this->padRecord( '', 4, 'AN' );                                                      //Establishment Number
-		$line[] = $this->padRecord( '', 9, 'AN' );                                                      //Other EIN
-		$line[] = $this->padRecord( $this->trade_name, 57, 'AN' );                                      //Company Name [40-96]
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address2 ), 22, 'AN' ); //Company Location Address [97-118]
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN' ); //Company Delivery Address [119-140]
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN' );     //Company City [141-162]
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN' );     //Company State [163-164]
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN' );  //Company Zip Code [165-169]
-		$line[] = $this->padRecord( '', 4, 'AN' );                                                      //Company Zip Code Extension [170-173]
-		$line[] = $this->padRecord( strtoupper( $this->kind_of_employer ), 1, 'AN' );                   //Kind of Employer
-		$line[] = $this->padRecord( '', 4, 'AN' );                                                      //Blank
-		$line[] = $this->padRecord( '', 23, 'AN' );                                                     //Foreign State/Province
-		$line[] = $this->padRecord( '', 15, 'AN' );                                                     //Foreign Postal Code
-		$line[] = $this->padRecord( '', 2, 'AN' );                                                      //Country, fill with blanks if its the US
-		$line[] = $this->padRecord( 'R', 1, 'AN' );                                                     //Employment Code - 941 Form
-		$line[] = $this->padRecord( '', 1, 'AN' );                                                      //Tax Jurisdiction
-		$line[] = $this->padRecord( ( $this->l13c == '' ) ? 0 : 1, 1, 'N' );                            //Third Party Sick Pay
-		$line[] = $this->padRecord( '', 291, 'AN' );                                                    //Blank
+	function _compileRE() {  //RE (Employer) Record
+		if ( in_array( strtoupper( $this->efile_state ), [ 'AL' ] ) ) { //Skip for eFiling in these states.
+			return false;
+		}
+
+		switch ( strtolower( $this->efile_state ) ) {
+			case 'ny': //New York
+				$line[] = 'RE';                                                                                   //(1-2) RE Record
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                        //(3-6) Tax Year
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                        //(7) Agent Indicator
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                       //(8-16 ) EIN
+				$line[] = $this->padRecord( '', 9, 'AN' );                                                        //(17-25) Agent for EIN
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                        //(26) Terminating Business
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                        //(27-30) Establishment Number
+				$line[] = $this->padRecord( '', 9, 'AN' );                                                        //(31-39) Other EIN
+				$line[] = $this->padRecord( $this->trade_name, 57, 'AN' );                                        //(40-96) Company Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address2 ), 22, 'AN' );   //(97-118) Company Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN' );   //(119-140) Company Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN' );       //(141-162) Company City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN' );       //(163-164) Company State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN' );    //(165-169) Company Zip Code
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                        //(170-173) Company Zip Code Extension
+				$line[] = $this->padRecord( '42020', 5, 'AN' );                                                   //(174) Kind of Employer ???????
+				//$line[] = $this->padRecord( '', 4, 'AN' );                                                      //(175-178) Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                       //(179-201) Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                       //(202-216) Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                        //(217-218) Country, fill with blanks if its the US
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                        //(219) Employment Code - 941 Form
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                        //(220) Tax Jurisdiction
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                        //(221) Third Party Sick Pay
+				$line[] = $this->padRecord( '', 27, 'AN' );                                                       //(222-248) Contact Name
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                       //(249-263) Contact Phone
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                        //(264-268) Contact Phone Ext
+				$line[] = $this->padRecord( '', 10, 'AN' );                                                       //(269-278) Contact Fax
+				$line[] = $this->padRecord( '', 40, 'AN' );                                                       //(279-318) Contact Email
+				$line[] = $this->padRecord( '', 194, 'AN' );                                                      //(319-512) Blank
+				break;
+			default:
+				$line[] = 'RE';                                                                                 //(1-2) RE Record
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->year ), 4, 'N' );                    //(3-6) Tax Year
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                      //(7) Agent Indicator
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                     //(8-16 ) EIN
+				$line[] = $this->padRecord( '', 9, 'AN' );                                                      //(17-25) Agent for EIN
+				$line[] = $this->padRecord( '0', 1, 'N' );                                                      //(26) Terminating Business
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                      //(27-30) Establishment Number
+				$line[] = $this->padRecord( '', 9, 'AN' );                                                      //(31-39) Other EIN
+				$line[] = $this->padRecord( $this->trade_name, 57, 'AN' );                                      //(40-96) Company Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address2 ), 22, 'AN' ); //(97-118) Company Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN' ); //(119-140) Company Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN' );     //(141-162) Company City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN' );     //(163-164) Company State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN' );  //(165-169) Company Zip Code
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                      //(170-173) Company Zip Code Extension
+				$line[] = $this->padRecord( strtoupper( $this->kind_of_employer ), 1, 'AN' );                   //(174) Kind of Employer
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                      //(175-178) Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                     //(179-201) Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                     //(202-216) Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                      //(217-218) Country, fill with blanks if its the US
+				$line[] = $this->padRecord( 'R', 1, 'AN' );                                                     //(219) Employment Code - 941 Form
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                      //(220) Tax Jurisdiction
+				$line[] = $this->padRecord( ( $this->l13c == '' ) ? 0 : 1, 1, 'N' );                            //(221) Third Party Sick Pay
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->contact_name ), 27, 'AN' );     //(222-248) Contact Name
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_phone ), 15, 'AN' );         //(249-263) Contact Phone
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_phone_ext ), 5, 'AN' );      //(264-268) Contact Phone Ext
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->contact_fax ), 10, 'AN' );           //(269-278) Contact Fax
+				$line[] = $this->padRecord( $this->contact_email, 40, 'AN' );                                   //(279-318) Contact Email
+				$line[] = $this->padRecord( '', 194, 'AN' );                                                    //(319-512) Blank
+				break;
+		}
 
 		$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+
+		if ( $this->debug == false && strlen( $retval ) != 512 ) {
+			Debug::Text( 'ERROR! RE Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
+		}
+
 		Debug::Text( 'RE Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
-	function _compileRW() {
-		$line[] = 'RW';                                                                                    //RW Record
-		$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                        //SSN
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );          //First Name
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' );         //Middle Name
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );           //Last Name
-		$line[] = $this->padRecord( '', 4, 'AN' );                                                         //Suffix
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );            //Location Address
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );            //Delivery Address
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );                //City
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );                //State
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );             //Zip
-		$line[] = $this->padRecord( '', 4, 'AN' );                                                         //Zip Extension
-		$line[] = $this->padRecord( '', 5, 'AN' );                                                         //Blank
-		$line[] = $this->padRecord( '', 23, 'AN' );                                                        //Foreign State/Province
-		$line[] = $this->padRecord( '', 15, 'AN' );                                                        //Foreign Postal Code
-		$line[] = $this->padRecord( '', 2, 'AN' );                                                         //Country, fill with blanks if its the US
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l1 ), 11, 'N' );                          //(188-198) Wages, Tips and Other Compensation
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l2 ), 11, 'N' );                          //(199-209) Federal Income Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l3 ), 11, 'N' );                          //(210-220) Social Security Wages
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l4 ), 11, 'N' );                          //(221-231) Social Security Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l5 ), 11, 'N' );                          //(232-242) Medicare Wages and Tips
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l6 ), 11, 'N' );                          //(243-253) Medicare Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l7 ), 11, 'N' );                          //(254-264) Social Security Tips
-		$line[] = $this->padRecord( '', 11, 'N' );                                                         //Advanced EIC
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l10 ), 11, 'N' );                         //(276-286) Dependant Care Benefits
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'D' ) ), 11, 'N' );  //Deferred Compensation Contributions to 401K //Code D in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'E' ) ), 11, 'N' );  //Deferred Compensation Contributions to 403(b) //Code E in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'F' ) ), 11, 'N' );  //Deferred Compensation Contributions to 408(k)(6) //Code F in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'G' ) ), 11, 'N' );  //Deferred Compensation Contributions to 457(b) //Code G in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'H' ) ), 11, 'N' );  //(331-341) Deferred Compensation Contributions to 501(c)(18)(D) //Code H in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( '', 11, 'AN' );                                                        //(342-352) Blank
-		$line[] = $this->padRecord( '', 11, 'N' );                                                         //Non-qualified Plan Section 457
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'W' ) ), 11, 'N' );  //(364-374) Employer Contributions to Health Savings Account //Code W in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( '', 11, 'N' );                                                         //Non-qualified NOT Plan Section 457
-		$line[] = $this->padRecord( '', 11, 'N' );                                                         //Non taxable combat pay
-		$line[] = $this->padRecord( '', 11, 'AN' );                                                        //Blank
-		$line[] = $this->padRecord( '', 11, 'N' );                                                         //Employer Cost of Premiums for Group Term Life Insurance over $50K
-		$line[] = $this->padRecord( '', 11, 'N' );                                                         //Income from the Exercise of Nonstatutory Stock Options
-		$line[] = $this->padRecord( '', 11, 'N' );                                                         //Deferrals Under a Section 409A non-qualified plan
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'AA' ) ), 11, 'N' ); //(441-451) Desiginated Roth Contributions under a section 401K //Code AA in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'BB' ) ), 11, 'N' ); //(452-462) Desiginated Roth Contributions under a section 403B //Code BB in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'DD' ) ), 11, 'N' ); //(463-473) Cost of Employer Sponsored Health Coverage //Code DD in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( '', 11, 'N' );                                                         //(474-484) Blank
-		$line[] = $this->padRecord( '', 1, 'AN' );                                                         //(485) Blank
-		$line[] = $this->padRecord( '0', 1, 'N' );                                                         //(486) Statutory Employee
-		$line[] = $this->padRecord( '', 1, 'AN' );                                                         //(487) Blank
-		$line[] = $this->padRecord( '0', 1, 'N' );                                                         //(488) Retirement Plan Indicator
-		$line[] = $this->padRecord( ( $this->l13c == '' ) ? 0 : 1, 1, 'N' );                               //(489) 3rd Party Sick Pay Indicator
-		$line[] = $this->padRecord( '', 23, 'AN' );                                                        //(490-512) Blank
+	function _compileRW() { //RW (Employee) Record
+		if ( in_array( strtoupper( $this->efile_state ), [ 'NY', 'AL', 'CO', 'CT', 'DE', 'MA', 'PA', 'VA' ] ) ) { //Skip for eFiling in these states.
+			return false;
+		}
+
+		switch ( strtolower( $this->efile_state ) ) {
+			default:
+				$line[] = 'RW';                                                                                    //RW Record
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                        //SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );          //First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' );         //Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );           //Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                         //Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );            //Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );            //Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );                //City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );                //State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );             //Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                         //Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                         //Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                        //Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                        //Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                         //Country, fill with blanks if its the US
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l1 ), 11, 'N' );                          //(188-198) Wages, Tips and Other Compensation
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l2 ), 11, 'N' );                          //(199-209) Federal Income Tax
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l3 ), 11, 'N' );                          //(210-220) Social Security Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l4 ), 11, 'N' );                          //(221-231) Social Security Tax
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l5 ), 11, 'N' );                          //(232-242) Medicare Wages and Tips
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l6 ), 11, 'N' );                          //(243-253) Medicare Tax
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l7 ), 11, 'N' );                          //(254-264) Social Security Tips
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                        //(265-275) Blank
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l10 ), 11, 'N' );                         //(276-286) Dependant Care Benefits
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'D' ) ), 11, 'N' );  //Deferred Compensation Contributions to 401K //Code D in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'E' ) ), 11, 'N' );  //Deferred Compensation Contributions to 403(b) //Code E in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'F' ) ), 11, 'N' );  //Deferred Compensation Contributions to 408(k)(6) //Code F in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'G' ) ), 11, 'N' );  //Deferred Compensation Contributions to 457(b) //Code G in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'H' ) ), 11, 'N' );  //(331-341) Deferred Compensation Contributions to 501(c)(18)(D) //Code H in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                        //(342-352) Blank
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l11 ), 11, 'N' );                         //(353-363) Non-qualified Plan Section 457
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'W' ) ), 11, 'N' );  //(364-374) Employer Contributions to Health Savings Account //Code W in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( '', 11, 'N' );                                                         //Non-qualified NOT Plan Section 457
+				$line[] = $this->padRecord( '', 11, 'N' );                                                         //Non taxable combat pay
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                        //Blank
+				$line[] = $this->padRecord( '', 11, 'N' );                                                         //Employer Cost of Premiums for Group Term Life Insurance over $50K
+				$line[] = $this->padRecord( '', 11, 'N' );                                                         //Income from the Exercise of Nonstatutory Stock Options
+				$line[] = $this->padRecord( '', 11, 'N' );                                                         //Deferrals Under a Section 409A non-qualified plan
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'AA' ) ), 11, 'N' ); //(441-451) Desiginated Roth Contributions under a section 401K //Code AA in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'BB' ) ), 11, 'N' ); //(452-462) Desiginated Roth Contributions under a section 403B //Code BB in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'DD' ) ), 11, 'N' ); //(463-473) Cost of Employer Sponsored Health Coverage //Code DD in any of the Box 12(a throug d).
+				$line[] = $this->padRecord( '', 11, 'N' );                                                         //(474-484) Blank
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                         //(485) Blank
+				$line[] = $this->padRecord( ( ( $this->l13a == '' ) ? 0 : 1 ), 1, 'N' );                           //(486) Statutory Employee
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                         //(487) Blank
+				$line[] = $this->padRecord( ( ( $this->l13b == '' ) ? 0 : 1 ), 1, 'N' );                           //(488) Retirement Plan Indicator
+				$line[] = $this->padRecord( ( ( $this->l13c == '' ) ? 0 : 1 ), 1, 'N' );                           //(489) 3rd Party Sick Pay Indicator
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                        //(490-512) Blank
+				break;
+		}
 
 		$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+
+		if ( $this->debug == false && strlen( $retval ) != 512 ) {
+			Debug::Text( 'ERROR! RW Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
+		}
+
 		Debug::Text( 'RW Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
 	//ID is the state identifier like: a, b, c, d,...
-	function _compileRS( $id ) {
+	function _compileRS( $id ) { //RS (State) Record
+		if ( $this->efile_state == '' ) { //Federal filing does not need any RS record at all.
+			return false;
+		}
+
 		$l15_state = 'l15' . $id . '_state';
 		$l15_state_id = 'l15' . $id . '_state_id';
+		$l15_state_control_number = 'l15' . $id . '_state_control_number';
+
 		$l16 = 'l16' . $id;
 		$l17 = 'l17' . $id;
 		$l18 = 'l18' . $id;
@@ -1133,10 +1273,109 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 			return false;
 		}
 
+		if ( strtolower( $this->efile_state ) != strtolower( $this->$l15_state ) ) {
+			Debug::Text( ' eFile Format for State: ' . $this->efile_state . ' Employee Record State: ' . $this->$l15_state, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
+		}
 
 		Debug::Text( 'RS Record State: ' . $this->efile_state, __FILE__, __LINE__, __METHOD__, 10 );
 		switch ( strtolower( $this->efile_state ) ) {
-			case 'ga': //Georgia
+			case 'al': //Alabama
+				//Withholding Number for State format is the State ID number.
+				$line[] = 'RS';                                                                               //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                    //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                    //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                   //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );     //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' );    //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );      //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                    //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( '', 22, 'AN' );                                                   //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( '', 22, 'AN' );                                                   //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( '', 22, 'AN' );                                                   //(117-138)[22]: City
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                    //(139-140)[2]: State
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                    //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                    //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                    //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                   //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                   //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                    //(193-194)[2]: Country, fill with blanks if its the US
+
+				//Unemployment reporting
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                    //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                    //(197-202)[6]: Reporting Period
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                   //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                   //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                    //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                    //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                    //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                    //(243-247)[5]: Blank
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 10, 'N' );        //(248-257)[10]: State Employer Account Number - For AL: Numbers below 700000 – right justify and zero fill. Numbers 700000 and above – R followed by nine digits.
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                   //(258-266)[9]: FEIN
+				$line[] = $this->padRecord( '', 7, 'AN' );                                                    //(267-273)[7]: Blank
+
+				//Income Tax Reporting
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );       //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                   //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                   //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( $this->removeDecimal( $this->l2 ), 10, 'N' );                     //(298-307)[10]: AL: Federal Income Tax Withheld
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                    //(308)[1]: Tax Type Code [C=City, D=County, E=School District, F=Other]
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                   //(309-319)[11]: Local Wages
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                   //(320-330)[11]: Local Income Tax
+				$line[] = $this->padRecord( '', 7, 'AN' );                                                    //(331-337)[7]: State Control Number
+				$line[] = $this->padRecord( 0, 11, 'N' );                                                     //(338-348)[11]: AL: Other income (1099, W2G, etc.), columns 338-348. (Only use this field to report other income reported on 1099, W2G, etc. from which Alabama tax was withheld. Zero fill if not applicable.)
+				$line[] = $this->padRecord( '', 44, 'AN' );                                                   //(349-392)[44]: Supplemental Data 1
+				$line[] = $this->padRecord( $this->year, 4, 'N' );                                            //(393-396)[4]: AL: Payment Year
+				$line[] = $this->padRecord( '', 116, 'AN' );                                                  //(397-512)[116]: Supplemental Data 1
+				break;
+			case 'ar': //Arkansas - https://www.dfa.arkansas.gov/images/uploads/incomeTaxOffice/Mag_Media.pdf
+				//Withholding Number for State format is the State ID number.
+				$line[] = 'RS';                                                                               //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );       //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                    //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                   //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );     //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' );    //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );      //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                    //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );       //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );       //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );           //(117-138)[22]: City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );           //(139-140)[2]: State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );        //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                    //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                    //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                   //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                   //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                    //(193-194)[2]: Country, fill with blanks if its the US
+
+				//Unemployment reporting
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                    //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '122020', 6, 'AN' );                                              //(197-202)[6]: AR: Last month and four digit year for the calendar quarter. Unemployment only, but might be required?
+				$line[] = $this->padRecord( '', 11, 'N' );                                                    //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'N' );                                                    //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'N' );                                                     //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                    //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                    //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                    //(243-247)[5]: Blank
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 20, 'AN' );                 //(248-267)[20]: AR: FEIN
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                    //(268-273)[6]: Blank
+
+				//Income Tax Reporting
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );       //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                   //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                   //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( '', 10, 'AN' );                                                   //(298-307)[10]: Other State Data
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                    //(308)[1]: Tax Type Code [C=City, D=County, E=School District, F=Other]
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                   //(309-319)[11]: Local Wages
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                   //(320-330)[11]: Local Income Tax
+				$line[] = $this->padRecord( '', 7, 'AN' );                                                    //(331-337)[7]: State Control Number
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 75, 'AN' );                 //(338-412)[75]: AR: Same as 248-267. EIN from RE Record.
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 75, 'AN' );       //(413-487)[75]: AR: 11 digit State of Arkansas ID number. Omit hypens.
+				$line[] = $this->padRecord( '', 25, 'AN' );                                                   //(488-512)[25]: Blank
+				break;
+			case 'ga': //Georgia -- Has Local Taxes
 				// File Format Specifications: https://dor.georgia.gov/sites/dor.georgia.gov/files/related_files/document/Federal%20Format%20Specs%202015.pdf
 				$line[] = 'RS';                                                                                             //RS Record
 				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );                     //State Code
@@ -1160,8 +1399,8 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				//Unemployment reporting
 				$line[] = $this->padRecord( '', 2, 'AN' );                                                                  //Optional Code
 				$line[] = $this->padRecord( '', 6, 'AN' );                                                                  //Reporting Period
-				$line[] = $this->padRecord( '', 11, 'AN' );                                                                 //State Quarterly Unemployment Total
-				$line[] = $this->padRecord( '', 11, 'AN' );                                                                 //State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 11, 'N' );                                                                  //State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'N' );                                                                  //State Quarterly Unemployment Insurance
 				$line[] = $this->padRecord( '', 2, 'AN' );                                                                  //Number of weeks worked
 				$line[] = $this->padRecord( '', 8, 'AN' );                                                                  //Date first employed
 				$line[] = $this->padRecord( '', 8, 'AN' );                                                                  //Date of separation
@@ -1173,7 +1412,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );                     //State Code
 				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                                 //State Taxable Wages
 				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                                 //State income tax
-				$line[] = $this->padRecord( '12/31/' . $this->year, 10, 'N' );                                              //Period End Date (last day of the year)
+				$line[] = $this->padRecord( '12/31/' . $this->year, 10, 'AN' );                                             //Period End Date (last day of the year)
 				$line[] = $this->padRecord( '', 1, 'AN' );                                                                  //Tax Type Code
 				$line[] = $this->padRecord( '', 11, 'AN' );                                                                 //Local Wages (blank)
 				$line[] = $this->padRecord( '', 11, 'AN' );                                                                 //Local Income Tax (blank)
@@ -1190,10 +1429,104 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				$line[] = $this->padRecord( '', 25, 'AN' );                                                                 //Blank
 
 				break;
+			case 'ks': //Kansas - https://www.ksrevenue.org/pdf/K-2MT.pdf
+				$line[] = 'RS';                                                                                      //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );              //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                           //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                          //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );            //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' );           //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );             //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                           //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );              //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );              //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );                  //(117-138)[22]: City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );                  //(139-140)[2]: State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );               //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                           //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                           //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                          //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                          //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                           //(193-194)[2]: Country, fill with blanks if its the US
+
+				//Unemployment reporting
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                           //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                           //(197-202)[6]: Reporting Period
+				$line[] = $this->padRecord( '', 11, 'N' );                                                           //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'N' );                                                           //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                           //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                           //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                           //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                           //(243-247)[5]: Blank
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->$l15_state_id ), 20, 'AN' );         //(248-267)[20]: State Employer Account Number
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                           //(268-273)[6]: Blank
+
+
+				//Income Tax Reporting
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );              //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                          //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                          //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( '', 10, 'AN' );                                                          //(298-307)[10]: Other State Data
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                           //(308)[1]: Tax Type Code [C=City, D=County, E=School District, F=Other]
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                          //(309-319)[11]: Local Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                          //(320-330)[11]: Local Income Tax
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_control_number ), 7, 'AN' );   //(331-337)[7]: State Control Number
+				$line[] = $this->padRecord( $this->removeDecimal( $this->getL14AmountByName( 'KPER' ) ), 11, 'N' );  //(338-348)[11]: KS: Employee Contribution to KPERS, KP & F and Judges - "KPER" or "KPERS" should appear on W2 under Box 14. - https://www.ksrevenue.org/kpers.html
+				$line[] = $this->padRecord( '', 64, 'AN' );                                                          //(349-412)[64]: Supplemental Data 1
+				$line[] = $this->padRecord( '', 75, 'AN' );                                                          //(413-487)[75]: Supplemental Data 2
+				$line[] = $this->padRecord( '', 25, 'AN' );                                                          //(488-512)[25]: Blank
+				break;
+			case 'ma': //Massachusetts
+				//Withholding Number for State format is the State ID number.
+				$line[] = 'RS';                                                                            //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );  //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' ); //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );   //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );    //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );    //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );        //(117-138)[22]: City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );        //(139-140)[2]: State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );     //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(193-194)[2]: Country, fill with blanks if its the US
+
+				//Unemployment reporting
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //(197-202)[6]: Reporting Period
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                 //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                 //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(243-247)[5]: Blank
+				$line[] = $this->padRecord( '', 20, 'AN' );                                                //(248-267)[20]: State Employer Account Number
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //(268-273)[6]: Blank
+
+				//Income Tax Reporting
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( '', 10, 'AN' );                                                //(298-307)[10]: Other State Data
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                 //(308)[1]: Tax Type Code [C=City, D=County, E=School District, F=Other]
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                //(309-319)[11]: Local Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                //(320-330)[11]: Local Income Tax
+				$line[] = $this->padRecord( '', 7, 'AN' );                                                 //(331-337)[7]: State Control Number
+				$line[] = $this->padRecord( '', 75, 'AN' );                                                //(338-412)[75]: Supplemental Data 1
+				$line[] = $this->padRecord( '', 75, 'AN' );                                                //(413-487)[75]: Supplemental Data 2
+				$line[] = $this->padRecord( '', 25, 'AN' );                                                //(488-512)[25]: Blank
+				break;
 			case 'oh': //Ohio - They share with Federal SSA. This is for RITA/Local format instead. It does not include school district taxes.
 				//File format specifications: https://www.tax.ohio.gov/Portals/0/employer_withholding/2019%20tax%20year/2018_W2_Specs_v3.pdf
 				//Ohio Regional for City reporting.
-				//File format specifications: https://cdn.ritaohio.com/Media/700682/2018%20W-2%20SPECS.pdf
+				//File format specifications: https://www.ritaohio.com/Media/701193/2020%20W-2%20SPECS.pdf
+				//   List of codes and tax rates: https://ritaohio.com/TaxRatesTable
 				$municipality_code = false;
 				$municipality_name = null;
 				$tax_type = 'C';
@@ -1235,8 +1568,8 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					//Unemployment reporting: Starts at 194
 					$line[] = $this->padRecord( '', 2, 'AN' );                                                 //Optional Code
 					$line[] = $this->padRecord( '', 6, 'AN' );                                                 //Reporting Period
-					$line[] = $this->padRecord( '', 11, 'AN' );                                                //State Quarterly Unemployment Total
-					$line[] = $this->padRecord( '', 11, 'AN' );                                                //State Quarterly Unemployment Insurance
+					$line[] = $this->padRecord( '', 11, 'N' );                                                 //State Quarterly Unemployment Total
+					$line[] = $this->padRecord( '', 11, 'N' );                                                 //State Quarterly Unemployment Insurance
 					$line[] = $this->padRecord( '', 2, 'AN' );                                                 //Number of weeks worked
 					$line[] = $this->padRecord( '', 8, 'AN' );                                                 //Date first employed
 					$line[] = $this->padRecord( '', 8, 'AN' );                                                 //Date of separation
@@ -1248,7 +1581,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //State Code [273-275]
 					$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                //State Taxable Wages [276-286]
 					$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                //State income tax [287-297]
-					$line[] = $this->padRecord( '', 10, 'N' );                                                 //Other State Data [298-307]
+					$line[] = $this->padRecord( '', 10, 'AN' );                                                //Other State Data [298-307]
 					$line[] = $this->padRecord( strtoupper( $tax_type ), 1, 'AN' );                            //Tax Type Code [308] //C=City, D=County, E=School District, F=Other -- For City: R=Residence C=Company/Work Location
 					$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                //Local Wages [309-319]
 					$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                //Local Income Tax [320-330]
@@ -1266,56 +1599,241 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					Debug::Text( 'Skipping RS Record due to incorrect Municipality Code: ' . $municipality_code . ' Tax Type: ' . $tax_type, __FILE__, __LINE__, __METHOD__, 10 );
 				}
 				break;
-			default: //Federal
-				//Withholding Number for State format is the State ID number.
-				$line[] = 'RS';                                                                            //RS Record
-				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //State Code
-				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //Tax Entity Code (Leave Blank)
-				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                //SSN
-				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );  //First Name
-				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' ); //Middle Name
-				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );   //Last Name
-				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //Suffix
-				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );    //Location Address
-				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );    //Delivery Address
-				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );        //City
-				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );        //State
-				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );     //Zip
-				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //Zip Extension
-				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //Blank
-				$line[] = $this->padRecord( '', 23, 'AN' );                                                //Foreign State/Province
-				$line[] = $this->padRecord( '', 15, 'AN' );                                                //Foreign Postal Code
-				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //Country, fill with blanks if its the US
+			case 'ok': //https://www.ok.gov/tax/documents/What%20is%20the%20purpose%20of%20the%20RS.pdf
+				$line[] = 'RS';                                                                            //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );  //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' ); //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );   //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );    //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );    //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );        //(117-138)[22]: City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );        //(139-140)[2]: State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );     //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(193-194)[2]: Country, fill with blanks if its the US
 
 				//Unemployment reporting
-				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //Optional Code
-				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //Reporting Period
-				$line[] = $this->padRecord( '', 11, 'AN' );                                                //State Quarterly Unemployment Total
-				$line[] = $this->padRecord( '', 11, 'AN' );                                                //State Quarterly Unemployment Insurance
-				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //Number of weeks worked
-				$line[] = $this->padRecord( '', 8, 'AN' );                                                 //Date first employed
-				$line[] = $this->padRecord( '', 8, 'AN' );                                                 //Date of separation
-				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //Blank
-				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 20, 'N' );     //State Employer Account Number
-				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //Blank
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //(197-202)[6]: Reporting Period
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                 //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                 //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(243-247)[5]: Blank
+				$line[] = $this->padRecord( '', 20, 'AN' );                                                //(248-267)[20]: UI: State Employer Account Number
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //(268-273)[6]: Blank
 
 				//Income Tax Reporting
-				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //State Code
-				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                //State Taxable Wages
-				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                //State income tax
-				$line[] = $this->padRecord( '', 10, 'N' );                                                 //Other State Data
-				$line[] = $this->padRecord( 'D', 1, 'AN' );                                                //Tax Type Code
-				$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                //Local Wages
-				$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                //Local Income Tax
-				$line[] = $this->padRecord( '', 7, 'AN' );                                                 //State Control Number
-				$line[] = $this->padRecord( '', 75, 'AN' );                                                //Supplemental Data 1
-				$line[] = $this->padRecord( '', 75, 'AN' );                                                //Supplemental Data 2
-				$line[] = $this->padRecord( '', 25, 'AN' );                                                //Blank
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( '', 10, 'AN' );                                                //(298-307)[10]: Other State Data
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                 //(308)[1]: Tax Type Code [C=City, D=County, E=School District, F=Other]
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                //(309-319)[11]: Local Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                //(320-330)[11]: Local Income Tax
+				$line[] = $this->padRecord( '', 7, 'AN' );                                                 //(331-337)[7]: State Control Number
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 15, 'AN' );    //(338-352)[15]: OK: Oklahoma withholding (WTH) Account Number
+				$line[] = $this->padRecord( '', 60, 'AN' );                                                //(353-412)[60]: Supplemental Data 1
+				$line[] = $this->padRecord( '', 75, 'AN' );                                                //(413-487)[75]: Supplemental Data 2
+				$line[] = $this->padRecord( '', 25, 'AN' );                                                //(488-512)[25]: Blank
+				break;
+			case 'or': //https://www.oregon.gov/dor/programs/businesses/Documents/iWire-w2-specifications.pdf
+				$line[] = 'RS';                                                                            //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );  //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' ); //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );   //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );    //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );    //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );        //(117-138)[22]: City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );        //(139-140)[2]: State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );     //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(193-194)[2]: Country, fill with blanks if its the US
+
+				//Unemployment reporting
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //(197-202)[6]: Reporting Period
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'AN' );                                                //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'N' );                                                  //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'N' );                                                  //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(243-247)[5]: Blank
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 20, 'N' );     //(248-267)[20]: State Employer Account Number
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //(268-273)[6]: Blank
+
+				//Income Tax Reporting
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( '', 50, 'AN' );                                                //(298-347)[50]: OR: Other State Data
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                //(348-358)[11]: Statewide Transit Tax Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                //(359-369)[11]: Statewide Transit Tax Income Tax Withheld
+				$line[] = $this->padRecord( '', 143, 'AN' );                                               //(370-512)[143]: Blank
+				break;
+			case 'pa': //https://www.revenue.pa.gov/GeneralTaxInformation/Tax%20Types%20and%20Information/EmployerWithholding/Documents/EFW2-EFW2C_reporting_inst_and_specs.pdf
+				$line[] = 'RS';                                                                            //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );  //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' ); //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );   //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );    //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );    //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );        //(117-138)[22]: City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );        //(139-140)[2]: State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );     //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                 //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(193-194)[2]: Country, fill with blanks if its the US
+
+				//Unemployment reporting
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //(197-202)[6]: Reporting Period
+				$line[] = $this->padRecord( '', 11, 'N' );                                                 //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'N' );                                                 //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                 //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                 //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                 //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                 //(243-247)[5]: Blank
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 8, 'N' );      //(248-255)[8]: State Employer Account Number
+				$line[] = $this->padRecord( '', 12, 'AN' );                                                //(256-267)[12]: Blank
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                 //(268-273)[6]: Blank
+
+				//Income Tax Reporting
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );    //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( '', 10, 'AN' );                                                //(298-307)[10]: Other State Data
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                 //(308)[1]: Tax Type Code [C=City, D=County, E=School District, F=Other]
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                //(309-319)[11]: Local Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                //(320-330)[11]: Local Income Tax
+				$line[] = $this->padRecord( '', 7, 'AN' );                                                 //(331-337)[7]: State Control Number
+				$line[] = $this->padRecord( 0, 9, 'N' );                                                   //(338-346)[9]: Employees ITIN as shown on card issued by SSA
+				$line[] = $this->padRecord( '', 166, 'AN' );                                               //(347-512)[166]: Blank
+				break;
+			case 'in': // Indiana - Has Local Taxes - https://www.in.gov/dor/files/w-2book.pdf
+				$line[] = 'RS';                                                                                          //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );                  //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                               //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                              //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );                //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' );               //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );                 //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                               //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );                  //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );                  //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );                      //(117-138)[22]: City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );                      //(139-140)[2]: State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );                   //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                               //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                               //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                              //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                              //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                               //(193-194)[2]: Country, fill with blanks if its the US
+
+				//Unemployment reporting
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                               //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                               //(197-202)[6]: Reporting Period
+				$line[] = $this->padRecord( '', 11, 'N' );                                                               //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'N' );                                                               //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                               //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                               //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                               //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                               //(243-247)[5]: Blank
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 20, 'N' );                   //(248-267)[20]: State Employer Account Number
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                               //(268-273)[6]: Blank
+
+				//Income Tax Reporting
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );                  //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                              //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                              //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( '', 10, 'AN' );                                                              //(298-307)[10]: Other State Data
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                               //(308)[1]: Tax Type Code [C=City, D=County, E=School District, F=Other]
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                              //(309-319)[11]: Local Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                              //(320-330)[11]: Local Income Tax
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 10, 'N' );                   //(331-340)[10]: IN: Indiana Employer Taxpayer ID (TID). Does not include the 3 digit location.
+				$line[] = $this->padRecord( $this->stripNonNumeric( substr( $this->$l15_state_id, -3 ) ), 3, 'N' );      //(341-343)[3]: IN: Indiana Employer Taxpayer ID (TID) Location. Last 3 digits of the State ID.
+				$line[] = $this->padRecord( '', 169, 'AN' );                                                             //(444-512)[169]: Blank
+				break;
+			case 'ia':
+				$this->$l15_state_id = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 20, 'N' ); //Must be right justified and zero filled.
+				//No break here, as we are just modifying some input data into the standard federal format.
+			default: //Federal
+				//Withholding Number for State format is the State ID number.
+				$line[] = 'RS';                                                                                    //(1-2)[2]: RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );            //(3-4)[2]: State Code
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                         //(5-9)[5]: Tax Entity Code [Leave Blank]
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N' );                        //(10-18)[9]: SSN
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN' );          //(19-33)[15]: First Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN' );         //(34-48)[15]: Middle Name
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN' );           //(49-68)[20]: Last Name
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                         //(69-72)[4]: Suffix
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN' );            //(73-94)[22]: Location Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN' );            //(95-116)[22]: Delivery Address
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN' );                //(117-138)[22]: City
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN' );                //(139-140)[2]: State
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN' );             //(141-145)[5]: Zip
+				$line[] = $this->padRecord( '', 4, 'AN' );                                                         //(146-149)[4]: Zip Extension
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                         //(150-154)[5]: Blank
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                        //(155-177)[23]: Foreign State/Province
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                        //(178-192)[15]: Foreign Postal Code
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                         //(193-194)[2]: Country, fill with blanks if its the US
+
+				//Unemployment reporting
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                         //(195-196)[2]: Optional Code
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                         //(197-202)[6]: Reporting Period
+				$line[] = $this->padRecord( '', 11, 'N' );                                                         //(203-213)[11]: State Quarterly Unemployment Total
+				$line[] = $this->padRecord( '', 11, 'N' );                                                         //(214-224)[11]: State Quarterly Unemployment Insurance
+				$line[] = $this->padRecord( '', 2, 'AN' );                                                         //(225-226)[2]: Number of weeks worked
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                         //(227-234)[8]: Date first employed
+				$line[] = $this->padRecord( '', 8, 'AN' );                                                         //(235-242)[8]: Date of separation
+				$line[] = $this->padRecord( '', 5, 'AN' );                                                         //(243-247)[5]: Blank
+				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->$l15_state_id ), 20, 'AN' );       //(248-267)[20]: State Employer Account Number
+				$line[] = $this->padRecord( '', 6, 'AN' );                                                         //(268-273)[6]: Blank
+
+				//Income Tax Reporting
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N' );            //(274-275)[2]: State Code
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N' );                        //(276-286)[11]: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N' );                        //(287-297)[11]: State income tax
+				$line[] = $this->padRecord( '', 10, 'AN' );                                                        //(298-307)[10]: Other State Data
+				$line[] = $this->padRecord( '', 1, 'AN' );                                                         //(308)[1]: Tax Type Code [C=City, D=County, E=School District, F=Other]
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N' );                        //(309-319)[11]: Local Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N' );                        //(320-330)[11]: Local Income Tax
+				$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_control_number ), 7, 'AN' ); //(331-337)[7]: State Control Number
+				$line[] = $this->padRecord( '', 75, 'AN' );                                                        //(338-412)[75]: Supplemental Data 1
+				$line[] = $this->padRecord( '', 75, 'AN' );                                                        //(413-487)[75]: Supplemental Data 2
+				$line[] = $this->padRecord( '', 25, 'AN' );                                                        //(488-512)[25]: Blank
 				break;
 		}
 
 		if ( isset( $line ) ) {
 			$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+			if ( $this->debug == false && strlen( $retval ) != 512 ) {
+				Debug::Text( 'ERROR! RS Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+				return false;
+			}
+
 			Debug::Text( 'RS Record: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $retval;
@@ -1324,85 +1842,296 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		}
 	}
 
-	function _compileRT( $total ) {
-		$line[] = 'RT';                                                               //RT Record
-		$line[] = $this->padRecord( $total->total, 7, 'N' );                          //Total RW records.
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l1 ), 15, 'N' );    //Wages, Tips and Other Compensation
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l2 ), 15, 'N' );    //Federal Income Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l3 ), 15, 'N' );    //Social Security Wages
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l4 ), 15, 'N' );    //Social Security Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l5 ), 15, 'N' );    //Medicare Wages and Tips
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l6 ), 15, 'N' );    //Medicare Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l7 ), 15, 'N' );    //(100-114) Social Security Tips
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //Advanced EIC
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l10 ), 15, 'N' );   //Dependant Care Benefits
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12d ), 15, 'N' );  //Deferred Compensation Contributions to 401K
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12e ), 15, 'N' );  //Deferred Compensation Contributions to 403(b)
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12f ), 15, 'N' );  //Deferred Compensation Contributions to 408(k)(6)
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12g ), 15, 'N' );  //Deferred Compensation Contributions to 457(b)
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12h ), 15, 'N' );  //(205-219) Deferred Compensation Contributions to 501(c)(18)(D)
-		$line[] = $this->padRecord( '', 15, 'AN' );                                   //Blank
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //Non-qualified Plan Section 457
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12w ), 15, 'N' );  //(250-264) Employer Contributions to Health Savings Account (Code W)
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //Non-qualified NOT Plan Section 457
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //Non taxable combat pay
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12dd ), 15, 'N' ); //(295-309) Cost of Employer Sponsored Health Coverage (Code DD)
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //Employer Cost of Premiums for Group Term Life Insurance over $50K
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //3rd party sick pay.
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //Income from the Exercise of Nonstatutory Stock Options
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //Deferrals Under a Section 409A non-qualified plan
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12aa ), 15, 'N' ); //(370-384) Desiginated Roth Contributions under a section 401K (Code AA)
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12bb ), 15, 'N' ); //(385-399) Desiginated Roth Contributions under a section 403B (Code BB)
-		$line[] = $this->padRecord( '', 15, 'N' );                                    //(400-414) Permitted Benefits Under a Qualified Small Employer Health Reimbursement (Code FF)
-		$line[] = $this->padRecord( '', 98, 'AN' );                                   //Blank
+	function _compileRO() { //RO (Employee Optional)
+		if ( in_array( strtoupper( $this->efile_state ), [ 'NY', 'AL', 'CO', 'CT', 'DE', 'KS', 'MA', 'PA', 'VA' ] ) ) { //Skip for eFiling in these states.
+			return false;
+		}
+
+		$line[] = 'RO';                                                                                                                                //Employee Optional
+		$line[] = $this->padRecord( '', 9, 'AN' );                                                                                                     //Blanks
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l8 ), 11, 'N' );                                                                      //(12-22) Allocated Tips
+		$line[] = $this->padRecord( $this->removeDecimal( bcadd( $this->_getL12AmountByCode( 'A' ), $this->_getL12AmountByCode( 'B' ) ) ), 11, 'N' );  //(23-33) Uncollected Employee Tax on Tips (Codes A and B)
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'R' ) ), 11, 'N' );                                              //(34-44) Medical Savings Account (Code R)
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'S' ) ), 11, 'N' );                                              //(45-55) Simple Retirement Account (Code S)
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'T' ) ), 11, 'N' );                                              //(56-66) Qualified Adoption Expenses (Code T)
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'M' ) ), 11, 'N' );                                              //(67-77) Uncollected Social Security or RRTA Tax on Cost ofGroup Term Life Insurance Over $50,000 (Code M)
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'N' ) ), 11, 'N' );                                              //(78-88) Uncollected Medicare Tax on Cost of Group TermLife Insurance Over$50,000 (Code N)
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'Z' ) ), 11, 'N' );                                              //(89-99) Income Under a NonqualifiedDeferredCompensation PlanThat Fails to SatisfySection 409A (Code Z)
+		$line[] = $this->padRecord( '', 11, 'AN' );                                                                                                    //(100-110) Blank
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'EE' ) ), 11, 'N' );                                             //(111-121) Designated Roth Contributions Under a Governmental Section 457(b) Plan (Code EE)
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'GG' ) ), 11, 'N' );                                             //(122-132) Income from Qualified Equity Grants Under Section 83(i) (Code GG)
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'HH' ) ), 11, 'N' );                                             //(133-143) Aggregate Deferrals Under Section 83(i) Elections as of theClose of the CalendarYear (Code HH)
+		$line[] = $this->padRecord( '', 131, 'AN' );                                                                                                   //(144-274) Blank
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(275-285) Wages Subject to Puerto Rico Tax
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(286-296) Commissions Subject to Puerto Rico Tax
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(297-307) Allowances Subject to Puerto Rico Tax
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(308-318) Tips Subject to Puerto Rico Tax
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(319-329) Total Wages, Commissions, Tips  and Allowances Subject to Puerto Rico Tax
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(330-340) Puerto Rico Tax Withheld
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(341-351) Retirement Fund Annual Contributions
+		$line[] = $this->padRecord( '', 11, 'AN' );                                                                                                    //(352-362) Blank
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(363-373) Total Wages, Tips and Other Compensation Subject to Virgin Islands, Guam, American Samoa or Northern Mariana Islands Income Tax
+		$line[] = $this->padRecord( 0, 11, 'N' );                                                                                                      //(374-384) Virgin Islands, Guam, American Samoa or  Northern Mariana Islands Income Tax Withheld
+		$line[] = $this->padRecord( '', 128, 'AN' );                                                                                                   //Blank
 
 		$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+
+		if ( $this->debug == false && strlen( $retval ) != 512 ) {
+			Debug::Text( 'ERROR! RO Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
+		}
+
+		Debug::Text( 'RO Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $retval;
+	}
+
+	function _compileRU( $total ) { //RU (Total Optional) Record
+		if ( in_array( strtoupper( $this->efile_state ), [ 'AL', 'CO', 'CT', 'DE', 'KS', 'MA', 'PA', 'VA' ] ) ) { //Skip for eFiling in these states.
+			return false;
+		}
+
+		$line[] = 'RU';                                                                                           //Employee Optional
+		$line[] = $this->padRecord( $total->total, 7, 'N' );                                                      //(3-9) Total Number of RO Records
+
+		switch ( strtolower( $this->efile_state ) ) {
+			case 'ny':
+				$line[] = $this->padRecord( '', 503, 'AN' );                                                          //(10-512) Blank
+				break;
+			default:
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l8 ), 15, 'N' );                            //(10-24) Total Allocated Tips
+				$line[] = $this->padRecord( $this->removeDecimal( bcadd( $total->l12a, $total->l12b ) ), 15, 'N' );   //(25-39) Total Uncollected Employee Tax on Tips (Codes A and B)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12r ), 15, 'N' );                          //(40-54) Total Medica Savings Account (Code R)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12s ), 15, 'N' );                          //(55-69) Total Simpl Retirement Account (Code S)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12t ), 15, 'N' );                          //(70-84) Total Qualified Adoption Expenses (Code T)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12m ), 15, 'N' );                          //(85-99) Total Uncollected Social Security or RRTA Tax on Cost of Group Term Life Insurance Over $50,000 (Code M)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12n ), 15, 'N' );                          //(100-114) Total Uncollected Medicare Tax on Cost of Group Term Life Insurance Over $50,000 (Code N)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12z ), 15, 'N' );                          //(115-129) Total Income Under a Nonqualified Deferred Compensation Plan That Fails to Satisfy Section 409A (Code Z)
+				$line[] = $this->padRecord( '', 15, 'AN' );                                                           //(130-144) Blank
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12ee ), 15, 'N' );                         //(145-159) Total Designated Roth Contributions Under a Governmental Section 457(b) Plan (Code EE)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12gg ), 15, 'N' );                         //(160-174) Total Income from Qualified Equity Grants Under Section 83(i) (Code GG)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12hh ), 15, 'N' );                         //(175-189) Total Aggregate Deferrals Under Section 83(i) Elections as of the Close of the Calendar Year(Code HH)
+				$line[] = $this->padRecord( '', 165, 'AN' );                                                          //(190-354) Blank
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(355-369) Wages Subject to Puerto Rico Tax
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(370-384) Commissions Subject to Puerto Rico Tax
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(385-399) Allowances Subject to Puerto Rico Tax
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(400-414) Tips Subject to Puerto Rico Tax
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(415-429) Total Wages, Commissions, Tips  and Allowances Subject to Puerto Rico Tax
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(430-444) Puerto Rico Tax Withheld
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(445-459) Retirement Fund Annual Contributions
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(460-474) Total Wages, Tips and Other Compensation Subject to Virgin Islands, Guam, American Samoa or Northern Mariana Islands Income Tax
+				$line[] = $this->padRecord( 0, 15, 'N' );                                                             //(475-489) Virgin Islands, Guam, American Samoa or  Northern Mariana Islands Income Tax Withheld
+				$line[] = $this->padRecord( '', 23, 'AN' );                                                           //(490-512) Blank
+				break;
+		}
+
+		$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+
+		if ( $this->debug == false && strlen( $retval ) != 512 ) {
+			Debug::Text( 'ERROR! RU Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
+		}
+
+		Debug::Text( 'RU Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $retval;
+	}
+
+	function _compileRT( $total ) { //RT (Total) Record - Total number of RW records reported since the last RE (Employer) record.
+		if ( in_array( strtoupper( $this->efile_state ), [ 'NY', 'AL', 'CO', 'DE', 'PA', 'VA' ] ) ) { //Skip for eFiling in these states.
+			return false;
+		}
+
+		$line[] = 'RT';                                                               //(1-2)[2]: RT Record
+
+		switch ( strtolower( $this->efile_state ) ) {
+			case 'ct':
+				$line[] = $this->padRecord( $total->total, 7, 'N' );                                          //(3-9)[7]: Total RS records.
+				$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' );   //(10-24)[15]: CT: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' );      //(25-39)[15]: CT: State Tax Withheld
+				$line[] = $this->padRecord( '', 473, 'AN' );                                                  //(40-512)[473]: Blank
+				break;
+			case 'ma':
+				$line[] = $this->padRecord( $total->total, 7, 'N' );                                          //(3-9)[7]: Total RS records.
+				$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' );   //(10-24)[15]: MA: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' );      //(25-39)[15]: MA: State Tax Withheld
+				$line[] = $this->padRecord( '', 473, 'AN' );                                                  //(40-512)[473]: Blank
+				break;
+			default:
+				$line[] = $this->padRecord( $total->total, 7, 'N' );                          //(3-9)[7]: Total RW records.
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l1 ), 15, 'N' );    //(10-24)[15]: Wages, Tips and Other Compensation
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l2 ), 15, 'N' );    //(25-39)[15]: Federal Income Tax
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l3 ), 15, 'N' );    //(40-54)[15]: Social Security Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l4 ), 15, 'N' );    //(55-69)[15]: Social Security Tax
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l5 ), 15, 'N' );    //(70-84)[15]: Medicare Wages and Tips
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l6 ), 15, 'N' );    //(85-99)[15]: Medicare Tax
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l7 ), 15, 'N' );    //(100-114)[15]: Social Security Tips
+				$line[] = $this->padRecord( '', 15, 'AN' );                                   //(115-129)[15]: Blank
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l10 ), 15, 'N' );   //(130-144)[15]: Dependant Care Benefits
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12d ), 15, 'N' );  //(145-159)[15]: Deferred Compensation Contributions to 401K (Code D)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12e ), 15, 'N' );  //(160-174)[15]: Deferred Compensation Contributions to 403(b) (Code E)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12f ), 15, 'N' );  //(175-189)[15]: Deferred Compensation Contributions to 408(k)(6) (Code F)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12g ), 15, 'N' );  //(190-204)[15]: Deferred Compensation Contributions to 457(b) (Code G)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12h ), 15, 'N' );  //(205-219)[15]: Deferred Compensation Contributions to 501(c)(18)(D) (Code H)
+				$line[] = $this->padRecord( '', 15, 'AN' );                                   //(220-234)[15]: Blank
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l11 ), 15, 'N' );   //(235-249)[15]: Non-qualified Plan Section 457
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12w ), 15, 'N' );  //(250-264)[15]: Employer Contributions to Health Savings Account (Code W)
+				$line[] = $this->padRecord( 0, 15, 'N' );                                     //(265-279)[15]: Non-qualified NOT Plan Section 457
+				$line[] = $this->padRecord( 0, 15, 'N' );                                     //(280-294)[15]: Non taxable combat pay
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12dd ), 15, 'N' ); //(295-309)[15]: Cost of Employer Sponsored Health Coverage (Code DD)
+				$line[] = $this->padRecord( 0, 15, 'N' );                                     //(310-324)[15]: Employer Cost of Premiums for Group Term Life Insurance over $50K
+				$line[] = $this->padRecord( 0, 15, 'N' );                                     //(325-339)[15]: 3rd party sick pay.
+				$line[] = $this->padRecord( 0, 15, 'N' );                                     //(340-354)[15]: Income from the Exercise of Nonstatutory Stock Options
+				$line[] = $this->padRecord( 0, 15, 'N' );                                     //(355-369)[15]: Deferrals Under a Section 409A non-qualified plan
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12aa ), 15, 'N' ); //(370-384)[15]: Desiginated Roth Contributions under a section 401K (Code AA)
+				$line[] = $this->padRecord( $this->removeDecimal( $total->l12bb ), 15, 'N' ); //(385-399)[15]: Desiginated Roth Contributions under a section 403B (Code BB)
+				$line[] = $this->padRecord( 0, 15, 'N' );                                     //(400-414)[15]: Permitted Benefits Under a Qualified Small Employer Health Reimbursement (Code FF)
+				$line[] = $this->padRecord( '', 98, 'AN' );                                   //(415-512)[98]: Blank
+				break;
+		}
+
+		$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+
+		if ( $this->debug == false && strlen( $retval ) != 512 ) {
+			Debug::Text( 'ERROR! RT Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
+		}
+
 		Debug::Text( 'RT Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
-	function _compileRV( $total, $id ) {
-		$l15_state = 'l15' . $id . '_state';
-		if ( !isset( $this->$l15_state ) ) {
+	function _compileRV( $total ) { //RV (State Total) Record - **OPTIONAL** Not processed or shared by SSA or IRS. Custom to each state.
+		if ( $this->efile_state == '' ) { //Federal filing does not need any RS record at all.
 			return false;
 		}
 
-		if ( $total->total > 0 ) {
-			if ( strtolower( $this->efile_state ) == 'oh' ) {
-				//Optional for OH and RITA (regional) W2 efiling.
-				Debug::Text( 'Skipping RV Record...', __FILE__, __LINE__, __METHOD__, 10 );
-				$retval = false;
-			} else {
-				//SSA specifications state RV records are optional and not processed or shared anyways.
-				$line[] = 'RV';                                                                             //RT Record
-				$line[] = $this->padRecord( $total->total, 7, 'N' );                                        //Total RW records.
-				$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' ); //State Wages, Tips and Other Compensation
-				$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' );    //State Income Tax
-				$line[] = $this->padRecord( '', 473, 'AN' );                                                //Blank
-
-				$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
-				Debug::Text( 'RV Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
-			}
+		if ( $this->efile_state == '' || !in_array( strtoupper( $this->efile_state ), [ 'IA', 'IL', 'MO', 'MT', 'ND', 'NE', 'OK', 'OR', 'PA' ] ) ) { //**THIS IS OPPOSITE AS OTHER FUNCTIONS** - Skip for eFiling in these states.
+			return false;
 		}
 
-		return $retval;
+
+		if ( $total->total > 0 ) {
+			$line[] = 'RV';                                                                             //RT Record
+
+			switch ( strtolower( $this->efile_state ) ) {
+				case 'ia': //https://tax.iowa.gov/sites/default/files/2020-09/2020_ElectronicReportingofWageandTaxStatements_Pulication_44082.pdf
+					$line[] = $this->padRecord( $total->total, 7, 'N' );                                                     //(3-9)[2]: Total RS records.
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' );              //(10-24)[15]: State Taxable Wages
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' );                 //(25-39)[15]: State Income Tax Withheld
+					$line[] = $this->padRecord( $this->stripNonNumeric( $this->state_secondary_id ), 8, 'N' );               //(40-47)[8]: IA: Employers BEN (Business eFile Number)
+					$line[] = $this->padRecord( 0, 10, 'N' );              													 //(48-57)[10]: IA: Confirmation Number (All Zeros)
+					$line[] = $this->padRecord( '', 455, 'AN' );                                                             //(58-512)[455]: Blank
+					break;
+				case 'mo': // https://dor.mo.gov/business/withhold/documents/MissouriAnnualW-2FilingGuidelines.pdf
+					$line[] = $this->padRecord( $this->year, 4, 'N' );                                                       //(3-6)[4]: Tax Year
+					$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                              //(7-15)[9]: FEIN
+					$line[] = $this->padRecord( $this->stripNonNumeric( $total->state_id ), 8, 'N' );                        //(16-23)[8]: State ID Number
+					$line[] = $this->padRecord( $this->trade_name, 57, 'AN' );                                               //(24-80)[57]: Employer Name
+					$line[] = $this->padRecord( $total->total, 6, 'N' );                                                     //(81-86)[6]: Employer Number of W2's
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 12, 'N' );                 //(87-98)[12]: Employer TOtal Tax Withheld as shown on W2s
+					$line[] = $this->padRecord( '', 414, 'AN' );                                                             //(99-512)[414]: Blank
+					break;
+				case 'ok': // https://www.ok.gov/tax/documents/What%20is%20the%20purpose%20of%20the%20RV.pdf
+					$line[] = $this->padRecord( $this->_getStateNumericCode( $total->state ), 2, 'N' );                        //(3-4)[2]: State Code
+					$line[] = $this->padRecord( $total->total, 7, 'N' );                                                        //(5-11)[7]: Total RS records.
+					$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                                 //(12-20)[9]: FEIN
+					$line[] = $this->padRecord( '', 21, 'AN' );                                                                 //(21-41)[21]: Blank
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' );                 //(42-56)[15]: State Taxable Wages
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' );                    //(57-71)[15]: State Income Tax Withheld
+					$line[] = $this->padRecord( $this->removeDecimal( $total->local_taxable_wages ), 15, 'N' );                 //(72-86)[15]: Local Taxable Wages
+					$line[] = $this->padRecord( $this->removeDecimal( $total->local_income_tax ), 15, 'N' );                    //(87-101)[15]: Local Income Tax Withheld
+					$line[] = $this->padRecord( '', 411, 'AN' );                                                                //(102-512)[411]: Blank
+					break;
+				case 'or': // https://www.oregon.gov/dor/programs/businesses/Documents/iWire-w2-specifications.pdf
+					$line[] = $this->padRecord( $total->total, 7, 'N' );                                                     //(3-9)[2]: Total RS records.
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' );              //(10-24)[15]: State Taxable Wages
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' );                 //(25-39)[15]: State Income Tax Withheld
+					$line[] = $this->padRecord( $this->removeDecimal( $total->local_taxable_wages ), 15, 'N' );              //(40-54)[15]: OR: Statewide Transit Taxable Wages
+					$line[] = $this->padRecord( $this->removeDecimal( $total->local_income_tax ), 15, 'N' );                 //(55-69)[15]: OR: Statewide Transit Tax Withheld
+					$line[] = $this->padRecord( '', 443, 'AN' );                                                             //(70-512)[443]: Blank
+					break;
+				case 'pa': // https://www.revenue.pa.gov/GeneralTaxInformation/Tax%20Types%20and%20Information/EmployerWithholding/Documents/EFW2-EFW2C_reporting_inst_and_specs.pdf
+					$line[] = $this->padRecord( $this->_getStateNumericCode( $total->state ), 2, 'N' );                      //(3-4)[2]: State Code
+					$line[] = $this->padRecord( $this->year, 4, 'N' );                                                       //(5-8)[4]: Tax Year
+					$line[] = $this->padRecord( $this->stripNonNumeric( $total->state_id ), 8, 'N' );                        //(9-16)[8]: PA Employer Account ID
+					$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N' );                              //(17-25)[9]: Employer Entity ID
+					$line[] = $this->padRecord( $total->total, 7, 'N' );                                                     //(26-32)[7]: Total RS records.
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' );              //(33-47)[15]: State Taxable Wages
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' );                 //(48-62)[15]: State Income Tax Withheld
+					$line[] = $this->padRecord( '', 450, 'AN' );                                                             //(63-512)[450]: Blank
+					break;
+				default:
+					//SSA specifications state RV records are optional and not processed or shared anyways.
+					//$retval = false;
+
+					$line[] = $this->padRecord( $total->total, 7, 'N' );                                        //Total RW records.
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 15, 'N' ); //State Wages, Tips and Other Compensation
+					$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 15, 'N' );    //State Income Tax
+					$line[] = $this->padRecord( '', 473, 'AN' );                                                //Blank
+
+					break;
+			}
+
+			$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+
+			if ( $this->debug == false && strlen( $retval ) != 512 ) {
+				Debug::Text( 'ERROR! RV Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+				return false;
+			}
+
+			Debug::Text( 'RV Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return $retval;
+		}
+
+		return false;
 	}
 
-	function _compileRF( $total_records ) {
-		$line[] = 'RF';                                       //RF Record
-		$line[] = $this->padRecord( '', 5, 'AN' );            //Blank
-		$line[] = $this->padRecord( $total_records, 9, 'N' ); //Total RW records.
-		$line[] = $this->padRecord( '', 496, 'AN' );          //Blank
+	function _compileRF( $total ) { //RF (Final) Record - Total number of RW (Employee) Records reported on the entire file.
+		if ( in_array( strtoupper( $this->efile_state ), [ 'AL' ] ) ) { //Skip for eFiling in these states.
+			return false;
+		}
+
+		$line[] = 'RF';                                          //RF Record
+
+		switch ( strtolower( $this->efile_state ) ) {
+			case 'ct':
+				$line[] = $this->padRecord( $total->total, 9, 'N' );                                          //(3-11)[9]: Total RS records.
+				$line[] = $this->padRecord( $this->removeDecimal( $total->state_taxable_wages ), 16, 'N' );   //(12-27)[16]: CT: State Taxable Wages
+				$line[] = $this->padRecord( $this->removeDecimal( $total->state_income_tax ), 16, 'N' );      //(28-43)[16]: CT: State Tax Withheld
+				$line[] = $this->padRecord( '', 469, 'AN' );                                                  //(44-512)[469]: Blank
+				break;
+			case 'ny':
+			case 'pa':
+				$line[] = $this->padRecord( '', 510, 'AN' );          //Blank
+				break;
+			default:
+				$line[] = $this->padRecord( '', 5, 'AN' );            //Blank
+				$line[] = $this->padRecord( $total->total, 9, 'N' );  //Total RW records.
+				$line[] = $this->padRecord( '', 496, 'AN' );          //Blank
+				break;
+		}
 
 		$retval = implode( ( $this->debug == true ) ? ',' : '', $line );
+
+		if ( $this->debug == false && strlen( $retval ) != 512 ) {
+			Debug::Text( 'ERROR! RF Record length is incorrect, should be 512 is: ' . strlen( $retval ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
+		}
 		Debug::Text( 'RF Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
 	//Fixed length field EFW2 format
-	function _outputEFILE() {
+	function _outputEFILE( $type = null ) {
 		/*
 		 Submitter Record (RA)
 		 Employer Record (RE)
@@ -1425,51 +2154,97 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 			$retval = $this->padLine( $this->_compileRA() );
 			$retval .= $this->padLine( $this->_compileRE() );
 
-			$total = Misc::preSetArrayValues( new stdClass(), [ 'total', 'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l10', 'l12d', 'l12e', 'l12f', 'l12g', 'l12h', 'l12w', 'l12aa', 'l12bb', 'l12dd' ], 0 );
+			$rt_total = Misc::preSetArrayValues( new stdClass(), [ 'total', 'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l10', 'l11', 'l12d', 'l12e', 'l12f', 'l12g', 'l12h', 'l12w', 'l12aa', 'l12bb', 'l12dd' ], 0 );
+			$rw_total = Misc::preSetArrayValues( new stdClass(), [ 'total' ], 0 );
+			$ro_total = Misc::preSetArrayValues( new stdClass(), [ 'total', 'l8', 'l12a', 'l12b', 'l12r', 'l12s', 'l12t', 'l12m', 'l12n', 'l12z', 'l12ee', 'l12gg', 'l12hh' ], 0 );
+			$state_total = Misc::preSetArrayValues( new stdClass(), [ 'total', 'state_taxable_wages', 'state_income_tax', 'local_taxable_wages', 'local_income_tax' ], 0 );
 
 			$i = 0;
 			foreach ( $records as $w2_data ) {
 				$this->arrayToObject( $w2_data ); //Convert record array to object
 
-				$retval .= $this->padLine( $this->_compileRW() );
-				foreach ( range( 'a', 'z' ) as $z ) {
-					if ( !isset( $state_total[$z] ) ) {
-						$state_total[$z] = Misc::preSetArrayValues( new stdClass(), [ 'total', 'state_taxable_wages', 'state_income_tax' ], 0 );
-					}
-					$retval .= $this->padLine( $this->_compileRS( $z ) );
-
-					$state_total[$z]->total += 1;
-					$state_total[$z]->state_taxable_wages += $this->{'l16' . $z};
-					$state_total[$z]->state_income_tax += $this->{'l17' . $z};
+				$compile_rw_retval = $this->padLine( $this->_compileRW() );
+				if ( $compile_rw_retval != '' ) {
+					$retval .= $compile_rw_retval;
+					$rw_total->total += 1;
 				}
 
-				$total->total += 1;
-				$total->l1 += $this->l1;
-				$total->l2 += $this->l2;
-				$total->l3 += $this->l3;
-				$total->l4 += $this->l4;
-				$total->l5 += $this->l5;
-				$total->l6 += $this->l6;
-				$total->l7 += $this->l7;
-				$total->l10 += $this->l10;
-				$total->l12d += $this->_getL12AmountByCode( 'D' );
-				$total->l12e += $this->_getL12AmountByCode( 'E' );
-				$total->l12f += $this->_getL12AmountByCode( 'F' );
-				$total->l12g += $this->_getL12AmountByCode( 'G' );
-				$total->l12h += $this->_getL12AmountByCode( 'H' );
-				$total->l12w += $this->_getL12AmountByCode( 'W' );
-				$total->l12aa += $this->_getL12AmountByCode( 'AA' );
-				$total->l12bb += $this->_getL12AmountByCode( 'BB' );
-				$total->l12dd += $this->_getL12AmountByCode( 'DD' );
+				$retval .= $this->padLine( $this->_compileRO() );
+
+				foreach ( range( 'a', 'z' ) as $z ) {
+					if ( strtolower( $this->{'l15' . $z . '_state'} ) == strtolower( $this->efile_state ) ) { //Only include RS records for the state we are filing for. They are optional for SSA so exclude them federally.
+						$compile_rs_retval = $this->padLine( $this->_compileRS( $z ) ); //This also excludes RS records for other states, but we need make we only consider totals for just this state too.
+
+						if ( $compile_rs_retval != '' ) {
+							$retval .= $compile_rs_retval;
+
+							$state_total->total += 1;
+
+							if ( !isset( $state_total->state ) && !isset( $state_total->state_id ) ) { //This uses the first State ID.
+								$state_total->state = $this->{'l15' . $z . '_state'};
+								$state_total->state_id = $this->{'l15' . $z . '_state_id'};
+							}
+
+							$state_total->state_taxable_wages += $this->{'l16' . $z};
+							$state_total->state_income_tax += $this->{'l17' . $z};
+							$state_total->local_taxable_wages += $this->{'l18' . $z};
+							$state_total->local_income_tax += $this->{'l19' . $z};
+						}
+					}
+				}
+
+				$rt_total->total += 1;
+				$rt_total->l1 += $this->l1;
+				$rt_total->l2 += $this->l2;
+				$rt_total->l3 += $this->l3;
+				$rt_total->l4 += $this->l4;
+				$rt_total->l5 += $this->l5;
+				$rt_total->l6 += $this->l6;
+				$rt_total->l7 += $this->l7;
+				$rt_total->l10 += $this->l10;
+				$rt_total->l11 += $this->l11;
+				$rt_total->l12d += $this->_getL12AmountByCode( 'D' );
+				$rt_total->l12e += $this->_getL12AmountByCode( 'E' );
+				$rt_total->l12f += $this->_getL12AmountByCode( 'F' );
+				$rt_total->l12g += $this->_getL12AmountByCode( 'G' );
+				$rt_total->l12h += $this->_getL12AmountByCode( 'H' );
+				$rt_total->l12w += $this->_getL12AmountByCode( 'W' );
+				$rt_total->l12aa += $this->_getL12AmountByCode( 'AA' );
+				$rt_total->l12bb += $this->_getL12AmountByCode( 'BB' );
+				$rt_total->l12dd += $this->_getL12AmountByCode( 'DD' );
+
+				$ro_total->total += 1;
+				$ro_total->l8 += $this->l8;
+				$ro_total->l12a += $this->_getL12AmountByCode( 'A' );
+				$ro_total->l12b += $this->_getL12AmountByCode( 'B' );
+				$ro_total->l12r += $this->_getL12AmountByCode( 'R' );
+				$ro_total->l12s += $this->_getL12AmountByCode( 'S' );
+				$ro_total->l12t += $this->_getL12AmountByCode( 'T' );
+				$ro_total->l12m += $this->_getL12AmountByCode( 'M' );
+				$ro_total->l12n += $this->_getL12AmountByCode( 'N' );
+				$ro_total->l12z += $this->_getL12AmountByCode( 'Z' );
+				$ro_total->l12ee += $this->_getL12AmountByCode( 'EE' );
+				$ro_total->l12gg += $this->_getL12AmountByCode( 'GG' );
+				$ro_total->l12hh += $this->_getL12AmountByCode( 'HH' );
+
+				$this->revertToOriginalDataState();
 
 				$i++;
 			}
 
-			$retval .= $this->padLine( $this->_compileRT( $total ) );
-			foreach ( range( 'a', 'z' ) as $z ) {
-				$retval .= $this->padLine( $this->_compileRV( $state_total[$z], $z ) ); //State Total Record
+			if ( in_array( $this->efile_state, [ 'CT', 'MA' ] ) ) {
+				$retval .= $this->padLine( $this->_compileRT( $state_total ) ); //CT uses the RT record like an RV record, showing state totals.
+			} else {
+				$retval .= $this->padLine( $this->_compileRT( $rt_total ) );
 			}
-			$retval .= $this->padLine( $this->_compileRF( $total->total ) );
+			$retval .= $this->padLine( $this->_compileRU( $ro_total ) );
+			$retval .= $this->padLine( $this->_compileRV( $state_total ) ); //State Total Record
+
+			if ( in_array( $this->efile_state, [ 'CT', 'MA', 'VA' ] ) ) {
+				$retval .= $this->padLine( $this->_compileRF( $state_total ) );
+			} else {
+				$retval .= $this->padLine( $this->_compileRF( $rw_total ) );
+			}
 		}
 
 		if ( isset( $retval ) ) {
@@ -1477,6 +2252,25 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		}
 
 		return false;
+	}
+
+	//Gets Line 14 amount by the name associated with that Line.
+	function getL14AmountByName( $name ) {
+		$name = trim( $name );
+
+		$retval = 0;
+		if ( $name != '' ) {
+			foreach ( range( 'a', 'd' ) as $z ) {
+				$l14_field = 'l14' . $z;
+				$l14_name_field = 'l14' . $z . '_name';
+				if ( strtolower( trim( $this->$l14_name_field ) ) == strtolower( $name ) ) {
+					$retval = $this->$l14_field;
+					break;
+				}
+			}
+		}
+
+		return $retval;
 	}
 
 	//This takes a single employee record and moves state/locality data from rows c, d, e, f, ... into rows a,b.
@@ -1590,7 +2384,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		return $this->getRecords();
 	}
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
@@ -1612,12 +2406,12 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 			if ( $this->efile_state != '' ) { //When doing state filing, only include the state copy of the W2.
 				$form_template_pages = [ 3 ]; //Template pages to use.
 			} else {
-				$form_template_pages = [ 2, 3, 10 ]; //Template pages to use.
+				$form_template_pages = [ 2, 3, 10 ]; //Template pages to use. 2=SSA, 3=State, City, Local, 10=Employer
 			}
 		} else {
 			$employees_per_page = 1;
 			$n = 1;                             //Loop the same employee twice.
-			$form_template_pages = [ 4, 6, 8 ]; //Template pages to use.
+			$form_template_pages = [ 4, 6, 8 ]; //Template pages to use. 4=Employee Federal Return, 6=Employee Records, 8=Employee State, City Local
 		}
 
 		//Get location map, start looping over each variable and drawing
@@ -1634,19 +2428,16 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 
 				if ( $this->getShowBackground() == true && $this->getType() == 'government' ) {
 					$template_schema[0]['combine_templates'] = [
-							[ 'template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets( 'x' ) ), 'y' => ( 0 + $this->getTemplateOffsets( 'y' ) ) ],
+							[ 'template_page' => $form_template_page, 'x' => 0, 'y' => 0 ],
 					];
 
 					if ( count( $records ) > 1 ) { //Only if more than 1 employee, show both top and bottom forms.
-						$template_schema[0]['combine_templates'][] =
-								[
-										'template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets( 'x' ) ), 'y' => ( $bottom_template_offset + $this->getTemplateOffsets( 'y' ) ) //Place two templates on the same page.
-								];
+						$template_schema[0]['combine_templates'][] = [ 'template_page' => $form_template_page, 'x' => 0, 'y' => $bottom_template_offset ]; //Place two templates on the same page.
 					}
 				} else if ( $this->getShowInstructionPage() == true && $this->getType() == 'employee' ) {
 					$template_schema[0]['combine_templates'] = [
-							[ 'template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets( 'x' ) ), 'y' => 0 + $this->getTemplateOffsets( 'y' ) ],
-							[ 'template_page' => ( $form_template_page + 1 ), 'x' => ( 0 + $this->getTemplateOffsets( 'x' ) ), 'y' => ( $bottom_template_offset + $this->getTemplateOffsets( 'y' ) ) ] //Place two templates on the same page.
+							[ 'template_page' => $form_template_page, 'x' => 0, 'y' => 0 ],
+							[ 'template_page' => ( $form_template_page + 1 ), 'x' => 0, 'y' => $bottom_template_offset ] //Place two templates on the same page.
 					];
 				}
 
@@ -1672,19 +2463,17 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 						$this->resetTemplatePage();
 					}
 
+					$this->revertToOriginalDataState();
+
 					$e++;
 				}
 			}
 		}
 
-		$this->clearRecords();
-
 		return true;
 	}
 
-
-	function _outputXML() {
-
+	function _outputXML( $type = null ) {
 		if ( is_object( $this->getXMLObject() ) ) {
 			$xml = $this->getXMLObject();
 		} else {
@@ -1928,6 +2717,8 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 
 				//Standard or Non Standard Code
 				$xml->ReturnData->IRSW2[$e]->addChild( 'StandardOrNonStandardCd', 'S' );
+
+				$this->revertToOriginalDataState();
 
 				$e++;
 			}

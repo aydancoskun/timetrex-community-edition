@@ -2,8 +2,8 @@
 
 <!--
 Description: 	Canada Revenue Agency Common Structures - Used to present data types that are common to multiple CRA internal or external user groups   
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	september 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema targetNamespace="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sdt="http://www.cra-arc.gc.ca/xmlns/sdt/2-2-0" xmlns:ccms="http://www.cra-arc.gc.ca/xmlns/ccms/1-0-0" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2-0-0">
@@ -264,6 +264,13 @@ Version#:	1.18 (version #.yy)
 		</xsd:restriction>
 		<!-- example: Yes-No or English-French indicators  -->
 	</xsd:simpleType>
+	
+	<xsd:simpleType name="OneCodeType">
+		<xsd:restriction base="sdt:CodeType">
+			<xsd:enumeration value="1"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
 	<xsd:simpleType name="YesNoCodeType">
 		<xsd:restriction base="sdt:CodeType">
 			<xsd:enumeration value="Y"/>

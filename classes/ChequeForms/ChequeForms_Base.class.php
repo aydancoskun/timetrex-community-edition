@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -119,7 +119,7 @@ class ChequeForms_Base {
 		return FALSE;
 	}
 	function getDateFormat() {
-        if ( isset( $this->country ) AND strtolower($this->country) == 'ca' ) {
+        if ( isset( $this->country ) && strtolower($this->country) == 'ca' ) {
 			$date_format = 'd/m/Y';
 		} else {
 			$date_format = 'm/d/Y';
@@ -136,6 +136,7 @@ class ChequeForms_Base {
     */
     function filterAmountWords( $value ) {
         if ( isset( $this->amount ) ) {
+			require_once( 'Numbers/Words.php' );
             $numbers_words = new Numbers_Words();
             $value =  str_pad( ucwords( $numbers_words->toWords( floor($this->amount), 'en_US' ) ).' ', 65, "-", STR_PAD_RIGHT );
         }
@@ -399,9 +400,9 @@ class ChequeForms_Base {
 
 
 		$i = 0;
-		while( TRUE AND $i < 1000000 ) {
-			if ( $x == $schema['coordinates']['x'] OR $x == ( $schema['coordinates']['x'] + ( $schema['coordinates']['w'] - $cell_size ) )
-					OR  $y == $schema['coordinates']['y'] OR $y == ( $schema['coordinates']['y'] + ( $schema['coordinates']['h'] - $cell_size ) ) ) {
+		while( TRUE && $i < 1000000 ) {
+			if ( $x == $schema['coordinates']['x'] || $x == ( $schema['coordinates']['x'] + ( $schema['coordinates']['w'] - $cell_size ) )
+					|| $y == $schema['coordinates']['y'] || $y == ( $schema['coordinates']['y'] + ( $schema['coordinates']['h'] - $cell_size ) ) ) {
 				$pdf->setDrawColor( 0, 0, 0 ); //Black - All cells on the border of the grid will be black, so we know its bounds.
 			} else {
 				$pdf->setDrawColor( 128, 128, 128 ); //Gray
@@ -430,8 +431,8 @@ class ChequeForms_Base {
 		$pdf = $this->getPDFObject();
 
 		$pdf->AddPage();
-		if ( $this->getShowBackground() == TRUE AND isset($this->template_index[$schema['template_page']]) ) {
-			if ( isset($schema['combine_templates']) AND is_array($schema['combine_templates']) ) {
+		if ( $this->getShowBackground() == TRUE && isset($this->template_index[$schema['template_page']]) ) {
+			if ( isset($schema['combine_templates']) && is_array($schema['combine_templates']) ) {
 				$template_schema = $this->getTemplateSchema();
 
 				//Handle combining multiple template together with a X,Y offset.
@@ -503,7 +504,7 @@ class ChequeForms_Base {
 		$pdf = $this->getPDFObject();
 
 		//Make sure we don't load the same template more than once.
-		if ( isset($schema['template_page']) AND $schema['template_page'] != $this->current_template_index ) {
+		if ( isset($schema['template_page']) && $schema['template_page'] != $this->current_template_index ) {
 			//Debug::text('Adding new page: '. $schema .' Template Page: '. $schema['template_page'], __FILE__, __LINE__, __METHOD__, 10);
 			$this->addPage( $schema );
 		} else {
@@ -512,7 +513,7 @@ class ChequeForms_Base {
 
 		//on_background flag forces that item to only be shown if the background is as well.
 		//This has to go below any addPage() call, otherwise pages won't be added if the first cell is only to be shown on the background.
-		if ( isset($schema['on_background']) AND $schema['on_background'] == TRUE AND $this->getShowBackground() == FALSE ) {
+		if ( isset($schema['on_background']) && $schema['on_background'] == TRUE && $this->getShowBackground() == FALSE ) {
 			return FALSE;
 		}
 
@@ -536,13 +537,13 @@ class ChequeForms_Base {
 			$coordinates = $schema['coordinates'];
 			//var_dump( Debug::BackTrace() );
 
-			if ( isset($coordinates['text_color']) AND is_array( $coordinates['text_color'] ) ) {
+			if ( isset($coordinates['text_color']) && is_array( $coordinates['text_color'] ) ) {
 				$pdf->setTextColor( $coordinates['text_color'][0], $coordinates['text_color'][1], $coordinates['text_color'][2] );
 			} else {
 				$pdf->setTextColor( 0, 0, 0 ); //Black text.
 			}
 
-			if ( isset($coordinates['fill_color']) AND is_array( $coordinates['fill_color'] ) ) {
+			if ( isset($coordinates['fill_color']) && is_array( $coordinates['fill_color'] ) ) {
 				$pdf->setFillColor( $coordinates['fill_color'][0], $coordinates['fill_color'][1], $coordinates['fill_color'][2] );
 				$coordinates['fill'] = 1;
 			} else {
@@ -561,7 +562,7 @@ class ChequeForms_Base {
 				}
 			}
 
-			if ( isset($schema['multicell']) AND $schema['multicell'] == TRUE ) {
+			if ( isset($schema['multicell']) && $schema['multicell'] == TRUE ) {
 				//Debug::text('Drawing MultiCell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 				$pdf->MultiCell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], strtoupper($coordinates['halign']), $coordinates['fill'] );
 			} else {
@@ -595,7 +596,7 @@ class ChequeForms_Base {
 		//Get location map, start looping over each variable and drawing
 		$records = $this->getRecords();
 
-		if ( is_array($records) AND count($records) > 0 ) {
+		if ( is_array($records) && count($records) > 0 ) {
 
 			$template_schema = $this->getTemplateSchema();
 

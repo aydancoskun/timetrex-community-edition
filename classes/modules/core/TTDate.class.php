@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -447,8 +447,13 @@ class TTDate {
 	/**
 	 * @return false|string
 	 */
-	public static function getTimeZoneOffset() {
-		return date( 'Z' );
+	public static function getTimeZoneOffset( $epoch = null ) {
+		//Seems to be a bug in PHP 7.x where if NULL is passed into date() it doesn't return the correct timezone offset, so always force time() in that case.
+		if ( !is_numeric( $epoch ) ) {
+			$epoch = time();
+		}
+
+		return date( 'Z', $epoch );
 	}
 
 	/**
@@ -461,16 +466,13 @@ class TTDate {
 			return $epoch;
 		}
 
-		$old_timezone_offset = TTDate::getTimeZoneOffset();
+		$old_timezone_offset = TTDate::getTimeZoneOffset( $epoch );
 
 		try {
-			//Use PEAR Date class to convert timezones instead of PHP v5.2 date object so we can still use older PHP versions for distros like CentOS.
-			require_once( 'Date.php' );
+			$datetime_obj = new DateTime( TTDate::getISOTimeStamp( $epoch ) );
+			$new_timezone_obj = new DateTimeZone( $timezone );
 
-			$d = new Date( date( 'r', $epoch ) );
-			$tz = new Date_TimeZone( $timezone );
-
-			$new_timezone_offset = ( $tz->getOffset( $d ) / 1000 );
+			$new_timezone_offset = $new_timezone_obj->getOffset( $datetime_obj );
 			Debug::text( 'Converting time: ' . $epoch . ' to TimeZone: ' . $timezone . ' Offset: ' . $new_timezone_offset, __FILE__, __LINE__, __METHOD__, 10 );
 
 			return ( $epoch - ( $old_timezone_offset - $new_timezone_offset ) );
@@ -619,8 +621,8 @@ class TTDate {
 					}
 				}
 
-				//Check if the first character is '-', or thre are any negative integers.
-				if ( strncmp( $time_units[0], '-', 1 ) == 0 || $time_units[0] < 0 || $time_units[1] < 0 || $time_units[2] < 0 ) {
+				//Check if the first character is '-', or there are any negative integers.
+				if ( strncmp( $time_units[0], '-', 1 ) == 0 || (int)$time_units[0] < 0 || (int)$time_units[1] < 0 || (int)$time_units[2] < 0 ) {
 					$negative_number = true;
 				}
 
@@ -899,6 +901,7 @@ class TTDate {
 			//Debug::text('	 NO Custom Parse Format detected!', __FILE__, __LINE__, __METHOD__, 10);
 			$formatted_date = $str;
 		}
+
 		//Debug::text('	 Parsing Date: '. $formatted_date, __FILE__, __LINE__, __METHOD__, 10);
 
 		//On the Recurring Templates, if the user enters "0600", its passed here without a date, and parsed as "600" which is incorrect.
@@ -906,6 +909,9 @@ class TTDate {
 		if ( is_numeric( $formatted_date ) ) {
 			$epoch = (int)$formatted_date;
 		} else {
+			$formatted_date = preg_replace('/([AP])(\s*[A-Z]{3})?$/i', '$1M', $formatted_date ); //Handle cases where the user enters "A" or "P" at the end of the string instead AM/PM. Convert to AM/PM
+			$formatted_date = preg_replace('/(\d{1,2})(\d{2})\s*(AM|PM)/i', '$1:$2 $3', $formatted_date); //Handle where a colon is left out of a 3 or 4 digit time value. ie: 815 instead of 8:15, or 1045 instead of 10:45. Add the colon in.
+
 			//$epoch = self::strtotime( $formatted_date );
 			$epoch = strtotime( $formatted_date ); //Don't use self::strtotime() as it treats all numeric values as epochs, which breaks handling for Ymd. Its faster too.
 
@@ -949,11 +955,21 @@ class TTDate {
 	}
 
 	/**
+	 * @param float $epoch EPOCH
+	 * @return false|string
+	 */
+	public static function getISOTimeStampWithMilliseconds( $epoch ) {
+		$epoch = sprintf( '%.6F', $epoch ); //Epoch must be in a string format with a decimal and some precision, otherwise it can cause the following error when called like this: TTDate::getISOTimeStampWithMilliseconds(1613774137) -- FATAL(1): Uncaught Error: Call to a member function setTimeZone() on boolean
+
+		return DateTime::createFromFormat( 'U.u', $epoch )->setTimeZone( new DateTimezone( TTDate::getTimeZone() ) )->format( 'Y-m-d H:i:s.u O' );
+	}
+
+	/**
 	 * @param string $format
 	 * @param int $epoch EPOCH
 	 * @return bool|false|null|string
 	 */
-	public static function getAPIDate( $format = 'DATE+TIME', $epoch ) {
+	public static function getAPIDate( $format = 'DATE+TIME', $epoch = null ) {
 		return self::getDate( $format, $epoch );
 	}
 
@@ -1032,10 +1048,15 @@ class TTDate {
 	/**
 	 * @return array
 	 */
-	public static function getDayOfMonthArray() {
+	public static function getDayOfMonthArray( $include_last_day_of_month = false ) {
 		$retarr = [];
+
 		for ( $i = 1; $i <= 31; $i++ ) {
 			$retarr[$i] = $i;
+		}
+
+		if ( $include_last_day_of_month == true ) {
+			$retarr[-1] = '-1';
 		}
 
 		return $retarr;
@@ -1314,6 +1335,29 @@ class TTDate {
 		return date( 'z', TTDate::getEndYearEpoch( $epoch ) );
 	}
 
+
+	/**
+	 * Helper function for incrementDate() to make sure 31-Mar-2021 and minus 1 month from it gets 28-Feb-2021 rather than 01-Mar-2021 or something.
+	 * @param $date_arr
+	 * @param $amount
+	 * @return false|mixed|string
+	 */
+	private static function incrementDateGetOtherMonth( $date_arr, $amount ) {
+		if ( $date_arr['mday'] > 28 ) { //28 is the shortest number of days in any one month (Feb).
+			$proper_other_month = TTDate::incrementDate( mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], 15, $date_arr['year'] ), ( ( $amount > 0 ) ? ( $amount * 30 ) : ( $amount * 30 ) ), 'day' );
+			$retval = TTDate::getDaysInMonth( $proper_other_month );
+
+			//Make sure we never go forward in the month. For example 28-Feb +1 month should be 28-Mar
+			if ( $retval > $date_arr['mday'] ) {
+				$retval = $date_arr['mday'];
+			}
+
+			return $retval;
+		}
+
+		return $date_arr['mday'];
+	}
+
 	/**
 	 * @param int $epoch EPOCH
 	 * @param $amount
@@ -1323,7 +1367,7 @@ class TTDate {
 	public static function incrementDate( $epoch, $amount, $unit ) {
 		//Debug::text('Epoch: '. $epoch .' ('.TTDate::getDate('DATE+TIME', $epoch).') Amount: '. $amount .' unit: '. $unit, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( $epoch == '' OR !is_int( $epoch ) ) {
+		if ( $epoch == '' || !is_int( $epoch ) ) {
 			return false;
 		}
 
@@ -1334,6 +1378,7 @@ class TTDate {
 		if ( $amount == 0 ) {
 			return $epoch;
 		}
+
 
 		$date_arr = getdate( $epoch );
 		$retval = null;
@@ -1352,12 +1397,17 @@ class TTDate {
 				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], ( $date_arr['mday'] + ( $amount * 7 ) ), $date_arr['year'] );
 				break;
 			case 'month':
+				//This isn't quite as simple as just adjust the month. Because if the day of month is Dec-31 and increment by -1 Nov, November doesn't have 31 days, so it gets bumped back to Dec 1st.
+				// This should always return a different month, and just get the date to fit as best as it can.
+				$date_arr['mday'] = TTDate::incrementDateGetOtherMonth( $date_arr, $amount );
 				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, ( $date_arr['mon'] + $amount ), $date_arr['mday'], $date_arr['year'] );
 				break;
 			case 'quarter':
+				$date_arr['mday'] = TTDate::incrementDateGetOtherMonth( $date_arr, ( $amount * 3 ) );
 				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, ( $date_arr['mon'] + ( $amount * 3 ) ), $date_arr['mday'], $date_arr['year'] );
 				break;
 			case 'year':
+				$date_arr['mday'] = TTDate::incrementDateGetOtherMonth( $date_arr, ( $amount * 12 ) );
 				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], $date_arr['mday'], ( $date_arr['year'] + $amount ) );
 				break;
 		}
@@ -1581,6 +1631,25 @@ class TTDate {
 		}
 
 		return $day_with_most_time;
+	}
+
+	/**
+	 * @param int $start_epoch EPOCH
+	 * @param int $end_epoch   EPOCH
+	 * @param string $format
+	 * @return bool|float|int
+	 */
+	public static function getDateDifference( $start_epoch, $end_epoch, $format = '%a' ) {
+		if ( $start_epoch == '' || $end_epoch == '' ) {
+			return false;
+		}
+
+		$interval = date_diff( self::getDateTimeObject( $end_epoch ), self::getDateTimeObject( $start_epoch ), false );
+
+		$retval = $interval->format( $format );
+		//Debug::text('Date Difference: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $retval;
 	}
 
 	/**
@@ -2053,14 +2122,12 @@ class TTDate {
 	}
 
 	/**
-	 * @param int $anchor_epoch       EPOCH
-	 * @param int $day_of_month_epoch EPOCH
-	 * @param null $day_of_month
+	 * @param int $anchor_epoch       EPOCH The anchor date to start searching from.
+	 * @param int $day_of_month_epoch EPOCH What we use to extract the day of the month from.
+	 * @param int $day_of_month       Day of the month to use, ie: 1-31
 	 * @return bool|false|int
 	 */
 	public static function getDateOfNextDayOfMonth( $anchor_epoch, $day_of_month_epoch, $day_of_month = null ) {
-		//Anchor Epoch is the anchor date to start searching from.
-		//Day of month epoch is the epoch we use to extract the day of the month from.
 		Debug::text( '-------- ', __FILE__, __LINE__, __METHOD__, 10 );
 		Debug::text( 'Anchor Epoch: ' . TTDate::getDate( 'DATE+TIME', $anchor_epoch ) . ' Day Of Month Epoch: ' . TTDate::getDate( 'DATE+TIME', $day_of_month_epoch ) . ' Day Of Month: ' . $day_of_month, __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -2070,6 +2137,10 @@ class TTDate {
 
 		if ( $day_of_month_epoch == '' && $day_of_month == '' ) {
 			return false;
+		}
+
+		if ( $day_of_month == '-1' ) { //If "Last Day of Month" is passed, assume 31.
+			$day_of_month = 31;
 		}
 
 		if ( $day_of_month_epoch == '' && $day_of_month != '' && $day_of_month <= 31 ) {
@@ -2455,52 +2526,59 @@ class TTDate {
 	public static function getNearestWeekDay( $epoch, $type = 0, $exclude_epochs = [] ) {
 		Debug::Text( 'Epoch: ' . TTDate::getDate( 'DATE+TIME', $epoch ) . ' Type: ' . $type, __FILE__, __LINE__, __METHOD__, 10 );
 
-		while ( TTDate::isWeekDay( $epoch ) == false || in_array( TTDate::getBeginDayEpoch( $epoch ), $exclude_epochs ) ) {
-			Debug::text( '<b>FOUND WeekDay/HOLIDAY!</b>', __FILE__, __LINE__, __METHOD__, 10 );
-			switch ( $type ) {
-				case 0: //No adjustment
-					break 2;
-				case 1: //Previous day
-					$epoch -= 86400;
-					break;
-				case 2: //Next day
-					$epoch += 86400;
-					break;
-				case 3: //Closest day
-					$forward_epoch = $epoch;
-					$forward_days = 0;
-					while ( TTDate::isWeekDay( $forward_epoch ) == false || in_array( TTDate::getBeginDayEpoch( $forward_epoch ), $exclude_epochs ) ) {
-						$forward_epoch += 86400;
-						$forward_days++;
-					}
+		if ( is_numeric( $epoch ) ) {
+			while ( is_numeric( $epoch ) && ( TTDate::isWeekDay( $epoch ) == false || in_array( TTDate::getBeginDayEpoch( $epoch ), $exclude_epochs ) ) ) {
+				Debug::text( '  FOUND WeekDay/HOLIDAY!', __FILE__, __LINE__, __METHOD__, 10 );
+				switch ( $type ) {
+					case 0: //No adjustment
+						break 2;
+					case 1: //Previous day
+						//$epoch -= 86400;
+						$epoch = TTDate::incrementDate( $epoch, -1, 'day' );
+						break;
+					case 2: //Next day
+						//$epoch += 86400;
+						$epoch = TTDate::incrementDate( $epoch, 1, 'day' );
+						break;
+					case 3: //Closest day
+						$forward_epoch = $epoch;
+						$forward_days = 0;
+						while ( is_numeric( $forward_epoch ) && TTDate::isWeekDay( $forward_epoch ) == false || in_array( TTDate::getBeginDayEpoch( $forward_epoch ), $exclude_epochs ) ) {
+							$forward_epoch = TTDate::incrementDate( $forward_epoch, 1, 'day' );
+							$forward_days++;
+						}
 
-					$backward_epoch = $epoch;
-					$backward_days = 0;
-					while ( TTDate::isWeekDay( $backward_epoch ) == false || in_array( TTDate::getBeginDayEpoch( $backward_epoch ), $exclude_epochs ) ) {
-						$backward_epoch -= 86400;
-						$backward_days++;
-					}
+						$backward_epoch = $epoch;
+						$backward_days = 0;
+						while ( is_numeric( $backward_epoch ) && TTDate::isWeekDay( $backward_epoch ) == false || in_array( TTDate::getBeginDayEpoch( $backward_epoch ), $exclude_epochs ) ) {
+							$backward_epoch = TTDate::incrementDate( $backward_epoch, -1, 'day' );
+							$backward_days++;
+						}
 
-					if ( $backward_days <= $forward_days ) {
-						$epoch = $backward_epoch;
-					} else {
-						$epoch = $forward_epoch;
-					}
-					break;
-				case 10: //Split: Sat=Sat, Sun=Mon
-					if ( TTDate::getDayOfWeek( $epoch ) == 0 ) { //Sun, move forward one day to Mon.
-						$epoch += 86400;
-					} else {
-						break 2; //No Adjustment
-					}
-					break;
-				case 20: //Split: Sat=Fri, Sun=Sun
-					if ( TTDate::getDayOfWeek( $epoch ) == 6 ) { //Sat, move backward one day to Fri.
-						$epoch -= 86400;
-					} else {
-						break 2; //No Adjustment
-					}
-					break;
+						Debug::text( '  Forward Days: ' . $forward_days . ' Backward Days: ' . $backward_days, __FILE__, __LINE__, __METHOD__, 10 );
+						if ( $backward_days <= $forward_days ) {
+							$epoch = $backward_epoch;
+						} else {
+							$epoch = $forward_epoch;
+						}
+						break;
+					case 10: //Split: Sat=Sat, Sun=Mon
+						if ( TTDate::getDayOfWeek( $epoch ) == 0 ) { //Sun, move forward one day to Mon.
+							//$epoch += 86400;
+							$epoch = TTDate::incrementDate( $epoch, 1, 'day' );
+						} else {
+							break 2; //No Adjustment
+						}
+						break;
+					case 20: //Split: Sat=Fri, Sun=Sun
+						if ( TTDate::getDayOfWeek( $epoch ) == 6 ) { //Sat, move backward one day to Fri.
+							//$epoch -= 86400;
+							$epoch = TTDate::incrementDate( $epoch, -1, 'day' );
+						} else {
+							break 2; //No Adjustment
+						}
+						break;
+				}
 			}
 		}
 
@@ -2662,7 +2740,7 @@ class TTDate {
 		//Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $start_date_obj->format('U') ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date_obj->format('U') ), __FILE__, __LINE__, __METHOD__, 10);
 		foreach ( $period as $date_obj ) {
 			//Force hour,min,second to always be the same on every iteration. This is important when considering DST so its not +/-3600
-			if ( $interval->format( 'd' ) > 1 ) {
+			if ( $interval->format( '%d' ) > 1 ) {
 				$date_obj->setTime( $start_date_obj->format( 'H' ), $start_date_obj->format( 'i' ), $start_date_obj->format( 's' ) );
 			}
 
@@ -2700,6 +2778,7 @@ class TTDate {
 	}
 
 	/**
+	 * Gets the time two shifts overlap of one another.
 	 * @param int $start_date1 EPOCH
 	 * @param int $end_date1   EPOCH
 	 * @param int $start_date2 EPOCH
@@ -2716,6 +2795,27 @@ class TTDate {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Gets the time between two shifts.
+	 * @param int $start_date1 EPOCH
+	 * @param int $end_date1   EPOCH
+	 * @param int $start_date2 EPOCH
+	 * @param int $end_date2   EPOCH
+	 * @return bool|mixed
+	 */
+	public static function getTimeNotOverLapDifference( $start_date1, $end_date1, $start_date2, $end_date2 ) {
+		//Check if periods overlap one another (don't consider equal times to overlap)
+		if ( $start_date1 < $end_date2 && $end_date1 > $start_date2 ) {
+			return false;
+		} else {
+			if ( $start_date1 > $start_date2 ) {
+				return ( $end_date2 - $start_date1 );
+			} else {
+				return ( $start_date2 - $end_date1 );
+			}
+		}
 	}
 
 	/**
@@ -2883,8 +2983,8 @@ class TTDate {
 	}
 
 	/**
-	 * break up a timespan into array of days between times and on midnight
-	 * if no filter break days on midnight only
+	 * Break up a timespan into array of days between times and on midnight
+	 * If no filter is specified, break days on midnight by default.
 	 *
 	 * @param time|int $start_time_stamp
 	 * @param time|int $end_time_stamp
@@ -2897,9 +2997,9 @@ class TTDate {
 		$start_timestamp_at_midnight = ( TTDate::getEndDayEpoch( $start_time_stamp ) + 1 );
 
 		/**
-		 * set up first pair
+		 * Set up first pair
 		 */
-		$date_floor = $date_ceiling = $start_time_stamp;
+		$date_floor = $start_time_stamp;
 
 		if ( $filter_start_time_stamp != false && $filter_end_time_stamp != false ) {
 			$date_ceiling = TTDate::getNextDateFromArray( $date_floor, [ $start_timestamp_at_midnight, TTDate::getTimeLockedDate( $filter_start_time_stamp, $start_time_stamp ), TTDate::getTimeLockedDate( $filter_end_time_stamp, $start_time_stamp ) ] );

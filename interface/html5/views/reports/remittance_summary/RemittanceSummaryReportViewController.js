@@ -1,4 +1,4 @@
-class RemittanceSummaryReportViewController extends ReportBaseViewController {
+export class RemittanceSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -72,7 +72,7 @@ class RemittanceSummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'gross_payroll_include_pay_stub_entry_account'
@@ -89,7 +89,7 @@ class RemittanceSummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'gross_payroll_exclude_pay_stub_entry_account'
@@ -109,7 +109,7 @@ class RemittanceSummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'ei_include_pay_stub_entry_account'
@@ -126,7 +126,7 @@ class RemittanceSummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'ei_exclude_pay_stub_entry_account'
@@ -146,7 +146,7 @@ class RemittanceSummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'cpp_include_pay_stub_entry_account'
@@ -163,7 +163,7 @@ class RemittanceSummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'cpp_exclude_pay_stub_entry_account'
@@ -183,7 +183,7 @@ class RemittanceSummaryReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'tax_include_pay_stub_entry_account'
@@ -200,7 +200,7 @@ class RemittanceSummaryReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'tax_exclude_pay_stub_entry_account'

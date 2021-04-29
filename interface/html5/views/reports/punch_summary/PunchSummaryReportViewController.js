@@ -1,4 +1,4 @@
-class PunchSummaryReportViewController extends ReportBaseViewController {
+export class PunchSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {} );
 

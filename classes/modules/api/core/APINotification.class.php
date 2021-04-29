@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -123,7 +123,7 @@ class APINotification extends APIFactory {
 				}
 
 				//Give early warning to installs using older stack components before the next version is released that forces the upgrade.
-				if ( version_compare( PHP_VERSION, '7.0.0', '<' ) == true ) {
+				if ( version_compare( PHP_VERSION, '7.2.0', '<' ) == true || PHP_INT_SIZE === 4 ) { //Check for 32-bit installs as well, since accrual policies with length of service dates >2038 will fail.
 					if ( OPERATING_SYSTEM == 'WIN' ) {
 						$message = TTi18n::getText( 'WARNING: System stack components are out-of-date and not supported with this version of %1! Please perform a manual upgrade to the latest version of %1 immediately!', APPLICATION_NAME );
 					} else {

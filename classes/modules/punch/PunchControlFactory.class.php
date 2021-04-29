@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -444,6 +444,7 @@ class PunchControlFactory extends Factory {
 	function setBranch( $value ) {
 		$value = TTUUID::castUUID( $value );
 
+		//If TTUUID::getNotExistID( 2 ) is passed in, handle it in preValidate() at which point we should have more information to get the previous punch.
 		if ( $this->getUser() != '' && is_object( $this->getUserObject() ) && $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultBranch();
 			Debug::Text( 'Using Default Branch: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
@@ -466,6 +467,7 @@ class PunchControlFactory extends Factory {
 	function setDepartment( $value ) {
 		$value = TTUUID::castUUID( $value );
 
+		//If TTUUID::getNotExistID( 2 ) is passed in, handle it in preValidate() at which point we should have more information to get the previous punch.
 		if ( $this->getUser() != '' && is_object( $this->getUserObject() ) && $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultDepartment();
 			Debug::Text( 'Using Default Department: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
@@ -490,6 +492,8 @@ class PunchControlFactory extends Factory {
 		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
+
+		//If TTUUID::getNotExistID( 2 ) is passed in, handle it in preValidate() at which point we should have more information to get the previous punch.
 		if ( $this->getUser() != '' && is_object( $this->getUserObject() ) && $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultJob();
 			Debug::Text( 'Using Default Job: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
@@ -514,6 +518,8 @@ class PunchControlFactory extends Factory {
 		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
+
+		//If TTUUID::getNotExistID( 2 ) is passed in, handle it in preValidate() at which point we should have more information to get the previous punch.
 		if ( $this->getUser() != '' && is_object( $this->getUserObject() ) && $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultJobItem();
 			Debug::Text( 'Using Default Job Item: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
@@ -820,22 +826,26 @@ class PunchControlFactory extends Factory {
 							$pf->setType( 20 );                       //Lunch
 							//If we start re-rounding this punch we have to recalculate the total for the previous punch_control too.
 							$pf->setTimeStamp( $pf->getTimeStamp() ); //Re-round timestamp now that its a lunch punch.
-							if ( $pf->Save( false ) == true ) {
-								$pcf = $pf->getPunchControlObject();
-								$pcf->setPunchObject( $pf );
-								$pcf->setEnableCalcUserDateID( true );
-								$pcf->setEnableCalcTotalTime( true );
-								$pcf->setEnableCalcSystemTotalTime( true );
-								$pcf->setEnableCalcWeeklySystemTotalTime( true );
-								$pcf->setEnableCalcUserDateTotal( true );
-								if ( $pcf->isValid() == true ) {
-									Debug::Text( ' Punch Control is valid, saving...', __FILE__, __LINE__, __METHOD__, 10 );
-									if ( $pcf->Save( true, true ) == true ) { //Force isNew() lookup.\
-										Debug::text( ' Returning TRUE!', __FILE__, __LINE__, __METHOD__, 10 );
+							if ( $pf->isValid() == true ) {
+								if ( $pf->Save( false ) == true ) {
+									$pcf = $pf->getPunchControlObject();
+									$pcf->setPunchObject( $pf );
+									$pcf->setEnableCalcUserDateID( true );
+									$pcf->setEnableCalcTotalTime( true );
+									$pcf->setEnableCalcSystemTotalTime( true );
+									$pcf->setEnableCalcWeeklySystemTotalTime( true );
+									$pcf->setEnableCalcUserDateTotal( true );
+									if ( $pcf->isValid() == true ) {
+										Debug::Text( ' Punch Control is valid, saving...', __FILE__, __LINE__, __METHOD__, 10 );
+										if ( $pcf->Save( true, true ) == true ) { //Force isNew() lookup.\
+											Debug::text( ' Returning TRUE!', __FILE__, __LINE__, __METHOD__, 10 );
 
-										return true;
+											return true;
+										}
 									}
 								}
+							} else {
+								Debug::Text( ' Punch is NOT valid, unable to save! (a)', __FILE__, __LINE__, __METHOD__, 10 );
 							}
 						}
 					}
@@ -856,28 +866,32 @@ class PunchControlFactory extends Factory {
 						$plf->getById( $previous_punch_obj->getId() );
 						if ( $plf->getRecordCount() == 1 ) {
 							Debug::text( ' Modifying previous punch...', __FILE__, __LINE__, __METHOD__, 10 );
-
 							$pf = $plf->getCurrent();
 							$pf->setUser( $this->getUser() );
 							$pf->setType( 30 );                       //Break
 							//If we start re-rounding this punch we have to recalculate the total for the previous punch_control too.
 							$pf->setTimeStamp( $pf->getTimeStamp() ); //Re-round timestamp now that its a break punch.
-							if ( $pf->Save( false ) == true ) {
-								$pcf = $pf->getPunchControlObject();
-								$pcf->setPunchObject( $pf );
-								$pcf->setEnableCalcUserDateID( true );
-								$pcf->setEnableCalcTotalTime( true );
-								$pcf->setEnableCalcSystemTotalTime( true );
-								$pcf->setEnableCalcWeeklySystemTotalTime( true );
-								$pcf->setEnableCalcUserDateTotal( true );
-								if ( $pcf->isValid() == true ) {
-									Debug::Text( ' Punch Control is valid, saving...', __FILE__, __LINE__, __METHOD__, 10 );
-									if ( $pcf->Save( true, true ) == true ) { //Force isNew() lookup.\
-										Debug::text( ' Returning TRUE!', __FILE__, __LINE__, __METHOD__, 10 );
+							if ( $pf->isValid() == true ) {
+								Debug::Text( ' Punch is valid, saving...', __FILE__, __LINE__, __METHOD__, 10 );
+								if ( $pf->Save( false ) == true ) {
+									$pcf = $pf->getPunchControlObject();
+									$pcf->setPunchObject( $pf );
+									$pcf->setEnableCalcUserDateID( true );
+									$pcf->setEnableCalcTotalTime( true );
+									$pcf->setEnableCalcSystemTotalTime( true );
+									$pcf->setEnableCalcWeeklySystemTotalTime( true );
+									$pcf->setEnableCalcUserDateTotal( true );
+									if ( $pcf->isValid() == true ) {
+										Debug::Text( ' Punch Control is valid, saving...', __FILE__, __LINE__, __METHOD__, 10 );
+										if ( $pcf->Save( true, true ) == true ) { //Force isNew() lookup.
+											Debug::text( ' Returning TRUE!', __FILE__, __LINE__, __METHOD__, 10 );
 
-										return true;
+											return true;
+										}
 									}
 								}
+							} else {
+								Debug::Text( ' Punch is NOT valid, unable to save! (b)', __FILE__, __LINE__, __METHOD__, 10 );
 							}
 						}
 					}
@@ -1454,7 +1468,7 @@ class PunchControlFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function preSave() {
+	function preValidate() {
 		if ( $this->getBranch() === false ) {
 			$this->setBranch( TTUUID::getZeroID() );
 		}
@@ -1481,6 +1495,55 @@ class PunchControlFactory extends Factory {
 
 		if ( $this->getPayPeriod() == false ) {
 			$this->setPayPeriod();
+		}
+
+		if ( in_array( TTUUID::getNotExistID( 2 ), [ $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getDepartment() ], true ) ) {
+			Debug::text( '  Branch/Dept/Job/Task is set to match that of the previous punch...', __FILE__, __LINE__, __METHOD__, 10 );
+			$previous_punch_obj = $this->getPunchObject()->getPreviousPunchObject( $this->getPunchObject()->getActualTimeStamp() );
+			if ( is_object( $previous_punch_obj ) ) {
+				$previous_punch_control_obj = $previous_punch_obj->getPunchControlObject();
+				if ( is_object( $previous_punch_obj ) ) {
+					Debug::text( '    Previous punch: Branch: ' . $previous_punch_control_obj->getBranch() . ' Dept: ' . $previous_punch_control_obj->getDepartment() . ' Job: ' . $previous_punch_control_obj->getJob() . ' Task: ' . $previous_punch_control_obj->getJobItem(), __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $this->getBranch() === TTUUID::getNotExistID( 2 ) ) {
+						$this->setBranch( $previous_punch_control_obj->getBranch() );
+					}
+
+					if ( $this->getDepartment() === TTUUID::getNotExistID( 2 ) ) {
+						$this->setDepartment( $previous_punch_control_obj->getDepartment() );
+					}
+
+					if ( $this->getJob() === TTUUID::getNotExistID( 2 ) ) {
+						$this->setJob( $previous_punch_control_obj->getJob() );
+					}
+
+					if ( $this->getJobItem() === TTUUID::getNotExistID( 2 ) ) {
+						$this->setJobItem( $previous_punch_control_obj->getJobItem() );
+					}
+				}
+			}
+
+			//If there is no previous punch, fall back to employee profile defaults.
+			// FIXME: Perhaps fall back to schedule first, then employee profile defaults?
+			if ( $previous_punch_obj == false || $previous_punch_control_obj == false ) {
+				Debug::text( '    Previous punch does not exist, using default values instead...', __FILE__, __LINE__, __METHOD__, 10 );
+				if ( $this->getBranch() === TTUUID::getNotExistID( 2 ) ) {
+					$this->setBranch( TTUUID::getNotExistID() );
+				}
+
+				if ( $this->getDepartment() === TTUUID::getNotExistID( 2 ) ) {
+					$this->setDepartment( TTUUID::getNotExistID() );
+				}
+
+				if ( $this->getJob() === TTUUID::getNotExistID( 2 ) ) {
+					$this->setJob( TTUUID::getNotExistID() );
+				}
+
+				if ( $this->getJobItem() === TTUUID::getNotExistID( 2 ) ) {
+					$this->setJobItem( TTUUID::getNotExistID() );
+				}
+			}
+
+			unset( $previous_punch_obj, $previous_punch_control_obj );
 		}
 
 		//Set Job default Job Item if required.

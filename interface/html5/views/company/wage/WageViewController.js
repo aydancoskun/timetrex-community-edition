@@ -1,4 +1,4 @@
-class WageViewController extends BaseViewController {
+export class WageViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#wage_view_container', //Must set el here and can only set string, so events can work
@@ -402,7 +402,7 @@ class WageViewController extends BaseViewController {
 			api_class: TTAPI.APIUserWage,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.WAGE,
+			layout_name: 'global_wage',
 			show_search_inputs: true,
 			navigation_mode: true
 		} );
@@ -426,7 +426,7 @@ class WageViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIUser,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'user_id'
@@ -445,7 +445,7 @@ class WageViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIWageGroup,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.WAGE_GROUP,
+			layout_name: 'global_wage_group',
 			show_search_inputs: true,
 			set_default: true,
 			field: 'wage_group_id'
@@ -461,7 +461,7 @@ class WageViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_wage_column1 );
 
 		//Wage
@@ -615,7 +615,7 @@ class WageViewController extends BaseViewController {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				default_args: default_args,
 				api_class: TTAPI.APIUser,
 				multiple: true,
@@ -631,7 +631,7 @@ class WageViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -639,7 +639,7 @@ class WageViewController extends BaseViewController {
 				label: $.i18n._( 'Wage Group' ),
 				in_column: 1,
 				field: 'wage_group_id',
-				layout_name: ALayoutIDs.WAGE_GROUP,
+				layout_name: 'global_wage_group',
 				api_class: TTAPI.APIWageGroup,
 				multiple: true,
 				basic_search: true,
@@ -654,7 +654,7 @@ class WageViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -663,7 +663,7 @@ class WageViewController extends BaseViewController {
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
@@ -674,7 +674,7 @@ class WageViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -687,7 +687,7 @@ class WageViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -700,7 +700,7 @@ class WageViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: false,
@@ -711,7 +711,7 @@ class WageViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				field: 'default_department_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: false,
@@ -723,7 +723,7 @@ class WageViewController extends BaseViewController {
 				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 2,
-				layout_name: ALayoutIDs.JOB_TITLE,
+				layout_name: 'global_job_title',
 				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
@@ -737,7 +737,7 @@ class WageViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.COMBO_BOX
 			} ),
 			new SearchField( {
@@ -747,7 +747,7 @@ class WageViewController extends BaseViewController {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 

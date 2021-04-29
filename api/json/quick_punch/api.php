@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -53,23 +53,31 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 		$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
 		if ( $class_name != '' && in_array( $class_name, $valid_unauthenticated_classes ) && class_exists( $class_name ) ) {
 			$obj = new $class_name;
-			if ( method_exists( $obj, 'setAPIMessageID' ) ) {
-				$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
-			}
-			if ( $method != '' && method_exists( $obj, $method ) ) {
-				$retval = call_user_func_array( [ $obj, $method ], (array)$arguments );
-				//If the function returns anything else, encode into JSON and return it.
-				//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
-				echo json_encode( $retval );
-				$json_error = getJSONError();
-				if ( $json_error !== false ) {
-					Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
-					echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+
+			if ( isWhiteListedAPICall( $obj, $method ) === true ) {
+				if ( method_exists( $obj, 'setAPIMessageID' ) ) {
+					$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
+				}
+				if ( $method != '' && method_exists( $obj, $method ) ) {
+					$retval = call_user_func_array( [ $obj, $method ], (array)$arguments );
+					//If the function returns anything else, encode into JSON and return it.
+					//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+					echo json_encode( $retval );
+					$json_error = getJSONError();
+					if ( $json_error !== false ) {
+						Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
+						echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+					}
+				} else {
+					$validator = TTnew( 'Validator' );
+					/** @var Validator $validator */
+					Debug::text( 'Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
+					echo json_encode( $api_auth->returnHandler( false, 'SESSION', TTi18n::getText( 'Method %1 does not exist.', [ $validator->escapeHTML( $method ) ] ) ) );
 				}
 			} else {
 				$validator = TTnew( 'Validator' ); /** @var Validator $validator */
-				Debug::text( 'Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
-				echo json_encode( $api_auth->returnHandler( false, 'SESSION', TTi18n::getText( 'Method %1 does not exist.', [ $validator->escapeHTML( $method ) ] ) ) );
+				Debug::text( 'Class: '. get_class( $obj ) .' Method: ' . $method . ' is private!', __FILE__, __LINE__, __METHOD__, 10 );
+				echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 is private, unable to call.', [ $validator->escapeHTML( $method ) ] ) ) );
 			}
 		} else {
 			$validator = TTnew( 'Validator' ); /** @var Validator $validator */
@@ -121,29 +129,35 @@ function authenticatedInvokeService( $class_name, $method, $arguments, $message_
 			//Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id .' UserName: '. $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $class_name != '' && class_exists( $class_name ) ) {
 				$obj = new $class_name;
-				if ( method_exists( $obj, 'setAPIMessageID' ) ) {
-					$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
-				}
 
-				if ( $method != '' && method_exists( $obj, $method ) ) {
-					$retval = call_user_func_array( [ $obj, $method ], (array)$arguments );
-					if ( $retval !== null ) {
-						if ( !is_object( $retval ) ) { //Make sure we never return a raw object to end-user, as too much information could be included in it.
-							echo json_encode( $retval );
-							$json_error = getJSONError();
-							if ( $json_error !== false ) {
-								Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
-								echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+				if ( isWhiteListedAPICall( $obj, $method ) === true ) {
+					if ( method_exists( $obj, 'setAPIMessageID' ) ) {
+						$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
+					}
+
+					if ( $method != '' && method_exists( $obj, $method ) ) {
+						$retval = call_user_func_array( [ $obj, $method ], (array)$arguments );
+						if ( $retval !== null ) {
+							if ( !is_object( $retval ) ) { //Make sure we never return a raw object to end-user, as too much information could be included in it.
+								echo json_encode( $retval );
+								$json_error = getJSONError();
+								if ( $json_error !== false ) {
+									Debug::Arr( $retval, 'ERROR: JSON: ' . $json_error, __FILE__, __LINE__, __METHOD__, 10 );
+									echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', 'ERROR: JSON: ' . $json_error ) );
+								}
+							} else {
+								Debug::text( 'OBJECT return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10 );
 							}
 						} else {
-							Debug::text( 'OBJECT return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::text( 'NULL return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10 );
 						}
 					} else {
-						Debug::text( 'NULL return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10 );
+						Debug::text( 'Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
+						echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 does not exist.', [ $current_company->Validator->escapeHTML( $method ) ] ) ) );
 					}
 				} else {
-					Debug::text( 'Method: ' . $method . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
-					echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 does not exist.', [ $current_company->Validator->escapeHTML( $method ) ] ) ) );
+					Debug::text( 'Method: ' . $method . ' is private!', __FILE__, __LINE__, __METHOD__, 10 );
+					echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Method %1 is private, unable to call.', [ $current_company->Validator->escapeHTML( $method ) ] ) ) );
 				}
 			} else {
 				Debug::text( 'Class: ' . $class_name . ' does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
@@ -244,7 +258,7 @@ $api_auth = TTNew( 'APIAuthentication' );
 $session_id = getSessionID( 600 );
 $authentication = new Authentication();
 $authentication->setIdleTimeout( 900 ); //Force 15 minute timeout.
-if ( $authentication->checkValidCSRFToken() == true ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
+if ( isUnauthenticatedMethod( $method ) == true || $authentication->checkValidCSRFToken() == true ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
 	if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == false ) && ( !isset( $config_vars['other']['down_for_maintenance'] ) || isset( $config_vars['other']['down_for_maintenance'] ) && $config_vars['other']['down_for_maintenance'] == '' ) && $session_id != '' && !isset( $_GET['disable_db'] ) && isUnauthenticatedMethod( $method ) == false ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
 		Debug::text( 'Session ID: ' . $session_id . ' Source IP: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $class_name != 'APIProgressBar' && $authentication->Check( $session_id, 'QUICK_PUNCH_ID' ) === true ) { //Always treat APIProgressBar as unauthenticated as an optimization to avoid causing uncessary SQL queries.

@@ -1,4 +1,6 @@
-class WizardStep extends TTBackboneView {
+import { TTBackboneView } from '@/views/TTBackboneView';
+
+export class WizardStep extends TTBackboneView {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			previous_step_name: null,

@@ -2,8 +2,8 @@
 
 <!--
 Description	T5008 Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -17,7 +17,7 @@ Version#:	1.18 (version #.yy)
 	<xsd:complexType name="T5008SlipDispositionType">
 		<xsd:all>
 			<xsd:element name="sin" type="sinType"/>
-			<xsd:element name="sbrn_root" type="bnRootType"/>
+			<xsd:element name="slp_rcpnt_bn" type="bn9AccntNbr15"/>
 			<xsd:element name="rcpnt_tr_acct_nbr" type="trustType" minOccurs="0"/>
 			<xsd:element name="bn" type="ccraType3"/>
 			<xsd:element name="rcpnt_pstl_cd" type="pcType" minOccurs="0"/>
@@ -39,9 +39,9 @@ Version#:	1.18 (version #.yy)
 	</xsd:complexType>
 	<xsd:complexType name="T5008AmountType">
 		<xsd:all>
-			<xsd:element name="fval_amt" type="int11Type" minOccurs="0"/>
-			<xsd:element name="cost_bok_val_amt" type="int11Type" minOccurs="0"/>
-			<xsd:element name="dispn_amt" type="signedInt11Type" minOccurs="0"/>
+			<xsd:element name="fval_amt" type="decimal13Type" minOccurs="0"/>
+			<xsd:element name="cost_bok_val_amt" type="decimal13Type" minOccurs="0"/>
+			<xsd:element name="dispn_amt" type="signedDecimal13Type" minOccurs="0"/>
 		</xsd:all>
 	</xsd:complexType>
 	<xsd:complexType name="T5008SlipIdentificationRecordType">
@@ -51,14 +51,14 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="ENTPRS_NM" type="Line2Type" minOccurs="0"/>
 			<xsd:element name="RCPNT_ADDR" type="CanadaAddressType" minOccurs="0"/>
 			<xsd:element name="sin" type="sinType"/>
-			<xsd:element name="sbrn_root" type="bnRootType"/>
+			<xsd:element name="slp_rcpnt_bn" type="bn9AccntNbr15"/>
 			<xsd:element name="rcpnt_tr_acct_nbr" type="trustType" minOccurs="0"/> 
 			<xsd:element name="bn" type="ccraType3"/>
 			<xsd:element name="rcpnt_acct_nbr" type="char12Type" minOccurs="0"/>
 			<xsd:element name="rpt_tcd" type="slipDataType"/>
 			<xsd:element name="rcpnt_tcd" type="indicator1-4Type"/>
 			<xsd:element name="dispn_trans_cnt" type="int7Type"/>
-			<xsd:element name="sttl_amt" type="signedInt13Type"/>
+			<xsd:element name="sttl_amt" type="signedDecimal15Type"/>
 		</xsd:all>
 	</xsd:complexType>
 	<xsd:complexType name="T5008SummaryType">
@@ -68,7 +68,7 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="TRD_DEALR_ADDR" type="RequiredPstlCdAddressType" minOccurs="0"/>
 			<xsd:element name="CNTC" type="ContactType2"/>
 			<xsd:element name="tx_yr" type="yearType"/>
-			<xsd:element name="tot_sttl_amt" type="signedInt15Type"/>
+			<xsd:element name="tot_sttl_amt" type="signedDecimal17Type"/>
 			<xsd:element name="slp_cnt" type="int7Type"/>
 			<xsd:element name="rpt_tcd" type="otherDataType"/>
 			<xsd:element name="fileramendmentnote" type="char1309Type" minOccurs="0"/>

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -632,6 +632,91 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= $this->getSortSQL( $order );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $user_id UUID
+	 * @param $authorized
+	 * @param $status_id
+	 * @param int $start_date EPOCH
+	 * @param int $end_date   EPOCH
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayStubAmendmentListFactory
+	 * @throws DBError
+	 */
+	function getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDateAndIncludePayStubId( $user_id, $authorized, $status_id, $start_date, $end_date, $include_pay_stub_id, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
+		}
+
+		if ( $authorized == '' ) {
+			return false;
+		}
+
+		if ( $status_id == '' ) {
+			return false;
+		}
+
+		if ( $start_date == '' ) {
+			return false;
+		}
+
+		if ( $end_date == '' ) {
+			return false;
+		}
+
+		$pseaf = new PayStubEntryAccountFactory();
+		$psef = new PayStubEntryFactory();
+		$psf = new PayStubFactory();
+
+		$ph = [
+			//'status_id' => (int)$status_id, //Normally only 50=ACTIVE, unless correction pay stubs are being generated, then it needs to be an array.
+			'authorized' => $this->toBool( $authorized ),
+			'start_date' => $start_date,
+			'end_date'   => $end_date,
+			'include_pay_stub_id' => TTUUID::castUUID( (string)$include_pay_stub_id ),
+		];
+
+		//CalculatePayStub uses this to find PS amendments.
+		//Because of percent amounts, make sure we order by effective date FIRST,
+		//Then FIXED amounts, then percents.
+
+		//Pay period end dates never equal the start start date, so >= and <= are proper.
+
+		//Make sure we ignore any pay stub amendments that happen to belong to deleted pay stub accounts.
+		//
+		//  Also ensure we exclude pay stub amendments assigned to other out-of-cycle pay stubs in the same pay period.
+		//  However if we are doing a post-adjustment carry-forward then we need to include pay stub amendments assigned to the pay stub we are correcting, otherwise the difference calculation will be incorrect of course.
+		$query = '
+					SELECT	a.*
+					FROM	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pseaf->getTable() . ' as psea ON ( a.pay_stub_entry_name_id = psea.id )
+					WHERE a.authorized = ?
+						AND a.effective_date >= ?
+						AND a.effective_date <= ?						
+						AND a.id NOT IN (
+								SELECT pay_stub_amendment_id 
+								FROM ' . $psef->getTable() . ' as pse_b				 	
+								LEFT JOIN ' . $psf->getTable() . ' as ps_b ON ( pse_b.pay_stub_id = ps_b.id )				
+								WHERE ps_b.id != ?
+									AND ps_b.user_id in (' . $this->getListSQL( $user_id, $ph, 'uuid' ) . ')
+									AND pse_b.pay_stub_amendment_id is NOT NULL
+									AND ( ps_b.deleted = 0 AND ps_b.deleted = 0 )					
+						)																	
+						AND a.status_id in (' . $this->getListSQL( $status_id, $ph, 'int' ) . ')
+						AND a.user_id in (' . $this->getListSQL( $user_id, $ph, 'uuid' ) . ')
+						 
+						AND ( a.deleted = 0 AND psea.deleted = 0 )
+					ORDER BY a.effective_date asc, a.type_id asc, psea.ps_order asc, a.id asc
+				';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

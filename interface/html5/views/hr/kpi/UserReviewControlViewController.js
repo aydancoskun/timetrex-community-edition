@@ -1,4 +1,4 @@
-class UserReviewControlViewController extends BaseViewController {
+export class UserReviewControlViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_review_control_view_container',
@@ -134,7 +134,7 @@ class UserReviewControlViewController extends BaseViewController {
 			api_class: TTAPI.APIUserReviewControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.KPI_REVIEW_CONTROL,
+			layout_name: 'global_kpi_review_control',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -159,7 +159,7 @@ class UserReviewControlViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user_id'
@@ -176,7 +176,7 @@ class UserReviewControlViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'reviewer_user_id'
@@ -187,21 +187,21 @@ class UserReviewControlViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_review_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_review_column1 );
 
 		// Terms
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'term_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.term_array ) );
+		form_item_input.setSourceData( $this.term_array );
 		this.addEditFieldToColumn( $.i18n._( 'Terms' ), form_item_input, tab_review_column1 );
 
 		// Rating
@@ -214,7 +214,7 @@ class UserReviewControlViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'severity_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.severity_array ) );
+		form_item_input.setSourceData( $this.severity_array );
 		this.addEditFieldToColumn( $.i18n._( 'Severity' ), form_item_input, tab_review_column2, '' );
 
 		// Start Date
@@ -249,11 +249,11 @@ class UserReviewControlViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				tree_mode: true,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				set_empty: true,
 				field: 'group_id'
 			} );
-			form_item_input.setSourceData( Global.addFirstItemToArray( $this.kpi_group_array ) );
+			form_item_input.setSourceData( $this.kpi_group_array );
 
 			var tab_review_column3 = tab_review.find( '.third-column' ).css( {
 				'float': 'left',
@@ -439,7 +439,7 @@ class UserReviewControlViewController extends BaseViewController {
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -451,7 +451,7 @@ class UserReviewControlViewController extends BaseViewController {
 				label: $.i18n._( 'Reviewer' ),
 				in_column: 1,
 				field: 'reviewer_user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -466,7 +466,7 @@ class UserReviewControlViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -487,7 +487,7 @@ class UserReviewControlViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -498,7 +498,7 @@ class UserReviewControlViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -509,7 +509,7 @@ class UserReviewControlViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -544,7 +544,7 @@ class UserReviewControlViewController extends BaseViewController {
 				label: $.i18n._( 'KPI' ),
 				in_column: 2,
 				field: 'kpi_id',
-				layout_name: ALayoutIDs.KPI,
+				layout_name: 'global_kpi',
 				api_class: TTAPI.APIKPI,
 				multiple: true,
 				basic_search: false,
@@ -556,7 +556,7 @@ class UserReviewControlViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -568,7 +568,7 @@ class UserReviewControlViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

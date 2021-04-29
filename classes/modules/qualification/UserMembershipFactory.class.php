@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -249,7 +249,7 @@ class UserMembershipFactory extends Factory {
 	 * @return bool|string
 	 */
 	function getAmount() {
-		return Misc::MoneyFormat( $this->getGenericDataValue( 'amount' ), false );
+		return Misc::MoneyRound( $this->getGenericDataValue( 'amount' ) );
 	}
 
 	/**
@@ -261,7 +261,7 @@ class UserMembershipFactory extends Factory {
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat( $value );
 
-		return $this->setGenericDataValue( 'amount', Misc::MoneyFormat( $value, false ) );
+		return $this->setGenericDataValue( 'amount', Misc::MoneyRound( $value ) );
 	}
 
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1178,13 +1178,14 @@ class RemittanceDestinationAccountFactory extends Factory {
 			}
 
 			//Make sure the name does not contain the account number for security reasons.
+			// **NOTE: If the stripos() needle is a false, null, or an empty string and haystack is also empty it will return 0 rather than FALSE. So just use a random UUID to work around this.
 			$this->Validator->isTrue( 'name',
-					( ( stripos( $this->Validator->stripNonNumeric( $this->getName() ), $this->getValue3() ) !== false ) ? false : true ),
+					( ( stripos( $this->Validator->stripNonNumeric( $this->getName() ), ( ( $this->getValue3() == '' ) ? TTUUID::generateUUID() : $this->getValue3() ) ) !== false ) ? false : true ),
 									  TTi18n::gettext( 'Account number must not be a part of the Name' ) );
 
 			//Make sure the description does not contain the account number for security reasons.
 			$this->Validator->isTrue( 'description',
-					( ( stripos( $this->Validator->stripNonNumeric( $this->getDescription() ), $this->getValue3() ) !== false ) ? false : true ),
+					( ( stripos( $this->Validator->stripNonNumeric( $this->getDescription() ), ( ( $this->getValue3() == '' ) ? TTUUID::generateUUID() : $this->getValue3() ) ) !== false ) ? false : true ),
 									  TTi18n::gettext( 'Account number must not be a part of the Description' ) );
 
 			if ( $ignore_warning == false && $this->getStatus() == 10 && $this->getType() == 3000 && is_object( $this->getRemittanceSourceAccountObject() ) == true && $this->getRemittanceSourceAccountObject()->getDataFormat() == 5 && is_object( $this->getRemittanceSourceAccountObject()->getLegalEntityObject() ) ) { //3000=EFT/ACH, 5=TimeTrex EFT

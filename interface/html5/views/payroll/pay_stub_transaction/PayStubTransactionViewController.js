@@ -1,4 +1,4 @@
-class PayStubTransactionViewController extends BaseViewController {
+export class PayStubTransactionViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#pay_stub_transaction_view_container',
@@ -507,7 +507,7 @@ class PayStubTransactionViewController extends BaseViewController {
 			api_class: TTAPI.APIPayStub,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB,
+			layout_name: 'global_pay_stub',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -525,7 +525,7 @@ class PayStubTransactionViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: false,
 			set_empty: false,
 			field: 'user_id'
@@ -534,14 +534,14 @@ class PayStubTransactionViewController extends BaseViewController {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_transaction_column1 );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRemittanceSourceAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
+			layout_name: 'global_remittance_source_account',
 			show_search_inputs: false,
 			set_empty: false,
 			field: 'remittance_source_account_id'
@@ -552,7 +552,7 @@ class PayStubTransactionViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRemittanceDestinationAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT,
+			layout_name: 'global_remittance_destination_account',
 			show_search_inputs: false,
 			set_empty: false,
 			field: 'remittance_destination_account_id'
@@ -563,7 +563,7 @@ class PayStubTransactionViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			field: 'currency_id',
 			set_empty: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			allow_multiple_selection: false,
 			show_search_inputs: false,
 			api_class: TTAPI.APICurrency
@@ -599,7 +599,7 @@ class PayStubTransactionViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -607,7 +607,7 @@ class PayStubTransactionViewController extends BaseViewController {
 				label: $.i18n._( 'Source Account' ),
 				in_column: 2,
 				field: 'remittance_source_account_id',
-				layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
+				layout_name: 'global_remittance_source_account',
 				api_class: TTAPI.APIRemittanceSourceAccount,
 				multiple: true,
 				basic_search: true,
@@ -619,7 +619,7 @@ class PayStubTransactionViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
-				layout_name: ALayoutIDs.PAY_PERIOD,
+				layout_name: 'global_Pay_period',
 				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
@@ -635,7 +635,7 @@ class PayStubTransactionViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -647,7 +647,7 @@ class PayStubTransactionViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.CURRENCY,
+				layout_name: 'global_currency',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -658,7 +658,7 @@ class PayStubTransactionViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.DATE_PICKER
 			} )
 

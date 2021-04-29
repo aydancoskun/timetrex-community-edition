@@ -1,4 +1,4 @@
-class AccrualViewController extends BaseViewController {
+export class AccrualViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#accrual_view_container',
@@ -120,7 +120,7 @@ class AccrualViewController extends BaseViewController {
 			api_class: TTAPI.APIAccrual,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ACCRUAL,
+			layout_name: 'global_accrual_accrual',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -152,7 +152,7 @@ class AccrualViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIUser,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'user_id'
@@ -175,7 +175,7 @@ class AccrualViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIAccrualPolicyAccount,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
+				layout_name: 'global_accrual_policy_account',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'accrual_policy_account_id'
@@ -188,7 +188,7 @@ class AccrualViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_type_array ) );
+		form_item_input.setSourceData( $this.user_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_accrual_column1 );
 
 		// Amount
@@ -223,7 +223,7 @@ class AccrualViewController extends BaseViewController {
 				field: 'user_id',
 				in_column: 1,
 				default_args: default_args,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: !this.hide_search_field,
@@ -235,7 +235,7 @@ class AccrualViewController extends BaseViewController {
 				label: $.i18n._( 'Accrual Account' ),
 				field: 'accrual_policy_account_id',
 				in_column: 1,
-				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
+				layout_name: 'global_accrual_policy_account',
 				api_class: TTAPI.APIAccrualPolicyAccount,
 				multiple: true,
 				basic_search: true,
@@ -250,7 +250,7 @@ class AccrualViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -259,7 +259,7 @@ class AccrualViewController extends BaseViewController {
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -270,7 +270,7 @@ class AccrualViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: !this.hide_search_field,
@@ -282,7 +282,7 @@ class AccrualViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				in_column: 2,
 				field: 'default_department_id',
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: !this.hide_search_field,
@@ -294,7 +294,7 @@ class AccrualViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: !this.hide_search_field,
@@ -306,7 +306,7 @@ class AccrualViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: !this.hide_search_field,

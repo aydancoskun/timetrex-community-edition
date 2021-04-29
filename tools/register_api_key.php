@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,14 +37,14 @@
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: register_api_key.php [OPTIONS]\n";
 	$help_output .= "\n";
 	$help_output .= "  Options:\n";
 	$help_output .= "    -server <URL>				URL to API server\n";
 	$help_output .= "    -username <username>		API username\n";
 	$help_output .= "    -password <password>		API password\n";
-	//$help_output .= "    -protocol <protocol>		API Protocol (JSON/SOAP)\n";
+	$help_output .= "    -protocol <protocol>		(Optional) API Protocol (JSON/SOAP/REPORT)\n";
 
 	echo $help_output;
 } else {
@@ -69,22 +69,38 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$password = false;
 	}
 
-	//Protocol is based on the Server URL.
-	//if ( in_array( '-protocol', $argv ) ) {
-	//	$protocol = strtoupper( trim( $argv[( array_search( '-protocol', $argv ) + 1 )] ) );
-	//} else {
-	//	$protocol = 'JSON';
-	//}
+	//Protocol is based on the Server URL. However we need a way to force it to something else in the case of the REPORT API, as it doesn't allow authentication in the same way.
+	if ( in_array( '-protocol', $argv ) ) {
+		$protocol = strtoupper( trim( $argv[( array_search( '-protocol', $argv ) + 1 )] ) );
+	} else {
+		$protocol = 'JSON';
+	}
+
+	switch ( strtolower( $protocol ) ) {
+		case 'json':
+			$end_point = 'json/api';
+			break;
+		case 'soap':
+			$end_point = 'soap/api';
+			break;
+		case 'report':
+			$end_point = 'report/api';
+			break;
+		default:
+			$end_point = 'json/api';
+			break;
+	}
 
 	$TIMETREX_URL = $api_url;
 
 	$api_session = new TimeTrexClientAPI();
-	$api_key = $api_session->registerAPIKey( $username, $password );
+	$api_key = $api_session->registerAPIKey( $username, $password, $end_point );
 	if ( is_string( $api_key ) && strlen( $api_key ) > 40 ) {
-		echo "Successfully Registered Permanent API Key: SessionID=". $api_key ." to Username: ". $username ."\n";
+		echo "Successfully Registered Permanent API Key: SessionID=" . $api_key . " to Username: " . $username . "\n";
+		$api_session->Logout();
 	} else {
 		echo "ERROR: Unable to register API key, please check the Server URL, Username and Password!\n";
-		exit(255);
+		exit( 255 );
 	}
 }
 echo "\n";

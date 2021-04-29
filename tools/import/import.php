@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,8 +44,7 @@ error_reporting( E_ALL );
 ini_set( 'display_errors', 1 ); //Try to display any errors that may arise from the API.
 
 function Array2CSV( $data, $columns = null, $ignore_last_row = true, $include_header = true, $eol = "\n" ) {
-	if ( is_array( $data ) AND count( $data ) > 0
-			AND is_array( $columns ) AND count( $columns ) > 0 ) {
+	if ( is_array( $data ) && count( $data ) > 0 && is_array( $columns ) && count( $columns ) > 0 ) {
 
 		if ( $ignore_last_row === true ) {
 			array_pop( $data );
@@ -91,7 +90,7 @@ function parseCSV( $file, $head = false, $first_column = false, $delim = ',', $l
 	//mime_content_type is being deprecated in PHP, and it doesn't work properly on Windows. So if its not available just accept any file type.
 	if ( function_exists( 'mime_content_type' ) ) {
 		$mime_type = mime_content_type( $file );
-		if ( $mime_type !== false AND !in_array( $mime_type, [ 'text/plain', 'plain/text', 'text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'text/x-c' ] ) ) {
+		if ( $mime_type !== false && !in_array( $mime_type, [ 'text/plain', 'plain/text', 'text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'text/x-c' ] ) ) {
 			Debug::text( 'Invalid MIME TYPE: ' . $mime_type, __FILE__, __LINE__, __METHOD__, 10 );
 
 			return false;
@@ -120,14 +119,14 @@ function parseCSV( $file, $head = false, $first_column = false, $delim = ',', $l
 	}
 
 	//Excel adds a Byte Order Mark (BOM) to the beginning of files with UTF-8 characters. That needs to be stripped off otherwise it looks like a space and columns don't match up.
-	if ( isset( $header ) AND isset( $header[0] ) ) {
+	if ( isset( $header ) && isset( $header[0] ) ) {
 		$header[0] = str_replace( "\xEF\xBB\xBF", '', $header[0] );
 	}
 
 	$i = 1;
 	while ( ( $data = fgetcsv( $handle, $len, $delim ) ) !== false ) {
 		if ( $data !== [ null ] ) { // Ignore blank lines
-			if ( $head == true AND isset( $header ) ) {
+			if ( $head == true && isset( $header ) ) {
 				$row = [];
 				foreach ( $header as $key => $heading ) {
 					$row[trim( $heading )] = ( isset( $data[$key] ) ) ? $data[$key] : '';
@@ -137,7 +136,7 @@ function parseCSV( $file, $head = false, $first_column = false, $delim = ',', $l
 				$return[] = $data;
 			}
 
-			if ( $max_lines !== null AND $max_lines != '' AND $i == $max_lines ) {
+			if ( $max_lines !== null && $max_lines != '' && $i == $max_lines ) {
 				break;
 			}
 
@@ -152,13 +151,14 @@ function parseCSV( $file, $head = false, $first_column = false, $delim = ',', $l
 	return $return;
 }
 
-if ( $argc < 3 OR in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
+if ( $argc < 3 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: import.php [OPTIONS] [Column MAP file] [CSV File]\n";
 	$help_output .= "\n";
 	$help_output .= "  Options:\n";
 	$help_output .= "    -server <URL>				URL to API server\n";
 	$help_output .= "    -username <username>		API username\n";
 	$help_output .= "    -password <password>		API password\n";
+	$help_output .= "    -api_key <key>			API key to use instead of username/password\n";
 	$help_output .= "    -object <object>			Object to import (ie: User,Branch,Punch)\n";
 	$help_output .= "    -f <flag>				Custom flags, ie: fuzzy_match,update\n";
 	$help_output .= "    -n 					Dry-run, display the first two lines to confirm mapping is correct\n";
@@ -193,6 +193,12 @@ if ( $argc < 3 OR in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 		$password = false;
 	}
 
+	if ( in_array( '-api_key', $argv ) ) {
+		$api_key = trim( $argv[array_search( '-api_key', $argv ) + 1] );
+	} else {
+		$api_key = false;
+	}
+
 	if ( in_array( '-object', $argv ) ) {
 		$object = trim( $argv[( array_search( '-object', $argv ) + 1 )] );
 	} else {
@@ -222,16 +228,16 @@ if ( $argc < 3 OR in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	}
 
 	if ( $export_map == false ) {
-		if ( isset( $argv[( $last_arg - 1 )] ) AND $argv[( $last_arg - 1 )] != '' ) {
-			if ( !file_exists( $argv[( $last_arg - 1 )] ) OR !is_readable( $argv[( $last_arg - 1 )] ) ) {
+		if ( isset( $argv[( $last_arg - 1 )] ) && $argv[( $last_arg - 1 )] != '' ) {
+			if ( !file_exists( $argv[( $last_arg - 1 )] ) || !is_readable( $argv[( $last_arg - 1 )] ) ) {
 				echo "Column MAP File: " . $argv[( $last_arg - 1 )] . " does not exist or is not readable!\n";
 			} else {
 				$column_map_file = $argv[( $last_arg - 1 )];
 			}
 		}
 
-		if ( isset( $argv[$last_arg] ) AND $argv[$last_arg] != '' ) {
-			if ( !file_exists( $argv[$last_arg] ) OR !is_readable( $argv[$last_arg] ) ) {
+		if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' ) {
+			if ( !file_exists( $argv[$last_arg] ) || !is_readable( $argv[$last_arg] ) ) {
 				echo "Import CSV File: " . $argv[$last_arg] . " does not exist or is not readable!\n";
 			} else {
 				$import_csv_file = $argv[$last_arg];
@@ -243,7 +249,7 @@ if ( $argc < 3 OR in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 			exit;
 		}
 	} else {
-		if ( isset( $argv[$last_arg] ) AND $argv[$last_arg] != '' ) {
+		if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' ) {
 			if ( file_exists( $argv[$last_arg] ) ) { //OR !is_writable( $argv[$last_arg] ) ) {
 				echo "Column Map File: " . $argv[$last_arg] . " already exists or is not writable!\n";
 			} else {
@@ -259,13 +265,22 @@ if ( $argc < 3 OR in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 
 	$TIMETREX_URL = $api_url;
 
-	$api_session = new TimeTrexClientAPI();
-	$api_session->Login( $username, $password );
-	if ( $TIMETREX_SESSION_ID == false ) {
-		echo "API Username/Password is incorrect!\n";
-		exit;
+	if ( isset( $api_key ) && $api_key != '' ) {
+		$TIMETREX_SESSION_ID = $api_key;
+		$api_session = new TimeTrexClientAPI();
+		//if ( $api_session->isLoggedIn() == false ) {
+		//	echo "API Key is incorrect!\n";
+		//	exit( 1 );
+		//}
+	} else {
+		$api_session = new TimeTrexClientAPI();
+		$api_session->Login( $username, $password );
+		if ( $TIMETREX_SESSION_ID == false ) {
+			echo "API Username/Password is incorrect!\n";
+			exit;
+		}
+		//echo "Session ID: $TIMETREX_SESSION_ID\n";
 	}
-	//echo "Session ID: $TIMETREX_SESSION_ID\n";
 
 	if ( $object != '' ) {
 		if ( $export_map == false ) {
@@ -287,7 +302,7 @@ if ( $argc < 3 OR in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 			//var_dump( $obj->getOptions('columns') );
 
 			$retval = $obj->Import( $column_map_arr, $flags, $dry_run );
-			if ( is_object( $retval ) AND $retval->getResult() == true ) {
+			if ( is_object( $retval ) && $retval->getResult() == true ) {
 				echo "Import successful!\n";
 			} else {
 				echo "ERROR: Failed importing data...\n";
@@ -299,7 +314,7 @@ if ( $argc < 3 OR in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 			$obj = new TimeTrexClientAPI( 'UserGenericData' );
 			$result = $obj->getUserGenericData( [ 'filter_data' => [ 'script' => 'import_wizard' . strtolower( $object ), 'name' => $export_map ] ] );
 			$retval = $result->getResult();
-			if ( is_array( $retval ) AND isset( $retval[0]['data'] ) ) {
+			if ( is_array( $retval ) && isset( $retval[0]['data'] ) ) {
 				$output = [];
 
 				$i = 0;
@@ -319,7 +334,7 @@ if ( $argc < 3 OR in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 					$i++;
 				}
 
-				if ( isset( $columns ) AND count( $output ) > 0 ) {
+				if ( isset( $columns ) && count( $output ) > 0 ) {
 					file_put_contents( $column_map_file, Array2CSV( $output, $columns, false ) );
 					echo "Column map written to: " . $column_map_file . "\n";
 				}

@@ -2,8 +2,6 @@
 require_once( '../../../../../includes/global.inc.php' );
 require_once( '../../../../GovernmentForms/GovernmentForms.class.php' );
 $gf = new GovernmentForms();
-$gf->tcpdf_dir = '../tcpdf';
-$gf->fpdi_dir = '../fpdi';
 
 $roe_obj = $gf->getFormObject( 'ROE', 'CA' );
 $roe_obj->setDebug( false );

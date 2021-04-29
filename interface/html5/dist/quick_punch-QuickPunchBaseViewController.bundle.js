@@ -1,0 +1,2 @@
+(self.webpackChunktimetrex=self.webpackChunktimetrex||[]).push([["quick_punch-QuickPunchBaseViewController"],{9942:(e,c,s)=>{"use strict";s.r(c),s.d(c,{"QuickPunchBaseViewController":()=>r});var u=s(6739);class r extends u.TTBackboneView{constructor(e={}){_.defaults(e,{}),super(e)}}}}]);
+//# sourceMappingURL=quick_punch-QuickPunchBaseViewController.bundle.js.map?v=f21af0ea66674a28825b

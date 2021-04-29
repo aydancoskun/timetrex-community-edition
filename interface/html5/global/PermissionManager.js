@@ -1,4 +1,4 @@
-var PermissionManager = ( function() {
+export var PermissionManager = ( function() {
 
 	var validate = function( name, value ) {
 
@@ -511,8 +511,8 @@ var PermissionManager = ( function() {
 					result = false;
 				}
 				break;
-			case 'Form1099MiscReport':
-				if ( PermissionManager.validate( 'report', 'view_form1099misc' ) &&
+			case 'Form1099NecReport':
+				if ( PermissionManager.validate( 'report', 'view_form1099nec' ) &&
 					countryPermissionValidate( 'US' )
 				) {
 					result = true;

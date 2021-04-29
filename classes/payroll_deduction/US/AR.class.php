@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,6 +42,22 @@ class PayrollDeduction_US_AR extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
 		//As of 20200301 use the tax brackets verbatim, where the "constant" is minused rather than added.
+		20210101 => [
+				0 => [
+						[ 'income' => 4699, 'rate' => 0.0, 'constant' => 0 ],
+						[ 'income' => 9199, 'rate' => 2.0, 'constant' => 93.98 ],
+						[ 'income' => 13899, 'rate' => 3.0, 'constant' => 185.97 ],
+						[ 'income' => 22899, 'rate' => 3.4, 'constant' => 241.57 ],
+						[ 'income' => 38499, 'rate' => 5.0, 'constant' => 427.71 ],
+						[ 'income' => 82000, 'rate' => 5.9, 'constant' => 774.20 ],
+						[ 'income' => 83000, 'rate' => 5.9, 'constant' => 681.70 ],
+						[ 'income' => 84000, 'rate' => 5.9, 'constant' => 581.70 ],
+						[ 'income' => 85300, 'rate' => 5.9, 'constant' => 481.70 ],
+						[ 'income' => 86400, 'rate' => 5.9, 'constant' => 381.70 ],
+						[ 'income' => 87500, 'rate' => 5.9, 'constant' => 281.70 ],
+						[ 'income' => 87500, 'rate' => 5.9, 'constant' => 241.70 ],
+				],
+		],
 		20200301 => [
 				0 => [
 						[ 'income' => 4599, 'rate' => 0.0, 'constant' => 0 ],
@@ -81,11 +97,15 @@ class PayrollDeduction_US_AR extends PayrollDeduction_US {
 	];
 
 	var $state_options = [
-			20150101 => [ //01-Jan-2015
+			20210101 => [
+						  'standard_deduction' => 2200,
+						  'allowance'          => 29,
+			],
+			20150101 => [
 						  'standard_deduction' => 2200,
 						  'allowance'          => 26,
 			],
-			20060101 => [ //01-Jan-2006
+			20060101 => [
 						  'standard_deduction' => 2000,
 						  'allowance'          => 20,
 			],

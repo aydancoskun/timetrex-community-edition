@@ -7,8 +7,7 @@
 	<title><?php echo ( ( isset( $META_TITLE ) && $META_TITLE != '' ) ? $META_TITLE . ' | ' : '' ) . APPLICATION_NAME ?></title>
 	<base href="<?php echo $BASE_URL; ?>">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-	<meta name="Description"
-		  content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
+	<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
 	<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD ?>"></script>
 	<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD ?>"></script>
 	<script src="global/APIGlobal.js.php?disable_db=1&v=<?php echo APPLICATION_BUILD ?>"></script>
@@ -16,15 +15,8 @@
 	<script src="framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
 	<script src="framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
 	<script src="global/Global.js?v=<?php echo APPLICATION_BUILD ?>"></script>
-	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-	<!--[if lt IE 9]>
-	<script src="./framework/html5shiv.min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
-	<script src="./framework/respond.min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
-	<![endif]-->
 	<script src="./framework/bootstrap/js/bootstrap.bundle.js?v=<?php echo APPLICATION_BUILD ?>"></script>
-	<link rel="stylesheet" type="text/css"
-		  href="./framework/bootstrap/css/bootstrap.min.css?v=<?php echo APPLICATION_BUILD ?>">
+	<link rel="stylesheet" type="text/css" href="./framework/bootstrap/css/bootstrap.min.css?v=<?php echo APPLICATION_BUILD ?>">
 	<style rel="stylesheet" type="text/css">
 		body {
 			min-height: 100%;

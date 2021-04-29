@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,10 +37,10 @@
 /**
  * @group USPayrollDeductionTest2015
  */
-class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
+class USPayrollDeductionTest2015 extends PHPUnit\Framework\TestCase {
 	public $company_id = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
@@ -50,18 +50,14 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->company_id = PRIMARY_COMPANY_ID;
 
 		TTDate::setTimeZone( 'Etc/GMT+8' ); //Force to non-DST timezone. 'PST' isnt actually valid.
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		return true;
 	}
 
 	public function mf( $amount ) {
-		return Misc::MoneyFormat( $amount, false );
+		return Misc::MoneyRound( $amount );
 	}
 
 	public function MatchWithinMarginOfError( $source, $destination, $error = 0 ) {
@@ -587,7 +583,7 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateGrossIncome( 0 );
 		$pd_obj->setYearToDateDeduction( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 60000 );
-		$this->assertEquals( '60000', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '60000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '10218.75', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
 	}
 
@@ -759,7 +755,7 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateGrossIncome( 0 );
 		$pd_obj->setYearToDateDeduction( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 60000 );
-		$this->assertEquals( '60000', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '60000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '10218.75', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
 	}
 
@@ -1277,7 +1273,7 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateGrossIncome( 0 );
 		$pd_obj->setYearToDateDeduction( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 60000 );
-		$this->assertEquals( '60000', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '60000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2697.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 
@@ -1448,7 +1444,7 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateGrossIncome( 0 );
 		$pd_obj->setYearToDateDeduction( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 60000 );
-		$this->assertEquals( '60000', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '60000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
 		$this->assertEquals( '2697.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );
 	}
 

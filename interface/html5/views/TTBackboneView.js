@@ -10,7 +10,7 @@
  * has the super.initialize( options ); line at the start (before the required_files or any other non-backbone values from the options are used).
  */
 
-class TTBackboneView extends Backbone.View {
+export class TTBackboneView extends Backbone.View {
 	constructor( options = {} ) {
 		_.defaults( options, {} );
 

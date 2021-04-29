@@ -120,13 +120,16 @@
 				is_mouse_over = true;
 			} );
 
-			$( this ).mouseleave( function() {
-				is_mouse_over = false;
+			$( this ).mouseleave( function( e ) {
+				// Issue #2853 - This comparison fixes an issue where firefox improperly triggers mouseleave on select menus.
+				if ( e.target == this ) {
+					is_mouse_over = false;
+				}
 			} );
 
 			LocalCacheData.openAwesomeBoxColumnEditor = $this;
 
-			if ( layout && Global.isSet( layout.data.type ) && layout.data.type === ALayoutType.saved_layout ) {
+			if ( layout && Global.isSet( layout.data.type ) && layout.data.type === 10 ) {
 				a_dropdown_div.css( 'display', 'none' );
 				rows_per_page_div.css( 'display', 'none' );
 
@@ -179,7 +182,7 @@
 
 							layout_selector.setSourceData( source_data );
 
-							if ( layout && Global.isSet( layout.data.type ) && layout.data.type === ALayoutType.saved_layout ) {
+							if ( layout && Global.isSet( layout.data.type ) && layout.data.type === 10 ) {
 								$( $( layout_selector ).find( 'option' ) ).filter( function() {
 									return parseInt( $( this ).attr( 'value' ) ) === layout.data.layout_id;
 								} ).prop( 'selected', true ).attr( 'selected', true );

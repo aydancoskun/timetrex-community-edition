@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1023,8 +1023,10 @@ class PurgeDatabase {
 							$cgtf = TTnew( 'CompanyGenericTagFactory' ); /** @var CompanyGenericTagFactory $cgtf */
 							$object_type_arr = $cgtf->getOptions( 'object_type' );
 							foreach ( $object_type_arr as $object_type_id => $object_type ) {
-								if ( in_array( $object_type, $table_arr ) ) {
+								if ( in_array( $object_type, $table_arr ) && isset( $purge_tables[$object_type] ) ) {
 									$query[] = 'DELETE FROM ' . $table . ' as a WHERE a.object_type_id = ' . $object_type_id . ' AND NOT EXISTS ( select 1 from ' . $object_type . ' as b WHERE a.object_id = b.id)';
+								} else {
+									Debug::Text( '  WARNING: Table does not exist or is not in the purge tables array: ' . $object_type, __FILE__, __LINE__, __METHOD__, 10 );
 								}
 							}
 							unset( $cgtf, $object_type_arr, $object_type, $table_arr );

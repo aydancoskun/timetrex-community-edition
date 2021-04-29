@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -747,18 +747,18 @@ class RemittanceSummaryReport extends Report {
 						$tmp_cpp_total = 0;
 					}
 
-					$tmp_cpp_total_deducted = Misc::MoneyFormat( array_sum( Misc::arrayColumn( $this->tmp_data['pay_stub_entry'][$user_id], 'cpp_total' ) ), false );
+					$tmp_cpp_total_deducted = Misc::MoneyRound( array_sum( Misc::arrayColumn( $this->tmp_data['pay_stub_entry'][$user_id], 'cpp_total' ) ) );
 					if ( $tmp_cpp_total_deducted > 0 ) { //If nothing was deducted, assume they are exempt.
-						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] = Misc::MoneyFormat( bcmul( ( $tmp_cpp_total > $pd_obj->getCPPEmployeeMaximumContribution() ? $pd_obj->getCPPEmployeeMaximumContribution() : $tmp_cpp_total ), 2 ), false );
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] = Misc::MoneyRound( bcmul( ( $tmp_cpp_total > $pd_obj->getCPPEmployeeMaximumContribution() ? $pd_obj->getCPPEmployeeMaximumContribution() : $tmp_cpp_total ), 2 ) );
 						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'], $tmp_cpp_total_deducted );
 					} else {
 						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] = $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] = null;
 					}
 
 					$tmp_ei_total = ( $tmp_ei_total_earnings * $pd_obj->getEIEmployeeRate() );
-					$tmp_ei_total_deducted = Misc::MoneyFormat( array_sum( Misc::arrayColumn( $this->tmp_data['pay_stub_entry'][$user_id], 'ei_total' ) ), false );
+					$tmp_ei_total_deducted = Misc::MoneyRound( array_sum( Misc::arrayColumn( $this->tmp_data['pay_stub_entry'][$user_id], 'ei_total' ) ) );
 					if ( $tmp_ei_total_deducted > 0 ) { //If nothing was deducted, assume they are exempt.
-						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] = Misc::MoneyFormat( bcmul( ( $tmp_ei_total > $pd_obj->getEIEmployeeMaximumContribution() ? $pd_obj->getEIEmployeeMaximumContribution() : $tmp_ei_total ), ( 1 + $pd_obj->getEIEmployerRate() ) ), false );
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] = Misc::MoneyRound( bcmul( ( $tmp_ei_total > $pd_obj->getEIEmployeeMaximumContribution() ? $pd_obj->getEIEmployeeMaximumContribution() : $tmp_ei_total ), ( 1 + $pd_obj->getEIEmployerRate() ) ) );
 						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'], $tmp_ei_total_deducted );
 					} else {
 						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] = $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] = null;
@@ -883,7 +883,7 @@ class RemittanceSummaryReport extends Report {
 			//NOTE: This is mostly for the tax wizard data, some of this data is overridden in PayStubTransactionFactory::exportPayStubRemittanceAgencyReports().
 			$retarr = [
 					'object'               => __CLASS__,
-					'user_success_message' => TTi18n::gettext( 'Payment submitted successfully for $%1', [ Misc::MoneyFormat( $amount_due ) ] ),
+					'user_success_message' => TTi18n::gettext( 'Payment submitted successfully for $%1', [ Misc::MoneyRound( $amount_due ) ] ),
 
 					'agency_report_data' => [
 							'type_id'         => 'P', //P=Payment

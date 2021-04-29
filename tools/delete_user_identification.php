@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,7 +37,7 @@
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: delete_user_identification.php [OPTIONS] [user_name]\n";
 	$help_output .= "  Options:\n";
 	$help_output .= "    -n [Dryrun, don't actually delete any data]\n";
@@ -52,7 +52,7 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	}
 
 	if ( in_array( '-t', $argv ) ) {
-		$data['t'] = trim( $argv[ array_search( '-t', $argv ) + 1 ] );
+		$data['t'] = trim( $argv[array_search( '-t', $argv ) + 1] );
 	} else {
 		$data['t'] = false;
 	}
@@ -64,8 +64,8 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 	$last_arg = count( $argv ) - 1;
 
-	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
-		$user_name = $argv[ $last_arg ];
+	if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' ) {
+		$user_name = $argv[$last_arg];
 
 		//Get user_id from user_name
 		$ulf = new UserListFactory();

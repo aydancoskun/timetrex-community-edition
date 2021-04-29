@@ -1,4 +1,4 @@
-class SchedulePolicyViewController extends BaseViewController {
+export class SchedulePolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#schedule_policy_view_container',
@@ -43,7 +43,7 @@ class SchedulePolicyViewController extends BaseViewController {
 			api_class: TTAPI.APISchedulePolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.SCHEDULE_POLICY,
+			layout_name: 'global_schedule',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -80,7 +80,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIMealPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.MEAL_POLICY,
+			layout_name: 'global_meal',
 			show_search_inputs: true,
 			set_any: true,
 			field: 'meal_policy',
@@ -97,7 +97,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIBreakPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.BREAK_POLICY,
+			layout_name: 'global_break',
 			show_search_inputs: true,
 			set_any: true,
 			field: 'break_policy',
@@ -116,7 +116,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRegularTimePolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
+			layout_name: 'global_regular_time',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'include_regular_time_policy'
@@ -133,7 +133,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIRegularTimePolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
+			layout_name: 'global_regular_time',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'exclude_regular_time_policy'
@@ -158,7 +158,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIOverTimePolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.OVER_TIME_POLICY,
+			layout_name: 'global_over_time',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'include_over_time_policy'
@@ -177,7 +177,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIOverTimePolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.OVER_TIME_POLICY,
+			layout_name: 'global_over_time',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'exclude_over_time_policy'
@@ -199,7 +199,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPremiumPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PREMIUM_POLICY,
+			layout_name: 'global_premium',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'include_premium_policy'
@@ -216,7 +216,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPremiumPolicy,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PREMIUM_POLICY,
+			layout_name: 'global_premium',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'exclude_premium_policy'
@@ -233,7 +233,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'full_shift_absence_policy_id'
@@ -245,7 +245,7 @@ class SchedulePolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			layout_name: 'global_absences',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'partial_shift_absence_policy_id'
@@ -341,7 +341,7 @@ class SchedulePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Full Shift Absence Policy' ),
 				in_column: 1,
 				field: 'full_shift_absence_policy_id',
-				layout_name: ALayoutIDs.ABSENCES_POLICY,
+				layout_name: 'global_absences',
 				api_class: TTAPI.APIAbsencePolicy,
 				multiple: true,
 				basic_search: true,
@@ -352,7 +352,7 @@ class SchedulePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Partial Shift Absence Policy' ),
 				in_column: 1,
 				field: 'partial_shift_absence_policy_id',
-				layout_name: ALayoutIDs.ABSENCES_POLICY,
+				layout_name: 'global_absences',
 				api_class: TTAPI.APIAbsencePolicy,
 				multiple: true,
 				basic_search: true,
@@ -363,7 +363,7 @@ class SchedulePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -375,7 +375,7 @@ class SchedulePolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

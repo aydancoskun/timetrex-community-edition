@@ -1,7 +1,9 @@
-class BaseWizardController extends BaseWindowController {
+import { TTBackboneView } from '@/views/TTBackboneView';
+
+export class BaseWizardController extends TTBackboneView {
 	constructor( options = {} ) {
 		_.defaults( options, {
-			_required_files: null,
+			// _required_files: null,
 			steps: 0,
 			title: 'Wizard',
 			current_step: 1,
@@ -54,22 +56,22 @@ class BaseWizardController extends BaseWindowController {
 	 *
 	 * @returns {Array}
 	 */
-	filterRequiredFiles() {
-		var retval = [];
-
-		if ( this._required_files && this._required_files[0] ) {
-			retval = this._required_files;
-		} else {
-			for ( var edition_id in this._required_files ) {
-				if ( Global.getProductEdition() >= edition_id ) {
-					retval = retval.concat( this._required_files[edition_id] );
-				}
-			}
-		}
-
-		Debug.Arr( retval, 'RETVAL', 'BaseWizardController.js', 'BaseWizardController', 'filterRequiredFiles', 10 );
-		return retval;
-	}
+	// filterRequiredFiles() {
+	// 	var retval = [];
+	//
+	// 	if ( this._required_files && this._required_files[0] ) {
+	// 		retval = this._required_files;
+	// 	} else {
+	// 		for ( var edition_id in this._required_files ) {
+	// 			if ( Global.getProductEdition() >= edition_id ) {
+	// 				retval = retval.concat( this._required_files[edition_id] );
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	Debug.Arr( retval, 'RETVAL', 'BaseWizardController.js', 'BaseWizardController', 'filterRequiredFiles', 10 );
+	// 	return retval;
+	// }
 
 	initialize( options ) {
 		super.initialize( options );
@@ -78,23 +80,24 @@ class BaseWizardController extends BaseWindowController {
 		this.stepsWidgetDic = {};
 		this.stepsDataDic = {};
 
-		//This is already done in BaseWindowController->initialize() which is called before this. Therefore is this is called again, BaseWizardController.default_data will always be null, and it will break HTML reports.
-		// this.default_data = BaseWizardController.default_data;
-		// this.call_back = BaseWizardController.call_back;
-		//
-		// BaseWizardController.call_back = null;
-		// BaseWizardController.default_data = null;
+		this.default_data = BaseWizardController.default_data;
+		this.call_back = BaseWizardController.call_back;
+
+		BaseWizardController.default_data = null;
+		BaseWizardController.call_back = null;
 
 		this.user_generic_data_api = TTAPI.APIUserGenericData;
 
 		LocalCacheData.current_open_wizard_controller = this;
-		// #2804 The below has been consolidated into BaseWindowController. FindAvailableWizard created two grids because the init function is triggered twice due to the require here and in BaseWindowController.
-		// var $this = this;
-		// require( this.filterRequiredFiles(), function() {
-		// 	$this.setDefaultDataToSteps();
-		// 	$this.init( options );
-		// 	TTPromise.resolve( 'BaseViewController', 'initialize' );
-		// } );
+
+		if ( typeof this.init == 'function' ) {
+			//FIXME: pull this out when all wizards are refactored to the new way #1187
+			if ( typeof this.setDefaultDataToSteps == 'function' ) {
+				this.setDefaultDataToSteps();
+			}
+			this.init( options );
+			TTPromise.resolve( 'BaseViewController', 'initialize' );
+		}
 	}
 
 	setDefaultDataToSteps() {
@@ -542,7 +545,7 @@ class BaseWizardController extends BaseWindowController {
 			field: field,
 			set_empty: true,
 			allow_multiple_selection: allowMultiple,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			key: 'value'
 		} );
 

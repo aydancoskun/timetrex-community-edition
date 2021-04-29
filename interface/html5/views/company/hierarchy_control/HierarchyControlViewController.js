@@ -1,4 +1,4 @@
-class HierarchyControlViewController extends BaseViewController {
+export class HierarchyControlViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#hierarchy_control_view_container',
@@ -63,7 +63,7 @@ class HierarchyControlViewController extends BaseViewController {
 			api_class: TTAPI.APIHierarchyControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.HIERARCHY,
+			layout_name: 'global_hierarchy',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -103,13 +103,13 @@ class HierarchyControlViewController extends BaseViewController {
 
 		form_item_input.AComboBox( {
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			show_search_inputs: false,
 			set_empty: true,
 			key: 'value',
 			field: 'object_type'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.object_type_array ) );
+		form_item_input.setSourceData( $this.object_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Objects' ), form_item_input, tab_hierarchy_column1 );
 
 		// Subordinates
@@ -119,7 +119,7 @@ class HierarchyControlViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user'
@@ -161,6 +161,11 @@ class HierarchyControlViewController extends BaseViewController {
 			for ( var i = 0; i < val.length; i++ ) {
 				if ( Global.isSet( val[i] ) ) {
 					var row = val[i];
+
+					if ( !this.parent_controller.current_edit_record.id ) { //Copy as New, clear the ID field.
+						row.id = '';
+					}
+
 					this.addRow( row );
 				}
 			}
@@ -234,7 +239,7 @@ class HierarchyControlViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			width: 132,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user_id'
@@ -439,7 +444,7 @@ class HierarchyControlViewController extends BaseViewController {
 				label: $.i18n._( 'Superior' ),
 				in_column: 1,
 				field: 'superior_user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -450,7 +455,7 @@ class HierarchyControlViewController extends BaseViewController {
 				label: $.i18n._( 'Subordinate' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -463,7 +468,7 @@ class HierarchyControlViewController extends BaseViewController {
 				field: 'object_type',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			//
@@ -471,7 +476,7 @@ class HierarchyControlViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -483,7 +488,7 @@ class HierarchyControlViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -491,6 +496,17 @@ class HierarchyControlViewController extends BaseViewController {
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
+	}
+
+	_continueDoCopyAsNew() {
+		this.setCurrentEditViewState( 'new' );
+		LocalCacheData.current_doing_context_action = 'copy_as_new';
+		if ( Global.isSet( this.edit_view ) ) {
+			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
+				this.editor.rows_widgets_array[i].current_edit_item.id = '';
+			}
+		}
+		super._continueDoCopyAsNew();
 	}
 
 	onCopyAsNewResult( result ) {

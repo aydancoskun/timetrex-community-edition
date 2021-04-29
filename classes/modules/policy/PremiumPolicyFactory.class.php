@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1793,14 +1793,15 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			$retval = 0;
-			//for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
 			foreach ( TTDate::getDatePeriod( TTDate::incrementDate( $start_time_stamp, -1, 'day' ), TTDate::incrementDate( $end_time_stamp, 1, 'day' ), 'P1D' ) as $i ) {
 				//Due to DST, we need to make sure we always lock time of day so its the exact same. Without this it can walk by one hour either way.
+				//Similar $tmp_end_time_stamp handling code is also in isActiveTime() and getPartialPunchTotalTime()
 				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), $i );
-				$next_i = ( $tmp_start_time_stamp + ( $end_time_stamp - $start_time_stamp ) ); //Get next date to base the end_time_stamp on, and to calculate if we need to adjust for DST.
+				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, $i );
+				if ( $tmp_end_time_stamp <= $tmp_start_time_stamp ) {
+					$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, TTDate::incrementDate( $tmp_end_time_stamp, 1, 'day' ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
+				}
 
-				//$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, ( $next_i + ( TTDate::getDSTOffset( $tmp_start_time_stamp, $next_i ) * -1 ) ) ); //Use $end_time_stamp as it can be modified above due to being near midnight. Also adjust for DST by reversing it.
-				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, $next_i );   //Use $end_time_stamp as it can be modified above due to being near midnight.
 				if ( $this->isActiveTime( $tmp_start_time_stamp, $tmp_end_time_stamp, $calculate_policy_obj ) == true ) {
 					$retval += TTDate::getTimeOverLapDifference( $tmp_start_time_stamp, $tmp_end_time_stamp, $in_epoch, $out_epoch );
 					Debug::text( ' Calculating partial time against Start TimeStamp: ' . TTDate::getDate( 'DATE+TIME', $tmp_start_time_stamp ) . ' End TimeStamp: ' . TTDate::getDate( 'DATE+TIME', $tmp_end_time_stamp ) . ' Total: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
@@ -1849,9 +1850,14 @@ class PremiumPolicyFactory extends Factory {
 			//where the premium policy applies, make sure we check all windows.
 			//for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
 			foreach ( TTDate::getDatePeriod( TTDate::incrementDate( $start_time_stamp, -1, 'day' ), TTDate::incrementDate( $end_time_stamp, 1, 'day' ), 'P1D' ) as $i ) {
-				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), TTDate::getBeginDayEpoch( $i ) );
-				$next_i = ( $tmp_start_time_stamp + ( $end_time_stamp - $start_time_stamp ) );                                                                     //Get next date to base the end_time_stamp on, and to calculate if we need to adjust for DST.
-				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, ( $next_i + ( TTDate::getDSTOffset( $tmp_start_time_stamp, $next_i ) * -1 ) ) ); //Use $end_time_stamp as it can be modified above due to being near midnight. Also adjust for DST by reversing it.
+				//Due to DST, we need to make sure we always lock time of day so its the exact same. Without this it can walk by one hour either way.
+				//Similar $tmp_end_time_stamp handling code is also in isActiveTime() and getPartialPunchTotalTime()
+				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), $i );
+				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, $i );
+				if ( $tmp_end_time_stamp <= $tmp_start_time_stamp ) {
+					$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, TTDate::incrementDate( $tmp_end_time_stamp, 1, 'day' ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
+				}
+
 				if ( $this->isActive( $tmp_start_time_stamp, $tmp_end_time_stamp, $calculate_policy_obj ) == true ) {
 					Debug::text( ' Checking against Start TimeStamp: ' . TTDate::getDate( 'DATE+TIME', $tmp_start_time_stamp ) . '(' . $tmp_start_time_stamp . ') End TimeStamp: ' . TTDate::getDate( 'DATE+TIME', $tmp_end_time_stamp ) . '(' . $tmp_end_time_stamp . ')', __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $this->getIncludePartialPunch() == true && TTDate::isTimeOverLap( $in_epoch, $out_epoch, $tmp_start_time_stamp, $tmp_end_time_stamp ) == true ) {

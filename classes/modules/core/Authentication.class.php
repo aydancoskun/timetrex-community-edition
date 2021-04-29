@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -117,7 +117,6 @@ class Authentication {
 		}
 
 		return $this->getNameByTypeId( $type_id );
-		//return $this->name;
 	}
 
 	/**
@@ -289,11 +288,24 @@ class Authentication {
 		if ( $end_point_id == '' || ( strpos( $end_point_id, 'api' ) === false && strpos( $end_point_id, 'soap/server.php' ) === false ) ) {
 			$retval = 'json/api';
 		} else {
-			$retval = Environment::stripDuplicateSlashes( str_replace( [ dirname( Environment::getAPIBaseURL() ) . '/', '.php' ], '', $end_point_id ) );
+			//$retval = Environment::stripDuplicateSlashes( str_replace( [ dirname( Environment::getAPIBaseURL() ) . '/', '.php' ], '', $end_point_id ) );
+			if ( strpos( $end_point_id, 'api/json/api' ) !== false ) {
+				$retval = 'json/api';
+			} else if ( strpos( $end_point_id, 'api/soap/api' ) !== false ) {
+				$retval = 'soap/api';
+			} else if ( strpos( $end_point_id, 'api/report/api' ) !== false ) {
+				$retval = 'report/api';
+			} else if ( strpos( $end_point_id, 'soap/server.php' ) !== false ) {
+				$retval = 'soap/server';
+			} else if ( strpos( $end_point_id, 'api/time_clock/api' ) !== false ) {
+				$retval = 'time_clock/api';
+			} else {
+				$retval = 'json/api'; //Default to this.
+			}
 		}
 
 		$retval = strtolower( trim( $retval, '/' ) ); //Strip leading and trailing slashes.
-		//Debug::text('End Point: '. $retval .' Input: '. $value .' API Base URL: '. Environment::getAPIBaseURL(), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text('End Point: '. $retval .' Input: '. $end_point_id .' API Base URL: '. Environment::getAPIBaseURL(), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
@@ -301,9 +313,14 @@ class Authentication {
 	/**
 	 * @return string
 	 */
-	function getEndPointID() {
+	function getEndPointID( $end_point_id = null ) {
+		if ( $end_point_id != '' ) {
+			$this->end_point_id = $end_point_id;
+			Debug::text('Forced End Point: '. $end_point_id, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		if ( $this->end_point_id == null ) {
-			$this->end_point_id = $this->parseEndPointID();
+			$this->end_point_id = $this->parseEndPointID( $end_point_id );
 		}
 
 		return $this->end_point_id;
@@ -450,17 +467,16 @@ class Authentication {
 	 * @return bool|string
 	 * @throws DBError
 	 */
-	function registerAPIKey( $user_name, $password ) {
-		$login_result = $this->Login( $user_name, $password, 'USER_NAME' ); //Make sure login succeeds before generating API key.
+	function registerAPIKey( $user_name, $password, $end_point = null ) {
+		$login_result = $this->Login( $user_name, $password, 'USER_NAME', false ); //Make sure login succeeds before generating API key. -- Make sure we don't set any cookies when registering an API key, as the cookie that is set will different from what is returned here anyways.
 		if ( $login_result === true ) {
-			Debug::text( 'Creating API Key session for User ID: ' . $this->getObjectID() . ' Original SessionID: ' . $this->getSessionID(), __FILE__, __LINE__, __METHOD__, 10 );
 			$authentication = new Authentication();
 			$authentication->setType( 700 ); //API Key
 			$authentication->setSessionID( 'API'. $this->genSessionID() );
 			$authentication->setIPAddress();
 
-			if ( $this->getEndPointID() == 'json/api' || $this->getEndPointID() == 'soap/api' ) {
-				$authentication->setEndPointID( $this->getEndPointID() ); //json/api, soap/api
+			if ( $this->getEndPointID( $end_point ) == 'json/api' || $this->getEndPointID( $end_point ) == 'soap/api' || $this->getEndPointID( $end_point ) == 'report/api' ) {
+				$authentication->setEndPointID( $this->getEndPointID( $end_point ) ); //json/api, soap/api
 			}
 			$authentication->setClientID( 'api' );
 			$authentication->setUserAgent( 'API KEY' ); //Force the same user agent for all API keys, as its very likely could change across time as these are long-lived keys.
@@ -468,6 +484,8 @@ class Authentication {
 			$authentication->setCreatedDate();
 			$authentication->setUpdatedDate();
 			$authentication->setObjectID( $this->getObjectID() );
+
+			Debug::text( 'Creating API Key session for User ID: ' . $this->getObjectID() . ' Original SessionID: ' . $this->getSessionID() .' New SessionID: '. $authentication->getSessionID() . ' DB: ' . $authentication->encryptSessionID( $authentication->getSessionID() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 			//Write data to db.
 			$authentication->Write();
@@ -849,9 +867,9 @@ class Authentication {
 			}
 
 			//Only check user agent if we know its a web-browser, and definitely not when its an API or Mobile App, as the user agent may change between SOAP/REST libraries or App versions.
-			if ( $result['client_id'] == 'browser-timetrex' && $result['user_agent'] != $this->getUserAgent() ) {
+			if ( PRODUCTION == true && $result['client_id'] == 'browser-timetrex' && $result['user_agent'] != $this->getUserAgent() ) {
 				Debug::text( 'WARNING: User Agent changed! Original: ' . $result['user_agent'] . ' Current: ' . $this->getUserAgent(), __FILE__, __LINE__, __METHOD__, 10 );
-				return FALSE; //Disable USER AGENT checking until v12 is fully released, and end-user have a chance to update their APIs to handle passing the user agent if using switchUser() or newSession()
+				return false;
 			}
 
 			$this->setType( $result['type_id'] );
@@ -934,7 +952,7 @@ class Authentication {
 	 * @return bool
 	 * @throws DBError
 	 */
-	function Login( $user_name, $password, $type = 'USER_NAME' ) {
+	function Login( $user_name, $password, $type = 'USER_NAME', $enable_cookie = true ) {
 		//DO NOT lowercase username, because iButton values are case sensitive.
 		$user_name = html_entity_decode( trim( $user_name ) );
 		$password = html_entity_decode( trim( $password ) );
@@ -1050,11 +1068,22 @@ class Authentication {
 				$this->setType( $type );
 				$this->setSessionID( $this->genSessionID() );
 				$this->setIPAddress();
+
+				if ( $this->getClientIDHeader() == 'App-TimeTrex' && Misc::getMobileAppClientVersion() != '' && version_compare( Misc::getMobileAppClientVersion(), '5.0.0', '>=' )  ) {
+					$this->setIdleTimeout( ( 60 * 86400 ) ); //Login from Mobile app, use longer (60 day)  idle timeouts so they don't have to login so often.
+				} else if ( $this->getClientIDHeader() == 'App-TimeTrex-Kiosk' ) {
+					$this->setIdleTimeout( ( 15 * 60 ) ); //Login from Mobile app in kiosk mode, use 15 min session timeout.
+				}
+
 				$this->setCreatedDate();
 				$this->setUpdatedDate();
 
 				//Sets session cookie.
-				$this->setCookie();
+				if ( $enable_cookie !== false ) {
+					$this->setCookie();
+				} else {
+					Debug::text( '  Not setting session cookie...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
 
 				//Write data to db.
 				$this->Write();
@@ -1506,7 +1535,13 @@ class Authentication {
 		} else if ( isset( $_POST['X-Client-ID'] ) && $_POST['X-Client-ID'] != '' ) { //Need to read X-Client-ID from POST variables so Global.APIFileDownload() works.
 			return trim( $_POST['X-Client-ID'] );
 		} else if ( Misc::isMobileAppUserAgent() == true ) {
-			return 'App-TimeTrex';
+			//Check if its Kiosk or Single Employee.
+			$parsed_user_agent = Misc::parseMobileAppUserAgent();
+			if ( isset( $parsed_user_agent['station_type'] ) && (int)$parsed_user_agent['station_type'] == 65 ) { //65=Kiosk
+				return 'App-TimeTrex-Kiosk'; //Kiosk Mode.
+			}
+
+			return 'App-TimeTrex'; //Single Employee
 		} else {
 			if ( isset( $_SERVER['SCRIPT_NAME'] ) && $_SERVER['SCRIPT_NAME'] != '' ) {
 				$script_name = $_SERVER['SCRIPT_NAME'];
@@ -1533,7 +1568,7 @@ class Authentication {
 
 		$client_id_header = $this->getClientIDHeader();
 
-		if ( $client_id_header != 'API' && $client_id_header != 'App-TimeTrex' && $client_id_header != 'App-TimeTrex-AGI'
+		if ( $client_id_header != 'API' && $client_id_header != 'App-TimeTrex' && $client_id_header != 'App-TimeTrex-Kiosk' && $client_id_header != 'App-TimeTrex-AGI'
 				&& ( !isset( $config_vars['other']['enable_csrf_validation'] ) || ( isset( $config_vars['other']['enable_csrf_validation'] ) && $config_vars['other']['enable_csrf_validation'] == true ) )
 				&& ( !isset( $config_vars['other']['installer_enabled'] ) || ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] != true ) ) //Disable CSRF if installer is enabled, because TTPassword::getPasswordSalt() has the potential to change at anytime.
 		) {
@@ -1566,7 +1601,7 @@ class Authentication {
 					return false;
 				}
 			} else {
-				Debug::Text( ' CSRF token does not match! Client-ID: ' . $client_id_header . ' CSRF Token: Header: ' . $csrf_token_header . ' Cookie: ' . $csrf_token_cookie, __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( ' CSRF token does not match! Client-ID: ' . $client_id_header . ' CSRF Token: Header: ' . $csrf_token_header . ' Cookie: ' . $csrf_token_cookie .' Total Cookies: '. count( $_COOKIE ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				return false;
 			}
@@ -1574,62 +1609,5 @@ class Authentication {
 			return true; //Not a CSRF vulnerable end-point
 		}
 	}
-
-	/**
-	 * Checks refer to help mitigate CSRF attacks.
-	 * @param bool $referer
-	 * @return bool
-	 */
-//	static function checkValidReferer( $referer = FALSE ) {
-//		global $config_vars;
-//
-//		if ( PRODUCTION == TRUE AND isset($config_vars['other']['enable_csrf_validation']) AND $config_vars['other']['enable_csrf_validation'] == TRUE ) {
-//			if ( $referer == FALSE ) {
-//				if ( isset($_SERVER['HTTP_ORIGIN']) AND $_SERVER['HTTP_ORIGIN'] != '' ) {
-//					//IE9 doesn't send this, but if it exists use it instead as its likely more trustworthy.
-//					//Debug::Text( 'Using Referer from Origin header...', __FILE__, __LINE__, __METHOD__, 10);
-//					$referer = $_SERVER['HTTP_ORIGIN'];
-//					if ( $referer == 'file://' ) { //Mobile App and some browsers can send the origin as: file://
-//						return TRUE;
-//					}
-//				} elseif ( isset($_SERVER['HTTP_REFERER']) AND $_SERVER['HTTP_REFERER'] != '' ) {
-//					Debug::Text( 'WARNING: CSRF check falling back for legacy browser... Referer: '. $_SERVER['HTTP_REFERER'], __FILE__, __LINE__, __METHOD__, 10);
-//					$referer = $_SERVER['HTTP_REFERER'];
-//				} else {
-//					Debug::Text( 'WARNING: No HTTP_ORIGIN or HTTP_REFERER headers specified...', __FILE__, __LINE__, __METHOD__, 10);
-//					$referer = '';
-//				}
-//			}
-//
-//			//Debug::Text( 'Raw Referer: '. $referer, __FILE__, __LINE__, __METHOD__, 10);
-//			$referer = strtolower( parse_url( $referer, PHP_URL_HOST ) ); //Make sure we lowercase it, so case doesn't prevent a match.
-//
-//			//Use HTTP_HOST rather than getHostName() as the same site can be referenced with multiple different host names
-//			//Especially considering on-site installs that default to 'localhost'
-//			//If deployment ondemand is set, then we assume SERVER_NAME is correct and revert to using that instead of HTTP_HOST which has potential to be forged.
-//			//Apache's UseCanonicalName On configuration directive can help ensure the SERVER_NAME is always correct and not masked.
-//			if ( DEPLOYMENT_ON_DEMAND == FALSE AND isset( $_SERVER['HTTP_HOST'] ) ) {
-//				$host_name = $_SERVER['HTTP_HOST'];
-//			} elseif ( isset( $_SERVER['SERVER_NAME'] ) ) {
-//				$host_name = $_SERVER['SERVER_NAME'];
-//			} elseif ( isset( $_SERVER['HOSTNAME'] ) ) {
-//				$host_name = $_SERVER['HOSTNAME'];
-//			} else {
-//				$host_name = '';
-//			}
-//			$host_name = ( $host_name != '' ) ? strtolower( parse_url( 'http://'.$host_name, PHP_URL_HOST ) ) : ''; //Need to add 'http://' so parse_url() can strip it off again. Also lowercase it so case differences don't prevent a match.
-//			//Debug::Text( 'Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
-//
-//			if ( $referer == $host_name OR $host_name == '' ) {
-//				return TRUE;
-//			}
-//
-//			Debug::Text( 'CSRF check failed... Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
-//			return FALSE;
-//		}
-//
-//		return TRUE;
-//	}
 }
-
 ?>

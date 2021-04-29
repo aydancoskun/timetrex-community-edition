@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -133,8 +133,9 @@ class APIPayStub extends APIFactory {
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 
 		if ( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) == false && $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) == false ) {
-			//Only display PAID pay stubs.
-			$data['filter_data']['status_id'] = [ 40 ];
+			//Only display PAID pay stubs that are not opening balance ones.
+			$data['filter_data']['status_id'] = [ 40 ]; //40=Paid
+			$data['filter_data']['type_id'] = [ 10, 20 ]; //10=Normal In-Cycle, 20=Out-of-Cycle
 		}
 
 		//Always hide employer rows unless they have permissions to view all pay stubs.
@@ -354,7 +355,7 @@ class APIPayStub extends APIFactory {
 				}
 				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$is_valid = $primary_validator->isValid( $ignore_warning );
+				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -498,6 +499,9 @@ class APIPayStub extends APIFactory {
 									continue;
 								}
 
+								$pst_obj = TTnew( 'PayStubTransactionFactory' ); /** @var PayStubTransactionFactory $pst_obj */
+								//$pst_obj->setPayStub( $lf->getId() ); //Don't set this here as it will cause validation failures. Its handled in addTransaction() instead.
+
 								if ( isset( $pay_stub_transaction['id'] )
 										&& TTUUID::isUUID( $pay_stub_transaction['id'] ) && $pay_stub_transaction['id'] != TTUUID::getZeroID() && $pay_stub_transaction['id'] != TTUUID::getNotExistID() ) {
 									$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
@@ -506,9 +510,6 @@ class APIPayStub extends APIFactory {
 										$pst_obj = $pstlf->getCurrent();
 									}
 									unset( $pstlf );
-								} else {
-									$pst_obj = TTnew( 'PayStubTransactionFactory' ); /** @var PayStubTransactionFactory $pst_obj */
-									//$pst_obj->setPayStub( $lf->getId() ); //Don't set this here as it will cause validation failures. Its handled in addTransaction() instead.
 								}
 
 								$pst_obj->setType( 10 ); //10=Valid
@@ -575,11 +576,13 @@ class APIPayStub extends APIFactory {
 
 						if ( $processed_transactions > 0 ) {
 							$lf->setTainted( true ); //Make sure tainted flag is set when any entries are processed.
+							$lf->setEnableSyncPendingPayStubTransactionDates( true );
 							$lf->setEnableProcessTransactions( true );
 							//$lf->processTransactions();
 						}
 					} else {
 						Debug::Text( ' Skipping ALL transactions... ', __FILE__, __LINE__, __METHOD__, 10 );
+						$lf->setEnableSyncPendingPayStubTransactionDates( true );
 					}
 
 					$lf->Validator->setValidateOnly( $validate_only );
@@ -601,7 +604,7 @@ class APIPayStub extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ], ( ( $total_records > 1 && is_object( $lf->getUserObject() ) ) ? $lf->getUserObject()->getFullName() .' ('. TTi18n::getText('Transaction Date') .': '. TTDate::getDate('DATE', $lf->getTransactionDate() ) .')' : null ) );
 				} else if ( $validate_only == true ) {
 					$lf->FailTransaction();
 				}
@@ -696,7 +699,7 @@ class APIPayStub extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ], ( ( $total_records > 1 && is_object( $lf->getUserObject() ) ) ? $lf->getUserObject()->getFullName() .' ('. TTi18n::getText('Transaction Date') .': '. TTDate::getDate('DATE', $lf->getTransactionDate() ) .')' : null ) );
 				}
 
 				$lf->CommitTransaction();

@@ -1,14 +1,18 @@
-(function (root, factory) {
-	if (typeof exports === 'object') {
-		module.exports = factory(root);
-	} else if (typeof define === 'function' && define.amd) {
-		define('colors', [], function () {
-			return factory(root);
-		});
-	} else {
-		root.Colors = factory(root);
-	}
-}(this, function(window, undefined) {
+// Modified for use with Webpack 4, from https://github.com/PitPik/tinyColorPicker
+
+// (function (root, factory) {
+// 	if (typeof exports === 'object') {
+// 		module.exports = factory(root);
+// 	} else if (typeof define === 'function' && define.amd) {
+// 		define('colors', [], function () {
+// 			return factory(root);
+// 		});
+// 	} else {
+// 		root.Colors = factory(root);
+// 	}
+// }(this, function(window, undefined) {
+
+export default (function(window, undefined) {
 	"use strict"
 
 	var _valueRanges = {
@@ -52,7 +56,7 @@
 			}
 			customBG = _options.customBG;
 			_options.customBG = (typeof customBG === 'string') ? ColorConverter.txt2color(customBG).rgb : customBG;
-			_colors = setColor(THIS.colors, _options.color, undefined, true); // THIS.colors = _colors = 
+			_colors = setColor(THIS.colors, _options.color, undefined, true); // THIS.colors = _colors =
 		},
 		focusInstance = function(THIS) {
 			if (_instance !== THIS) {
@@ -452,4 +456,4 @@
 	}
 
 	return Colors;
-}));
+})(window, undefined);

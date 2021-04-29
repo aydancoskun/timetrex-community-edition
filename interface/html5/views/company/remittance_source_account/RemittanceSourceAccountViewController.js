@@ -1,14 +1,17 @@
-class RemittanceSourceAccountViewController extends BaseViewController {
+import '@/global/widgets/filebrowser/TImage';
+import '@/global/widgets/filebrowser/TImageAdvBrowser';
+
+export class RemittanceSourceAccountViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#remittance_source_account_view_container',
-
-			_required_files: ['TImage', 'TImageAdvBrowser'],
 
 			status_array: null,
 			type_array: null,
 			country_array: null,
 			data_format_array: null,
+			ach_transaction_type_array: null,
+			ach_transaction_type_data: null,
 			company_api: null
 		} );
 
@@ -43,6 +46,14 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 		this.initDropDownOption( 'type' );
 //		this.initDropDownOption( 'data_format' );
 		this.initDropDownOption( 'country', 'country', this.company_api );
+
+		this.api.getOptions( 'ach_transaction_type', {
+			onResult: function( res ) {
+				var result = res.getResult();
+				$this.ach_transaction_type_data = result;
+				$this.ach_transaction_type_array = Global.buildRecordArray( result );
+			}
+		} );
 	}
 
 	getSignatureUrl() {
@@ -57,6 +68,31 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 	setEditViewDataDone() {
 		super.setEditViewDataDone();
 		this.file_browser.setImage( this.getSignatureUrl() );
+	}
+
+	uniformVariable( record ) {
+		//ensure that the variable variable fields are set to false if they aren't showing.
+		if ( this.edit_view_ui_dic && this.current_edit_record.remittance_source_account_id != TTUUID.zero_id ) { //Keep accountd data if UUID == zero_id
+			for ( var i = 1; i <= 10; i++ ) {
+				if ( i == 1 ) {
+					if ( this.edit_view_ui_dic['country'].getValue() == 'US' ) {
+						if ( this.edit_view_ui_dic['value1_2']  ) {
+							record['value1'] = record['value1_2'] ? record['value1_2'] : this.edit_view_ui_dic['value1_2'].getValue();
+						}
+					} else {
+						if ( this.edit_view_ui_dic['value1_1']  ) {
+							record['value1'] = record['value1_1'] ? record['value1_1'] : this.edit_view_ui_dic['value1_1'].getValue();
+						}
+					}
+				} else {
+					if ( !this.is_mass_editing && record['value' + i] && ( typeof this.edit_view_ui_dic['value' + i] == 'undefined' ) ) {
+						record['value' + i] = false;
+					}
+				}
+			}
+		}
+
+		return record;
 	}
 
 	getCustomContextMenuModel() {
@@ -134,6 +170,10 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 		var c_value = target.getValue();
 
 		switch ( key ) {
+			case 'value1_1':
+			case 'value1_2':
+				this.current_edit_record['value1'] = c_value;
+				break;
 			case 'country':
 			case 'type_id':
 				this.onTypeChange();
@@ -202,8 +242,20 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 			}
 
 			var widget = this.edit_view_ui_dic[key];
+
+			if ( key === 'value1' && this.current_edit_record[key] && !this.is_mass_editing ) {
+				if ( Global.isSet( this.ach_transaction_type_data[this.current_edit_record[key]] ) ) {
+					this.edit_view_ui_dic['value1_2'].setValue( this.current_edit_record[key] );
+				} else {
+					this.edit_view_ui_dic['value1_1'].setValue( this.current_edit_record[key] );
+				}
+			}
+
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
+					case 'value1_1':
+					case 'value1_2':
+					    break;
 					case 'type_id': //popular case
 						widget.setValue( this.current_edit_record[key] );
 						this.onTypeChange();
@@ -345,7 +397,9 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 
 		this.detachElement( 'data_format_id' );
 		this.detachElement( 'last_transaction_number' );
-		this.detachElement( 'value1' );
+		this.detachElement( 'value1_1' );
+		this.detachElement( 'value1_2' );
+		//this.detachElement( 'value1' );
 		this.detachElement( 'value2' );
 		this.detachElement( 'value3' );
 
@@ -360,19 +414,29 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 
 			if ( !this.is_mass_editing && country != null ) {
 				if ( country == 'US' ) { //ACH
+					this.attachElement( 'value1_2' ).text( $.i18n._( 'Account Type' ) + ':' );
 					this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
 					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+					if ( Global.isFalseOrNull( this.current_edit_record['value1'] ) ) {
+						this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_2'].getValue();
+						this.current_edit_record['value1_2'] = this.edit_view_ui_dic['value1_2'].getValue();
+					}
 				} else if ( country == 'CA' ) { //Canadian EFT
-					this.attachElement( 'value1' ).text( $.i18n._( 'Institution' ) + ':' );
+					this.attachElement( 'value1_1' ).text( $.i18n._( 'Institution' ) + ':' );
 					this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
 					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
 				} else if ( $.inArray( country, ['AG', 'BS', 'BB', 'BZ', 'DO', 'GY', 'HT', 'JM', 'DM', 'GD', 'KN', 'LC', 'VC', 'SR', 'TT'] ) != -1 ) { //Carribbean countries.
-					this.attachElement( 'value1' ).text( $.i18n._( 'Institution' ) + ':' );
+					this.attachElement( 'value1_1' ).text( $.i18n._( 'Institution' ) + ':' );
 					this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
 					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
 				} else {
+					this.attachElement( 'value1_2' ).text( $.i18n._( 'Account Type' ) + ':' );
 					this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
 					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+					if ( Global.isFalseOrNull( this.current_edit_record['value1'] ) ) {
+						this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_2'].getValue();
+						this.current_edit_record['value1_2'] = this.edit_view_ui_dic['value1_2'].getValue();
+					}
 				}
 			}
 		}
@@ -427,7 +491,7 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 			api_class: TTAPI.APIRemittanceSourceAccount,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
+			layout_name: 'global_remittance_source_account',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -451,7 +515,7 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			layout_name: 'global_legal_entity',
 			field: 'legal_entity_id',
 			//set_empty: true,
 			set_any: true,
@@ -463,7 +527,7 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_remittance_source_account_column1, '' );
 
 		// Name
@@ -481,13 +545,13 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 		//TYPE
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'type_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_remittance_source_account_column1, '' );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
+		form_item_input.setSourceData( $this.country_array );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_remittance_source_account_column1 );
 
 		// Currency
@@ -495,7 +559,7 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CURRENCY,
+			layout_name: 'global_currency',
 			field: 'currency_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -505,13 +569,14 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 		// Data Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'data_format_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.data_format_array ) );
+		form_item_input.setSourceData( $this.data_format_array );
 		this.addEditFieldToColumn( $.i18n._( 'Format' ), form_item_input, tab_remittance_source_account_column1, '', null, true );
 
 		// Last Transaction Number
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'last_transaction_number', width: '60' } );
 		this.addEditFieldToColumn( $.i18n._( 'Last Transaction Number' ), form_item_input, tab_remittance_source_account_column1, '', null, true );
+
 
 		//generate Value# fields 1-30
 		//shorter and easier to read than 150 extra lines
@@ -531,14 +596,26 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 				tab_for_values = tab_advanced_column1;
 			}
 
-			if ( i == 24 ) { //24: Offset Transaction
-				form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-				form_item_input.TCheckbox( { field: 'value' + i } );
-			} else {
+			if ( i == 1 ) { //ACH
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				form_item_input.TTextInput( { field: 'value' + i, width: width } );
+				form_item_input.TTextInput( { field: 'value1_1', validation_field: 'value1', width: width } );
+				this.addEditFieldToColumn( $.i18n._( 'Value' + i ), form_item_input, tab_for_values, '', null, true );
+
+				form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input.TComboBox( { field: 'value1_2', validation_field: 'value1' } );
+				form_item_input.setSourceData( $this.ach_transaction_type_array );
+				this.addEditFieldToColumn( $.i18n._( 'Value' + i ), form_item_input, tab_for_values, '', null, true );
+			} else {
+				if ( i == 24 ) { //24: Offset Transaction
+					form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
+					form_item_input.TCheckbox( { field: 'value' + i } );
+				} else {
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+					form_item_input.TTextInput( { field: 'value' + i, width: width } );
+				}
+				this.addEditFieldToColumn( $.i18n._( 'Value' + i ), form_item_input, tab_for_values, '', null, true );
 			}
-			this.addEditFieldToColumn( $.i18n._( 'Value' + i ), form_item_input, tab_for_values, '', null, true );
+
 		}
 
 		//Signature Upload
@@ -609,7 +686,7 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 				label: $.i18n._( 'Legal Entity' ),
 				in_column: 1,
 				field: 'legal_entity_id',
-				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				layout_name: 'global_legal_entity',
 				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				basic_search: true,
@@ -624,7 +701,7 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -640,7 +717,7 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 3,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -653,7 +730,7 @@ class RemittanceSourceAccountViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 3,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

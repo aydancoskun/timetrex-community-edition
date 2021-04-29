@@ -1,4 +1,6 @@
-class PayrollRemittanceAgencyEventWizardStepPublish extends WizardStep {
+import { WizardStep } from '@/global/widgets/wizard/WizardStep';
+
+export class PayrollRemittanceAgencyEventWizardStepPublish extends WizardStep {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			name: 'publish',
@@ -71,17 +73,17 @@ class PayrollRemittanceAgencyEventWizardStepPublish extends WizardStep {
 						$.i18n._( 'Print employee W2 forms for distribution to employees by hand or mail.' )
 					);
 					break;
-				case 'F1099MISC':
+				case 'F1099NEC':
 					$this.addButton( ContextMenuIconName.print,
 						'payroll_remittance_agency-35x35.png',
 						$.i18n._( 'Publish' ),
-						$.i18n._( 'Publish 1099-MISC forms for recipients to access online with their own login under Payroll -> Government Documents.' )
+						$.i18n._( 'Publish 1099-NEC forms for recipients to access online with their own login under Payroll -> Government Documents.' )
 					);
 
-					$this.addButton( 'Employee1099Misc',
+					$this.addButton( 'Employee1099Nec',
 						Icons.print,
-						$.i18n._( 'Print employee 1099-MISC Forms' ) + ' (' + $.i18n._( 'Optional' ) + ') ',
-						$.i18n._( 'Print employee 1099-MISC forms for distribution to recipients by hand or mail.' )
+						$.i18n._( 'Print employee 1099-NEC Forms' ) + ' (' + $.i18n._( 'Optional' ) + ') ',
+						$.i18n._( 'Print employee 1099-NEC forms for distribution to recipients by hand or mail.' )
 					);
 					break;
 			}
@@ -138,7 +140,7 @@ class PayrollRemittanceAgencyEventWizardStepPublish extends WizardStep {
 						break;
 				}
 				break;
-			case 'F1099MISC':
+			case 'F1099NEC':
 				switch ( icon ) {
 					case ContextMenuIconName.print:
 						this.getWizardObject().disableForCommunity( function() {
@@ -146,8 +148,8 @@ class PayrollRemittanceAgencyEventWizardStepPublish extends WizardStep {
 						} );
 
 						break;
-					case 'Employee1099Misc':
-						Global.loadScript( 'views/reports/form1099/Form1099MiscReportViewController', function() {
+					case 'Employee1099Nec':
+						Global.loadScript( 'views/reports/form1099/Form1099NecReportViewController', function() {
 							$this.getWizardObject().getReport( 'pdf_form' );
 						} );
 						break;

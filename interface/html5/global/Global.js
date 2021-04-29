@@ -1,5 +1,13 @@
+// import { LocalCacheData } from 'exports-loader?exports=LocalCacheData!@/global/LocalCacheData';
+import { TTUUID } from '@/global/TTUUID';
+import { TTAPI } from '@/services/TimeTrexClientAPI';
+import { FormItemType, WidgetNamesDic } from '@/global/widgets/search_panel/FormItemType'; // TODO: duplicated in merged js files.
+import { RateLimit } from '@/global/RateLimit';
+import '@/global/widgets/view_min_tab/ViewMinTabBar';
+import { ServiceCaller } from '@/services/ServiceCaller';
+
 //Global variables and functions will be used everywhere
-var Global = function() {
+export var Global = function() {
 };
 Global.sortOrderRegex = /^-\d{4}-.*/i;
 Global.current_ping = -1;
@@ -83,20 +91,88 @@ Global.sendErrorReport = function() {
 	var error_string = arguments[0];
 	var from_file = arguments[1];
 	var line = arguments[2];
-	var error_stack = arguments[4];
+	var col = arguments[3];
+	var error_obj = arguments[4]; //Error object.
 
 	RateLimit.setID( 'sendErrorReport' );
 	RateLimit.setAllowedCalls( 6 );
 	RateLimit.setTimeFrame( 7200 ); //2hrs
 
 	if ( RateLimit.check() ) {
-		//var api_authentication = new APIAuthentication();
-		var api_authentication = TTAPI.APIAuthentication;
+		var captureScreenShot = function( error_msg, error_obj ) {
+			if ( Global.isCanvasSupported() && typeof Promise !== 'undefined' ) { //HTML2Canvas requires promises, which IE11 does not have.
+				html2canvas( document.body ).then( function( canvas ) {
+					var image_string = canvas.toDataURL().split( ',' )[1];
+					sourceMapStackTrace( error_msg, error_obj, image_string );
+				} );
+			} else {
+				sourceMapStackTrace( error_msg, error_obj, null );
+			}
+		};
+
+		var sourceMapStackTrace = function( error_msg, error_obj, image_string ) {
+			if ( error_obj ) {
+				var stacktrace_callback = function( stackframes, error_msg, error_obj, image_string ) {
+					var stringified_stack = stackframes.map( function( sf ) {
+						return '  ' + sf.toString(); //Indent stack trace.
+					} ).join( '\n' );
+
+					error_msg = error_msg + '\n\n\n' + 'Stack Trace (Mapped): \n' + error_obj.name + ': ' + error_obj.message + '\n' + stringified_stack;
+					error_msg = error_msg + '\n\n\n' + 'Stack Trace (Raw): \n' + error_obj.stack;
+
+					sendErrorReport( error_msg, error_obj, image_string );
+				};
+
+				var stacktrace_errback = function( error_msg, error_obj, image_string ) {
+					console.error( 'ERROR: Unable to source map stack trace!' );
+					sendErrorReport( error_msg, error_obj, image_string );
+				};
+
+				StackTrace.fromError( error_obj ).then( stackframes => stacktrace_callback( stackframes, error_msg, error_obj, image_string ) ).catch( error => stacktrace_errback( error_msg, error_obj, image_string ) );
+			} else {
+				sendErrorReport( error_msg, error_obj, image_string );
+			}
+		};
+
+		var sendErrorReport = function( error_msg, error_obj, image_string ) {
+			Debug.Text( 'ERROR: ' + error_msg, 'Global.js', '', 'sendErrorReport', 1 );
+
+			var api_authentication = TTAPI.APIAuthentication;
+			api_authentication.sendErrorReport( error_msg, image_string, {
+				onResult: function( result ) {
+					if ( !Global.dont_check_browser_cache && APIGlobal.pre_login_data.production === true && result.getResult() !== APIGlobal.pre_login_data.application_build ) {
+						result = result.getResult();
+						var message = $.i18n._( 'Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.' ) + '<br><br>' + $.i18n._( 'Local Version' ) + ':  ' + result + '<br>' + $.i18n._( 'Remote Version' ) + ': ' + APIGlobal.pre_login_data.application_build;
+						Global.dont_check_browser_cache = true;
+						Global.sendErrorReport( 'Your web browser is caching incorrect data. Local Version' + ':  ' + result + ' Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.root_url, '', '', '' );
+
+						var timeout_handler = window.setTimeout( function() {
+							window.location.reload( true );
+						}, 120000 );
+
+						TAlertManager.showAlert( message, '', function() {
+							LocalCacheData.loadedScriptNames = {};
+							Debug.Text( 'Incorrect cache... Forcing reload after JS exception...', 'Global.js', 'Global', 'cachingIncorrectData', 10 );
+							window.clearTimeout( timeout_handler );
+							window.location.reload( true );
+						} );
+					} else if ( Global.dont_check_browser_cache ) {
+						Global.dont_check_browser_cache = false;
+					}
+				}
+			} );
+		};
+
 		var login_user = LocalCacheData.getLoginUser();
 
 		/*
 		 * JavaScript exception ignore list
 		 */
+		if ( from_file && typeof from_file == 'string' && from_file.indexOf( 'extension://' ) >= 0 ) { //Error happened in some Chrome Extension, ignore.
+			console.error( 'Ignoring javascript exception from browser extension outside of our control...' );
+			return;
+		}
+
 		if ( error_string.indexOf( 'Script error' ) >= 0 || //Script error. in:  line: 0 -- Likely browser extensions or errors from injected or outside javascript.
 			error_string.indexOf( 'Unspecified error' ) >= 0 || //From IE: Unspecified error. in N/A line 1
 			error_string.indexOf( 'TypeError: \'null\' is not an object' ) >= 0 ||
@@ -116,6 +192,7 @@ Global.sendErrorReport = function() {
 				'exDescription': 'Session Idle: ' + error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '' ) : 'N/A' ) + ' Line: ' + line,
 				'exFatal': false
 			} );
+
 			return;
 		}
 
@@ -142,9 +219,9 @@ Global.sendErrorReport = function() {
 		}
 
 		if ( login_user && Debug.varDump ) {
-			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: ' + login_user.user_name + '\n\nURL: ' + window.location.href + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + ie + '\n\nCurrent Ping: ' + Global.current_ping + '\n\nIdle Time: ' + Global.idle_time + '\n\nSession ID Key: ' + LocalCacheData.getSessionID() + '\n\nCurrent User Object: \n' + Debug.varDump( login_user ) + '\n\nCurrent Company Object: \n' + Debug.varDump( current_company_obj ) + '\n\nPreLogin: \n' + Debug.varDump( pre_login_data ) + ' ';
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + ':' + col + '\n\nUser: ' + login_user.user_name + '\n\nURL: ' + window.location.href + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + window.ie + '\n\nCurrent Ping: ' + Global.current_ping + '\n\nIdle Time: ' + Global.idle_time + '\n\nSession ID Key: ' + LocalCacheData.getSessionID() + '\n\nCurrent User Object: \n' + Debug.varDump( login_user ) + '\n\nCurrent Company Object: \n' + Debug.varDump( current_company_obj ) + '\n\nPreLogin: \n' + Debug.varDump( pre_login_data ) + ' ';
 		} else {
-			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: N/A' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + ie;
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + ':' + col + '\n\nUser: N/A' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + window.ie;
 		}
 
 		console.error( 'JAVASCRIPT EXCEPTION:\n---------------------------------------------\n' + error + '\n---------------------------------------------' );
@@ -159,7 +236,7 @@ Global.sendErrorReport = function() {
 			// Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
 			// Strip the domain part off the URL on 'from_file' to better account for similar errors.
 			ga( 'send', 'exception', {
-				'exDescription': error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '' ) : 'N/A' ) + ' Line: ' + line,
+				'exDescription': error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '' ) : 'N/A' ) + ' Line: ' + line + ':' + col,
 				'exFatal': false
 			} );
 		}
@@ -168,8 +245,8 @@ Global.sendErrorReport = function() {
 		//from_file should always contains the root url
 		//If URL is not sent by IE, assume its our own code and report the error still.
 		// Modern browsers won't send error reports from other domains due to security issues now, so I think this can be removed.
-		// if ( from_file && from_file.indexOf( ServiceCaller.rootURL ) < 0 ) {
-		// 	Debug.Text( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.rootURL + '" Script: ' + from_file, 'Global.js', '', 'sendErrorReport', 1 );
+		// if ( from_file && from_file.indexOf( ServiceCaller.root_url ) < 0 ) {
+		// 	Debug.Text( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.root_url + '" Script: ' + from_file, 'Global.js', '', 'sendErrorReport', 1 );
 		// 	return;
 		// }
 
@@ -180,47 +257,7 @@ Global.sendErrorReport = function() {
 		error = error + '\n\n\n' + 'Clicked target stacks: ' + JSON.stringify( LocalCacheData.ui_click_stack, undefined, 2 );
 		error = error + '\n\n\n' + 'API stacks: ' + JSON.stringify( LocalCacheData.api_stack, undefined, 2 );
 
-		if ( error_stack ) {
-			var trace = error_stack.stack;
-			error = error + '\n\n\n' + 'Stack Trace: ' + trace;
-		}
-
-		Debug.Text( 'ERROR: ' + error, 'Global.js', '', 'sendErrorReport', 1 );
-
-		if ( Global.isCanvasSupported() && typeof Promise !== 'undefined' ) { //HTML2Canvas requires promises, which IE11 does not have.
-			html2canvas( document.body ).then( function( canvas ) {
-				var image_string = canvas.toDataURL().split( ',' )[1];
-				api_authentication.sendErrorReport( error, image_string, {
-					onResult: function( result ) {
-						if ( !Global.dont_check_browser_cache && APIGlobal.pre_login_data.production === true && result.getResult() !== APIGlobal.pre_login_data.application_build ) {
-							result = result.getResult();
-							var message = $.i18n._( 'Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.' ) + '<br><br>' + $.i18n._( 'Local Version' ) + ':  ' + result + '<br>' + $.i18n._( 'Remote Version' ) + ': ' + APIGlobal.pre_login_data.application_build;
-							Global.dont_check_browser_cache = true;
-							Global.sendErrorReport( 'Your web browser is caching incorrect data. Local Version' + ':  ' + result + ' Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '' );
-
-							var timeout_handler = window.setTimeout( function() {
-								window.location.reload( true );
-							}, 120000 );
-
-							TAlertManager.showAlert( message, '', function() {
-								LocalCacheData.loadedScriptNames = {};
-								Debug.Text( 'Incorrect cache... Forcing reload after JS exception...', 'Global.js', 'Global', 'cachingIncorrectData', 10 );
-								window.clearTimeout( timeout_handler );
-								window.location.reload( true );
-							} );
-						} else if ( Global.dont_check_browser_cache ) {
-							Global.dont_check_browser_cache = false;
-						}
-
-					}
-				} );
-			} );
-		} else {
-			api_authentication.sendErrorReport( error, '', {
-				onResult: function( result ) {
-				}
-			} );
-		}
+		captureScreenShot( error, error_obj );
 	}
 };
 
@@ -334,12 +371,12 @@ Global.clearCache = function( function_name ) {
 
 Global.getHost = function( host ) {
 	if ( !host ) {
-		var host = window.location.hostname;
+		host = window.location.hostname;
 	}
 
 	//Make sure its not an IPv4 address, and if its a domain has more than 1 dot in it before parsing off the sub-domain part.
 	// So both IPv4 addresses and domains like: localhost (no dot at all), mycompany.com should not be modified at all. Only: sub.mycompany.com, sub.sub2.mycompany.com
-	is_sub_domain = host.match( /\./g );
+	var is_sub_domain = host.match( /\./g );
 	if ( /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test( host ) == false && is_sub_domain && is_sub_domain.length > 1 ) {
 		host = host.substring( ( host.indexOf( '.' ) + 1 ) );
 	}
@@ -516,11 +553,18 @@ Global.convertTojQueryFormat = function( date_format ) {
 		'D, M d Y': 'D, M dd yy',
 		'D, d-M-Y': 'D, dd-M-yy',
 		'D, dMY': 'D, ddMyy',
-		'G:i': 'HH:mm',
-		'G:i T': 'HH:mm',
+
 		'g:i A': 'h:mm TT',
+		'g:i a': 'h:mm tt',
+		'G:i': 'H:mm',
 		'g:i A T': 'h:mm TT',
-		'g:i a': 'h:mm tt'
+		'G:i T': 'H:mm',
+
+		'g:i:s A': 'h:mm:ss TT',
+		'g:i:s a': 'h:mm:ss tt',
+		'G:i:s': 'H:mm:ss',
+		'g:i:s A T': 'h:mm:ss TT',
+		'G:i:s T': 'H:mm:ss'
 	};
 
 	return jquery_date_format[date_format];
@@ -1420,13 +1464,6 @@ Global.buildRecordArray = function( array, first_item, orderType ) {
 
 };
 
-Global.dataConvert = function( result, target ) {
-
-	target.fromJSONToAttributes( result );
-
-	return target;
-};
-
 Global.topContainer = function() {
 	return $( '#topContainer' );
 };
@@ -1468,7 +1505,7 @@ Global.setSignalStrength = function() {
 			return;
 		}
 
-		ping( ServiceCaller.orginalUrl + 'interface/ping.html?t=' + new Date().getTime(), function( time ) {
+		ping( ServiceCaller.base_url + 'interface/ping.html?t=' + new Date().getTime(), function( time ) {
 			$( '.signal-strength-empty' ).removeClass( 'signal-strength-empty' );
 
 			if ( checking_array.length >= 3 ) {
@@ -1480,7 +1517,7 @@ Global.setSignalStrength = function() {
 				total_time = checking_array[i] + total_time;
 			}
 			average_time = total_time / checking_array.length;
-			Debug.Text( 'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + ( new Date ).toISOString().replace( /z|t/gi, ' ' ), 'Global.js', '', 'doPing', 1 );
+			Debug.Text( 'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + ( new Date ).toISOString().replace( /z|t/gi, ' ' ), 'Global.js', '', 'doPing', 6 );
 			Global.current_ping = average_time;
 			status = $.i18n._( 'Good' );
 			//do not allow signal strength variation in unit test mode
@@ -1580,10 +1617,10 @@ Global.hasRequireLoaded = function( script_path ) {
 	//  In this case the same InOutViewController.js file is in the process of being loaded, then is cancelled,
 	//  and another one tries to load and the success callback where the class is instantiated is called before it can be instantiated, causing a JS exception (ReferenceError: InOutViewController is not defined).
 	//  Better double-click prevention would also help.
-	//if ( typeof require === 'function' && typeof require.specified === 'function' && ( require.specified( id ) || require.specified( script_path ) || require.specified( alternative_script_path ) ) ) {
-	if ( typeof require === 'function' && typeof require.defined === 'function' && ( require.defined( id ) || require.defined( script_path ) || require.defined( alternative_script_path ) ) ) {
-		return true;
-	}
+	// if ( typeof require === 'function' && typeof require.specified === 'function' && ( require.specified( id ) || require.specified( script_path ) || require.specified( alternative_script_path ) ) ) {
+	// if ( typeof require === 'function' && typeof require.defined === 'function' && ( require.defined( id ) || require.defined( script_path ) || require.defined( alternative_script_path ) ) ) {
+	// 	return true;
+	// //}
 
 	return false;
 };
@@ -1623,6 +1660,21 @@ Global.loadScript = function( scriptPath, onResult ) {
 
 	var realPath = scriptPath;
 
+	// Mainly used in the async code, but put here to also catch duplicate declared classes in both async and synchronous calls.
+	var split_script_path = realPath.split( '/' );
+	var import_file_name = split_script_path[split_script_path.length - 1].replace( '.js', '' );
+	//var import_path = realPath.replace('views/', '');
+
+	var class_exists = eval("typeof "+ import_file_name +" === 'function'");
+	if ( class_exists ) {
+		// This means class already exists on the window object, so it must have been already loaded.
+		// DEV NOTE: This should NOT happen. If it happens, it means script is being loaded twice. Check manual loading calls like requirejs or Webpack MergeIntoSingleFilePlugin plugin
+		// In all likelyhood, it is listed in the concatenation array for MergeIntoSingleFilePlugin. Best to try to remove it from there, as long as its correctly loaded on demand in all relevant places. See what else uses the class to be sure.
+		Global.sendAnalyticsEvent( 'error:scriptload:duplicate_class', 'load', 'error:scriptload:duplicate:'+ scriptPath );
+		Debug.Error( 'Duplicate class declaration: '+ import_file_name, 'Global.js', 'Global', 'loadScript', 1 );
+		return true;
+	}
+
 	if ( Global.url_offset ) {
 		realPath = Global.getBaseURL( Global.url_offset + realPath );
 	}
@@ -1630,13 +1682,82 @@ Global.loadScript = function( scriptPath, onResult ) {
 	if ( async ) {
 		Debug.Text( 'ASYNC-LOADING: ' + scriptPath, 'Global.js', 'Global', 'loadScript', 10 );
 		//require will add the cachebuster (APIGlobal.pre_login_data.application_build) on its own.
-		if ( typeof realPath == 'string' ) {
-			realPath = [realPath];
+
+		// if ( typeof realPath == 'string' ) {
+		// 	//realPath = '/interface/html5/' + realPath;
+		// 	realPath = [realPath];
+		// }
+		// require( realPath, function() {
+		// 	LocalCacheData.loadedScriptNames[scriptPath] = true;
+		// 	onResult();
+		// } );
+
+		// jQuery.ajax( {
+		// 	async: true,
+		// 	type: 'GET',
+		// 	url: realPath + '?v=' + APIGlobal.pre_login_data.application_build,
+		// 	crossOrigin: false,
+		// 	data: null,
+		// 	cache: true,
+		// 	success: function() {
+		// 		successflag = true;
+		// 		if ( async ) {
+		// 			LocalCacheData.loadedScriptNames[scriptPath] = true;
+		// 			onResult();
+		// 		}
+		// 	},
+		// 	error: function( jqXHR, textStatus, errorThrown ) {
+		// 		TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
+		// 	},
+		// 	dataType: 'script'
+		// } );
+
+
+		var import_path;
+		if ( scriptPath.indexOf('views') !== -1 ){
+			import_path = scriptPath.replace('views/', ''); // This is to ensure the variable in the dynamic webpack import() is a single variable rather than a full path.
+			import(
+				/* webpackChunkName: "[request]" */
+				/* webpackInclude: /\.js$/ */
+				/* webpackExclude: /triggerParserError\.js$/ */
+				`@/views/${import_path}`
+			).then((module) => {
+				if ( module && module[import_file_name] ) {
+					window[import_file_name] = module[import_file_name];
+					LocalCacheData.loadedScriptNames[scriptPath] = true;
+					onResult();
+				} else {
+					// Loading class failed.
+					// If there is not an attribute matching the class on the module result, then this suggests a missing export on the class. There will also be a default attribute with an empty object to show no default classes exported.
+					debugger;
+					Debug.Error( 'Loading view class failed. Potential missing export for: ' + import_file_name, 'Global.js', 'Global', 'loadScript', 1 );
+				}
+			} ).catch( Global.importErrorHandler );
+		} else if ( scriptPath.indexOf('global/widgets') !== -1 ) {
+			import_path = scriptPath.replace('global/widgets/', ''); // This is to ensure the variable in the dynamic webpack import() is a single variable rather than a full path.
+			import(
+				/* webpackChunkName: "[request]" */
+				/* webpackInclude: /\.js$/ */
+				`@/global/widgets/${import_path}`
+			).then((module) => {
+				if( module && module[import_file_name] ) {
+					window[import_file_name] = module[import_file_name];
+					LocalCacheData.loadedScriptNames[scriptPath] = true;
+					onResult();
+				} else {
+					// Loading class failed.
+					// If there is not an attribute matching the class on the module result, then this suggests a missing export on the class. There will also be a default attribute with an empty object to show no default classes exported.
+					// This could also be a widget that is historically meant to load synchronously with the jQuery.ajax code further down. If this is the case, refactor the callback to load the widget syncronously instead.
+					debugger;
+					Debug.Error( 'Loading widget class failed. Potential missing export for: '+ import_file_name, 'Global.js', 'Global', 'loadScript', 1 );
+				}
+
+			} ).catch( Global.importErrorHandler );
+		} else {
+			debugger;
+			Debug.Error( 'Loading class failed. Unhandled file type path request: '+ scriptPath, 'Global.js', 'Global', 'loadScript', 1 );
 		}
-		require( realPath, function() {
-			LocalCacheData.loadedScriptNames[scriptPath] = true;
-			onResult();
-		} );
+
 	} else {
 		var calling_script = '';
 		if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId ) {
@@ -1682,6 +1803,34 @@ Global.loadScript = function( scriptPath, onResult ) {
 		return ( successflag );
 	}
 
+};
+
+Global.importErrorHandler = function( error ) {
+	if ( error.name == 'ChunkLoadError' ) {
+		if ( window.script_error_shown === undefined ) {
+			window.script_error_shown = 1;
+			//There is no pretty errorbox at this time. You may only have basic javascript.
+			if ( confirm( 'Unable to download required data. Your internet connection may have failed press Ok to reload.' ) ) {
+				//For testing, so that there's time to turn internet back on after confirm is clicked.
+				//window.setTimeout(function() {window.location.reload()},5000);
+
+				//This can also happen if the user manually modifies the URL to be a bogus ViewId (ie: #!m=homeABC)
+				//So try to redirect back to the home page first, otherwise try to do a browser reload.
+				if ( ServiceCaller.root_url && APIGlobal.pre_login_data.base_url ) {
+					Global.setURLToBrowser( ServiceCaller.root_url + APIGlobal.pre_login_data.base_url );
+				} else {
+					window.location.reload();
+				}
+
+			}
+		}
+		console.debug( error.message );
+		//Stop error from bubbling up.
+		// delete e; // commented out from old code as webpack complains about deleting local variable in strict mode.
+
+	} else {
+		// Throw general error?
+	}
 };
 
 Global.getRealImagePath = function( path ) {
@@ -1913,7 +2062,7 @@ Global.convertColumnsTojGridFormat = function( columns, layout_name, setWidthCal
 				hidden: true,
 				title: false
 			};
-		} else if ( layout_name === ALayoutIDs.SORT_COLUMN ) {
+		} else if ( layout_name === 'global_sort_columns' ) {
 
 			if ( view_column_data.value === 'sort' ) {
 				column_info = {
@@ -1983,9 +2132,6 @@ Global.loadWidgetByName = function( widgetName, raw_text ) {
 			break;
 		case FormItemType.TEXT_INPUT:
 			widget_path = 'global/widgets/text_input/TTextInput.html';
-			break;
-		case FormItemType.TEXT_INPUT_NO_AUTO:
-			widget_path = 'global/widgets/text_input/TTextInputNoAuto.html';
 			break;
 		case FormItemType.PASSWORD_INPUT:
 			widget_path = 'global/widgets/text_input/TPasswordInput.html';
@@ -2116,6 +2262,7 @@ Global.loadWidget = function( url ) {
 
 	var message_id = TTUUID.generateUUID();
 	ProgressBar.showProgressBar( message_id );
+	var successflag = false;
 	var responseData = $.ajax( {
 		async: false,
 		type: 'GET',
@@ -2575,7 +2722,7 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'Form941Report':
 			path = 'views/reports/form941/';
 			break;
-		case 'Form1099MiscReport':
+		case 'Form1099NecReport':
 			path = 'views/reports/form1099/';
 			break;
 		case 'FormW2Report':
@@ -2704,19 +2851,21 @@ Global.getViewPathByViewId = function( viewId ) {
 
 //returns exact filepaths for class dependencies
 Global.getViewPreloadPathByViewId = function( viewId ) {
+	// DEPRECATED: Moved the loading of these preloads to post-login-main_ui-dependancies.js
+
 	var preloads = [];
-	switch ( viewId ) {
-		case 'Request':
-		case 'RequestAuthorization':
-			preloads = ['views/common/AuthorizationHistoryCommon.js', 'views/common/RequestViewCommonController.js', 'views/common/EmbeddedMessageCommon.js'];
-			break;
-		case 'ExpenseAuthorization':
-		case 'UserExpense':
-		case 'LoginUserExpense':
-		case 'TimeSheetAuthorization':
-			preloads = ['views/common/AuthorizationHistoryCommon.js'];
-			break;
-	}
+	// switch ( viewId ) {
+	// 	case 'Request':
+	// 	case 'RequestAuthorization':
+	// 		preloads = ['views/common/AuthorizationHistoryCommon.js', 'views/common/RequestViewCommonController.js', 'views/common/EmbeddedMessageCommon.js'];
+	// 		break;
+	// 	case 'ExpenseAuthorization':
+	// 	case 'UserExpense':
+	// 	case 'LoginUserExpense':
+	// 	case 'TimeSheetAuthorization':
+	// 		preloads = ['views/common/AuthorizationHistoryCommon.js'];
+	// 		break;
+	// }
 	return preloads;
 };
 
@@ -2753,8 +2902,8 @@ Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
 		} else {
 			//Invalid viewId, redirect to home page?
 			console.debug( 'View does not exist! ViewId: ' + viewId + ' File Name: ' + fileName );
-			if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
-				Global.setURLToBrowser( ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url );
+			if ( ServiceCaller.root_url && APIGlobal.pre_login_data.base_url ) {
+				Global.setURLToBrowser( ServiceCaller.root_url + APIGlobal.pre_login_data.base_url );
 			}
 		}
 
@@ -2770,8 +2919,8 @@ Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
 		} else {
 			//Invalid viewId, redirect to home page?
 			console.debug( 'View does not exist! ViewId: ' + viewId + ' File Name: ' + fileName );
-			if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
-				Global.setURLToBrowser( ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url );
+			if ( ServiceCaller.root_url && APIGlobal.pre_login_data.base_url ) {
+				Global.setURLToBrowser( ServiceCaller.root_url + APIGlobal.pre_login_data.base_url );
 			}
 		}
 	}
@@ -2786,6 +2935,7 @@ Global.loadPageSync = function( url ) {
 	}
 	var message_id = TTUUID.generateUUID();
 	ProgressBar.showProgressBar( message_id );
+	var successflag = false;
 	var responseData = $.ajax( {
 		async: false,
 		type: 'GET',
@@ -2833,10 +2983,22 @@ Global.loadPage = function( url, onResult ) {
 
 };
 
-Global.getBaseURL = function( url_relative_path ) {
+Global.getRootURL = function( url ) {
+	if ( !url ) {
+		url = location.href;
+	}
+
+	//Rather than parse the URL ourselves, lets use the URL API and build it back up from its components.
+	var url_obj = new URL( url );
+	var retval = url_obj.protocol + '//' + url_obj.host;
+
+	return retval;
+};
+
+Global.getBaseURL = function( url_relative_path, include_search = true ) {
 	//Rather than parse the URL ourselves, lets use the URL API and build it back up from its components.
 	var url_obj = new URL( location.href );
-	var retval = url_obj.protocol +'//'+ url_obj.host + url_obj.pathname;
+	var retval = url_obj.protocol + '//' + url_obj.host + url_obj.pathname;
 
 	//Resolve any specified relative path here, so we can append the search component of the URL after.
 	//  This is needed for the recruitment portal to work if Facebook or some other 3rd party appends search components on the URL, ie: ?test=1#!m=PortalJobVacancyDetail&id=05a45d0b-b982-2a1f-2003-21ea65522bf3&company_id=ABC
@@ -2844,10 +3006,11 @@ Global.getBaseURL = function( url_relative_path ) {
 		retval = new URL( url_relative_path, retval ).href;
 	}
 
-	retval += url_obj.search;
+	if ( include_search == true ) {
+		retval += url_obj.search; //Can't put the search component back on when getting BaseURL.
+	}
 
 	return retval;
-
 };
 
 Global.isArrayAndHasItems = function( object ) {
@@ -3165,31 +3328,33 @@ Global.formatGridData = function( grid_data, key_name ) {
 
 };
 /* jshint ignore:end */
-//make backone support a simple super funciton
-Backbone.Model.prototype._super = function( funcName ) {
-	return this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
-};
 
-//make backone support a simple super function
-Backbone.View.prototype._super = function( funcName ) {
-	// Note: If 'Maximum call stack size exceeded' error encountered, and view is extending twice (BaseView->ReportBaseView->SomeRandomView), then make sure you define `this.real_this` at the 2nd level extend. See reportBaseViewController init for example.
-	if ( this.real_this && this.real_this.constructor.__super__[funcName] ) {
-		return this.real_this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
-	} else {
-		return this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
-	}
-
-};
-
-//make backone support a simple super funciton for second level class
-Backbone.View.prototype.__super = function( funcName ) {
-	if ( !this.real_this ) {
-		this.real_this = this.constructor.__super__;
-	}
-
-	return this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
-
-};
+// Commented out as we have now fully refactored the old _super and __super references in the new ES6 code.
+// //make backone support a simple super funciton
+// Backbone.Model.prototype._super = function( funcName ) {
+// 	return this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
+// };
+//
+// //make backone support a simple super function
+// Backbone.View.prototype._super = function( funcName ) {
+// 	// Note: If 'Maximum call stack size exceeded' error encountered, and view is extending twice (BaseView->ReportBaseView->SomeRandomView), then make sure you define `this.real_this` at the 2nd level extend. See reportBaseViewController init for example.
+// 	if ( this.real_this && this.real_this.constructor.__super__[funcName] ) {
+// 		return this.real_this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
+// 	} else {
+// 		return this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
+// 	}
+//
+// };
+//
+// //make backone support a simple super funciton for second level class
+// Backbone.View.prototype.__super = function( funcName ) {
+// 	if ( !this.real_this ) {
+// 		this.real_this = this.constructor.__super__;
+// 	}
+//
+// 	return this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
+//
+// };
 
 /*
  * Date Format 1.2.3
@@ -3331,7 +3496,7 @@ Date.prototype.format = function( mask, utc ) {
 	return format_str;
 };
 
-var RightClickMenuType = function() {
+window.RightClickMenuType = function() {
 
 };
 
@@ -3680,8 +3845,8 @@ Global.loadStyleSheet = function( path, fn, scope ) {
 };
 
 Global.getSessionIDKey = function() {
-	if ( LocalCacheData.all_url_args ) {
-		if ( LocalCacheData.all_url_args.hasOwnProperty( 'company_id' ) ) {
+	if ( LocalCacheData.getAllURLArgs() ) {
+		if ( LocalCacheData.getAllURLArgs().hasOwnProperty( 'company_id' ) ) {
 			return 'SessionID-JA';
 		}
 	}
@@ -3729,11 +3894,11 @@ Global.loadStyleSheet = function( path, fn, scope ) {
 };
 
 Global.getSessionIDKey = function() {
-	if ( LocalCacheData.all_url_args ) {
-		if ( LocalCacheData.all_url_args.hasOwnProperty( 'company_id' ) ) {
+	if ( LocalCacheData.getAllURLArgs() ) {
+		if ( LocalCacheData.getAllURLArgs().hasOwnProperty( 'company_id' ) ) {
 			return 'SessionID-JA';
 		}
-		if ( LocalCacheData.all_url_args.hasOwnProperty( 'punch_user_id' ) ) {
+		if ( LocalCacheData.getAllURLArgs().hasOwnProperty( 'punch_user_id' ) ) {
 			return 'SessionID-QP';
 		}
 	}
@@ -4054,7 +4219,7 @@ Global.convertValidationErrorToString = function( object ) {
 
 Global.APIFileDownload = function( class_name, method, post_data, url ) {
 	if ( url == undefined ) {
-		url = ServiceCaller.getURLWithSessionId( 'Class=' + class_name + '&Method=' + method );
+		url = ServiceCaller.getAPIURL( 'Class=' + class_name + '&Method=' + method );
 	}
 
 	var message_id = TTUUID.generateUUID();
@@ -4084,6 +4249,45 @@ Global.APIFileDownload = function( class_name, method, post_data, url ) {
 	if ( !is_browser_iOS ) {
 		ProgressBar.showProgressBar( message_id, true );
 	}
+};
+
+Global.JSFileDownload = function( file_name, content, mime_type ) {
+	var a = document.createElement( 'a' );
+	mime_type = mime_type || 'application/octet-stream';
+
+	if ( URL && 'download' in a ) { //html5 A[download]
+		a.href = URL.createObjectURL( new Blob( [content], {
+			type: mime_type
+		} ) );
+		a.setAttribute( 'download', file_name );
+		document.body.appendChild( a );
+		a.click();
+		document.body.removeChild( a );
+	} else {
+		location.href = 'data:application/octet-stream,' + encodeURIComponent( content ); // only this mime type is supported
+	}
+};
+
+//Get a refreshed CSRF token cookie in case it expires prior to the user clicking the login button. This helps avoid showing an error message and triggering a full browser refresh.
+Global.refreshCSRFToken = function( callback ) {
+	if ( getCookie( 'CSRF-Token' ) == '' ) {
+		Debug.Text( 'CSRF Token cookie does not exist, refreshing...', 'Global.js', '', 'refreshCSRFToken', 10 );
+		this.authentication_api = TTAPI.APIAuthentication;
+		this.authentication_api.sendCSRFTokenCookie( {
+				onResult: function( e ) {
+					Debug.Text( 'CSRF Refresh success!...', null, null, 'refreshCSRFToken', 10 );
+					callback();
+				},
+				onError: function( e ) {
+					Debug.Text( 'CSRF Refresh Error...', null, null, 'refreshCSRFToken', 10 );
+					callback();
+				},
+			});
+	} else {
+		callback();
+	}
+
+	return true;
 };
 
 Global.setStationID = function( val ) {
@@ -4196,40 +4400,69 @@ Global.isNumeric = function( value ) {
 	return retval;
 };
 
+//Calculates a "smart" debounce time based on the network ping time.
+//Debounce on at least 1.5x the round-trip ping time. ( 333 * 1.5 = 500ms. )
+//Because a user on a really slow connection could click Save 1s apart and the packets could arrive close to each other and cause duplicate request errors still.
+Global.calcDebounceWaitTimeBasedOnNetwork = function( min_time = null, max_time = null ) {
+	var ping = Global.current_ping;
+
+	if ( !min_time ) {
+		var min_time = 500; //Turns into 500ms after 1.5x
+	}
+
+	if ( !max_time ) {
+		var max_time = 10000; //Turns into 10s after 1.5x
+	}
+
+	var retval = ( ping * 1.5 );
+
+	if ( retval < min_time ) {
+		retval = min_time;
+	}
+
+	if ( retval > max_time ) {
+		retval = max_time;
+	}
+
+	return retval;
+}
+
 // Returns a function, that, as long as it continues to be invoked, will not be triggered. The function will be called after it stops being called for N milliseconds.
 // If `immediate` is passed, trigger the function on the leading edge, instead of the trailing.
 Global.debounce = function( callback, wait, immediate ) {
 	var timeout;
 
 	return function() {
-		var context = this, args = arguments;
+		var context = this;
+		var args = arguments;
 
 		var callback_name = ( callback.name ) ? callback.name : 'N/A';
 
 		var later = function() {
 			timeout = null;
 			if ( !immediate ) {
-				Debug.Text( 'Calling after debounce wait: ' + callback_name, 'Global.js', 'Global', 'debounce', 10 );
+				Debug.Text( 'Calling after debounce wait: ' + callback_name + ' Wait Time: ' + wait, 'Global.js', 'Global', 'debounce', 10 );
 				callback.apply( context, args );
 			} else {
-				Debug.Text( 'Skipping due to debounce: ' + callback_name, 'Global.js', 'Global', 'debounce', 11 );
+				Debug.Text( 'Skipping due to debounce: ' + callback_name + ' Wait Time: ' + wait, 'Global.js', 'Global', 'debounce', 11 );
 			}
 		};
 
-		var callNow = immediate && !timeout;
+		var call_now = immediate && !timeout;
 
 		clearTimeout( timeout );
 
 		timeout = setTimeout( later, wait );
 
-		if ( callNow ) {
-			Debug.Text( 'Calling immediate debounce: ' + callback_name, 'Global.js', 'Global', 'debounce', 10 );
+		if ( call_now ) {
+			Debug.Text( 'Calling immediate debounce: ' + callback_name + ' Wait Time: ' + wait, 'Global.js', 'Global', 'debounce', 10 );
 			callback.apply( context, args );
 		} else {
-			Debug.Text( 'Skipping due to debounce: ' + callback_name, 'Global.js', 'Global', 'debounce', 11 );
+			Debug.Text( 'Skipping due to debounce: ' + callback_name + ' Wait Time: ' + wait, 'Global.js', 'Global', 'debounce', 11 );
 		}
 	};
 };
+
 /**
  * Filter output to prevent the user from seeing strings such as undefined, false or null.
  * @param {string} entry the string that needs to be sanitized.
@@ -4341,4 +4574,16 @@ Global.glowAnimation = {
 		}
 		return element.removeClass( 'animate-glow' );
 	}
+};
+
+Global.buildArgDic = function( array ) {
+	var len = array.length;
+	var result = {};
+	for ( var i = 0; i < len; i++ ) {
+		var item = array[i];
+		item = item.split( '=' );
+		result[item[0]] = item[1];
+	}
+
+	return result;
 };

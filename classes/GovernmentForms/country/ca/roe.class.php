@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,10 +46,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 	public $pdf_template = 'roe.pdf';
 
 	public $template_offsets = [ -10, 0 ];
-
-	/*
-	public $payment_cutoff_amount = 7000; //Line5
-	*/
 
 	function getOptions( $name ) {
 		$retval = null;
@@ -970,7 +966,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 		return true;
 	}
 
-	function _outputXML() {
+	function _outputXML( $type = null ) {
 		$records = $this->getRecords();
 		Debug::Arr( $records, 'Output XML Records: ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -1164,6 +1160,8 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 				// Box20
 				$xml->ROE[$e]->addChild( 'B20', 'E' );                         //Language //minOccurs="0"  //maxLength 1
 
+				$this->revertToOriginalDataState();
+
 				$e++;
 			}
 		}
@@ -1172,7 +1170,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 	}
 
 
-	function _outputPDF() {
+	function _outputPDF( $type ) {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
@@ -1207,11 +1205,11 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 				$this->resetTemplatePage();
 
+				$this->revertToOriginalDataState();
+
 				$e++;
 			}
 		}
-
-		$this->clearRecords();
 
 		return true;
 	}

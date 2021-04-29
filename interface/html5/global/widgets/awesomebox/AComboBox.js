@@ -878,7 +878,7 @@
 							continue;
 						}
 
-						if ( layout_name === ALayoutIDs.SORT_COLUMN && select_items[0][display_columns[y].name] === undefined ) {
+						if ( layout_name === 'global_sort_columns' && select_items[0][display_columns[y].name] === undefined ) {
 							var item = select_items[0];
 
 							for ( var key in item ) {
@@ -961,7 +961,7 @@
 			if ( set_any ) {
 				label_span.text( Global.any_item );
 			} else if ( set_empty || set_special_empty ) {
-				if ( layout_name === ALayoutIDs.TREE_COLUMN ) {
+				if ( layout_name === 'global_tree_column' ) {
 					label_span.text( Global.root_item );
 				} else {
 					label_span.text( Global.empty_item );
@@ -987,12 +987,12 @@
 
 		this.onColumnSettingSaveFromLayout = function( layout ) {
 			var filter = {};
-			filter.script = ALayoutIDs.AWESOMEBOX_COLUMNS;
+			filter.script = 'global_awesomebox_columns';
 			filter.name = layout_name;
 			filter.is_default = 'false';
 
 			filter.data = layout.data;
-			filter.data.type = ALayoutType.saved_layout;
+			filter.data.type = 10;
 			filter.data.layout_id = layout.id;
 
 			if ( ALayoutCache.layout_dic[layout_name] ) {
@@ -1012,10 +1012,10 @@
 		this.onColumnSettingSave = function( seletedColumns, rowsPerPageNumber, layout_id, filter_data ) {
 
 			var filter = {};
-			filter.script = ALayoutIDs.AWESOMEBOX_COLUMNS;
+			filter.script = 'global_awesomebox_columns';
 			filter.name = layout_name;
 			filter.is_default = 'false';
-			filter.type = ALayoutType.customize;
+			filter.type = 1; //ALayoutType.customize
 
 			if ( ALayoutCache.layout_dic[layout_name] ) {
 				filter.id = ALayoutCache.layout_dic[layout_name].id;
@@ -1089,7 +1089,7 @@
 
 					var data = ALayoutCache.layout_dic[layout_name].data;
 
-					if ( Global.isSet( data.type ) && data.type === ALayoutType.saved_layout ) {
+					if ( Global.isSet( data.type ) && data.type === 10 ) {
 						display_columns = data.display_columns;
 
 						if ( display_columns.length > 0 ) {
@@ -1149,7 +1149,7 @@
 				return;
 			} else {
 				var filter = {};
-				filter.filter_data = { script: ALayoutIDs.AWESOMEBOX_COLUMNS, name: layout_name };
+				filter.filter_data = { script: 'global_awesomebox_columns', name: layout_name };
 				user_generic_api.getUserGenericData( filter, {
 					onResult: function( res ) {
 
@@ -1160,7 +1160,7 @@
 							var data = resData[0].data;
 
 							//if saved layout is saved view layout. get it
-							if ( data.type === ALayoutType.saved_layout ) {
+							if ( data.type === 10 ) {
 
 								var columns_result_data = api.getOptions( column_option_key, { async: false } ).getResult();
 								all_columns = Global.buildColumnArray( columns_result_data );
@@ -1191,7 +1191,7 @@
 
 							ALayoutCache.layout_dic[$this.getScriptName()] = layout_name; // bind current view name to layout name;
 
-							if ( Global.isSet( data.type ) && data.type === ALayoutType.saved_layout ) {
+							if ( Global.isSet( data.type ) && data.type === 10 ) {
 
 								display_columns = data.display_columns;
 								if ( display_columns.length > 0 ) {
@@ -1359,7 +1359,7 @@
 			a_dropdown_div.remove();
 			is_mouse_over = false; //When close from esc, this maybe true
 			LocalCacheData.openAwesomeBox = null;
-			if ( a_dropdown.isChanged() || layout_name === ALayoutIDs.SORT_COLUMN ) {
+			if ( a_dropdown.isChanged() || layout_name === 'global_sort_columns' ) {
 				if ( check_box ) {
 					$this.setCheckBox( true );
 				}
@@ -1641,11 +1641,20 @@
 			}
 
 			if ( a_dropdown ) { //#2353 - js exception when a_dropdown is not defined yet
-				var selected_ids = a_dropdown.getSelectItems();
-				if ( selected_ids.length > 0 && selected_ids[0] != TTUUID.zero_id ) {
+				// var selected_ids = a_dropdown.getSelectItems();
+				// if ( selected_ids.length > 0 && selected_ids[0] != TTUUID.zero_id ) {
+				// 	args.filter_data.exclude_id = [];
+				// 	for ( var x in selected_ids ) {
+				// 		args.filter_data.exclude_id.push( selected_ids[x].id );
+				// 	}
+				// }
+
+				//When using ACombo, at this point a_dropdown.getSelectItems() might be empty, but $this.getValue()/select_items has the selected IDs instead. They are in a different format though.
+				var selected_ids = select_items;
+				if ( selected_ids && Global.isArray( selected_ids ) && selected_ids.length > 0 && selected_ids[0] != TTUUID.zero_id ) {
 					args.filter_data.exclude_id = [];
 					for ( var x in selected_ids ) {
-						args.filter_data.exclude_id.push( selected_ids[x].id );
+						args.filter_data.exclude_id.push( selected_ids[x] );
 					}
 				}
 			}
@@ -2072,11 +2081,11 @@
 				list_view_default_columns = val;
 			}
 
-			if ( layout_name !== ALayoutIDs.OPTION_COLUMN && //Simple options
-				layout_name !== ALayoutIDs.TREE_COLUMN && //Tree Mode
-				layout_name !== ALayoutIDs.SORT_COLUMN &&
-				layout_name !== ALayoutIDs.TIMESHEET &&
-				layout_name !== ALayoutIDs.ABSENCE ) {
+			if ( layout_name !== 'global_option_column' && //Simple options
+				layout_name !== 'global_tree_column' && //Tree Mode
+				layout_name !== 'global_sort_columns' &&
+				layout_name !== 'global_timesheet' &&
+				layout_name !== 'global_absence' ) {
 				this.initColumns();
 			}
 
@@ -2091,13 +2100,13 @@
 		};
 
 		this.shouldInitColumns = function() {
-			if ( layout_name === ALayoutIDs.OPTION_COLUMN || //Simple options
-				layout_name === ALayoutIDs.TREE_COLUMN || //Tree Mode
-				layout_name === ALayoutIDs.SORT_COLUMN ||
-				layout_name === ALayoutIDs.TIMESHEET ||
-				layout_name === ALayoutIDs.ABSENCE ||
-				layout_name === ALayoutIDs.SIMPLE_NAME ||
-				layout_name === ALayoutIDs.SIMPLE_NAME + '_navigation' ) {
+			if ( layout_name === 'global_option_column' || //Simple options
+				layout_name === 'global_tree_column' || //Tree Mode
+				layout_name === 'global_sort_columns' ||
+				layout_name === 'global_timesheet' ||
+				layout_name === 'global_absence' ||
+				layout_name === 'global_simple_name' ||
+				layout_name === 'global_simple_name' + '_navigation' ) {
 
 				return false;
 			}
@@ -2575,7 +2584,7 @@
 						row_per_page = current_row_per_page;
 
 						if ( !set_default_args_manually ) {
-							if ( Global.isSet( layout.data.type ) && layout.data.type === ALayoutType.saved_layout ) {
+							if ( Global.isSet( layout.data.type ) && layout.data.type === 10 ) {
 								var default_args = {};
 								default_args.filter_data = layout.data.filter_data;
 								default_args.filter_sort = layout.data.filter_sort;
@@ -2725,7 +2734,7 @@
 
 					if ( allow_multiple_selection ) {
 
-						if ( layout_name === ALayoutIDs.SORT_COLUMN ) {
+						if ( layout_name === 'global_sort_columns' ) {
 							select_items = buildSortBySelectColumns( select_items );
 						}
 

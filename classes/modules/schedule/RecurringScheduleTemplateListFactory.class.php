@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -143,8 +143,10 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 				'id'         => TTUUID::castUUID( $id ),
 		];
 
+		// recurring_schedule_template_control_created_by is needed to pass back the creator of the recurring schedule template control record, as that is the value that is changed when ownership is passed to another supervisor.
 		$query = '
-					select	a.*
+					select	a.*,
+							b.created_by as recurring_schedule_template_control_created_by
 					from	' . $this->getTable() . ' as a
 					LEFT JOIN ' . $rstcf->getTable() . ' as b ON a.recurring_schedule_template_control_id = b.id
 					where	b.company_id = ?
@@ -406,7 +408,8 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 					where	b.company_id = ?
 					';
 
-		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		//permission_children_ids needs to check the recurring_schedule_template_control_id.created_by, otherwise when a recurring schedule template control record is switched to owned by someone else, they won't see the actual shifts (recurring schedule template records).
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'b.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
 		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
 		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : null;
 

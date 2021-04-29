@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -633,6 +633,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 							uf.status_id as user_status_id,
 							uf.country as country,
 							uf.province as province,
+					        uf.employee_number as employee_number,
 							
 							cdf.name as name,
 							cdf.status_id as status_id,

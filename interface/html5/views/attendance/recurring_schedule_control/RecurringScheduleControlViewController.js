@@ -1,4 +1,4 @@
-class RecurringScheduleControlViewController extends BaseViewController {
+export class RecurringScheduleControlViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#recurring_schedule_control_view_container',
@@ -78,7 +78,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 			api_class: TTAPI.APIRecurringScheduleControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.RECURRING_SCHEDULE_CONTROL,
+			layout_name: 'global_recurring_schedule_control',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -101,7 +101,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRecurringScheduleTemplateControl,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.RECURRING_TEMPLATE_CONTROL,
+			layout_name: 'global_recurring_template_control',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'recurring_schedule_template_control_id'
@@ -151,7 +151,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIUser,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				show_search_inputs: true,
 				set_any: true,
 				field: 'user',
@@ -179,7 +179,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIUser,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				show_search_inputs: true,
 				set_any: true,
 				custom_first_label: Global.empty_item,
@@ -204,7 +204,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -212,7 +212,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				label: $.i18n._( 'Template' ),
 				in_column: 1,
 				field: 'recurring_schedule_template_control_id',
-				layout_name: ALayoutIDs.RECURRING_TEMPLATE_CONTROL,
+				layout_name: 'global_recurring_template_control',
 				api_class: TTAPI.APIRecurringScheduleTemplateControl,
 				multiple: true,
 				basic_search: true,
@@ -224,7 +224,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -238,7 +238,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
@@ -249,7 +249,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 1,
-				layout_name: ALayoutIDs.JOB_TITLE,
+				layout_name: 'global_job_title',
 				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
@@ -261,7 +261,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
@@ -274,7 +274,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				label: $.i18n._( 'Default Department' ),
 				in_column: 2,
 				field: 'default_department_id',
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
@@ -287,7 +287,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -299,7 +299,7 @@ class RecurringScheduleControlViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

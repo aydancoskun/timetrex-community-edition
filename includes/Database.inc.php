@@ -4,7 +4,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -59,12 +59,13 @@ if ( !isset( $disable_database_connection ) ) {
 				}
 			}
 
+			if ( !isset( $config_vars['database']['persistent_connections'] ) ) {
+				$config_vars['database']['persistent_connections'] = false;
+			}
+
 			$ADODB_GETONE_EOF = false; //Make sure GetOne returns FALSE rather then NULL.
 			if ( strpos( $config_vars['database']['host'], ',' ) !== false ) {
 				require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
-				if ( !isset( $config_vars['database']['persistent_connections'] ) ) {
-					$config_vars['database']['persistent_connections'] = false;
-				}
 
 				$db = new ADOdbLoadBalancer();
 

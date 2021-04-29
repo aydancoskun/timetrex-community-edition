@@ -3,9 +3,6 @@ require_once('../../../includes/global.inc.php');
 require_once('../../ChequeForms/ChequeForms.class.php');
 $cf = new ChequeForms();
 
-$cf->tcpdf_dir = '../tcpdf';
-$cf->fpdi_dir = '../fpdi';
-
     $c9209p = $cf->getFormObject( '9209p' );
 
     $c9209p->setDebug(FALSE);

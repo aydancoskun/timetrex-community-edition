@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -471,8 +471,12 @@ class PayrollDeduction_Base {
 
 		krsort( $arr, SORT_NUMERIC );
 		foreach ( $arr as $date => $val ) {
-			if ( $epoch >= $date ) {
-				return $val;
+			if ( strlen( $date ) == 8 ) {
+				if ( $epoch >= $date ) {
+					return $val;
+				}
+			} else {
+				throw new Exception( 'Invalid PayrollDeduction date length: ' . $date ); //Catch typos in the ISO date where it might be 7 or 9 characters instead of 8.
 			}
 		}
 

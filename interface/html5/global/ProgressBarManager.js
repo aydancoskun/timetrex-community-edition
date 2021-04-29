@@ -1,4 +1,7 @@
-var ProgressBar = ( function() {
+import { TTAPI } from '@/services/TimeTrexClientAPI';
+import Nanobar from 'nanobar'; // need to rely on the default export via CommonJS syntax, hence no named import.
+
+export var ProgressBar = ( function() {
 
 	var loading_box = null;
 

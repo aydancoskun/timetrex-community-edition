@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -86,11 +86,15 @@ class DBError extends Exception {
 		}
 
 		if ( $e->getTrace() != '' ) {
-			ob_start(); //ADDBO_BACKTRACE() always insists on printing its output and returning it, so capture the output and drop it, so we can use the $e variable instead.
-			$e = adodb_backtrace( $e->getTrace(), 9999, false );
+			ob_start(); //ADDBO_BACKTRACE() always insists on printing its output and returning it, so capture the output and drop it, so we can use the $adodb_backtrace_arr variable instead.
+			$adodb_backtrace_arr = adodb_backtrace( $e->getTrace(), 9999, false );
 			ob_end_clean();
-			Debug::Arr( $e, 'Exception...', __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Arr( $adodb_backtrace_arr, 'Exception...', __FILE__, __LINE__, __METHOD__, 10 );
+			unset( $adodb_backtrace_arr );
 		}
+
+		//Make sure we populate the exception variables, so we can properly catch them again.
+		parent::__construct( $e->getMessage(), $e->getCode() );
 
 		Debug::Text( 'End Exception...', __FILE__, __LINE__, __METHOD__, 10 );
 

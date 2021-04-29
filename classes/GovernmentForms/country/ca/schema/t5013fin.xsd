@@ -88,6 +88,7 @@ Users of this schema:
 			<xsd:element ref="ols:ScientificResearchAttachmentIndicator" minOccurs="0"/>
 			<xsd:element ref="ols:AllocateRenouncedAttachmentIndicator" minOccurs="0"/>
 			<xsd:element ref="ols:ForeignPropertyAttachmentIndicator" minOccurs="0"/>
+			<xsd:element ref="ols:JournalismTaxCreditsAttachmentIndicator" minOccurs="0"/>
 			<!-- ADDITIONAL INFORMATION -->
 			<xsd:element ref="ols:InternationalFinancialReportingStandardsIndicator" minOccurs="0"/>
 			<xsd:element ref="ols:MultipleNomineeIndicator" minOccurs="0"/>
@@ -387,6 +388,13 @@ Users of this schema:
 		<xsd:annotation>
 			<xsd:documentation xml:lang="en"> 
 			Did the partnership own specified foreign property in the fiscal period with a cost amount over $100,000?
+ 		   </xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="JournalismTaxCreditsAttachmentIndicator" type="ccms:OneTwoCodeType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en"> 
+			Is the partnership allocating any Canadian journalism labour tax credits?
  		   </xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>

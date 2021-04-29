@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -584,7 +584,7 @@ class CalculatePayStub extends PayStubFactory {
 		//Use User Termination Date instead of ROE.
 		//Also need to handle cases where vacation accrual is being released after they have been terminated.
 		//  so when the pay period is after the termination date, only generate pay stubs if Pay Stub Amendments exist.
-		if ( $this->getUserObject()->getTerminationDate() != ''
+		if ( !empty( $this->getUserObject()->getTerminationDate() )
 				&& (
 				(
 						$this->getUserObject()->getTerminationDate() >= $this->getPayPeriodObject()->getStartDate()
@@ -602,7 +602,7 @@ class CalculatePayStub extends PayStubFactory {
 		//Scenarios to handle:
 		// 1. Employees last day for which paid could be Aug 25th (PP ends on Aug 30th), but they never gave any notice and dont work again, so vacation pay must be released after their termination date, but in the following pay period.
 		//       this requires: $this->getUserObject()->getTerminationDate() < $this->getPayPeriodObject()->getStartDate()
-		if ( ( $this->getEnablePostTerminationCalculation() == true && $this->getUserObject()->getTerminationDate() < $this->getPayPeriodObject()->getStartDate() ) ) {
+		if ( ( $this->getEnablePostTerminationCalculation() == true && !empty( $this->getUserObject()->getTerminationDate() ) && $this->getUserObject()->getTerminationDate() < $this->getPayPeriodObject()->getStartDate() ) ) {
 			Debug::text( 'User has been terminated AFTER this pay period... Also setting Out-of-Cycle pay run...', __FILE__, __LINE__, __METHOD__, 10 );
 			$is_post_termination_pay_period = true;
 			$this->setType( 20 ); //When post termination, make sure its a Out-of-Cycle run.
@@ -616,7 +616,7 @@ class CalculatePayStub extends PayStubFactory {
 		//Also allow pay stubs to be generated in pay periods *before* their termination date.
 		if ( $this->getUserObject()->getStatus() != 10
 				&& ( ( $is_termination_pay_period == false && $is_post_termination_pay_period == false ) &&
-						( $this->getUserObject()->getTerminationDate() == '' || $this->getUserObject()->getTerminationDate() < $this->getPayPeriodObject()->getStartDate() ) )
+						( empty( $this->getUserObject()->getTerminationDate() ) || $this->getUserObject()->getTerminationDate() < $this->getPayPeriodObject()->getStartDate() ) )
 		) {
 			Debug::text( 'Pay Period is after users termination date (' . TTDate::getDate( 'DATE+TIME', $this->getUserObject()->getTerminationDate() ) . '), or no termination date is set...', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -644,12 +644,12 @@ class CalculatePayStub extends PayStubFactory {
 
 			//Check for current pay stub ID so we can compare against it.
 			$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
-			$pslf->getByUserIdAndPayPeriodId( $this->getUser(), $this->getPayPeriod() );
-			if ( $pslf->getRecordCount() > 0 ) {
+			$pslf->getByUserIdAndTypeIdAndPayPeriodId( $this->getUser(), 10, $this->getPayPeriod() ); //Only consider Normal In-Cycle pay stubs since we don't have a way to defining specifically which other pay stubs to diff.
+			if ( $pslf->getRecordCount() == 1 ) { //Only make a comparison if a single pay stub is returned.
 				$old_pay_stub_id = $pslf->getCurrent()->getId();
 				Debug::text( 'Comparing Against Pay Stub ID: ' . $old_pay_stub_id, __FILE__, __LINE__, __METHOD__, 10 );
 			} else {
-				Debug::text( 'No pay stub to compare against...', __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::text( 'No pay stub to compare against: '. $pslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 		$pay_stub->setUser( $this->getUser() );
@@ -701,7 +701,7 @@ class CalculatePayStub extends PayStubFactory {
 			$pay_stub->setDefaultDates();
 		}
 
-		if ( $this->getTransactionDate() != false && $this->getType() != 10 ) {
+		if ( $this->getTransactionDate() != false ) {
 			Debug::text( 'Overriding Transaction Date To: ' . $this->getTransactionDate(), __FILE__, __LINE__, __METHOD__, 10 );
 
 			//If transaction date is earlier than the pay period end date, back date it also, otherwise the transaction date will be moved forward to the end date in PayStubFactory->setTransactionDate().
@@ -770,23 +770,27 @@ class CalculatePayStub extends PayStubFactory {
 		} else {
 			$pay_stub_amendment_status_ids = [ 50 ]; //Active
 		}
-		$psalf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $this->getUser(), true, $pay_stub_amendment_status_ids, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+		$psalf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDateAndIncludePayStubId( $this->getUser(), true, $pay_stub_amendment_status_ids, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $old_pay_stub_id );
 		unset( $pay_stub_amendment_status_ids );
 
-		$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
-		$udlf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->getUserObject()->getId() );
-		Debug::text( 'Total PayStubAmendments: ' . $psalf->getRecordCount() . ' UserDeductions: ' . $udlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $this->getType() == 100 || $this->getType() == 90 ) { //100=Opening Balance, 90=YTD Adjustment -- Skip all Tax/Deduction records and only consider Pay Stub Amendments. So we don't need to disable Tax/Deductions.
+			$udlf = false;
+			Debug::text( 'Total PayStubAmendments: ' . $psalf->getRecordCount() . ' UserDeductions: 0', __FILE__, __LINE__, __METHOD__, 10 );
+		} else {
+			$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
+			$udlf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->getUserObject()->getId() );
+			Debug::text( 'Total PayStubAmendments: ' . $psalf->getRecordCount() . ' UserDeductions: ' . $udlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		}
 
 		//Only include expenses when calculating in-cycle payroll runs, as we currently can't tell if they have already been included on a pay stub or not.
 		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE && $this->getType() == 10 && $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
 			$uelf = TTnew( 'UserExpenseListFactory' ); /** @var UserExpenseListFactory $uelf */
-			//$uelf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
 			if ( $this->getEnableCorrection() == true ) {      //When doing post-adjustment carry-forward, we need to take into account already paid expenses, otherwise the differeces will always be incorrect.
 				$user_expense_status_ids = [ 30, 35, 40, 50 ]; //30=Active, 35=In Use, 40=Paid/Reimbursed, 50=Authorized
 			} else {
 				$user_expense_status_ids = [ 30, 50 ]; //30=Active, 50=Authorized
 			}
-			$uelf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $this->getUser(), true, $user_expense_status_ids, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+			$uelf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDateAndIncludePayStubId( $this->getUser(), true, $user_expense_status_ids, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $old_pay_stub_id );
 			unset( $user_expense_status_ids );
 
 			Debug::text( 'Total User Expenses: ' . $uelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -798,7 +802,7 @@ class CalculatePayStub extends PayStubFactory {
 		//Make sure we don't try to generate a pay stub before the employees hire date, since we don't calculate Tax/Deduction before their hire date anyways (similar check below), this could result in just earnings and no tax deductions.
 		// This can occur when a user tries to terminate an employee, generate an ROE, then immediately re-hire an employee a few days later, then generate pay stubs for the prior pay pay period (the employees last pay period).
 		// Essentially they are doing it out of order, they should terminate the employee, generate the final pay stub, generate the ROE, close the pay period, then re-hire the employee.
-		if ( $this->getEnableCorrection() == false && ( $this->getUserObject()->getHireDate() != '' && TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) > TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getEndDate() ) ) ) {
+		if ( $this->getEnableCorrection() == false && ( !empty( $this->getUserObject()->getHireDate() ) && TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) > TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getEndDate() ) ) ) {
 			$pay_stub->Validator->isTRUE( 'hire_date',
 										  false,
 										  TTi18n::gettext( 'Employee was hired after this pay period already ended, check hire date' ) // Employee Hire Date is after Pay Period End Date
@@ -814,7 +818,7 @@ class CalculatePayStub extends PayStubFactory {
 						$ud_obj = $data_arr['obj'];
 
 						//Ensure that if a Tax/Deduction assigned to this user checks age eligibility that the employee has a birth date specified. Otherwise don't generate the pay stub.
-						if ( $this->getUserObject()->getBirthDate() == '' && $ud_obj->getCompanyDeductionObject()->isUserAgeEligibility() == true ) {
+						if ( empty( $this->getUserObject()->getBirthDate() ) && $ud_obj->getCompanyDeductionObject()->isUserAgeEligibility() == true ) {
 							$pay_stub->Validator->isTRUE( 'birth_date',
 														  false,
 														  TTi18n::gettext( 'Birth Date not specified, unable to determine age eligibility for %1', $ud_obj->getCompanyDeductionObject()->getName() )
@@ -822,7 +826,7 @@ class CalculatePayStub extends PayStubFactory {
 						}
 
 						//Hire Date is always defaulted, so this likely will never get triggered.
-						if ( $this->getUserObject()->getHireDate() == '' && $ud_obj->getCompanyDeductionObject()->isUserLengthOfServiceEligibility() == true ) {
+						if ( empty( $this->getUserObject()->getHireDate() ) && $ud_obj->getCompanyDeductionObject()->isUserLengthOfServiceEligibility() == true ) {
 							$pay_stub->Validator->isTRUE( 'hire_date',
 														  false,
 														  TTi18n::gettext( 'Hire Date not specified, unable to determine length of service eligibility for %1', $ud_obj->getCompanyDeductionObject()->getName() )
@@ -893,9 +897,11 @@ class CalculatePayStub extends PayStubFactory {
 		$pay_stub->setEnableProcessEntries( true );
 		$pay_stub->processEntries();
 
-		$pay_stub->setEnableProcessTransactions( true );
-		$pay_stub->calculateDefaultTransactions();
-		//$pay_stub->processTransactions();
+		if ( $this->getType() != 100 ) { //100=Opening Balance
+			$pay_stub->setEnableProcessTransactions( true );
+			$pay_stub->calculateDefaultTransactions();
+			//$pay_stub->processTransactions();
+		}
 
 		if ( $pay_stub->isValid() == true ) {
 			Debug::text( 'Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10 );
@@ -937,7 +943,7 @@ class CalculatePayStub extends PayStubFactory {
 				} else if ( $psalf->getRecordCount() > 0 ) {
 					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 20, TTi18n::gettext( 'Employee has %1 active pay stub amendments before this pay period that have not been paid', [ $psalf->getRecordCount() ] ), null );
 				} else {
-					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 30, TTi18n::gettext( 'Total Gross' ) . ': ' . Misc::MoneyFormat( $pay_stub->getGrossPay() ) . ' ' . TTi18n::gettext( 'Net Pay' ) . ': ' . Misc::MoneyFormat( $pay_stub->getNetPay() ), null );
+					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 30, TTi18n::gettext( 'Total Gross' ) . ': ' . Misc::MoneyFormat( $pay_stub->getGrossPay() ) . ' ' . TTi18n::gettext( 'Net Pay' ) . ': ' . Misc::MoneyFormat( $pay_stub->getNetPay() ) . ' ' . TTi18n::gettext( 'Employer Contributions' ) . ': ' . Misc::MoneyFormat( $pay_stub->getEmployerDeductions() ), null );
 				}
 
 				return true;

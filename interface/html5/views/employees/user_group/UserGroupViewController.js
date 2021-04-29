@@ -1,4 +1,4 @@
-class UserGroupViewController extends BaseTreeViewController {
+export class UserGroupViewController extends BaseTreeViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_group_view_container',

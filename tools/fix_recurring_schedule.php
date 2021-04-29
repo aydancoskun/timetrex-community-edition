@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,7 +37,7 @@
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
 require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
+if ( $argc < 1 || ( isset( $argv[1] ) && in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) ) {
 	$help_output = "Usage: fix_recurring_schedule.php [options] [company_id]\n";
 	$help_output .= "    -n				Dry-run\n";
 	echo $help_output;
@@ -52,8 +52,8 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 		$dry_run = false;
 	}
 
-	if ( isset( $argv[ $last_arg ] ) AND is_numeric( $argv[ $last_arg ] ) ) {
-		$company_id = $argv[ $last_arg ];
+	if ( isset( $argv[$last_arg] ) && is_numeric( $argv[$last_arg] ) ) {
+		$company_id = $argv[$last_arg];
 	}
 
 	//
@@ -77,7 +77,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 	$clf->getAll();
 	if ( $clf->getRecordCount() > 0 ) {
 		foreach ( $clf as $c_obj ) {
-			if ( isset( $company_id ) AND $company_id != '' AND $company_id != $c_obj->getId() ) {
+			if ( isset( $company_id ) && $company_id != '' && $company_id != $c_obj->getId() ) {
 				continue;
 			}
 
@@ -121,7 +121,7 @@ if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-
 
 						//Make sure its always at least the display weeks based on the end of the current week.
 						$maximum_end_date = ( ( TTDate::getEndWeekEpoch( $current_epoch ) + 1 ) + ( $rsc_obj->getDisplayWeeks() * ( 86400 * 7 ) ) - 1 );
-						if ( $rsc_obj->getEndDate() != '' AND $maximum_end_date > $rsc_obj->getEndDate() ) {
+						if ( $rsc_obj->getEndDate() != '' && $maximum_end_date > $rsc_obj->getEndDate() ) {
 							$maximum_end_date = $rsc_obj->getEndDate();
 						}
 						Debug::text( 'Recurring Schedule ID: ' . $rsc_obj->getID() . ' Maximum End Date: ' . TTDate::getDate( 'DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10 );

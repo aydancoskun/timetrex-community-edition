@@ -1,4 +1,4 @@
-class AccrualPolicyViewController extends BaseViewController {
+export class AccrualPolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#accrual_policy_view_container',
@@ -212,7 +212,7 @@ class AccrualPolicyViewController extends BaseViewController {
 			api_class: TTAPI.APIAccrualPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ACCRUAL_POLICY,
+			layout_name: 'global_accrual',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -254,7 +254,7 @@ class AccrualPolicyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_accrual_policy_column1 );
 
 		// Contributing Shift
@@ -262,7 +262,7 @@ class AccrualPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+			layout_name: 'global_contributing_shift_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			set_default: true,
@@ -275,7 +275,7 @@ class AccrualPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAccrualPolicyAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
+			layout_name: 'global_accrual_policy_account',
 			show_search_inputs: true,
 			set_empty: true,
 			set_default: true,
@@ -288,7 +288,7 @@ class AccrualPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIContributingPayCodePolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
+			layout_name: 'global_contributing_pay_code_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			set_default: true,
@@ -309,14 +309,14 @@ class AccrualPolicyViewController extends BaseViewController {
 		//Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'milestone_rollover_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_year_array ) );
+		form_item_input.setSourceData( $this.month_of_year_array );
 		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
 		//Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'milestone_rollover_day_of_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
+		form_item_input.setSourceData( $this.day_of_month_array );
 		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
 		var tab_accrual_policy_column2 = tab_accrual_policy.find( '.second-column' );
@@ -330,7 +330,7 @@ class AccrualPolicyViewController extends BaseViewController {
 		//Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'apply_frequency_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.apply_frequency_array ) );
+		form_item_input.setSourceData( $this.apply_frequency_array );
 		this.addEditFieldToColumn( $.i18n._( 'Frequency' ), form_item_input, tab_accrual_policy_column2, '', null, true );
 
 		//Employee's Hire Date
@@ -341,26 +341,26 @@ class AccrualPolicyViewController extends BaseViewController {
 		//Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'apply_frequency_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_year_array ) );
+		form_item_input.setSourceData( $this.month_of_year_array );
 		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab_accrual_policy_column2, '', null, true );
 
 		//Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'apply_frequency_day_of_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
+		form_item_input.setSourceData( $this.day_of_month_array );
 		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab_accrual_policy_column2, '', null, true );
 
 		//Day Of Week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'apply_frequency_day_of_week' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $.extend( {}, $this.day_of_week_array ) ) );
+		form_item_input.setSourceData( $.extend( {}, $this.day_of_week_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Day Of Week' ), form_item_input, tab_accrual_policy_column2, '', null, true );
 
 		// Month of Quarter
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'apply_frequency_quarter_month', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_quarter_array ) );
+		form_item_input.setSourceData( $this.month_of_quarter_array );
 		this.addEditFieldToColumn( $.i18n._( 'Month of Quarter' ), form_item_input, tab_accrual_policy_column2, '', null, true );
 
 		// After Minimum Employed Days
@@ -643,7 +643,7 @@ class AccrualPolicyViewController extends BaseViewController {
 
 		var form_item_combobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_combobox.TComboBox( { field: 'length_of_service_unit_id' } );
-		form_item_combobox.setSourceData( Global.addFirstItemToArray( this.parent_controller.length_of_service_unit_array ) );
+		form_item_combobox.setSourceData( this.parent_controller.length_of_service_unit_array );
 		form_item_combobox.setValue( data.length_of_service_unit_id ? data.length_of_service_unit_id : 10 );
 
 		form_item_combobox.bind( 'formItemChange', function( e, target ) {
@@ -1080,7 +1080,7 @@ class AccrualPolicyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -1088,7 +1088,7 @@ class AccrualPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -1100,7 +1100,7 @@ class AccrualPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

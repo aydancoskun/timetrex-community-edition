@@ -1,4 +1,4 @@
-TTPromise = {
+export var TTPromise = {
 	promises: {},
 
 	add: function( category, key ) {
@@ -172,7 +172,7 @@ TTPromise = {
 
 		var pending_count = 0;
 		for ( var n in p ) {
-			if ( p[n].state() == 'pending' ) {
+			if ( p[n] && p[n].state() == 'pending' ) {
 				console.debug( 'Category: ' + p[n].extra_data.category + ' Key: ' + p[n].extra_data.key + ' State: ' + p[n].state() );
 				pending_count++;
 			}

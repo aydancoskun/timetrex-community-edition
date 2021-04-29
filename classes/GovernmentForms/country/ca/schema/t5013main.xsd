@@ -3,7 +3,7 @@
 Description: Specialty Business Returns - Partnership Financial Return and related Schedules
 Contact: CRA, ITB, Solutions, RASD, Business Suite Assessing System, Other Levies
 Date created: January 2013
-Updates: olsbr/1-0-1 - November 2013 - added Min and Max for sequence elements
+Updates: August 2020
 Users of this schema:
 -Other Levies System
 -->
@@ -19,10 +19,11 @@ xmlns:ols9="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols9/1
 xmlns:ols12="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols12/1-0-1" 
 xmlns:ols50="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols50/1-0-1" 
 xmlns:ols52="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols52/1-0-1" 
+xmlns:ols58="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols58/1-0-1"
 xmlns:ols100="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols100/1-0-1" 
 xmlns:ols125="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols125/1-0-1"  
 xmlns:ols140="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols140/1-0-1"  
-xmlns:ols141="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols141/1-0-1"  
+xmlns:ols141="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols141/1-0-1"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 targetNamespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/olsbr/1-0-1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="olsbr/1-0-0">
 	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols/1-0-1" schemaLocation="t5013fin.xsd"/>
@@ -36,6 +37,7 @@ targetNamespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/o
 	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols12/1-0-1" schemaLocation="t5013sch12.xsd"/>
 	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols50/1-0-1" schemaLocation="t5013sch50.xsd"/>
 	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols52/1-0-1" schemaLocation="t5013sch52.xsd"/>
+	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols58/1-0-1" schemaLocation="t5013sch58.xsd"/>
 	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols100/1-0-1" schemaLocation="t5013sch100.xsd"/>
 	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols125/1-0-1" schemaLocation="t5013sch125.xsd"/>	
 	<xsd:import namespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/ols140/1-0-1" schemaLocation="t5013sch140.xsd"/>
@@ -55,6 +57,7 @@ targetNamespace="http://www.cra-arc.gc.ca/enov/ol/interfaces/efile/partnership/o
 			<xsd:element ref="ols12:T5013Schedule12Data" minOccurs="0"/>
 			<xsd:element ref="ols50:T5013Schedule50Data" minOccurs="0"/>
 			<xsd:element ref="ols52:T5013Schedule52Data" minOccurs="0"/>
+			<xsd:element ref="ols58:T5013Schedule58Data" minOccurs="0"/>
 			<xsd:element ref="ols100:T5013Schedule100Data" minOccurs="0"/>
 			<xsd:element ref="ols125:T5013Schedule125Data" minOccurs="0" maxOccurs ="2000"/>
 			<xsd:element ref="ols140:T5013Schedule140Data" minOccurs="0"/>

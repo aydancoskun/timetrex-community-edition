@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1118,9 +1118,9 @@ class ScheduleFactory extends Factory {
 								)
 						) ) {
 					//UnPaid Absence.
-					$total_time_wage = Misc::MoneyFormat( 0 );
+					$total_time_wage = Misc::MoneyRound( 0 );
 				} else {
-					$total_time_wage = Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), $s_obj->getColumn( 'user_wage_hourly_rate' ) ), false );
+					$total_time_wage = Misc::MoneyRound( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), $s_obj->getColumn( 'user_wage_hourly_rate' ) ) );
 				}
 
 				//v11.5.0 change ISO date stamp to have dashes in it, but that caused problems with existing versions of the app which were expecting no dashes.
@@ -1199,7 +1199,7 @@ class ScheduleFactory extends Factory {
 
 						'total_time' => $s_obj->getTotalTime(),
 
-						'hourly_rate'     => Misc::MoneyFormat( $s_obj->getColumn( 'user_wage_hourly_rate' ), false ),
+						'hourly_rate'     => Misc::MoneyRound( $s_obj->getColumn( 'user_wage_hourly_rate' ) ),
 						'total_time_wage' => $total_time_wage,
 
 						'note' => $s_obj->getColumn( 'note' ),

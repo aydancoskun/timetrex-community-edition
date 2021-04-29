@@ -1,4 +1,4 @@
-class RequestViewCommonController extends BaseViewController {
+export class RequestViewCommonController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			authorization_history: null,
@@ -591,7 +591,7 @@ class RequestViewCommonController extends BaseViewController {
 			api_class: TTAPI.APIRequest,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REQUEST,
+			layout_name: 'global_request',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -627,7 +627,7 @@ class RequestViewCommonController extends BaseViewController {
 			//Working Status
 			var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 			form_item_input.TComboBox( { field: 'request_schedule_status_id', set_empty: false } );
-			form_item_input.setSourceData( Global.addFirstItemToArray( { 10: 'Working', 20: 'Absent' } ) );
+			form_item_input.setSourceData( { 10: 'Working', 20: 'Absent' } );
 			this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_request_column1 );
 			form_item_input.bind( 'change', function( e ) {
 				$this.onWorkingStatusChanged();
@@ -714,7 +714,7 @@ class RequestViewCommonController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APISchedulePolicy,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.SCHEDULE_POLICY,
+				layout_name: 'global_schedule',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'schedule_policy_id'
@@ -726,7 +726,7 @@ class RequestViewCommonController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIAbsencePolicy,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.ABSENCES_POLICY,
+				layout_name: 'global_absences',
 				set_empty: true,
 				field: 'absence_policy_id',
 				customSearchFilter: function( filter ) {
@@ -754,7 +754,7 @@ class RequestViewCommonController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIBranch,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.BRANCH,
+				layout_name: 'global_branch',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'branch_id'
@@ -769,7 +769,7 @@ class RequestViewCommonController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIDepartment,
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.DEPARTMENT,
+				layout_name: 'global_department',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'department_id'
@@ -786,7 +786,7 @@ class RequestViewCommonController extends BaseViewController {
 				form_item_input.AComboBox( {
 					api_class: TTAPI.APIJob,
 					allow_multiple_selection: false,
-					layout_name: ALayoutIDs.JOB,
+					layout_name: 'global_job',
 					show_search_inputs: true,
 					set_empty: true,
 					setRealValueCallBack: ( function( val ) {
@@ -822,7 +822,7 @@ class RequestViewCommonController extends BaseViewController {
 				form_item_input.AComboBox( {
 					api_class: TTAPI.APIJobItem,
 					allow_multiple_selection: false,
-					layout_name: ALayoutIDs.JOB_ITEM,
+					layout_name: 'global_job_item',
 					show_search_inputs: true,
 					set_empty: true,
 					setRealValueCallBack: ( function( val ) {

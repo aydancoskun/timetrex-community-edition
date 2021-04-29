@@ -1,4 +1,4 @@
-class DepartmentViewController extends BaseViewController {
+export class DepartmentViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#department_view_container',
@@ -51,7 +51,7 @@ class DepartmentViewController extends BaseViewController {
 			api_class: TTAPI.APIDepartment,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.DEPARTMENT,
+			layout_name: 'global_department',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -72,7 +72,7 @@ class DepartmentViewController extends BaseViewController {
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_department_column1, '' );
 
 		//Name
@@ -95,7 +95,7 @@ class DepartmentViewController extends BaseViewController {
 			form_item_input.AComboBox( {
 				api_class: TTAPI.APIGEOFence,
 				allow_multiple_selection: true,
-				layout_name: ALayoutIDs.GEO_FENCE,
+				layout_name: 'global_geo_fence',
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'geo_fence_ids'
@@ -121,7 +121,7 @@ class DepartmentViewController extends BaseViewController {
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -152,7 +152,7 @@ class DepartmentViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -164,7 +164,7 @@ class DepartmentViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

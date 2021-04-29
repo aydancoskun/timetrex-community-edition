@@ -4,7 +4,9 @@
  * CRITICAL: ALL WIZARDS MUST HAVE A HOME STEP SO THAT THEY HAVE SOMEWHERE TO START.
  **/
 
-class Wizard extends TTBackboneView {
+import { TTBackboneView } from '@/views/TTBackboneView';
+
+export class Wizard extends TTBackboneView {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			current_step: false,
@@ -273,20 +275,16 @@ class Wizard extends TTBackboneView {
 
 		if ( typeof step.getNextStepName() != 'string' ) {
 			$( this.el ).find( '.forward-btn' ).addClass( 'disable-image' );
+			$( this.el ).find( '.done-btn' ).removeClass( 'disable-image' ); //When right arrow is disabled, assume last step and enable done button.
 		} else {
 			$( this.el ).find( '.forward-btn' ).removeClass( 'disable-image' );
+			$( this.el ).find( '.done-btn' ).addClass( 'disable-image' ); //When right arrow is enabled, assume *not* last step, disable done button.
 		}
 
 		if ( typeof step.getPreviousStepName() != 'string' ) {
 			$( this.el ).find( '.back-btn' ).addClass( 'disable-image' );
 		} else {
 			$( this.el ).find( '.back-btn' ).removeClass( 'disable-image' );
-		}
-
-		if ( typeof step.getPreviousStepName() == 'string' && typeof step.getNextStepName() != 'string' ) {
-			$( this.el ).find( '.done-btn' ).removeClass( 'disable-image' );
-		} else {
-			$( this.el ).find( '.done-btn' ).addClass( 'disable-image' );
 		}
 
 		this._enableButtons();

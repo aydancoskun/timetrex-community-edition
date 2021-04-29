@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,7 +43,8 @@ require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPAR
 //			php export_report.php -server "http://192.168.1.1/timetrex/api/soap/api.php" -username myusername -password mypass -report UserSummaryReport -time_period last_year /tmp/employee_list.csv csv
 //			php export_report.php -server "http://192.168.1.1/timetrex/api/soap/api.php" -username myusername -password mypass -report UserSummaryReport -time_period custom_date -filter start_date=01-Jan-19,end_date=31-Jan-19 /tmp/employee_list.csv csv
 //			php export_report.php -server "http://192.168.1.1/timetrex/api/soap/api.php" -username myusername -password mypass -report UserSummaryReport -time_period custom_date -filter date_stamp="\=>29-Jun-19 & <\=29-Jun-19" /tmp/employee_list.csv csv
-if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
+//          php export_report.php -server "http://192.168.1.1/timetrex/api/json/api.php" -username myusername -password mypass -report PayrollExportReport -saved_report MySavedReport /tmp/payroll_export.csv payroll_export
+if ( $argc < 3 || in_array( $argv[1], [ '--help', '-help', '-h', '-?' ] ) ) {
 	$help_output = "Usage: export_report.php [OPTIONS] [output file] [file format]\n";
 	$help_output .= "\n";
 	$help_output .= "  Options:\n";
@@ -69,66 +70,66 @@ if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	}
 
 	if ( in_array( '-server', $argv ) ) {
-		$api_url = trim( $argv[ array_search( '-server', $argv ) + 1 ] );
+		$api_url = trim( $argv[array_search( '-server', $argv ) + 1] );
 	} else {
 		$api_url = false;
 	}
 
 	if ( in_array( '-username', $argv ) ) {
-		$username = trim( $argv[ array_search( '-username', $argv ) + 1 ] );
+		$username = trim( $argv[array_search( '-username', $argv ) + 1] );
 	} else {
 		$username = false;
 	}
 
 	if ( in_array( '-password', $argv ) ) {
-		$password = trim( $argv[ array_search( '-password', $argv ) + 1 ] );
+		$password = trim( $argv[array_search( '-password', $argv ) + 1] );
 	} else {
 		$password = false;
 	}
 
 	if ( in_array( '-api_key', $argv ) ) {
-		$api_key = trim( $argv[ array_search( '-api_key', $argv ) + 1 ] );
+		$api_key = trim( $argv[array_search( '-api_key', $argv ) + 1] );
 	} else {
 		$api_key = false;
 	}
 
 	if ( in_array( '-report', $argv ) ) {
-		$report = trim( $argv[ array_search( '-report', $argv ) + 1 ] );
+		$report = trim( $argv[array_search( '-report', $argv ) + 1] );
 	} else {
 		$report = false;
 	}
 
 	if ( in_array( '-template', $argv ) ) {
-		$template = trim( $argv[ array_search( '-template', $argv ) + 1 ] );
+		$template = trim( $argv[array_search( '-template', $argv ) + 1] );
 	} else {
 		$template = false;
 	}
 
 	if ( in_array( '-saved_report', $argv ) ) {
-		$saved_report = trim( $argv[ array_search( '-saved_report', $argv ) + 1 ] );
+		$saved_report = trim( $argv[array_search( '-saved_report', $argv ) + 1] );
 	} else {
 		$saved_report = false;
 	}
 
 	if ( in_array( '-time_period', $argv ) ) {
-		$time_period = trim( $argv[ array_search( '-time_period', $argv ) + 1 ] );
+		$time_period = trim( $argv[array_search( '-time_period', $argv ) + 1] );
 	} else {
 		$time_period = false;
 	}
 
 	if ( in_array( '-filter', $argv ) ) {
 		//Allow handling escapted deliminters so we can handle date ranges like: >=01-Jan-18 without the "=" being treated as a different name/value pair.
-		$other_filter = preg_split( '~(?<!\\\)' . preg_quote( ',', '~' ) . '~', trim( $argv[ array_search( '-filter', $argv ) + 1 ] ) );
+		$other_filter = preg_split( '~(?<!\\\)' . preg_quote( ',', '~' ) . '~', trim( $argv[array_search( '-filter', $argv ) + 1] ) );
 		if ( is_array( $other_filter ) ) {
 			foreach ( $other_filter as $tmp_other_filter ) {
 				//$split_other_filter = explode('=', $tmp_other_filter);
 				$split_other_filter = preg_split( '~(?<!\\\)' . preg_quote( '=', '~' ) . '~', $tmp_other_filter );
-				if ( isset( $split_other_filter[0] ) AND isset( $split_other_filter[1] ) ) {
+				if ( isset( $split_other_filter[0] ) && isset( $split_other_filter[1] ) ) {
 					$split_other_filter[1] = str_replace( '\=', '=', $split_other_filter[1] ); //Unescape deliminter
-					if ( isset( $override_filter[ $split_other_filter[0] ] ) ) { //Handle array of data.
-						$override_filter[ $split_other_filter[0] ][] = $split_other_filter[1];
+					if ( isset( $override_filter[$split_other_filter[0]] ) ) { //Handle array of data.
+						$override_filter[$split_other_filter[0]][] = $split_other_filter[1];
 					} else {
-						$override_filter[ $split_other_filter[0] ] = $split_other_filter[1];
+						$override_filter[$split_other_filter[0]] = $split_other_filter[1];
 					}
 				}
 			}
@@ -138,13 +139,13 @@ if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	}
 
 	$output_file = null;
-	if ( isset( $argv[ $last_arg - 1 ] ) AND $argv[ $last_arg - 1 ] != '' ) {
-		$output_file = $argv[ $last_arg - 1 ];
+	if ( isset( $argv[$last_arg - 1] ) && $argv[$last_arg - 1] != '' ) {
+		$output_file = $argv[$last_arg - 1];
 	}
 
 	$file_format = 'csv';
-	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
-		$file_format = $argv[ $last_arg ];
+	if ( isset( $argv[$last_arg] ) && $argv[$last_arg] != '' ) {
+		$file_format = $argv[$last_arg];
 	}
 
 	if ( !isset( $output_file ) ) {
@@ -154,7 +155,7 @@ if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 	$TIMETREX_URL = $api_url;
 
-	if ( isset($api_key) && $api_key != '' ) {
+	if ( isset( $api_key ) && $api_key != '' ) {
 		$TIMETREX_SESSION_ID = $api_key;
 		$api_session = new TimeTrexClientAPI();
 		//if ( $api_session->isLoggedIn() == false ) {
@@ -174,12 +175,13 @@ if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	if ( $report != '' ) {
 		$report_obj = new TimeTrexClientAPI( $report );
 
-		$config = array();
+		$config = [];
+
 		if ( $saved_report != '' ) {
 			$saved_report_obj = new TimeTrexClientAPI( 'UserReportData' );
-			$saved_report_result = $saved_report_obj->getUserReportData( array('filter_data' => array('name' => trim( $saved_report ))) );
+			$saved_report_result = $saved_report_obj->getUserReportData( [ 'filter_data' => [ 'name' => trim( $saved_report ) ] ] );
 			$saved_report_data = $saved_report_result->getResult();
-			if ( is_array( $saved_report_data ) AND isset( $saved_report_data[0] ) AND isset( $saved_report_data[0]['data'] ) ) {
+			if ( is_array( $saved_report_data ) && isset( $saved_report_data[0] ) && isset( $saved_report_data[0]['data'] ) ) {
 				$config = $saved_report_data[0]['data']['config'];
 			} else {
 				echo "ERROR: Saved report not found...\n";
@@ -194,22 +196,41 @@ if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			$config['time_period']['time_period'] = $time_period;
 		}
 
-		if ( isset( $override_filter ) AND is_array( $override_filter ) ) {
+
+		$form_config_result = $report_obj->getCompanyFormConfig();
+		if ( $form_config_result->isValid() == true ) {
+			$tmp_form_config = $form_config_result->getResult();
+			if ( is_array( $tmp_form_config) ) {
+				$config['form'] = $form_config_result->getResult();
+			}
+		}
+
+
+		if ( isset( $override_filter ) && is_array( $override_filter ) ) {
 			$config = array_merge( $config, $override_filter );
 		}
 		//var_dump($config);
 
+
 		$result = $report_obj->getReport( $config, strtolower( $file_format ) );
-		$retval = $result->getResult();
-		if ( is_array( $retval ) ) {
-			if ( isset( $retval['file_name'] ) AND $output_file == '' ) {
-				$output_file = $retval['file_name'];
+		if ( is_object( $result ) ) {
+			$retval = $result->getResult();
+			if ( is_array( $retval ) ) {
+				if ( isset( $retval['file_name'] ) && $output_file == '' ) {
+					$output_file = $retval['file_name'];
+				}
+				file_put_contents( $output_file, base64_decode( $retval['data'] ) );
+			} else {
+				//var_dump( $retval );
+				//echo "ERROR: No report data...\n";
+				//exit( 1 );
+
+				//When using JSON API, the server might send a raw file to download, so just save it directly into it.
+				file_put_contents( $output_file, $retval );
 			}
-			file_put_contents( $output_file, base64_decode( $retval['data'] ) );
 		} else {
-			var_dump( $retval );
-			echo "ERROR: No report data...\n";
-			exit( 1 );
+			echo "ERROR: Request failed, no object returned...\n";
+			exit ( 1 );
 		}
 	} else {
 		echo "ERROR: No report specified...\n";

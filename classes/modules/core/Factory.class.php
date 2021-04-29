@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedFunctionInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -681,8 +681,6 @@ abstract class Factory {
 	 * @return bool
 	 */
 	function setCreatedBy( $id = null ) {
-		//$id = (int)trim($id);
-
 		if ( empty( $id ) ) {
 			global $current_user;
 
@@ -691,6 +689,10 @@ abstract class Factory {
 			} else {
 				return false;
 			}
+		}
+
+		if ( TTUUID::isUUID( $id ) == false ) { //Don't change if its not a valid UUID.
+			return false;
 		}
 
 		//Its possible that these are incorrect, especially if the user was created by a system or master administrator.
@@ -759,8 +761,6 @@ abstract class Factory {
 	 * @return bool|null
 	 */
 	function setUpdatedBy( $id = null ) {
-		//$id = (int)trim($id);
-
 		if ( empty( $id ) ) {
 			global $current_user;
 
@@ -769,6 +769,10 @@ abstract class Factory {
 			} else {
 				return false;
 			}
+		}
+
+		if ( TTUUID::isUUID( $id ) == false ) { //Don't change if its not a valid UUID.
+			return false;
 		}
 
 		//Its possible that these are incorrect, especially if the user was created by a system or master administrator.
@@ -1439,19 +1443,22 @@ abstract class Factory {
 			case 'geo_overlaps':
 				if ( isset( $args ) && !is_array( $args ) && trim( $args ) != '' ) {
 					if ( $query_stub == '' && !is_array( $columns ) ) {
-						$query_stub = $columns . ' && polygon(' . $this->db->qstr( $args ) . ')';
+						$query_stub = $columns . ' && polygon(' . $this->db->qstr( $args ) . ')'; //If we ever pass anything into here *not* from convertGEOPolygonToString(), this needs to changed to use placeholders instead to avoid SQL attacks.
 					}
 					$retval = $query_stub;
 				}
 				break;
 			case 'geo_contains':
-				if ( isset( $args ) && is_array( $args ) ) {
-					$args = implode( ',', $args );
-				}
-				if ( isset( $args ) && !is_array( $args ) && trim( $args ) != '' ) {
+				//Args must always be two elements to make a point.
+				if ( isset( $args ) && is_array( $args ) && count( $args ) == 2 && isset( $args[0] ) && isset( $args[1] ) ) {
 					if ( $query_stub == '' && !is_array( $columns ) ) {
-						//$query_stub = 'circle('. $columns .') @> point('. $args .')'; //Sometimes polygons are passed into this, so we can't convert them to circles.
-						$query_stub = $columns . ' @> point(' . $args . ')';
+						$ph[] = $args[0];
+						$ph[] = $args[1];
+					}
+
+					if ( $query_stub == '' && !is_array( $columns ) ) {
+						//$query_stub = 'circle('. $columns .') @> point( ? )'; //Sometimes polygons are passed into this, so we can't convert them to circles.
+						$query_stub = $columns . ' @> point( ?, ? )';
 					}
 					$retval = $query_stub;
 				}
@@ -1462,13 +1469,17 @@ abstract class Factory {
 					if ( is_array( $split_args ) && count( $split_args ) > 0 && $query_stub == '' ) {
 						foreach ( $split_args as $key => $arg ) {
 							if ( trim( $arg ) != '' ) {
-								$ph_arr[] = addslashes( $this->stripSQLSyntax( TTi18n::strtolower( $arg ) ) );
+								$ph_arr[] = $this->stripSQLSyntax( TTi18n::strtolower( $arg ) );
 							}
 						}
 
 						if ( $query_stub == '' && !is_array( $columns ) ) {
-							$query_stub = $columns . ' @@ to_tsquery(\'' . implode( ' & ', $ph_arr ) . '\')';
+							$ph[] = implode( ' & ', $ph_arr );
 						}
+					}
+
+					if ( $query_stub == '' && !is_array( $columns ) ) {
+						$query_stub = $columns . ' @@ to_tsquery( ? )';
 					}
 					$retval = $query_stub;
 				}
@@ -1501,6 +1512,7 @@ abstract class Factory {
 				}
 				break;
 			case 'text_metaphone':
+				//See also: Option::getByFuzzyValue -- As it tries to replicate this.
 				if ( isset( $args ) && !is_array( $args ) && trim( $args ) != '' ) {
 					if ( $query_stub == '' && !is_array( $columns ) ) {
 						$query_stub = '( lower(' . $columns . ') LIKE ? OR ' . $columns . '_metaphone LIKE ? )';
@@ -2342,8 +2354,18 @@ abstract class Factory {
 
 		$query = $this->db->GetInsertSQL( $rs, $this->data );
 
+		$query = $this->modifyInsertQuery( $query );
 		//Debug::text('Insert Query: '. $query, __FILE__, __LINE__, __METHOD__, 9);
 
+		return $query;
+	}
+
+	/**
+	 * Modifies the automatically generated SQL INSERT query for adding things like " ON CONFLICT ..."
+	 * @param $query
+	 * @return mixed
+	 */
+	function modifyInsertQuery( $query ) {
 		return $query;
 	}
 
@@ -2567,11 +2589,13 @@ abstract class Factory {
 				&& ( stristr( $e->getMessage(), 'could not serialize' ) !== false
 						|| stristr( $e->getMessage(), 'deadlock' ) !== false
 						|| stristr( $e->getMessage(), 'lock timeout' ) !== false
-						|| stristr( $e->getMessage(), 'current transaction is aborted' ) !== false ) //There seems to be cases wher the "could not serialize" error is not picked up by PHP and therefore not triggered, so on the next query we get this error instead.
+						|| stristr( $e->getMessage(), 'current transaction is aborted' ) !== false ) //There seems to be cases where the "could not serialize" error is not picked up by PHP and therefore not triggered, so on the next query we get this error instead.
 		) {
+			Debug::text( 'Retryable SQL Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 			return true;
 		}
 
+		Debug::text( 'Non-Retryable SQL Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 		return false;
 	}
 
@@ -2584,6 +2608,12 @@ abstract class Factory {
 	 * @throws DBError
 	 */
 	function RetryTransaction( $transaction_function, $retry_max_attempts = 4, $retry_sleep = 1 ) { //When changing function definition, also see APIFactory->RetryTransaction()
+		// Help mitigate function injection attacks due to the variable function call below $transaction_function();
+		if ( !$transaction_function instanceof Closure ) {
+			Debug::text( 'ERROR: Retry function is not a closure, unable to execute!', __FILE__, __LINE__, __METHOD__, 10 );
+			return null;
+		}
+
 		$is_nested_retry_transaction = false;
 
 		if ( $this->db->transCnt > 0 ) {
@@ -2726,6 +2756,16 @@ abstract class Factory {
 		return false;
 	}
 
+
+	/**
+	 * Used to handle any "RETURNING ..." clause on a SQL INSERT/UPDATE query.
+	 * @param $rs
+	 * @return bool
+	 */
+	function handleSaveSQLReturning( $rs ) {
+		return true;
+	}
+
 	/**
 	 * Determines to insert or update, and does it.
 	 * Have this handle created, createdby, updated, updatedby.
@@ -2762,19 +2802,19 @@ abstract class Factory {
 			//CreatedBy/Time needs to be set to original values when doing things like importing records.
 			//However from the API, Created By only needs to be set for a small subset of classes like RecurringScheduleTemplateControl.
 			//We handle this in setCreatedAndUpdatedColumns().
-			if ( $this->getCreatedDate() == '' ) {
+			if ( empty( $this->getCreatedDate() ) ) {
 				$this->setCreatedDate( $time );
 			}
-			if ( $this->getCreatedBy() == '' ) {
+			if ( empty( $this->getCreatedBy() ) ) {
 				$this->setCreatedBy();
 			}
 
 			//Set updated date at the same time, so we can easily select last
 			//updated, or last created records.
-			if ( $this->getUpdatedDate() == '' ) {
+			if ( empty( $this->getUpdatedDate() ) ) {
 				$this->setUpdatedDate( $time );
 			}
-			if ( $this->getUpdatedBy() == '' ) {
+			if ( empty( $this->getUpdatedBy() ) ) {
 				$this->setUpdatedBy();
 			}
 
@@ -2824,7 +2864,8 @@ abstract class Factory {
 		if ( $query != '' || $query === true ) {
 
 			if ( is_string( $query ) && $query != '' ) {
-				$this->ExecuteSQL( $query );
+				$rs = $this->ExecuteSQL( $query );
+				$this->handleSaveSQLReturning( $rs );
 			}
 
 			if ( method_exists( $this, 'addLog' ) ) {

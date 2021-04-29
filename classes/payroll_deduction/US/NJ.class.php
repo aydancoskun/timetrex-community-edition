@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -50,6 +50,55 @@
 class PayrollDeduction_US_NJ extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
+			20200101 => [ //This was released 29-Sep-2020 and retroactive to 01-Jan-20
+					10 => [
+							[ 'income' => 20000, 'rate' => 1.5, 'constant' => 0 ],
+							[ 'income' => 35000, 'rate' => 2.0, 'constant' => 300 ],
+							[ 'income' => 40000, 'rate' => 3.9, 'constant' => 600 ],
+							[ 'income' => 75000, 'rate' => 6.1, 'constant' => 795 ],
+							[ 'income' => 500000, 'rate' => 7.0, 'constant' => 2930 ],
+							[ 'income' => 1000000, 'rate' => 9.9, 'constant' => 32680 ],
+							[ 'income' => 1000000, 'rate' => 11.8, 'constant' => 82180 ],
+					],
+					20 => [
+							[ 'income' => 20000, 'rate' => 1.5, 'constant' => 0 ],
+							[ 'income' => 50000, 'rate' => 2.0, 'constant' => 300 ],
+							[ 'income' => 70000, 'rate' => 2.7, 'constant' => 900 ],
+							[ 'income' => 80000, 'rate' => 3.9, 'constant' => 1440 ],
+							[ 'income' => 150000, 'rate' => 6.1, 'constant' => 1830 ],
+							[ 'income' => 500000, 'rate' => 7.0, 'constant' => 6100 ],
+							[ 'income' => 1000000, 'rate' => 9.9, 'constant' => 30600 ],
+							[ 'income' => 1000000, 'rate' => 11.8, 'constant' => 80100 ],
+					],
+					30 => [
+							[ 'income' => 20000, 'rate' => 1.5, 'constant' => 0 ],
+							[ 'income' => 40000, 'rate' => 2.3, 'constant' => 300 ],
+							[ 'income' => 50000, 'rate' => 2.8, 'constant' => 760 ],
+							[ 'income' => 60000, 'rate' => 3.5, 'constant' => 1040 ],
+							[ 'income' => 150000, 'rate' => 5.6, 'constant' => 1390 ],
+							[ 'income' => 500000, 'rate' => 6.6, 'constant' => 6430 ],
+							[ 'income' => 1000000, 'rate' => 9.9, 'constant' => 29530 ],
+							[ 'income' => 1000000, 'rate' => 11.8, 'constant' => 79030 ],
+					],
+					40 => [
+							[ 'income' => 20000, 'rate' => 1.5, 'constant' => 0 ],
+							[ 'income' => 40000, 'rate' => 2.7, 'constant' => 300 ],
+							[ 'income' => 50000, 'rate' => 3.4, 'constant' => 840 ],
+							[ 'income' => 60000, 'rate' => 4.3, 'constant' => 1180 ],
+							[ 'income' => 150000, 'rate' => 5.6, 'constant' => 1610 ],
+							[ 'income' => 500000, 'rate' => 6.5, 'constant' => 6650 ],
+							[ 'income' => 1000000, 'rate' => 9.9, 'constant' => 29400 ],
+							[ 'income' => 1000000, 'rate' => 11.8, 'constant' => 78900 ],
+					],
+					50 => [
+							[ 'income' => 20000, 'rate' => 1.5, 'constant' => 0 ],
+							[ 'income' => 35000, 'rate' => 2.0, 'constant' => 300 ],
+							[ 'income' => 100000, 'rate' => 5.8, 'constant' => 600 ],
+							[ 'income' => 500000, 'rate' => 6.5, 'constant' => 4370 ],
+							[ 'income' => 1000000, 'rate' => 9.9, 'constant' => 30370 ],
+							[ 'income' => 1000000, 'rate' => 11.8, 'constant' => 79870 ],
+					],
+			],
 			20060101 => [
 					10 => [
 							[ 'income' => 20000, 'rate' => 1.5, 'constant' => 0 ],

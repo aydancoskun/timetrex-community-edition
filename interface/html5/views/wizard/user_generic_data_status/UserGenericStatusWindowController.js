@@ -1,4 +1,4 @@
-class UserGenericStatusWindowController extends BaseViewController {
+export class UserGenericStatusWindowController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			// el: '.user-generic-data-status',
@@ -247,31 +247,26 @@ class UserGenericStatusWindowController extends BaseViewController {
 UserGenericStatusWindowController.open = function( batch_id, user_id, callback ) {
 	Global.loadViewSource( 'UserGenericStatus', 'UserGenericStatusWindow.css' );
 	Global.loadViewSource( 'UserGenericStatus', 'UserGenericStatusWindow.html', function( result ) {
-		var args = {
-			batch_id: batch_id,
-			failed: $.i18n._( 'Failed' ),
-			warning: $.i18n._( 'Warning' ),
-			success: $.i18n._( 'Success' )
-		};
+		if ( TTUUID.isUUID( batch_id ) == true ) {
+			var args = {
+				batch_id: batch_id,
+				failed: $.i18n._( 'Failed' ),
+				warning: $.i18n._( 'Warning' ),
+				success: $.i18n._( 'Success' )
+			};
 
-		var template = _.template( result );
-		$( 'body' ).append( template( args ) );
+			var template = _.template( result );
+			$( 'body' ).append( template( args ) );
 
-		//Make it global variable
-		// UserGenericStatusWindowController.instance = new UserGenericStatusWindowController( {
-		// 	batch_id: batch_id,
-		// 	user_id: user_id,
-		// 	can_cache_controller: false
-		// } );
-		//UserGenericStatusWindowController.instance.callback = callback;
-
-		new UserGenericStatusWindowController( {
-			el: '#' + batch_id,
-			batch_id: batch_id,
-			user_id: user_id,
-			can_cache_controller: false,
-			callback: callback,
-		} );
-
+			new UserGenericStatusWindowController( {
+				el: '#' + batch_id,
+				batch_id: batch_id,
+				user_id: user_id,
+				can_cache_controller: false,
+				callback: callback,
+			} );
+		} else {
+			TAlertManager.showAlert( $.i18n._( 'Status report is empty. Please try again.', LocalCacheData.getApplicationName() ), $.i18n._( 'NOTICE' ) );
+		}
 	} );
 };

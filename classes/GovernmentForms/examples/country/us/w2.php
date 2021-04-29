@@ -3,15 +3,12 @@
 require_once( '../../../../../includes/global.inc.php' );
 require_once( '../../../../GovernmentForms/GovernmentForms.class.php' );
 $gf = new GovernmentForms();
-$gf->tcpdf_dir = '../tcpdf';
-$gf->fpdi_dir = '../fpdi';
-
 
 $return1040 = $gf->getFormObject( 'RETURN1040', 'US' );
 $return1040->return_created_timestamp = '2001-12-17T09:30:47Z';
 $return1040->year = '1000';
 $return1040->tax_period_begin_date = '1967-08-13';
-$return1040->tax_period_end__date = '1967-08-13';
+$return1040->tax_period_end_date = '1967-08-13';
 $return1040->software_id = '00000000';
 $return1040->originator_efin = '000000';
 $return1040->originator_type_code = 'FinancialAgent';

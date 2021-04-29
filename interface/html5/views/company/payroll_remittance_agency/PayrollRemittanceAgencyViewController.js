@@ -1,4 +1,4 @@
-class PayrollRemittanceAgencyViewController extends BaseViewController {
+export class PayrollRemittanceAgencyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#payroll_remittance_agency_view_container',
@@ -303,7 +303,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 				onResult: function( result ) {
 					result = result.getResult();
 					$this.remittance_source_account_array = result;
-					$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( Global.addFirstItemToArray( result ) );
+					$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( result );
 				}
 			} );
 		}
@@ -479,7 +479,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 				api_class: TTAPI.APIPayrollRemittanceAgency,
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
+				layout_name: 'global_payroll_remittance_agency',
 				navigation_mode: true,
 				show_search_inputs: true
 			} );
@@ -502,7 +502,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.LEGAL_ENTITY,
+			layout_name: 'global_legal_entity',
 			field: 'legal_entity_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -516,7 +516,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'status_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_payroll_remittance_agency_column1 );
 
 		// Name
@@ -538,7 +538,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'type_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_payroll_remittance_agency_column1 );
 
 		// Country
@@ -547,7 +547,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 			set_empty: false,
 			field: 'country'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
+		form_item_input.setSourceData( $this.country_array );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_payroll_remittance_agency_column1 );
 
 		// Province/State
@@ -556,7 +556,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 			set_empty: false,
 			field: 'province'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_payroll_remittance_agency_column1, '', null, true );
 
 		// District
@@ -565,7 +565,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 			set_empty: false,
 			field: 'district'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'District' ), form_item_input, tab_payroll_remittance_agency_column1, '', null, true );
 
 		// Agency
@@ -574,7 +574,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 			set_empty: false,
 			field: 'agency_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
+		form_item_input.setSourceData( [] );
 		this.addEditFieldToColumn( $.i18n._( 'Agency' ), form_item_input, tab_payroll_remittance_agency_column1 );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -615,7 +615,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			field: 'contact_user_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -628,7 +628,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRemittanceSourceAccount,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
+			layout_name: 'global_remittance_source_account',
 			field: 'remittance_source_account_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -638,14 +638,14 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 		// Always On Business Day
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'always_week_day_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( this.always_week_day_array ) );
+		form_item_input.setSourceData( this.always_week_day_array );
 		this.addEditFieldToColumn( $.i18n._( 'Events Always On Business Day' ), form_item_input, tab_payroll_remittance_agency_column2 );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIRecurringHoliday,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.RECURRING_HOLIDAY,
+			layout_name: 'global_recurring_holiday',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'recurring_holiday_policy_id'
@@ -697,7 +697,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 				label: $.i18n._( 'Legal Entity' ),
 				in_column: 1,
 				field: 'legal_entity_id',
-				layout_name: ALayoutIDs.LEGAL_ENTITY,
+				layout_name: 'global_legal_entity',
 				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				basic_search: true,
@@ -712,7 +712,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -731,7 +731,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.COMBO_BOX
 			} ),
 			new SearchField( {
@@ -741,14 +741,14 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Created By' ),
 				in_column: 3,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
@@ -761,7 +761,7 @@ class PayrollRemittanceAgencyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 3,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,

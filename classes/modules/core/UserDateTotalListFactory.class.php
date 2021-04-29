@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -948,7 +948,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 																			( epf.type_id = \'C1\' AND ( pf.status_id = 10 AND pf.time_stamp <= ' . $this->getSQLToTimeStampFunction() . '(' . (int)$current_epoch . ' - epf.grace) ) )
 																		)
 																	)
-						WHERE ( epf.type_id in (\'S4\', \'S6\', \'C1\') AND epf.active = 1 AND ( epf.type_id != \'C1\' OR ( epf.type_id = \'C1\' AND epf.grace > 0 ) ) )
+						WHERE ( epf.type_id in (\'S4\', \'S6\', \'S8\', \'C1\') AND epf.active = 1 AND ( epf.type_id != \'C1\' OR ( epf.type_id = \'C1\' AND epf.grace > 0 ) ) )
 							AND ( uf.status_id = 10 AND cf.status_id in (10, 20, 23) ) ';
 
 		if ( $user_id != '' ) {
@@ -959,12 +959,14 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							AND (
 									(
 										(
-											epf.type_id in (\'S4\', \'S6\')
+											epf.type_id in (\'S4\', \'S6\', \'S8\' )
 											AND ( sf.id IS NOT NULL AND sf.deleted = 0 )
 											AND (
 													( epf.type_id = \'S4\' AND sf.start_time <= ' . $this->getSQLToTimeStampFunction() . '(' . (int)$current_epoch . ') )
 													OR
 													( epf.type_id = \'S6\' AND sf.end_time <= ' . $this->getSQLToTimeStampFunction() . '(' . (int)$current_epoch . ') )
+													OR
+													( epf.type_id = \'S8\' AND sf.end_time <= ' . $this->getSQLToTimeStampFunction() . '(' . (int)$current_epoch . ') )													
 												)
 											AND pf.id IS NULL
 										)
@@ -980,7 +982,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -1506,46 +1508,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 * @param string $pay_period_id UUID
 	 * @return bool|int
 	 */
-	function getTimeSumByUserIDAndPayPeriodId( $user_id, $pay_period_id ) {
-		if ( $user_id == '' ) {
-			return false;
-		}
-
-		if ( $pay_period_id == '' ) {
-			return false;
-		}
-
-		$ph = [
-				'user_id'       => TTUUID::castUUID( $user_id ),
-				'pay_period_id' => TTUUID::castUUID( $pay_period_id ),
-		];
-
-		//Include only paid absences.
-		//AND ( a.status_id in (20, 30) OR ( a.status_id = 10 AND a.type_id in ( 100, 110 ) ) )
-		$query = '
-					select	sum(total_time)
-					from	' . $this->getTable() . ' as a
-					where	a.user_id = ?
-						AND a.pay_period_id = ?
-						AND a.object_type_id in ( 10, 50, 100, 110 )
-						AND ( a.deleted = 0 )
-				';
-
-		$total = $this->db->GetOne( $query, $ph );
-
-		if ( $total === false ) {
-			$total = 0;
-		}
-		Debug::text( 'Total: ' . $total . ' Pay Period: ' . $pay_period_id, __FILE__, __LINE__, __METHOD__, 10 );
-
-		return $total;
-	}
-
-	/**
-	 * @param string $user_id       UUID
-	 * @param string $pay_period_id UUID
-	 * @return bool|int
-	 */
 	function getWorkedTimeSumByUserIDAndPayPeriodId( $user_id, $pay_period_id ) {
 		if ( $user_id == '' ) {
 			return false;
@@ -1866,40 +1828,32 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 * @param array $order             Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getReportByStartDateAndEndDateAndJobList( $start_date, $end_date, $job_ids, $order = null ) {
-		if ( $job_ids == '' ) {
+	function getReportByStartDateAndEndDateAndJobList( $filter_data, $job_ids, $order = null ) {
+		if ( $job_ids == '' || ( is_array( $job_ids ) && count( $job_ids ) == 0 ) ) {
 			Debug::Text( 'No Job Ids: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			return false;
 		}
 
-		if ( $start_date == '' ) {
-			//Debug::Text('No Start Date: ', __FILE__, __LINE__, __METHOD__, 10);
-			$start_date = 0;
+		if ( !is_array( $filter_data) ) {
+			$filter_data = [];
 		}
 
-		if ( $end_date == '' ) {
-			//Debug::Text('No End Date: ', __FILE__, __LINE__, __METHOD__, 10);
-			$end_date = time();
-		}
+		if ( !isset($filter_data['pay_period_id']) || $filter_data['pay_period_id'] == '' ) {
+			if ( !isset( $filter_data['start_date'] ) || $filter_data['start_date'] == '' ) {
+				//Debug::Text('No Start Date: ', __FILE__, __LINE__, __METHOD__, 10);
+				$filter_data['start_date'] = 0;
+			}
 
-		//$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
-		//$order = array( 'z.last_name' => 'asc' );
-		/*
-		if ( $order == NULL ) {
-			$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
+			if ( !isset( $filter_data['end_date'] ) || $filter_data['end_date'] == '' ) {
+				//Debug::Text('No End Date: ', __FILE__, __LINE__, __METHOD__, 10);
+				$filter_data['end_date'] = time();
+			}
 		}
-		*/
 
 		$pcf = new PayCodeFactory();
 
-		$ph = [
-				'start_date' => $this->db->BindDate( $start_date ),
-				'end_date'   => $this->db->BindDate( $end_date ),
-		];
+		$ph = [];
 
 		$query = 'select	a.user_id as user_id,
 							a.object_type_id as object_type_id,
@@ -1929,10 +1883,20 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					from	' . $this->getTable() . ' as a
 					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
 
-					where	a.date_stamp >= ?
-						AND a.date_stamp <= ?
-						AND a.job_id in (' . $this->getListSQL( $job_ids, $ph, 'uuid' ) . ')
-						AND ( a.deleted = 0 )
+					where 	a.job_id in (' . $this->getListSQL( $job_ids, $ph, 'uuid' ) . ') ';
+
+		$query .= ( isset( $filter_data['pay_period_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : null;
+
+		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['start_date'] );
+			$query .= ' AND a.date_stamp >= ?';
+		}
+		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['end_date'] );
+			$query .= ' AND a.date_stamp <= ?';
+		}
+
+		$query .= '     AND ( a.deleted = 0 )
 					group by a.user_id, a.object_type_id, a.src_object_id, a.pay_code_id, pcf.type_id, a.branch_id, a.department_id, a.job_id, a.job_item_id, a.currency_id, a.currency_rate, a.hourly_rate, a.hourly_rate_with_burden
 					order by a.job_id asc
 				';

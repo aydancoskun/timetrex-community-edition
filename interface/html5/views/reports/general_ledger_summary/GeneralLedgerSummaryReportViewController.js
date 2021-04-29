@@ -1,4 +1,4 @@
-class GeneralLedgerSummaryReportViewController extends ReportBaseViewController {
+export class GeneralLedgerSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 

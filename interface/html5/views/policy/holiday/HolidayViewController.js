@@ -1,4 +1,4 @@
-class HolidayViewController extends BaseViewController {
+export class HolidayViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#holiday_view_container',
@@ -60,7 +60,7 @@ class HolidayViewController extends BaseViewController {
 			api_class: TTAPI.APIHoliday,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.HOLIDAY,
+			layout_name: 'global_holiday_holoday',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );

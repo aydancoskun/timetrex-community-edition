@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -286,13 +286,13 @@ class APIAuthentication extends APIFactory {
 	 * @param string $password
 	 * @return bool|string
 	 */
-	function registerAPIKey( $user_name, $password ) {
+	function registerAPIKey( $user_name, $password, $end_point = null ) {
 		//Always require UserName/Password when registering an API key, as from a security stand-point this is similar to changing passwords.
 		//  If its a master administrator, only need to register an API key for the master administrator employee, then they can switchUser() to any other user as needed with that same key.
 		if ( $user_name != '' && $password != '' ) {
 			$authentication = new Authentication();
-			$api_key = $authentication->registerAPIKey( $user_name, $password );
-			Debug::text( 'User Name: ' . $user_name .' Registered API Key: '. $api_key, __FILE__, __LINE__, __METHOD__, 10 );
+			$api_key = $authentication->registerAPIKey( $user_name, $password, $end_point );
+			Debug::text( 'User Name: ' . $user_name .' API Key: '. $api_key .' End Point: '. $end_point, __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $api_key; //Don't wrap in return handler.
 		}
@@ -726,7 +726,7 @@ class APIAuthentication extends APIFactory {
 				'primary_company_id'                  => PRIMARY_COMPANY_ID, //Needed for some branded checks.
 				'primary_company_name'                => null, //Requires DB connection.
 				'base_url'                            => Environment::getBaseURL(),
-				'cookie_base_url'                     => Environment::getCookieBaseURL(),
+				'cookie_base_url'                     => Environment::getCookieBaseURL( 'json' ),
 				'api_url'                             => Environment::getAPIURL( $api ),
 				'api_base_url'                        => Environment::getAPIBaseURL( $api ),
 				'api_json_url'                        => Environment::getAPIURL( 'json' ),
@@ -1055,6 +1055,14 @@ class APIAuthentication extends APIFactory {
 		}
 
 		return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), [ 'error' => $validator->getErrorsArray() ], [ 'total_records' => 1, 'valid_records' => 0 ] );
+	}
+
+
+	/**
+	 * Sends a refreshed CSRF token cookie in case it expires prior to the user clicking the login button. This helps avoid showing an error message and triggering a full browser refresh.
+	 */
+	function sendCSRFTokenCookie() {
+		return $this->returnHandler( sendCSRFTokenCookie() );
 	}
 
 	/**

@@ -1,4 +1,4 @@
-var FormItemType = function() {
+export var FormItemType = function() {
 
 };
 
@@ -11,7 +11,6 @@ FormItemType.LIST = 'list';
 FormItemType.TEXT_INPUT = 'textInput';
 FormItemType.TIME_PICKER = 'timePicker';
 FormItemType.FEEDBACK_BOX = 'feedbackBox';
-FormItemType.TEXT_INPUT_NO_AUTO = 'textInputNoAuto';
 FormItemType.PASSWORD_INPUT = 'passwordInput';
 FormItemType.TEXT_AREA = 'textArea';
 FormItemType.TINYMCE_TEXT_AREA = 'tinymceTextArea';
@@ -29,7 +28,7 @@ FormItemType.INSIDE_EDITOR = 'insideEditor';
 FormItemType.IMAGE = 'image';
 FormItemType.COLOR_PICKER = 'colorPicker';
 
-var WidgetNamesDic = function() {
+export var WidgetNamesDic = function() {
 
 };
 

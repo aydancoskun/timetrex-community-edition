@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,7 +43,6 @@ class Redis_Cache_Lite extends Cache_Lite {
 	 * @param array $options
 	 */
 	function __construct( $options = [ null ] ) {
-		//$this->Cache_Lite( $options );
 		parent::__construct( $options );
 
 		if ( defined( 'ADODB_DIR' ) ) {

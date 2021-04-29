@@ -4,8 +4,7 @@ require_once( '../../../../../includes/global.inc.php' );
 require_once( '../../../../GovernmentForms/GovernmentForms.class.php' );
 
 $gf = new GovernmentForms();
-$gf->tcpdf_dir = '../tcpdf';
-$gf->fpdi_dir = '../fpdi';
+
 $f941sb_obj = $gf->getFormObject( '941sb', 'US' );
 $f941sb_obj->setDebug(FALSE);
 $f941sb_obj->setShowBackground(TRUE);

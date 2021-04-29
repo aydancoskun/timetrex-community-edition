@@ -1,10 +1,11 @@
-class BreakPolicyViewController extends BaseViewController {
+export class BreakPolicyViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#break_policy_view_container',
 
 			type_array: null,
 			auto_detect_type_array: null,
+			allocation_type_array: null,
 
 			date_api: null
 		} );
@@ -31,9 +32,9 @@ class BreakPolicyViewController extends BaseViewController {
 	}
 
 	initOptions() {
-		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'auto_detect_type' );
+		this.initDropDownOption( 'allocation_type' );
 	}
 
 	buildEditViewUI() {
@@ -52,7 +53,7 @@ class BreakPolicyViewController extends BaseViewController {
 			api_class: TTAPI.APIBreakPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.BREAK_POLICY,
+			layout_name: 'global_break',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -88,7 +89,7 @@ class BreakPolicyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		form_item_input.setSourceData( $this.type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_break_policy_column1 );
 
 		//Active After
@@ -111,7 +112,7 @@ class BreakPolicyViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'auto_detect_type_id', set_empty: false } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.auto_detect_type_array ) );
+		form_item_input.setSourceData( $this.auto_detect_type_array );
 		this.addEditFieldToColumn( $.i18n._( 'Auto-Detect Breaks By' ), form_item_input, tab_break_policy_column1 );
 
 		// Minimum Punch Time
@@ -149,12 +150,18 @@ class BreakPolicyViewController extends BaseViewController {
 		form_item_input.TCheckbox( { field: 'include_multiple_breaks' } );
 		this.addEditFieldToColumn( $.i18n._( 'Include Multiple Breaks' ), form_item_input, tab_break_policy_column1, '', null, true );
 
+		// Allocation Type
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'allocation_type_id', set_empty: false } );
+		form_item_input.setSourceData( $this.allocation_type_array );
+		this.addEditFieldToColumn( $.i18n._( 'Allocation Type' ), form_item_input, tab_break_policy_column1, '', null, true );
+
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_CODE,
+			layout_name: 'global_pay_code',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_code_id'
@@ -166,7 +173,7 @@ class BreakPolicyViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+			layout_name: 'global_pay_formula_policy',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'pay_formula_policy_id',
@@ -200,7 +207,7 @@ class BreakPolicyViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -208,7 +215,7 @@ class BreakPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Code' ),
 				in_column: 1,
 				field: 'pay_code_id',
-				layout_name: ALayoutIDs.PAY_CODE,
+				layout_name: 'global_pay_code',
 				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
@@ -220,7 +227,7 @@ class BreakPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Pay Formula Policy' ),
 				in_column: 1,
 				field: 'pay_formula_policy_id',
-				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
+				layout_name: 'global_pay_formula_policy',
 				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
@@ -232,7 +239,7 @@ class BreakPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -244,7 +251,7 @@ class BreakPolicyViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -295,16 +302,15 @@ class BreakPolicyViewController extends BaseViewController {
 	}
 
 	onTypeChange() {
-
+		this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Break Time' ) + ': ' ); //Keep consistent field label for all types, also simplifies the documentation.
 		if ( this.current_edit_record['type_id'] == 10 || this.current_edit_record['type_id'] == 15 ) {
-
-			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Deduction/Addition Time' ) + ': ' );
+			//this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Deduction/Addition Time' ) + ': ' );
 			this.attachElement( 'include_break_punch_time' );
+			this.attachElement( 'allocation_type_id' );
 			this.attachElement( 'include_multiple_breaks' );
-
 		} else if ( this.current_edit_record['type_id'] == 20 ) {
-			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Break Time' ) + ': ' );
 			this.detachElement( 'include_break_punch_time' );
+			this.detachElement( 'allocation_type_id' );
 			this.detachElement( 'include_multiple_breaks' );
 		}
 
@@ -312,19 +318,16 @@ class BreakPolicyViewController extends BaseViewController {
 	}
 
 	onAutoDetectTypeChange() {
-
 		if ( this.current_edit_record['auto_detect_type_id'] == 10 ) {
 			this.attachElement( 'start_window' );
 			this.attachElement( 'window_length' );
 			this.detachElement( 'minimum_punch_time' );
 			this.detachElement( 'maximum_punch_time' );
-
 		} else if ( this.current_edit_record['auto_detect_type_id'] == 20 ) {
 			this.detachElement( 'start_window' );
 			this.detachElement( 'window_length' );
 			this.attachElement( 'minimum_punch_time' );
 			this.attachElement( 'maximum_punch_time' );
-
 		}
 
 		this.editFieldResize();

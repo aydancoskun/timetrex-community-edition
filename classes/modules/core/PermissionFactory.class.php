@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -447,7 +447,7 @@ class PermissionFactory extends Factory {
 								'delete_own'   => TTi18n::gettext( 'Delete Own' ),
 								'delete_child' => TTi18n::gettext( 'Delete Subordinate' ),
 								'delete'       => TTi18n::gettext( 'Delete' ),
-								//'view_sin' => TTi18n::gettext('View SIN/SSN'),
+								'view_sin' 	   => TTi18n::gettext( 'View SIN/SSN' ),
 								//'undelete' => TTi18n::gettext('Un-Delete')
 						],
 						'user_preference'                => [
@@ -1110,8 +1110,7 @@ class PermissionFactory extends Factory {
 								'view_generic_tax_summary'     => TTi18n::gettext( 'Generic Tax Summary' ),
 								'view_form941'                 => TTi18n::gettext( 'Form 941' ),
 								'view_form940'                 => TTi18n::gettext( 'Form 940' ),
-								'view_form940ez'               => TTi18n::gettext( 'Form 940-EZ' ),
-								'view_form1099misc'            => TTi18n::gettext( 'Form 1099-Misc' ),
+								'view_form1099nec'             => TTi18n::gettext( 'Form 1099-NEC' ),
 								'view_formW2'                  => TTi18n::gettext( 'Form W2 / W3' ),
 								'view_affordable_care'         => TTi18n::gettext( 'Affordable Care' ),
 								'view_user_barcode'            => TTi18n::gettext( 'Employee Barcodes' ),
@@ -1814,6 +1813,9 @@ class PermissionFactory extends Factory {
 														'edit_own_password'       => true,
 														'edit_own_phone_password' => true,
 												],
+												'wage'                => [
+														'view_own'    => true, //So they can see their own Vacation Accrual dollars when submitted requests.
+												],
 												'user_preference' => [
 														'enabled'    => true,
 														'view_own'   => true,
@@ -1840,7 +1842,6 @@ class PermissionFactory extends Factory {
 														'enabled' => true,
 														'view'    => true,
 												],
-
 										],
 								10 => //Module: Scheduling
 										[
@@ -2659,8 +2660,7 @@ class PermissionFactory extends Factory {
 														'view_generic_tax_summary'    => true,
 														'view_form941'                => true,
 														'view_form940'                => true,
-														'view_form940ez'              => true,
-														'view_form1099misc'           => true,
+														'view_form1099nec'            => true,
 														'view_formW2'                 => true,
 														'view_affordable_care'        => true,
 														'view_general_ledger_summary' => true,
@@ -3221,7 +3221,7 @@ class PermissionFactory extends Factory {
 	 * @return bool
 	 */
 	function clearCache( $user_id, $company_id ) {
-		if ( $user_id == '' OR $company_id == '' ) {
+		if ( $user_id == '' || $company_id == '' ) {
 			return false;
 		}
 

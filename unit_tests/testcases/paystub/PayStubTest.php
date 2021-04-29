@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,14 +35,14 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-class PayStubTest extends PHPUnit_Framework_TestCase {
+class PayStubTest extends PHPUnit\Framework\TestCase {
 	protected $company_id = null;
 	protected $user_id = null;
 	protected $pay_period_schedule_id = null;
 	protected $pay_period_objs = null;
 	protected $pay_stub_account_link_arr = null;
 
-	public function setUp() {
+	public function setUp(): void {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$dd = new DemoData();
@@ -70,16 +70,10 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
-
-		return true;
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
-
-		//$this->deleteAllSchedules();
-
-		return true;
 	}
 
 	function getPayStubAccountLinkArray() {
@@ -187,8 +181,8 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach ( $pself as $pse_obj ) {
 				$ps_entry_arr[$pse_obj->getPayStubEntryNameId()][] = [
-						'amount'     => $pse_obj->getAmount(),
-						'ytd_amount' => $pse_obj->getYTDAmount(),
+						'amount'     => Misc::MoneyRound( $pse_obj->getAmount() ),
+						'ytd_amount' => Misc::MoneyRound( $pse_obj->getYTDAmount() ),
 				];
 			}
 		}
@@ -213,61 +207,61 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		//									 proRateSalary($salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $termination_date )
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '13-Aug-2016' ), false );
-		$this->assertEquals( '1000.00', $pro_rated_salary );
+		$this->assertEquals( '1000.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '13-Aug-2016' ), false, strtotime( '13-Aug-2016' ) );
-		$this->assertEquals( '1000.00', $pro_rated_salary );
+		$this->assertEquals( '1000.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '13-Aug-2016 11:59:59PM' ), false, strtotime( '13-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '1000.00', $pro_rated_salary );
+		$this->assertEquals( '1000.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '1000.00', $pro_rated_salary );
+		$this->assertEquals( '1000.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '02-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '900.00', $pro_rated_salary );
+		$this->assertEquals( '900.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '06-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '500.00', $pro_rated_salary );
+		$this->assertEquals( '500.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '10-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '100.00', $pro_rated_salary );
+		$this->assertEquals( '100.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '11-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '0.00', $pro_rated_salary );
+		$this->assertEquals( '0.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '09-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '900.00', $pro_rated_salary );
+		$this->assertEquals( '900.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '05-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '500.00', $pro_rated_salary );
+		$this->assertEquals( '500.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '01-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '100.00', $pro_rated_salary );
+		$this->assertEquals( '100.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '31-Jul-2016 9:00AM' ) );
-		$this->assertEquals( '0.00', $pro_rated_salary );
+		$this->assertEquals( '0.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016' ), strtotime( '01-Aug-2016 9:00AM' ), strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '1000.00', $pro_rated_salary );
+		$this->assertEquals( '1000.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '11-Aug-2016' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '900.00', $pro_rated_salary );
+		$this->assertEquals( '900.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Jul-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '11-Aug-2016' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '900.00', $pro_rated_salary );
+		$this->assertEquals( '900.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		//
 		//Test changing salary in the middle of a pay period.
 		//
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '05-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '11-Aug-2016' ), strtotime( '01-Aug-2016 9:00AM' ), strtotime( '11-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '600.00', $pro_rated_salary );
+		$this->assertEquals( '600.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Jul-2016' ), strtotime( '05-Aug-2016' ), strtotime( '01-Aug-2016' ), strtotime( '11-Aug-2016' ), strtotime( '01-Aug-2016 9:00AM' ), strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '400.00', $pro_rated_salary );
+		$this->assertEquals( '400.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016 11:59:59PM' ) );
-		$this->assertEquals( '1000.00', $pro_rated_salary );
+		$this->assertEquals( '1000.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016 11:59:59PM' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '08-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '700.00', $pro_rated_salary );
+		$this->assertEquals( '700.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '05-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016 11:59:59PM' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '08-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '400.00', $pro_rated_salary );
+		$this->assertEquals( '400.00', Misc::MoneyRound( $pro_rated_salary ) );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Jul-2016' ), strtotime( '05-Aug-2016' ), strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016 11:59:59PM' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '08-Aug-2016 9:00AM' ) );
-		$this->assertEquals( '300.00', $pro_rated_salary );
+		$this->assertEquals( '300.00', Misc::MoneyRound( $pro_rated_salary ) );
 
 		return true;
 	}

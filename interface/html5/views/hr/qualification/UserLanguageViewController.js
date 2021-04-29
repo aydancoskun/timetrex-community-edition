@@ -1,4 +1,4 @@
-class UserLanguageViewController extends BaseViewController {
+export class UserLanguageViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#user_language_view_container',
@@ -189,7 +189,7 @@ class UserLanguageViewController extends BaseViewController {
 			api_class: TTAPI.APIUserLanguage,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER_Language,
+			layout_name: 'global_user_language',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -211,7 +211,7 @@ class UserLanguageViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			field: 'user_id',
 			set_empty: true,
 			show_search_inputs: true
@@ -231,7 +231,7 @@ class UserLanguageViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIQualification,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.QUALIFICATION,
+			layout_name: 'global_qualification',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualification_id'
@@ -243,13 +243,13 @@ class UserLanguageViewController extends BaseViewController {
 		// Fluency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'fluency_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.fluency_array ) );
+		form_item_input.setSourceData( $this.fluency_array );
 		this.addEditFieldToColumn( $.i18n._( 'Fluency' ), form_item_input, tab_language_column1 );
 
 		// Competency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'competency_id' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.competency_array ) );
+		form_item_input.setSourceData( $this.competency_array );
 		this.addEditFieldToColumn( $.i18n._( 'Competency' ), form_item_input, tab_language_column1 );
 
 		// Description
@@ -279,7 +279,7 @@ class UserLanguageViewController extends BaseViewController {
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -291,7 +291,7 @@ class UserLanguageViewController extends BaseViewController {
 				label: $.i18n._( 'Language' ),
 				in_column: 1,
 				field: 'qualification_id',
-				layout_name: ALayoutIDs.QUALIFICATION,
+				layout_name: 'global_qualification',
 				api_class: TTAPI.APIQualification,
 				multiple: true,
 				basic_search: true,
@@ -304,7 +304,7 @@ class UserLanguageViewController extends BaseViewController {
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
+				layout_name: 'global_tree_column',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
@@ -318,7 +318,7 @@ class UserLanguageViewController extends BaseViewController {
 				field: 'source_type_id',
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -339,7 +339,7 @@ class UserLanguageViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -350,7 +350,7 @@ class UserLanguageViewController extends BaseViewController {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
+				layout_name: 'global_option_column',
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -358,7 +358,7 @@ class UserLanguageViewController extends BaseViewController {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
@@ -370,7 +370,7 @@ class UserLanguageViewController extends BaseViewController {
 				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
+				layout_name: 'global_user',
 				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,

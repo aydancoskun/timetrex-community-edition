@@ -27,6 +27,21 @@ TTGrid = function( table_id, setup, column_info_array ) {
 
 	this.ui_id = table_id;
 
+	// Issue #2891 - Forcing GridUnload can cause grids inside a AComboBox to disappear after repeated opening. Check for container_selector is to mitigate that.
+	if ( !setup.container_selector ) {
+		// We are unloading grids with the same ID if they exist to help prevent: Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': parameter 2 is not of type 'Node'.
+		// Looping through array in reverse to make sure no index issues after splicing.
+		for ( var i = LocalCacheData.resizeable_grids.length - 1; i >= 0; i-- ) {
+			if ( LocalCacheData.resizeable_grids[i] != null && LocalCacheData.resizeable_grids[i].grid != null && LocalCacheData.resizeable_grids[i].ui_id == this.ui_id ) {
+				LocalCacheData.resizeable_grids[i].grid.jqGrid( 'GridUnload' );
+				LocalCacheData.resizeable_grids.splice( i, 1 );
+			} else if ( LocalCacheData.resizeable_grids[i] == null || LocalCacheData.resizeable_grids[i].grid == null ) {
+				// LocalCacheData.resizeable_grids array gets full of null values from resize event and we are making sure to clear it out.
+				LocalCacheData.resizeable_grids.splice( i, 1 );
+			}
+		}
+	}
+
 	var max_height = null;
 
 	this.setTableIDElement();
@@ -246,6 +261,41 @@ TTGrid = function( table_id, setup, column_info_array ) {
 	this.setColumnModel = function( val ) {
 		this.getGridParam( 'colModel', val );
 	};
+
+	this.grid2csv = function( filename ) {
+		// TODO: Add in more robust quote escaping to handle data strings that have quotes. Currently we are just wrapping everything in double quotes.
+
+		let csv_data = [];
+
+		// Get grid data for csv.
+		// Column headers are in a different table. Seems to be a jqGrid thing?
+		// Parsing column headers using aria-describedby on the first none blank <tr> (2nd) which links to the id of the header and from there gets the textContent.
+		let i = 1;
+		let headers = [];
+		for ( let tr of document.querySelectorAll( '#' + this.getGridId() + ' tr' ) ) {
+			let row = [];
+			for ( let td of tr.querySelectorAll( 'td' ) ) {
+				row.push( '"' + td.textContent.trim() + '"' );
+				if ( i === 2 ) {
+					// Column headers sometimes contain HTML such as Claim<br>Dependents.
+					// Using a temporary element to replace <br> with a space and then grabbing the textContent to strip the HTML.
+					let temp_element = document.createElement( 'div' );
+					temp_element.innerHTML = document.getElementById( td.getAttribute( 'aria-describedby' ) ).innerHTML.replace( '<br>', ' ' );
+					headers.push( '"' + temp_element.textContent.trim() + '"' );
+				}
+			}
+			csv_data.push( row.join( ',' ) );
+			i++;
+		}
+
+		// Replace blank row with table headers
+		csv_data[0] = headers.join( ',' );
+
+		let csv_content = csv_data.join( '\r\n' );
+
+		Global.JSFileDownload( filename + '.csv', csv_content, 'text/csv;encoding:utf-8' );
+
+	}
 
 	this.getRecordCount = function() {
 		if ( !this.grid ) {

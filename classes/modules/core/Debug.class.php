@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedFunctionInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -600,7 +600,7 @@ class Debug {
 			global $config_vars, $current_user, $current_company;
 			self::Text( 'URI: ' . ( isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : 'N/A' ) . ' IP Address: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
 			self::Text( 'USER-AGENT: ' . ( isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10 );
-			self::Text( 'Version: ' . APPLICATION_VERSION . ' (PHP: v' . phpversion() . ') Edition: ' . getTTProductEdition() . ' Production: ' . (int)PRODUCTION . ' Server: ' . ( isset( $_SERVER['SERVER_ADDR'] ) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) . ' OS: ' . OPERATING_SYSTEM . ' Database: Type: ' . ( isset( $config_vars['database']['type'] ) ? $config_vars['database']['type'] : 'N/A' ) . ' Name: ' . ( isset( $config_vars['database']['database_name'] ) ? $config_vars['database']['database_name'] : 'N/A' ) . ' Config: ' . CONFIG_FILE . ' Demo Mode: ' . (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10 );
+			self::Text( 'Version: ' . APPLICATION_VERSION . ' (PHP: v' . phpversion() . ' ['. PHP_INT_SIZE .']) Edition: ' . getTTProductEdition() . ' Production: ' . (int)PRODUCTION . ' Server: ' . ( isset( $_SERVER['SERVER_ADDR'] ) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) . ' OS: ' . OPERATING_SYSTEM . ' Database: Type: ' . ( isset( $config_vars['database']['type'] ) ? $config_vars['database']['type'] : 'N/A' ) . ' Name: ' . ( isset( $config_vars['database']['database_name'] ) ? $config_vars['database']['database_name'] : 'N/A' ) . ' Config: ' . CONFIG_FILE . ' Demo Mode: ' . (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10 );
 			self::Text( 'Current User: ' . ( ( isset( $current_user ) && is_object( $current_user ) ) ? $current_user->getUserName() : 'N/A' ) . ' (User ID: ' . ( ( isset( $current_user ) && is_object( $current_user ) ) ? $current_user->getID() : 'N/A' ) . ') Company: ' . ( ( isset( $current_company ) && is_object( $current_company ) ) ? $current_company->getName() : 'N/A' ) . ' (Company ID: ' . ( ( isset( $current_company ) && is_object( $current_company ) ) ? $current_company->getId() : 'N/A' ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
 
 			self::Text( 'Detected PHP errors (' . self::$php_errors . '), emailing log...', __FILE__, __LINE__, __METHOD__, 0 );

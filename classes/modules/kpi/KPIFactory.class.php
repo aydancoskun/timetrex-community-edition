@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -53,15 +53,33 @@ class KPIFactory extends Factory {
 		$retval = null;
 		switch ( $name ) {
 			case 'status':
-				$retval = [ 10 => TTi18n::gettext( 'Enabled (Required)' ), 15 => TTi18n::gettext( 'Enabled (Optional)' ), 20 => TTi18n::gettext( 'Disabled' ), ];
+				$retval = [
+						10 => TTi18n::gettext( 'Enabled (Required)' ),
+						15 => TTi18n::gettext( 'Enabled (Optional)' ),
+						20 => TTi18n::gettext( 'Disabled' ),
+				];
 				break;
 			case 'type':
-				$retval = [ 10 => TTi18n::gettext( 'Scale Rating' ), 20 => TTi18n::gettext( 'Yes/No' ), 30 => TTi18n::gettext( 'Text' ), ];
+				$retval = [
+						10 => TTi18n::gettext( 'Scale Rating' ),
+						20 => TTi18n::gettext( 'Yes/No' ),
+						30 => TTi18n::gettext( 'Text' ),
+				];
 				break;
 			case 'columns':
 				$retval = [
-						'-1000-name'        => TTi18n::gettext( 'Name' ), //'-2040-group' => TTi18n::gettext('Group'),
-						'-1040-description' => TTi18n::gettext( 'Description' ), '-1050-type' => TTi18n::getText( 'Type' ), '-4050-minimum_rate' => TTi18n::gettext( 'Minimum Rating' ), '-4060-maximum_rate' => TTi18n::gettext( 'Maximum Rating' ), '-1010-status' => TTi18n::gettext( 'Status' ), '-1300-tag' => TTi18n::gettext( 'Tags' ), '-2000-created_by' => TTi18n::gettext( 'Created By' ), '-2010-created_date' => TTi18n::gettext( 'Created Date' ), '-2020-updated_by' => TTi18n::gettext( 'Updated By' ), '-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+						'-1000-status'       => TTi18n::gettext( 'Status' ),
+						'-1020-type'         => TTi18n::getText( 'Type' ),
+						'-1030-name'         => TTi18n::gettext( 'Name' ),
+						'-1040-description'  => TTi18n::gettext( 'Description' ),
+						'-1050-minimum_rate' => TTi18n::gettext( 'Minimum Rating' ),
+						'-1060-maximum_rate' => TTi18n::gettext( 'Maximum Rating' ),
+						'-1080-kpi_group'    => TTi18n::gettext( 'Group' ),
+						'-1900-tag'          => TTi18n::gettext( 'Tags' ),
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
 				];
 				break;
 			case 'list_columns':
@@ -69,8 +87,12 @@ class KPIFactory extends Factory {
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = [
-						'name', //'group',
-						'description', 'type', 'minimum_rate', 'maximum_rate',
+						'status',
+						'type',
+						'name',
+						'minimum_rate',
+						'maximum_rate',
+						'kpi_group',
 				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
@@ -91,7 +113,8 @@ class KPIFactory extends Factory {
 				'id'           => 'ID',
 				'company_id'   => 'Company',
 				'name'         => 'Name',
-				'group_id'     => 'Group', //'group' => FALSE,
+				'group_id'     => 'Group',
+				'kpi_group'	   => false,
 				'type_id'      => 'Type',
 				'type'         => false,
 				'tag'          => 'Tag',
@@ -223,7 +246,6 @@ class KPIFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getGroup() {
-
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 2020, $this->getID() );
 	}
 
@@ -232,7 +254,6 @@ class KPIFactory extends Factory {
 	 * @return bool
 	 */
 	function setGroup( $ids ) {
-
 		Debug::text( 'Setting Groups IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
 		Debug::Arr( $ids, 'Setting Group data... ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -318,7 +339,6 @@ class KPIFactory extends Factory {
 	 * @return bool|string
 	 */
 	function getTag() {
-
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
 		$value = $this->getGenericTempDataValue( 'tags' );
@@ -539,13 +559,9 @@ class KPIFactory extends Factory {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
 							break;
-						/*case 'group':
-							if ( $this->getColumn( 'map_id' ) == -1 ) {
-								$data[$variable] = 'All';
-							} else {
-								$data[$variable] = $this->getColumn( $variable );
-							}
-							break;*/
+						case 'kpi_group':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();
@@ -566,7 +582,6 @@ class KPIFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'KPI' ), null, $this->getTable(), $this );
 	}
 }

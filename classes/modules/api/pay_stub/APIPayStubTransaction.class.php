@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -207,7 +207,7 @@ class APIPayStubTransaction extends APIFactory {
 				}
 				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$is_valid = $primary_validator->isValid( $ignore_warning );
+				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -232,7 +232,7 @@ class APIPayStubTransaction extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				} else if ( $validate_only == true ) {
 					$lf->FailTransaction();
 				}
@@ -322,7 +322,7 @@ class APIPayStubTransaction extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[$key] = $this->setValidationArray( [ $primary_validator, $lf ] );
 				}
 
 				$lf->CommitTransaction();
@@ -373,6 +373,10 @@ class APIPayStubTransaction extends APIFactory {
 	 * @return array|bool
 	 */
 	function getPayPeriodTransactionSummary( $filter_data ) {
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
+			return $this->getPermissionObject()->AuthenticationTypeDenied();
+		}
+
 		if ( !$this->getPermissionObject()->Check( 'pay_stub', 'enabled' )
 				|| !( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) || $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();

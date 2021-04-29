@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1225,7 +1225,7 @@ class CalculatePolicy {
 	 * @param int $date_stamp EPOCH
 	 * @return bool
 	 */
-	function calculateBreakTimePolicy( $date_stamp ) {
+	function calculateBreakTimePolicy( $date_stamp, $force_proportional_distribution = null ) {
 		if ( $this->isUserDateTotalData() == false ) {
 			Debug::text( 'No UDT records...', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -1325,12 +1325,7 @@ class CalculatePolicy {
 
 		$udtlf = $this->filterUserDateTotalDataByObjectTypeIDs( $date_stamp, $date_stamp, [ 10 ] );
 		if ( is_array( $udtlf ) && count( $udtlf ) > 0 ) {
-			$day_total_time = 0;
-			foreach ( $udtlf as $udt_obj ) {
-				$udt_arr[$udt_obj->getId()] = $udt_obj->getTotalTime();
-
-				$day_total_time += $udt_obj->getTotalTime();
-			}
+			$day_total_time = $this->getSumUserDateTotalData( $udtlf );
 			Debug::text( 'Day Total Time: ' . $day_total_time, __FILE__, __LINE__, __METHOD__, 10 );
 
 			//Loop over all regular time policies calculating the pay codes, up until $maximum_time is reached.
@@ -1409,32 +1404,103 @@ class CalculatePolicy {
 					if ( $break_policy_time != 0 ) {
 						$break_policy_total_time = bcadd( $break_policy_total_time, $break_policy_time );
 
-						if ( is_array( $udt_arr ) && $day_total_time > 0 ) {
-							$remainder = 0;
-							foreach ( $udt_arr as $udt_id => $total_time ) {
-								//Make sure we use bcmath() functions here to avoid floating point imprecision issues.
-								$udt_raw_break_policy_time = bcmul( bcdiv( $total_time, $day_total_time ), $break_policy_time );
-								if ( $break_policy_time > 0 ) {
-									$rounded_udt_raw_break_policy_time = floor( $udt_raw_break_policy_time );
-									$remainder = bcadd( $remainder, bcsub( $udt_raw_break_policy_time, $rounded_udt_raw_break_policy_time ) );
-								} else {
-									$rounded_udt_raw_break_policy_time = ceil( $udt_raw_break_policy_time );
-									$remainder = bcadd( $remainder, bcsub( $udt_raw_break_policy_time, $rounded_udt_raw_break_policy_time ) );
-								}
+						if ( $day_total_time > 0 && is_array( $udtlf ) && count( $udtlf ) > 0 ) {
+							$allocation_type_id = ( $force_proportional_distribution === true ) ? 10 : $bp_obj->getAllocationType();
+							switch ( $allocation_type_id ) {
+								case 10: //Proportional Distribution
+									$remainder = 0;
+									foreach ( $udtlf as $udt_obj ) {
+										$udt_id = $udt_obj->getId();
+										$total_time = $udt_obj->getTotalTime();
 
-								$worked_time_break_policy_adjustments[$udt_id] = (int)$rounded_udt_raw_break_policy_time;
-								Debug::text( 'UserDateTotal Row ID: ' . $udt_id . ' UDT Total Time: ' . $total_time . ' Raw Break Policy Time: ' . $udt_raw_break_policy_time . '(' . $rounded_udt_raw_break_policy_time . ') Remainder: ' . $remainder, __FILE__, __LINE__, __METHOD__, 10 );
+										//Make sure we use bcmath() functions here to avoid floating point imprecision issues.
+										$udt_raw_break_policy_time = bcmul( bcdiv( $total_time, $day_total_time ), $break_policy_time );
+										if ( $break_policy_time > 0 ) {
+											$rounded_udt_raw_break_policy_time = floor( $udt_raw_break_policy_time );
+											$remainder = bcadd( $remainder, bcsub( $udt_raw_break_policy_time, $rounded_udt_raw_break_policy_time ) );
+										} else {
+											$rounded_udt_raw_break_policy_time = ceil( $udt_raw_break_policy_time );
+											$remainder = bcadd( $remainder, bcsub( $udt_raw_break_policy_time, $rounded_udt_raw_break_policy_time ) );
+										}
+
+										$worked_time_break_policy_adjustments[$udt_id] = (int)$rounded_udt_raw_break_policy_time;
+										Debug::text( 'UserDateTotal Row ID: ' . $udt_id . ' UDT Total Time: ' . $total_time . ' Raw Break Policy Time: ' . $udt_raw_break_policy_time . '(' . $rounded_udt_raw_break_policy_time . ') Remainder: ' . $remainder, __FILE__, __LINE__, __METHOD__, 10 );
+									}
+
+									//Add remainder rounded to the nearest second to the last row.
+									if ( $break_policy_time > 0 ) { //Auto-Add
+										$remainder = ceil( $remainder );
+									} else { //Auto-Deduct
+										$remainder = floor( $remainder );
+									}
+
+									$worked_time_break_policy_adjustments[$udt_id] = (int)( $worked_time_break_policy_adjustments[$udt_id] + $remainder );
+									unset( $udt_obj, $udt_id, $total_time, $rounded_udt_raw_meal_policy_time );
+
+									break;
+								case 100: //At Active After Time
+									$remaining_break_policy_time = $break_policy_time;
+									$udt_raw_break_policy_time = 0;
+									$found_first_udt = false;
+
+									foreach ( $udtlf as $udt_obj ) {
+										if ( $udt_obj->getTotalTime() == 0 ) { //Skip records with 0 time
+											continue;
+										}
+
+										$udt_id = $udt_obj->getId();
+										$udt_raw_break_policy_time = 0;
+
+										//Find the correct UDT record that spans the break start time.
+										if ( $found_first_udt == true || ( $last_punch_in_timestamp >= $udt_obj->getStartTimeStamp() && $last_punch_in_timestamp <= $udt_obj->getEndTimeStamp() ) ) {
+											$found_first_udt = true;
+
+											//If break starts half way into a UDT record, adjust the total time accordingly.
+											if ( $last_punch_in_timestamp >= $udt_obj->getStartTimeStamp() && $last_punch_in_timestamp <= $udt_obj->getEndTimeStamp() ){
+												$tmp_udt_total_time = ( $udt_obj->getEndTimeStamp() - $last_punch_in_timestamp ); //Total time from break start time to end of UDT record.
+											} else {
+												$tmp_udt_total_time = $udt_obj->getTotalTime();
+											}
+
+											//Check to see if we can deduct the entire break from a single UDT record.
+											if ( $tmp_udt_total_time >= abs( $remaining_break_policy_time ) ) {
+												$udt_raw_break_policy_time = $remaining_break_policy_time;
+											} else {
+												$udt_raw_break_policy_time = $tmp_udt_total_time;
+											}
+										}
+
+										if ( $udt_raw_break_policy_time != 0 ) {
+											//Force positive/negative for the break policy adjustment.
+											if ( $break_policy_time > 0 ) { //Auto-Add
+												$udt_raw_break_policy_time = abs( $udt_raw_break_policy_time );
+											} else { //Auto-Deduct
+												$udt_raw_break_policy_time = ( abs( $udt_raw_break_policy_time ) * -1 );
+											}
+
+											$worked_time_break_policy_adjustments[$udt_id] = (int)$udt_raw_break_policy_time;
+											$remaining_break_policy_time += ( $udt_raw_break_policy_time * -1 );
+											Debug::text( 'UserDateTotal Row ID: ' . $udt_id . ' UDT Total Time: ' . $udt_obj->getTotalTime() . ' Raw break Policy Time: ' . $udt_raw_break_policy_time, ' Remaining break Time: ' . $remaining_break_policy_time, __FILE__, __LINE__, __METHOD__, 10 );
+										}
+
+										//If remainder is 0, break out of the loop, as the break time is all accounted for.
+										if ( $remaining_break_policy_time == 0 ) {
+											break;
+										}
+									}
+
+									if ( $remaining_break_policy_time != 0 ) {
+										//Not enough time left in the day from when the break started. Fall back to proportional distribution instead.
+										Debug::text( '  NOTICE: Remaining Break Time: ' . $remaining_break_policy_time .' with no time remaining in day! Falling back to proportional distribution allocation!', __FILE__, __LINE__, __METHOD__, 10 );
+										return $this->calculateBreakTimePolicy( $date_stamp, true ); //Force Proportional Distribution.
+									}
+
+									unset( $udt_obj, $udt_id, $total_time, $udt_raw_break_policy_time, $abs_break_policy_time, $found_first_udt, $tmp_udt_total_time, $remaining_break_policy_time );
+
+									break;
 							}
 
-							//Add remainder rounded to the nearest second to the last row.
-							if ( $break_policy_time > 0 ) {
-								$remainder = ceil( $remainder );
-							} else {
-								$remainder = floor( $remainder );
-							}
-							$worked_time_break_policy_adjustments[$udt_id] = (int)( $worked_time_break_policy_adjustments[$udt_id] + $remainder );
-
-							Debug::Arr( $worked_time_break_policy_adjustments, 'UserDateTotal Adjustments: Final Remainder: ' . $remainder, __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::Arr( $worked_time_break_policy_adjustments, 'UserDateTotal Adjustments: Final Remainder: ', __FILE__, __LINE__, __METHOD__, 10 );
 						}
 
 						//Create a UDT row for each break policy adjustment element, so other policies can include/exclude the break/break time on its own.
@@ -1596,7 +1662,7 @@ class CalculatePolicy {
 				} else if ( $always_return_at_least_one == true && isset( $bp_obj ) ) {
 					Debug::text( 'Forced to always return at least one...', __FILE__, __LINE__, __METHOD__, 10 );
 
-					return [ $bp_obj ]; //This is used by calculateExceptionPolicy() so we can *not* trigger No Lunch exception when the user has worked less than trigger time.
+					return [ $bp_obj ]; //This is used by calculateExceptionPolicy() so we can *not* trigger No Break exception when the user has worked less than trigger time.
 				}
 			} else if ( is_array( $bplf ) && count( $bplf ) == 0 ) {
 				return []; //Return a blank array so we know no meal policies apply to this day, but there were some, or -1 (No Meal) was used instead.
@@ -1647,7 +1713,7 @@ class CalculatePolicy {
 	 * @param int $date_stamp EPOCH
 	 * @return bool
 	 */
-	function calculateMealTimePolicy( $date_stamp ) {
+	function calculateMealTimePolicy( $date_stamp, $force_proportional_distribution = null ) {
 		if ( $this->isUserDateTotalData() == false ) {
 			Debug::text( 'No UDT records...', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -1742,12 +1808,7 @@ class CalculatePolicy {
 
 		$udtlf = $this->filterUserDateTotalDataByObjectTypeIDs( $date_stamp, $date_stamp, [ 10 ] );
 		if ( is_array( $udtlf ) && count( $udtlf ) > 0 ) {
-			$day_total_time = 0;
-			foreach ( $udtlf as $udt_obj ) {
-				$udt_arr[$udt_obj->getId()] = $udt_obj->getTotalTime();
-
-				$day_total_time += $udt_obj->getTotalTime();
-			}
+			$day_total_time = $this->getSumUserDateTotalData( $udtlf );
 			Debug::text( 'Day Total Time: ' . $day_total_time, __FILE__, __LINE__, __METHOD__, 10 );
 
 			//Loop over all regular time policies calculating the pay codes, up until $maximum_time is reached.
@@ -1767,7 +1828,7 @@ class CalculatePolicy {
 						}
 					}
 
-					Debug::text( ' Lunch Total Time: ' . $lunch_total_time, __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::text( ' Lunch Total Time: ' . $lunch_total_time .' Last Punch In: '. TTDate::getDate('DATE+TIME', $last_punch_in_timestamp ), __FILE__, __LINE__, __METHOD__, 10 );
 					switch ( $mp_obj->getType() ) {
 						case 10: //Auto-Deduct
 							Debug::text( ' Lunch AutoDeduct.', __FILE__, __LINE__, __METHOD__, 10 );
@@ -1797,32 +1858,105 @@ class CalculatePolicy {
 
 					Debug::text( ' Meal Policy Total Time: ' . $meal_policy_time, __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $meal_policy_time != 0 ) {
-						if ( is_array( $udt_arr ) && $day_total_time > 0 ) {
-							$remainder = 0;
-							foreach ( $udt_arr as $udt_id => $total_time ) {
-								//Make sure we use bcmath() functions here to avoid floating point imprecision issues.
-								$udt_raw_meal_policy_time = bcmul( bcdiv( $total_time, $day_total_time ), $meal_policy_time );
-								if ( $meal_policy_time > 0 ) {
-									$rounded_udt_raw_meal_policy_time = floor( $udt_raw_meal_policy_time );
-									$remainder = bcadd( $remainder, bcsub( $udt_raw_meal_policy_time, $rounded_udt_raw_meal_policy_time ) );
-								} else {
-									$rounded_udt_raw_meal_policy_time = ceil( $udt_raw_meal_policy_time );
-									$remainder = bcadd( $remainder, bcsub( $udt_raw_meal_policy_time, $rounded_udt_raw_meal_policy_time ) );
-								}
+						if ( $day_total_time > 0 && is_array( $udtlf ) && count( $udtlf ) > 0 ) {
 
-								$worked_time_meal_policy_adjustments[$udt_id] = (int)$rounded_udt_raw_meal_policy_time;
-								Debug::text( 'UserDateTotal Row ID: ' . $udt_id . ' UDT Total Time: ' . $total_time . ' Raw Meal Policy Time: ' . $udt_raw_meal_policy_time . '(' . $rounded_udt_raw_meal_policy_time . ') Remainder: ' . $remainder, __FILE__, __LINE__, __METHOD__, 10 );
+							$allocation_type_id = ( $force_proportional_distribution === true ) ? 10 : $mp_obj->getAllocationType();
+							switch ( $allocation_type_id ) {
+								case 10: //Proportional Distribution
+									$remainder = 0;
+
+									foreach ( $udtlf as $udt_obj ) {
+									    $udt_id = $udt_obj->getId();
+									    $total_time = $udt_obj->getTotalTime();
+
+										//Make sure we use bcmath() functions here to avoid floating point imprecision issues.
+										$udt_raw_meal_policy_time = bcmul( bcdiv( $total_time, $day_total_time ), $meal_policy_time );
+										if ( $meal_policy_time > 0 ) {
+											$rounded_udt_raw_meal_policy_time = floor( $udt_raw_meal_policy_time );
+											$remainder = bcadd( $remainder, bcsub( $udt_raw_meal_policy_time, $rounded_udt_raw_meal_policy_time ) );
+										} else {
+											$rounded_udt_raw_meal_policy_time = ceil( $udt_raw_meal_policy_time );
+											$remainder = bcadd( $remainder, bcsub( $udt_raw_meal_policy_time, $rounded_udt_raw_meal_policy_time ) );
+										}
+
+										$worked_time_meal_policy_adjustments[$udt_id] = (int)$rounded_udt_raw_meal_policy_time;
+										Debug::text( 'UserDateTotal Row ID: ' . $udt_id . ' UDT Total Time: ' . $total_time . ' Raw Meal Policy Time: ' . $udt_raw_meal_policy_time . '(' . $rounded_udt_raw_meal_policy_time . ') Remainder: ' . $remainder, __FILE__, __LINE__, __METHOD__, 10 );
+									}
+
+									//Add remainder rounded to the nearest second to the last row.
+									if ( $meal_policy_time > 0 ) { //Auto-Add
+										$remainder = ceil( $remainder );
+									} else { //Auto-Deduct
+										$remainder = floor( $remainder );
+									}
+
+									$worked_time_meal_policy_adjustments[$udt_id] = (int)( $worked_time_meal_policy_adjustments[$udt_id] + $remainder );
+									unset( $udt_obj, $udt_id, $total_time, $rounded_udt_raw_meal_policy_time );
+
+									break;
+								case 100: //At Active After Time
+									$remaining_meal_policy_time = $meal_policy_time;
+									$udt_raw_meal_policy_time = 0;
+									$found_first_udt = false;
+
+									foreach ( $udtlf as $udt_obj ) {
+										if ( $udt_obj->getTotalTime() == 0 ) { //Skip records with 0 time
+											continue;
+										}
+
+										$udt_id = $udt_obj->getId();
+										$udt_raw_meal_policy_time = 0;
+
+										//Find the correct UDT record that spans the lunch start time.
+										if ( $found_first_udt == true || ( $last_punch_in_timestamp >= $udt_obj->getStartTimeStamp() && $last_punch_in_timestamp <= $udt_obj->getEndTimeStamp() ) ) {
+											$found_first_udt = true;
+
+											//If lunch starts half way into a UDT record, adjust the total time accordingly.
+											if ( $last_punch_in_timestamp >= $udt_obj->getStartTimeStamp() && $last_punch_in_timestamp <= $udt_obj->getEndTimeStamp() ){
+												$tmp_udt_total_time = ( $udt_obj->getEndTimeStamp() - $last_punch_in_timestamp ); //Total time from meal start time to end of UDT record.
+											} else {
+												$tmp_udt_total_time = $udt_obj->getTotalTime();
+											}
+
+											//Check to see if we can deduct the entire meal from a single UDT record.
+											if ( $tmp_udt_total_time >= abs( $remaining_meal_policy_time ) ) {
+												$udt_raw_meal_policy_time = $remaining_meal_policy_time;
+											} else {
+												$udt_raw_meal_policy_time = $tmp_udt_total_time;
+											}
+										}
+
+										if ( $udt_raw_meal_policy_time != 0 ) {
+											//Force positive/negative for the meal policy adjustment.
+											if ( $meal_policy_time > 0 ) { //Auto-Add
+												$udt_raw_meal_policy_time = abs( $udt_raw_meal_policy_time );
+											} else { //Auto-Deduct
+												$udt_raw_meal_policy_time = ( abs( $udt_raw_meal_policy_time ) * -1 );
+											}
+
+											$worked_time_meal_policy_adjustments[$udt_id] = (int)$udt_raw_meal_policy_time;
+											$remaining_meal_policy_time += ( $udt_raw_meal_policy_time * -1 );
+											Debug::text( 'UserDateTotal Row ID: ' . $udt_id . ' UDT Total Time: ' . $udt_obj->getTotalTime() . ' Raw Meal Policy Time: ' . $udt_raw_meal_policy_time, ' Remaining Meal Time: ' . $remaining_meal_policy_time, __FILE__, __LINE__, __METHOD__, 10 );
+										}
+
+										//If remainder is 0, break out of the loop, as the meal time is all accounted for.
+										if ( $remaining_meal_policy_time == 0 ) {
+											break;
+										}
+									}
+
+									if ( $remaining_meal_policy_time != 0 ) {
+										//Not enough time left in the day from when the meal started. Fall back to proportional distribution instead.
+										Debug::text( '  NOTICE: Remaining Meal Time: ' . $remaining_meal_policy_time .' with no time remaining in day! Falling back to proportional distribution allocation!', __FILE__, __LINE__, __METHOD__, 10 );
+										return $this->calculateMealTimePolicy( $date_stamp, true ); //Force Proportional Distribution.
+									}
+
+									unset( $udt_obj, $udt_id, $total_time, $udt_raw_meal_policy_time, $abs_meal_policy_time, $found_first_udt, $tmp_udt_total_time, $remaining_meal_policy_time );
+
+									break;
 							}
 
-							//Add remainder rounded to the nearest second to the last row.
-							if ( $meal_policy_time > 0 ) {
-								$remainder = ceil( $remainder );
-							} else {
-								$remainder = floor( $remainder );
-							}
-							$worked_time_meal_policy_adjustments[$udt_id] = (int)( $worked_time_meal_policy_adjustments[$udt_id] + $remainder );
-
-							Debug::Arr( $worked_time_meal_policy_adjustments, 'UserDateTotal Adjustments: Final Remainder: ' . $remainder, __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::Arr( $worked_time_meal_policy_adjustments, 'UserDateTotal Adjustments:', __FILE__, __LINE__, __METHOD__, 10 );
 						}
 
 						//Create a UDT row for each meal policy adjustment element, so other policies can include/exclude the meal/break time on its own.
@@ -1843,7 +1977,7 @@ class CalculatePolicy {
 
 									$udtf->setStartType( 20 ); //Lunch
 									$udtf->setEndType( 20 );   //Lunch
-									if ( $mp_obj->getType() == 15 ) { //Auto_Include
+									if ( $mp_obj->getType() == 15 ) { //Auto-Add
 										if ( $last_punch_in_timestamp != '' ) { //If the first punch is a Lunch IN and only a Normal OUT, $last_punch_in_timestamp will be NULL.
 											$udtf->setStartTimeStamp( $last_punch_in_timestamp - abs( $worked_time_meal_policy_adjustment ) );
 											$udtf->setEndTimeStamp( $last_punch_in_timestamp );
@@ -4865,14 +4999,13 @@ class CalculatePolicy {
 						break;
 					case 's7': //Over Scheduled Hours
 						if ( is_array( $plf ) && count( $plf ) > 0 ) {
-							//FIXME: Assign this exception to the last punch of the day, so it can be related back to a punch branch/department?
 							//This ONLY takes in to account WORKED hours, not paid absence hours.
-							//FIXME: Do we want to trigger this before their last out punch?
+							//Do we want to trigger this before their last out punch? -- If we do, they would know the exception as early as possible.
 							$schedule_total_time = 0;
 
 							if ( is_array( $slf ) && count( $slf ) > 0 ) {
 								//Check for schedule policy
-								foreach ( $slf as $s_obj ) {
+								foreach ( $slf as $s_obj ) { //This should only be looping over 10=Working shifts based on the filter above.
 									Debug::text( ' Schedule Total Time: ' . $s_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10 );
 									$schedule_total_time += $s_obj->getTotalTime();
 								}
@@ -4898,7 +5031,7 @@ class CalculatePolicy {
 												'date_stamp'          => $date_stamp,
 												'exception_policy_id' => $ep_obj->getId(),
 												'type_id'             => $type_id,
-												'punch_id'            => TTUUID::getZeroID(),
+												'punch_id'            => TTUUID::getZeroID(), //Don't assign to a specific punch, as it could be moved between punches as more are added each day, which might cause users to be notified each time.
 												'punch_control_id'    => TTUUID::getZeroID(),
 										];
 									} else {
@@ -4911,16 +5044,16 @@ class CalculatePolicy {
 						}
 						break;
 					case 's8': //Under Scheduled Hours
-						if ( is_array( $plf ) && count( $plf ) > 0 ) {
-							//FIXME: Assign this exception to the last punch of the day, so it can be related back to a punch branch/department?
+						if ( is_array( $plf ) && count( $plf ) > 0 && count( $plf ) % 2 == 0 ) { //Punches should always be paired before bothering to calculate this.
 							//This ONLY takes in to account WORKED hours, not paid absence hours.
 							$schedule_total_time = 0;
 
 							if ( is_array( $slf ) && count( $slf ) > 0 ) {
 								//Check for schedule policy
-								foreach ( $slf as $s_obj ) {
+								foreach ( $slf as $s_obj ) { //This should only be looping over 10=Working shifts based on the filter above.
 									Debug::text( ' Schedule Total Time: ' . $s_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10 );
 									$schedule_total_time += $s_obj->getTotalTime();
+									$last_schedule_obj = $s_obj;
 								}
 
 								$daily_total_time = 0;
@@ -4938,23 +5071,37 @@ class CalculatePolicy {
 
 									if ( $daily_total_time < ( $schedule_total_time - $ep_obj->getGrace() ) ) {
 										Debug::text( ' Worked Under Scheduled Hours', __FILE__, __LINE__, __METHOD__, 10 );
+										$total_punches = count( $plf );
 
-										if ( $type_id == 5 && $date_stamp < TTDate::getBeginDayEpoch( ( $current_epoch - $premature_delay ) ) ) {
-											$type_id = 50;
+										$x = 1;
+										foreach ( $plf as $p_obj ) {
+											//Ignore punches that have the exact same timestamp and/or punches with the transfer flag, as they are likely transfer punches.
+											//  Only switch from pre-mature to mature once the current wall clock time has passed the last scheduled end time.
+											//  Since this is exception requires a schedule, that seems to make the most sense rather than using the premature_delay.
+											//  We mostly want to avoid cases where punch type is detected based on punch time, so a Normal Out punch at noon for 30mins doesn't trigger this exception as the user punches back in at 12:30PM and it switches to a lunch out punch instead.
+											if ( $p_obj->getTransfer() == false && $p_obj->getType() == 10 && $p_obj->getStatus() == 20 && $x == $total_punches ) { //Last Normal Out
+												if ( $type_id == 5 && $current_epoch >= $last_schedule_obj->getEndTime() ) {
+													$type_id = 50;
+												}
+
+												$current_exceptions[] = [
+														'user_id'             => $user_id,
+														'date_stamp'          => $date_stamp,
+														'exception_policy_id' => $ep_obj->getId(),
+														'type_id'             => $type_id,
+														'punch_id'            => TTUUID::getZeroID(), //Don't assign to a specific punch, as it could be moved between punches as more are added each day, which might cause users to be notified each time.
+														'punch_control_id'    => TTUUID::getZeroID(),
+												];
+											}
+
+											$x++;
 										}
-
-										$current_exceptions[] = [
-												'user_id'             => $user_id,
-												'date_stamp'          => $date_stamp,
-												'exception_policy_id' => $ep_obj->getId(),
-												'type_id'             => $type_id,
-												'punch_id'            => TTUUID::getZeroID(),
-												'punch_control_id'    => TTUUID::getZeroID(),
-										];
+										unset( $total_punches, $first_punch_obj, $x );
 									} else {
 										Debug::text( ' DID NOT Work Under Scheduled Hours', __FILE__, __LINE__, __METHOD__, 10 );
 									}
 								}
+								unset( $last_schedule_obj );
 							} else {
 								Debug::text( ' Not Scheduled', __FILE__, __LINE__, __METHOD__, 10 );
 							}
@@ -5009,22 +5156,11 @@ class CalculatePolicy {
 							//In either case though we should take into account the entires week worth of scheduled time even if we are only partially through
 							//the week, that way we won't be triggering s9 exceptions on a Wed and a Fri or something, it will only occur on the last days of the week.
 							if ( strtolower( $ep_obj->getType() ) == 's9' ) {
-								$tmp_slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $tmp_slf */
-								$tmp_slf->getByUserIdAndStartDateAndEndDate( $user_id, TTDate::getBeginWeekEpoch( $date_stamp, $start_week_day_id ), TTDate::getEndWeekEpoch( $date_stamp, $start_week_day_id ) );
-								if ( $tmp_slf->getRecordCount() > 0 ) {
-									foreach ( $tmp_slf as $s_obj ) {
-										if ( $s_obj->getStatus() == 10 ) { //Only working shifts.
-											$weekly_scheduled_total_time += $s_obj->getTotalTime();
-										}
-									}
-								}
-								unset( $tmp_slf, $s_obj );
+								$weekly_scheduled_total_time = $this->getSumScheduleTime( $this->filterScheduleDataByStatus( TTDate::getBeginWeekEpoch( $date_stamp, $this->start_week_day_id ), TTDate::getEndWeekEpoch( $date_stamp, $this->start_week_day_id ), [ 10 ] ) );
 							}
 
 							//Get daily total time. - This ONLY takes in to account WORKED hours, not paid absence hours.
-							$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
-							$weekly_total_time = $udtlf->getWorkedTimeSumByUserIDAndStartDateAndEndDate( $user_id, TTDate::getBeginWeekEpoch( $date_stamp, $start_week_day_id ), $date_stamp );
-
+							$weekly_total_time = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByObjectTypeIDs( TTDate::getBeginWeekEpoch( $date_stamp, $this->start_week_day_id ), $date_stamp, [ 10, 100, 110 ] ) );
 							Debug::text( ' Weekly Total Time: ' . $weekly_total_time . ' Weekly Scheduled Total Time: ' . $weekly_scheduled_total_time . ' Watch Window: ' . $ep_obj->getWatchWindow() . ' Grace: ' . $ep_obj->getGrace() . ' User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 							//Don't trigger either of these exceptions unless both the worked and scheduled time is greater than 0. If they aren't scheduled at all
 							//it should trigger a Unscheduled Absence exception instead of a over weekly scheduled time exception.
@@ -5622,8 +5758,14 @@ class CalculatePolicy {
 							) {
 
 								//Get pay period total time, include worked and paid absence time.
-								$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
-								$total_time = $udtlf->getTimeSumByUserIDAndPayPeriodId( $user_id, $this->pay_period_obj->getID() );
+								// Optimization, see if there is worked time in the data we already have loaded. If not, load data to the beginning of the pay period.
+								$total_time = (int)$this->getSumUserDateTotalData( $this->filterUserDateTotalDataByObjectTypeIDs( $this->pay_period_obj->getStartDate(), $date_stamp, [ 10, 50, 100, 110 ] ) );
+								if ( $total_time == 0 ) {
+									Debug::text( '  Total Worked/Paid Absence Time for the current week is 0, searching back further...', __FILE__, __LINE__, __METHOD__, 10 );
+									$this->getUserDateTotalData( $this->pay_period_obj->getStartDate(), $date_stamp );
+									$total_time = (int)$this->getSumUserDateTotalData( $this->filterUserDateTotalDataByObjectTypeIDs( $this->pay_period_obj->getStartDate(), $date_stamp, [ 10, 50, 100, 110 ] ) );
+								}
+
 								if ( $total_time > 0 ) {
 									//Check to see if pay period has been verified or not yet.
 									$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' ); /** @var PayPeriodTimeSheetVerifyListFactory $pptsvlf */
@@ -5631,7 +5773,6 @@ class CalculatePolicy {
 
 									$pay_period_verified = false;
 									if ( $pptsvlf->getRecordCount() > 0 ) {
-										//$pay_period_verified = $pptsvlf->getCurrent()->getAuthorized();
 										$pay_period_verified = ( $pptsvlf->getCurrent()->getStatus() == 50 ) ? true : false; //If setup as such, make sure both supervisor AND employee have verified before this goes away.
 									}
 

@@ -1,4 +1,4 @@
-var ALayoutCache = function() {
+export var ALayoutCache = function() {
 
 };
 
@@ -24,151 +24,151 @@ ALayoutCache.getDefaultColumn = function( layout_name ) {
 ALayoutCache.buildDefaultColumns = function() {
 	var default_columns = {};
 
-//	  default_columns[ALayoutIDs.BRANCH] = [new ViewColumn({label:'Name',value:'name'})];
-//	  default_columns[ALayoutIDs.DEPARTMENT] = [new ViewColumn({label:'Name',value:'name'})];
-//	  default_columns[ALayoutIDs.JOB_TITLE] = [new ViewColumn({label:'Name',value:'name'})];
-//	  default_columns[ALayoutIDs.PERMISSION_CONTROL] = [new ViewColumn({label:'Name',value:'name'})];
+//	  default_columns['global_branch'] = [new ViewColumn({label:'Name',value:'name'})];
+//	  default_columns['global_department'] = [new ViewColumn({label:'Name',value:'name'})];
+//	  default_columns['global_job_title'] = [new ViewColumn({label:'Name',value:'name'})];
+//	  default_columns['global_permission_control'] = [new ViewColumn({label:'Name',value:'name'})];
 
-	default_columns[ALayoutIDs.CLIENT_CONTACT] = [
+	default_columns['global_client_contact'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Status' ), value: 'status' }
 	];
 
-	default_columns[ALayoutIDs.LEGAL_ENTITY] = [
+	default_columns['global_legal_entity'] = [
 		{ label: $.i18n._( 'Name' ), value: 'legal_name' }
 	];
 
-	default_columns[ALayoutIDs.JOB] = [
+	default_columns['global_job'] = [
 		{ label: $.i18n._( 'Name' ), value: 'name' },
 		{ label: $.i18n._( 'Code' ), value: 'manual_id' }
 	];
 
-	default_columns[ALayoutIDs.JOB_ITEM] = [
+	default_columns['global_job_item'] = [
 		{ label: $.i18n._( 'Name' ), value: 'name' },
 		{ label: $.i18n._( 'Code' ), value: 'manual_id' }
 	];
 
-	default_columns[ALayoutIDs.CLIENT_PAYMENT] = [
+	default_columns['global_client_payment'] = [
 		{ label: $.i18n._( 'Number' ), value: 'display_number' },
 		{ label: $.i18n._( 'Type' ), value: 'type' }
 	];
-	default_columns[ALayoutIDs.OPTION_COLUMN] = [
+	default_columns['global_option_column'] = [
 		{ label: $.i18n._( 'Name' ), value: 'label' }
 	];
-	default_columns[ALayoutIDs.ABSENCE] = [
+	default_columns['global_absence'] = [
 		{ label: $.i18n._( 'Name' ), value: 'name' },
 		{ label: $.i18n._( 'Date' ), value: 'date_stamp' }
 	];
-	default_columns[ALayoutIDs.TIMESHEET] = [
+	default_columns['global_timesheet'] = [
 		{ label: $.i18n._( 'Time' ), value: 'punch_time' },
 		{ label: $.i18n._( 'In/Out' ), value: 'status' },
 		{ label: $.i18n._( 'Punch Type' ), value: 'type' }
 
 	];
-	default_columns[ALayoutIDs.USER] = [
+	default_columns['global_user'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Status' ), value: 'status' }
 	];
 
-	default_columns[ALayoutIDs.MESSAGE_USER] = [
+	default_columns['global_message_user'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Status' ), value: 'status' }
 	];
 
-	default_columns[ALayoutIDs.USER_CONTACT] = [
+	default_columns['global_user_contact'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' }
 	];
-	default_columns[ALayoutIDs.WAGE] = [
+	default_columns['global_wage'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Type' ), value: 'type' },
 		{ label: $.i18n._( 'Wage' ), value: 'wage' }
 	];
-	default_columns[ALayoutIDs.LOG] = [
+	default_columns['global_log'] = [
 		{ label: $.i18n._( 'Date' ), value: 'date' },
 		{ label: $.i18n._( 'Action' ), value: 'action' },
 		{ label: $.i18n._( 'Object' ), value: 'object' }
 	];
-	default_columns[ALayoutIDs.BANK_ACCOUNT] = [
+	default_columns['global_bank_account'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Account Name' ), value: 'account' }
 	];
-	default_columns[ALayoutIDs.TREE_COLUMN] = [
+	default_columns['global_tree_column'] = [
 		{ label: '', value: 'id' },
 		{ label: $.i18n._( 'Name' ), value: 'name' }
 	];
 
-	default_columns[ALayoutIDs.SORT_COLUMN] = [
+	default_columns['global_sort_columns'] = [
 		{ label: $.i18n._( 'Column Name' ), value: 'label' },
 		{ label: $.i18n._( 'Sort' ), value: 'sort' }
 	];
-	default_columns[ALayoutIDs.PAY_PERIOD] = [
+	default_columns['global_Pay_period'] = [
 		{ label: $.i18n._( 'Start Date' ), value: 'start_date' },
 		{ label: $.i18n._( 'End Date' ), value: 'end_date' },
 		{ label: $.i18n._( 'Pay Period Schedule' ), value: 'pay_period_schedule' }
 
 	];
 
-	default_columns[ALayoutIDs.USER_SKILL] = [
+	default_columns['global_user_skill'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Skill' ), value: 'qualification' }
 
 	];
 
-	default_columns[ALayoutIDs.USER_Education] = [
+	default_columns['global_user_education'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Course' ), value: 'qualification' }
 
 	];
 
-	default_columns[ALayoutIDs.USER_Membership] = [
+	default_columns['global_user_membership'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Membership' ), value: 'qualification' }
 
 	];
 
-	default_columns[ALayoutIDs.USER_LICENSE] = [
+	default_columns['global_user_license'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'License' ), value: 'qualification' }
 
 	];
 
-	default_columns[ALayoutIDs.JOB_APPLICANT] = [
+	default_columns['global_job_applicant'] = [
 		{ label: $.i18n._( 'First Name' ), value: 'first_name' },
 		{ label: $.i18n._( 'Last Name' ), value: 'last_name' },
 		{ label: $.i18n._( 'Status' ), value: 'status' }
 
 	];
 
-	default_columns[ALayoutIDs.JOB_APPLICATION] = [
+	default_columns['global_job_application'] = [
 		{ label: $.i18n._( 'Job Vacancy' ), value: 'job_vacancy' },
 		{ label: $.i18n._( 'Type' ), value: 'type' },
 		{ label: $.i18n._( 'Status' ), value: 'status' }
 
 	];
 
-	default_columns[ALayoutIDs.KPI] = [
+	default_columns['global_kpi'] = [
 		{ label: $.i18n._( 'Name' ), value: 'name' },
 		{ label: $.i18n._( 'Type' ), value: 'type' },
 		{ label: $.i18n._( 'Status' ), value: 'status' }
 
 	];
 
-	default_columns[ALayoutIDs.PAYROLL_REMITTANCE_AGENCY] = [
+	default_columns['global_payroll_remittance_agency'] = [
 		{ label: $.i18n._( 'Name' ), value: 'name' },
 		{ label: $.i18n._( 'Legal Entity Name' ), value: 'legal_entity_legal_name' }
 	];
 
-	default_columns[ALayoutIDs.KPI_REVIEW_CONTROL] = [
+	default_columns['global_kpi_review_control'] = [
 		{ label: $.i18n._( 'Employee Name' ), value: 'user' },
 		{ label: $.i18n._( 'Reviewer Name' ), value: 'reviewer_user' },
 		{ label: $.i18n._( 'Start Date' ), value: 'start_date' },
@@ -176,30 +176,30 @@ ALayoutCache.buildDefaultColumns = function() {
 
 	];
 
-	default_columns[ALayoutIDs.INVOICE] = [
+	default_columns['global_invoice'] = [
 		{ label: $.i18n._( 'Client' ), value: 'client' },
 		{ label: $.i18n._( 'Status' ), value: 'status' }
 
 	];
 
-	default_columns[ALayoutIDs.CLIENT] = [
+	default_columns['global_client'] = [
 		{ label: $.i18n._( 'Company Name' ), value: 'company_name' },
 		{ label: $.i18n._( 'Groups' ), value: 'group' }
 
 	];
 
-	default_columns[ALayoutIDs.INVOICE_TRANSACTION] = [
+	default_columns['global_transaction'] = [
 		{ label: $.i18n._( 'Client' ), value: 'client' },
 		{ label: $.i18n._( 'Status' ), value: 'status' }
 
 	];
 
-	default_columns[ALayoutIDs.PAY_STUB_ACCOUNT] = [
+	default_columns['global_PayStubAccount'] = [
 		{ label: $.i18n._( 'Name' ), value: 'name' },
 		{ label: $.i18n._( 'Type' ), value: 'type' }
 	];
 
-	default_columns[ALayoutIDs.SIMPLE_NAME] = [
+	default_columns['global_simple_name'] = [
 		{ label: 'Name', value: 'name' }
 	];
 

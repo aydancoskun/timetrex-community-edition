@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1069,6 +1069,63 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 	/**
 	 * @param string $company_id    UUID
+	 * @param int $status_id
+	 * @param int $limit            Limit the number of records returned
+	 * @param int $page             Page number of records to return for pagination
+	 * @param array $where          Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order          Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayStubListFactory
+	 */
+	function getByCompanyIdAndStatusIdAndTypeId( $company_id, $status_id, $type_id, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
+		}
+
+		if ( $status_id == '' ) {
+			return false;
+		}
+
+		if ( $type_id == '' ) {
+			return false;
+		}
+
+		$strict_order = true;
+		if ( $order == null || !is_array( $order ) ) {
+			$order = [ 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' ];
+			$strict_order = false;
+		}
+
+		$ulf = new UserListFactory();
+		$pplf = new PayPeriodListFactory();
+
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
+
+		$query = '
+					select	a.*
+					from	' . $this->getTable() . ' as a,
+							' . $ulf->getTable() . ' as b,
+							' . $pplf->getTable() . ' as c
+					where	a.user_id = b.id
+						AND a.pay_period_id = c.id
+						AND b.company_id = ?						
+						AND a.status_id in (' . $this->getListSQL( $status_id, $ph, 'int' ) . ')
+						AND a.type_id in (' . $this->getListSQL( $type_id, $ph, 'int' ) . ')
+						AND a.deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict_order );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $this;
+	}
+
+	/**
+	 * @param string $company_id    UUID
 	 * @param string $pay_period_id UUID
 	 * @param int $status_id
 	 * @param int $limit            Limit the number of records returned
@@ -1270,6 +1327,47 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 					from	' . $this->getTable() . '
 					where	pay_period_id = ?
 						AND user_id = ?
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $user_id       UUID
+	 * @param string $pay_period_id UUID
+	 * @param array $where          Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order          Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayStubListFactory
+	 */
+	function getByUserIdAndTypeIdAndPayPeriodId( $user_id, $type_id, $pay_period_id, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
+		}
+
+		if ( $type_id == '' ) {
+			return false;
+		}
+
+		if ( $pay_period_id == '' ) {
+			return false;
+		}
+
+		$ph = [
+				'pay_period_id' => TTUUID::castUUID( $pay_period_id ),
+				'user_id'       => TTUUID::castUUID( $user_id ),
+				'type_id'       => (int)$type_id,
+		];
+
+		$query = '
+					select	*
+					from	' . $this->getTable() . '
+					where	pay_period_id = ?
+						AND user_id = ?
+						AND type_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );

@@ -1,4 +1,4 @@
-class PayrollRemittanceAgencyEventViewController extends BaseViewController {
+export class PayrollRemittanceAgencyEventViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#payroll_remittance_agency_event_view_container', //Must set el here and can only set string, so events can work
@@ -364,7 +364,7 @@ class PayrollRemittanceAgencyEventViewController extends BaseViewController {
 			api_class: TTAPI.APIPayrollRemittanceAgencyEvent,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
+			layout_name: 'global_payroll_remittance_agency',
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
@@ -380,7 +380,7 @@ class PayrollRemittanceAgencyEventViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayrollRemittanceAgency,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
+			layout_name: 'global_payroll_remittance_agency',
 			show_search_inputs: true,
 			set_empty: false,
 			field: 'payroll_remittance_agency_id'
@@ -391,7 +391,7 @@ class PayrollRemittanceAgencyEventViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'status_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		form_item_input.setSourceData( $this.status_array );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_payroll_remittance_agency_event_column_1 );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -405,13 +405,13 @@ class PayrollRemittanceAgencyEventViewController extends BaseViewController {
 		form_item_input.TComboBox( {
 			field: 'frequency_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.frequency_array ) );
+		form_item_input.setSourceData( $this.frequency_array );
 		this.addEditFieldToColumn( $.i18n._( 'Frequency' ), form_item_input, tab_payroll_remittance_agency_event_column_1 );
 
 		// Payment Frequency Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'primary_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.month_of_year_array ) ) );
+		form_item_input.setSourceData( Global.buildRecordArray( $this.month_of_year_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Primary Month' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Day Of Month
@@ -425,48 +425,48 @@ class PayrollRemittanceAgencyEventViewController extends BaseViewController {
 		// Payment Frequency Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'secondary_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.month_of_year_array ) ) );
+		form_item_input.setSourceData( Global.buildRecordArray( $this.month_of_year_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Secondary Month' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Day Of Month
 		// Day of the Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'secondary_day_of_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( day_of_month_array ) );
+		form_item_input.setSourceData( day_of_month_array );
 		this.addEditFieldToColumn( $.i18n._( 'Secondary Day of Month' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'week' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.week_interval_array ) ) );
+		form_item_input.setSourceData( Global.buildRecordArray( $this.week_interval_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Week' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency quarter Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'quarter_month' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_quarter_array ) );
+		form_item_input.setSourceData( $this.month_of_quarter_array );
 		this.addEditFieldToColumn( $.i18n._( 'Month of Quarter' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Day of the week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'day_of_week' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.day_of_week_array ) ) );
+		form_item_input.setSourceData( Global.buildRecordArray( $this.day_of_week_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Day of week' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayPeriodSchedule,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
+			layout_name: 'global_pay_period_schedule',
 			show_search_inputs: true,
 			set_special_empty: true,
 			set_any: true,
 			field: 'pay_period_schedule_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.saved_report_array ) );
+		form_item_input.setSourceData( $this.saved_report_array );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Schedule' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Days After Transaction Date
@@ -488,7 +488,7 @@ class PayrollRemittanceAgencyEventViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'reminder_user_id'
@@ -498,7 +498,7 @@ class PayrollRemittanceAgencyEventViewController extends BaseViewController {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.SAVED_REPORT,
+			layout_name: 'global_user_report_data',
 			show_search_inputs: true,
 			set_default: true,
 			field: 'user_report_data_id'

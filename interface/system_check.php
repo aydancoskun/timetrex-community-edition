@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -49,6 +49,20 @@ if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['othe
 	exit;
 }
 
+//Check license is valid. If not employees can't punch!
+try {
+	$license = new TTLicense();
+	$is_valid_license = $license->validateLicense();
+	if ( $is_valid_license !== true ) {
+		echo 'FAIL! (LICENSE INVALID)';
+		exit;
+	}
+	unset( $license, $is_valid_license );
+} catch ( Exception $e ) {
+	echo 'FAIL! (LICENSE INVALID)';
+	exit;
+}
+
 //Confirm database connection is up and maintenance jobs have run recently...
 if ( PRODUCTION == true ) {
 	$cjlf = TTnew( 'CronJobListFactory' ); /** @var CronJobListFactory $cjlf */
@@ -60,6 +74,7 @@ if ( PRODUCTION == true ) {
 			exit;
 		}
 	}
+	unset( $cjlf, $last_run_date_diff );
 }
 
 //If caching is enabled, make sure cache directory exists and is writeable.
@@ -74,6 +89,7 @@ if ( isset( $config_vars['cache']['enable'] ) && $config_vars['cache']['enable']
 			exit;
 		}
 		$tmp_f->removeCache( 'system_check' );
+		unset( $tmp_f, $random_value, $result );
 	} else if ( file_exists( $config_vars['cache']['dir'] ) == false ) {
 		echo 'FAIL! (300)';
 		exit;

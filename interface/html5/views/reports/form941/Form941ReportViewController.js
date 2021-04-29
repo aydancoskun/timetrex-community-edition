@@ -1,4 +1,4 @@
-class Form941ReportViewController extends ReportBaseViewController {
+export class Form941ReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 
@@ -97,11 +97,11 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input = form_item_input.AComboBox( {
 			field: 'deposit_schedule',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.OPTION_COLUMN,
+			layout_name: 'global_option_column',
 			key: 'value'
 		} );
 
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.schedule_deposit_array ) );
+		form_item_input.setSourceData( $this.schedule_deposit_array );
 		this.addEditFieldToColumn( $.i18n._( 'Schedule Depositor' ), form_item_input, tab3_column1, '' );
 
 		//Total Deposits For This Quarter
@@ -117,7 +117,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'wages_include_pay_stub_entry_account'
@@ -134,7 +134,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'wages_exclude_pay_stub_entry_account'
@@ -154,7 +154,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'income_tax_include_pay_stub_entry_account'
@@ -171,7 +171,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'income_tax_exclude_pay_stub_entry_account'
@@ -189,7 +189,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'social_security_wages_include_pay_stub_entry_account'
@@ -201,7 +201,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'social_security_wages_exclude_pay_stub_entry_account'
@@ -219,7 +219,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'social_security_tax_include_pay_stub_entry_account'
@@ -236,7 +236,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'social_security_tax_exclude_pay_stub_entry_account'
@@ -256,7 +256,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'social_security_tax_employer_include_pay_stub_entry_account'
@@ -273,7 +273,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'social_security_tax_employer_exclude_pay_stub_entry_account'
@@ -293,7 +293,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'social_security_tips_include_pay_stub_entry_account'
@@ -310,7 +310,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'social_security_tips_exclude_pay_stub_entry_account'
@@ -330,7 +330,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'medicare_wages_include_pay_stub_entry_account'
@@ -347,7 +347,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'medicare_wages_exclude_pay_stub_entry_account'
@@ -367,7 +367,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'medicare_tax_include_pay_stub_entry_account'
@@ -384,7 +384,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'medicare_tax_exclude_pay_stub_entry_account'
@@ -405,7 +405,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'medicare_tax_employer_include_pay_stub_entry_account'
@@ -422,7 +422,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'medicare_tax_employer_exclude_pay_stub_entry_account'
@@ -441,6 +441,11 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.TTextInput( { field: 'form_5884c_credit' } );
 		this.addEditFieldToColumn( $.i18n._( 'Credit from Form 5884-C on Line 11 (Line 23)' ), form_item_input, tab3_column1 );
 
+		//Credit from Form 5884-D, line 12, for this quarter
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'form_5884d_credit' } );
+		this.addEditFieldToColumn( $.i18n._( 'Credit from Form 5884-D on Line 12' ), form_item_input, tab3_column1 );
+
 
 		//COVID-19 related settings.
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
@@ -454,7 +459,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualified_sick_leave_wages_include_pay_stub_entry_account'
@@ -466,7 +471,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualified_sick_leave_wages_exclude_pay_stub_entry_account'
@@ -481,7 +486,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualified_family_leave_wages_include_pay_stub_entry_account'
@@ -493,7 +498,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualified_family_leave_wages_exclude_pay_stub_entry_account'
@@ -509,7 +514,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualified_retention_credit_wages_include_pay_stub_entry_account'
@@ -521,7 +526,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualified_retention_credit_wages_exclude_pay_stub_entry_account'
@@ -536,7 +541,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualified_health_plan_expenses_include_pay_stub_entry_account'
@@ -548,7 +553,7 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item_input_1.AComboBox( {
 			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: 'global_PayStubAccount',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'qualified_health_plan_expenses_exclude_pay_stub_entry_account'
@@ -556,11 +561,6 @@ class Form941ReportViewController extends ReportBaseViewController {
 		form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Exclude' ) );
 		v_box.append( form_item );
 		this.addEditFieldToColumn( $.i18n._( 'Qualified Health Plan Expenses' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
-
-		//Deferred amount of employer share of social security tax
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'deferred_social_security_tax_employer' } );
-		this.addEditFieldToColumn( $.i18n._( 'Deferred Employer Social Security Tax (Line 13b)' ), form_item_input, tab3_column1 );
 
 		//Advances from filing Forms 7200 for the quarter.
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -638,9 +638,9 @@ class Form941ReportViewController extends ReportBaseViewController {
 		other.deposit_schedule = this.current_edit_record.deposit_schedule;
 		other.quarter_deposit = this.current_edit_record.quarter_deposit;
 
-		other.deferred_social_security_tax_employer = this.current_edit_record.deferred_social_security_tax_employer;
 		other.form_7200_advances = this.current_edit_record.form_7200_advances;
 		other.form_5884c_credit = this.current_edit_record.form_5884c_credit;
+		other.form_5884d_credit = this.current_edit_record.form_5884d_credit;
 
 		return other;
 	}
@@ -768,11 +768,6 @@ class Form941ReportViewController extends ReportBaseViewController {
 				this.current_edit_record.deposit_schedule = res_Data.deposit_schedule;
 			}
 
-			if ( res_Data.deferred_social_security_tax_employer ) {
-				this.edit_view_ui_dic.deferred_social_security_tax_employer.setValue( res_Data.deferred_social_security_tax_employer );
-				this.current_edit_record.deferred_social_security_tax_employer = res_Data.deferred_social_security_tax_employer;
-			}
-
 			if ( res_Data.form_7200_advances ) {
 				this.edit_view_ui_dic.form_7200_advances.setValue( res_Data.form_7200_advances );
 				this.current_edit_record.form_7200_advances = res_Data.form_7200_advances;
@@ -781,6 +776,11 @@ class Form941ReportViewController extends ReportBaseViewController {
 			if ( res_Data.form_5884c_credit ) {
 				this.edit_view_ui_dic.form_5884c_credit.setValue( res_Data.form_5884c_credit );
 				this.current_edit_record.form_5884c_credit = res_Data.form_5884c_credit;
+			}
+
+			if ( res_Data.form_5884d_credit ) {
+				this.edit_view_ui_dic.form_5884d_credit.setValue( res_Data.form_5884d_credit );
+				this.current_edit_record.form_5884d_credit = res_Data.form_5884d_credit;
 			}
 		}
 	}

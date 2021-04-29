@@ -2,8 +2,8 @@
 
 <!--
 Description	T4A Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -76,6 +76,8 @@ Version#:	1.18 (version #.yy)
 					<xsd:field xpath="prpp_txmpt_inc_pamt"/>
 					<xsd:field xpath="abe_tuit_ast_amt"/>
 					<xsd:field xpath="vtrn_ben_pens_splt_elg_amt"/>
+					<xsd:field xpath="alda_amt"/>
+					<xsd:field xpath="prov_trty_emrg_ben_amt"/>
 				</xsd:unique>
 			</xsd:element>
 			<xsd:element name="ADD_INFO" type="T4AAdditionalInformationType" minOccurs="0">
@@ -168,7 +170,9 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="prpp_tx_inc_pamt" type="decimal11Type"/>
 			<xsd:element name="prpp_txmpt_inc_pamt" type="decimal11Type"/>
 			<xsd:element name="abe_tuit_ast_amt" type="decimal11Type"/>
-			<xsd:element name="vtrn_ben_pens_splt_elg_amt" type="decimal11Type"/><!-- New for 2016 -->
+			<xsd:element name="vtrn_ben_pens_splt_elg_amt" type="decimal11Type"/>
+			<xsd:element name="alda_amt" type="signedDecimal11Type"/>
+			<xsd:element name="prov_trty_emrg_ben_amt" type="decimal11Type"/>
 		</xsd:choice>
 	</xsd:group>
 	<xsd:complexType name="T4ASummaryType">
@@ -200,7 +204,7 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="tot_resp_aip_amt" type="decimal15Type" minOccurs="0"/>
 			<xsd:element name="tot_resp_amt" type="decimal15Type" minOccurs="0"/>
 			<xsd:element name="rpt_tot_fee_srvc_amt" type="decimal15Type" minOccurs="0"/>
-			<xsd:element name="rpt_tot_oth_info_amt" type="decimal15Type" minOccurs="0"/>
+			<xsd:element name="rpt_tot_oth_info_amt" type="signedDecimal15Type" minOccurs="0"/>
 		</xsd:all>
 	</xsd:complexType>
 	<xsd:complexType name="RppNumberType">

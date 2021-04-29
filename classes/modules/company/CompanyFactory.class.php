@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1492,6 +1492,8 @@ class CompanyFactory extends Factory {
 						'-1310-total_active_days' => TTi18n::gettext( 'Total Active (Days)' ),
 						'-1320-last_login_days'   => TTi18n::gettext( 'Last Login (Days)' ),
 
+						'-1390-max_punch_time_stamp'      => TTi18n::gettext( 'Last Punch Time' ),
+
 						'-1410-this_month_min_active_users' => TTi18n::gettext( 'Employees [This Month] (MIN)' ),
 						'-1415-this_month_avg_active_users' => TTi18n::gettext( 'Employees [This Month] (AVG)' ),
 						'-1420-this_month_max_active_users' => TTi18n::gettext( 'Employees [This Month] (MAX)' ),
@@ -1600,6 +1602,7 @@ class CompanyFactory extends Factory {
 				'last_login_date'             => false,
 				'total_active_days'           => false,
 				'last_login_days'             => false,
+				'max_punch_time_stamp'        => false,
 				'this_month_min_active_users' => false,
 				'this_month_avg_active_users' => false,
 				'this_month_max_active_users' => false,
@@ -3684,6 +3687,9 @@ class CompanyFactory extends Factory {
 						case 'total_active_days':
 						case 'last_login_days':
 							$data[ $variable ] = (int)TTDate::getDays( (int)$this->getColumn( $variable ) );
+							break;
+						case 'max_punch_time_stamp':
+							$data[ $variable ] = TTDate::getAPIDate( 'DATE+TIME', TTDate::strtotime( $this->getColumn( $variable ) ) );
 							break;
 						case 'this_month_min_active_users':
 						case 'this_month_avg_active_users':

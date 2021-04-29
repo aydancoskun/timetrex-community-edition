@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -707,18 +707,6 @@ class RecurringScheduleTemplateFactory extends Factory {
 								$absence_policy_id = TTUUID::castUUID( $holiday_data[$policy_group_id][$iso_date_stamp]['absence_policy_id'] );
 							}
 						}
-
-						/*
-						$hourly_rate = Misc::MoneyFormat( $this->getColumn('user_wage_hourly_rate'), FALSE );
-
-						if ( TTUUID::isUUID($absence_policy_id) AND $absence_policy_id != TTUUID::getZeroID() AND $absence_policy_id != TTUUID::getNotExistID()
-								AND in_array( $absence_policy_type_id, $absence_policy_paid_type_options ) == FALSE ) {
-							//UnPaid Absence.
-							$total_time_wage = Misc::MoneyFormat(0);
-						} else {
-							$total_time_wage = Misc::MoneyFormat( bcmul( TTDate::getHours( $this->getTotalTime() ), $hourly_rate ), FALSE );
-						}
-						*/
 
 						//Debug::text('I: '. $i .' N: '. $n .' User ID: '. $this->getColumn('user_id') .' Current Date: '. TTDate::getDate('DATE+TIME', $i) .' Current Week: '. $current_week .' Start Time: '. TTDate::getDate('DATE+TIME', $start_time ) .' Absence Policy: '. $absence_policy, __FILE__, __LINE__, __METHOD__, 10);
 						//$shifts[$iso_date_stamp][$this->getColumn('user_id').$start_time] = array(

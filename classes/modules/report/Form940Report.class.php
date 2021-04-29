@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -725,6 +725,7 @@ class Form940Report extends Report {
 			$form_data['total_payments']['include_pay_stub_entry_account'] = [];
 			$form_data['total_payments']['exclude_pay_stub_entry_account'] = [];
 			$form_data['total_payments']['pay_stub_entry_account'] = [];
+			$form_data['state_total_payments'] = [];
 			foreach ( $ralf as $key => $ra_obj ) {
 				if ( $ra_obj->getStatus() == 10 &&
 						( ( $ra_obj->getType() == 10 && $ra_obj->parseAgencyID( null, 'id' ) == 10 ) //IRS
@@ -1074,10 +1075,14 @@ class Form940Report extends Report {
 					$f940->return_type = $return_type_arr;
 				}
 
-				if ( isset( $this->form_data['remittance_agency_states'][$legal_entity_id] ) && count( $this->form_data['remittance_agency_states'][$legal_entity_id] ) > 1 ) {
-					$f940->l1b = true; //Let them set this manually.
+				if ( isset( $this->form_data['remittance_agency_states'][$legal_entity_id] ) ) {
+					if ( count( $this->form_data['remittance_agency_states'][$legal_entity_id] ) > 1 ) {
+						$f940->l1b = true; //Let them set this manually.
+					} else {
+						$f940->l1a = key( $this->form_data['remittance_agency_states'][$legal_entity_id] );
+					}
 				} else {
-					$f940->l1a = key( $this->form_data['remittance_agency_states'][$legal_entity_id] );
+					$f940->l1a = 'XX'; //Unknown state due to remittance agency's not setup correctly?
 				}
 
 				if ( isset( $this->form_data['remittance_agency_states'][$legal_entity_id] ) ) {

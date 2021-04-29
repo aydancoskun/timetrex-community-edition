@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -2211,14 +2211,22 @@ class UserFactory extends Factory {
 
 	/**
 	 * @param null $sin
+	 * @param bool $force_secure Force the SIN to always be secure regardless of permissions.
 	 * @return bool|string
 	 */
-	function getSecureSIN( $sin = null ) {
+	function getSecureSIN( $sin = null, $force_secure = false ) {
 		if ( $sin == '' ) {
 			$sin = $this->getSIN();
 		}
 
 		if ( $sin != '' ) {
+			global $current_user;
+			if ( $force_secure == false && isset( $current_user ) && is_object( $current_user ) ) {
+				if ( $this->getPermissionObject()->Check( 'user', 'view_sin', $current_user->getId(), $current_user->getCompany() ) == true ) {
+					return $sin;
+				}
+			}
+
 			return Misc::censorString( $sin, '*', null, 1, 4, 4 );
 		}
 
@@ -3352,7 +3360,7 @@ class UserFactory extends Factory {
 			$modify_email = false;
 			if ( $this->getCurrentUserPermissionLevel() >= $this->getPermissionLevel() ) {
 				$modify_email = true;
-			} else if ( $this->getHomeEmail() == $this->getHomeEmail() ) { //No modification made.
+			} else if ( $this->isDataDifferent( 'home_email', $data_diff ) == false ) { //No modification made.
 				$modify_email = true;
 			}
 
@@ -3362,7 +3370,7 @@ class UserFactory extends Factory {
 			}
 			$this->Validator->isEmailAdvanced( 'home_email',
 											   $this->getHomeEmail(),
-					( ( DEPLOYMENT_ON_DEMAND == true ) ? TTi18n::gettext( 'Home email address is invalid' ) : [ 0 => TTi18n::gettext( 'Home email address is invalid' ), 5 => TTi18n::gettext( 'Home email address does not have a valid DNS MX record' ), 6 => TTi18n::gettext( 'Home email address does not have a valid DNS record' ) ] ),
+											   [ 0 => TTi18n::gettext( 'Home email address is invalid' ), 5 => TTi18n::gettext( 'Home email address does not have a valid DNS MX record' ), 6 => TTi18n::gettext( 'Home email address does not have a valid DNS record' ) ],
 											   $error_threshold
 			);
 			if ( $this->Validator->isError( 'home_email' ) == false ) {
@@ -3392,7 +3400,7 @@ class UserFactory extends Factory {
 			$modify_email = false;
 			if ( $this->getCurrentUserPermissionLevel() >= $this->getPermissionLevel() ) {
 				$modify_email = true;
-			} else if ( $this->getWorkEmail() == $this->getWorkEmail() ) { //No modification made.
+			} else if ( $this->isDataDifferent( 'work_email', $data_diff ) == false ) { //No modification made.
 				$modify_email = true;
 			}
 
@@ -3403,7 +3411,7 @@ class UserFactory extends Factory {
 
 			$this->Validator->isEmailAdvanced( 'work_email',
 											   $this->getWorkEmail(),
-					( ( DEPLOYMENT_ON_DEMAND == true ) ? TTi18n::gettext( 'Work email address is invalid' ) : [ 0 => TTi18n::gettext( 'Work email address is invalid' ), 5 => TTi18n::gettext( 'Work email address does not have a valid DNS MX record' ), 6 => TTi18n::gettext( 'Work email address does not have a valid DNS record' ) ] ),
+											   [ 0 => TTi18n::gettext( 'Work email address is invalid' ), 5 => TTi18n::gettext( 'Work email address does not have a valid DNS MX record' ), 6 => TTi18n::gettext( 'Work email address does not have a valid DNS record' ) ],
 											   $error_threshold
 			);
 			if ( $this->Validator->isError( 'work_email' ) == false ) {
@@ -4505,9 +4513,9 @@ class UserFactory extends Factory {
 						case 'hierarchy_level_display':
 							$data[ $variable ] = $this->getHierarchyLevelDisplay();
 							break;
-						//case 'sin': //This is handled in the API class instead.
-						//	$data[$variable] = $this->getSecureSIN();
-						//	break;
+						case 'sin':
+							$data[$variable] = $this->getSecureSIN(); //getSecureSIN() will display the full SIN if permissions allow.
+							break;
 						case 'last_login_date':
 						case 'hire_date':
 						case 'birth_date':

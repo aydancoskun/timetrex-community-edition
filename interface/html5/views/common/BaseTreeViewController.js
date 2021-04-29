@@ -1,4 +1,4 @@
-class BaseTreeViewController extends BaseViewController {
+export class BaseTreeViewController extends BaseViewController {
 	setSelectLayout( column_start_from ) {
 		var $this = this;
 
@@ -209,7 +209,7 @@ class BaseTreeViewController extends BaseViewController {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'parent_id':
-						widget.setSourceData( Global.addFirstItemToArray( this.grid_current_page_items ) );
+						widget.setSourceData( this.grid_current_page_items );
 						widget.setValue( this.current_edit_record[key] );
 						break;
 					default:
@@ -238,7 +238,7 @@ class BaseTreeViewController extends BaseViewController {
 
 				//init navigation only when open edit view
 				if ( !this.navigation.getSourceData() ) {
-					this.navigation.setSourceData( Global.addFirstItemToArray( this.grid_current_page_items ) );
+					this.navigation.setSourceData( this.grid_current_page_items );
 
 					var default_args = {};
 					default_args.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
@@ -425,7 +425,7 @@ class BaseTreeViewController extends BaseViewController {
 			id: this.script_name + '_navigation',
 			tree_mode: true,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			navigation_mode: true,
 			show_search_inputs: false,
 			on_tree_grid_row_select: function( id, tree_mode_collapse ) {
@@ -456,7 +456,7 @@ class BaseTreeViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			tree_mode: true,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.TREE_COLUMN,
+			layout_name: 'global_tree_column',
 			set_empty: true,
 			field: 'parent_id'
 		} );

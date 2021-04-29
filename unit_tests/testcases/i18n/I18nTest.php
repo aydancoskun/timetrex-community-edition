@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,13 +37,13 @@
 /**
  * @group i18nTest
  */
-class i18nTest extends PHPUnit_Framework_TestCase {
+class i18nTest extends PHPUnit\Framework\TestCase {
 
-	function setUp() {
+	function setUp(): void {
 		TTi18n::setLocale( 'en_CA' );
 	}
 
-	function tearDown() {
+	function tearDown(): void {
 		TTi18n::setLocale( 'en_CA' );
 	}
 
@@ -157,7 +157,7 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( '-123.12', TTi18n::formatNumber( -123.12345 ) );
 
 		$this->assertEquals( '-87.990122', TTi18n::formatNumber( -87.990122, true, 2, 6 ) );
-		$this->assertEquals( '-87.9000', TTi18n::formatNumber( -87.9000, true, 2, 4 ) );
+		$this->assertEquals( '-87.90', TTi18n::formatNumber( -87.9000, true, 2, 4 ) );
 		$this->assertEquals( '-87.9901', TTi18n::formatNumber( -87.9901, true, 2, 4 ) );
 		$this->assertEquals( '1,234.9901', TTi18n::formatNumber( 1234.990122, true, 2, 4 ) );
 		$this->assertEquals( '123,456.99012', TTi18n::formatNumber( 123456.990122, true, 3, 5 ) );
@@ -237,7 +237,7 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( '12.91', TTI18n::parseFloat( '12.91' ) );
 		$this->assertEquals( '-12.91', TTI18n::parseFloat( '-12.91' ) );
 		$this->assertEquals( '12.123', TTI18n::parseFloat( (float)12.123 ) );
-		$this->assertEquals( '0', TTI18n::parseFloat( '0.00' ) );
+		$this->assertEquals( '0.00', TTI18n::parseFloat( '0.00' ) );
 		$this->assertEquals( '0', TTI18n::parseFloat( '0' ) );
 		$this->assertEquals( '0', TTI18n::parseFloat( 0 ) );
 
@@ -258,10 +258,10 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( '1234.123', TTI18n::parseFloat( '1. 234,123' ) );
 		$this->assertEquals( '12.91', TTI18n::parseFloat( '12,91' ) );
 
-		$this->assertEquals( '0.12', TTI18n::parseFloat( '.12' ) );
-		$this->assertEquals( '0.12', TTI18n::parseFloat( ',12' ) );
-		$this->assertEquals( '-0.12', TTI18n::parseFloat( '-.12' ) );
-		$this->assertEquals( '-0.12', TTI18n::parseFloat( '-,12' ) );
+		$this->assertEquals( '.12', TTI18n::parseFloat( '.12' ) );
+		$this->assertEquals( '.12', TTI18n::parseFloat( ',12' ) );
+		$this->assertEquals( '-.12', TTI18n::parseFloat( '-.12' ) );
+		$this->assertEquals( '-.12', TTI18n::parseFloat( '-,12' ) );
 
 		$this->assertEquals( '0.12', TTI18n::parseFloat( '0.12' ) );
 		$this->assertEquals( '0.12', TTI18n::parseFloat( '0,12' ) );
@@ -288,7 +288,7 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( '12912', TTI18n::parseFloat( '12,912' ) );    //Ambiguous as it could be assumed to be 12.912, or 12, 912
 		$this->assertEquals( '12.9123', TTI18n::parseFloat( '12,9123' ) ); //Ambiguous as it could be assumed to be 12.9123, or 12, 9123
 
-		$this->assertEquals( '123.00', TTI18n::parseFloat( '123' ) );
+		$this->assertEquals( '123', TTI18n::parseFloat( '123' ) );
 		$this->assertEquals( '1234', TTI18n::parseFloat( '1, 234' ) );  //Ambiguous as it could be assumed to be 1,234, or 1.234.
 		$this->assertEquals( '1.234', TTI18n::parseFloat( '1. 234' ) ); //Ambiguous as it could be assumed to be 1,234, or 1.234 -- However since there is only one separator and it matches the decimal separator in the locale we can be certain.
 
@@ -308,7 +308,7 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( '1234567890123456789000.123', TTI18n::parseFloat( '1,234,567,890,123,456,789,000.123' ) );
 		$this->assertEquals( '1234567890123456789123.123', TTI18n::parseFloat( '1,234,567,890,123,456,789,123.123' ) );
 
-		$this->assertEquals( '0', TTI18n::parseFloat( '0,00' ) );
+		$this->assertEquals( '0.00', TTI18n::parseFloat( '0,00' ) );
 		$this->assertEquals( '0', TTI18n::parseFloat( '0' ) );
 		$this->assertEquals( '0', TTI18n::parseFloat( 0 ) );
 
@@ -353,7 +353,7 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( '1234.123', TTI18n::parseFloat( '1. 234,123' ) );      //Has both separators, so can be parsed properly.
 		$this->assertEquals( '1234.91', TTI18n::parseFloat( '1 234,91' ) );
 		$this->assertEquals( '12.91', TTI18n::parseFloat( '12,91' ) );
-		$this->assertEquals( '0', TTI18n::parseFloat( '0,00' ) );
+		$this->assertEquals( '0.00', TTI18n::parseFloat( '0,00' ) );
 		$this->assertEquals( '12.123', TTI18n::parseFloat( (float)12.123 ) ); //If its input as an actual float value, it shouldn't be touched.
 
 
@@ -362,7 +362,7 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( '1234.123', TTI18n::parseFloat( '1.234,123' ) );
 			$this->assertEquals( '1234.123', TTI18n::parseFloat( '1. 234,123' ) );
 			$this->assertEquals( '12.91', TTI18n::parseFloat( '12,91' ) );
-			$this->assertEquals( '0', TTI18n::parseFloat( '0,00' ) );
+			$this->assertEquals( '0.00', TTI18n::parseFloat( '0,00' ) );
 			$this->assertEquals( '12.123', TTI18n::parseFloat( (float)12.123 ) ); //If its input as an actual float value, it shouldn't be touched.
 
 			$this->assertEquals( '12.9', TTI18n::parseFloat( '12.9', 1 ) );       //Ambiguous as it could be assumed to be 12.9, or 129
@@ -430,6 +430,42 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 
 		$user_id = $dd->createUser( $company_id, $legal_entity_id, 100 );
 		$user_idb = $dd->createUser( $company_id, $legal_entity_id, 10 );
+
+		//Delete all wages so we there is a clean slate and there are no random wages that might occur *after* the ones we create below, which would cause the report to be different.
+		// Skip first wage on the employees hire date.
+		$uwlf = TTnew('UserWageListFactory');
+		$uwlf->getByUserId( $user_id, [ 'effective_date' => 'asc', 'wage_group_id' => 'asc' ] );
+		if ( $uwlf->getRecordCount() > 0 ) {
+			$i = 0;
+			foreach( $uwlf as $uw_obj ) {
+				if ( $i == 0 ) { //Skip first wage effective date.
+					$i++;
+					continue;
+				}
+
+				$uw_obj->setDeleted( true );
+				$uw_obj->Save();
+
+				$i++;
+			}
+		}
+
+		$uwlf = TTnew('UserWageListFactory');
+		$uwlf->getByUserId( $user_idb, [ 'effective_date' => 'asc', 'wage_group_id' => 'asc' ] );
+		if ( $uwlf->getRecordCount() > 0 ) {
+			$i = 0;
+			foreach( $uwlf as $uw_obj ) {
+				if ( $i == 0 ) { //Skip first wage effective date.
+					$i++;
+					continue;
+				}
+
+				$uw_obj->setDeleted( true );
+				$uw_obj->Save();
+
+				$i++;
+			}
+		}
 
 		//Get User Object.
 		$ulf = new UserListFactory();
@@ -631,9 +667,10 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$amount2 = '90.9';
 		$this->assertEquals( 601.80, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
 
-		$amount1 = '510,9';
-		$amount2 = '90,9';
-		@$this->assertEquals( 0.00, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
+		//This causes PHP fatal error on PHP v8.0.2: PHP ERROR - FATAL(1): Uncaught ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+		//$amount1 = '510,9';
+		//$amount2 = '90,9';
+		//@$this->assertEquals( 0.00, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
 
 
 		//
@@ -646,15 +683,21 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 
 		$amount1 = 510.9;
 		$amount2 = 90.9;
-		@$this->assertEquals( 0.00, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
+		if ( version_compare( PHP_VERSION, '8.0', '>=' ) ) { //PHP v8.0 seems to handle comma separated floats.
+			$this->assertEquals( 601.80, bcadd( $amount1, $amount2, 2 ) );
+		} else {
+			@$this->assertEquals( 0.00, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
+		}
 
-		$amount1 = '510,9';
-		$amount2 = '90,9';
-		@$this->assertEquals( 0.00, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
+		//This causes PHP fatal error on PHP v8.0.2: PHP ERROR - FATAL(1): Uncaught ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+		//$amount1 = '510,9';
+		//$amount2 = '90,9';
+		//@$this->assertEquals( 0.00, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
 
-		$amount1 = '123456710,9';
-		$amount2 = '90,9';
-		@$this->assertEquals( 0.00, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
+		//This causes PHP fatal error on PHP v8.0.2: PHP ERROR - FATAL(1): Uncaught ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+		//$amount1 = '123456710,9';
+		//$amount2 = '90,9';
+		//@$this->assertEquals( 0.00, bcadd( $amount1, $amount2, 2 ) ); //BCMath fails handling floating point values with comma separator.
 
 		//Set locale back to the default so it doesn't affect other tests.
 		setlocale( LC_ALL, TTi18n::generateLocale( 'en_US' ) );

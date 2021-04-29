@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -227,6 +227,7 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 
 		$uf = new UserFactory();
 		$rscf = new RecurringScheduleControlFactory();
+		$rsf = new RecurringScheduleTemplateFactory();
 
 		$ph = [
 				'company_id' => TTUUID::castUUID( $company_id ),
@@ -259,6 +260,8 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
 		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
 		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : null;
+
+		$query .= ( isset( $filter_data['schedule_policy_id'] ) ) ? ' AND a.id in ( SELECT recurring_schedule_template_control_id FROM ' . $rsf->getTable() . ' WHERE' . $this->getWhereClauseSQL( 'schedule_policy_id', $filter_data['schedule_policy_id'], 'uuid_list', $ph, null, false ) . ' AND deleted = 0 ) ' : null;
 
 		$query .= ( isset( $filter_data['name'] ) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : null;
 		$query .= ( isset( $filter_data['description'] ) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : null;

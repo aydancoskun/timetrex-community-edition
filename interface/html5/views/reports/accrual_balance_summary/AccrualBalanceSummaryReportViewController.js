@@ -1,4 +1,4 @@
-class AccrualBalanceSummaryReportViewController extends ReportBaseViewController {
+export class AccrualBalanceSummaryReportViewController extends ReportBaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 

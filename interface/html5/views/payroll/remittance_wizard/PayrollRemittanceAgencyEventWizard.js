@@ -1,4 +1,6 @@
-class PayrollRemittanceAgencyEventWizard extends Wizard {
+import { Wizard } from '@/global/widgets/wizard/Wizard';
+
+export class PayrollRemittanceAgencyEventWizard extends Wizard {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			current_step: false,
@@ -10,7 +12,7 @@ class PayrollRemittanceAgencyEventWizard extends Wizard {
 
 			wizard_id: 'PayrollRemittanceAgencyEventWizard',
 			_step_map: {
-				'home': {
+				'home': { // TODO: Webpack: Investigate how this works/does not work with Webpack
 					script_path: 'views/payroll/remittance_wizard/PayrollRemittanceAgencyEventWizardStepHome.js',
 					object_name: 'PayrollRemittanceAgencyEventWizardStepHome'
 				},

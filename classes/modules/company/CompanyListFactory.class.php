@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2021 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -422,7 +422,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanyListFactory
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null, $include_last_punch_time = false ) {
 		if ( $company_id == '' ) {
 			return false;
 		}
@@ -436,9 +436,14 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		$additional_order_fields = [ 'status_id', 'last_login_date', 'total_active_days', 'last_login_days', 'this_month_max_active_users', 'this_month_avg_active_users', 'this_month_min_active_users', 'last_month_max_active_users', 'last_month_avg_active_users', 'last_month_min_active_users', 'regular_user_feedback_rating', 'supervisor_user_feedback_rating', 'admin_user_feedback_rating', 'all_user_feedback_rating' ];
 
+		if ( $include_last_punch_time == true ) {
+			$additional_order_fields[] = 'max_punch_time_stamp';
+		}
+
 		$sort_column_aliases = [
-				'status'          => 'status_id',
-				'product_edition' => 'product_edition_id',
+				'status'               => 'status_id',
+				'product_edition'      => 'product_edition_id',
+				'max_punch_time_stamp' => false,
 		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
@@ -465,17 +470,25 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$puf = new PermissionUserFactory();
 		$pcf = new PermissionControlFactory();
 
+		$punchf = new PunchFactory();
+		$punchcf = new PunchControlFactory();
+
 		$ph = [];
 
+		//Round total_active_days and last_login_days to nearest 86400 seconds (1 day)
 		$query = '
 					SELECT	
 							_ADODB_COUNT
 							a.*,
 							user_last_login.last_login_date as last_login_date,
 							user_last_login.total_active_days as total_active_days,
-							user_last_login.last_login_days as last_login_days,
+							user_last_login.last_login_days as last_login_days, ';
 
-							this_month_company_user_count.min_active_users as this_month_min_active_users,
+		if ( $include_last_punch_time == true ) {
+			$query .= '	user_last_punch.max_punch_time_stamp as max_punch_time_stamp, ';
+		}
+
+		$query .= '			this_month_company_user_count.min_active_users as this_month_min_active_users,
 							this_month_company_user_count.avg_active_users as this_month_avg_active_users,
 							this_month_company_user_count.max_active_users as this_month_max_active_users,
 							last_month_company_user_count.min_active_users as last_month_min_active_users,
@@ -499,14 +512,34 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 									SELECT
 									company_id,
 									max(last_login_date) as last_login_date,
-									max(last_login_date)-min(cf.created_date) as total_active_days,
-									( ' . time() . '-max(last_login_date) ) as last_login_days
-									FROM
-									' . $uf->getTable() . ' as uf
+									round( ( max(last_login_date) - min(cf.created_date) ) / 86400 ) * 86400 as total_active_days,
+									round( ( ' . time() . ' - max(last_login_date) ) / 86400 ) * 86400 as last_login_days
+									FROM ' . $uf->getTable() . ' as uf
 									LEFT JOIN ' . $this->getTable() . ' as cf ON ( uf.company_id = cf.id )
 									AND uf.deleted = 0 AND cf.deleted = 0
 									GROUP BY uf.company_id
-						) as user_last_login ON ( a.id = user_last_login.company_id )
+						) as user_last_login ON ( a.id = user_last_login.company_id ) ';
+
+						if ( $include_last_punch_time == true ) {
+							$query .= ' LEFT JOIN
+								(
+										SELECT tmp2_d.company_id as company_id, 
+												max(tmp2_a.time_stamp) as max_punch_time_stamp
+										FROM	' . $punchf->getTable() . ' as tmp2_a
+										LEFT JOIN ' . $punchcf->getTable() . ' as tmp2_b ON tmp2_a.punch_control_id = tmp2_b.id
+										LEFT JOIN ' . $uf->getTable() . ' as tmp2_d ON tmp2_b.user_id = tmp2_d.id
+										WHERE tmp2_d.status_id = 10
+											AND tmp2_b.date_stamp >= ' . $this->db->qstr( $this->db->BindDate( TTDate::getBeginDayEpoch( time() - ( 86400 * 31 ) ) ) ) . '
+											AND tmp2_b.date_stamp <= ' . $this->db->qstr( $this->db->BindDate( TTDate::getEndDayEpoch( time() ) ) ) . '
+											AND tmp2_a.time_stamp IS NOT NULL
+											AND tmp2_a.station_id IS NOT NULL 
+											AND ( tmp2_a.deleted = 0 AND tmp2_b.deleted = 0 )
+										GROUP BY tmp2_d.company_id
+								) as user_last_punch ON ( a.id = user_last_punch.company_id ) ';
+
+						}
+
+		$query .= '
 						LEFT JOIN (
 									SELECT
 									company_id,
@@ -589,7 +622,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

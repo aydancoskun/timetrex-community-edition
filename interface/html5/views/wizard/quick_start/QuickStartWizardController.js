@@ -1,4 +1,4 @@
-class QuickStartWizardController extends BaseWizardController {
+export class QuickStartWizardController extends BaseWizardController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '.wizard-bg',
@@ -151,7 +151,7 @@ class QuickStartWizardController extends BaseWizardController {
 				form_item_input.AComboBox( {
 					api_class: TTAPI.APILegalEntity,
 					allow_multiple_selection: true,
-					layout_name: ALayoutIDs.LEGAL_ENTITY,
+					layout_name: 'global_legal_entity',
 					show_search_inputs: false,
 					set_empty: true,
 					custom_first_label: Global.all_item

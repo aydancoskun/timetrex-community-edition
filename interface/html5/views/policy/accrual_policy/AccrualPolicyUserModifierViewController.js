@@ -1,4 +1,4 @@
-class AccrualPolicyUserModifierViewController extends BaseViewController {
+export class AccrualPolicyUserModifierViewController extends BaseViewController {
 	constructor( options = {} ) {
 		_.defaults( options, {
 			el: '#accrual_policy_user_modifier_view_container', //Must set el here and can only set string, so events can work
@@ -380,6 +380,20 @@ class AccrualPolicyUserModifierViewController extends BaseViewController {
 		}
 	}
 
+	doViewAPICall( filter, api_args, _callback ) {
+		var record_id = this.getCurrentSelectedRecord();
+		if ( TTUUID.isUUID( record_id ) && record_id != TTUUID.not_exist_id && record_id != TTUUID.zero_id ) {
+			return super.doViewAPICall( filter, api_args, _callback );
+		} else {
+			var result_data = this.getRecordFromGridById( record_id );
+
+			if ( result_data && result_data.id ) {
+				result_data.id = '';
+			}
+			return this.handleViewAPICallbackResult( result_data );
+		}
+	}
+
 	onSaveResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
@@ -641,7 +655,7 @@ class AccrualPolicyUserModifierViewController extends BaseViewController {
 			api_class: TTAPI.APIAccrualPolicyUserModifier,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.WAGE,
+			layout_name: 'global_wage',
 			show_search_inputs: true,
 			navigation_mode: true
 		} );
@@ -666,7 +680,7 @@ class AccrualPolicyUserModifierViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.USER,
+			layout_name: 'global_user',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'user_id'
@@ -685,7 +699,7 @@ class AccrualPolicyUserModifierViewController extends BaseViewController {
 		form_item_input.AComboBox( {
 			api_class: TTAPI.APIAccrualPolicy,
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ACCRUAL_POLICY,
+			layout_name: 'global_accrual',
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'accrual_policy_id'
@@ -1133,6 +1147,33 @@ class AccrualPolicyUserModifierViewController extends BaseViewController {
 	searchDone() {
 		super.searchDone();
 		TTPromise.resolve( 'AccrualView', 'init' );
+	}
+
+	setEditViewWidgetsMode() {
+		var did_clean_dic = {};
+		for ( var key in this.edit_view_ui_dic ) {
+			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+				continue;
+			}
+			var widget = this.edit_view_ui_dic[key];
+			widget.css( 'opacity', 1 );
+			var column = widget.parent().parent().parent();
+			var tab_id = column.parent().attr( 'id' );
+			if ( !column.hasClass( 'v-box' ) ) {
+				if ( !did_clean_dic[tab_id] ) {
+					did_clean_dic[tab_id] = true;
+				}
+			}
+			if ( this.is_viewing || ( this.parent_view === 'employee' && ( key === 'accrual_policy_id' || key === 'user_id' ) ) ) {
+				if ( Global.isSet( widget.setEnabled ) ) {
+					widget.setEnabled( false );
+				}
+			} else {
+				if ( Global.isSet( widget.setEnabled ) ) {
+					widget.setEnabled( true );
+				}
+			}
+		}
 	}
 
 }

@@ -2,8 +2,8 @@
 
 <!--
 Description	T4E Return Complex and Element Types
-Last updated 	October 2018
-Version#:	1.18 (version #.yy)
+Last updated 	September 2020
+Version#:	1.16 (version #.yy)
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -30,6 +30,7 @@ Version#:	1.18 (version #.yy)
 					<xsd:field xpath="pay_con_rev_amt"/>
 					<xsd:field xpath="qmpb_amt"/>
 					<xsd:field xpath="ppip_ben_pay_amt"/>
+					<xsd:field xpath="ei_mtrnt_prntl_trnng_rfndbl_amt"/>
 				</xsd:unique>
 			</xsd:element>
 		</xsd:all>
@@ -60,6 +61,8 @@ Version#:	1.18 (version #.yy)
 			<xsd:element name="pay_con_rev_amt" type="decimal9Type" minOccurs="0"/>
 			<xsd:element name="qmpb_amt" type="decimal9Type" minOccurs="0"/>
 			<xsd:element name="ppip_ben_pay_amt" type="decimal9Type" minOccurs="0"/>
+			<!-- PSL43902 -->
+			<xsd:element name="ei_mtrnt_prntl_trnng_rfndbl_amt" type="decimal9Type" minOccurs="0"/>
 		</xsd:choice>
 	</xsd:group>
 	<xsd:complexType name="T4ESummaryType">
