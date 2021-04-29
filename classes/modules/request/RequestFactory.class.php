@@ -42,76 +42,74 @@ class RequestFactory extends Factory {
 	protected $table = 'request';
 	protected $pk_sequence_name = 'request_id_seq'; //PK Sequence name
 
-	var $user_date_obj = NULL;
+	var $user_date_obj = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'type':
-				$retval = array(
-										10 => TTi18n::gettext('Missed Punch'),				//request_punch
-										20 => TTi18n::gettext('Punch Adjustment'),			//request_punch_adjust
-										30 => TTi18n::gettext('Absence (incl. Vacation)'),	//request_absence
-										40 => TTi18n::gettext('Schedule Adjustment'),		//request_schedule
-										100 => TTi18n::gettext('Other'),					//request_other
-									);
+				$retval = [
+						10  => TTi18n::gettext( 'Missed Punch' ),                //request_punch
+						20  => TTi18n::gettext( 'Punch Adjustment' ),            //request_punch_adjust
+						30  => TTi18n::gettext( 'Absence (incl. Vacation)' ),    //request_absence
+						40  => TTi18n::gettext( 'Schedule Adjustment' ),        //request_schedule
+						100 => TTi18n::gettext( 'Other' ),                    //request_other
+				];
 				break;
 			case 'status':
-				$retval = array(
-										10 => TTi18n::gettext('INCOMPLETE'),
-										20 => TTi18n::gettext('OPEN'),
-										30 => TTi18n::gettext('PENDING'), //Used to be "Pending Authorizion"
-										40 => TTi18n::gettext('AUTHORIZATION OPEN'),
-										50 => TTi18n::gettext('AUTHORIZED'), //Used to be "Active"
-										55 => TTi18n::gettext('DECLINED'), //Used to be "AUTHORIZATION DECLINED"
-										60 => TTi18n::gettext('DISABLED')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'INCOMPLETE' ),
+						20 => TTi18n::gettext( 'OPEN' ),
+						30 => TTi18n::gettext( 'PENDING' ), //Used to be "Pending Authorizion"
+						40 => TTi18n::gettext( 'AUTHORIZATION OPEN' ),
+						50 => TTi18n::gettext( 'AUTHORIZED' ), //Used to be "Active"
+						55 => TTi18n::gettext( 'DECLINED' ), //Used to be "AUTHORIZATION DECLINED"
+						60 => TTi18n::gettext( 'DISABLED' ),
+				];
 				break;
 			case 'columns':
-				$retval = array(
+				$retval = [
 
-										'-1010-first_name' => TTi18n::gettext('First Name'),
-										'-1020-last_name' => TTi18n::gettext('Last Name'),
-										'-1060-title' => TTi18n::gettext('Title'),
-										'-1070-user_group' => TTi18n::gettext('Group'),
-										'-1080-default_branch' => TTi18n::gettext('Branch'),
-										'-1090-default_department' => TTi18n::gettext('Department'),
+						'-1010-first_name'         => TTi18n::gettext( 'First Name' ),
+						'-1020-last_name'          => TTi18n::gettext( 'Last Name' ),
+						'-1060-title'              => TTi18n::gettext( 'Title' ),
+						'-1070-user_group'         => TTi18n::gettext( 'Group' ),
+						'-1080-default_branch'     => TTi18n::gettext( 'Branch' ),
+						'-1090-default_department' => TTi18n::gettext( 'Department' ),
 
-										'-1110-date_stamp' => TTi18n::gettext('Date'),
-										'-1120-status' => TTi18n::gettext('Status'),
-										'-1130-type' => TTi18n::gettext('Type'),
+						'-1110-date_stamp' => TTi18n::gettext( 'Date' ),
+						'-1120-status'     => TTi18n::gettext( 'Status' ),
+						'-1130-type'       => TTi18n::gettext( 'Type' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( array('date_stamp', 'status', 'type'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( [ 'date_stamp', 'status', 'type' ], Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'first_name',
-								'last_name',
-								'type',
-								'date_stamp',
-								'status',
-								);
+				$retval = [
+						'first_name',
+						'last_name',
+						'type',
+						'date_stamp',
+						'status',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								);
+				$retval = [];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array(
-								);
+				$retval = [];
 				break;
 		}
 
@@ -123,35 +121,36 @@ class RequestFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										//'user_date_id' => 'UserDateID',
-										'user_id' => 'User',
-										'date_stamp' => 'DateStamp',
-										'pay_period_id' => 'PayPeriod',
+		$variable_function_map = [
+				'id'            => 'ID',
+				//'user_date_id' => 'UserDateID',
+				'user_id'       => 'User',
+				'date_stamp'    => 'DateStamp',
+				'pay_period_id' => 'PayPeriod',
 
-										//'user_id' => FALSE,
+				//'user_id' => FALSE,
 
-										'first_name' => FALSE,
-										'last_name' => FALSE,
-										'default_branch' => FALSE,
-										'default_department' => FALSE,
-										'user_group' => FALSE,
-										'title' => FALSE,
+				'first_name'         => false,
+				'last_name'          => false,
+				'default_branch'     => false,
+				'default_department' => false,
+				'user_group'         => false,
+				'title'              => false,
 
-										'type_id' => 'Type',
-										'type' => FALSE,
-										'hierarchy_type_id' => 'HierarchyTypeId',
-										'status_id' => 'Status',
-										'status' => FALSE,
-										'authorized' => 'Authorized',
-										'authorization_level' => 'AuthorizationLevel',
-										'message' => 'Message',
+				'type_id'             => 'Type',
+				'type'                => false,
+				'hierarchy_type_id'   => 'HierarchyTypeId',
+				'status_id'           => 'Status',
+				'status'              => false,
+				'authorized'          => 'Authorized',
+				'authorization_level' => 'AuthorizationLevel',
+				'message'             => 'Message',
 
-										'request_schedule' => FALSE,
+				'request_schedule' => false,
 
-										'deleted' => 'Deleted',
-										);
+				'deleted' => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -190,8 +189,8 @@ class RequestFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPayPeriod( $value = NULL) {
-		if ( $value == NULL ) {
+	function setPayPeriod( $value = null ) {
+		if ( $value == null ) {
 			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
 		$value = TTUUID::castUUID( $value );
@@ -204,17 +203,17 @@ class RequestFactory extends Factory {
 	 * @param bool $raw
 	 * @return bool|int
 	 */
-	function getDateStamp( $raw = FALSE ) {
+	function getDateStamp( $raw = false ) {
 		$value = $this->getGenericDataValue( 'date_stamp' );
-		if ( $value !== FALSE ) {
-			if ( $raw === TRUE ) {
+		if ( $value !== false ) {
+			if ( $raw === true ) {
 				return $value;
 			} else {
 				return TTDate::strtotime( $value );
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -223,6 +222,7 @@ class RequestFactory extends Factory {
 	 */
 	function setDateStamp( $value ) {
 		$value = (int)$value;
+
 		return $this->setGenericDataValue( 'date_stamp', $value );
 	}
 
@@ -233,13 +233,13 @@ class RequestFactory extends Factory {
 	 */
 	function getTypeIdFromHierarchyTypeId( $type_id ) {
 		//Make sure we support an array of type_ids.
-		if ( is_array($type_id) ) {
-			foreach( $type_id as $request_type_id ) {
-				$retval[] = ( $request_type_id >= 1000 AND $request_type_id < 2000 ) ? ( (int)$request_type_id - 1000 ) : (int)$request_type_id;
+		if ( is_array( $type_id ) ) {
+			foreach ( $type_id as $request_type_id ) {
+				$retval[] = ( $request_type_id >= 1000 && $request_type_id < 2000 ) ? ( (int)$request_type_id - 1000 ) : (int)$request_type_id;
 			}
 		} else {
-			$retval = ( $type_id >= 1000 AND $type_id < 2000 ) ? ( (int)$type_id - 1000 ) : (int)$type_id;
-			Debug::text('Hierarchy Type ID: '. $type_id .' Request Type ID: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+			$retval = ( $type_id >= 1000 && $type_id < 2000 ) ? ( (int)$type_id - 1000 ) : (int)$type_id;
+			Debug::text( 'Hierarchy Type ID: ' . $type_id . ' Request Type ID: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return $retval;
@@ -249,24 +249,25 @@ class RequestFactory extends Factory {
 	 * @param int $type_id ID
 	 * @return array|bool|int
 	 */
-	function getHierarchyTypeId( $type_id = NULL ) {
+	function getHierarchyTypeId( $type_id = null ) {
 		if ( $type_id == '' ) {
 			$type_id = $this->getType();
 		}
 
-		if ( $type_id == FALSE ) {
+		if ( $type_id == false ) {
 			Debug::text( 'ERROR: Type ID is FALSE', __FILE__, __LINE__, __METHOD__, 10 );
-			return FALSE;
+
+			return false;
 		}
 
 		//Make sure we support an array of type_ids.
-		if ( is_array($type_id) ) {
-			foreach( $type_id as $request_type_id ) {
+		if ( is_array( $type_id ) ) {
+			foreach ( $type_id as $request_type_id ) {
 				$retval[] = ( (int)$request_type_id + 1000 );
 			}
 		} else {
 			$retval = ( (int)$type_id + 1000 );
-			Debug::text('Request Type ID: '. $type_id .' Hierarchy Type ID: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Request Type ID: ' . $type_id . ' Hierarchy Type ID: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return $retval;
@@ -283,8 +284,9 @@ class RequestFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setType( $value) {
-		$value = (int)trim($value);
+	function setType( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'type_id', $value );
 	}
 
@@ -300,7 +302,8 @@ class RequestFactory extends Factory {
 	 * @return bool
 	 */
 	function setStatus( $value ) {
-		$value = (int)trim($value);
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'status_id', $value );
 	}
 
@@ -316,7 +319,7 @@ class RequestFactory extends Factory {
 	 * @return bool
 	 */
 	function setAuthorized( $value ) {
-		return $this->setGenericDataValue( 'authorized', $this->toBool($value) );
+		return $this->setGenericDataValue( 'authorized', $this->toBool( $value ) );
 	}
 
 	/**
@@ -330,11 +333,12 @@ class RequestFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setAuthorizationLevel( $value) {
+	function setAuthorizationLevel( $value ) {
 		$value = (int)trim( $value );
 		if ( $value < 0 ) {
 			$value = 0;
 		}
+
 		return $this->setGenericDataValue( 'authorization_level', $value );
 	}
 
@@ -350,17 +354,18 @@ class RequestFactory extends Factory {
 	 * @return bool
 	 */
 	function setMessage( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericTempDataValue( 'message', htmlspecialchars( $value ) );
 	}
 
 	/**
-	 * @return bool
+	 * @return bool|array
 	 */
 	function getRequestSchedule() {
 		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			$rslf = TTNew( 'RequestScheduleListFactory' ); /** @var RequestScheduleListFactory $rslf */
-			$rslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('request_id' => $this->getId()) );
+			$rslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [ 'request_id' => $this->getId() ] );
 			if ( $rslf->getRecordCount() == 1 ) {
 				foreach ( $rslf as $rs_obj ) {
 					$result = $rs_obj->getObjectAsArray();
@@ -373,33 +378,33 @@ class RequestFactory extends Factory {
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// User
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$this->Validator->isResultSetWithRows(	'user',
-														$ulf->getByID($this->getUser()),
-														TTi18n::gettext('Invalid Employee')
-													);
+		$this->Validator->isResultSetWithRows( 'user',
+											   $ulf->getByID( $this->getUser() ),
+											   TTi18n::gettext( 'Invalid Employee' )
+		);
 
-		if ( !is_object( $this->getUserObject() ) AND $this->Validator->hasError('user_id') == FALSE ) {
-			$this->Validator->isTRUE(		'user_id',
-											 FALSE,
-											 TTi18n::gettext('Invalid Employee') );
+		if ( !is_object( $this->getUserObject() ) && $this->Validator->hasError( 'user_id' ) == false ) {
+			$this->Validator->isTRUE( 'user_id',
+									  false,
+									  TTi18n::gettext( 'Invalid Employee' ) );
 		}
 
-		if ( $this->getDeleted() == FALSE ) { //Relax validation checks when deleting record, specifically to allow deleting records more than 1 year old that aren't authorized.
+		if ( $this->getDeleted() == false ) { //Relax validation checks when deleting record, specifically to allow deleting records more than 1 year old that aren't authorized.
 			// Pay Period
-			if ( $this->getPayPeriod() !== FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
+			if ( $this->getPayPeriod() !== false && $this->getPayPeriod() != TTUUID::getZeroID() ) {
 				$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 				$this->Validator->isResultSetWithRows( 'pay_period',
 													   $pplf->getByID( $this->getPayPeriod() ),
@@ -411,43 +416,43 @@ class RequestFactory extends Factory {
 									  $this->getDateStamp(),
 									  TTi18n::gettext( 'Incorrect date' ) . ' (a)'
 			);
-			if ( $this->Validator->isError( 'date_stamp' ) == FALSE ) {
+			if ( $this->Validator->isError( 'date_stamp' ) == false ) {
 				if ( $this->getDateStamp() > 0 ) {
 					$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
 				} else {
 					$this->Validator->isTRUE( 'date_stamp',
-											  FALSE,
+											  false,
 											  TTi18n::gettext( 'Incorrect date' ) . ' (b)'
 					);
 				}
 			}
 
-			if ( $this->getDateStamp() == FALSE
-					AND $this->Validator->hasError( 'date_stamp' ) == FALSE ) {
+			if ( $this->getDateStamp() == false
+					&& $this->Validator->hasError( 'date_stamp' ) == false ) {
 				$this->Validator->isTRUE( 'date_stamp',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'Incorrect Date' ) . ' (c)' );
 			}
 
-			if ( $this->Validator->isError( 'date_stamp' ) == FALSE AND $this->getDateStamp() < ( time() - ( 86400 * 365 * 1 ) ) ) { //No more than 1 year in the past
+			if ( $this->Validator->isError( 'date_stamp' ) == false && $this->getDateStamp() < ( time() - ( 86400 * 365 * 1 ) ) ) { //No more than 1 year in the past
 				$this->Validator->isTRUE( 'date_stamp',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'Date cannot be more than 1 year in the past' )
 				);
 			}
 
-			if ( $this->Validator->isError( 'date_stamp' ) == FALSE AND $this->getDateStamp() > ( time() + ( 86400 * 365 * 5 ) ) ) { //No more than 5 years in the future.
+			if ( $this->Validator->isError( 'date_stamp' ) == false && $this->getDateStamp() > ( time() + ( 86400 * 365 * 5 ) ) ) { //No more than 5 years in the future.
 				$this->Validator->isTRUE( 'date_stamp',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'Date cannot be more than 5 years in the future' )
 				);
 			}
 
 			//Make sure the user isn't entering requests before the employees hire or after termination date
-			if ( $this->Validator->isError( 'date_stamp' ) == FALSE AND $this->getDateStamp() != FALSE AND is_object( $this->getUserObject() ) ) {
-				if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
+			if ( $this->Validator->isError( 'date_stamp' ) == false && $this->getDateStamp() != false && is_object( $this->getUserObject() ) ) {
+				if ( $this->getUserObject()->getHireDate() != '' && TTDate::getBeginDayEpoch( $this->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
 					$this->Validator->isTRUE( 'date_stamp',
-											  FALSE,
+											  false,
 											  TTi18n::gettext( 'Date cannot be before your hire date' ) );
 				}
 				//Don't bother checking termination date, as it leak sensitive information.
@@ -460,7 +465,7 @@ class RequestFactory extends Factory {
 										  $this->getOptions( 'type' )
 			);
 			// Status
-			if ( $this->getStatus() != FALSE ) {
+			if ( $this->getStatus() != false ) {
 				$this->Validator->inArrayKey( 'status',
 											  $this->getStatus(),
 											  TTi18n::gettext( 'Incorrect Status' ),
@@ -469,16 +474,16 @@ class RequestFactory extends Factory {
 			}
 
 			// Authorization level
-			if ( $this->getAuthorizationLevel() !== FALSE ) {
+			if ( $this->getAuthorizationLevel() !== false ) {
 				$this->Validator->isNumeric( 'authorization_level',
 											 $this->getAuthorizationLevel(),
 											 TTi18n::gettext( 'Incorrect authorization level' )
 				);
 			}
 
-			if ( $this->getMessage() !== FALSE ) {
+			if ( $this->getMessage() !== false ) {
 				// HTML interface validates the message too soon, make it skip a 0 length message when only validating.
-				if ( $this->Validator->getValidateOnly() == TRUE AND $this->getMessage() == '' ) {
+				if ( $this->Validator->getValidateOnly() == true && $this->getMessage() == '' ) {
 					$minimum_length = 0;
 				} else {
 					$minimum_length = 2;
@@ -498,42 +503,42 @@ class RequestFactory extends Factory {
 			//Check to make sure this user has superiors to send a request too, otherwise we can't save the request.
 			if ( is_object( $this->getUserObject() ) ) {
 				$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
-				$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getHierarchyTypeId(), TRUE, FALSE ); //Request - Immediate parents only.
+				$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getHierarchyTypeId(), true, false ); //Request - Immediate parents only.
 				Debug::Arr( $request_parent_level_user_ids, 'Check for Superiors: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				if ( !is_array( $request_parent_level_user_ids ) OR count( $request_parent_level_user_ids ) == 0 ) {
+				if ( !is_array( $request_parent_level_user_ids ) || count( $request_parent_level_user_ids ) == 0 ) {
 					$this->Validator->isTRUE( 'message',
-											  FALSE,
+											  false,
 											  TTi18n::gettext( 'No supervisors are assigned to you at this time, please try again later' ) );
 				}
 			}
 
 			//Check to make sure an authorized/declined request is not set back to pending status.
 			$data_diff = $this->getDataDifferences();
-			if ( $this->isDataDifferent( 'status_id', $data_diff ) == TRUE AND in_array( $data_diff['status_id'], array( 50, 55) ) AND $this->getStatus() <= 30 ) {
+			if ( $this->isDataDifferent( 'status_id', $data_diff ) == true && in_array( $data_diff['status_id'], [ 50, 55 ] ) && $this->getStatus() <= 30 ) {
 				$this->Validator->isTRUE( 'status_id',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'Request has already been authorized/declined' ) );
 			}
 		}
 
-		if ( $this->isNew() == TRUE
-				AND $this->Validator->hasError( 'message' ) == FALSE
-				AND $this->getMessage() == FALSE
-				AND $this->Validator->getValidateOnly() == FALSE ) {
+		if ( $this->isNew() == true
+				&& $this->Validator->hasError( 'message' ) == false
+				&& $this->getMessage() == false
+				&& $this->Validator->getValidateOnly() == false ) {
 			$this->Validator->isTRUE( 'message',
-									  FALSE,
+									  false,
 									  TTi18n::gettext( 'Reason / Message must be specified' ) );
 		}
 
 
-		if ( $this->getDeleted() == TRUE AND in_array( $this->getStatus(), array(50, 55) ) ) {
-			$this->Validator->isTRUE(		'status_id',
-											FALSE,
-											TTi18n::gettext('Unable to delete requests after they have been authorized/declined') );
+		if ( $this->getDeleted() == true && in_array( $this->getStatus(), [ 50, 55 ] ) ) {
+			$this->Validator->isTRUE( 'status_id',
+									  false,
+									  TTi18n::gettext( 'Unable to delete requests after they have been authorized/declined' ) );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -542,19 +547,19 @@ class RequestFactory extends Factory {
 	function preSave() {
 		//If this is a new request, find the current authorization level to assign to it.
 		// isNew should be a force check due to request schedule child table
-		if ( $this->isNew(TRUE) == TRUE ) {
-			if ( $this->getStatus() == FALSE OR $this->getStatus() < 30 ) { //10=INCOMPLETE, 20=OPEN. When upgrading from v10 to v11 if the browser cache isn't cleared the status_id comes through as 20. We saw some cases of it coming through as 10 too.
-				$this->setStatus( 30 ); //Pending Auth.
+		if ( $this->isNew( true ) == true ) {
+			if ( $this->getStatus() == false || $this->getStatus() < 30 ) { //10=INCOMPLETE, 20=OPEN. When upgrading from v10 to v11 if the browser cache isn't cleared the status_id comes through as 20. We saw some cases of it coming through as 10 too.
+				$this->setStatus( 30 );                                     //Pending Auth.
 			}
 
 			$hierarchy_highest_level = AuthorizationFactory::getInitialHierarchyLevel( ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getCompany() : 0 ), ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getID() : 0 ), $this->getHierarchyTypeId() );
 			$this->setAuthorizationLevel( $hierarchy_highest_level );
 		}
-		if ( $this->getAuthorized() == TRUE ) {
+		if ( $this->getAuthorized() == true ) {
 			$this->setAuthorizationLevel( 0 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -562,13 +567,13 @@ class RequestFactory extends Factory {
 	 */
 	function postSave() {
 		//Save message here after we have the request_id.
-		if ( $this->getMessage() !== FALSE ) {
+		if ( $this->getMessage() !== false ) {
 			$mcf = TTnew( 'MessageControlFactory' ); /** @var MessageControlFactory $mcf */
 			$mcf->StartTransaction();
 
 			$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
-			$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getHierarchyTypeId(), TRUE, FALSE ); //Request - Immediate parents only.
-			Debug::Arr($request_parent_level_user_ids, 'Sending message to current direct Superiors: ', __FILE__, __LINE__, __METHOD__, 10);
+			$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getHierarchyTypeId(), true, false ); //Request - Immediate parents only.
+			Debug::Arr( $request_parent_level_user_ids, 'Sending message to current direct Superiors: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			$mcf = TTnew( 'MessageControlFactory' ); /** @var MessageControlFactory $mcf */
 			$mcf->setFromUserId( $this->getUser() );
@@ -576,9 +581,9 @@ class RequestFactory extends Factory {
 			$mcf->setObjectType( 50 ); //Messages don't break out request types like hierarchies do.
 			$mcf->setObject( $this->getID() );
 			$mcf->setParent( TTUUID::getZeroID() );
-			$mcf->setSubject( Option::getByKey( $this->getType(), $this->getOptions('type') ) .' '. TTi18n::gettext('request from') .': '. $this->getUserObject()->getFullName(TRUE) );
+			$mcf->setSubject( Option::getByKey( $this->getType(), $this->getOptions( 'type' ) ) . ' ' . TTi18n::gettext( 'request from' ) . ': ' . $this->getUserObject()->getFullName( true ) );
 			$mcf->setBody( $this->getMessage() );
-			$mcf->setEnableEmailMessage( FALSE ); //Dont email message notification, send authorization notice instead.
+			$mcf->setEnableEmailMessage( false ); //Dont email message notification, send authorization notice instead.
 
 			if ( $mcf->isValid() ) {
 				$mcf->Save();
@@ -592,29 +597,29 @@ class RequestFactory extends Factory {
 		}
 
 		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-			if ( $this->getDeleted() == FALSE AND $this->getAuthorized() == TRUE ) {
-				$rsf = TTNew('RequestScheduleFactory'); /** @var RequestScheduleFactory $rsf */
+			if ( $this->getDeleted() == false && $this->getAuthorized() == true ) {
+				$rsf = TTNew( 'RequestScheduleFactory' ); /** @var RequestScheduleFactory $rsf */
 				$add_related_schedules_retval = $rsf->addRelatedSchedules( $this );
-				if ( $add_related_schedules_retval == FALSE ) {
-					Debug::Text('  addRelatedSchedules failed, passing along validation errors!', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $add_related_schedules_retval == false ) {
+					Debug::Text( '  addRelatedSchedules failed, passing along validation errors!', __FILE__, __LINE__, __METHOD__, 10 );
 					$this->Validator->Merge( $rsf->Validator );
 				}
-				unset($rsf);
+				unset( $rsf );
 			}
 		}
 
-		if ( $this->getDeleted() == TRUE ) {
-			Debug::Text('Delete authorization history for this request...'. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->getDeleted() == true ) {
+			Debug::Text( 'Delete authorization history for this request...' . $this->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 			$alf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $alf */
 			$alf->getByObjectTypeAndObjectId( $this->getHierarchyTypeId(), $this->getId() );
-			foreach( $alf as $authorization_obj ) {
-				Debug::Text('Deleting authorization ID: '. $authorization_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-				$authorization_obj->setDeleted(TRUE);
+			foreach ( $alf as $authorization_obj ) {
+				Debug::Text( 'Deleting authorization ID: ' . $authorization_obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
+				$authorization_obj->setDeleted( true );
 				$authorization_obj->Save();
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -636,19 +641,19 @@ class RequestFactory extends Factory {
 			}
 			*/
 
-			if ( isset($data['status_id']) AND $data['status_id'] == '' ) {
-				unset($data['status_id']);
+			if ( isset( $data['status_id'] ) && $data['status_id'] == '' ) {
+				unset( $data['status_id'] );
 				$this->setStatus( 30 ); //Pending authorization
 			}
-			if ( isset($data['user_date_id']) AND $data['user_date_id'] == '' ) {
-				unset($data['user_date_id']);
+			if ( isset( $data['user_date_id'] ) && $data['user_date_id'] == '' ) {
+				unset( $data['user_date_id'] );
 			}
 
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
-					$function = 'set'.$function;
-					switch( $key ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						case 'date_stamp':
 							$this->setDateStamp( TTDate::parseDateTime( $data['date_stamp'] ) );
 							break;
@@ -663,10 +668,10 @@ class RequestFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -674,14 +679,14 @@ class RequestFactory extends Factory {
 	 * @param bool $permission_children_ids
 	 * @return mixed
 	 */
-	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
+	function getObjectAsArray( $include_columns = null, $permission_children_ids = false ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'first_name':
 						case 'last_name':
 						case 'title':
@@ -695,7 +700,7 @@ class RequestFactory extends Factory {
 							break;
 						case 'status':
 						case 'type':
-							$function = 'get'.$variable;
+							$function = 'get' . $variable;
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -704,10 +709,10 @@ class RequestFactory extends Factory {
 							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->getDateStamp() );
 							break;
 						case 'request_schedule':
-							if( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-								if ( $this->getType() == 30 OR $this->getType() == 40 ) {
+							if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+								if ( $this->getType() == 30 || $this->getType() == 40 ) {
 									$request_schedule = $this->getRequestSchedule();
-									if ( $request_schedule != FALSE AND count( $request_schedule ) > 0 ) {
+									if ( $request_schedule != false && count( $request_schedule ) > 0 ) {
 										$data[$variable] = $request_schedule;
 									}
 								}
@@ -733,7 +738,8 @@ class RequestFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Request - Employee').': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Type').': '. Option::getByKey( $this->getType(), $this->getOptions('type') ) .' '. TTi18n::getText('Date').': '. TTDate::getDate('DATE+TIME', $this->getDateStamp() ), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Request - Employee' ) . ': ' . UserListFactory::getFullNameById( $this->getUser() ) . ' ' . TTi18n::getText( 'Type' ) . ': ' . Option::getByKey( $this->getType(), $this->getOptions( 'type' ) ) . ' ' . TTi18n::getText( 'Date' ) . ': ' . TTDate::getDate( 'DATE+TIME', $this->getDateStamp() ), null, $this->getTable(), $this );
 	}
 }
+
 ?>

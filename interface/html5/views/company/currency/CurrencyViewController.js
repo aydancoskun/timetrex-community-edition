@@ -17,7 +17,7 @@ CurrencyViewController = BaseViewController.extend( {
 		this.table_name_key = 'currency';
 		this.context_menu_name = $.i18n._( 'Currencies' );
 		this.navigation_label = $.i18n._( 'Currency' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APICurrency' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -62,7 +62,7 @@ CurrencyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
@@ -71,7 +71,6 @@ CurrencyViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
 
 		//Tab 0 start
 
@@ -109,7 +108,6 @@ CurrencyViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( { field: 'is_base' } );
 		this.addEditFieldToColumn( $.i18n._( 'Base Currency' ), form_item_input, tab_currency_column1 );
-
 
 		// Conversion Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -223,7 +221,7 @@ CurrencyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -235,7 +233,7 @@ CurrencyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

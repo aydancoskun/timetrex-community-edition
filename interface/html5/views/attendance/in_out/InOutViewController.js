@@ -31,12 +31,12 @@ InOutViewController = BaseViewController.extend( {
 		this.script_name = 'InOutView';
 		this.table_name_key = 'punch';
 		this.context_menu_name = $.i18n._( 'In/Out' );
-		this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
 
 		//Tried to fix  Cannot call method 'getJobItem' of null. Use ( Global.getProductEdition() >= 20 )
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 		}
 
 		this.render();
@@ -45,10 +45,10 @@ InOutViewController = BaseViewController.extend( {
 		this.initPermission();
 
 		this.initData();
-		this.is_changed == true;
+		this.is_changed = true;
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [ContextMenuIconName.save, ContextMenuIconName.cancel]
@@ -76,7 +76,7 @@ InOutViewController = BaseViewController.extend( {
 
 	jobUIValidate: function() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				PermissionManager.validate( 'punch', 'edit_job' ) ) {
+			PermissionManager.validate( 'punch', 'edit_job' ) ) {
 			return true;
 		}
 		return false;
@@ -112,7 +112,7 @@ InOutViewController = BaseViewController.extend( {
 
 	badQuantityUIValidate: function() {
 		if ( PermissionManager.validate( 'punch', 'edit_quantity' ) &&
-				PermissionManager.validate( 'punch', 'edit_bad_quantity' ) ) {
+			PermissionManager.validate( 'punch', 'edit_bad_quantity' ) ) {
 			return true;
 		}
 		return false;
@@ -185,7 +185,7 @@ InOutViewController = BaseViewController.extend( {
 		var result = false;
 
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
-		var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
 			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } );
 		}
@@ -246,7 +246,7 @@ InOutViewController = BaseViewController.extend( {
 
 		var station_id = Global.getStationID();
 
-		var api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
+		var api_station = new ( APIFactory.getAPIClass( 'APIStation' ) )();
 
 		if ( station_id ) {
 			api_station.getCurrentStation( station_id, '10', {
@@ -296,7 +296,6 @@ InOutViewController = BaseViewController.extend( {
 					}
 				}
 
-
 			} );
 
 		}
@@ -317,7 +316,6 @@ InOutViewController = BaseViewController.extend( {
 				if ( !$this.edit_view ) {
 					$this.initEditViewUI( 'InOut', 'InOutEditView.html' );
 				}
-
 
 				$this.getUserPunch( function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
@@ -363,7 +361,7 @@ InOutViewController = BaseViewController.extend( {
 				break;
 			case 'job_item_id':
 				if ( ( Global.getProductEdition() >= 20 ) ) {
-					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? (target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '') : '' );
+					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
@@ -485,10 +483,10 @@ InOutViewController = BaseViewController.extend( {
 
 		if ( !callback ) {
 			callback = {
-				onResult: function ( result ) {
+				onResult: function( result ) {
 					this.onSaveResult( result );
-				}.bind(this)
-			}
+				}.bind( this )
+			};
 		}
 
 		return current_api.setUserPunch( record, false, ignoreWarning, callback );
@@ -524,7 +522,6 @@ InOutViewController = BaseViewController.extend( {
 	getOtherFieldReferenceField: function() {
 		return 'note';
 	},
-
 
 	buildEditViewUI: function() {
 		this._super( 'buildEditViewUI' );
@@ -605,7 +602,7 @@ InOutViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -623,7 +620,7 @@ InOutViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -638,23 +635,22 @@ InOutViewController = BaseViewController.extend( {
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 
-
 			//Job
 
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'job_id'
 			} );
 
@@ -677,16 +673,16 @@ InOutViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 					if ( val ) {
 						job_item_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'job_item_id'
 			} );
 
@@ -789,7 +785,7 @@ InOutViewController = BaseViewController.extend( {
 						break;
 					case 'job_item_id':
 						if ( ( Global.getProductEdition() >= 20 ) ) {
-							args = {};
+							var args = {};
 							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
 							widget.setValue( this.current_edit_record[key] );
@@ -842,6 +838,6 @@ InOutViewController.loadView = function() {
 		var template = _.template( result );
 
 		Global.contentContainer().html( template( args ) );
-	} )
+	} );
 
 };

@@ -47,7 +47,7 @@ class APIPayStubSummaryReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIPayStubSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getPayStubSummaryReport( $config = FALSE, $format = 'pdf' ) {
+	function getPayStubSummaryReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

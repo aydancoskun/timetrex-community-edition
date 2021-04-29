@@ -41,42 +41,42 @@
 class ROEListFactory extends ROEFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ROEListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array();
+		$ph = [];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
-					where	id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
+					from	' . $this->getTable() . '
+					where	id in (' . $this->getListSQL( $id, $ph, 'uuid' ) . ')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -88,25 +88,25 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ROEListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id)
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $uf->getTable() . ' as b
 					where	a.user_id = b.id
 						AND b.company_id = ?
 						AND a.deleted = 0 AND b.deleted = 0';
@@ -118,34 +118,34 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ROEListFactory
 	 */
-	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByIdAndCompanyId( $id, $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $id == '') {
-			return FALSE;
+		if ( $id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id)
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $uf->getTable() . ' as b
 					where	a.user_id = b.id
 						AND b.company_id = ?
-						AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
+						AND a.id in (' . $this->getListSQL( $id, $ph, 'uuid' ) . ')
 						AND a.deleted = 0 AND b.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -155,26 +155,26 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param string $id   UUID
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ROEListFactory
 	 */
-	function getByUserId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByUserId( $id, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	user_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -186,37 +186,37 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param string $id   UUID
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ROEListFactory
 	 */
-	function getLastROEByUserId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getLastROEByUserId( $id, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'last_date' => 'desc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'last_date' => 'desc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		if ( $limit == NULL ) {
+		if ( $limit == null ) {
 			$limit = 1;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	user_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -228,36 +228,36 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id      UUID
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $end_date   EPOCH
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ROEListFactory
 	 */
-	function getByUserIdAndStartDateAndEndDate( $id, $start_date, $end_date, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByUserIdAndStartDateAndEndDate( $id, $start_date, $end_date, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $start_date == '') {
-			return FALSE;
+		if ( $start_date == '' ) {
+			return false;
 		}
 
-		if ( $end_date == '') {
-			return FALSE;
+		if ( $end_date == '' ) {
+			return false;
 		}
 
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					'start_date' => $start_date,
-					'end_date' => $end_date,
-					);
+		$ph = [
+				'id'         => TTUUID::castUUID( $id ),
+				'start_date' => $start_date,
+				'end_date'   => $end_date,
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	user_id = ?
 						AND last_date >= ?
 						AND last_date <= ?
@@ -273,41 +273,41 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 	/**
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
-	 * @param int $date EPOCH
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $end_date   EPOCH
+	 * @param int $date       EPOCH
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool
 	 */
-	function getIsModifiedByUserIdAndStartDateAndEndDateAndDate( $user_id, $start_date, $end_date, $date, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
+	function getIsModifiedByUserIdAndStartDateAndEndDateAndDate( $user_id, $start_date, $end_date, $date, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $start_date == '') {
-			return FALSE;
+		if ( $start_date == '' ) {
+			return false;
 		}
 
-		if ( $end_date == '') {
-			return FALSE;
+		if ( $end_date == '' ) {
+			return false;
 		}
 
-		if ( $date == '') {
-			return FALSE;
+		if ( $date == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $start_date,
-					'end_date' => $end_date,
-					'created_date' => $date,
-					'updated_date' => $date,
-					);
+		$ph = [
+				'user_id'      => TTUUID::castUUID( $user_id ),
+				'start_date'   => $start_date,
+				'end_date'     => $end_date,
+				'created_date' => $date,
+				'updated_date' => $date,
+		];
 
 		//INCLUDE Deleted rows in this query.
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where
 							user_id = ?
 						AND last_date >= ?
@@ -321,59 +321,60 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 		if ( $this->getRecordCount() > 0 ) {
-			Debug::text('ROE rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'ROE rows have been modified: ' . $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
-			return TRUE;
+			return true;
 		}
-		Debug::text('ROE rows have NOT been modified', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::text( 'ROE rows have NOT been modified', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ROEListFactory
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
-		if ( isset($filter_data['roe_id']) ) {
+		if ( isset( $filter_data['roe_id'] ) ) {
 			$filter_data['id'] = $filter_data['roe_id'];
 			unset( $filter_data['roe_id'] );
 		}
-		if ( !is_array($order) ) {
+		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
+			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
+				$order = [ Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order'] ];
 			}
 		}
 
-		$additional_order_fields = array('uf.first_name', 'uf.last_name', 'code_id', 'pay_period_type_id');
+		$additional_order_fields = [ 'uf.first_name', 'uf.last_name', 'code_id', 'pay_period_type_id' ];
 
-		$sort_column_aliases = array(
-									'code' => 'code_id',
-									'pay_period_type' => 'pay_period_type_id',
-									);
+		$sort_column_aliases = [
+				'code'            => 'code_id',
+				'pay_period_type' => 'pay_period_type_id',
+		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
-		if ( $order == NULL ) {
-			$order = array( 'last_date' => 'desc'); //Order ROEs by last date for which paid.
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'last_date' => 'desc' ]; //Order ROEs by last date for which paid.
+			$strict = false;
 		} else {
-			if ( isset($order['first_name']) ) {
+			if ( isset( $order['first_name'] ) ) {
 				$order['uf.first_name'] = $order['first_name'];
-				unset($order['first_name']);
+				unset( $order['first_name'] );
 			}
-			if ( isset($order['last_name']) ) {
+			if ( isset( $order['last_name'] ) ) {
 				$order['uf.last_name'] = $order['last_name'];
-				unset($order['last_name']);
+				unset( $order['last_name'] );
 			}
-			$strict = TRUE;
+			$strict = true;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -381,9 +382,9 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 		//$ppsf = new PayPeriodScheduleFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*,
@@ -395,43 +396,43 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '.$uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	uf.company_id = ?';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : null;
 
-		if ( isset($filter_data['code']) AND !is_array($filter_data['code']) AND trim($filter_data['code']) != '' AND !isset($filter_data['code_id']) ) {
-			$filter_data['code_id'] = Option::getByFuzzyValue( $filter_data['code'], $this->getOptions('code') );
+		if ( isset( $filter_data['code'] ) && !is_array( $filter_data['code'] ) && trim( $filter_data['code'] ) != '' && !isset( $filter_data['code_id'] ) ) {
+			$filter_data['code_id'] = Option::getByFuzzyValue( $filter_data['code'], $this->getOptions( 'code' ) );
 		}
-		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'uf.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
-		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'uf.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
+		$query .= ( isset( $filter_data['first_name'] ) ) ? $this->getWhereClauseSQL( 'uf.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : null;
+		$query .= ( isset( $filter_data['last_name'] ) ) ? $this->getWhereClauseSQL( 'uf.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : null;
 
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['code_id']) ) ? $this->getWhereClauseSQL( 'a.code_id', $filter_data['code_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_type_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_type_id', $filter_data['pay_period_type_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['code_id'] ) ) ? $this->getWhereClauseSQL( 'a.code_id', $filter_data['code_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['pay_period_type_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_type_id', $filter_data['pay_period_type_id'], 'numeric_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['first_date']) ) ? $this->getWhereClauseSQL( 'a.first_date', $filter_data['first_date'], 'date_range', $ph ) : NULL;
-		$query .= ( isset($filter_data['last_date']) ) ? $this->getWhereClauseSQL( 'a.last_date', $filter_data['last_date'], 'date_range', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_end_date']) ) ? $this->getWhereClauseSQL( 'a.pay_period_end_date', $filter_data['pay_period_end_date'], 'date_range', $ph ) : NULL;
-		$query .= ( isset($filter_data['recall_date']) ) ? $this->getWhereClauseSQL( 'a.recall_date', $filter_data['recall_date'], 'date_range', $ph ) : NULL;
+		$query .= ( isset( $filter_data['first_date'] ) ) ? $this->getWhereClauseSQL( 'a.first_date', $filter_data['first_date'], 'date_range', $ph ) : null;
+		$query .= ( isset( $filter_data['last_date'] ) ) ? $this->getWhereClauseSQL( 'a.last_date', $filter_data['last_date'], 'date_range', $ph ) : null;
+		$query .= ( isset( $filter_data['pay_period_end_date'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_end_date', $filter_data['pay_period_end_date'], 'date_range', $ph ) : null;
+		$query .= ( isset( $filter_data['recall_date'] ) ) ? $this->getWhereClauseSQL( 'a.recall_date', $filter_data['recall_date'], 'date_range', $ph ) : null;
 
-		if ( isset($filter_data['termination_start_date']) AND (int)$filter_data['termination_start_date'] != 0 AND isset($filter_data['termination_end_date']) AND (int)$filter_data['termination_end_date'] != 0 ) {
-			$query .= ' AND ( uf.termination_date >= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['termination_start_date'] ) ) .' AND uf.termination_date <= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['termination_end_date'] ) ) .' ) ';
+		if ( isset( $filter_data['termination_start_date'] ) && (int)$filter_data['termination_start_date'] != 0 && isset( $filter_data['termination_end_date'] ) && (int)$filter_data['termination_end_date'] != 0 ) {
+			$query .= ' AND ( uf.termination_date >= ' . $this->db->qstr( $this->db->BindDate( (int)$filter_data['termination_start_date'] ) ) . ' AND uf.termination_date <= ' . $this->db->qstr( $this->db->BindDate( (int)$filter_data['termination_end_date'] ) ) . ' ) ';
 		}
 
-		$query .= ( isset($filter_data['serial']) ) ? $this->getWhereClauseSQL( 'a.serial', $filter_data['serial'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['comments']) ) ? $this->getWhereClauseSQL( 'a.comments', $filter_data['comments'], 'text', $ph ) : NULL;
+		$query .= ( isset( $filter_data['serial'] ) ) ? $this->getWhereClauseSQL( 'a.serial', $filter_data['serial'], 'text', $ph ) : null;
+		$query .= ( isset( $filter_data['comments'] ) ) ? $this->getWhereClauseSQL( 'a.comments', $filter_data['comments'], 'text', $ph ) : null;
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.created_by', 'y.first_name', 'y.last_name' ], $filter_data['created_by'], 'user_id_or_name', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.updated_by', 'z.first_name', 'z.last_name' ], $filter_data['updated_by'], 'user_id_or_name', $ph ) : null;
 
-		$query .=	'
+		$query .= '
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -443,4 +444,5 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 	}
 
 }
+
 ?>

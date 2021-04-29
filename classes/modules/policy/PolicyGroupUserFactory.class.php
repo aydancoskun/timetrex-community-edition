@@ -42,7 +42,7 @@ class PolicyGroupUserFactory extends Factory {
 	protected $table = 'policy_group_user';
 	protected $pk_sequence_name = 'policy_group_user_id_seq'; //PK Sequence name
 
-	var $user_obj = NULL;
+	var $user_obj = null;
 
 	/**
 	 * @return bool|mixed
@@ -55,8 +55,9 @@ class PolicyGroupUserFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPolicyGroup( $value) {
+	function setPolicyGroup( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'policy_group_id', $value );
 	}
 
@@ -64,17 +65,18 @@ class PolicyGroupUserFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
+		if ( is_object( $this->user_obj ) ) {
 			return $this->user_obj;
 		} else {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
+
 				return $this->user_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -82,23 +84,23 @@ class PolicyGroupUserFactory extends Factory {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function isUniqueUser( $id) {
+	function isUniqueUser( $id ) {
 		$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
-		$query = 'select a.id from '. $this->getTable() .' as a, '. $pglf->getTable() .' as b where a.policy_group_id = b.id AND a.user_id = ? AND b.deleted=0';
-		$user_id = $this->db->GetOne($query, $ph);
+		$query = 'select a.id from ' . $this->getTable() . ' as a, ' . $pglf->getTable() . ' as b where a.policy_group_id = b.id AND a.user_id = ? AND b.deleted=0';
+		$user_id = $this->db->GetOne( $query, $ph );
 		//Debug::Arr($user_id, 'Unique User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( $user_id === FALSE ) {
-			return TRUE;
+		if ( $user_id === false ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -112,10 +114,12 @@ class PolicyGroupUserFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -124,25 +128,25 @@ class PolicyGroupUserFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Policy Group
-		if (  $this->getPolicyGroup() == TTUUID::getZeroID() ) {
+		if ( $this->getPolicyGroup() == TTUUID::getZeroID() ) {
 			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
-			$this->Validator->isResultSetWithRows(	'policy_group',
-															$pglf->getByID($this->getPolicyGroup()),
-															TTi18n::gettext('Policy Group is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'policy_group',
+												   $pglf->getByID( $this->getPolicyGroup() ),
+												   TTi18n::gettext( 'Policy Group is invalid' )
+			);
 		}
 		// Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-			$this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($this->getUser()),
-															TTi18n::gettext('Selected Employee is invalid')
-														);
-			if ( $this->Validator->isError('user') == FALSE ) {
-				$this->Validator->isTrue(		'user',
-														$this->isUniqueUser($this->getUser()),
-														TTi18n::gettext('Selected Employee is already assigned to another Policy Group')
-													);
+			$this->Validator->isResultSetWithRows( 'user',
+												   $ulf->getByID( $this->getUser() ),
+												   TTi18n::gettext( 'Selected Employee is invalid' )
+			);
+			if ( $this->Validator->isError( 'user' ) == false ) {
+				$this->Validator->isTrue( 'user',
+										  $this->isUniqueUser( $this->getUser() ),
+										  TTi18n::gettext( 'Selected Employee is already assigned to another Policy Group' )
+				);
 			}
 		}
 
@@ -150,7 +154,7 @@ class PolicyGroupUserFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -159,75 +163,75 @@ class PolicyGroupUserFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -235,30 +239,30 @@ class PolicyGroupUserFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -267,11 +271,12 @@ class PolicyGroupUserFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
-		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getPolicyGroup(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
+		if ( is_object( $u_obj ) ) {
+			return TTLog::addEntry( $this->getPolicyGroup(), $log_action, TTi18n::getText( 'Employee' ) . ': ' . $u_obj->getFullName( false, true ), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

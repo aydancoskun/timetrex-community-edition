@@ -47,5 +47,4 @@ var APIRecurringScheduleTemplateControl = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportRecurringScheduleTemplateControl', arguments );
 	}
 
-
 } );

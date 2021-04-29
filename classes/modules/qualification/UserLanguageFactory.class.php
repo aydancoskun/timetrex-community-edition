@@ -41,71 +41,70 @@
 class UserLanguageFactory extends Factory {
 	protected $table = 'user_language';
 	protected $pk_sequence_name = 'user_language_id_seq'; //PK Sequence name
-	protected $qualification_obj = NULL;
+	protected $qualification_obj = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'fluency':
-				$retval = array(
-										10 => TTi18n::gettext('Speaking'),
-										20 => TTi18n::gettext('Writing'),
-										30 => TTi18n::gettext('Reading'),
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Speaking' ),
+						20 => TTi18n::gettext( 'Writing' ),
+						30 => TTi18n::gettext( 'Reading' ),
+				];
 				break;
 			case 'competency':
-				$retval = array(
-										10 => TTi18n::gettext('Native Language'),
-										20 => TTi18n::gettext('Good'),
-										30 => TTi18n::gettext('Basic'),
-										40 => TTi18n::gettext('Poor'),
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Native Language' ),
+						20 => TTi18n::gettext( 'Good' ),
+						30 => TTi18n::gettext( 'Basic' ),
+						40 => TTi18n::gettext( 'Poor' ),
+				];
 				break;
 			case 'source_type':
-				$qf = TTnew('QualificationFactory'); /** @var QualificationFactory $qf */
+				$qf = TTnew( 'QualificationFactory' ); /** @var QualificationFactory $qf */
 				$retval = $qf->getOptions( $name );
 				break;
 			case 'columns':
-				$retval = array(
-										'-1010-first_name' => TTi18n::gettext('First Name'),
-										'-1020-last_name' => TTi18n::gettext('Last Name'),
-										'-2050-qualification' => TTi18n::gettext('Language'),
-										'-2040-group' => TTi18n::gettext('Group'),
-										'-4010-fluency' => TTi18n::gettext('Fluency'),
-										'-4020-competency' => TTi18n::gettext('Competency'),
-										'-1040-description' => TTi18n::getText('Description'),
-										'-1300-tag' => TTi18n::gettext('Tags'),
+				$retval = [
+						'-1010-first_name'    => TTi18n::gettext( 'First Name' ),
+						'-1020-last_name'     => TTi18n::gettext( 'Last Name' ),
+						'-2050-qualification' => TTi18n::gettext( 'Language' ),
+						'-2040-group'         => TTi18n::gettext( 'Group' ),
+						'-4010-fluency'       => TTi18n::gettext( 'Fluency' ),
+						'-4020-competency'    => TTi18n::gettext( 'Competency' ),
+						'-1040-description'   => TTi18n::getText( 'Description' ),
+						'-1300-tag'           => TTi18n::gettext( 'Tags' ),
 
-										'-1090-title' => TTi18n::gettext('Title'),
-										'-1099-user_group' => TTi18n::gettext('Employee Group'),
-										'-1100-default_branch' => TTi18n::gettext('Branch'),
-										'-1110-default_department' => TTi18n::gettext('Department'),
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-1090-title'              => TTi18n::gettext( 'Title' ),
+						'-1099-user_group'         => TTi18n::gettext( 'Employee Group' ),
+						'-1100-default_branch'     => TTi18n::gettext( 'Branch' ),
+						'-1110-default_department' => TTi18n::gettext( 'Department' ),
+						'-2000-created_by'         => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date'       => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'         => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date'       => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'first_name',
-								'last_name',
-								'qualification',
-								'fluency',
-								'competency',
-								'description',
-								);
+				$retval = [
+						'first_name',
+						'last_name',
+						'qualification',
+						'fluency',
+						'competency',
+						'description',
+				];
 				break;
-
 		}
 
 		return $retval;
@@ -116,28 +115,29 @@ class UserLanguageFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'user_id' => 'User',
-										'first_name' => FALSE,
-										'last_name' => FALSE,
-										'qualification_id' => 'Qualification',
-										'qualification' => FALSE,
-										'group' => FALSE,
-										'fluency_id' => 'Fluency',
-										'fluency' => FALSE,
+		$variable_function_map = [
+				'id'               => 'ID',
+				'user_id'          => 'User',
+				'first_name'       => false,
+				'last_name'        => false,
+				'qualification_id' => 'Qualification',
+				'qualification'    => false,
+				'group'            => false,
+				'fluency_id'       => 'Fluency',
+				'fluency'          => false,
 
-										'competency_id' => 'Competency',
-										'competency' => FALSE,
+				'competency_id' => 'Competency',
+				'competency'    => false,
 
-										'description' => 'Description',
-										'tag' => 'Tag',
-										'default_branch' => FALSE,
-										'default_department' => FALSE,
-										'user_group' => FALSE,
-										'title' => FALSE,
-										'deleted' => 'Deleted',
-										);
+				'description'        => 'Description',
+				'tag'                => 'Tag',
+				'default_branch'     => false,
+				'default_department' => false,
+				'user_group'         => false,
+				'title'              => false,
+				'deleted'            => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -160,8 +160,9 @@ class UserLanguageFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -178,6 +179,7 @@ class UserLanguageFactory extends Factory {
 	 */
 	function setQualification( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'qualification_id', $value );
 	}
 
@@ -195,6 +197,7 @@ class UserLanguageFactory extends Factory {
 	 */
 	function setFluency( $value ) {
 		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'fluency_id', $value );
 	}
 
@@ -212,6 +215,7 @@ class UserLanguageFactory extends Factory {
 	 */
 	function setCompetency( $value ) {
 		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'competency_id', $value );
 	}
 
@@ -228,8 +232,9 @@ class UserLanguageFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setDescription( $value) {
-		$value = trim($value);
+	function setDescription( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'description', $value );
 	}
 
@@ -240,15 +245,15 @@ class UserLanguageFactory extends Factory {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
 		$value = $this->getGenericTempDataValue( 'tags' );
-		if ( $value !== FALSE ) {
+		if ( $value !== false ) {
 			return $value;
-		} elseif ( is_object( $this->getQualificationObject() )
-					AND TTUUID::isUUID( $this->getQualificationObject()->getCompany() ) AND $this->getQualificationObject()->getCompany() != TTUUID::getZeroID() AND $this->getQualificationObject()->getCompany() != TTUUID::getNotExistID()
-					AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
+		} else if ( is_object( $this->getQualificationObject() )
+				&& TTUUID::isUUID( $this->getQualificationObject()->getCompany() ) && $this->getQualificationObject()->getCompany() != TTUUID::getZeroID() && $this->getQualificationObject()->getCompany() != TTUUID::getNotExistID()
+				&& TTUUID::isUUID( $this->getID() ) && $this->getID() != TTUUID::getZeroID() && $this->getID() != TTUUID::getNotExistID() ) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getQualificationObject()->getCompany(), 254, $this->getID() );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -256,7 +261,8 @@ class UserLanguageFactory extends Factory {
 	 * @return bool
 	 */
 	function setTag( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		//Save the tags in temporary memory to be committed in postSave()
 		return $this->setGenericTempDataValue( 'tags', $value );
 	}
@@ -265,49 +271,49 @@ class UserLanguageFactory extends Factory {
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Employee
-		if ( $this->getUser() !== FALSE ) {
+		if ( $this->getUser() !== false ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-			$this->Validator->isResultSetWithRows(	'user_id',
-															$ulf->getByID($this->getUser()),
-															TTi18n::gettext('Employee must be specified')
-														);
+			$this->Validator->isResultSetWithRows( 'user_id',
+												   $ulf->getByID( $this->getUser() ),
+												   TTi18n::gettext( 'Employee must be specified' )
+			);
 		}
 		// Qualification
-		if ( $this->getQualification() !== FALSE ) {
+		if ( $this->getQualification() !== false ) {
 			$qlf = TTnew( 'QualificationListFactory' ); /** @var QualificationListFactory $qlf */
 			$this->Validator->isResultSetWithRows( 'qualification_id',
-															$qlf->getById( $this->getQualification() ),
-															TTi18n::gettext('Language must be specified')
-														);
+												   $qlf->getById( $this->getQualification() ),
+												   TTi18n::gettext( 'Language must be specified' )
+			);
 		}
 		// Fluency
-		if ( $this->getFluency() !== FALSE ) {
+		if ( $this->getFluency() !== false ) {
 			$this->Validator->inArrayKey( 'fluency_id',
-												$this->getFluency(),
-												TTi18n::gettext( 'Fluency is invalid' ),
-												$this->getOptions( 'fluency' )
-											);
+										  $this->getFluency(),
+										  TTi18n::gettext( 'Fluency is invalid' ),
+										  $this->getOptions( 'fluency' )
+			);
 		}
 		// Competency
-		if ( $this->getCompetency() !== FALSE ) {
+		if ( $this->getCompetency() !== false ) {
 			$this->Validator->inArrayKey( 'competency_id',
-												$this->getCompetency(),
-												TTi18n::gettext( 'Competency is invalid' ),
-												$this->getOptions( 'competency' )
-											);
+										  $this->getCompetency(),
+										  TTi18n::gettext( 'Competency is invalid' ),
+										  $this->getOptions( 'competency' )
+			);
 		}
 		// Description
 		if ( $this->getDescription() != '' ) {
 			$this->Validator->isLength( 'description',
-												$this->getDescription(),
-												TTi18n::gettext('Description is invalid'),
-												2, 255
-											);
+										$this->getDescription(),
+										TTi18n::gettext( 'Description is invalid' ),
+										2, 255
+			);
 		}
 
 		//
@@ -315,14 +321,14 @@ class UserLanguageFactory extends Factory {
 		//
 		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -330,13 +336,14 @@ class UserLanguageFactory extends Factory {
 	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
-		$this->removeCache( $this->getUser().$this->getQualification() );
+		$this->removeCache( $this->getUser() . $this->getQualification() );
 
-		if ( $this->getDeleted() == FALSE ) {
-			Debug::text('Setting Tags...', __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->getDeleted() == false ) {
+			Debug::text( 'Setting Tags...', __FILE__, __LINE__, __METHOD__, 10 );
 			CompanyGenericTagMapFactory::setTags( $this->getQualificationObject()->getCompany(), 254, $this->getID(), $this->getTag() );
 		}
-		return TRUE;
+
+		return true;
 	}
 
 	/**
@@ -347,11 +354,11 @@ class UserLanguageFactory extends Factory {
 
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -363,10 +370,10 @@ class UserLanguageFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -374,16 +381,16 @@ class UserLanguageFactory extends Factory {
 	 * @param bool $permission_children_ids
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null, $permission_children_ids = false ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
+					$function = 'get' . $function_stub;
 
-					switch( $variable ) {
+					switch ( $variable ) {
 						case 'qualification':
 						case 'group':
 						case 'first_name':
@@ -396,7 +403,7 @@ class UserLanguageFactory extends Factory {
 							break;
 						case 'fluency':
 						case 'competency':
-							$function = 'get'.$variable;
+							$function = 'get' . $variable;
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -407,7 +414,6 @@ class UserLanguageFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getPermissionColumns( $data, $this->getUser(), $this->getCreatedBy(), $permission_children_ids, $include_columns );
@@ -423,8 +429,9 @@ class UserLanguageFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Language'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Language' ), null, $this->getTable(), $this );
 	}
 
 }
+
 ?>

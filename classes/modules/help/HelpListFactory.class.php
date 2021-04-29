@@ -41,51 +41,51 @@
 class HelpListFactory extends HelpFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 
-		$strict_order = TRUE;
-		if ( $order == NULL ) {
-			$order = array('created_date' => 'desc');
+		$strict_order = true;
+		if ( $order == null ) {
+			$order = [ 'created_date' => 'desc' ];
 			//$strict_order = FALSE;
 		}
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted=0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HelpListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
+	function getById( $id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 						AND deleted=0';
 		$query .= $this->getWhereSQL( $where );
@@ -103,33 +103,33 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HelpListFactory
 	 */
-	function getByScriptNameAndGroupName( $script_name, $group_name = NULL, $where = NULL, $order = NULL) {
-		if ( $script_name == '' AND $group_name == '' ) {
-			return FALSE;
+	function getByScriptNameAndGroupName( $script_name, $group_name = null, $where = null, $order = null ) {
+		if ( $script_name == '' && $group_name == '' ) {
+			return false;
 		}
 
 		$hgcf = new HelpGroupControlFactory();
 		$hg = new HelpGroupFactory();
 
-		$ph = array(
-					'script_name' => $script_name,
-					'group_name' => $group_name,
-					);
+		$ph = [
+				'script_name' => $script_name,
+				'group_name'  => $group_name,
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $hgcf->getTable() .' as b,
-							'. $hg->getTable() .' as c
+					from	' . $this->getTable() . ' as a,
+							' . $hgcf->getTable() . ' as b,
+							' . $hg->getTable() . ' as c
 					where	b.id = c.help_group_control_id
 							AND c.help_id = a.id
 						';
 		//if ( $script_name != '' ) {
-			$query .= ' AND b.script_name = ?';
+		$query .= ' AND b.script_name = ?';
 		//}
 
 		//if ( $group_name != '') {
-			$query .= ' AND b.name = ?';
+		$query .= ' AND b.name = ?';
 		//}
 
 		$query .= ' AND a.deleted=0
@@ -151,33 +151,33 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HelpListFactory
 	 */
-	function getByScriptNameAndType( $script_name, $type, $where = NULL, $order = NULL) {
-		if ( $script_name == '') {
-			return FALSE;
+	function getByScriptNameAndType( $script_name, $type, $where = null, $order = null ) {
+		if ( $script_name == '' ) {
+			return false;
 		}
 
-		if ( $type == '') {
-			return FALSE;
+		if ( $type == '' ) {
+			return false;
 		}
 
-		$type_key = Option::getByValue($type, $this->getOptions('type') );
-		if ($type_key !== FALSE) {
+		$type_key = Option::getByValue( $type, $this->getOptions( 'type' ) );
+		if ( $type_key !== false ) {
 			$type = $type_key;
 		}
 
 		$hgcf = new HelpGroupControlFactory();
 		$hg = new HelpGroupFactory();
 
-		$ph = array(
-					'script_name' => $script_name,
-					'type_id' => $type,
-					);
+		$ph = [
+				'script_name' => $script_name,
+				'type_id'     => $type,
+		];
 
 		$query = '
 					select	a.*, b.name as group_name
-					from	'. $this->getTable() .' as a,
-							'. $hgcf->getTable() .' as b,
-							'. $hg->getTable() .' as c
+					from	' . $this->getTable() . ' as a,
+							' . $hgcf->getTable() . ' as b,
+							' . $hg->getTable() . ' as c
 					where	b.id = c.help_group_control_id
 							AND c.help_id = a.id
 							AND b.script_name = ?
@@ -203,38 +203,38 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HelpListFactory
 	 */
-	function getByScriptNameAndTypeAndStatus( $script_name, $type, $status, $where = NULL, $order = NULL) {
-		if ( $script_name == '') {
-			return FALSE;
+	function getByScriptNameAndTypeAndStatus( $script_name, $type, $status, $where = null, $order = null ) {
+		if ( $script_name == '' ) {
+			return false;
 		}
 
-		if ( $type == '') {
-			return FALSE;
+		if ( $type == '' ) {
+			return false;
 		}
 
-		if ( $status == '') {
-			return FALSE;
+		if ( $status == '' ) {
+			return false;
 		}
 
-		$type_key = Option::getByValue($type, $this->getOptions('type') );
-		if ($type_key !== FALSE) {
+		$type_key = Option::getByValue( $type, $this->getOptions( 'type' ) );
+		if ( $type_key !== false ) {
 			$type = $type_key;
 		}
 
 		$hgcf = new HelpGroupControlFactory();
 		$hg = new HelpGroupFactory();
 
-		$ph = array(
-					'script_name' => $script_name,
-					'type_id' => $type,
-					'status_id' => $status,
-					);
+		$ph = [
+				'script_name' => $script_name,
+				'type_id'     => $type,
+				'status_id'   => $status,
+		];
 
 		$query = '
 					select	a.*, b.name as group_name
-					from	'. $this->getTable() .' as a,
-							'. $hgcf->getTable() .' as b,
-							'. $hg->getTable() .' as c
+					from	' . $this->getTable() . ' as a,
+							' . $hgcf->getTable() . ' as b,
+							' . $hg->getTable() . ' as c
 					where	b.id = c.help_group_control_id
 							AND c.help_id = a.id
 							AND b.script_name = ?
@@ -260,33 +260,33 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HelpListFactory
 	 */
-	function getByScriptNameAndStatus( $script_name, $status, $where = NULL, $order = NULL) {
-		if ( $script_name == '') {
-			return FALSE;
+	function getByScriptNameAndStatus( $script_name, $status, $where = null, $order = null ) {
+		if ( $script_name == '' ) {
+			return false;
 		}
 
-		if ( $status == '') {
-			return FALSE;
+		if ( $status == '' ) {
+			return false;
 		}
 
-		$status_key = Option::getByValue($status, $this->getOptions('status') );
-		if ($status_key !== FALSE) {
+		$status_key = Option::getByValue( $status, $this->getOptions( 'status' ) );
+		if ( $status_key !== false ) {
 			$status = $status_key;
 		}
 
 		$hgcf = new HelpGroupControlFactory();
 		$hg = new HelpGroupFactory();
 
-		$ph = array(
-					'script_name' => $script_name,
-					'status_id' => $status,
-					);
+		$ph = [
+				'script_name' => $script_name,
+				'status_id'   => $status,
+		];
 
 		$query = '
 					select	a.*, b.name as group_name
-					from	'. $this->getTable() .' as a,
-							'. $hgcf->getTable() .' as b,
-							'. $hg->getTable() .' as c
+					from	' . $this->getTable() . ' as a,
+							' . $hgcf->getTable() . ' as b,
+							' . $hg->getTable() . ' as c
 					where	b.id = c.help_group_control_id
 							AND c.help_id = a.id
 							AND b.script_name = ?
@@ -313,11 +313,12 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 
 		$help_list[TTUUID::getZeroID()] = '--';
 
-		foreach ($hlf as $help) {
-			$help_list[$help->getID()] = '('. $help->getID() .') ['. Option::getByKey($help->getType(), $help->getOptions('type') ) .'] '. $help->getHeading();
+		foreach ( $hlf as $help ) {
+			$help_list[$help->getID()] = '(' . $help->getID() . ') [' . Option::getByKey( $help->getType(), $help->getOptions( 'type' ) ) . '] ' . $help->getHeading();
 		}
 
 		return $help_list;
 	}
 }
+
 ?>

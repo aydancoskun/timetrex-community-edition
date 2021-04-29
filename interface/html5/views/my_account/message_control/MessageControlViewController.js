@@ -27,8 +27,8 @@ MessageControlViewController = BaseViewController.extend( {
 		this.script_name = 'MessageControlView';
 		this.table_name_key = 'message_control';
 		this.context_menu_name = $.i18n._( 'Message' );
-		this.api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
-		this.request_api = new (APIFactory.getAPIClass( 'APIRequest' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
+		this.request_api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
 		this.folder_id = 10;
 
 		this.render();
@@ -60,7 +60,7 @@ MessageControlViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -93,7 +93,7 @@ MessageControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -105,7 +105,7 @@ MessageControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -326,14 +326,14 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var need_break = false;
 
-		for ( i = 0; i < len; i++ ) {
+		for ( var i = 0; i < len; i++ ) {
 
 			if ( need_break ) {
 				break;
 			}
 
-			context_btn = $( this.context_menu_array[i] );
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+			var context_btn = $( this.context_menu_array[i] );
+			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			switch ( id ) {
 				case ContextMenuIconName.view:
@@ -399,7 +399,6 @@ MessageControlViewController = BaseViewController.extend( {
 			Global.setUIInitComplete();
 			ProgressBar.closeOverlay();
 
-
 			TTPromise.resolve( 'base', 'onCancelClick' );
 
 		}
@@ -422,7 +421,6 @@ MessageControlViewController = BaseViewController.extend( {
 
 			$this.onSaveDone( result );
 
-
 			if ( $this.isReloadViewUI ) {
 				$this.isReloadViewUI = false;
 				$this.removeEditView();
@@ -432,9 +430,9 @@ MessageControlViewController = BaseViewController.extend( {
 				$this.removeEditView();
 			}
 
-			$().TFeedback({
+			$().TFeedback( {
 				source: 'Save'
-			});
+			} );
 
 		} else {
 			$this.setErrorMenu();
@@ -613,10 +611,6 @@ MessageControlViewController = BaseViewController.extend( {
 
 	},
 
-	openEditView: function() {
-		this.initEditViewUI( this.viewId, this.edit_view_tpl );
-	},
-
 	setGridCellBackGround: function() {
 		var data = this.grid.getGridParam( 'data' );
 
@@ -698,150 +692,139 @@ MessageControlViewController = BaseViewController.extend( {
 
 		this.initRightClickMenu( RightClickMenuType.EDITVIEW );
 
-		if ( this.is_add ) {
-			this.buildAddViewUI();
-		} else if ( this.is_viewing ) {
-			if ( this.is_request ) {
-				this.buildRequestViewUI();
-			} else if ( this.is_message ) {
-				this.buildMessageViewUI();
-			}
-		} else if ( this.is_edit ) {
-			this.buildEditViewUI();
+		this.buildEditViewUI();
+		this.setEditViewTabHeight();
+	},
+
+	getViewSelectedRecordId: function( record ) {
+		// overriden from BaseVC due to the this.getRecordFromGridById call
+		var selected_item;
+		var selected_id;
+		var grid_selected_id_array = this.getGridSelectIdArray();
+		var grid_selected_length = grid_selected_id_array.length;
+
+		if ( Global.isSet( record ) ) {
+			selected_item = record; // If the next_selected_item is defined, first to use this variable.
+
+		} else if ( grid_selected_length > 0 ) {
+			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
+		} else {
+			TTPromise.reject( 'MessageControllViewController', 'onViewClick' );
+			return null;
 		}
-		$this.setEditViewTabHeight();
+
+		if ( selected_item.object_type_id == 50 ) {
+			selected_id = selected_item.object_id;
+			this.is_request = true;
+			this.is_message = false;
+		} else {
+			selected_id = selected_item.id;
+			this.is_request = false;
+			this.is_message = true;
+		}
+
+		return selected_item;
+	},
+
+	getCurrentSelectedRecord: function( return_object ) {
+		var selected_item = this.current_selected_record;
+		if ( !selected_item ) {
+			return false;
+		}
+
+		var selected_id;
+		if ( selected_item.object_type_id && selected_item.object_type_id == 50 ) {
+			selected_id = selected_item.object_id;
+		} else {
+			selected_id = selected_item.id;
+		}
+
+		// current_selected_record normally handles ID's, but for MessageControlVC we will be using the record object as this is needed in various places.
+		if ( return_object === true ) {
+			return selected_item;
+		} else {
+			return selected_id;
+		}
+	},
+
+	handleViewAPICallbackResult: function( result ) {
+		var result_data;
+		if ( result && result.getResult ) {
+			result_data = result.getResult();
+			if ( this.is_request ) {
+				result_data = result_data[0];
+			} else {
+				// Note that we dont want to take just the first record if its not a request. Requests (and most other onView pages, only have one record. But messages can have multiple records in the results data.
+				result_data = result_data.length > 1 ? result_data.reverse() : result_data[0];
+			}
+		} else {
+			result_data = result;
+		}
+
+		return this._super( 'handleViewAPICallbackResult', result_data );
+	},
+
+	doViewAPICall: function( filter ) {
+		var callback = { onResult: this.handleViewAPICallbackResult.bind( this ) };
+
+		if ( this.is_request ) {
+			return this.request_api.getRequest( filter, callback );
+		} else {
+			return this.api.getMessage( filter, callback );
+		}
+	},
+
+	doViewClickResult: function( result_data ) {
+		// save current select grid data. Not this not work when access from url action. See autoOpenEditView function for why
+		this.current_select_message_control_data = this.getCurrentSelectedRecord( true );
+
+		//if access from url, current_select_message_control_data need be get again
+		if ( !this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
+			var filter = { filter_data: { id: this.current_select_message_control_data.id } };
+			var message_control_data = this.api.getMessageControl( filter, { async: false } ).getResult()[0];
+
+			if ( message_control_data ) {
+				this.current_select_message_control_data = message_control_data;
+			}
+
+		}
+		var retval = this._super( 'doViewClickResult', result_data );
+		TTPromise.resolve( 'MessageControllViewController', 'onViewClick' );
+		// The promise must be resolved last, after everthing else, hence the specific order here with retval and the super.
+		return retval;
+	},
+
+	getAPIFilters: function() {
+		var record_id = this.getCurrentSelectedRecord();
+		var filter = {};
+
+		filter.filter_data = {};
+		filter.filter_data.id = record_id;
+
+		return filter;
 	},
 
 	onViewClick: function( next_selected_item, noRefreshUI ) {
 		TTPromise.add( 'MessageControllViewController', 'onViewClick' );
 		TTPromise.wait();
 		var $this = this;
-		$this.is_viewing = true;
-		$this.is_edit = false;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'view';
+
+		this.setCurrentEditViewState( 'view' );
+
 		$this.isReloadViewUI = true;
-		var filter = {};
-		var selectedId;
-		var selected_item;
 
-		var grid_selected_id_array = this.getGridSelectIdArray();
-		var grid_selected_length = grid_selected_id_array.length;
-
-		if ( Global.isSet( next_selected_item ) ) {
-			selected_item = next_selected_item; // If the next_selected_item is defined, first to use this variable.
-
-		} else if ( grid_selected_length > 0 ) {
-			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
-		} else {
-			TTPromise.reject( 'MessageControllViewController', 'onViewClick' );
+		var selected_item = this.getViewSelectedRecordId( next_selected_item );
+		if ( Global.isFalseOrNull( selected_item ) ) {
 			return;
 		}
+		this.setCurrentSelectedRecord( selected_item );
 
-		if ( selected_item.object_type_id == 50 ) {
-			selectedId = selected_item.object_id;
-			$this.is_request = true;
-			$this.is_message = false;
-		} else {
-			selectedId = selected_item.id;
-			$this.is_request = false;
-			$this.is_message = true;
-		}
+		var filter = this.getAPIFilters();
+		this.openEditView();
 
-		filter.filter_data = {};
-		filter.filter_data.id = selectedId;
-
-		$this.openEditView();
-
-		if ( $this.is_request ) {
-
-			this.request_api['getRequest']( filter, {
-				onResult: function( result ) {
-
-					var result_data = result.getResult();
-
-					if ( !result_data ) {
-						result_data = [];
-					}
-
-					result_data = result_data[0];
-
-					if ( !result_data ) {
-						TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-						if ( !$this.edit_view ) {
-							$this.onCancelClick();
-						}
-						TTPromise.reject( 'MessageControllViewController', 'onViewClick' );
-						return;
-					}
-
-					// save current select grid data. Not this not work when access from url action. See autoOpenEditView function for why
-					$this.current_select_message_control_data = selected_item;
-
-					$this.current_edit_record = result_data;
-
-					//if access from url, current_select_message_control_data need be get again
-					if ( !$this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
-						var filter = { filter_data: { id: $this.current_select_message_control_data.id } };
-						var message_control_data = $this.api.getMessageControl( filter, { async: false } ).getResult()[0];
-
-						if ( message_control_data ) {
-							$this.current_select_message_control_data = message_control_data;
-						}
-
-					}
-
-					$this.initEditView();
-					TTPromise.resolve( 'MessageControllViewController', 'onViewClick' );
-				}
-			} );
-
-		} else {
-
-			this.api['getMessage']( filter, {
-				onResult: function( result ) {
-
-					var result_data = result.getResult();
-
-					if ( !result_data ) {
-						result_data = [];
-					}
-
-					result_data = result_data.length > 1 ? result_data.reverse() : result_data[0];
-
-					if ( !result_data ) {
-						TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-						if ( !$this.edit_view ) {
-							$this.onCancelClick();
-						}
-						TTPromise.reject( 'MessageControllViewController', 'onViewClick' );
-						return;
-					}
-
-					// save current select grid data. Not this not work when access from url action. See autoOpenEditView function for why
-					$this.current_select_message_control_data = selected_item;
-
-					$this.current_edit_record = result_data;
-					//if access from url, current_select_message_control_data need be get again
-					if ( !$this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
-						var filter = { filter_data: { id: $this.current_select_message_control_data.id } };
-						var message_control_data = $this.api.getMessageControl( filter, { async: false } ).getResult()[0];
-
-						if ( message_control_data ) {
-							$this.current_select_message_control_data = message_control_data;
-						}
-
-					}
-
-					$this.initEditView();
-
-					TTPromise.resolve( 'MessageControllViewController', 'onViewClick' );
-				}
-			} );
-
-		}
-
+		return this.doViewAPICall( filter );
 	},
+
 	/* jshint ignore:start */
 	setURL: function() {
 
@@ -870,14 +853,14 @@ MessageControlViewController = BaseViewController.extend( {
 
 					if ( this.is_request ) {
 						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId +
-								'&a=' + a + '&id=' + this.current_select_message_control_data.id +
-								'&t=request&object_id=' + this.current_select_message_control_data.object_id +
-								'&tab=' + tab_name );
+							'&a=' + a + '&id=' + this.current_select_message_control_data.id +
+							'&t=request&object_id=' + this.current_select_message_control_data.object_id +
+							'&tab=' + tab_name );
 					} else {
 						Global.setURLToBrowser( Global.getBaseURL() +
-								'#!m=' + this.viewId + '&a=' +
-								a + '&id=' + this.current_select_message_control_data.id + '&t=message' +
-								'&tab=' + tab_name );
+							'#!m=' + this.viewId + '&a=' +
+							a + '&id=' + this.current_select_message_control_data.id + '&t=message' +
+							'&tab=' + tab_name );
 					}
 
 				}
@@ -888,11 +871,11 @@ MessageControlViewController = BaseViewController.extend( {
 				if ( a ) {
 					//Edit a record which don't have id, schedule view Recurring Scedule
 					if ( a === 'edit' ) {
-						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&a=new&t=' + (this.is_request ? 'request' : 'message') +
-								'&tab=' + tab_name );
+						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&a=new&t=' + ( this.is_request ? 'request' : 'message' ) +
+							'&tab=' + tab_name );
 					} else {
-						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&a=' + a + '&t=' + (this.is_request ? 'request' : 'message') +
-								'&tab=' + tab_name );
+						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&a=' + a + '&t=' + ( this.is_request ? 'request' : 'message' ) +
+							'&tab=' + tab_name );
 					}
 
 				} else {
@@ -914,7 +897,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 			//because I will always get this in onViewClick, so else branch should never be in
 			if ( this.current_select_message_control_data && this.current_select_message_control_data.hasOwnProperty( 'id' ) &&
-					this.current_select_message_control_data.hasOwnProperty( 'subject' ) ) {
+				this.current_select_message_control_data.hasOwnProperty( 'subject' ) ) {
 				navigation_source_data = this.current_select_message_control_data;
 			} else {
 				navigation_source_data = Global.isArray( this.current_edit_record ) ? this.current_edit_record[0] : this.current_edit_record;
@@ -960,58 +943,12 @@ MessageControlViewController = BaseViewController.extend( {
 		this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'none' );
 	},
 
-//	collectUIDataToCurrentEditRecord: function() {
-//
-//		if ( this.is_mass_editing || this.is_viewing ) {
-//			return;
-//		}
-//
-//		var $this = this;
-//		for ( var key in this.edit_view_ui_dic ) {
-//
-//			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
-//				continue;
-//			}
-//
-//			var widget = this.edit_view_ui_dic[key];
-//			var value;
-//			//Set all UI field to current edit record, we need validate all UI field when save and validate
-//			if ( Global.isArray( $this.current_edit_record ) ) {
-//
-//				for ( var i = 0; i < $this.current_edit_record.length; i++ ) {
-//					if ( !Global.isSet( $this.current_edit_record[i][key] ) || $this.current_edit_record[key] != value ) {
-//
-//						value = widget.getValue();
-//						if ( !value || value === '0' || (Global.isArray( value ) && value.length === 0) ) {
-//							$this.current_edit_record[i][key] = false;
-//						} else {
-//							$this.current_edit_record[i][key] = value;
-//						}
-//
-//					}
-//				}
-//			} else {
-//				if ( !Global.isSet( $this.current_edit_record[key] ) || $this.current_edit_record[key] != value ) {
-//
-//					value = widget.getValue();
-//					if ( !value || value === '0' || (Global.isArray( value ) && value.length === 0) ) {
-//						$this.current_edit_record[key] = false;
-//					} else {
-//						$this.current_edit_record[key] = value;
-//					}
-//
-//				}
-//			}
-//
-//		}
-//	},
-
 	setNavigation: function() {
 
 		var $this = this;
 
 		this.navigation.setPossibleDisplayColumns( this.buildDisplayColumnsByColumnModel( this.grid.getGridParam( 'colModel' ) ),
-				this.buildDisplayColumns( this.default_display_columns ) );
+			this.buildDisplayColumns( this.default_display_columns ) );
 
 		this.navigation.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 
@@ -1040,7 +977,10 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {
-		this.setCurrentEditViewState('edit');
+		// edit click is clicking on Reply
+		this.setCurrentEditViewState( 'edit' );
+		this.is_request = false;
+		this.is_message = false;
 
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var selected_item = {};
@@ -1058,17 +998,37 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	buildEditViewUI: function() {
+		// Builds the fields for Add and Edit, and partially for Requests. But fields for Messages and some of requests are done dynamically in setMessages (Both) and initEmbeddedMessageData (Request only)
 
+		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
+		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
 		this._super( 'buildEditViewUI' );
-
 		var $this = this;
 
+		// This is actually updated in switchMessageOrRequestWidgets depending on view type
 		var tab_model = {
-			'tab_message': { 'label': $.i18n._( 'Message' ) },
+			'tab_message': { 'label': $.i18n._( 'Message' ) }
 		};
 		this.setTabModel( tab_model );
 
+		this.navigation.AComboBox( {
+			api_class: ( APIFactory.getAPIClass( 'APIMessageControl' ) ),
+			id: this.script_name + '_navigation',
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.MESSAGE_USER,
+			navigation_mode: true,
+			show_search_inputs: true
+		} );
+		this.setNavigation();
+
+		if ( pager_data && source_data ) {
+			this.navigation.setSourceData( source_data );
+			this.navigation.setPagerData( pager_data );
+		}
+
 		//Tab 0 start
+
+		var form_item_input;
 
 		var tab_message = this.edit_view_tab.find( '#tab_message' );
 
@@ -1079,185 +1039,144 @@ MessageControlViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0] = [];
 
 		this.edit_view_tabs[0].push( tab_message_column1 );
-
-		var form_item_input;
-
-		// Employee(s)
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'from_full_name' } );
-		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_message_column1, '' );
-
-		// Subject
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'subject', width: 359 } );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
-
-		// Body
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-
-		form_item_input.TTextArea( { field: 'body', width: 600, height: 400 } );
-
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
-
+		this.edit_view_tabs[0].push( tab_message_column2 );
 		tab_message_column2.css( 'display', 'none' );
 
-	},
+		// Now set the fields up
 
-	buildRequestViewUI: function() {
-		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
-		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
-		this._super( 'buildEditViewUI' );
+		// 'Message' fields
+		// #2775 'Message' message threads fields now dynamically built on the fly in setMessages()
 
-		var $this = this;
-
-		var tab_model = {
-			'tab_message': { 'label': $.i18n._( 'Message' ) },
-		};
-		this.setTabModel( tab_model );
-
-		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
-			id: this.script_name + '_navigation',
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.MESSAGE_USER,
-			navigation_mode: true,
-			show_search_inputs: true
-		} );
-
-		this.setNavigation();
-
-		if ( pager_data && source_data ) {
-			this.navigation.setSourceData( source_data );
-			this.navigation.setPagerData( pager_data );
-		}
-
-		//Tab 0 first column start
-
-		var tab_message = this.edit_view_tab.find( '#tab_message' );
-
-		var tab_message_column1 = tab_message.find( '.first-column' );
-
-		this.edit_view_tabs[0] = [];
-
-		this.edit_view_tabs[0].push( tab_message_column1 );
+		// 'Request' fields
 
 		// Employee
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'full_name', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_message_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_message_column1, '', null, true );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'date_stamp', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1, '', null, true );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'type', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_message_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_message_column1, '', null, true );
 
 		// tab_message first column end
 
-		var separate_box = tab_message.find( '.separate' );
+		// 'Request' Separated Box for 'Messages' Header
 
-		// Messages
+		var separated_box = tab_message.find( '.separate' );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( { label: $.i18n._( 'Messages' ) } );
-		this.addEditFieldToColumn( null, form_item_input, separate_box );
+		this.addEditFieldToColumn( null, form_item_input, separated_box, '', null, true, null, 'separated_box' );
 
-		// Tab 0 second column start
-
-		var tab_message_column2 = tab_message.find( '.second-column' );
-
-		this.edit_view_tabs[0].push( tab_message_column2 );
-
-		// From
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'from', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_message_column2, '' );
-
-		// Subject
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'subject', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column2 );
-
-		// Body
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'body', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column2, '', null, null, true );
+		// #2775 Request message thread fields now generated by initEmbeddedMessageData() and setMessages()
 
 		// Tab 0 second column end
 
-		tab_message_column2.css( 'display', 'none' );
+		// 'New (add)' and 'Reply (edit)' fields
 
+		// Employee - 'New' view
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: ( APIFactory.getAPIClass( 'APIMessageControl' ) ),
+			column_option_key: 'user_columns',
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.MESSAGE_USER,
+			show_search_inputs: true,
+			set_empty: true,
+			custom_key_name: 'User',
+			field: 'to_user_id'
+		} );
+		var default_args = {};
+		default_args.permission_section = 'message';
+		form_item_input.setDefaultArgs( default_args );
+		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_message_column1, '', null, true );
+
+		// Employee(s) - 'Reply' view
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input.TText( { field: 'from_full_name' } );
+		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_message_column1, '', null, true );
+
+		// Subject - shared with the new/add & reply/edit view
+		// Dev Note, in old reply view code, the width was passed as 359. Should that be incorporated here?
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'subject' } );
+		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1, '', null, true );
+
+		// Body  - shared with the new/add & reply/edit view
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+		form_item_input.TTextArea( { field: 'body', width: 600, height: 400 } );
+		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, true, true );
 	},
 
-	buildMessageViewUI: function() {
-		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
-		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
-		this._super( 'buildEditViewUI' );
-		var $this = this;
+	setEditViewWidgetsMode: function() {
+		this.switchMessageOrRequestWidgets();
+		this._super( 'setEditViewWidgetsMode' );
+	},
+	switchMessageOrRequestWidgets: function() {
+		// UI field building is done from buildEditViewUI(), and setMessages() for Messages and Requests (Also initEmbeddedMessageData).
+		// This function shows/hides various fields depending on whether the view is displaying a message or request, to reduce re-building the form elements, instead simply hiding and showing the right ones.
+		var tab_label;
 
-		var tab_model = {
-			'tab_message': { 'label': $.i18n._( 'Message' ) },
-		};
-		this.setTabModel( tab_model );
-
-		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
-			id: this.script_name + '_navigation',
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.MESSAGE_USER,
-			navigation_mode: true,
-			show_search_inputs: true
-		} );
-		this.setNavigation();
-
-		if ( pager_data && source_data ) {
-			this.navigation.setSourceData( source_data );
-			this.navigation.setPagerData( pager_data );
+		// Detach all fields, further down we just attach the ones we need for the view
+		for ( var key in this.edit_view_ui_dic ) {
+			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+				continue;
+			}
+			this.detachElement( key );
 		}
 
-		//Tab 0 start
+		// Detach the Request Messages header label box and hide parent container
+		this.detachElement( 'separated_box' );
 
-		var tab_message = this.edit_view_tab.find( '#tab_message' );
+		// Remove message list for both Message type and Request type - Message UI fields do not detach, we just remove them, as they are dynamically built on the fly.
+		this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab .second-column.message-container' ).remove();
 
-		var tab_message_column1 = tab_message.find( '.first-column' );
+		if ( this.is_request ) {
+			tab_label = 'Request';
+			this.attachElement( 'full_name' );
+			this.attachElement( 'date_stamp' );
+			this.attachElement( 'type' );
+			this.attachElement( 'separated_box' );
 
-		var tab_message_column2 = tab_message.find( '.second-column' );
+			// In show the main container which holds the fields.
+			this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab .first-column' ).show();
 
-		this.edit_view_tabs[0] = [];
+		} else if ( this.is_message ) {
+			tab_label = 'Message';
+			// #2775 No longer attaching elements here, as the Messages fields are dynamically built in setMessages
 
-		this.edit_view_tabs[0].push( tab_message_column1 );
+			// Hide the first-column field, as this is not used by messages, but causes a border to be shown at the top. Hiding only here rather than at the top, to reduce flashing (if any)
+			this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab .first-column' ).hide();
 
-		// From
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'from_full_name', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_message_column1, '' );
+		} else if ( this.is_add ) {
+			tab_label = 'New Message';
+			this.attachElement( 'to_user_id' );
+			this.attachElement( 'subject' );
+			this.attachElement( 'body' );
 
-		// To
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'to_full_name', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'To' ), form_item_input, tab_message_column1 );
+			// Show the main container which holds the fields.
+			this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab .first-column' ).show();
 
-		// Date
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'updated_date', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1 );
+		} else if ( this.is_edit ) {
+			tab_label = 'Reply';
+			this.attachElement( 'from_full_name' );
+			this.attachElement( 'subject' );
+			this.attachElement( 'body' );
 
-		// Subject
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'subject', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
+			// Show the main container which holds the fields.
+			this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab .first-column' ).show();
+		}
 
-		// Body
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( { field: 'body', selected_able: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
-
-		tab_message_column2.css( 'display', 'none' );
+		var tab_model = {
+			'tab_message': { 'label': $.i18n._( tab_label ) }
+		};
+		this.setTabModel( tab_model );
 
 	},
 
@@ -1274,63 +1193,6 @@ MessageControlViewController = BaseViewController.extend( {
 		this.setNavigationArrowsEnabled();
 	},
 
-	buildAddViewUI: function() {
-		this._super( 'buildEditViewUI' );
-
-		var $this = this;
-
-		var tab_model = {
-			'tab_message': { 'label': $.i18n._( 'Message' ) },
-		};
-		this.setTabModel( tab_model );
-
-		//Tab 0 start
-
-		var tab_message = this.edit_view_tab.find( '#tab_message' );
-
-		var tab_message_column1 = tab_message.find( '.first-column' );
-
-		var tab_message_column2 = tab_message.find( '.second-column' );
-
-		this.edit_view_tabs[0] = [];
-
-		this.edit_view_tabs[0].push( tab_message_column1 );
-
-		// Employee
-
-		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
-			column_option_key: 'user_columns',
-			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.MESSAGE_USER,
-			show_search_inputs: true,
-			set_empty: true,
-			custom_key_name: 'User',
-			field: 'to_user_id'
-		} );
-		var default_args = {};
-		default_args.permission_section = 'message';
-		form_item_input.setDefaultArgs( default_args );
-		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_message_column1, '' );
-
-		// Subject
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( { field: 'subject' } );
-
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
-
-		// Body
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-
-		form_item_input.TTextArea( { field: 'body', width: 600, height: 400 } );
-
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
-
-		tab_message_column2.css( 'display', 'none' );
-
-	},
-
 	onAddClick: function() {
 
 		TTPromise.add( 'Message', 'add' );
@@ -1341,6 +1203,8 @@ MessageControlViewController = BaseViewController.extend( {
 		this.is_add = true;
 		this.isReloadViewUI = false;
 		LocalCacheData.current_doing_context_action = 'new';
+		this.is_request = false;
+		this.is_message = false;
 		$this.openEditView();
 
 		var result_data = {};
@@ -1377,8 +1241,8 @@ MessageControlViewController = BaseViewController.extend( {
 
 	setEditMenuDeleteIcon: function( context_btn, pId ) {
 		if ( !this.current_select_message_control_data ||
-				this.is_edit ||
-				this.is_add ) {
+			this.is_edit ||
+			this.is_add ) {
 
 			context_btn.addClass( 'disable-image' );
 		}
@@ -1388,8 +1252,8 @@ MessageControlViewController = BaseViewController.extend( {
 	setEditMenuDeleteAndNextIcon: function( context_btn, pId ) {
 
 		if ( !this.current_select_message_control_data ||
-				this.is_edit ||
-				this.is_add ) {
+			this.is_edit ||
+			this.is_add ) {
 
 			context_btn.addClass( 'disable-image' );
 		}
@@ -1403,6 +1267,10 @@ MessageControlViewController = BaseViewController.extend( {
 
 		if ( Global.isSet( this.edit_view_ui_dic['subject'] ) ) {
 			record.subject = this.edit_view_ui_dic['subject'].getValue();
+		} else if ( Global.isSet( this.edit_view_ui_dic['message_subject'] ) ) {
+			record.subject = this.edit_view_ui_dic['message_subject'].getValue();
+		} else if ( Global.isSet( this.edit_view_ui_dic['request_subject'] ) ) {
+			record.subject = this.edit_view_ui_dic['request_subject'].getValue();
 		}
 		record = this.uniformVariable( record );
 
@@ -1423,11 +1291,14 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 		if ( Global.isSet( this.edit_view_ui_dic['subject'] ) ) {
 			record.subject = this.edit_view_ui_dic['subject'].getValue();
+		} else if ( Global.isSet( this.edit_view_ui_dic['message_subject'] ) ) {
+			record.subject = this.edit_view_ui_dic['message_subject'].getValue();
+		} else if ( Global.isSet( this.edit_view_ui_dic['request_subject'] ) ) {
+			record.subject = this.edit_view_ui_dic['request_subject'].getValue();
 		}
-
 		record = this.uniformVariable( record );
 
-		this.doSaveAPICall( record, ignoreWarning);
+		this.doSaveAPICall( record, ignoreWarning );
 	},
 
 	uniformVariable: function( records ) {
@@ -1447,11 +1318,6 @@ MessageControlViewController = BaseViewController.extend( {
 
 			} else {
 				// request
-//				if ( Global.isSet( this.messages ) ) {
-//					reply_data.object_id = records.object_id;
-//				} else {
-//					reply_data.object_id = records.id;
-//				}
 
 				reply_data.object_id = records.object_id;
 
@@ -1477,13 +1343,21 @@ MessageControlViewController = BaseViewController.extend( {
 	setCurrentEditRecordData: function() {
 		var $this = this;
 		// If the current_edit_record is an array, then handle them in setEditViewDataDone function.
-		if ( Global.isArray( this.current_edit_record ) ) {
-			this.setMultipleMessages();
+		// if ( Global.isArray( this.current_edit_record ) ) { // Commenting out to trial whether single messages can go through this too.
+		if ( this.is_message ) {
+			this.setMessages();
 		} else {
+			// TODO: Figure out where to trigger the uniformVariable work on splitting out the subject and body for msg/req stuff. Here or in above section, as multiple messages go elsewhere???
+
 			//Set current edit record data to all widgets
 			for ( var key in this.current_edit_record ) {
+				if ( !this.current_edit_record.hasOwnProperty( key ) ) {
+					continue;
+				}
+
 				var widget = this.edit_view_ui_dic[key];
 				if ( Global.isSet( widget ) ) {
+					// Now that all messages go through setMessages() and no longer through the below, we can remove some of the fields below. Not done yet as theres Add/Edit to consider and test first.
 					switch ( key ) {
 						case 'from_full_name':
 							widget.setValue( this.current_edit_record['from_first_name'] + ' ' + this.current_edit_record['from_last_name'] );
@@ -1506,6 +1380,10 @@ MessageControlViewController = BaseViewController.extend( {
 								widget.setValue( this.current_edit_record[key] );
 							}
 							break;
+						case 'message_body':
+						case 'request_body':
+							widget.setValue( this.current_edit_record[key] );
+							break;
 						default:
 							widget.setValue( this.current_edit_record[key] );
 							break;
@@ -1520,9 +1398,10 @@ MessageControlViewController = BaseViewController.extend( {
 					}
 				} );
 			}
+
+			this.collectUIDataToCurrentEditRecord(); // #2775 If Messages then, we do not want to store any ui fields to current_edit_record. Its view only, and we dont have references to each generated message anyway, as they generate on the fly.
 		}
-		this.collectUIDataToCurrentEditRecord();
-		this.setEditViewDataDone();
+		this.setEditViewDataDone(); // 2775 notes: also trigger more data/widget handling for request (SINGLE+MULTIPLE)
 	},
 	/* jshint ignore:end */
 	autoOpenEditViewIfNecessary: function() {
@@ -1559,22 +1438,23 @@ MessageControlViewController = BaseViewController.extend( {
 			}
 			retval.push( this.current_select_message_control_data.id );
 		} else {
-			retval = this._super('getDeleteSelectedRecordId');
+			retval = this._super( 'getDeleteSelectedRecordId' );
 		}
 		return retval;
 	},
 
 	doDeleteAPICall: function( remove_ids, _callback ) {
 		var callback = _callback || {
-			onResult: function ( result ) {
+			onResult: function( result ) {
 				this.isReloadViewUI = false;
 				this.onDeleteResult( result, remove_ids );
-			}.bind(this)
+			}.bind( this )
 		};
 		return this.api['delete' + this.api.key_name]( remove_ids, this.folder_id, callback );
 	},
 
 	setEditViewDataDone: function() {
+		// TODO: Refactor this to move into setCurrentEditRecordData, as this is not code that is classed as Data Load Done, its still data loading.
 		var $this = this;
 		this._super( 'setEditViewDataDone' );
 
@@ -1593,50 +1473,96 @@ MessageControlViewController = BaseViewController.extend( {
 
 	},
 
-	setMultipleMessages: function() {
-		var $this = this;
-		var container = $( '<div></div>' );
-
-		this.messages = $this.current_edit_record;
-
+	setMessages: function( message_data ) {
+		// This function handles message thread generation for both the message and request types.
 		var read_ids = [];
 
-		for ( var key in $this.current_edit_record ) {
+		if ( message_data ) {
+			this.messages = message_data;
+		} else {
+			this.messages = this.current_edit_record;
+		}
 
-			var currentItem = $this.current_edit_record[key];
-			if ( !currentItem.hasOwnProperty( 'id' ) ) {
+		if ( !Global.isArray( this.messages ) ) {
+			// This function works on an array of messages. If there is only one message, then provide an array of one message and process the same way.
+			this.messages = [this.messages];
+		}
+
+		// Remove all old messages first.
+		this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab .second-column.message-container' ).remove();
+
+		/*
+		 * Loop through and create the message fields
+		 */
+
+		// Collection container for the messages to be held in, until they are added in one go to the page.
+		var container = $( '<div></div>' );
+
+		for ( var key = 0; key < this.messages.length; key++ ) {
+
+			var current_item = this.messages[key];
+			if ( !current_item.hasOwnProperty( 'id' ) ) {
 				continue;
 			}
 
-			if ( currentItem.status_id == 10 ) {
-				read_ids.push( currentItem.id );
+			if ( current_item.status_id == 10 ) {
+				read_ids.push( current_item.id );
 			}
 
-			$this.edit_view_ui_dic['from_full_name'].setValue( currentItem['from_first_name'] + ' ' + currentItem['from_last_name'] );
-			$this.edit_view_ui_dic['to_full_name'].setValue( currentItem['to_first_name'] + ' ' + currentItem['to_last_name'] );
-			$this.edit_view_ui_dic['updated_date'].setValue( currentItem['updated_date'] );
-			$this.edit_view_ui_dic['subject'].setValue( currentItem['subject'] );
-			$this.edit_view_ui_dic['body'].setValue( currentItem['body'] );
+			var message_container = $( '<div></div>', { class: "second-column full-width-column message-container" } );
 
-			var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.first-column' ) ).clone();
+			if ( this.is_message ) {
+				this.addMessageRow( message_container, 'From', 'msg_from_full_name', current_item['from_first_name'] + ' ' + current_item['from_last_name'] );
+				this.addMessageRow( message_container, 'To', 'msg_to_full_name', current_item['to_first_name'] + ' ' + current_item['to_last_name'] );
+				this.addMessageRow( message_container, 'Date', 'msg_updated_date', current_item['updated_date'] );
+				this.addMessageRow( message_container, 'Subject', 'msg_subject', current_item['subject'] );
+				this.addMessageRow( message_container, 'Body', 'msg_body', current_item['body'], true );
 
-			cloneMessageControl.css( 'display', 'block' ).appendTo( container );
+			} else if ( this.is_request ) {
+				this.addMessageRow( message_container, 'From', 'req_from_full_name', current_item['from_first_name'] + ' ' + current_item['from_last_name'] + '@' + current_item['updated_date'] );
+				this.addMessageRow( message_container, 'Subject', 'req_subject', current_item['subject'] );
+				this.addMessageRow( message_container, 'Body', 'req_body', current_item['body'], true );
 
+			} else {
+				// Error: Message type not supported. Exit. Currently only messages and request types supported.
+				return;
+			}
+
+			container.append( message_container );
 		}
 
+		// Add the new message to the page
+		this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).append( container.html() );
+
 		if ( read_ids.length > 0 ) {
-			$this.api['markRecipientMessageAsRead']( read_ids, {
+			var $this = this;
+			this.api['markRecipientMessageAsRead']( read_ids, {
 				onResult: function( res ) {
 					$this.search( false );
 				}
 			} );
 		}
+	},
 
-		$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.first-column' ).remove();
-		$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).append( container.html() );
+	addMessageRow: function( message_container, label, field, value, set_resize_event ) {
+		// Note: Take extra care with this function, as we are building widgets outside of the normal init flow, so compare to the standard flow of buildEditViewUI if anything odd happens.
+
+		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input.TText( { field: field, selected_able: true } );
+		this.addEditFieldToColumn( $.i18n._( label ), form_item_input, message_container, '', null, null, set_resize_event );
+
+		// #2775 You must set the value after its added to column, not before, otherwise the field label will not resize after a large value is set.
+		form_item_input.setValue( value );
+
+		// #2775 You must set the opacity to 1 after adding to column, as the addEditFieldToColumn sets opacity to 0 during loading, and normally set back to 1 at the bottom of BaseVC.initEditViewData but here we are building widgets outside of the normal init flow.
+		form_item_input.css( 'opacity', '1' );
+
+		// remove the field reference from this.edit_view_ui_dic as we wont track the on-the-fly built fields.
+		delete this.edit_view_ui_dic[field];
 	},
 
 	initEmbeddedMessageData: function() {
+		// Used to generate the message threads for a Request type
 		var $this = this;
 		var args = {};
 		args.filter_data = {};
@@ -1651,62 +1577,17 @@ MessageControlViewController = BaseViewController.extend( {
 				}
 
 				var data = res.getResult();
-
-				if ( Global.isArray( data ) ) {
-					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'block' );
-
-					$this.messages = data;
-					var read_ids = [];
-
-					var container = $( '<div></div>' );
-
-					for ( var key in data ) {
-
-						var currentItem = data[key];
-						/* jshint ignore:start */
-
-						if ( currentItem.status_id == 10 ) {
-
-							read_ids.push( currentItem.id );
-
-						}
-						/* jshint ignore:end */
-
-						var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + '@' + currentItem.updated_date;
-						$this.edit_view_ui_dic['from'].setValue( from );
-						$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
-						$this.edit_view_ui_dic['body'].setValue( currentItem.body );
-
-						var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
-
-						cloneMessageControl.css( 'display', 'block' ).appendTo( container );
-					}
-
-					if ( read_ids.length > 0 ) {
-						$this.api['markRecipientMessageAsRead']( read_ids, {
-							onResult: function( res ) {
-								$this.search( false );
-							}
-						} );
-					}
-
-					$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
-					$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).append( container.html() );
-				} else {
-
-					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
-				}
-
+				$this.setMessages( data );
 			}
 		} );
 	},
-
-	/* jshint ignore:start */
-	search: function( set_default_menu, page_action, page_number, callBack ) {
-		this.refresh_id = null;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack );
-	}
-
-	/* jshint ignore:end */
+	// #2775 Commenting out to fix an issue where Delete&Next does not go to the next record. Not 100% certain why this is here, but annotations show something to do with flashing, which does not seem an issue atm.
+	// /* jshint ignore:start */
+	// search: function( set_default_menu, page_action, page_number, callBack ) {
+	// 	this.refresh_id = null;
+	// 	this._super( 'search', set_default_menu, page_action, page_number, callBack );
+	// }
+	//
+	// /* jshint ignore:end */
 
 } );

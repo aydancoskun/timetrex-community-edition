@@ -63,6 +63,4 @@ var APIForm1099MiscReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

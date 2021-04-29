@@ -40,37 +40,39 @@
  */
 class GovernmentForms_Base {
 
-	public $debug = FALSE;
-	public $data = NULL; //Form data is stored here in an array.
-	public $records = array(); //Store multiple records here to process on a single form. ie: T4's where two employees can be on a single page.
-	public $records_total = array(); //Total for all records.
+	public $debug = false;
+	public $data = null;        //Form data is stored here in an array.
+	public $records = [];       //Store multiple records here to process on a single form. ie: T4's where two employees can be on a single page.
+	public $records_total = []; //Total for all records.
 
-	public $class_directory = NULL;
+	public $class_directory = null;
 
 	/*
 	 * PDF related variables
 	 */
-	public $pdf_object = NULL;
-	public $template_index = array();
-	public $current_template_index = NULL;
+	public $pdf_object = null;
+	public $template_index = [];
+	public $current_template_index = null;
 
-	public $page_margins = array( 0, 43 ); //x, y - 43pt = 15mm Absolute margins that affect all drawing and templates.
-	public $page_offsets = array(0, 0 ); //x, y - Only affects drawing.
-	public $template_offsets = array( 0, 0 ); //x, y - Only affects templates.
+	public $page_margins = [ 0, 43 ];    //x, y - 43pt = 15mm Absolute margins that affect all drawing and templates.
+	public $page_offsets = [ 0, 0 ];     //x, y - Only affects drawing.
+	public $template_offsets = [ 0, 0 ]; //x, y - Only affects templates.
 
-	public $temp_page_offsets = array(0, 0 ); //x, y - Only affects drawing and is reset based on page_offets above.
+	public $temp_page_offsets = [ 0, 0 ]; //x, y - Only affects drawing and is reset based on page_offets above.
 
-	public $show_background = TRUE; //Shows the PDF background
+	public $show_background = true; //Shows the PDF background
 	public $default_font = 'helvetica';
 
 	function __construct() {
 		$this->temp_page_offsets = $this->page_offsets; //Default temp page offets to whatever page offsets is originally set to.
-		return TRUE;
+
+		return true;
 	}
 
 	function setDebug( $bool ) {
 		$this->debug = $bool;
 	}
+
 	function getDebug() {
 		return $this->debug;
 	}
@@ -78,12 +80,13 @@ class GovernmentForms_Base {
 	function setClassDirectory( $dir ) {
 		$this->class_directory = $dir;
 	}
+
 	function getClassDirectory() {
 		return $this->class_directory;
 	}
 
 	function Output( $type ) {
-		switch ( strtolower($type) ) {
+		switch ( strtolower( $type ) ) {
 			case 'pdf':
 				return $this->_outputPDF( $type );
 				break;
@@ -91,7 +94,7 @@ class GovernmentForms_Base {
 				return $this->_outputXML( $type );
 				break;
 			case 'efile':
-				return $this->_outputEFILE( $type );
+				return $this->_outputEFILE();
 				break;
 		}
 	}
@@ -99,16 +102,19 @@ class GovernmentForms_Base {
 	function getRecords() {
 		return $this->records;
 	}
+
 	function setRecords( $data ) {
-		if ( is_array($data) ) {
-			foreach( $data as $record ) {
+		if ( is_array( $data ) ) {
+			foreach ( $data as $record ) {
 				$this->addRecord( $record ); //Make sure preCalc() is called for each record.
 			}
 		} else {
 			$this->records = $data;
 		}
-		return TRUE;
+
+		return true;
 	}
+
 	function addRecord( $data ) {
 		//Filter functions should only be used for drawing the PDF, they do not modify the actual values themselves.
 		//preCalc functions should be used to modify the actual values themselves, prior to drawing on the PDF, as well prior to totalling.
@@ -116,20 +122,20 @@ class GovernmentForms_Base {
 		//preCalc functions can modify any other value in the record as well.
 		if ( is_array( $data ) ) {
 			if ( method_exists( $this, 'getPreCalcFunction' ) ) {
-				foreach( $data as $key => $value ) {
+				foreach ( $data as $key => $value ) {
 					$filter_function = $this->getPreCalcFunction( $key );
 					if ( $filter_function != '' ) {
 						if ( !is_array( $filter_function ) ) {
 							$filter_function = (array)$filter_function;
 						}
 
-						foreach( $filter_function as $function ) {
+						foreach ( $filter_function as $function ) {
 							//Call function
 							if ( method_exists( $this, $function ) ) {
 								$value = $this->$function( $value, $key, $data );
 							}
 						}
-						unset($function);
+						unset( $function );
 					}
 
 					$data[$key] = $value;
@@ -139,20 +145,25 @@ class GovernmentForms_Base {
 			$this->records[] = $data;
 		}
 
-		return TRUE;
+		return true;
 	}
+
 	function clearRecords() {
-		$this->records = array();
+		$this->records = [];
 	}
+
 	function countRecords() {
-		return count($this->records);
+		return count( $this->records );
 	}
+
 	//Totals all the values for all the records.
 	function sumRecords() {
 		//Make sure we handle array elements with letters, so we can properly combine boxes with the same letters.
-		$this->records_total = Misc::ArrayAssocSum( $this->records, NULL, NULL, TRUE );
-		return TRUE;
+		$this->records_total = Misc::ArrayAssocSum( $this->records, null, null, true );
+
+		return true;
 	}
+
 	function getRecordsTotal() {
 		return $this->records_total;
 	}
@@ -162,45 +173,46 @@ class GovernmentForms_Base {
 	 * Math functions
 	 *
 	 */
-	function MoneyFormatPretty($value) {
+	function MoneyFormatPretty( $value ) {
 		if ( !is_numeric( $value ) ) {
-			return FALSE;
+			return false;
 		}
 
-		return number_format( $value, 2, '.', ',');
+		return number_format( $value, 2, '.', ',' );
 	}
-	function MoneyFormat($value) {
+
+	function MoneyFormat( $value ) {
 		if ( !is_numeric( $value ) ) {
-			return FALSE;
+			return false;
 		}
 
-		return number_format( $value, 2, '.', '');
+		return number_format( $value, 2, '.', '' );
 	}
 
-	function getBeforeDecimal($float) {
-		$float = $this->MoneyFormat( $float, FALSE );
+	function getBeforeDecimal( $float ) {
+		$float = $this->MoneyFormat( $float );
 
-		$float_array = preg_split('/\./', $float);
+		$float_array = preg_split( '/\./', $float );
 
-		if ( isset($float_array[0]) ) {
+		if ( isset( $float_array[0] ) ) {
 			return $float_array[0];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	function getAfterDecimal($float, $format_number = TRUE ) {
-		if ( $format_number == TRUE ) {
-			$float = $this->MoneyFormat( $float, FALSE );
+	function getAfterDecimal( $float, $format_number = true ) {
+		if ( $format_number == true ) {
+			$float = $this->MoneyFormat( $float );
 		}
 
-		$float_array = preg_split('/\./', $float);
+		$float_array = preg_split( '/\./', $float );
 
-		if ( isset($float_array[1]) ) {
-			return str_pad($float_array[1], 2, '0');
+		if ( isset( $float_array[1] ) ) {
+			return str_pad( $float_array[1], 2, '0' );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -210,7 +222,7 @@ class GovernmentForms_Base {
 	 */
 	static function arraySum( $array ) {
 		$retval = 0;
-		foreach( $array as $value ) {
+		foreach ( $array as $value ) {
 			$retval = bcadd( $retval, $value );
 		}
 
@@ -222,12 +234,12 @@ class GovernmentForms_Base {
 	 * Date functions
 	 *
 	 */
-	public function getYear($epoch = NULL) {
-		if ($epoch == NULL) {
+	public function getYear( $epoch = null ) {
+		if ( $epoch == null ) {
 			$epoch = TTDate::getTime();
 		}
 
-		return date('Y', $epoch);
+		return date( 'Y', $epoch );
 	}
 
 	/*
@@ -236,13 +248,14 @@ class GovernmentForms_Base {
 	 *
 	 */
 	public function formatSSN( $value ) {
-		$value = substr_replace($value, '-', 3, 0);
-		$value = substr_replace($value, '-', 6, 0);
+		$value = substr_replace( $value, '-', 3, 0 );
+		$value = substr_replace( $value, '-', 6, 0 );
+
 		return $value;
 	}
 
 	public function formatEIN( $value ) {
-		return substr_replace($value, '-', 2, 0);
+		return substr_replace( $value, '-', 2, 0 );
 	}
 
 	/*
@@ -255,7 +268,7 @@ class GovernmentForms_Base {
 			return $value;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/*
@@ -263,24 +276,24 @@ class GovernmentForms_Base {
 	 * Filter functions
 	 *
 	 */
-	function stripSpaces($value) {
-		return str_replace(' ', '', trim($value));
+	function stripSpaces( $value ) {
+		return str_replace( ' ', '', trim( $value ) );
 	}
 
-	function stripNonNumeric($value) {
-		$retval = preg_replace('/[^0-9]/', '', $value);
+	function stripNonNumeric( $value ) {
+		$retval = preg_replace( '/[^0-9]/', '', $value );
 
 		return $retval;
 	}
 
-	function stripNonAlphaNumeric($value) {
-		$retval = preg_replace('/[^A-Za-z0-9\ ]/', '', $value); //Don't strip spaces
+	function stripNonAlphaNumeric( $value ) {
+		$retval = preg_replace( '/[^A-Za-z0-9\ ]/', '', $value ); //Don't strip spaces
 
 		return $retval;
 	}
 
-	function stripNonFloat($value) {
-		$retval = preg_replace('/[^-0-9\.]/', '', $value);
+	function stripNonFloat( $value ) {
+		$retval = preg_replace( '/[^-0-9\.]/', '', $value );
 
 		return $retval;
 	}
@@ -291,37 +304,37 @@ class GovernmentForms_Base {
 	 *
 	 */
 	function removeDecimal( $value ) {
-		$retval = str_replace('.', '', number_format( $value, 2, '.', '') );
+		$retval = str_replace( '.', '', number_format( $value, 2, '.', '' ) );
 
 		return $retval;
 	}
 
 	function padRecord( $value, $length, $type ) {
-		$type = strtolower($type);
+		$type = strtolower( $type );
 
 		//Trim record incase its too long.
-		$value = substr( $value, 0, $length);
+		$value = substr( $value, 0, $length );
 
-		switch ($type) {
+		switch ( $type ) {
 			case 'n':
-				$retval = str_pad( $value, $length, 0, STR_PAD_LEFT);
+				$retval = str_pad( $value, $length, 0, STR_PAD_LEFT );
 				break;
 			case 'an':
-				$retval = str_pad( $value, $length, ' ', STR_PAD_RIGHT);
+				$retval = str_pad( $value, $length, ' ', STR_PAD_RIGHT );
 				break;
 		}
 
 		return $retval;
 	}
 
-	function padLine( $line, $length = FALSE ) {
+	function padLine( $line, $length = false ) {
 		if ( $line == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$retval = str_pad( $line, ( $length == FALSE ) ? strlen($line) : $length, ' ', STR_PAD_RIGHT);
+		$retval = str_pad( $line, ( $length == false ) ? strlen( $line ) : $length, ' ', STR_PAD_RIGHT );
 
-		return $retval."\r\n";
+		return $retval . "\r\n";
 	}
 
 	/*
@@ -331,8 +344,10 @@ class GovernmentForms_Base {
 	 */
 	function setXMLObject( &$obj ) {
 		$this->xml_object = $obj;
-		return TRUE;
+
+		return true;
 	}
+
 	function getXMLObject() {
 		return $this->xml_object;
 	}
@@ -344,26 +359,32 @@ class GovernmentForms_Base {
 	 */
 	function setPDFObject( &$obj ) {
 		$this->pdf_object = $obj;
-		return TRUE;
+
+		return true;
 	}
+
 	function getPDFObject() {
 		return $this->pdf_object;
 	}
 
 	function setShowBackground( $bool ) {
 		$this->show_background = $bool;
-		return TRUE;
+
+		return true;
 	}
+
 	function getShowBackground() {
 		return $this->show_background;
 	}
 
 	function setPageMargins( $x, $y ) {
-		$this->page_margins = array( $x, $y );
-		return TRUE;
+		$this->page_margins = [ $x, $y ];
+
+		return true;
 	}
-	function getPageMargins( $type = NULL ) {
-		switch ( strtolower($type) ) {
+
+	function getPageMargins( $type = null ) {
+		switch ( strtolower( $type ) ) {
 			case 'x':
 				return $this->page_margins[0];
 				break;
@@ -377,11 +398,13 @@ class GovernmentForms_Base {
 	}
 
 	function setTempPageOffsets( $x, $y ) {
-		$this->temp_page_offsets = array( $x, $y );
-		return TRUE;
+		$this->temp_page_offsets = [ $x, $y ];
+
+		return true;
 	}
-	function getTempPageOffsets( $type = NULL ) {
-		switch ( strtolower($type) ) {
+
+	function getTempPageOffsets( $type = null ) {
+		switch ( strtolower( $type ) ) {
 			case 'x':
 				return $this->temp_page_offsets[0];
 				break;
@@ -395,13 +418,15 @@ class GovernmentForms_Base {
 	}
 
 	function setPageOffsets( $x, $y ) {
-		$this->page_offsets = array( $x, $y );
+		$this->page_offsets = [ $x, $y ];
 
 		$this->setTempPageOffsets( $x, $y ); //Update temp page offsets each time this is called.
-		return TRUE;
+
+		return true;
 	}
-	function getPageOffsets( $type = NULL ) {
-		switch ( strtolower($type) ) {
+
+	function getPageOffsets( $type = null ) {
+		switch ( strtolower( $type ) ) {
 			case 'x':
 				return $this->page_offsets[0];
 				break;
@@ -415,11 +440,13 @@ class GovernmentForms_Base {
 	}
 
 	function setTemplateOffsets( $x, $y ) {
-		$this->template_offsets = array( $x, $y );
-		return TRUE;
+		$this->template_offsets = [ $x, $y ];
+
+		return true;
 	}
-	function getTemplateOffsets( $type = NULL ) {
-		switch ( strtolower($type) ) {
+
+	function getTemplateOffsets( $type = null ) {
+		switch ( strtolower( $type ) ) {
 			case 'x':
 				return $this->template_offsets[0];
 				break;
@@ -434,83 +461,85 @@ class GovernmentForms_Base {
 
 	function getTemplateDirectory() {
 		$dir = $this->getClassDirectory() . DIRECTORY_SEPARATOR . 'templates';
+
 		return $dir;
 	}
 
-	function getSchemaSpecificCoordinates( $schema, $key, $sub_key1 = NULL ) {
+	function getSchemaSpecificCoordinates( $schema, $key, $sub_key1 = null ) {
 
-		unset($schema['function']);
+		unset( $schema['function'] );
 
-		if ( $sub_key1 !== NULL ) {
-			if ( isset($schema['coordinates'][$key][$sub_key1]) ) {
-				return array( 'coordinates' => $schema['coordinates'][$key][$sub_key1] );
+		if ( $sub_key1 !== null ) {
+			if ( isset( $schema['coordinates'][$key][$sub_key1] ) ) {
+				return [ 'coordinates' => $schema['coordinates'][$key][$sub_key1] ];
 			}
 		} else {
-			if ( isset($schema['coordinates'][$key]) ) {
-				return array( 'coordinates' => $schema['coordinates'][$key], 'font' => ( isset($schema['font']) ) ? $schema['font'] : array() );
+			if ( isset( $schema['coordinates'][$key] ) ) {
+				return [ 'coordinates' => $schema['coordinates'][$key], 'font' => ( isset( $schema['font'] ) ) ? $schema['font'] : [] ];
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//This gives the same affect of adding a new page on the next time Draw() is called.
 	//Can be used when multiple records are processed for a single form.
 	function resetTemplatePage() {
-		$this->current_template_index = NULL;
-		return TRUE;
+		$this->current_template_index = null;
+
+		return true;
 	}
 
 	//Draw all digits before the decimal in the first location, and after the decimal in the second location.
 	function drawSplitDecimalFloat( $value, $schema ) {
-		if ( $value != 0 OR isset($schema['draw_zero_value']) AND $schema['draw_zero_value'] == TRUE ) {
+		if ( $value != 0 || isset( $schema['draw_zero_value'] ) && $schema['draw_zero_value'] == true ) {
 			$this->Draw( $this->getBeforeDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, 0 ) );
 			$this->Draw( $this->getAfterDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, 1 ) );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	//Draw each char/digit one at a time in different locations.
 	function drawChars( $value, $schema ) {
 		$value = (string)$value; //convert integer to string.
-		$max = strlen($value);
-		for($i=0; $i < $max; $i++) {
+		$max = strlen( $value );
+		for ( $i = 0; $i < $max; $i++ ) {
 			$this->Draw( $value[$i], $this->getSchemaSpecificCoordinates( $schema, $i ) );
 		}
 
-		return TRUE;
+		return true;
 	}
-    // Draw the same data at different locations
-    // value should be string
-    function drawPiecemeal( $value, $schema ) {
-        unset( $schema['function'] );
-        foreach( $schema['coordinates'] as $key => $coordinates ) {
-            if ( is_array( $coordinates ) ) {
-                if ( isset( $schema['font'] ) ) {
-                    $this->Draw( $value, array( 'coordinates' => $coordinates, 'font' => $schema['font'] ) );
-                } else {
-                    $this->Draw( $value, array( 'coordinates' => $coordinates ) );
-                }
-            }
-        }
+	// Draw the same data at different locations
+	// value should be string
+	function drawPiecemeal( $value, $schema ) {
+		unset( $schema['function'] );
+		foreach ( $schema['coordinates'] as $key => $coordinates ) {
+			if ( is_array( $coordinates ) ) {
+				if ( isset( $schema['font'] ) ) {
+					$this->Draw( $value, [ 'coordinates' => $coordinates, 'font' => $schema['font'] ] );
+				} else {
+					$this->Draw( $value, [ 'coordinates' => $coordinates ] );
+				}
+			}
+		}
 
-        return TRUE;
-    }
+		return true;
+	}
 
 	//Draw each element of an array at different locations.
 	//Value must be an array.
 	function drawSegments( $value, $schema ) {
 
-		if ( is_array($value) ) {
-			$i=0;
-			foreach( $value as $segment ) {
+		if ( is_array( $value ) ) {
+			$i = 0;
+			foreach ( $value as $segment ) {
 				$this->Draw( $segment, $this->getSchemaSpecificCoordinates( $schema, $i ) );
 				$i++;
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	//Draw an normal values in a grid.
@@ -519,30 +548,28 @@ class GovernmentForms_Base {
 			$value = (array)$value;
 		}
 
-		foreach( $value as $key => $tmp_value ) {
+		foreach ( $value as $key => $tmp_value ) {
 
-			if ( $tmp_value !== FALSE ) {
+			if ( $tmp_value !== false ) {
 				//var_dump($tmp_value, $schema['coordinates'][$key] );
 
 				//$this->Draw( $this->getBeforeDecimal( $value ),  array('coordinates' => $schema['coordinates'][$key][0] ) );
 				//var_dump( $this->getSchemaSpecificCoordinates( $schema, $key, 0 ) );
 				//$this->Draw( $this->getBeforeDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, $key, 0 ) );
 
-				if ( is_array($tmp_value) ) {
+				if ( is_array( $tmp_value ) ) {
 
-					foreach( $tmp_value as $value ) {
+					foreach ( $tmp_value as $value ) {
 						$this->drawNormal( $value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
 					}
 				} else {
 					$this->drawNormal( $tmp_value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
 				}
-
-
 				//$this->Draw( $tmp_value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	//Draw an split decimal values in a grid.
@@ -551,30 +578,28 @@ class GovernmentForms_Base {
 			$value = (array)$value;
 		}
 
-		foreach( $value as $key => $tmp_value ) {
+		foreach ( $value as $key => $tmp_value ) {
 
-			if ( $tmp_value !== FALSE ) {
+			if ( $tmp_value !== false ) {
 				//var_dump($tmp_value, $schema['coordinates'][$key] );
 
 				//$this->Draw( $this->getBeforeDecimal( $value ),  array('coordinates' => $schema['coordinates'][$key][0] ) );
 				//var_dump( $this->getSchemaSpecificCoordinates( $schema, $key, 0 ) );
 				//$this->Draw( $this->getBeforeDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, $key, 0 ) );
 
-                if ( is_array($tmp_value) ) {
+				if ( is_array( $tmp_value ) ) {
 
-                    foreach( $tmp_value as $value ) {
-                        $this->drawSplitDecimalFloat( $value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
-                    }
-                } else {
-                    $this->drawSplitDecimalFloat( $tmp_value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
-                }
-
-
+					foreach ( $tmp_value as $value ) {
+						$this->drawSplitDecimalFloat( $value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
+					}
+				} else {
+					$this->drawSplitDecimalFloat( $tmp_value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
+				}
 				//$this->Draw( $tmp_value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	//Draw an X in each of the specified locations
@@ -586,163 +611,161 @@ class GovernmentForms_Base {
 			$value = (array)$value;
 		}
 
-		foreach( $value as $tmp_value ) {
+		foreach ( $value as $tmp_value ) {
 			//Skip any false values.
-			if ( $tmp_value === FALSE ) {
+			if ( $tmp_value === false ) {
 				continue;
 			}
 
 			if ( is_string( $tmp_value ) ) {
-				$tmp_value = strtolower($tmp_value);
+				$tmp_value = strtolower( $tmp_value );
 			}
 
-			if ( is_bool($tmp_value) AND $tmp_value == TRUE ) {
+			if ( is_bool( $tmp_value ) && $tmp_value == true ) {
 				$tmp_value = 0;
 			}
 
 			$this->Draw( $char, $this->getSchemaSpecificCoordinates( $schema, $tmp_value ) );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function drawNormal( $value, $schema ) {
-		if ( $value !== FALSE ) { //If value is FALSE don't draw anything, this prevents a blank cell from being drawn overtop of other text.
-			unset($schema['function']); //Strip off the function element to prevent infinite loop
+		if ( $value !== false ) {         //If value is FALSE don't draw anything, this prevents a blank cell from being drawn overtop of other text.
+			unset( $schema['function'] ); //Strip off the function element to prevent infinite loop
 			$this->Draw( $value, $schema );
-			return TRUE;
+
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
-    function drawGrid( $value, $schema ) {
+	function drawGrid( $value, $schema ) {
 
-        unset($schema['function']);
+		unset( $schema['function'] );
 
-        if ( isset( $schema['grid'] ) ) {
-            $grid = $schema['grid'];
-        }
+		if ( isset( $schema['grid'] ) ) {
+			$grid = $schema['grid'];
+		}
 
-        if ( is_array( $value ) ) {
+		if ( is_array( $value ) ) {
 
-			if ( isset( $grid ) AND is_array( $grid ) ) {
+			if ( isset( $grid ) && is_array( $grid ) ) {
 
-			     $top_left_x = $x = $grid['top_left_x'];
-                 $top_left_y = $y = $grid['top_left_y'];
-                 $h = $grid['h'];
-                 $w = $grid['w'];
-                 $step_x = $grid['step_x'];
-                 $step_y = $grid['step_y'];
-                 $col = $grid['column'];
+				$top_left_x = $x = $grid['top_left_x'];
+				$top_left_y = $y = $grid['top_left_y'];
+				$h = $grid['h'];
+				$w = $grid['w'];
+				$step_x = $grid['step_x'];
+				$step_y = $grid['step_y'];
+				$col = $grid['column'];
 
-			     $i=1;
-                 foreach( $value as $val ) {
+				$i = 1;
+				foreach ( $value as $val ) {
 
-                    $coordinates = array(
-                        'x' => $x,
-                        'y' => $y,
-                        'h' => $h,
-                        'w' => $w,
-                    );
+					$coordinates = [
+							'x' => $x,
+							'y' => $y,
+							'h' => $h,
+							'w' => $w,
+					];
 
-                    $schema['coordinates'] = array_merge( $schema['coordinates'], $coordinates );
+					$schema['coordinates'] = array_merge( $schema['coordinates'], $coordinates );
 
-                    $this->Draw( $val, $schema );
+					$this->Draw( $val, $schema );
 
-                    if ( $i > 0 AND $i % $col == 0 ) {
-                        $x = $top_left_x;
-    					$y += $step_y;
-    				} else {
-    					$x += $step_x;
-    				}
-    				$i++;
-
-                }
-
+					if ( $i > 0 && $i % $col == 0 ) {
+						$x = $top_left_x;
+						$y += $step_y;
+					} else {
+						$x += $step_x;
+					}
+					$i++;
+				}
 			}
-        }
+		}
 
-        return TRUE;
-    }
+		return true;
+	}
 
 
-
-	function addPage( $schema = NULL ) {
+	function addPage( $schema = null ) {
 		$pdf = $this->getPDFObject();
 
 		$pdf->AddPage();
-		if ( $this->getShowBackground() == TRUE AND isset($this->template_index[$schema['template_page']]) ) {
-			if ( isset($schema['combine_templates']) AND is_array($schema['combine_templates']) ) {
+		if ( $this->getShowBackground() == true && isset( $this->template_index[$schema['template_page']] ) ) {
+			if ( isset( $schema['combine_templates'] ) && is_array( $schema['combine_templates'] ) ) {
 				$template_schema = $this->getTemplateSchema();
 
 				//Handle combining multiple template together with a X,Y offset.
-				foreach( $schema['combine_templates'] as $combine_template ) {
+				foreach ( $schema['combine_templates'] as $combine_template ) {
 					//Debug::text('Combining Template Pages... Template: '. $combine_template['template_page'] .' Y: '. $combine_template['y'], __FILE__, __LINE__, __METHOD__, 10);
-					$pdf->useTemplate( $this->template_index[$combine_template['template_page']], ( $combine_template['x'] + $this->getTemplateOffsets('x') + $this->getPageMargins('x') ), ( $combine_template['y'] + $this->getTemplateOffsets('y') + $this->getPageMargins('y') ) );
+					$pdf->useTemplate( $this->template_index[$combine_template['template_page']], ( $combine_template['x'] + $this->getTemplateOffsets( 'x' ) + $this->getPageMargins( 'x' ) ), ( $combine_template['y'] + $this->getTemplateOffsets( 'y' ) + $this->getPageMargins( 'y' ) ) );
 
-					$this->setTempPageOffsets( ( $combine_template['x'] + $this->getPageOffsets('x') ), ( $combine_template['y'] + $this->getPageOffsets('y') ) );
+					$this->setTempPageOffsets( ( $combine_template['x'] + $this->getPageOffsets( 'x' ) ), ( $combine_template['y'] + $this->getPageOffsets( 'y' ) ) );
 					$this->current_template_index = $combine_template['template_page'];
 
 					//For things like W2 instruction templates at the bottom half of the page, allow the initPage() function to be disabled for the template.
-					if ( !isset($combine_template['init']) OR ( isset($combine_template['init']) AND $combine_template['init'] == TRUE ) ) {
+					if ( !isset( $combine_template['init'] ) || ( isset( $combine_template['init'] ) && $combine_template['init'] == true ) ) {
 						$this->initPage( $template_schema );
 					}
 				}
-				unset($combine_templates);
-				$this->setTempPageOffsets( $this->getPageOffsets('x'), $this->getPageOffsets('y') ); //Reset page offsets after each template is initialized.
+				unset( $combine_templates );
+				$this->setTempPageOffsets( $this->getPageOffsets( 'x' ), $this->getPageOffsets( 'y' ) ); //Reset page offsets after each template is initialized.
 			} else {
-				$pdf->useTemplate( $this->template_index[$schema['template_page']], ( $this->getTemplateOffsets('x') + $this->getPageMargins('x') ), ( $this->getTemplateOffsets('y') + $this->getPageMargins('y') ) );
+				$pdf->useTemplate( $this->template_index[$schema['template_page']], ( $this->getTemplateOffsets( 'x' ) + $this->getPageMargins( 'x' ) ), ( $this->getTemplateOffsets( 'y' ) + $this->getPageMargins( 'y' ) ) );
 			}
 		}
 		$this->current_template_index = $schema['template_page'];
 
 
-		return TRUE;
+		return true;
 	}
 
 	function initPage( $template_schema ) {
-		if ( is_array($template_schema) ) {
-			foreach( $template_schema as $field => $init_schema ) {
-				if ( is_numeric($field) ) {
+		if ( is_array( $template_schema ) ) {
+			foreach ( $template_schema as $field => $init_schema ) {
+				if ( is_numeric( $field ) ) {
 					//Debug::text(' Initializing Template Page... Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
 					$this->Draw( $this->$field, $init_schema );
 				}
 			}
-			unset($template_schema, $field, $init_schema);
+			unset( $template_schema, $field, $init_schema );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//Generic draw function that works strictly off the coordinate map.
 	//It checks for a variable specific function before running though, so we can handle more complex
 	//drawing functionality.
 	function Draw( $value, $schema ) {
-		if ( !is_array($schema) ) {
-			return FALSE;
+		if ( !is_array( $schema ) ) {
+			return false;
 		}
 
 		//If its set, use the static value from the schema.
-		if ( isset($schema['value'])) {
+		if ( isset( $schema['value'] ) ) {
 			$value = $schema['value'];
-			unset($schema['value']);
+			unset( $schema['value'] );
 		}
 
 		//If custom function is defined, pass off to that immediate.
 		//Else, try the generic drawing method.
-		if ( isset($schema['function'])  ) {
-			if ( !is_array($schema['function']) ) {
+		if ( isset( $schema['function'] ) ) {
+			if ( !is_array( $schema['function'] ) ) {
 				$schema['function'] = (array)$schema['function'];
 			}
-			foreach( $schema['function'] as $function ) {
-				if ( method_exists( $this, $function) ) {
-					$value = $this->$function($value, $schema);
+			foreach ( $schema['function'] as $function ) {
+				if ( method_exists( $this, $function ) ) {
+					$value = $this->$function( $value, $schema );
 				}
 			}
-			unset($function);
+			unset( $function );
 
 			return $value;
 		}
@@ -750,7 +773,7 @@ class GovernmentForms_Base {
 		$pdf = $this->getPDFObject();
 
 		//Make sure we don't load the same template more than once.
-		if ( isset($schema['template_page']) AND $schema['template_page'] != $this->current_template_index ) {
+		if ( isset( $schema['template_page'] ) && $schema['template_page'] != $this->current_template_index ) {
 			//Debug::text('Adding new page: '. $schema .' Template Page: '. $schema['template_page'], __FILE__, __LINE__, __METHOD__, 10);
 			$this->addPage( $schema );
 		} else {
@@ -758,44 +781,44 @@ class GovernmentForms_Base {
 		}
 
 		//If only_template_page is set, then only draw when we are on that template.
-		if ( isset($schema['only_template_page']) AND ( ( is_array( $schema['only_template_page'] ) AND !in_array( $this->current_template_index, $schema['only_template_page'] ) ) OR ( !is_array( $schema['only_template_page'] ) AND $schema['only_template_page'] != $this->current_template_index ) ) ) {
+		if ( isset( $schema['only_template_page'] ) && ( ( is_array( $schema['only_template_page'] ) && !in_array( $this->current_template_index, $schema['only_template_page'] ) ) || ( !is_array( $schema['only_template_page'] ) && $schema['only_template_page'] != $this->current_template_index ) ) ) {
 			//Debug::text('Skipping template based on filter... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+			return false;
 		}
 
 		//on_background flag forces that item to only be shown if the background is as well.
 		//This has to go below any addPage() call, otherwise pages won't be added if the first cell is only to be shown on the background.
-		if ( isset($schema['on_background']) AND $schema['on_background'] == TRUE AND $this->getShowBackground() == FALSE ) {
-			return FALSE;
+		if ( isset( $schema['on_background'] ) && $schema['on_background'] == true && $this->getShowBackground() == false ) {
+			return false;
 		}
 
-		if ( isset($schema['font']) ) {
-			if ( !isset($schema['font']['font']) ) {
+		if ( isset( $schema['font'] ) ) {
+			if ( !isset( $schema['font']['font'] ) ) {
 				$schema['font']['font'] = $this->default_font;
 			}
-			if ( !isset($schema['font']['type']) ) {
+			if ( !isset( $schema['font']['type'] ) ) {
 				$schema['font']['type'] = '';
 			}
-			if ( !isset($schema['font']['size']) ) {
+			if ( !isset( $schema['font']['size'] ) ) {
 				$schema['font']['size'] = 8;
 			}
 
-			$pdf->SetFont( $schema['font']['font'], $schema['font']['type'], $schema['font']['size']);
+			$pdf->SetFont( $schema['font']['font'], $schema['font']['type'], $schema['font']['size'] );
 		} else {
 			$pdf->SetFont( $this->default_font, '', 8 );
 		}
 
-		if ( isset($schema['coordinates']) ) {
+		if ( isset( $schema['coordinates'] ) ) {
 			$coordinates = $schema['coordinates'];
 			//var_dump( Debug::BackTrace() );
 
-			if ( isset($coordinates['text_color']) AND is_array( $coordinates['text_color'] ) ) {
+			if ( isset( $coordinates['text_color'] ) && is_array( $coordinates['text_color'] ) ) {
 				$pdf->setTextColor( $coordinates['text_color'][0], $coordinates['text_color'][1], $coordinates['text_color'][2] );
 			} else {
 				$pdf->setTextColor( 0, 0, 0 ); //Black text.
 			}
 
-			if ( isset($coordinates['fill_color']) AND is_array( $coordinates['fill_color'] ) ) {
+			if ( isset( $coordinates['fill_color'] ) && is_array( $coordinates['fill_color'] ) ) {
 				$pdf->setFillColor( $coordinates['fill_color'][0], $coordinates['fill_color'][1], $coordinates['fill_color'][2] );
 				$coordinates['fill'] = 1;
 			} else {
@@ -803,42 +826,42 @@ class GovernmentForms_Base {
 				$coordinates['fill'] = 0;
 			}
 
-			$pdf->setXY( ( $coordinates['x'] + $this->getTempPageOffsets( 'x') + $this->getPageMargins( 'x') ), ( $coordinates['y'] + $this->getTempPageOffsets( 'y') + $this->getPageMargins( 'y') ) );
+			$pdf->setXY( ( $coordinates['x'] + $this->getTempPageOffsets( 'x' ) + $this->getPageMargins( 'x' ) ), ( $coordinates['y'] + $this->getTempPageOffsets( 'y' ) + $this->getPageMargins( 'y' ) ) );
 
-			if ( $this->getDebug() == TRUE ) {
+			if ( $this->getDebug() == true ) {
 				$pdf->setDrawColor( 0, 0, 255 );
 				$coordinates['border'] = 1;
 			} else {
-				if ( !isset($coordinates['border']) ) {
+				if ( !isset( $coordinates['border'] ) ) {
 					$coordinates['border'] = 0;
 				}
 			}
 
-			if ( isset($schema['multicell']) AND $schema['multicell'] == TRUE ) {
+			if ( isset( $schema['multicell'] ) && $schema['multicell'] == true ) {
 				//Debug::text('Drawing MultiCell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-				$pdf->MultiCell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], strtoupper($coordinates['halign']), $coordinates['fill'] );
+				$pdf->MultiCell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], strtoupper( $coordinates['halign'] ), $coordinates['fill'] );
 			} else {
 				//Debug::text('Drawing Cell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-				$pdf->Cell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], 0, strtoupper($coordinates['halign']), $coordinates['fill'], FALSE, 1 );
+				$pdf->Cell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], 0, strtoupper( $coordinates['halign'] ), $coordinates['fill'], false, 1 );
 			}
-			unset($coordinates);
+			unset( $coordinates );
 		} else {
-			Debug::text('NOT Drawing Cell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'NOT Drawing Cell... Value: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	//Make sure we pass *ALL* data to this function, as it will overwrite existing data, but if one record has a field and another one doesn't,
 	//we need to send blank fields so the data is overwritten correctly.
 	function arrayToObject( $array ) {
-		if ( is_array($array) ) {
-			foreach( $array as $key => $value ) {
+		if ( is_array( $array ) ) {
+			foreach ( $array as $key => $value ) {
 				$this->$key = $value;
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/*
@@ -853,38 +876,39 @@ class GovernmentForms_Base {
 				$filter_function = (array)$filter_function;
 			}
 
-			foreach( $filter_function as $function ) {
+			foreach ( $filter_function as $function ) {
 				//Call function
 				if ( method_exists( $this, $function ) ) {
 					$value = $this->$function( $value );
 
-					if ( $value === FALSE ) {
-						return FALSE;
+					if ( $value === false ) {
+						return false;
 					}
 				}
 			}
-			unset($function);
+			unset( $function );
 		}
 
 		$this->data[$name] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function __get( $name ) {
-		if ( isset($this->data[$name]) ) {
+		if ( isset( $this->data[$name] ) ) {
 			return $this->data[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-    public function __isset($name) {
-        return isset($this->data[$name]);
-    }
+	public function __isset( $name ) {
+		return isset( $this->data[$name] );
+	}
 
-    public function __unset($name) {
-        unset($this->data[$name]);
-    }
+	public function __unset( $name ) {
+		unset( $this->data[$name] );
+	}
 }
+
 ?>

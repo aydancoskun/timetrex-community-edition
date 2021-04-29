@@ -44,98 +44,97 @@ class InstallSchema_1046A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Allow edit password/phone password permissions for all permission groups.
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+			foreach ( $clf as $c_obj ) {
+				Debug::text( 'Company: ' . $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 				if ( $c_obj->getStatus() != 30 ) {
 					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
+					$pclf->getByCompanyId( $c_obj->getId(), null, null, null, [ 'name' => 'asc' ] ); //Force order to prevent references to columns that haven't been created yet.
 					if ( $pclf->getRecordCount() > 0 ) {
-						foreach( $pclf as $pc_obj ) {
-							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+						foreach ( $pclf as $pc_obj ) {
+							Debug::text( 'Permission Group: ' . $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $c_obj->getId(), $pc_obj->getId(), 'user', 'edit_own', 1 );
 							if ( $plf->getRecordCount() > 0 ) {
-								Debug::text('Found permission group with user edit own enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
-								$pc_obj->setPermission( array('user' => array('edit_own_password' => TRUE, 'edit_own_phone_password' => TRUE) ) );
+								Debug::text( 'Found permission group with user edit own enabled: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
+								$pc_obj->setPermission( [ 'user' => [ 'edit_own_password' => true, 'edit_own_phone_password' => true ] ] );
 							} else {
-								Debug::text('Permission group does NOT have user edit own report enabled...', __FILE__, __LINE__, __METHOD__, 9);
+								Debug::text( 'Permission group does NOT have user edit own report enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 							}
 						}
 					}
-
 				}
 			}
 		}
 
 		//Metaphoneize data
-		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAll();
 		if ( $ulf->getRecordCount() > 0 ) {
-			foreach( $ulf as $u_obj ) {
+			foreach ( $ulf as $u_obj ) {
 
-				$ph = array(
-							'first_name_metaphone' => $u_obj->getFirstNameMetaphone( $u_obj->setFirstNameMetaphone( $u_obj->getFirstName() ) ),
-							'last_name_metaphone' => $u_obj->getLastNameMetaphone( $u_obj->setLastNameMetaphone( $u_obj->getLastName() ) ),
-							'id' => TTUUID::castUUID($u_obj->getId()),
-							);
-				$query = 'update '. $ulf->getTable() .' set first_name_metaphone = ?, last_name_metaphone = ? where id = ?';
+				$ph = [
+						'first_name_metaphone' => $u_obj->getFirstNameMetaphone( $u_obj->setFirstNameMetaphone( $u_obj->getFirstName() ) ),
+						'last_name_metaphone'  => $u_obj->getLastNameMetaphone( $u_obj->setLastNameMetaphone( $u_obj->getLastName() ) ),
+						'id'                   => TTUUID::castUUID( $u_obj->getId() ),
+				];
+				$query = 'update ' . $ulf->getTable() . ' set first_name_metaphone = ?, last_name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
 			}
 		}
 
-		$clf = TTnew('CompanyListFactory'); /** @var CompanyListFactory $clf */
+		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
+			foreach ( $clf as $c_obj ) {
 
-				$ph = array(
-							'name_metaphone' => $c_obj->getNameMetaphone( $c_obj->setNameMetaphone( $c_obj->getName() ) ),
-							'id' => TTUUID::castUUID($c_obj->getId()),
-							);
-				$query = 'update '. $clf->getTable() .' set name_metaphone = ? where id = ?';
+				$ph = [
+						'name_metaphone' => $c_obj->getNameMetaphone( $c_obj->setNameMetaphone( $c_obj->getName() ) ),
+						'id'             => TTUUID::castUUID( $c_obj->getId() ),
+				];
+				$query = 'update ' . $clf->getTable() . ' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
 			}
 		}
 
-		$blf = TTnew('BranchListFactory'); /** @var BranchListFactory $blf */
+		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getAll();
 		if ( $blf->getRecordCount() > 0 ) {
-			foreach( $blf as $b_obj ) {
+			foreach ( $blf as $b_obj ) {
 
-				$ph = array(
-							'name_metaphone' => $b_obj->getNameMetaphone( $b_obj->setNameMetaphone( $b_obj->getName() ) ),
-							'id' => TTUUID::castUUID($b_obj->getId()),
-							);
-				$query = 'update '. $blf->getTable() .' set name_metaphone = ? where id = ?';
+				$ph = [
+						'name_metaphone' => $b_obj->getNameMetaphone( $b_obj->setNameMetaphone( $b_obj->getName() ) ),
+						'id'             => TTUUID::castUUID( $b_obj->getId() ),
+				];
+				$query = 'update ' . $blf->getTable() . ' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
 			}
 		}
 
-		$dlf = TTnew('DepartmentListFactory'); /** @var DepartmentListFactory $dlf */
+		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$dlf->getAll();
 		if ( $dlf->getRecordCount() > 0 ) {
-			foreach( $dlf as $d_obj ) {
+			foreach ( $dlf as $d_obj ) {
 
-				$ph = array(
-							'name_metaphone' => $d_obj->getNameMetaphone( $d_obj->setNameMetaphone( $d_obj->getName() ) ),
-							'id' => TTUUID::castUUID($d_obj->getId()),
-							);
-				$query = 'update '. $dlf->getTable() .' set name_metaphone = ? where id = ?';
+				$ph = [
+						'name_metaphone' => $d_obj->getNameMetaphone( $d_obj->setNameMetaphone( $d_obj->getName() ) ),
+						'id'             => TTUUID::castUUID( $d_obj->getId() ),
+				];
+				$query = 'update ' . $dlf->getTable() . ' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
 			}
 		}
@@ -143,16 +142,17 @@ class InstallSchema_1046A extends InstallSchema_Base {
 
 		//Add GeoCode cronjob to database to run every morning.
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('GeoCode');
-		$cjf->setMinute('15');
-		$cjf->setHour('2');
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand('GeoCode.php');
+		$cjf->setName( 'GeoCode' );
+		$cjf->setMinute( '15' );
+		$cjf->setHour( '2' );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( 'GeoCode.php' );
 		$cjf->Save();
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

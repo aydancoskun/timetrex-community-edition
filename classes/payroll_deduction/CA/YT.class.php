@@ -39,86 +39,86 @@
  * @package PayrollDeduction\CA
  */
 class PayrollDeduction_CA_YT extends PayrollDeduction_CA {
-	var $provincial_income_tax_rate_options = array(
-			20200101 => array(
-					array('income' => 48535, 'rate' => 6.40, 'constant' => 0),
-					array('income' => 97069, 'rate' => 9.00, 'constant' => 1262),
-					array('income' => 150473, 'rate' => 10.90, 'constant' => 3106),
-					array('income' => 500000, 'rate' => 12.80, 'constant' => 5965),
-					array('income' => 500000, 'rate' => 15.00, 'constant' => 16965),
-			),
-			20190101 => array(
-					array('income' => 47630, 'rate' => 6.40, 'constant' => 0),
-					array('income' => 95259, 'rate' => 9.00, 'constant' => 1238),
-					array('income' => 147667, 'rate' => 10.90, 'constant' => 3048),
-					array('income' => 500000, 'rate' => 12.80, 'constant' => 5854),
-					array('income' => 500000, 'rate' => 15.00, 'constant' => 16854),
-			),
-			20180101 => array(
-					array('income' => 46605, 'rate' => 6.40, 'constant' => 0),
-					array('income' => 93208, 'rate' => 9.00, 'constant' => 1212),
-					array('income' => 144489, 'rate' => 10.90, 'constant' => 2983),
-					array('income' => 500000, 'rate' => 12.80, 'constant' => 5728),
-					array('income' => 500000, 'rate' => 15.00, 'constant' => 16728),
-			),
-			20170101 => array(
-					array('income' => 45916, 'rate' => 6.40, 'constant' => 0),
-					array('income' => 91831, 'rate' => 9.00, 'constant' => 1194),
-					array('income' => 142353, 'rate' => 10.90, 'constant' => 2939),
-					array('income' => 500000, 'rate' => 12.80, 'constant' => 5643),
-					array('income' => 500000, 'rate' => 15.00, 'constant' => 16643),
-			),
-			20160101 => array(
-					array('income' => 45282, 'rate' => 6.40, 'constant' => 0),
-					array('income' => 90563, 'rate' => 9.00, 'constant' => 1177),
-					array('income' => 140388, 'rate' => 10.90, 'constant' => 2898),
-					array('income' => 500000, 'rate' => 12.80, 'constant' => 5565),
-					array('income' => 500000, 'rate' => 15.00, 'constant' => 16565),
-			),
-			20150701 => array(
-					array('income' => 44701, 'rate' => 5.76, 'constant' => 0),
-					array('income' => 89401, 'rate' => 8.32, 'constant' => 1144),
-					array('income' => 138586, 'rate' => 10.36, 'constant' => 2968),
-					array('income' => 500000, 'rate' => 12.84, 'constant' => 6405),
-					array('income' => 500000, 'rate' => 17.24, 'constant' => 28405),
-			),
-			20150101 => array(
-					array('income' => 44701, 'rate' => 7.04, 'constant' => 0),
-					array('income' => 89401, 'rate' => 9.68, 'constant' => 1180),
-					array('income' => 138586, 'rate' => 11.44, 'constant' => 2754),
-					array('income' => 138586, 'rate' => 12.76, 'constant' => 4583),
-			),
-			20140101 => array(
-					array('income' => 43953, 'rate' => 7.04, 'constant' => 0),
-					array('income' => 87907, 'rate' => 9.68, 'constant' => 1160),
-					array('income' => 136270, 'rate' => 11.44, 'constant' => 2708),
-					array('income' => 136270, 'rate' => 12.76, 'constant' => 4506),
-			),
-			20130101 => array(
-					array('income' => 43561, 'rate' => 7.04, 'constant' => 0),
-					array('income' => 87123, 'rate' => 9.68, 'constant' => 1150),
-					array('income' => 135054, 'rate' => 11.44, 'constant' => 2683),
-					array('income' => 135054, 'rate' => 12.76, 'constant' => 4466),
-			),
-			20120101 => array(
-					array('income' => 42707, 'rate' => 7.04, 'constant' => 0),
-					array('income' => 85414, 'rate' => 9.68, 'constant' => 1127),
-					array('income' => 132406, 'rate' => 11.44, 'constant' => 2631),
-					array('income' => 132406, 'rate' => 12.76, 'constant' => 4379),
-			),
-			20110101 => array(
-					array('income' => 41544, 'rate' => 7.04, 'constant' => 0),
-					array('income' => 83088, 'rate' => 9.68, 'constant' => 1097),
-					array('income' => 128800, 'rate' => 11.44, 'constant' => 2559),
-					array('income' => 128800, 'rate' => 12.76, 'constant' => 4259),
-			),
-			20100101 => array(
-					array('income' => 40970, 'rate' => 7.04, 'constant' => 0),
-					array('income' => 81941, 'rate' => 9.68, 'constant' => 1082),
-					array('income' => 127021, 'rate' => 11.44, 'constant' => 2524),
-					array('income' => 127021, 'rate' => 12.76, 'constant' => 4200),
-			),
-	);
+	var $provincial_income_tax_rate_options = [
+			20200101 => [
+					[ 'income' => 48535, 'rate' => 6.40, 'constant' => 0 ],
+					[ 'income' => 97069, 'rate' => 9.00, 'constant' => 1262 ],
+					[ 'income' => 150473, 'rate' => 10.90, 'constant' => 3106 ],
+					[ 'income' => 500000, 'rate' => 12.80, 'constant' => 5965 ],
+					[ 'income' => 500000, 'rate' => 15.00, 'constant' => 16965 ],
+			],
+			20190101 => [
+					[ 'income' => 47630, 'rate' => 6.40, 'constant' => 0 ],
+					[ 'income' => 95259, 'rate' => 9.00, 'constant' => 1238 ],
+					[ 'income' => 147667, 'rate' => 10.90, 'constant' => 3048 ],
+					[ 'income' => 500000, 'rate' => 12.80, 'constant' => 5854 ],
+					[ 'income' => 500000, 'rate' => 15.00, 'constant' => 16854 ],
+			],
+			20180101 => [
+					[ 'income' => 46605, 'rate' => 6.40, 'constant' => 0 ],
+					[ 'income' => 93208, 'rate' => 9.00, 'constant' => 1212 ],
+					[ 'income' => 144489, 'rate' => 10.90, 'constant' => 2983 ],
+					[ 'income' => 500000, 'rate' => 12.80, 'constant' => 5728 ],
+					[ 'income' => 500000, 'rate' => 15.00, 'constant' => 16728 ],
+			],
+			20170101 => [
+					[ 'income' => 45916, 'rate' => 6.40, 'constant' => 0 ],
+					[ 'income' => 91831, 'rate' => 9.00, 'constant' => 1194 ],
+					[ 'income' => 142353, 'rate' => 10.90, 'constant' => 2939 ],
+					[ 'income' => 500000, 'rate' => 12.80, 'constant' => 5643 ],
+					[ 'income' => 500000, 'rate' => 15.00, 'constant' => 16643 ],
+			],
+			20160101 => [
+					[ 'income' => 45282, 'rate' => 6.40, 'constant' => 0 ],
+					[ 'income' => 90563, 'rate' => 9.00, 'constant' => 1177 ],
+					[ 'income' => 140388, 'rate' => 10.90, 'constant' => 2898 ],
+					[ 'income' => 500000, 'rate' => 12.80, 'constant' => 5565 ],
+					[ 'income' => 500000, 'rate' => 15.00, 'constant' => 16565 ],
+			],
+			20150701 => [
+					[ 'income' => 44701, 'rate' => 5.76, 'constant' => 0 ],
+					[ 'income' => 89401, 'rate' => 8.32, 'constant' => 1144 ],
+					[ 'income' => 138586, 'rate' => 10.36, 'constant' => 2968 ],
+					[ 'income' => 500000, 'rate' => 12.84, 'constant' => 6405 ],
+					[ 'income' => 500000, 'rate' => 17.24, 'constant' => 28405 ],
+			],
+			20150101 => [
+					[ 'income' => 44701, 'rate' => 7.04, 'constant' => 0 ],
+					[ 'income' => 89401, 'rate' => 9.68, 'constant' => 1180 ],
+					[ 'income' => 138586, 'rate' => 11.44, 'constant' => 2754 ],
+					[ 'income' => 138586, 'rate' => 12.76, 'constant' => 4583 ],
+			],
+			20140101 => [
+					[ 'income' => 43953, 'rate' => 7.04, 'constant' => 0 ],
+					[ 'income' => 87907, 'rate' => 9.68, 'constant' => 1160 ],
+					[ 'income' => 136270, 'rate' => 11.44, 'constant' => 2708 ],
+					[ 'income' => 136270, 'rate' => 12.76, 'constant' => 4506 ],
+			],
+			20130101 => [
+					[ 'income' => 43561, 'rate' => 7.04, 'constant' => 0 ],
+					[ 'income' => 87123, 'rate' => 9.68, 'constant' => 1150 ],
+					[ 'income' => 135054, 'rate' => 11.44, 'constant' => 2683 ],
+					[ 'income' => 135054, 'rate' => 12.76, 'constant' => 4466 ],
+			],
+			20120101 => [
+					[ 'income' => 42707, 'rate' => 7.04, 'constant' => 0 ],
+					[ 'income' => 85414, 'rate' => 9.68, 'constant' => 1127 ],
+					[ 'income' => 132406, 'rate' => 11.44, 'constant' => 2631 ],
+					[ 'income' => 132406, 'rate' => 12.76, 'constant' => 4379 ],
+			],
+			20110101 => [
+					[ 'income' => 41544, 'rate' => 7.04, 'constant' => 0 ],
+					[ 'income' => 83088, 'rate' => 9.68, 'constant' => 1097 ],
+					[ 'income' => 128800, 'rate' => 11.44, 'constant' => 2559 ],
+					[ 'income' => 128800, 'rate' => 12.76, 'constant' => 4259 ],
+			],
+			20100101 => [
+					[ 'income' => 40970, 'rate' => 7.04, 'constant' => 0 ],
+					[ 'income' => 81941, 'rate' => 9.68, 'constant' => 1082 ],
+					[ 'income' => 127021, 'rate' => 11.44, 'constant' => 2524 ],
+					[ 'income' => 127021, 'rate' => 12.76, 'constant' => 4200 ],
+			],
+	];
 
 	function getProvincialSurtax() {
 		/*
@@ -135,10 +135,10 @@ class PayrollDeduction_CA_YT extends PayrollDeduction_CA {
 		$V1 = 0;
 
 		//Repealed 01-Jul-2015 retroactively to 01-Jan-2015.
-		if ( $this->getDate() >= 20080101 AND $this->getDate() < 20150701 ) {
+		if ( $this->getDate() >= 20080101 && $this->getDate() < 20150701 ) {
 			if ( $T4 <= 6000 ) {
 				$V1 = 0;
-			} elseif ( $T4 > 6000 ) {
+			} else if ( $T4 > 6000 ) {
 				$V1 = bcmul( 0.05, bcsub( $T4, 6000 ) );
 			}
 		}
@@ -156,7 +156,7 @@ class PayrollDeduction_CA_YT extends PayrollDeduction_CA {
 		*/
 
 		$K4P = 0;
-		if ( $this->getProvince() == 'YT' AND $this->getDate() >= 20130101 ) { //Yukon only currently.
+		if ( $this->getProvince() == 'YT' && $this->getDate() >= 20130101 ) { //Yukon only currently.
 			$tmp1_K4P = bcmul( $this->getData()->getProvincialLowestRate(), $this->getAnnualTaxableIncome() );
 			$tmp2_K4P = bcmul( $this->getData()->getProvincialLowestRate(), $this->getData()->getFederalEmploymentCreditAmount() ); //This matches the federal employment credit amount currently.
 

@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnusedLocalVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -46,7 +46,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 	function preInstall() {
 		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,16 +55,16 @@ class InstallSchema_1093A extends InstallSchema_Base {
 	 */
 	function getLastTransactionNumber( $company_id ) {
 		$ugdlf = TTnew( 'UserGenericDataListFactory' ); /** @var UserGenericDataListFactory $ugdlf */
-		$ugdlf->getByCompanyIdAndScriptAndDefault( $company_id, 'PayStubFactory', TRUE );
+		$ugdlf->getByCompanyIdAndScriptAndDefault( $company_id, 'PayStubFactory', true );
 		if ( $ugdlf->getRecordCount() > 0 ) {
 			$ugd_obj = $ugdlf->getCurrent();
 			$setup_data = $ugd_obj->getData();
 
 			if ( isset( $setup_data['file_creation_number'] ) ) {
 				Debug::Text( '      Using file_creation_number from UserGenericDataListFactory' );
+
 				return $setup_data['file_creation_number']; // company generic data
 			}
-
 		}
 
 		return 0;
@@ -87,63 +87,63 @@ class InstallSchema_1093A extends InstallSchema_Base {
 
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->StartTransaction();
-		$clf->getAll( NULL, NULL, NULL, array('created_date' => 'asc' ) );
+		$clf->getAll( null, null, null, [ 'created_date' => 'asc' ] );
 		Debug::Text( 'Get all companies. Found: ' . $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach ( $clf as $cf ) {
-				Debug::text( 'Processing company: ' . $cf->getId() .' Name: '. $cf->getName(), __FILE__, __LINE__, __METHOD__, 9 );
+				Debug::text( 'Processing company: ' . $cf->getId() . ' Name: ' . $cf->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 				//echo 'Processing company: ' . $cf->getId() .' Name: '. $cf->getName() ."\n";
 
 				//Setup new permissions.
 				$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-				$pclf->getByCompanyId( $cf->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
+				$pclf->getByCompanyId( $cf->getId(), null, null, null, [ 'name' => 'asc' ] ); //Force order to prevent references to columns that haven't been created yet.
 				if ( $pclf->getRecordCount() > 0 ) {
-					foreach( $pclf as $pc_obj ) {
-						Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+					foreach ( $pclf as $pc_obj ) {
+						Debug::text( 'Permission Group: ' . $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 						$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'company', 'edit_own', 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() > 0 ) {
-							Debug::text('Found permission group with over_time_policy, add enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
+							Debug::text( 'Found permission group with over_time_policy, add enabled: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 							$pc_obj->setPermission(
-									array(
-											'legal_entity' => array(
-													'enabled' => TRUE,
-													'view' => TRUE,
-													'add' => TRUE,
-													'edit' => TRUE,
-													'delete' => TRUE
-											),
-									)
+									[
+											'legal_entity' => [
+													'enabled' => true,
+													'view'    => true,
+													'add'     => true,
+													'edit'    => true,
+													'delete'  => true,
+											],
+									]
 							);
 						} else {
-							Debug::text('Permission group does NOT have company, edit_own enabled...', __FILE__, __LINE__, __METHOD__, 9);
+							Debug::text( 'Permission group does NOT have company, edit_own enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 						}
 
 						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'company_tax_deduction', 'edit', 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() > 0 ) {
-							Debug::text('Found permission group with over_time_policy, add enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
+							Debug::text( 'Found permission group with over_time_policy, add enabled: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 							$pc_obj->setPermission(
-									array(
-											'payroll_remittance_agency' => array(
-													'enabled' => TRUE,
-													'view' => TRUE,
-													'add' => TRUE,
-													'edit' => TRUE,
-													'delete' => TRUE
-											),
-									)
+									[
+											'payroll_remittance_agency' => [
+													'enabled' => true,
+													'view'    => true,
+													'add'     => true,
+													'edit'    => true,
+													'delete'  => true,
+											],
+									]
 							);
 						} else {
-							Debug::text('Permission group does NOT have company_tax_deduction, edit enabled...', __FILE__, __LINE__, __METHOD__, 9);
+							Debug::text( 'Permission group does NOT have company_tax_deduction, edit enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 						}
 
 						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'company', 'edit_own_bank', 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() > 0 ) {
 							Debug::text( ' Found company->edit_own_bank. Adding remittance_source_account permissions: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 							$pc_obj->setPermission(
-									array(
-											'remittance_source_account' => array('enabled' => TRUE, 'add' => TRUE, 'view' => TRUE, 'edit' => TRUE, 'delete' => TRUE),
-									)
+									[
+											'remittance_source_account' => [ 'enabled' => true, 'add' => true, 'view' => true, 'edit' => true, 'delete' => true ],
+									]
 							);
 						} else {
 							Debug::text( ' Permission group does NOT have company, edit_own_bank enabled...', __FILE__, __LINE__, __METHOD__, 9 );
@@ -153,40 +153,40 @@ class InstallSchema_1093A extends InstallSchema_Base {
 						if ( $plf->getRecordCount() > 0 ) {
 							Debug::text( '  Found user->edit_own_bank. Adding remittance_destination_account permissions: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 							$pc_obj->setPermission(
-									array(
-											'remittance_destination_account' => array('enabled' => TRUE, 'add' => TRUE, 'view_own' => TRUE, 'edit_own' => TRUE, 'delete_own' => TRUE),
-									)
+									[
+											'remittance_destination_account' => [ 'enabled' => true, 'add' => true, 'view_own' => true, 'edit_own' => true, 'delete_own' => true ],
+									]
 							);
 						} else {
 							Debug::text( '  Permission group does NOT have user, edit_own_bank enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 						}
 
-						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'user', array( 'edit_child_bank'), 1 ); //Only return records where permission is ALLOWED.
+						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'user', [ 'edit_child_bank' ], 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() > 0 ) {
 							Debug::text( '  Found user->edit_child_bank. Adding remittance_destination_account permissions: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 							$pc_obj->setPermission(
-									array(
-											'remittance_destination_account' => array('enabled' => TRUE, 'view_child' => TRUE, 'add' => TRUE, 'edit_child' => TRUE, 'delete_child' => TRUE),
-									)
+									[
+											'remittance_destination_account' => [ 'enabled' => true, 'view_child' => true, 'add' => true, 'edit_child' => true, 'delete_child' => true ],
+									]
 							);
 						} else {
 							Debug::text( ' Permission group does NOT have user->edit_child_bank enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 						}
 
-						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'user', array( 'edit_bank'), 1 ); //Only return records where permission is ALLOWED.
+						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'user', [ 'edit_bank' ], 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() > 0 ) {
-							Debug::text( '  Found permission group with user->edit_bank adding remitance_destination_account permissions: ' . $plf->getCurrent()->getValue(). ' Permission Group ID: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 9 );
+							Debug::text( '  Found permission group with user->edit_bank adding remitance_destination_account permissions: ' . $plf->getCurrent()->getValue() . ' Permission Group ID: ' . $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 9 );
 							$pc_obj->setPermission(
-									array(
-											'remittance_destination_account' => array('enabled' => TRUE, 'view' => TRUE, 'add' => TRUE, 'edit' => TRUE, 'delete' => TRUE),
-									)
+									[
+											'remittance_destination_account' => [ 'enabled' => true, 'view' => true, 'add' => true, 'edit' => true, 'delete' => true ],
+									]
 							);
 						} else {
-							Debug::text( '  Permission group does NOT have user->edit_bank enabled... Permission Group ID: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 9 );
+							Debug::text( '  Permission group does NOT have user->edit_bank enabled... Permission Group ID: ' . $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 9 );
 						}
 					}
 				}
-				unset($pclf, $plf, $pc_obj);
+				unset( $pclf, $plf, $pc_obj );
 
 				/***
 				 * Migrate old objects to new objects using new schema.
@@ -196,7 +196,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 				$lef = TTnew( 'LegalEntityFactory' ); /** @var LegalEntityFactory $lef */
 				$lef->setCompany( $cf->getId() );
 				$lef->setStatus( 10 ); //set status to active.
-				$lef->setType( 10 ); //defaulting to corporation.
+				$lef->setType( 10 );   //defaulting to corporation.
 				$lef->setLegalName( $cf->getname() );
 				$lef->setTradeName( $cf->getname() );
 				$lef->setAddress1( $cf->getAddress1() );
@@ -207,7 +207,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 				$lef->setPostalCode( $cf->getPostalCode() );
 				$lef->setWorkPhone( $cf->getWorkPhone() );
 				$lef->setFaxPhone( $cf->getFaxPhone() );
-				$lef->setEnableAddRemittanceSource( FALSE ); //Don't create default remittance source accounts as they will be created below instead.
+				$lef->setEnableAddRemittanceSource( false ); //Don't create default remittance source accounts as they will be created below instead.
 				if ( $lef->isValid() ) {
 					$legal_entity_id = $lef->save();
 					Debug::Text( '  Legal Entity: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -216,33 +216,34 @@ class InstallSchema_1093A extends InstallSchema_Base {
 
 					//Don't continue with installation if this fails for any company.
 					$clf->FailTransaction();
-					return FALSE;
+
+					return false;
 				}
 
-				if ( isset($legal_entity_id) AND $legal_entity_id != '' ) {
+				if ( isset( $legal_entity_id ) && $legal_entity_id != '' ) {
 					//Update user_default values to use the new legal entity.
 					$sql = 'UPDATE user_default set legal_entity_id = ' . $legal_entity_id . ' WHERE company_id = ' . $cf->getId(); //Update even terminated/inactive/deleted users
 					$this->getDatabaseConnection()->Execute( $sql );
 
 					//Assign all users to new legal entity.
-					$sql = 'UPDATE users set legal_entity_id = ' . $legal_entity_id . ' WHERE company_id = ' . $cf->getId(); //Update even terminated/inactive/deleted users
+					$sql = 'UPDATE users set legal_entity_id = ' . $legal_entity_id . ' WHERE company_id = ' . $cf->getId();        //Update even terminated/inactive/deleted users
 					$this->getDatabaseConnection()->Execute( $sql );
 
 
-					$currency_to_eft_source_account_map = array();
-					$currency_to_check_source_account_map = array();
+					$currency_to_eft_source_account_map = [];
+					$currency_to_check_source_account_map = [];
 					$currency_lf = TTnew( 'CurrencyListFactory' ); /** @var CurrencyListFactory $currency_lf */
 					$currency_lf->getByCompanyId( $cf->getId() );
 					Debug::Text( '  Get all currencies. Found: ' . $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $currency_lf->getRecordCount() > 0 ) {
-						$query = 'SELECT * FROM bank_account WHERE company_id = '. (int)$cf->getId() .' AND ( user_id != 0 AND user_id IS NOT NULL ) AND deleted = 0'; //DO NOT CAST! This is before we switch to UUID.
+						$query = 'SELECT * FROM bank_account WHERE company_id = ' . (int)$cf->getId() . ' AND ( user_id != 0 AND user_id IS NOT NULL ) AND deleted = 0'; //DO NOT CAST! This is before we switch to UUID.
 						$user_bank_account_rs = $this->getDatabaseConnection()->Execute( $query );
 						Debug::Text( '    User Bank Total Records: ' . $user_bank_account_rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
 						foreach ( $currency_lf as $currency_obj ) {
 							Debug::Text( '     Currency: ' . $currency_obj->getISOCode() . ' ID: ' . $currency_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-							if ( $currency_obj->getDefault() == TRUE ) {
-								$query = 'SELECT * FROM bank_account WHERE company_id = '. (int)$cf->getId() .' AND ( user_id = 0 OR user_id IS NULL ) AND deleted = 0'; //DO NOT CAST! This is before we switch to UUID.
+							if ( $currency_obj->getDefault() == true ) {
+								$query = 'SELECT * FROM bank_account WHERE company_id = ' . (int)$cf->getId() . ' AND ( user_id = 0 OR user_id IS NULL ) AND deleted = 0'; //DO NOT CAST! This is before we switch to UUID.
 								$rs = $this->getDatabaseConnection()->Execute( $query );
 
 								Debug::Text( '    Get company bank accounts. Found: ' . $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -259,8 +260,8 @@ class InstallSchema_1093A extends InstallSchema_Base {
 										$rsaf->setName( 'Checking (' . $currency_obj->getISOCode() . ') [EFT/ACH]' );
 										$rsaf->setCurrency( $currency_obj->getId() );
 										$rsaf->setValue1( $bank_row['institution'] ); //Institution
-										$rsaf->setValue2( $bank_row['transit'] ); //Routing
-										$rsaf->setValue3( $bank_row['account'] ); //Account
+										$rsaf->setValue2( $bank_row['transit'] );     //Routing
+										$rsaf->setValue3( $bank_row['account'] );     //Account
 										$rsaf->setValue4( $cf->getBusinessNumber() ); //Business Number
 
 										Debug::Text( 'OriginatorID: ' . $cf->getOriginatorID() . ' DataCenterID: ' . $cf->getDataCenterID(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -282,12 +283,12 @@ class InstallSchema_1093A extends InstallSchema_Base {
 											$rsaf->setValue9( $cf->getOtherID5() ); //Trace Number
 										}
 
-										$is_balanced = CompanySettingFactory::getCompanySettingValueByName( $cf->getId(), 'pay_stub.eft.balance_ach');
-										if ( $is_balanced == TRUE ) {
+										$is_balanced = CompanySettingFactory::getCompanySettingValueByName( $cf->getId(), 'pay_stub.eft.balance_ach' );
+										if ( $is_balanced == true ) {
 											Debug::Text( '  Enabling OFFSET transaction...', __FILE__, __LINE__, __METHOD__, 10 );
 											$rsaf->setValue24( 1 ); //Enable OFFSET transaction.
 										}
-										unset($is_balanced);
+										unset( $is_balanced );
 
 										$rsaf->setLastTransactionNumber( $this->getLastTransactionNumber( $cf->getId() ) );
 										Debug::Text( 'Last transaction Number: ' . $rsaf->getLastTransactionNumber(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -308,7 +309,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 											$currency_to_eft_source_account_map[$currency_obj->getId()] = $remittance_source_account_id;
 											Debug::Text( '    New remittance EFT source account saved: ' . $remittance_source_account_id, __FILE__, __LINE__, __METHOD__, 10 );
 										} else {
-											$create_checking_source_account = TRUE;
+											$create_checking_source_account = true;
 											Debug::Arr( $rsaf->data, '    ERROR: Invalid EFT source account. Creating checking account instead...', __FILE__, __LINE__, __METHOD__, 10 );
 										}
 
@@ -350,7 +351,6 @@ class InstallSchema_1093A extends InstallSchema_Base {
 
 							unset( $rsaf );
 						}
-
 					} else {
 						Debug::Text( '    WARNING: no currencies for company: ' . $cf->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 					}
@@ -367,7 +367,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 								if ( $ulf->getRecordCount() === 1 ) {
 									$user_obj = $ulf->getCurrent();
 
-									if ( isset($currency_to_eft_source_account_map[$user_obj->getCurrencyObject()->getId()])) {
+									if ( isset( $currency_to_eft_source_account_map[$user_obj->getCurrencyObject()->getId()] ) ) {
 										$account_name = 'Default';
 										if ( strtoupper( $cf->getCountry() ) == 'US' ) {
 											if ( $bank_row['institution'] == 32 ) {
@@ -379,17 +379,17 @@ class InstallSchema_1093A extends InstallSchema_Base {
 
 										$rdaf = TTnew( 'RemittanceDestinationAccountFactory' ); /** @var RemittanceDestinationAccountFactory $rdaf */
 										$rdaf->setRemittanceSourceAccount( $currency_to_eft_source_account_map[$user_obj->getCurrencyObject()->getId()] );
-										$rdaf->setUser( $bank_row['user_id'] ); // DO NOT CAST! This is before we switch to UUID.
-										$rdaf->setStatus( 10 ); //default to enabled.
+										$rdaf->setUser( $bank_row['user_id'] );                                 // DO NOT CAST! This is before we switch to UUID.
+										$rdaf->setStatus( 10 );                                                 //default to enabled.
 										$rdaf->setType( $rdaf->getRemittanceSourceAccountObject()->getType() ); //default to EFT
-										$rdaf->setName( $account_name ); //!!!!  BASED ON THE ACCOUNT TYPE
+										$rdaf->setName( $account_name );                                        //!!!!  BASED ON THE ACCOUNT TYPE
 										//$rdaf->setCurrency( $user_obj->getCurrency() );//from employee record - Not used in destination accounts currently.
-										$rdaf->setPriority( 5 ); //default to 5
-										$rdaf->setAmountType( 10 ); //10 = percent, 20 = fixed amount
-										$rdaf->setPercentAmount( 100 ); //default to 100 percent
-										$rdaf->setValue1( $bank_row['institution'] ); //routing
-										$rdaf->setValue2( $bank_row['transit'] ); //routing
-										$rdaf->setValue3( $bank_row['account'] ); //account
+										$rdaf->setPriority( 5 );                                                //default to 5
+										$rdaf->setAmountType( 10 );                                             //10 = percent, 20 = fixed amount
+										$rdaf->setPercentAmount( 100 );                                         //default to 100 percent
+										$rdaf->setValue1( $bank_row['institution'] );                           //routing
+										$rdaf->setValue2( $bank_row['transit'] );                               //routing
+										$rdaf->setValue3( $bank_row['account'] );                               //account
 
 										//Debug::Arr( $rdaf->data, '    New Remittance Destination Account: ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -422,13 +422,13 @@ class InstallSchema_1093A extends InstallSchema_Base {
 							$rdaf = TTnew( 'RemittanceDestinationAccountFactory' ); /** @var RemittanceDestinationAccountFactory $rdaf */
 							$rdaf->setRemittanceSourceAccount( $currency_to_check_source_account_map[$user_row['currency_id']] );
 							$rdaf->setUser( $user_row['id'] ); // DO NOT CAST! This is before we switch to UUID.
-							$rdaf->setStatus( 10 ); //default to enabled.
-							$rdaf->setType( 2000 ); //default to Checking
-							$rdaf->setName( 'Checking' ); //!!!!  BASED ON THE ACCOUNT TYPE
+							$rdaf->setStatus( 10 );            //default to enabled.
+							$rdaf->setType( 2000 );            //default to Checking
+							$rdaf->setName( 'Checking' );      //!!!!  BASED ON THE ACCOUNT TYPE
 							//$rdaf->setCurrency( $user_obj->getCurrency() );//from employee record - Not used in destination accounts currently.
-							$rdaf->setPriority( 5 ); //default to 5
-							$rdaf->setAmountType( 10 ); //10 = percent, 20 = fixed amount
-							$rdaf->setPercentAmount( 100 ); //default to 100 percent
+							$rdaf->setPriority( 5 );           //default to 5
+							$rdaf->setAmountType( 10 );        //10 = percent, 20 = fixed amount
+							$rdaf->setPercentAmount( 100 );    //default to 100 percent
 
 							//Debug::Arr( $rdaf->data, '    New Remittance Destination Account: ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -448,14 +448,14 @@ class InstallSchema_1093A extends InstallSchema_Base {
 
 					//Pick a oldest user from the highest permission level to use as the payroll contact, as we really have no guaranteed way to know who to use otherwise.
 					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-					$pclf->getByCompanyId( $cf->getId(), NULL, NULL, NULL, array('level' => 'desc') ); //Force order to prevent references to columns that haven't been created yet.
+					$pclf->getByCompanyId( $cf->getId(), null, null, null, [ 'level' => 'desc' ] ); //Force order to prevent references to columns that haven't been created yet.
 					if ( $pclf->getRecordCount() > 0 ) {
 						Debug::Text( '  Found Permission Control records: ' . $pclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 						foreach ( $pclf as $pc_obj ) {
 							$permission_control_user_ids = (array)$pclf->getCurrent()->getUser();
 							sort( $permission_control_user_ids ); //Use the oldest (lowest ID) user as a best guess.
-							if ( is_array($permission_control_user_ids) AND count( $permission_control_user_ids ) > 0 ) {
-								foreach( $permission_control_user_ids as $admin_user_id ) {
+							if ( is_array( $permission_control_user_ids ) && count( $permission_control_user_ids ) > 0 ) {
+								foreach ( $permission_control_user_ids as $admin_user_id ) {
 									Debug::Text( '  Permission Control User ID: ' . $admin_user_id . ' Company ID: ' . $cf->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 									if ( $admin_user_id > 0 ) { //Not a UUID yet.
 										Debug::Text( '    Admin User ID: ' . $admin_user_id . ' Company ID: ' . $cf->getId(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -475,39 +475,39 @@ class InstallSchema_1093A extends InstallSchema_Base {
 					//Go through all CompanyDeductions and match them to a remittance agency. Then use that list of extract out country/province pairs for SetupPresets.
 					//  Do it this way instead of using country/province fields from the CompanyDeductions, as things like UI don't them specified, and for states without income tax, they won't be created from that either.
 					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
-					$cdlf->getByCompanyId( $cf->getId(), NULL, array('calculation_id' => 'desc', 'country' => 'asc', 'province' => 'asc' ) );
+					$cdlf->getByCompanyId( $cf->getId(), null, [ 'calculation_id' => 'desc', 'country' => 'asc', 'province' => 'asc' ] );
 					if ( $cdlf->getRecordCount() ) {
-						$ra_obj = TTnew('PayrollRemittanceAgencyFactory'); /** @var PayrollRemittanceAgencyFactory $ra_obj */
-						$processed_agency_countries = array();
-						$processed_agency_provinces = array();
+						$ra_obj = TTnew( 'PayrollRemittanceAgencyFactory' ); /** @var PayrollRemittanceAgencyFactory $ra_obj */
+						$processed_agency_countries = [];
+						$processed_agency_provinces = [];
 						foreach ( $cdlf as $cd_obj ) {
 							$agency_id = $cd_obj->getPayrollRemittanceAgencyIdByNameOrCalculation();
 							if ( $agency_id != '' ) {
 								$agency_data = $ra_obj->parseAgencyID( $agency_id );
-								if ( is_array($agency_data) AND isset($agency_data['country']) ) {
+								if ( is_array( $agency_data ) && isset( $agency_data['country'] ) ) {
 									Debug::Text( '    Creating Payroll Remittance Agencies for Country: ' . $agency_data['country'] . ' Province: ' . $agency_data['province'], __FILE__, __LINE__, __METHOD__, 10 );
 									//Make sure we don't call the country presets more than once for the same country to avoid validation failures.
-									if ( $agency_data['country'] != '' AND !in_array( $agency_data['country'], $processed_agency_countries ) ) {
+									if ( $agency_data['country'] != '' && !in_array( $agency_data['country'], $processed_agency_countries ) ) {
 										$sp->PayrollRemittanceAgencys( $agency_data['country'] );
 										$processed_agency_countries[] = $agency_data['country'];
 									}
 
 									//Because Canada doesn't have Province specific remittance agencies other than WCB, we need to figure out which provinces to apply the presets for based on the company and add that WCB agency.
-									if ( strtoupper( $agency_data['country'] ) == 'CA' AND $agency_data['province'] == '00' AND is_object( $cd_obj->getCompanyObject() ) ) {
+									if ( strtoupper( $agency_data['country'] ) == 'CA' && $agency_data['province'] == '00' && is_object( $cd_obj->getCompanyObject() ) ) {
 										$agency_data['province'] = strtoupper( $cd_obj->getCompanyObject()->getProvince() );
 									}
 
-									if ( $agency_data['country'] != '' AND $agency_data['province'] != '' AND $agency_data['province'] != '00' AND !in_array( $agency_data['province'], $processed_agency_provinces ) ) {
+									if ( $agency_data['country'] != '' && $agency_data['province'] != '' && $agency_data['province'] != '00' && !in_array( $agency_data['province'], $processed_agency_provinces ) ) {
 										$sp->PayrollRemittanceAgencys( $agency_data['country'], $agency_data['province'] );
 										$processed_agency_provinces[] = $agency_data['province'];
 									}
 								}
 							} else {
-								Debug::Text( '  Company Deduction cannot be mapped to agency: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+								Debug::Text( '  Company Deduction cannot be mapped to agency: ' . $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 							}
 						}
 					}
-					unset($ra_obj, $cdlf, $cd_obj, $processed_agency_countries, $processed_agency_provinces, $agency_id, $agency_data );
+					unset( $ra_obj, $cdlf, $cd_obj, $processed_agency_countries, $processed_agency_provinces, $agency_id, $agency_data );
 
 					//Assign Tax/Deductions to above created legal entity and remittance agencies.
 					//  This should happen after the remittance source accounts are created, so they can be used by the agencies.
@@ -557,26 +557,27 @@ class InstallSchema_1093A extends InstallSchema_Base {
 						Debug::Text( '  Company business number is not specified, unable to copy it to remittance agencies...', __FILE__, __LINE__, __METHOD__, 10 );
 					}
 
-					unset($legal_entity_id, $lef ); //Unset at end of foreach loop.
+					unset( $legal_entity_id, $lef ); //Unset at end of foreach loop.
 				}
 			}
 		}
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('RemittanceAgencyEvent');
-		$cjf->setMinute(0); //Random time once a day for load balancing
-		$cjf->setHour('*'); //Random time once a day for load balancing
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand('RemittanceAgencyEvent.php');
+		$cjf->setName( 'RemittanceAgencyEvent' );
+		$cjf->setMinute( 0 ); //Random time once a day for load balancing
+		$cjf->setHour( '*' ); //Random time once a day for load balancing
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( 'RemittanceAgencyEvent.php' );
 		$cjf->Save();
 
 		//$clf->FailTransaction(); return FALSE; //FOR DEBUG DO NOT COMMIT THIS UNLESS IT IS COMMENTED OUT!!!!
 		$clf->CommitTransaction();
-		unset($clf);
+		unset( $clf );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

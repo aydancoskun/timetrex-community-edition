@@ -47,19 +47,19 @@ class APIPayStubEntry extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * Get options for dropdown boxes.
 	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
-	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
+	 * @param mixed $parent     Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return bool|array
 	 */
-	function getOptions( $name = FALSE, $parent = NULL ) {
+	function getOptions( $name = false, $parent = null ) {
 		if ( $name == 'columns'
-			AND ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_own') OR $this->getPermissionObject()->Check('pay_stub', 'view_child') ) ) ) {
+				&& ( !$this->getPermissionObject()->Check( 'pay_stub', 'enabled' )
+						|| !( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) || $this->getPermissionObject()->Check( 'pay_stub', 'view_own' ) || $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -71,9 +71,9 @@ class APIPayStubEntry extends APIFactory {
 	 * @return array
 	 */
 	function getPayStubEntryDefaultData() {
-		Debug::Text('Getting pay stub entry default data...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Getting pay stub entry default data...', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 
 	/**
@@ -82,30 +82,31 @@ class APIPayStubEntry extends APIFactory {
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
-	function getPayStubEntry( $data = NULL, $disable_paging = FALSE ) {
+	function getPayStubEntry( $data = null, $disable_paging = false ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
-			OR !( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_child')	) ) {
+		if ( !$this->getPermissionObject()->Check( 'pay_stub', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) || $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
-		$pself->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$pself->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
+		Debug::Text( 'Record Count: ' . $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $pself->getRecordCount() > 0 ) {
 			$this->setPagerObject( $pself );
-			$retarr = array();
-			foreach( $pself as $pse_obj ) {
+			$retarr = [];
+			foreach ( $pself as $pse_obj ) {
 
 				$retarr[] = $pse_obj->getObjectAsArray( $data['filter_columns'] );
 			}
 
 			return $this->returnHandler( $retarr );
 		}
-		return $this->returnHandler( TRUE ); //No records returned.
+
+		return $this->returnHandler( true ); //No records returned.
 	}
 
 	/**
@@ -114,7 +115,7 @@ class APIPayStubEntry extends APIFactory {
 	 * @return array
 	 */
 	function getCommonPayStubEntryData( $data ) {
-		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getPayStubEntry( $data, TRUE ) ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getPayStubEntry( $data, true ) ) );
 	}
 
 	/**
@@ -123,7 +124,7 @@ class APIPayStubEntry extends APIFactory {
 	 * @return array
 	 */
 	function validatePayStubEntry( $data ) {
-		return $this->setPayStubEntry( $data, TRUE );
+		return $this->setPayStubEntry( $data, true );
 	}
 
 	/**
@@ -213,4 +214,5 @@ class APIPayStubEntry extends APIFactory {
 //		return $this->returnHandler( FALSE );
 //	}
 }
+
 ?>

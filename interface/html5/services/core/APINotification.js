@@ -39,5 +39,4 @@ var APINotification = ServiceCaller.extend( {
 
 	}
 
-
 } );

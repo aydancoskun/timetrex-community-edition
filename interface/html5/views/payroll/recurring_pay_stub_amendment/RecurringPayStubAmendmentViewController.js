@@ -12,7 +12,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		this.table_name_key = 'recurring_ps_amendment';
 		this.context_menu_name = $.i18n._( 'Recurring PS Amendment' );
 		this.navigation_label = $.i18n._( 'Recurring PS Amendment' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRecurringPayStubAmendment' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRecurringPayStubAmendment' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -175,7 +175,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRecurringPayStubAmendment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRecurringPayStubAmendment' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.RECURRING_AMENDMENT,
@@ -242,7 +242,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		// Employee(s)
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -267,7 +267,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -320,7 +320,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		// Percent of
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -384,7 +384,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
@@ -395,13 +395,12 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
 	}
-
 
 } );

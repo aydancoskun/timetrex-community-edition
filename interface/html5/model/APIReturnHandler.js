@@ -6,7 +6,6 @@
 
 var APIReturnHandler = Base.extend( {
 
-
 	defaults: {
 		result_data: null,
 		delegate: null
@@ -107,7 +106,7 @@ var APIReturnHandler = Base.extend( {
 	},
 
 	getAttributeInAPIDetails: function( attrName ) {
-		return    this.get( 'result_data' ).api_details[attrName];
+		return this.get( 'result_data' ).api_details[attrName];
 	},
 
 	getDetailsAsString: function() {
@@ -116,13 +115,11 @@ var APIReturnHandler = Base.extend( {
 		$.each( this.getDetails(), function( index, errorItem ) {
 
 			for ( var i in errorItem ) {
-				errorInfo += errorItem[i][0] + '\r'
+				errorInfo += errorItem[i][0] + '\r';
 			}
 		} );
 
 		return errorInfo;
 	}
 
-
-
-} )
+} );

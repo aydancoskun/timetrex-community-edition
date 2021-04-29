@@ -47,5 +47,4 @@ var APIUserTitle = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportUserTitle', arguments );
 	},
 
-
 } );

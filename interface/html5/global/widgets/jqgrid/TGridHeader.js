@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TGridHeader = function( options ) {
 		var opts = $.extend( {}, $.fn.TGridHeader.defaults, options );
@@ -78,4 +78,4 @@
 
 	$.fn.TGridHeader.defaults = {};
 
-})( jQuery );
+} )( jQuery );

@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TComboBox = function( options ) {
 		var opts = $.extend( {}, $.fn.TComboBox.defaults, options );
@@ -76,7 +76,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -146,7 +146,7 @@
 
 		this.getLabel = function() {
 
-			if ( !source_data || (set_empty && source_data.length === 1) || (set_any && source_data.length === 1) ) {
+			if ( !source_data || ( set_empty && source_data.length === 1 ) || ( set_any && source_data.length === 1 ) ) {
 				return select_value;
 			}
 			//if value is number convert to number type
@@ -157,7 +157,7 @@
 
 		this.getValue = function() {
 
-			if ( !source_data || (set_empty && source_data.length === 1) || (set_any && source_data.length === 1) ) {
+			if ( !source_data || ( set_empty && source_data.length === 1 ) || ( set_any && source_data.length === 1 ) ) {
 				return select_value;
 			}
 
@@ -199,7 +199,7 @@
 		this.setValue = function( val ) {
 			select_value = val;
 
-			if ( !source_data || source_data.length < 1 || (set_empty && source_data.length === 1) || (set_any && source_data.length === 1) ) {
+			if ( !source_data || source_data.length < 1 || ( set_empty && source_data.length === 1 ) || ( set_any && source_data.length === 1 ) ) {
 				set_select_item_when_set_source_data = true;
 				return;
 			}
@@ -243,12 +243,12 @@
 				}
 			} else {
 				if ( set_empty ) {
-					if ( val && val.length > 0 && (val[0].value != TTUUID.zero_id && val[0].value != 0) ) {
+					if ( val && val.length > 0 && ( val[0].value != TTUUID.zero_id && val[0].value != 0 ) ) {
 						val = Global.addFirstItemToArray( val, 'empty', customFirstItemLabel );
 					}
 
 				} else if ( set_any ) {
-					if ( val && val.length > 0 && (val[0].value != TTUUID.not_exist_id && val[0].value != -1) ) {
+					if ( val && val.length > 0 && ( val[0].value != TTUUID.not_exist_id && val[0].value != -1 ) ) {
 						val = Global.addFirstItemToArray( val, 'any', customFirstItemLabel );
 					}
 
@@ -261,7 +261,7 @@
 			if ( $.isArray( val ) ) {
 				var len = val.length;
 				for ( var i = 0; i < len; i++ ) {
-					option_array.push( '<option value="' +  val[i][valueKey] + '">' +  val[i][labelKey] + '</option>' );
+					option_array.push( '<option value="' + val[i][valueKey] + '">' + val[i][labelKey] + '</option>' );
 					// $( this ).append( '<option value="' + item[valueKey] + '">' + item[labelKey] + '</option>' );
 				}
 			} else {
@@ -271,7 +271,7 @@
 				}
 			}
 
-			if ( $(this)[0] ) {
+			if ( $( this )[0] ) {
 				$( this )[0].innerHTML = option_array.join( '' );
 			}
 
@@ -321,13 +321,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-								LocalCacheData.current_open_sub_controller.edit_view &&
-								LocalCacheData.current_open_sub_controller.is_viewing ) {
+							LocalCacheData.current_open_sub_controller.edit_view &&
+							LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-								LocalCacheData.current_open_primary_controller.edit_view &&
-								LocalCacheData.current_open_primary_controller.is_viewing ) {
+							LocalCacheData.current_open_primary_controller.edit_view &&
+							LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -357,4 +357,4 @@
 
 	$.fn.TComboBox.defaults = {};
 
-})( jQuery );
+} )( jQuery );

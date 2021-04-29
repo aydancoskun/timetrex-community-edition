@@ -39,13 +39,13 @@
  * @package Core
  */
 class Validator {
-	private $num_errors = 0; //Number of errors.
+	private $num_errors = 0;   //Number of errors.
 	private $num_warnings = 0; //Number of errors.
-	private $errors = array(); //Array of errors.
-	private $warnings = array(); //Array of errors.
+	private $errors = [];      //Array of errors.
+	private $warnings = [];    //Array of errors.
 	private $verbosity = 8;
 
-	public $validate_only = FALSE;
+	public $validate_only = false;
 
 	/**
 	 * Checks a result set for one or more rows.
@@ -54,18 +54,18 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isResultSetWithRows( $label, $rs, $msg = NULL) {
+	function isResultSetWithRows( $label, $rs, $msg = null ) {
 		//Debug::Arr($rs, 'ResultSet: ', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ( is_object($rs) ) {
-			if ( isset($rs->rs) AND is_object($rs->rs) AND isset($rs->rs->_numOfRows) AND $rs->rs->_numOfRows > 0 ) {
-				return TRUE;
+		if ( is_object( $rs ) ) {
+			if ( isset( $rs->rs ) && is_object( $rs->rs ) && isset( $rs->rs->_numOfRows ) && $rs->rs->_numOfRows > 0 ) {
+				return true;
 			}
 		}
 
-		$this->Error($label, $msg);
+		$this->Error( $label, $msg );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -74,13 +74,14 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isNotResultSetWithRows( $label, $rs, $msg = NULL) {
+	function isNotResultSetWithRows( $label, $rs, $msg = null ) {
 		//Debug::Arr($rs, 'ResultSet: ', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ( is_object($rs) ) {
-			if ( isset($rs->rs) AND is_object($rs->rs) AND isset($rs->rs->_numOfRows) AND $rs->rs->_numOfRows > 0 ) {
-				$this->Error($label, $msg);
-				return FALSE;
+		if ( is_object( $rs ) ) {
+			if ( isset( $rs->rs ) && is_object( $rs->rs ) && isset( $rs->rs->_numOfRows ) && $rs->rs->_numOfRows > 0 ) {
+				$this->Error( $label, $msg );
+
+				return false;
 			}
 			//foreach($rs as $result) {
 			//	$this->Error($label, $msg);
@@ -89,7 +90,7 @@ class Validator {
 			//}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -99,14 +100,14 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isTrue( $label, $value, $msg = NULL) {
-		if ($value == TRUE) {
-			return TRUE;
+	function isTrue( $label, $value, $msg = null ) {
+		if ( $value == true ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, (int)$value );
+		$this->Error( $label, $msg, (int)$value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -115,14 +116,14 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isFalse( $label, $value, $msg = NULL) {
-		if ($value == FALSE) {
-			return TRUE;
+	function isFalse( $label, $value, $msg = null ) {
+		if ( $value == false ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, (int)$value );
+		$this->Error( $label, $msg, (int)$value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -131,16 +132,16 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isNull( $label, $value, $msg = NULL) {
+	function isNull( $label, $value, $msg = null ) {
 		//Debug::text('Value: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ($value == NULL ) {
-			return TRUE;
+		if ( $value == null ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, (int)$value );
+		$this->Error( $label, $msg, (int)$value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -149,16 +150,16 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isNotNull( $label, $value, $msg = NULL) {
+	function isNotNull( $label, $value, $msg = null ) {
 		//Debug::text('Value: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ( $value != NULL ) { //== NULL matches on (float)0.0
-			return TRUE;
+		if ( $value != null ) { //== NULL matches on (float)0.0
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -168,16 +169,16 @@ class Validator {
 	 * @param $array
 	 * @return bool
 	 */
-	function inArrayValue( $label, $value, $msg = NULL, $array) {
+	function inArrayValue( $label, $value, $msg = null, $array ) {
 		//Debug::text('Value: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if (is_array($array) AND in_array($value, array_values( $array ) ) ) {
-			return TRUE;
+		if ( is_array( $array ) && in_array( $value, array_values( $array ) ) ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -187,16 +188,16 @@ class Validator {
 	 * @param $array
 	 * @return bool
 	 */
-	function inArrayKey( $label, $key, $msg = NULL, $array) {
+	function inArrayKey( $label, $key, $msg = null, $array ) {
 		//Debug::text('Key: '. $key, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 		//Debug::Arr($array, 'isArrayKey Array:', __FILE__, __LINE__, __METHOD__, $this->verbosity);
-		if (is_array($array) AND in_array($key, array_keys( $array ) ) ) {
-			return TRUE;
+		if ( is_array( $array ) && in_array( $key, array_keys( $array ) ) ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, $key );
+		$this->Error( $label, $msg, $key );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -205,16 +206,16 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isDigits( $label, $value, $msg = NULL) {
+	function isDigits( $label, $value, $msg = null ) {
 		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ( ctype_digit( trim($value) ) == TRUE ) { //Must be *only* digits.
-			return TRUE;
+		if ( ctype_digit( trim( $value ) ) == true ) { //Must be *only* digits.
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -223,17 +224,17 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isNumeric( $label, $value, $msg = NULL) {
+	function isNumeric( $label, $value, $msg = null ) {
 		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		//if ( preg_match('/^[-0-9]+$/', $value) ) {
-		if ( is_numeric( $value ) == TRUE ) {
-			return TRUE;
+		if ( is_numeric( $value ) == true ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -242,18 +243,18 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isUUID( $label, $value, $msg = NULL) {
+	function isUUID( $label, $value, $msg = null ) {
 		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		//Benchmarking proved that this method is faster than ctype_alnum()
 		//this regex is duplicated into Factory::setID()
-		if ( TTUUID::isUUID($value) == TRUE ) {
-			return TRUE;
+		if ( TTUUID::isUUID( $value ) == true ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -263,20 +264,20 @@ class Validator {
 	 * @param null $max
 	 * @return bool
 	 */
-	function isLessThan( $label, $value, $msg = NULL, $max = NULL ) {
+	function isLessThan( $label, $value, $msg = null, $max = null ) {
 		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ( $max === NULL OR $max === '' ) {
+		if ( $max === null || $max === '' ) {
 			$max = PHP_INT_MAX;
 		}
 
 		if ( $value <= $max ) {
-			return TRUE;
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -286,20 +287,20 @@ class Validator {
 	 * @param null $min
 	 * @return bool
 	 */
-	function isGreaterThan( $label, $value, $msg = NULL, $min = NULL ) {
+	function isGreaterThan( $label, $value, $msg = null, $min = null ) {
 		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ( $min === NULL OR $min === '' ) {
+		if ( $min === null || $min === '' ) {
 			$min = ( -1 * PHP_INT_MAX );
 		}
 
 		if ( $value >= $min ) {
-			return TRUE;
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 
@@ -309,20 +310,20 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isFloat( $label, $value, $msg = NULL) {
+	function isFloat( $label, $value, $msg = null ) {
 		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		//Don't use TTi18n::parseFloat() here, as if we are going to be doing that we should do it as early as possible to the user input, like in setObjectFromArray()
 		//  We do need to check if the value passed in is already cast to float/int and just accept it in that case.
 		//    Because in other locales preg_match() casts $value to a string, which means decimal could become a comma, then it won't match.
 		//    Allow commas and decimals to be accepted as floats, as parseFloat() should almost always be called after this function, and it accepts both in all locales.
-		if ( ( is_float( $value ) == TRUE OR is_int( $value ) === TRUE ) OR preg_match('/^(([\.,][0-9]+)|([-0-9]+([\.,\ 0-9]*)?))$/', trim( $value ) ) === 1 ) {
-			return TRUE;
+		if ( ( is_float( $value ) == true || is_int( $value ) === true ) || preg_match( '/^(([\.,][0-9]+)|([-0-9]+([\.,\ 0-9]*)?))$/', trim( $value ) ) === 1 ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -332,15 +333,15 @@ class Validator {
 	 * @param $regex
 	 * @return bool
 	 */
-	function isRegEx( $label, $value, $msg, $regex) {
+	function isRegEx( $label, $value, $msg, $regex ) {
 		//Debug::text('Value: '. $value .' RegEx: '. $regex, __FILE__, __LINE__, __METHOD__, $this->verbosity);
-		if ( preg_match($regex, $value) ) {
-			return TRUE;
+		if ( preg_match( $regex, $value ) ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -350,15 +351,15 @@ class Validator {
 	 * @param $regex
 	 * @return bool
 	 */
-	function isNotRegEx( $label, $value, $msg, $regex) {
+	function isNotRegEx( $label, $value, $msg, $regex ) {
 		//Debug::text('Value: '. $value .' RegEx: '. $regex, __FILE__, __LINE__, __METHOD__, $this->verbosity);
-		if ( preg_match($regex, $value) == FALSE ) {
-			return TRUE;
+		if ( preg_match( $regex, $value ) == false ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -369,18 +370,18 @@ class Validator {
 	 * @param int $max
 	 * @return bool
 	 */
-	function isLength( $label, $value, $msg = NULL, $min = 1, $max = 255) {
-		$len = strlen($value);
+	function isLength( $label, $value, $msg = null, $min = 1, $max = 255 ) {
+		$len = strlen( $value );
 
 		//Debug::text('Value: '. $value .' Length: '. $len .' Min: '. $min .' Max: '. $max, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ($len < $min OR $len > $max) {
-			$this->Error($label, $msg, $value );
+		if ( $len < $min || $len > $max ) {
+			$this->Error( $label, $msg, $value );
 
-			return FALSE;
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -391,18 +392,18 @@ class Validator {
 	 * @param int $max
 	 * @return bool
 	 */
-	function isLengthBeforeDecimal( $label, $value, $msg = NULL, $min = 1, $max = 255) {
-		$len = strlen( Misc::getBeforeDecimal($value) );
+	function isLengthBeforeDecimal( $label, $value, $msg = null, $min = 1, $max = 255 ) {
+		$len = strlen( Misc::getBeforeDecimal( $value ) );
 
 		//Debug::text('Value: '. $value .' Length: '. $len .' Min: '. $min .' Max: '. $max, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ($len < $min OR $len > $max) {
-			$this->Error($label, $msg, $value );
+		if ( $len < $min || $len > $max ) {
+			$this->Error( $label, $msg, $value );
 
-			return FALSE;
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -413,18 +414,18 @@ class Validator {
 	 * @param int $max
 	 * @return bool
 	 */
-	function isLengthAfterDecimal( $label, $value, $msg = NULL, $min = 1, $max = 255) {
-		$len = strlen( Misc::getAfterDecimal($value, FALSE) );
+	function isLengthAfterDecimal( $label, $value, $msg = null, $min = 1, $max = 255 ) {
+		$len = strlen( Misc::getAfterDecimal( $value, false ) );
 
 		//Debug::text('Value: '. $value .' Length: '. $len .' Min: '. $min .' Max: '. $max, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ($len < $min OR $len > $max) {
-			$this->Error($label, $msg, $value );
+		if ( $len < $min || $len > $max ) {
+			$this->Error( $label, $msg, $value );
 
-			return FALSE;
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -433,31 +434,30 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isUniqueCharacters( $label, $value, $msg = NULL ) {
+	function isUniqueCharacters( $label, $value, $msg = null ) {
 		//Check for unique characters and not consecutive characters.
 		//This will fail on:
 		// aaaaaaa
 		// bbbbbbb
 		// abc
 		// xyz
-		if ( strlen($value) > 2 ) {
-			$char_arr = str_split( strtolower($value) );
-			$prev_char_int = ord($char_arr[0]);
-			foreach( $char_arr as $char ) {
-				$curr_char_int = ord($char);
-				if ( abs($prev_char_int - $curr_char_int) > 1 ) {
-					return TRUE;
+		if ( strlen( $value ) > 2 ) {
+			$char_arr = str_split( strtolower( $value ) );
+			$prev_char_int = ord( $char_arr[0] );
+			foreach ( $char_arr as $char ) {
+				$curr_char_int = ord( $char );
+				if ( abs( $prev_char_int - $curr_char_int ) > 1 ) {
+					return true;
 				}
 				$prev_char_int = $curr_char_int;
 			}
 
-			$this->Error($label, $msg, $value );
+			$this->Error( $label, $msg, $value );
 
-			return FALSE;
-
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -468,38 +468,37 @@ class Validator {
 	 * @param bool $consecutive_only
 	 * @return bool
 	 */
-	function isDuplicateCharacters( $label, $value, $msg = NULL, $max_duplicate_percent = FALSE, $consecutive_only = FALSE ) {
-		if ( strlen($value) > 2 AND $max_duplicate_percent != FALSE ) {
+	function isDuplicateCharacters( $label, $value, $msg = null, $max_duplicate_percent = false, $consecutive_only = false ) {
+		if ( strlen( $value ) > 2 && $max_duplicate_percent != false ) {
 			$duplicate_chars = 0;
 
-			$char_arr = str_split( strtolower($value) );
-			$prev_char_int = ord($char_arr[0]);
-			foreach( $char_arr as $char ) {
-				$curr_char_int = ord($char);
-				if ( abs($prev_char_int - $curr_char_int) > 1 ) {
-					if ( $consecutive_only == TRUE ) {
+			$char_arr = str_split( strtolower( $value ) );
+			$prev_char_int = ord( $char_arr[0] );
+			foreach ( $char_arr as $char ) {
+				$curr_char_int = ord( $char );
+				if ( abs( $prev_char_int - $curr_char_int ) > 1 ) {
+					if ( $consecutive_only == true ) {
 						$duplicate_chars = 0; //Reset duplicate count.
 					}
-
 				} else {
 					$duplicate_chars++;
 				}
 				$prev_char_int = $curr_char_int;
 			}
 
-			$duplicate_percent = ( ( $duplicate_chars / strlen($value) ) * 100 );
-			Debug::text('Duplicate Chars: '. $duplicate_chars .' Percent: '. $duplicate_percent .' Max Percent: '. $max_duplicate_percent .' Consec: '. (int)$consecutive_only, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+			$duplicate_percent = ( ( $duplicate_chars / strlen( $value ) ) * 100 );
+			Debug::text( 'Duplicate Chars: ' . $duplicate_chars . ' Percent: ' . $duplicate_percent . ' Max Percent: ' . $max_duplicate_percent . ' Consec: ' . (int)$consecutive_only, __FILE__, __LINE__, __METHOD__, $this->verbosity );
 
 			if ( $duplicate_percent < $max_duplicate_percent ) {
-				return TRUE;
+				return true;
 			}
 
-			$this->Error($label, $msg, $value );
+			$this->Error( $label, $msg, $value );
 
-			return FALSE;
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -509,21 +508,21 @@ class Validator {
 	 * @param $bad_words
 	 * @return bool
 	 */
-	function isAllowedWords( $label, $value, $msg = NULL, $bad_words ) {
-		$words = explode(' ', $value );
-		if ( is_array($words) ) {
-			foreach( $words as $word ) {
-				foreach( $bad_words as $bad_word ) {
-					if ( strtolower($word) == strtolower($bad_word) ) {
-						$this->Error($label, $msg, $value );
+	function isAllowedWords( $label, $value, $msg = null, $bad_words ) {
+		$words = explode( ' ', $value );
+		if ( is_array( $words ) ) {
+			foreach ( $words as $word ) {
+				foreach ( $bad_words as $bad_word ) {
+					if ( strtolower( $word ) == strtolower( $bad_word ) ) {
+						$this->Error( $label, $msg, $value );
 
-						return FALSE;
+						return false;
 					}
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -533,16 +532,16 @@ class Validator {
 	 * @param $bad_words
 	 * @return bool
 	 */
-	function isAllowedValues( $label, $value, $msg = NULL, $bad_words ) {
-		foreach( $bad_words as $bad_word ) {
-			if ( strtolower($value) == strtolower($bad_word) ) {
-				$this->Error($label, $msg, $value );
+	function isAllowedValues( $label, $value, $msg = null, $bad_words ) {
+		foreach ( $bad_words as $bad_word ) {
+			if ( strtolower( $value ) == strtolower( $bad_word ) ) {
+				$this->Error( $label, $msg, $value );
 
-				return FALSE;
+				return false;
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -551,20 +550,20 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isPhoneNumber( $label, $value, $msg = NULL) {
+	function isPhoneNumber( $label, $value, $msg = null ) {
 
 		//Strip out all non-numeric characters.
-		$phone = $this->stripNonNumeric($value);
+		$phone = $this->stripNonNumeric( $value );
 
 		//Debug::text('Raw Phone: '. $value .' Phone: '. $phone, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ( strlen($phone) >= 6 AND strlen($phone) <= 20 AND preg_match('/^[0-9\(\)\-\.\+\ ]{6,20}$/i', $value) ) {
-			return TRUE;
+		if ( strlen( $phone ) >= 6 && strlen( $phone ) <= 20 && preg_match( '/^[0-9\(\)\-\.\+\ ]{6,20}$/i', $value ) ) {
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -575,141 +574,141 @@ class Validator {
 	 * @param null $province
 	 * @return bool
 	 */
-	function isPostalCode( $label, $value, $msg = NULL, $country = NULL, $province = NULL) {
+	function isPostalCode( $label, $value, $msg = null, $country = null, $province = null ) {
 		//Debug::text('Raw Postal Code: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		//Remove any spaces, keep dashes for US extended ZIP.
-		$value = str_replace( array(' '), '', trim($value) );
+		$value = str_replace( [ ' ' ], '', trim( $value ) );
 
-		$province = strtolower( trim($province) );
+		$province = strtolower( trim( $province ) );
 
-		switch ( strtolower(trim($country)) ) {
+		switch ( strtolower( trim( $country ) ) ) {
 			case 'us':
 				//US zip code
-				if ( preg_match('/^[0-9]{5}$/i', $value) OR preg_match('/^[0-9]{5}\-[0-9]{4}$/i', $value) ) {
+				if ( preg_match( '/^[0-9]{5}$/i', $value ) || preg_match( '/^[0-9]{5}\-[0-9]{4}$/i', $value ) ) {
 
 					if ( $province != '' ) {
-						$province_postal_code_map = array (
-										'ak' => array ('9950099929'),
-										'al' => array ('3500036999'),
-										'ar' => array ('7160072999', '7550275505'),
-										'az' => array ('8500086599'),
-										'ca' => array ('9000096199'),
-										'co' => array ('8000081699'),
-										'ct' => array ('0600006999'),
-										'dc' => array ('2000020099', '2020020599'),
-										'de' => array ('1970019999'),
-										'fl' => array ('3200033999', '3410034999'),
-										'ga' => array ('3000031999'),
-										'hi' => array ('9670096798', '9680096899'),
-										'ia' => array ('5000052999'),
-										'id' => array ('8320083899'),
-										'il' => array ('6000062999'),
-										'in' => array ('4600047999'),
-										'ks' => array ('6600067999'),
-										'ky' => array ('4000042799', '4527545275'),
-										'la' => array ('7000071499', '7174971749'),
-										'ma' => array ('0100002799'),
-										'md' => array ('2033120331', '2060021999'),
-										'me' => array ('0380103801', '0380403804', '0390004999'),
-										'mi' => array ('4800049999'),
-										'mn' => array ('5500056799'),
-										'mo' => array ('6300065899'),
-										'ms' => array ('3860039799'),
-										'mt' => array ('5900059999'),
-										'nc' => array ('2700028999'),
-										'nd' => array ('5800058899'),
-										'ne' => array ('6800069399'),
-										'nh' => array ('0300003803', '0380903899'),
-										'nj' => array ('0700008999'),
-										'nm' => array ('8700088499'),
-										'nv' => array ('8900089899'),
-										'ny' => array ('0040000599', '0639006390', '0900014999'),
-										'oh' => array ('4300045999'),
-										'ok' => array ('7300073199', '7340074999'),
-										'or' => array ('9700097999'),
-										'pa' => array ('1500019699'),
-										'ri' => array ('0280002999', '0637906379'),
-										'sc' => array ('2900029999'),
-										'sd' => array ('5700057799'),
-										'tn' => array ('3700038599', '7239572395'),
-										'tx' => array ('7330073399', '7394973949', '7500079999', '8850188599'),
-										'ut' => array ('8400084799'),
-										'va' => array ('2010520199', '2030120301', '2037020370', '2200024699'),
-										'vt' => array ('0500005999'),
-										'wa' => array ('9800099499'),
-										'wi' => array ('4993649936', '5300054999'),
-										'wv' => array ('2470026899'),
-										'wy' => array ('8200083199')
-									);
+						$province_postal_code_map = [
+								'ak' => [ '9950099929' ],
+								'al' => [ '3500036999' ],
+								'ar' => [ '7160072999', '7550275505' ],
+								'az' => [ '8500086599' ],
+								'ca' => [ '9000096199' ],
+								'co' => [ '8000081699' ],
+								'ct' => [ '0600006999' ],
+								'dc' => [ '2000020099', '2020020599' ],
+								'de' => [ '1970019999' ],
+								'fl' => [ '3200033999', '3410034999' ],
+								'ga' => [ '3000031999' ],
+								'hi' => [ '9670096798', '9680096899' ],
+								'ia' => [ '5000052999' ],
+								'id' => [ '8320083899' ],
+								'il' => [ '6000062999' ],
+								'in' => [ '4600047999' ],
+								'ks' => [ '6600067999' ],
+								'ky' => [ '4000042799', '4527545275' ],
+								'la' => [ '7000071499', '7174971749' ],
+								'ma' => [ '0100002799' ],
+								'md' => [ '2033120331', '2060021999' ],
+								'me' => [ '0380103801', '0380403804', '0390004999' ],
+								'mi' => [ '4800049999' ],
+								'mn' => [ '5500056799' ],
+								'mo' => [ '6300065899' ],
+								'ms' => [ '3860039799' ],
+								'mt' => [ '5900059999' ],
+								'nc' => [ '2700028999' ],
+								'nd' => [ '5800058899' ],
+								'ne' => [ '6800069399' ],
+								'nh' => [ '0300003803', '0380903899' ],
+								'nj' => [ '0700008999' ],
+								'nm' => [ '8700088499' ],
+								'nv' => [ '8900089899' ],
+								'ny' => [ '0040000599', '0639006390', '0900014999' ],
+								'oh' => [ '4300045999' ],
+								'ok' => [ '7300073199', '7340074999' ],
+								'or' => [ '9700097999' ],
+								'pa' => [ '1500019699' ],
+								'ri' => [ '0280002999', '0637906379' ],
+								'sc' => [ '2900029999' ],
+								'sd' => [ '5700057799' ],
+								'tn' => [ '3700038599', '7239572395' ],
+								'tx' => [ '7330073399', '7394973949', '7500079999', '8850188599' ],
+								'ut' => [ '8400084799' ],
+								'va' => [ '2010520199', '2030120301', '2037020370', '2200024699' ],
+								'vt' => [ '0500005999' ],
+								'wa' => [ '9800099499' ],
+								'wi' => [ '4993649936', '5300054999' ],
+								'wv' => [ '2470026899' ],
+								'wy' => [ '8200083199' ],
+						];
 
-						if ( isset($province_postal_code_map[$province]) ) {
-							$zip5 = substr($value, 0, 5);
+						if ( isset( $province_postal_code_map[$province] ) ) {
+							$zip5 = substr( $value, 0, 5 );
 							//Debug::text('Checking ZIP code range, short zip: '. $zip5, __FILE__, __LINE__, __METHOD__, $this->verbosity);
-							foreach( $province_postal_code_map[$province] as $postal_code_range ) {
+							foreach ( $province_postal_code_map[$province] as $postal_code_range ) {
 								//Debug::text('Checking ZIP code range: '. $postal_code_range, __FILE__, __LINE__, __METHOD__, $this->verbosity);
-								if ( ( $zip5 >= substr($postal_code_range, 0, 5) ) AND ( $zip5 <= substr( $postal_code_range, 5 ) ) ) {
-									return TRUE;
+								if ( ( $zip5 >= substr( $postal_code_range, 0, 5 ) ) && ( $zip5 <= substr( $postal_code_range, 5 ) ) ) {
+									return true;
 								}
 							}
 						} // else { //Debug::text('Postal Code does not match province!', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 					} else {
-						return TRUE;
+						return true;
 					}
 				}
 				break;
 			case 'ca':
 				//Canada postal code
-				if ( preg_match('/^[a-zA-Z]{1}[0-9]{1}[a-zA-Z]{1}[-]?[0-9]{1}[a-zA-Z]{1}[0-9]{1}$/i', $value) ) {
+				if ( preg_match( '/^[a-zA-Z]{1}[0-9]{1}[a-zA-Z]{1}[-]?[0-9]{1}[a-zA-Z]{1}[0-9]{1}$/i', $value ) ) {
 					if ( $province != '' ) {
 						//Debug::text('Verifying postal code against province!', __FILE__, __LINE__, __METHOD__, $this->verbosity);
-						$province_postal_code_map = array(
-												'ab' => array('t'),
-												'bc' => array('v'),
-												'sk' => array('s'),
-												'mb' => array('r'),
-												'qc' => array('g', 'h', 'j'),
-												'on' => array('k', 'l', 'm', 'n', 'p'),
-												'nl' => array('a'),
-												'nb' => array('e'),
-												'ns' => array('b'),
-												'pe' => array('c'),
-												'nt' => array('x'),
-												'yt' => array('y'),
-												'nu' => array('x')
-											);
+						$province_postal_code_map = [
+								'ab' => [ 't' ],
+								'bc' => [ 'v' ],
+								'sk' => [ 's' ],
+								'mb' => [ 'r' ],
+								'qc' => [ 'g', 'h', 'j' ],
+								'on' => [ 'k', 'l', 'm', 'n', 'p' ],
+								'nl' => [ 'a' ],
+								'nb' => [ 'e' ],
+								'ns' => [ 'b' ],
+								'pe' => [ 'c' ],
+								'nt' => [ 'x' ],
+								'yt' => [ 'y' ],
+								'nu' => [ 'x' ],
+						];
 
 						//Debug::Arr($province_postal_code_map[$province], 'Valid Postal Codes for Province', __FILE__, __LINE__, __METHOD__, $this->verbosity);
-						if ( isset($province_postal_code_map[$province]) AND in_array( substr( strtolower($value), 0, 1), $province_postal_code_map[$province] ) )	{
-							return TRUE;
+						if ( isset( $province_postal_code_map[$province] ) && in_array( substr( strtolower( $value ), 0, 1 ), $province_postal_code_map[$province] ) ) {
+							return true;
 						} // else { //Debug::text('Postal Code does not match province!', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 					} else {
-						return TRUE;
+						return true;
 					}
 				}
 				break;
 			default:
 				//US
-				if ( preg_match('/^[0-9]{5}$/i', $value) OR preg_match('/^[0-9]{5}\-[0-9]{4}$/i', $value) ) {
-					return TRUE;
+				if ( preg_match( '/^[0-9]{5}$/i', $value ) || preg_match( '/^[0-9]{5}\-[0-9]{4}$/i', $value ) ) {
+					return true;
 				}
 
 				//CA
-				if ( preg_match('/^[a-zA-Z]{1}[0-9]{1}[a-zA-Z]{1}[-]?[0-9]{1}[a-zA-Z]{1}[0-9]{1}$/i', $value) ) {
-					return TRUE;
+				if ( preg_match( '/^[a-zA-Z]{1}[0-9]{1}[a-zA-Z]{1}[-]?[0-9]{1}[a-zA-Z]{1}[0-9]{1}$/i', $value ) ) {
+					return true;
 				}
 
 				//Other
-				if ( preg_match('/^[a-zA-Z0-9]{1,10}$/i', $value) ) {
-					return TRUE;
+				if ( preg_match( '/^[a-zA-Z0-9]{1,10}$/i', $value ) ) {
+					return true;
 				}
 
 				break;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -718,17 +717,17 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isEmail( $label, $value, $msg = NULL) {
+	function isEmail( $label, $value, $msg = null ) {
 		//Debug::text('Raw Email: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
-		if ( function_exists('filter_var') AND filter_var($value, FILTER_VALIDATE_EMAIL) !== FALSE ) {
-			return TRUE;
-		} elseif ( preg_match('/^[\w\.\-\&\+]+\@[\w\.\-]+\.[a-z]{2,5}$/i', $value) ) { //This Email regex is no where near correct, use PHP filter_var instead. - Allow 5 char suffixes to support .local domains.
-			return TRUE;
+		if ( function_exists( 'filter_var' ) && filter_var( $value, FILTER_VALIDATE_EMAIL ) !== false ) {
+			return true;
+		} else if ( preg_match( '/^[\w\.\-\&\+]+\@[\w\.\-]+\.[a-z]{2,5}$/i', $value ) ) { //This Email regex is no where near correct, use PHP filter_var instead. - Allow 5 char suffixes to support .local domains.
+			return true;
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -737,26 +736,27 @@ class Validator {
 	 * @param null $msg
 	 * @param bool $error_level
 	 * @return bool
+	 * @noinspection PhpUndefinedConstantInspection
 	 */
-	function isEmailAdvanced( $label, $value, $msg = NULL, $error_level = TRUE ) {
+	function isEmailAdvanced( $label, $value, $msg = null, $error_level = true ) {
 		//Debug::text('Raw Email: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		$retval = Misc::isEmail( $value, TRUE, $error_level, TRUE );
+		$retval = Misc::isEmail( $value, true, $error_level, true );
 		if ( $retval === ISEMAIL_VALID ) {
-			return TRUE;
+			return true;
 		}
 
-		if ( is_array($msg) ) {
-			if ( isset($msg[$retval]) ) {
+		if ( is_array( $msg ) ) {
+			if ( isset( $msg[$retval] ) ) {
 				$msg = $msg[$retval];
 			} else {
 				$msg = $msg[0];
 			}
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -765,28 +765,28 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isIPAddress( $label, $value, $msg = NULL) {
+	function isIPAddress( $label, $value, $msg = null ) {
 		//Debug::text('Raw IP: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		$ip = explode('.', $value);
+		$ip = explode( '.', $value );
 
-		if( count($ip) == 4 ) {
-			$valid = TRUE;
+		if ( count( $ip ) == 4 ) {
+			$valid = true;
 
-			foreach($ip as $block) {
-				if( !is_numeric($block) OR $block >= 255 OR $block < 0) {
-					$valid = FALSE;
+			foreach ( $ip as $block ) {
+				if ( !is_numeric( $block ) || $block >= 255 || $block < 0 ) {
+					$valid = false;
 				}
 			}
 
-			if ( $valid == TRUE ) {
-				return TRUE;
+			if ( $valid == true ) {
+				return true;
 			}
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -795,20 +795,20 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
-	function isDate( $label, $value, $msg = NULL) {
+	function isDate( $label, $value, $msg = null ) {
 		//Because most epochs are stored as 4-byte integers, make sure we are within range.
 		if ( TTDate::isValidDate( $value ) ) {
-			$date = gmdate('U', $value);
+			$date = gmdate( 'U', $value );
 			//Debug::text('Raw Date: '. $value .' Converted Value: '. $date, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-			if (  $date == $value ) {
-				return TRUE;
+			if ( $date == $value ) {
+				return true;
 			}
 		}
 
-		$this->Error($label, $msg, $value );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -818,14 +818,14 @@ class Validator {
 	 * @param null $country
 	 * @return bool
 	 */
-	function isSIN( $label, $value, $msg = NULL, $country = NULL ) {
+	function isSIN( $label, $value, $msg = null, $country = null ) {
 		$sin = $this->stripNonAlphaNumeric( trim( $value ) ); //UK National Insurance Number (NINO) has letters, so we can only strip spaces.
-		Debug::text('Validating SIN/SSN: '. $value .' Country: '. $country, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+		Debug::text( 'Validating SIN/SSN: ' . $value . ' Country: ' . $country, __FILE__, __LINE__, __METHOD__, $this->verbosity );
 
-		$retval = FALSE;
-		switch ( strtolower( trim( $country) ) ) {
+		//$retval = false;
+		switch ( strtolower( trim( $country ) ) ) {
 			case 'ca':
-				if ( ( is_numeric( $sin ) AND $sin >= 100000000 AND $sin < 999999999 ) ) {
+				if ( ( is_numeric( $sin ) && $sin >= 100000000 && $sin < 999999999 ) ) {
 					$split_sin = str_split( $sin );
 
 					if ( ( $split_sin[1] *= 2 ) >= 10 ) {
@@ -842,40 +842,40 @@ class Validator {
 					}
 
 					if ( ( array_sum( $split_sin ) % 10 ) != 0 ) {
-						$retval = FALSE;
+						$retval = false;
 					} else {
-						$retval = TRUE;
+						$retval = true;
 					}
 				} else {
-					if ( $sin == 999999999 OR $sin == '000000000' ) { //Allow all 9/0's for a SIN in case its an out of country employee that doesn't have one.
-						$retval = TRUE;
+					if ( $sin == 999999999 || $sin == '000000000' ) { //Allow all 9/0's for a SIN in case its an out of country employee that doesn't have one.
+						$retval = true;
 					} else {
-						$retval = FALSE;
+						$retval = false;
 					}
 				}
 				break;
 			case 'us':
-				if ( strlen($sin) == 9 AND is_numeric( $sin ) ) {
+				if ( strlen( $sin ) == 9 && is_numeric( $sin ) ) {
 					//Due to highgroup randomization, we can no longer validate SSN's without querying the IRS database.
-					$retval = TRUE;
+					$retval = true;
 				} else {
-					$retval = FALSE;
+					$retval = false;
 				}
 				break;
 			default:
 				//Allow all foriegn countries to utilize
-				$retval = self::isLength($label, $value, $msg, 1, 255);
+				$retval = self::isLength( $label, $value, $msg, 1, 255 );
 				break;
 		}
 
-		if ( $retval === TRUE ) {
-			return TRUE;
+		if ( $retval === true ) {
+			return true;
 		}
 
-		Debug::text('Invalid SIN/SSN: '. $value .' Country: '. $country, __FILE__, __LINE__, __METHOD__, $this->verbosity);
-		$this->Error($label, $msg, $value );
+		Debug::text( 'Invalid SIN/SSN: ' . $value . ' Country: ' . $country, __FILE__, __LINE__, __METHOD__, $this->verbosity );
+		$this->Error( $label, $msg, $value );
 
-		return FALSE;
+		return false;
 	}
 
 	/*
@@ -885,8 +885,8 @@ class Validator {
 	 * @param $value
 	 * @return int
 	 */
-	function stripNon32bitInteger( $value) {
-		if ( (int)$value >= 2147483647 OR (int)$value <= -2147483648 ) { //Make sure we cast $value to integer, otherwise its a string comparison which is not as intended.
+	function stripNon32bitInteger( $value ) {
+		if ( (int)$value >= 2147483647 || (int)$value <= -2147483648 ) { //Make sure we cast $value to integer, otherwise its a string comparison which is not as intended.
 			return 0;
 		}
 
@@ -897,16 +897,17 @@ class Validator {
 	 * @param $value
 	 * @return mixed
 	 */
-	function stripSpaces( $value) {
-		return str_replace(' ', '', trim($value));
+	function stripSpaces( $value ) {
+		return str_replace( ' ', '', trim( $value ) );
 	}
 
 	/**
 	 * @param $value
 	 * @return mixed
 	 */
-	function stripNumeric( $value) {
-		$retval = preg_replace('/[0-9]/', '', $value);
+	function stripNumeric( $value ) {
+		$retval = preg_replace( '/[0-9]/', '', $value );
+
 		return $retval;
 	}
 
@@ -914,8 +915,9 @@ class Validator {
 	 * @param $value
 	 * @return mixed
 	 */
-	function stripNonNumeric( $value) {
-		$retval = preg_replace('/[^0-9]/', '', $value);
+	function stripNonNumeric( $value ) {
+		$retval = preg_replace( '/[^0-9]/', '', $value );
+
 		return $retval;
 	}
 
@@ -923,8 +925,8 @@ class Validator {
 	 * @param $value
 	 * @return mixed
 	 */
-	function stripNonAlphaNumeric( $value) {
-		$retval = preg_replace('/[^A-Za-z0-9]/', '', $value);
+	function stripNonAlphaNumeric( $value ) {
+		$retval = preg_replace( '/[^A-Za-z0-9]/', '', $value );
 
 		//Debug::Text('Alpha Numeric String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
@@ -935,13 +937,13 @@ class Validator {
 	 * @param $value int|float|string
 	 * @return int|float|string
 	 */
-	function stripNonFloat( $value) {
+	function stripNonFloat( $value ) {
 		//Don't use TTi18n::parseFloat() here, as if we are going to be doing that we should do it as early as possible to the user input, like in setObjectFromArray().
 		//  Then this function would often be called afterwards, so it should always return a float value or something that can be used in math.
 		//  TTi18n::parseFloat() parses out non-float characters itself.
 		//We do need to check if the value passed in is already cast to float/int and just accept it in that case.
 		//    Because in other locales preg_match() casts $value to a string, which means decimal could become a comma, then it won't match.
-		if ( is_float( $value ) === TRUE OR is_int( $value ) === TRUE ) {
+		if ( is_float( $value ) === true || is_int( $value ) === true ) {
 			return $value;
 		} else {
 			//Strips repeating "." and "-" characters that might slip in due to typos. Then strips non-float valid characters.
@@ -964,8 +966,8 @@ class Validator {
 	 * @param $value
 	 * @return mixed
 	 */
-	function stripNonTimeUnit( $value) {
-		$retval = preg_replace('/[^-0-9\.:]/', '', $value);
+	function stripNonTimeUnit( $value ) {
+		$retval = preg_replace( '/[^-0-9\.:]/', '', $value );
 
 		//Debug::Text('Float String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
@@ -976,16 +978,16 @@ class Validator {
 	 * @param $value
 	 * @return string
 	 */
-	function stripHTML( $value) {
-		return strip_tags($value);
+	function stripHTML( $value ) {
+		return strip_tags( $value );
 	}
 
 	/**
 	 * @param $value
 	 * @return string
 	 */
-	function escapeHTML( $value) {
-		return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+	function escapeHTML( $value ) {
+		return htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' );
 	}
 
 	/**
@@ -996,19 +998,20 @@ class Validator {
 		global $config_vars;
 
 		//Require inside this function as HTMLPurifier is a huge file.
-		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'HTMLPurifier'. DIRECTORY_SEPARATOR .'HTMLPurifier.standalone.php');
+		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'HTMLPurifier' . DIRECTORY_SEPARATOR . 'HTMLPurifier.standalone.php' );
 
 		$config = HTMLPurifier_Config::createDefault();
-		if ( isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE
-			AND $config_vars['cache']['dir'] != '' AND is_writable( $config_vars['cache']['dir'] ) ) {
-			$config->set('Cache.SerializerPath', $config_vars['cache']['dir'] );
+		if ( isset( $config_vars['cache']['enable'] ) && $config_vars['cache']['enable'] == true
+				&& $config_vars['cache']['dir'] != '' && is_writable( $config_vars['cache']['dir'] ) ) {
+			$config->set( 'Cache.SerializerPath', $config_vars['cache']['dir'] );
 			//Debug::Text('Caching HTMLPurifier...', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 		} else {
-			$config->set('Cache.DefinitionImpl', NULL );
-			Debug::Text('NOT caching HTMLPurifier...', __FILE__, __LINE__, __METHOD__, $this->verbosity);
+			$config->set( 'Cache.DefinitionImpl', null );
+			Debug::Text( 'NOT caching HTMLPurifier...', __FILE__, __LINE__, __METHOD__, $this->verbosity );
 		}
 
 		$purifier = new HTMLPurifier( $config );
+
 		return $purifier->purify( $value );
 	}
 
@@ -1016,14 +1019,15 @@ class Validator {
 	 * @param $value
 	 * @return bool|string
 	 */
-	function getPhoneNumberAreaCode( $value) {
+	function getPhoneNumberAreaCode( $value ) {
 		$phone_number = $this->stripNonNumeric( $value );
-		if ( strlen($phone_number) > 7 ) {
+		if ( strlen( $phone_number ) > 7 ) {
 			$retval = substr( $phone_number, -10, 3 ); //1 555 555 5555
+
 			return $retval;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/*
@@ -1035,18 +1039,18 @@ class Validator {
 	 * @param $var_array
 	 * @return mixed
 	 */
-	function varReplace( $string, $var_array) {
+	function varReplace( $string, $var_array ) {
 		//var_array = arary('var1' => 'blah1', 'var2' => 'blah2');
-		$keys = array();
-		$values = array();
-		if ( is_array($var_array) AND count($var_array) > 0) {
-			foreach($var_array as $key => $value) {
-				$keys[] = '#'.$key;
+		$keys = [];
+		$values = [];
+		if ( is_array( $var_array ) && count( $var_array ) > 0 ) {
+			foreach ( $var_array as $key => $value ) {
+				$keys[] = '#' . $key;
 				$values[] = $value;
 			}
 		}
 
-		$retval = str_replace($keys, $values, $string);
+		$retval = str_replace( $keys, $values, $string );
 
 		return $retval;
 	}
@@ -1070,7 +1074,7 @@ class Validator {
 	 * @return array
 	 */
 	function getErrorsAndWarningsArray() {
-		return array( 'errors' => $this->errors, 'warnings' => $this->warnings );
+		return [ 'errors' => $this->errors, 'warnings' => $this->warnings ];
 	}
 
 	/**
@@ -1079,7 +1083,7 @@ class Validator {
 	 * @return bool
 	 */
 	function merge( $validator ) {
-		if ( is_object( $validator ) AND $validator->isValid() == FALSE ) {
+		if ( is_object( $validator ) && $validator->isValid() == false ) {
 			$this->errors = array_merge( $this->errors, $validator->getErrorsArray() );
 			$this->num_errors += count( $validator->getErrorsArray() );
 
@@ -1087,7 +1091,7 @@ class Validator {
 			$this->num_warnings += count( $validator->getWarningsArray() );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -1101,18 +1105,19 @@ class Validator {
 	 * @return bool|string
 	 */
 	function getErrors() {
-		if ( count( $this->errors ) > 0) {
+		if ( count( $this->errors ) > 0 ) {
 			$output = "<ol>\n";
-			foreach ($this->errors as $label) {
-				foreach ($label as $msg) {
-					$output .= '<li>'.$msg.".</li>";
+			foreach ( $this->errors as $label ) {
+				foreach ( $label as $msg ) {
+					$output .= '<li>' . $msg . ".</li>";
 				}
 			}
 			$output .= "</ol>\n";
+
 			return $output;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -1120,23 +1125,23 @@ class Validator {
 	 * @param array $errors_arr Pass in other error array to be converted to text.
 	 * @return bool|string
 	 */
-	function getTextErrors( $numbered_list = TRUE, $errors_arr = NULL ) {
-		if ( $errors_arr == NULL ) {
+	function getTextErrors( $numbered_list = true, $errors_arr = null ) {
+		if ( $errors_arr == null ) {
 			$errors_arr = $this->errors;
 		}
 
-		if ( is_array( $errors_arr ) AND count( $errors_arr ) > 0) {
+		if ( is_array( $errors_arr ) && count( $errors_arr ) > 0 ) {
 			$output = '';
-			$number_prefix = NULL;
+			$number_prefix = null;
 			$i = 1;
 			foreach ( $errors_arr as $label ) {
 				foreach ( $label as $msgs ) {
-					if ( $numbered_list == TRUE ) {
-						$number_prefix = $i .'. ';
+					if ( $numbered_list == true ) {
+						$number_prefix = $i . '. ';
 					}
 
 					if ( is_array( $msgs ) ) {
-						foreach( $msgs as $msg ) {
+						foreach ( $msgs as $msg ) {
 							$output .= $number_prefix . $msg . "\n";
 
 							$i++;
@@ -1152,19 +1157,19 @@ class Validator {
 			return $output;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $label
 	 * @return bool
 	 */
-	final function isValid( $label = NULL ) {
-		if ( $this->isError( $label ) OR $this->isWarning( $label ) ) {
-			return FALSE;
+	final function isValid( $label = null ) {
+		if ( $this->isError( $label ) || $this->isWarning( $label ) ) {
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -1172,25 +1177,26 @@ class Validator {
 	 * @param null $label
 	 * @return bool
 	 */
-	final function isError( $label = NULL ) {
-		if ( $label != NULL ) {
+	final function isError( $label = null ) {
+		if ( $label != null ) {
 			return $this->hasError( $label );
-		} elseif ( $this->num_errors > 0 ) {
-			Debug::Arr($this->errors, 'Errors', __FILE__, __LINE__, __METHOD__, $this->verbosity);
-			return TRUE;
+		} else if ( $this->num_errors > 0 ) {
+			Debug::Arr( $this->errors, 'Errors', __FILE__, __LINE__, __METHOD__, $this->verbosity );
+
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function resetErrors() {
-		$this->errors = array(); //Set to blank array rather than use unset() as that will cause PHP warnings in hasError().
+		$this->errors = []; //Set to blank array rather than use unset() as that will cause PHP warnings in hasError().
 		$this->num_errors = 0;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -1198,11 +1204,11 @@ class Validator {
 	 * @return bool
 	 */
 	function hasError( $label ) {
-		if ( in_array($label, array_keys($this->errors)) ) {
-			return TRUE;
+		if ( in_array( $label, array_keys( $this->errors ) ) ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -1212,19 +1218,19 @@ class Validator {
 	 * @return bool
 	 */
 	function Error( $label, $msg, $value = '' ) {
-		Debug::text('Validation Error: Label: '. $label .' Value: "'. $value .'" Msg: '. $msg, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+		Debug::text( 'Validation Error: Label: ' . $label . ' Value: "' . $value . '" Msg: ' . $msg, __FILE__, __LINE__, __METHOD__, $this->verbosity );
 
 		//If label is NULL, assume we don't actually want to trigger an error.
 		//This is good for just using the check functions for other purposes.
-		if ( $label != '') {
+		if ( $label != '' ) {
 			$this->errors[$label][] = $msg;
 
 			$this->num_errors++;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -1242,25 +1248,26 @@ class Validator {
 	 * @param null $label
 	 * @return bool
 	 */
-	final function isWarning( $label = NULL ) {
-		if ( $label != NULL ) {
+	final function isWarning( $label = null ) {
+		if ( $label != null ) {
 			return $this->hasWarning( $label );
-		} elseif ( $this->num_warnings > 0 ) {
-			Debug::Arr($this->warnings, 'Warnings', __FILE__, __LINE__, __METHOD__, $this->verbosity);
-			return TRUE;
+		} else if ( $this->num_warnings > 0 ) {
+			Debug::Arr( $this->warnings, 'Warnings', __FILE__, __LINE__, __METHOD__, $this->verbosity );
+
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function resetWarnings() {
-		$this->warnings = array(); //Set to blank array rather than use unset() as that will cause PHP warnings in hasWarning().
+		$this->warnings = []; //Set to blank array rather than use unset() as that will cause PHP warnings in hasWarning().
 		$this->num_warnings = 0;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -1268,11 +1275,11 @@ class Validator {
 	 * @return bool
 	 */
 	function hasWarning( $label ) {
-		if ( in_array($label, array_keys($this->warnings)) ) {
-			return TRUE;
+		if ( in_array( $label, array_keys( $this->warnings ) ) ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -1282,19 +1289,20 @@ class Validator {
 	 * @return bool
 	 */
 	function Warning( $label, $msg, $value = '' ) {
-		Debug::text('Validation Warning: Label: '. $label .' Value: "'. $value .'" Msg: '. $msg, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+		Debug::text( 'Validation Warning: Label: ' . $label . ' Value: "' . $value . '" Msg: ' . $msg, __FILE__, __LINE__, __METHOD__, $this->verbosity );
 
-		if ( $label != '') {
+		if ( $label != '' ) {
 			$this->warnings[$label][] = $msg;
 
 			$this->num_warnings++;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 
 }
+
 ?>

@@ -26,15 +26,15 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Pay Stub Transaction' );
 		this.navigation_label = $.i18n._( 'Pay Stub Transactions' ) + ':';
 
-		this.api = new (APIFactory.getAPIClass( 'APIPayStubTransaction' ))();
-		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
-		this.remittance_source_account_api = new (APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ))();
-		this.remittance_destination_account_api = new (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.pay_stub_entry_api = new (APIFactory.getAPIClass( 'APIPayStubEntry' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-		this.pay_period_api = new (APIFactory.getAPIClass( 'APIPayPeriod' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayStubTransaction' ) )();
+		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
+		this.remittance_source_account_api = new ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) )();
+		this.remittance_destination_account_api = new ( APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.pay_stub_entry_api = new ( APIFactory.getAPIClass( 'APIPayStubEntry' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.pay_period_api = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
 
 		this.initPermission();
 		this.render();
@@ -61,7 +61,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'status', 'transaction_status_id' );
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -501,7 +501,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStub' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStub' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB,
@@ -520,7 +520,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: false,
@@ -536,7 +536,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRemittanceSourceAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
 			show_search_inputs: false,
@@ -547,7 +547,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT,
 			show_search_inputs: false,
@@ -563,7 +563,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.CURRENCY,
 			allow_multiple_selection: false,
 			show_search_inputs: false,
-			api_class: (APIFactory.getAPIClass( 'APICurrency' ))
+			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) )
 		} );
 		;
 		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab_pay_stub_transaction_column1 );
@@ -605,7 +605,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'remittance_source_account_id',
 				layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
-				api_class: (APIFactory.getAPIClass( 'APIRemittanceSourceAccount' )),
+				api_class: ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -617,7 +617,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -628,7 +628,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -636,19 +636,17 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
-
 			new SearchField( {
 				label: $.i18n._( 'Currency' ),
 				in_column: 2,
 				field: 'currency_id',
-				api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+				api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.CURRENCY,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
-
 
 			new SearchField( {
 				label: $.i18n._( 'Transaction Date' ),
@@ -761,7 +759,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				filter.filter_data = {};
 
 				var grid_selected_id_array = this.getGridSelectIdArray();
-				selectedId = grid_selected_id_array[0];
+				var selectedId = grid_selected_id_array[0];
 				filter.filter_data.id = [selectedId];
 
 				this.api['get' + this.api.key_name]( filter, {

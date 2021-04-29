@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.AComboBox = function( options ) {
 		var opts = $.extend( {}, $.fn.AComboBox.defaults, options );
@@ -289,7 +289,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -803,7 +803,7 @@
 				for ( var i = 0; i < len; i++ ) {
 					item = val[i];
 					if ( $.type( item ) === 'string' ||
-							$.type( item ) === 'number' ) {
+						$.type( item ) === 'number' ) {
 						if ( !do_not_get_real_data ) {
 							this.getRealData( item );
 						} else {
@@ -857,7 +857,7 @@
 		};
 
 		this.setLabel = function() {
-			label_arr = Array();
+			var label_arr = Array();
 
 			if ( allow_multiple_selection ) {
 				if ( !select_items ) {
@@ -1039,7 +1039,7 @@
 
 			//Error: TypeError: user_generic_api is null in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=9.0.0-20150822-090205 line 987
 			if ( !user_generic_api ) {
-				user_generic_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+				user_generic_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
 			}
 			user_generic_api.setUserGenericData( filter, {
 				onResult: function( res ) {
@@ -1052,7 +1052,7 @@
 					//Reload real data if columns have changed, so they display data for any new columns
 					// We can't just pass in the selected_items verbatim here, we need to parse off the 'id' fields and pass that in as an array instead.
 					if ( $.type( select_items ) === 'array' ) {
-						select_items = select_items.map( function ( obj ) {
+						select_items = select_items.map( function( obj ) {
 							if ( obj.hasOwnProperty( 'id' ) ) {
 								return obj['id'];
 							}
@@ -1072,10 +1072,10 @@
 		//Set columns, display columns will be used when open AwesomeBox. If no layout saved. Display columns are the default ones set in this.each
 		this.initColumns = function() {
 
-			user_generic_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+			user_generic_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
 
 			//Error: TypeError: 'undefined' is not a function (evaluating 'user_generic_api.getUserGenericData') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-095711 line 1044
-			if ( !user_generic_api || !user_generic_api.getUserGenericData || typeof(user_generic_api.getUserGenericData) !== 'function' ) {
+			if ( !user_generic_api || !user_generic_api.getUserGenericData || typeof ( user_generic_api.getUserGenericData ) !== 'function' ) {
 				return;
 			}
 
@@ -1239,7 +1239,6 @@
 //							}
 							}
 						} else {
-
 
 							//If set possible columns, use it
 							if ( list_view_default_columns ) {
@@ -1427,7 +1426,7 @@
 
 				quick_search_typed_keys = quick_search_typed_keys + String.fromCharCode( e.which ).toLowerCase();
 				Debug.Text( 'Quick search typed keys: ' + quick_search_typed_keys, 'AComboBox.js', 'AComboBox', 'selectNextItem', 10 );
-				trimmed_quick_search_typed_keys = quick_search_typed_keys.trim();
+				var trimmed_quick_search_typed_keys = quick_search_typed_keys.trim();
 
 				if ( allow_multiple_selection || tree_mode ) {
 					if ( trimmed_quick_search_typed_keys ) {
@@ -1451,7 +1450,7 @@
 						var next_select_item = false;
 						var grid_data = target_grid.getData();
 						for ( var z = 0; z < grid_data.length; z++ ) {
-							if ( grid_data[z].id == td.parents('tr').attr('id') ) {
+							if ( grid_data[z].id == td.parents( 'tr' ).attr( 'id' ) ) {
 								next_select_item = grid_data[z];
 								break;
 							}
@@ -1654,15 +1653,15 @@
 			return args;
 		};
 
-		this.searchIsEmpty = function(a_dropdown){
-			var inputs = a_dropdown.find('input.search-input');
+		this.searchIsEmpty = function( a_dropdown ) {
+			var inputs = a_dropdown.find( 'input.search-input' );
 			for ( var i = 0; i < inputs.length; i++ ) {
-				if ( $(inputs[i]).val() != $.i18n._('click to search') ) {
+				if ( $( inputs[i] ).val() != $.i18n._( 'click to search' ) ) {
 					return false;
 				}
 			}
 			return true;
-		}
+		};
 
 		this.onADropDownSearch = function( targetName, page_action, default_select_item, callBack ) {
 			var this_val = this.getValue();
@@ -1793,7 +1792,7 @@
 
 			} else {
 				args = this.buildSelectGridFilter();
-				if (  args.filter_data.id && args.filter_data.id !== false ) { //prevent returning all available rows when nothing is selected
+				if ( args.filter_data.id && args.filter_data.id !== false ) { //prevent returning all available rows when nothing is selected
 					api['get' + custom_key_name]( args, {
 						onResult: function( result ) {
 							var result_data = result.getResult();
@@ -2059,10 +2058,10 @@
 			}
 
 			if ( layout_name !== ALayoutIDs.OPTION_COLUMN && //Simple options
-					layout_name !== ALayoutIDs.TREE_COLUMN && //Tree Mode
-					layout_name !== ALayoutIDs.SORT_COLUMN &&
-					layout_name !== ALayoutIDs.TIMESHEET &&
-					layout_name !== ALayoutIDs.ABSENCE ) {
+				layout_name !== ALayoutIDs.TREE_COLUMN && //Tree Mode
+				layout_name !== ALayoutIDs.SORT_COLUMN &&
+				layout_name !== ALayoutIDs.TIMESHEET &&
+				layout_name !== ALayoutIDs.ABSENCE ) {
 				this.initColumns();
 			}
 
@@ -2078,12 +2077,12 @@
 
 		this.shouldInitColumns = function() {
 			if ( layout_name === ALayoutIDs.OPTION_COLUMN || //Simple options
-					layout_name === ALayoutIDs.TREE_COLUMN || //Tree Mode
-					layout_name === ALayoutIDs.SORT_COLUMN ||
-					layout_name === ALayoutIDs.TIMESHEET ||
-					layout_name === ALayoutIDs.ABSENCE ||
-					layout_name === ALayoutIDs.SIMPLE_NAME ||
-					layout_name === ALayoutIDs.SIMPLE_NAME + '_navigation' ) {
+				layout_name === ALayoutIDs.TREE_COLUMN || //Tree Mode
+				layout_name === ALayoutIDs.SORT_COLUMN ||
+				layout_name === ALayoutIDs.TIMESHEET ||
+				layout_name === ALayoutIDs.ABSENCE ||
+				layout_name === ALayoutIDs.SIMPLE_NAME ||
+				layout_name === ALayoutIDs.SIMPLE_NAME + '_navigation' ) {
 
 				return false;
 			}
@@ -2345,13 +2344,13 @@
 				e.stopPropagation();
 				if ( !enabled ) {
 					if ( LocalCacheData.current_open_sub_controller &&
-							LocalCacheData.current_open_sub_controller.edit_view &&
-							LocalCacheData.current_open_sub_controller.is_viewing ) {
+						LocalCacheData.current_open_sub_controller.edit_view &&
+						LocalCacheData.current_open_sub_controller.is_viewing ) {
 						error_string = Global.view_mode_message;
 						$this.showErrorTip( 10 );
 					} else if ( LocalCacheData.current_open_primary_controller &&
-							LocalCacheData.current_open_primary_controller.edit_view &&
-							LocalCacheData.current_open_primary_controller.is_viewing ) {
+						LocalCacheData.current_open_primary_controller.edit_view &&
+						LocalCacheData.current_open_primary_controller.is_viewing ) {
 						error_string = Global.view_mode_message;
 						$this.showErrorTip( 10 );
 					}
@@ -2380,7 +2379,7 @@
 			if ( !o.width ) {
 				$( this ).css( 'min-width', '169px' );
 			} else {
-				$( this ).css( 'min-width', (o.width + 33) + 'px' );
+				$( this ).css( 'min-width', ( o.width + 33 ) + 'px' );
 			}
 
 			if ( !$this.shouldInitColumns() ) { //Sort Selector in search panel
@@ -2411,7 +2410,7 @@
 
 			function setADropDownSelectValues( select_items ) {
 
-				if ( !(set_any && select_items == TTUUID.not_exist_id) ) {
+				if ( !( set_any && select_items == TTUUID.not_exist_id ) ) {
 					a_dropdown.setSelectGridData( select_items );
 				}
 
@@ -2487,20 +2486,21 @@
 				TTPromise.wait( 'AComboBox', 'init', function() {
 					a_dropdown.setGridColumnsWidths();
 
-					if ( allow_multiple_selection && $this.getValue().length > 0  && api) {
-						args = {};
+					if ( allow_multiple_selection && $this.getValue().length > 0 && api ) {
+						var args = {};
 						args.filter_data = { id: $this.getValue() };
 						args.filter_columns = $this.getColumnFilter();
 						args.filter_items_per_page = 10000;
 
-						api['get'+custom_key_name]( args, {
+						api['get' + custom_key_name]( args, {
 							onResult: function( result ) {
-								doNext(result)
+								doNext( result );
 							}
 						} );
 					} else {
 						doNext();
 					}
+
 					function doNext( result ) {
 						if ( result ) {
 							a_dropdown.setRealSelectItems( result.getResult(), $this.getValue() );
@@ -2522,9 +2522,7 @@
 						a_dropdown.setSelectGridDragAble();
 					}
 
-
 				} );
-
 
 				a_dropdown.bind( 'close', $this.onClose );
 
@@ -2554,7 +2552,7 @@
 					var current_row_per_page = layout.data.row_per_page;
 
 					//If current columns or row_per_page not same as saved layout. Reload data base on current setting
-					if ( $this.checkIfLayoutChanged( current_display_columns ) || (row_per_page !== current_row_per_page && !navigation_mode) ) {
+					if ( $this.checkIfLayoutChanged( current_display_columns ) || ( row_per_page !== current_row_per_page && !navigation_mode ) ) {
 
 						display_columns = current_display_columns;
 						source_data = null;
@@ -2565,7 +2563,7 @@
 
 						if ( !set_default_args_manually ) {
 							if ( Global.isSet( layout.data.type ) && layout.data.type === ALayoutType.saved_layout ) {
-								default_args = {};
+								var default_args = {};
 								default_args.filter_data = layout.data.filter_data;
 								default_args.filter_sort = layout.data.filter_sort;
 							} else {
@@ -2719,7 +2717,7 @@
 
 						if ( get_real_data_when_open ) {
 							get_real_data_when_open = false;
-							args = {};
+							var args = {};
 							args.filter_data = { id: select_items };
 							args.filter_columns = $this.getColumnFilter();
 							args.filter_items_per_page = 10000;
@@ -2790,4 +2788,4 @@
 
 	$.fn.AComboBox.defaults = {};
 
-})( jQuery );
+} )( jQuery );

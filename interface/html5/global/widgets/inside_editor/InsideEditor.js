@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.InsideEditor = function( options ) {
 
@@ -161,4 +161,4 @@
 
 	$.fn.InsideEditor.defaults = {};
 
-})( jQuery );
+} )( jQuery );

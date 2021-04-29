@@ -27,11 +27,11 @@ var RibbonSubMenu = Base.extend( {
 			this.get( 'group' ).get( 'sub_menus' ).push( this );
 		}
 	}
-} )
+} );
 
-var RibbonSubMenuType = (function() {
+var RibbonSubMenuType = ( function() {
 	var normal = '1';
 	var nav = '2';
 
-	return {NORMAL: normal, NAVIGATION: nav}
-})();
+	return { NORMAL: normal, NAVIGATION: nav };
+} )();

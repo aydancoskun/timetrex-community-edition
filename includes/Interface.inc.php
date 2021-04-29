@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUndefinedVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -43,33 +43,33 @@ forceNoCacheHeaders(); //Send headers to disable caching.
 
 //Skip this step if disable_database_connection is enabled or the user is going through the installer still
 $clf = new CompanyListFactory();
-if ( ( !isset($disable_database_connection) OR ( isset($disable_database_connection) AND $disable_database_connection != TRUE ) )
-		AND ( !isset($config_vars['other']['installer_enabled']) OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] != TRUE ) )) {
+if ( ( !isset( $disable_database_connection ) || ( isset( $disable_database_connection ) && $disable_database_connection != true ) )
+		&& ( !isset( $config_vars['other']['installer_enabled'] ) || ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] != true ) ) ) {
 	//Get all system settings, so they can be used even if the user isn't logged in, such as the login page.
 	try {
 		$sslf = new SystemSettingListFactory();
 		$system_settings = $sslf->getAllArray();
-		unset($sslf);
+		unset( $sslf );
 
 		//Get primary company data needs to be used when user isn't logged in as well.
 		$clf->getByID( PRIMARY_COMPANY_ID );
 		if ( $clf->getRecordCount() == 1 ) {
 			$primary_company = $clf->getCurrent();
 		}
-	} catch (Exception $e) {
+	} catch ( Exception $e ) {
 		//Database not initialized, or some error, redirect to Install page.
-		throw new DBError($e, 'DBInitialize');
+		throw new DBError( $e, 'DBInitialize' );
 	}
 }
 
 $permission = new Permission();
 
 $authentication = new Authentication();
-if ( isset($authenticate) AND $authenticate === FALSE ) {
-	Debug::text('Bypassing Authentication', __FILE__, __LINE__, __METHOD__, 10);
+if ( isset( $authenticate ) && $authenticate === false ) {
+	Debug::text( 'Bypassing Authentication', __FILE__, __LINE__, __METHOD__, 10 );
 	TTi18n::chooseBestLocale();
 } else {
-	if ( $authentication->Check() === TRUE ) {
+	if ( $authentication->Check() === true ) {
 		$profiler->startTimer( 'Interface.inc - Post-Authentication' );
 
 		/*
@@ -77,9 +77,9 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 		 */
 
 		$current_user = $authentication->getObject();
-		Debug::text('User Authenticated: '. $current_user->getUserName() .' Created Date: '. $authentication->getCreatedDate(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'User Authenticated: ' . $current_user->getUserName() . ' Created Date: ' . $authentication->getCreatedDate(), __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( isset($primary_company) AND PRIMARY_COMPANY_ID == $current_user->getCompany() ) {
+		if ( isset( $primary_company ) && PRIMARY_COMPANY_ID == $current_user->getCompany() ) {
 			$current_company = $primary_company;
 		} else {
 			$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();
@@ -101,18 +101,18 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 		 *  setting almost useless. Causing issues when printing pay stubs and in each
 		 *  users language.
 		 */
-		Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10);
-		if ( $current_user_prefs->isNew() == FALSE AND TTi18n::getLocaleCookie() != '' AND $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
-			Debug::text('Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Locale Cookie: ' . TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $current_user_prefs->isNew() == false && TTi18n::getLocaleCookie() != '' && $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
+			Debug::text( 'Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10 );
 			$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
 			if ( $current_user_prefs->isValid() ) {
-				$current_user_prefs->Save(FALSE);
+				$current_user_prefs->Save( false );
 			}
 		} else {
-			Debug::text('User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		if ( isset($_GET['language']) AND $_GET['language'] != '' ) {
+		if ( isset( $_GET['language'] ) && $_GET['language'] != '' ) {
 			TTi18n::setLocale( $_GET['language'] ); //Sets master locale
 		} else {
 			TTi18n::setLanguage( $current_user_prefs->getLanguage() );
@@ -123,12 +123,12 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 		//Debug::text('Current Company: '. $current_company->getName(), __FILE__, __LINE__, __METHOD__, 10);
 		$profiler->stopTimer( 'Interface.inc - Post-Authentication' );
 	} else {
-		Debug::text('User NOT Authenticated!', __FILE__, __LINE__, __METHOD__, 10);
-		Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'html5/') );
+		Debug::text( 'User NOT Authenticated!', __FILE__, __LINE__, __METHOD__, 10 );
+		Redirect::Page( URLBuilder::getURL( null, Environment::GetBaseURL() . 'html5/' ) );
 		//exit;
 	}
 }
-unset($clf);
+unset( $clf );
 
 $profiler->startTimer( 'Main' );
 ?>

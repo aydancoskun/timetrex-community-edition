@@ -7,8 +7,8 @@ var RibbonMenu = Base.extend( {
 		permission_result: true
 	},
 
-    getSubMenuGroups: function() {
-        var sub_menu_group = this.get('sub_menu_groups');
-        return sub_menu_group.sort(Global.compareMenuItems);
-    }
+	getSubMenuGroups: function() {
+		var sub_menu_group = this.get( 'sub_menu_groups' );
+		return sub_menu_group.sort( Global.compareMenuItems );
+	}
 } );

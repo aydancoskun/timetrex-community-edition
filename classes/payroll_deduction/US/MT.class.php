@@ -40,22 +40,22 @@
  */
 class PayrollDeduction_US_MT extends PayrollDeduction_US {
 
-	var $state_income_tax_rate_options = array(
-			20060101 => array(
-					0 => array(
-							array('income' => 7000, 'rate' => 1.8, 'constant' => 0),
-							array('income' => 15000, 'rate' => 4.4, 'constant' => 126),
-							array('income' => 120000, 'rate' => 6.0, 'constant' => 478),
-							array('income' => 120000, 'rate' => 6.6, 'constant' => 6778),
-					),
-			),
-	);
+	var $state_income_tax_rate_options = [
+			20060101 => [
+					0 => [
+							[ 'income' => 7000, 'rate' => 1.8, 'constant' => 0 ],
+							[ 'income' => 15000, 'rate' => 4.4, 'constant' => 126 ],
+							[ 'income' => 120000, 'rate' => 6.0, 'constant' => 478 ],
+							[ 'income' => 120000, 'rate' => 6.6, 'constant' => 6778 ],
+					],
+			],
+	];
 
-	var $state_options = array(
-			20060101 => array(
+	var $state_options = [
+			20060101 => [
 					'allowance' => 1900,
-			),
-	);
+			],
+	];
 
 	function getStatePayPeriodDeductionRoundedValue( $amount ) {
 		return $this->RoundNearestDollar( $amount );
@@ -74,9 +74,8 @@ class PayrollDeduction_US_MT extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['allowance'];

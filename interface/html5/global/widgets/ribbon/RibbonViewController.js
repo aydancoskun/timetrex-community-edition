@@ -64,7 +64,7 @@ RibbonViewController = Backbone.View.extend( {
 
 	onReportMenuClick: function( id ) {
 		Global.closeEditViews( function() {
-			if ( id === 'AffordableCareReport' && !(Global.getProductEdition() >= 15) ) {
+			if ( id === 'AffordableCareReport' && !( Global.getProductEdition() >= 15 ) ) {
 				TAlertManager.showAlert( Global.getUpgradeMessage() );
 			} else {
 				var parent_view = LocalCacheData.current_open_edit_only_controller ? LocalCacheData.current_open_edit_only_controller : LocalCacheData.current_open_primary_controller;
@@ -301,7 +301,7 @@ RibbonViewController = Backbone.View.extend( {
 				break;
 			case 'EmailHelp':
 				if ( Global.getProductEdition() >= 15 ) {
-					location.href = 'mailto:'+ APIGlobal.pre_login_data.support_email +'?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' + 'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
+					location.href = 'mailto:' + APIGlobal.pre_login_data.support_email + '?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' + 'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
 				} else {
 					url = 'https://www.timetrex.com/r?id=29';
 					window.open( url, '_blank' );
@@ -409,22 +409,25 @@ RibbonViewController = Backbone.View.extend( {
 
 	doLogout: function() {
 		//Don't wait for result of logout in case of slow or disconnected internet. Just clear local cookies and move on.
-		var current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+		var current_user_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
 		if ( typeof current_user_api.Logout !== 'undefined' ) { //Fix JS exception: Uncaught TypeError: current_user_api.Logout is not a function -- Which can occur when offline and clicking Logout.
-			current_user_api.Logout({onResult: function () {}})
+			current_user_api.Logout( {
+				onResult: function() {
+				}
+			} );
 		}
 
 		Global.setAnalyticDimensions();
-		if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
+		if ( typeof ( ga ) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
 			try {
 				ga( 'send', 'pageview', { 'sessionControl': 'end' } );
-			} catch(e) {
+			} catch ( e ) {
 				throw e;
 			}
 		}
 
 		//A bare "if" wrapped around lh_inst doesn't work here for some reason.
-		if ( typeof(lh_inst) != 'undefined' ) {
+		if ( typeof ( lh_inst ) != 'undefined' ) {
 			//stop the update loop for live chat with support
 			clearTimeout( lh_inst.timeoutStatuscheck );
 		}

@@ -49,5 +49,4 @@ var APIDepartment = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportDepartment', arguments );
 	}
 
-
 } );

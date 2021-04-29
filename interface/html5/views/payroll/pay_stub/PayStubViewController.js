@@ -39,20 +39,20 @@ PayStubViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_stub';
 		this.context_menu_name = $.i18n._( 'Pay Stub' );
 		this.navigation_label = $.i18n._( 'Pay Stubs' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.pay_stub_entry_api = new (APIFactory.getAPIClass( 'APIPayStubEntry' ))();
-		this.pay_stub_entry_account_link_api = new (APIFactory.getAPIClass( 'APIPayStubEntryAccountLink' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-		this.pay_period_api = new (APIFactory.getAPIClass( 'APIPayPeriod' ))();
-		this.pay_stub_transaction_api = new (APIFactory.getAPIClass( 'APIPayStubTransaction' ))();
-		this.remittance_destination_account_api = new (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.pay_stub_entry_api = new ( APIFactory.getAPIClass( 'APIPayStubEntry' ) )();
+		this.pay_stub_entry_account_link_api = new ( APIFactory.getAPIClass( 'APIPayStubEntryAccountLink' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.pay_period_api = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
+		this.pay_stub_transaction_api = new ( APIFactory.getAPIClass( 'APIPayStubTransaction' ) )();
+		this.remittance_destination_account_api = new ( APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ) )();
 
 		var $this = this;
 		$.when(
-				this.preloadTransactionOptions( new $.Deferred() ),
-				this.preloadPayStubAccountLinks( new $.Deferred() )
+			this.preloadTransactionOptions( new $.Deferred() ),
+			this.preloadPayStubAccountLinks( new $.Deferred() )
 		).done( function() {
 			$this.completeInit();
 		} );
@@ -155,7 +155,7 @@ PayStubViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				pay_stubs: {
@@ -364,7 +364,7 @@ PayStubViewController = BaseViewController.extend( {
 
 	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
 		if ( pId === 'punch' || pId === 'schedule' || pId === 'pay_stub_amendment' ) {
-			this._super('setDefaultMenuViewIcon', context_btn, grid_selected_length, pId);
+			this._super( 'setDefaultMenuViewIcon', context_btn, grid_selected_length, pId );
 		} else if ( pId === 'pay_stub_transaction' ) {
 			if ( PermissionManager.validate( 'pay_stub', 'enabled' )
 				&& ( PermissionManager.validate( 'pay_stub', 'view' ) || PermissionManager.validate( 'pay_stub', 'view_child' ) ) ) {
@@ -619,7 +619,6 @@ PayStubViewController = BaseViewController.extend( {
 			}
 		} );
 	},
-
 
 	getPayStubTransaction: function( callback ) {
 		var $this = this;
@@ -986,7 +985,6 @@ PayStubViewController = BaseViewController.extend( {
 					is_add = false;
 				}
 
-
 				if ( TTUUID.isUUID( data['pay_stub_amendment_id'] ) && data['pay_stub_amendment_id'] != TTUUID.zero_id ) {
 					pay_stub_amendment_id = data['pay_stub_amendment_id'];
 				}
@@ -1018,7 +1016,7 @@ PayStubViewController = BaseViewController.extend( {
 				// Pay Stub Account
 				var form_item_name_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 				form_item_name_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+					api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 					width: 132,
 					is_static_width: 132,
 					allow_multiple_selection: false,
@@ -1036,7 +1034,7 @@ PayStubViewController = BaseViewController.extend( {
 
 				var form_item_name_text = Global.loadWidgetByName( FormItemType.TEXT );
 				form_item_name_text.TText( { field: 'name' } );
-				form_item_name_text.setValue( data.name ? ( ( data['type_id'] != 40) ? '  ' + data.name : data.name  ) : '' );
+				form_item_name_text.setValue( data.name ? ( ( data['type_id'] != 40 ) ? '  ' + data.name : data.name ) : '' );
 
 				// Note(description)
 				var form_item_note_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -1069,7 +1067,6 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_rate_text.TText( { field: 'rate' } );
 				form_item_rate_text.setValue( Global.removeTrailingZeros( data.rate ) );
 
-
 				// Hrs/Units
 				var form_item_units_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_units_input.TTextInput( { field: 'units', width: 60, hasKeyEvent: true } );
@@ -1089,7 +1086,6 @@ PayStubViewController = BaseViewController.extend( {
 				var form_item_units_text = Global.loadWidgetByName( FormItemType.TEXT );
 				form_item_units_text.TText( { field: 'units' } );
 				form_item_units_text.setValue( Global.removeTrailingZeros( data.units ) );
-
 
 				// Amount
 				var form_item_amount_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -1117,7 +1113,7 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_ytd_amount_text.TText( { field: 'ytd_amount' } );
 				form_item_ytd_amount_text.setValue( Global.removeTrailingZeros( data.ytd_amount ) );
 				form_item_ytd_amount_text.attr( {
-					'pay_stub_entry_id': (data.id && $this.parent_controller.current_edit_record.id) ? data.id : '',
+					'pay_stub_entry_id': ( data.id && $this.parent_controller.current_edit_record.id ) ? data.id : '',
 					'type_id': data['type_id'],
 					'original_amount': data['amount'] ? data['amount'] : '0.00',
 					'original_ytd_amount': data['ytd_amount'] ? data['ytd_amount'] : '0.00',
@@ -1188,7 +1184,7 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				// Note
-				if ( ( data['type_id'] == type.toString() || data['type_id'] === type) && type != 40 && !data.total_row ) {
+				if ( ( data['type_id'] == type.toString() || data['type_id'] === type ) && type != 40 && !data.total_row ) {
 					if ( $this.parent_controller.isEditMode() == true ) {
 						if ( ( ( TTUUID.isUUID( pay_stub_amendment_id ) && pay_stub_amendment_id != TTUUID.zero_id ) || ( TTUUID.isUUID( user_expense_id ) && user_expense_id != TTUUID.zero_id ) ) ) {
 							form_item_note_input.setReadOnly( true );
@@ -1209,7 +1205,7 @@ PayStubViewController = BaseViewController.extend( {
 //							widgets[form_item_note_input.getField()] = form_item_note_input;
 //							row.children().eq( 1 ).append( form_item_note_input );
 //						}
-						if ( (data['type_id'] == 40 || data.total_row === true) ) {
+						if ( ( data['type_id'] == 40 || data.total_row === true ) ) {
 
 						} else {
 							widgets[form_item_note_input.getField()] = form_item_note_input;
@@ -1244,7 +1240,7 @@ PayStubViewController = BaseViewController.extend( {
 
 					}
 				} else {
-					if ( (Global.isSet( index ) || is_add || ( _.size( data ) === 1 && ( $this.parent_controller.isEditMode() == true ) ) ) && type != 40 && !data.total_row ) {
+					if ( ( Global.isSet( index ) || is_add || ( _.size( data ) === 1 && ( $this.parent_controller.isEditMode() == true ) ) ) && type != 40 && !data.total_row ) {
 
 						if ( data['type_id'] == 40 ) {
 							form_item_amount_text.css( 'font-weight', 'bold' );
@@ -1264,7 +1260,7 @@ PayStubViewController = BaseViewController.extend( {
 						}
 
 					} else {
-						if ( (data['type_id'] == 40 || data.total_row) && type == 30 ) {
+						if ( ( data['type_id'] == 40 || data.total_row ) && type == 30 ) {
 							form_item_amount_text.css( 'font-weight', 'bold' );
 						} else {
 							form_item_amount_text.css( 'font-weight', 'bold' );
@@ -1369,7 +1365,7 @@ PayStubViewController = BaseViewController.extend( {
 
 				if ( typeof index !== 'undefined' ) {
 					row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
-					$this.rows_widgets_array.splice( (index + 1 ), 0, widgets );
+					$this.rows_widgets_array.splice( ( index + 1 ), 0, widgets );
 
 				} else {
 					$( render ).append( row );
@@ -1457,7 +1453,7 @@ PayStubViewController = BaseViewController.extend( {
 		} );
 	},
 
-	onSaveDone: function ( result ) {
+	onSaveDone: function( result ) {
 		this.current_edit_record = null;
 		return true;
 	},
@@ -1482,7 +1478,7 @@ PayStubViewController = BaseViewController.extend( {
 	onCopyAsNewClick: function() {
 		var $this = this;
 		var reload_entries = false;
-		this.setCurrentEditViewState('new');
+		this.setCurrentEditViewState( 'new' );
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
 //			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
@@ -1497,7 +1493,7 @@ PayStubViewController = BaseViewController.extend( {
 			this.current_edit_record.id = '';
 
 			this.edit_view_ui_dic.user_id.setEnabled( true );
-			if ( !this.current_edit_record.status_id != 25 ) {
+			if ( this.current_edit_record.status_id != 25 ) {
 				this.current_edit_record.status_id = 25;
 				this.edit_view_ui_dic.status_id.setValue( 25 );
 //				this.editor.show_cover = false;
@@ -1542,7 +1538,6 @@ PayStubViewController = BaseViewController.extend( {
 			} else {
 				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
 			}
-
 
 		}
 
@@ -1771,19 +1766,18 @@ PayStubViewController = BaseViewController.extend( {
 				data['pay_stub_entry_name_id'] = row['ytd_amount'].attr( 'pay_stub_entry_name_id' );
 			}
 
-
 			// return back to the server with the same data get from API.
 			data['pay_stub_amendment_id'] = row['ytd_amount'].attr( 'pay_stub_amendment_id' );
 			data['user_expense_id'] = row['ytd_amount'].attr( 'user_expense_id' );
 
 			data['pay_stub_id'] = current_edit_item_id;
 			if ( row['total_row'] != true && TTUUID.isUUID( data['pay_stub_entry_name_id'] )
-					&& ( data['pay_stub_entry_name_id'] != TTUUID.zero_id
-							|| ( data['description'] != undefined && data['description'].length > 0 )
-							|| ( data['rate'] != undefined && data['rate'].length > 0 && parseFloat( data['rate'] ) != 0 )
-							|| ( data['units'] != undefined && data['units'].length > 0 && parseFloat( data['units'] ) != 0 )
-							|| ( data['amount'] != undefined && data['amount'].length > 0 && parseFloat( data['amount'] ) != 0 )
-					) ) {
+				&& ( data['pay_stub_entry_name_id'] != TTUUID.zero_id
+					|| ( data['description'] != undefined && data['description'].length > 0 )
+					|| ( data['rate'] != undefined && data['rate'].length > 0 && parseFloat( data['rate'] ) != 0 )
+					|| ( data['units'] != undefined && data['units'].length > 0 && parseFloat( data['units'] ) != 0 )
+					|| ( data['amount'] != undefined && data['amount'].length > 0 && parseFloat( data['amount'] ) != 0 )
+				) ) {
 				result.push( data );
 			}
 		}
@@ -1888,7 +1882,6 @@ PayStubViewController = BaseViewController.extend( {
 				break;
 		}
 
-
 		if ( key === 'country' || key === 'pay_period_id' ) {
 			return;
 		}
@@ -1971,7 +1964,6 @@ PayStubViewController = BaseViewController.extend( {
 		}
 	},
 
-
 	validate: function() {
 		var $this = this;
 
@@ -2031,7 +2023,7 @@ PayStubViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStub' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStub' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB,
@@ -2058,7 +2050,7 @@ PayStubViewController = BaseViewController.extend( {
 		// Employee
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -2083,7 +2075,7 @@ PayStubViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			show_search_inputs: true,
@@ -2096,7 +2088,7 @@ PayStubViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_PERIOD,
 			show_search_inputs: true,
@@ -2169,7 +2161,7 @@ PayStubViewController = BaseViewController.extend( {
 			if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
 				//widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) );
 				//var amount_value = Global.MoneyRound( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) );
-				amount_value = Global.MoneyRound( Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed(4) );
+				var amount_value = Global.MoneyRound( Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed( 4 ) );
 				if ( amount_value == 'NaN' || amount_value == 0 || amount_value == '' ) {
 					amount_value = '0.00';
 				}
@@ -2211,7 +2203,7 @@ PayStubViewController = BaseViewController.extend( {
 					original_amount = 0.00;
 				}
 
-				var new_ytd_amount = Global.removeTrailingZeros( Decimal( original_ytd_amount ).sub( original_amount ).add( c_value ).toFixed(4) );
+				var new_ytd_amount = Global.removeTrailingZeros( Decimal( original_ytd_amount ).sub( original_amount ).add( c_value ).toFixed( 4 ) );
 				if ( isNaN( new_ytd_amount ) ) {
 					new_ytd_amount = 0.00;
 				}
@@ -2247,7 +2239,6 @@ PayStubViewController = BaseViewController.extend( {
 					continue;
 				}
 
-
 				if ( row['total_row'] === true ) {
 					if ( !Global.isNumeric( total_amount ) ) {
 						total_amount = 0;
@@ -2268,10 +2259,10 @@ PayStubViewController = BaseViewController.extend( {
 						net_pay_ytd_amount = total_ytd_amount;
 					} else if ( row.type_id == 20 ) { // Subtract deductions (only)
 						//net_pay_amount = net_pay_amount - total_amount;
-						net_pay_amount = Decimal( net_pay_amount ).sub( total_amount ).toFixed(4);
+						net_pay_amount = Decimal( net_pay_amount ).sub( total_amount ).toFixed( 4 );
 
 						//net_pay_ytd_amount = net_pay_ytd_amount - total_ytd_amount;
-						net_pay_ytd_amount = Decimal( net_pay_ytd_amount ).sub( total_ytd_amount ).toFixed(4);
+						net_pay_ytd_amount = Decimal( net_pay_ytd_amount ).sub( total_ytd_amount ).toFixed( 4 );
 					}
 
 					this.parent_controller.net_pay_amount = net_pay_amount;
@@ -2303,19 +2294,19 @@ PayStubViewController = BaseViewController.extend( {
 
 				if ( total_units_blank == false ) {
 					// total_units = parseFloat( total_units ) + parseFloat( current_units );
-					total_units = Decimal( parseFloat( total_units ) ).add( parseFloat( current_units ) ).toFixed(4);
+					total_units = Decimal( parseFloat( total_units ) ).add( parseFloat( current_units ) ).toFixed( 4 );
 				} else {
 					total_units = '';
 				}
 
 				if ( Global.isNumeric( current_total_amount ) ) {
 					// total_amount = total_amount + current_total_amount;
-					total_amount = Decimal( total_amount ).add( current_total_amount ).toFixed(4);
+					total_amount = Decimal( total_amount ).add( current_total_amount ).toFixed( 4 );
 				}
 
 				if ( Global.isNumeric( current_ytd_total ) ) {
 					// total_ytd_amount = total_ytd_amount + current_ytd_total;
-					total_ytd_amount = Decimal( total_ytd_amount ).add( current_ytd_total ).toFixed(4);
+					total_ytd_amount = Decimal( total_ytd_amount ).add( current_ytd_total ).toFixed( 4 );
 				}
 
 			}
@@ -2382,7 +2373,6 @@ PayStubViewController = BaseViewController.extend( {
 				} );
 			}
 
-
 			this.calcTransactionTotals();
 		};
 
@@ -2428,10 +2418,10 @@ PayStubViewController = BaseViewController.extend( {
 					data['pay_stub_id'] = parent_id;
 
 					if ( row['total_row'] != true && TTUUID.isUUID( data['remittance_destination_account_id'] )
-							&& ( data['remittance_destination_account_id'] != TTUUID.zero_id
-									|| ( data['note'] != undefined && data['note'].length > 0 )
-									|| ( data['amount'] != undefined && data['amount'].length > 0 && parseFloat( data['amount'] ) != 0 )
-							) ) {
+						&& ( data['remittance_destination_account_id'] != TTUUID.zero_id
+							|| ( data['note'] != undefined && data['note'].length > 0 )
+							|| ( data['amount'] != undefined && data['amount'].length > 0 && parseFloat( data['amount'] ) != 0 )
+						) ) {
 						result.push( data );
 					}
 				}
@@ -2469,7 +2459,6 @@ PayStubViewController = BaseViewController.extend( {
 			this.parent_controller.validate();
 			$this.calcTransactionTotals();
 
-
 		};
 
 		this.editor.calcTransactionTotals = function() {
@@ -2479,11 +2468,11 @@ PayStubViewController = BaseViewController.extend( {
 				var row = this.rows_widgets_array[i];
 				//use transaction_date column existence as is transaction flag.
 				if ( _.isObject( row ) //row is object
-						&& Global.isSet( row[0] )	//row's object is set.
-						&& Global.isSet( row[0].remittance_destination_account_id ) //row is a pay stub transaction
-						&& Global.isSet( row[0].form_item_record.deleted ) == false //row is not removed
-						&& Global.isSet( row[0].status_id ) //row is not removed
-						&& ( row[0].status_id.getValue() == 10 || row[0].status_id.getValue() == 20 ) //status is valid
+					&& Global.isSet( row[0] )	//row's object is set.
+					&& Global.isSet( row[0].remittance_destination_account_id ) //row is a pay stub transaction
+					&& Global.isSet( row[0].form_item_record.deleted ) == false //row is not removed
+					&& Global.isSet( row[0].status_id ) //row is not removed
+					&& ( row[0].status_id.getValue() == 10 || row[0].status_id.getValue() == 20 ) //status is valid
 				) {
 					var current = parseFloat( row[0].amount.getValue() );
 					if ( isNaN( current ) ) {
@@ -2499,10 +2488,9 @@ PayStubViewController = BaseViewController.extend( {
 			var render = this.getRender();
 			$( '.transaction_total_rows' ).remove();
 
-
 			if ( total_amount > 0 ) {
 				// var difference = Global.removeTrailingZeros( parseFloat( total_amount ) - parseFloat( this.parent_controller.net_pay_amount ) );
-				var difference = Global.removeTrailingZeros( Decimal( parseFloat( total_amount ) ).sub( parseFloat( this.parent_controller.net_pay_amount ) ).toFixed(4) );
+				var difference = Global.removeTrailingZeros( Decimal( parseFloat( total_amount ) ).sub( parseFloat( this.parent_controller.net_pay_amount ) ).toFixed( 4 ) );
 
 				if ( isNaN( difference ) ) {
 					difference = 0;
@@ -2537,7 +2525,7 @@ PayStubViewController = BaseViewController.extend( {
 				transaction.form_item_record = {};
 				var row = $( Global.loadWidget( 'views/payroll/pay_stub/PayStubTransactionViewInsideEditorColumnRow.html' ) );
 				data = _.isArray( data ) ? data[0] : data;
-				transaction.form_item_record.id = (data.id && $this.parent_controller.current_edit_record.id) ? data.id : '';
+				transaction.form_item_record.id = ( data.id && $this.parent_controller.current_edit_record.id ) ? data.id : '';
 				var pay_stub_status_id = $this.parent_controller.current_edit_record.status_id;
 				var is_add = false;
 				if ( !$this.parent_controller.current_edit_record.id && !$this.parent_controller.copied_record_id ) {
@@ -2552,7 +2540,7 @@ PayStubViewController = BaseViewController.extend( {
 				}
 				var form_item_remittance_destination_account_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 				form_item_remittance_destination_account_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' )),
+					api_class: ( APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ) ),
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT,
 					show_search_inputs: true,
@@ -2592,7 +2580,7 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_status_input.TComboBox( { field: 'status_id', set_empty: false } );
 				form_item_status_input.setSourceData( Global.addFirstItemToArray( $this.parent_controller.transaction_status_array ) );
 				form_item_status_input.setValue( data.status_id ? data.status_id : '' );
-				form_item_status_input.setEnabled( (LocalCacheData.current_doing_context_action == 'copy_as_new') );
+				form_item_status_input.setEnabled( ( LocalCacheData.current_doing_context_action == 'copy_as_new' ) );
 				form_item_status_input.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 					$this.parent_controller.validate();
 				} );
@@ -2635,7 +2623,6 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_amount_text.TText( { field: 'amount' } );
 				form_item_amount_text.setValue( data.amount ? Global.removeTrailingZeros( data.amount ) : '' );
 
-
 				if ( !data.status_id ) {
 					data.status_id = 10;
 				}
@@ -2670,14 +2657,13 @@ PayStubViewController = BaseViewController.extend( {
 				transaction[form_item_transaction_date_input.getField()] = form_item_transaction_date_input;
 				row.children().eq( 3 ).append( form_item_transaction_date_input );
 
-
 				transaction[form_item_amount_input.getField()] = form_item_amount_input;
 				row.children().eq( 4 ).append( form_item_amount_input );
 
 				widgets.push( transaction );
 				if ( typeof index !== 'undefined' ) {
 					row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
-					$this.rows_widgets_array.splice( (index ), 0, widgets );
+					$this.rows_widgets_array.splice( ( index ), 0, widgets );
 				} else {
 					$( render ).append( row );
 					$this.rows_widgets_array.push( widgets );
@@ -2747,7 +2733,7 @@ PayStubViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -2768,7 +2754,7 @@ PayStubViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -2779,7 +2765,7 @@ PayStubViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -2790,7 +2776,7 @@ PayStubViewController = BaseViewController.extend( {
 				field: 'currency_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.CURRENCY,
-				api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+				api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -2812,7 +2798,7 @@ PayStubViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -2823,7 +2809,7 @@ PayStubViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -2863,7 +2849,7 @@ PayStubViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -2875,7 +2861,7 @@ PayStubViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -2902,7 +2888,7 @@ PayStubViewController = BaseViewController.extend( {
 		}
 	},
 
-	onViewClick: function( editId, noRefreshUI ) {
+	onViewClick: function( edit_record, noRefreshUI ) {
 		this.onNavigationClick( ContextMenuIconName.view );
 	},
 
@@ -3037,10 +3023,10 @@ PayStubViewController = BaseViewController.extend( {
 			case ContextMenuIconName.view:
 				post_data = { 0: args, 1: false, 2: 'pdf', 3: true };
 				this.doFormIFrameCall( post_data );
-				$().TFeedback({
+				$().TFeedback( {
 					source: 'View', // viewId GovernmentDocument will be prepended in TFeedback functions.
 					delay: 5000
-				});
+				} );
 				break;
 			case ContextMenuIconName.employee_pay_stubs:
 				post_data = { 0: args, 1: false, 2: 'pdf', 3: true };
@@ -3082,6 +3068,5 @@ PayStubViewController = BaseViewController.extend( {
 	doFormIFrameCall: function( postData ) {
 		Global.APIFileDownload( this.api.className, 'get' + this.api.key_name, postData );
 	}
-
 
 } );

@@ -1,92 +1,92 @@
 .top-menu {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+	position: absolute;
+	width: 100%;
+	height: 100%;
 }
 
 .top-menu-navigation-wrapper ul {
-    list-style: none;
-    padding: 0;
-    padding-right: 20px;
-    margin: 0;
+	list-style: none;
+	padding: 0;
+	padding-right: 20px;
+	margin: 0;
 
 }
 
 .top-menu-left-menu {
-    left: 10%;
-    position: absolute;
-    top: 0;
+	left: 10%;
+	position: absolute;
+	top: 0;
 }
 
 .top-menu-left-available-jobs {
-    color: #fff;
-    line-height: 30px;
-    text-decoration: none;
+	color: #ffffff;
+	line-height: 30px;
+	text-decoration: none;
 }
 
 .top-menu-left-available-jobs:hover,
 .top-menu-left-applied-jobs:hover {
-    text-decoration: underline;
+	text-decoration: underline;
 }
 
 .top-menu-left-applied-jobs {
-    color: #fff;
-    line-height: 30px;
-    text-decoration: none;
-    border-left: 1px solid #fff;
-    padding-left: 5px;
+	color: #ffffff;
+	line-height: 30px;
+	text-decoration: none;
+	border-left: 1px solid #ffffff;
+	padding-left: 5px;
 }
 
 .top-menu-navigation-wrapper {
-    position: absolute;
-    right: 10%;
-    top: 0;
+	position: absolute;
+	right: 10%;
+	top: 0;
 }
 
 .top-menu-navigation-wrapper > ul > li {
-    zoom: 1;
-    position: relative;
-    color: #fff;
-    cursor: pointer;
-    width: 100%;
+	zoom: 1;
+	position: relative;
+	color: #ffffff;
+	cursor: pointer;
+	width: 100%;
 }
 
 .top-menu-navigation-wrapper > ul > li > a {
-    line-height: 30px;
+	line-height: 30px;
 }
 
 .top-menu-navigation-wrapper > ul > li > a:hover {
-    text-decoration: underline;
+	text-decoration: underline;
 }
 
 .top-menu .top-menu-submenu {
-    display: none;
-    padding-left: 0;
-    padding-right: 0;
-    background: #355f87;
-    position: absolute;
-    top: 30px;
+	display: none;
+	padding-left: 0;
+	padding-right: 0;
+	background: #355f87;
+	position: absolute;
+	top: 30px;
 
 }
 
 .top-menu-navigation-wrapper > ul > li:hover .top-menu-submenu {
-    display: block;
+	display: block;
 }
 
 .top-menu .top-menu-submenu > li {
-    color: #fff;
-    padding: 5px;
-    display: block;
-    width: 108px;
+	color: #ffffff;
+	padding: 5px;
+	display: block;
+	width: 108px;
 }
 
 .top-menu .top-menu-submenu > li > a:hover {
-    text-decoration: underline;
+	text-decoration: underline;
 }
 
 .top-container {
-    height: 30px;
-    background: #355f87;
-    position: relative;
-    z-index: 100;
+	height: 30px;
+	background: #355f87;
+	position: relative;
+	z-index: 100;
 }

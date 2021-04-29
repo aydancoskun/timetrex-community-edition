@@ -44,27 +44,24 @@ class InstallSchema_1051A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-			$this->db->GenID( 'schedule_id_seq' ); //Make sure the sequence exists so it can be updated.
-		}
-
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Assume any company that already exists is already setup.
 		$cf = new CompanyFactory();
-		$query = 'update '. $cf->getTable() .' set is_setup_complete = 1';
+		$query = 'update ' . $cf->getTable() . ' set is_setup_complete = 1';
 		$this->db->Execute( $query );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

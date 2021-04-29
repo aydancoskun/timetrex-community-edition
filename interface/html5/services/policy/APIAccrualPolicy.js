@@ -53,5 +53,4 @@ var APIAccrualPolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportAccrualPolicy', arguments );
 	}
 
-
 } );

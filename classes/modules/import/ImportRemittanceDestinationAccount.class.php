@@ -41,49 +41,49 @@ class ImportRemittanceDestinationAccount extends Import {
 
 	public $class_name = 'APIRemittanceDestinationAccount';
 
-	public $wage_group_options = FALSE;
+	public $wage_group_options = false;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|bool|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$baf = TTNew('RemittanceDestinationAccountFactory'); /** @var RemittanceDestinationAccountFactory $baf */
-				$retval = Misc::trimSortPrefix( $baf->getOptions('columns') );
+				$baf = TTNew( 'RemittanceDestinationAccountFactory' ); /** @var RemittanceDestinationAccountFactory $baf */
+				$retval = Misc::trimSortPrefix( $baf->getOptions( 'columns' ) );
 
-				unset($retval['display_amount']); //For display purposes only.
+				unset( $retval['display_amount'] ); //For display purposes only.
 
-				$retval = Misc::addSortPrefix( Misc::prependArray( $this->getUserIdentificationColumns(), Misc::trimSortPrefix($retval) ) );
-				ksort($retval);
+				$retval = Misc::addSortPrefix( Misc::prependArray( $this->getUserIdentificationColumns(), Misc::trimSortPrefix( $retval ) ) );
+				ksort( $retval );
 
 				break;
 			case 'column_aliases':
 				//Used for converting column names after they have been parsed.
-				$retval = array(
+				$retval = [
 
-								//'wage_group' => 'wage_group_id',
-								'amount_type' => 'amount_type_id',
-								'type' => 'type_id',
+					//'wage_group' => 'wage_group_id',
+					'amount_type' => 'amount_type_id',
+					'type'        => 'type_id',
 
-								);
+				];
 				break;
 			case 'import_options':
-				$retval = array(
-								'-1010-fuzzy_match' => TTi18n::getText('Enable smart matching.'),
-								);
+				$retval = [
+						'-1010-fuzzy_match' => TTi18n::getText( 'Enable smart matching.' ),
+				];
 				break;
 			case 'parse_hint':
 				//$upf = TTnew('UserPreferenceFactory');
 
-				$retval = array(
-								//'effective_date' => $upf->getOptions('date_format'),
-								//'weekly_time' => $upf->getOptions('time_unit_format'),
-								);
+				$retval = [
+					//'effective_date' => $upf->getOptions('date_format'),
+					//'weekly_time' => $upf->getOptions('time_unit_format'),
+				];
 				break;
 		}
 
@@ -98,7 +98,7 @@ class ImportRemittanceDestinationAccount extends Import {
 	function _preParseRow( $row_number, $raw_row ) {
 		//Try to determine if its a checking or savings account, so we at least have a chance at specifying a default name for the account.
 		$ach_transaction_type = 22;
-		if ( isset($raw_row['ach_transaction_type']) ) {
+		if ( isset( $raw_row['ach_transaction_type'] ) ) {
 			$ach_transaction_type = $this->parse_ach_transaction_type( $raw_row['ach_transaction_type'] );
 		}
 
@@ -106,6 +106,7 @@ class ImportRemittanceDestinationAccount extends Import {
 		foreach ( $raw_row as $key => $value ) {
 			$retval[$key] = $value;
 		}
+
 		return $retval;
 	}
 
@@ -116,17 +117,17 @@ class ImportRemittanceDestinationAccount extends Import {
 	 */
 	function _postParseRow( $row_number, $raw_row ) {
 		$raw_row['user_id'] = $this->getUserIdByRowData( $raw_row );
-		if ( $raw_row['user_id'] == FALSE ) {
+		if ( $raw_row['user_id'] == false ) {
 			$raw_row['user_id'] = TTUUID::getNotExistID();
 			//unset($raw_row['user_id']);
 		}
 
-		if ( !isset($raw_row['type']) OR $raw_row['type'] == '' ) {
+		if ( !isset( $raw_row['type'] ) || $raw_row['type'] == '' ) {
 			$raw_row['type'] = 3000; //EFT
 		}
 
 		//remittance source by user
-		if ( isset($raw_row['user_id']) AND !isset($raw_row['remittance_source_account_id']) ) {
+		if ( isset( $raw_row['user_id'] ) && !isset( $raw_row['remittance_source_account_id'] ) ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByIdAndCompanyId( $raw_row['user_id'], $this->getCompanyObject()->getId() );
 
@@ -141,7 +142,6 @@ class ImportRemittanceDestinationAccount extends Import {
 					unset( $rsalf );
 				}
 			}
-
 		}
 
 		return $raw_row;
@@ -163,12 +163,12 @@ class ImportRemittanceDestinationAccount extends Import {
 	 * @param null $raw_row
 	 * @return int
 	 */
-	function parse_status( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
+	function parse_status( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
 		if ( strtolower( $input ) == 'e'
-				OR strtolower( $input ) == 'enabled' ) {
+				|| strtolower( $input ) == 'enabled' ) {
 			$retval = 10;
-		} elseif ( strtolower( $input ) == 'd'
-				OR strtolower( $input ) == 'disabled' ) {
+		} else if ( strtolower( $input ) == 'd'
+				|| strtolower( $input ) == 'disabled' ) {
 			$retval = 20;
 		} else {
 			$retval = (int)$input;
@@ -184,17 +184,17 @@ class ImportRemittanceDestinationAccount extends Import {
 	 * @param null $parse_hint
 	 * @return array|bool|mixed
 	 */
-	function parse_type( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$rsaf = TTnew('RemittanceSourceAccountFactory'); /** @var RemittanceSourceAccountFactory $rsaf */
+	function parse_type( $input, $default_value = null, $parse_hint = null ) {
+		$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */
 		$options = $rsaf->getOptions( 'type' );
 
-		if ( isset($options[$input]) ) {
+		if ( isset( $options[$input] ) ) {
 			return $input;
 		} else {
-			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
+			if ( $this->getImportOptions( 'fuzzy_match' ) == true ) {
 				return $this->findClosestMatch( $input, $options, 50 );
 			} else {
-				return array_search( strtolower($input), array_map('strtolower', $options) );
+				return array_search( strtolower( $input ), array_map( 'strtolower', $options ) );
 			}
 		}
 	}
@@ -205,17 +205,17 @@ class ImportRemittanceDestinationAccount extends Import {
 	 * @param null $parse_hint
 	 * @return array|bool|mixed
 	 */
-	function parse_amount_type( $input, $default_value = 'Percent', $parse_hint = NULL ) {
-		$rsaf = TTnew('RemittanceDestinationAccountFactory'); /** @var RemittanceDestinationAccountFactory $rsaf */
+	function parse_amount_type( $input, $default_value = 'Percent', $parse_hint = null ) {
+		$rsaf = TTnew( 'RemittanceDestinationAccountFactory' ); /** @var RemittanceDestinationAccountFactory $rsaf */
 		$options = $rsaf->getOptions( 'amount_type' );
 
-		if ( isset($options[$input]) ) {
+		if ( isset( $options[$input] ) ) {
 			return $input;
 		} else {
-			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
+			if ( $this->getImportOptions( 'fuzzy_match' ) == true ) {
 				return $this->findClosestMatch( $input, $options, 50 );
 			} else {
-				return array_search( strtolower($input), array_map('strtolower', $options) );
+				return array_search( strtolower( $input ), array_map( 'strtolower', $options ) );
 			}
 		}
 	}
@@ -226,12 +226,12 @@ class ImportRemittanceDestinationAccount extends Import {
 	 * @param null $parse_hint
 	 * @return array|bool|int|mixed
 	 */
-	function parse_remittance_source_account( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$rdalf = TTnew('RemittanceSourceAccountListFactory'); /** @var RemittanceSourceAccountListFactory $rdalf */
-		$rdalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), array());
-		$result  = (array)$rdalf->getArrayByListFactory( $rdalf, FALSE );
+	function parse_remittance_source_account( $input, $default_value = null, $parse_hint = null ) {
+		$rdalf = TTnew( 'RemittanceSourceAccountListFactory' ); /** @var RemittanceSourceAccountListFactory $rdalf */
+		$rdalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), [] );
+		$result = (array)$rdalf->getArrayByListFactory( $rdalf, false );
 		$retval = $this->findClosestMatch( $input, $result );
-		if ( $retval === FALSE ) {
+		if ( $retval === false ) {
 			$retval = -1; //Make sure this fails.
 		}
 
@@ -244,19 +244,20 @@ class ImportRemittanceDestinationAccount extends Import {
 	 * @param null $parse_hint
 	 * @return array|bool|mixed
 	 */
-	function parse_ach_transaction_type( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$rdaf = TTnew('RemittanceDestinationAccountFactory'); /** @var RemittanceDestinationAccountFactory $rdaf */
+	function parse_ach_transaction_type( $input, $default_value = null, $parse_hint = null ) {
+		$rdaf = TTnew( 'RemittanceDestinationAccountFactory' ); /** @var RemittanceDestinationAccountFactory $rdaf */
 		$options = $rdaf->getOptions( 'ach_transaction_type' );
 
-		if ( isset($options[$input]) ) {
+		if ( isset( $options[$input] ) ) {
 			return $input;
 		} else {
-			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
+			if ( $this->getImportOptions( 'fuzzy_match' ) == true ) {
 				return $this->findClosestMatch( $input, $options, 50 );
 			} else {
-				return array_search( strtolower($input), array_map('strtolower', (array)$options) );
+				return array_search( strtolower( $input ), array_map( 'strtolower', (array)$options ) );
 			}
 		}
 	}
 }
+
 ?>

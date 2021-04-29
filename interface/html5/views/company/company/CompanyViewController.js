@@ -23,7 +23,7 @@ CompanyViewController = BaseViewController.extend( {
 		this.script_name = 'CompanyView';
 		this.table_name_key = 'company';
 		this.context_menu_name = $.i18n._( 'Company Information' );
-		this.api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -31,7 +31,7 @@ CompanyViewController = BaseViewController.extend( {
 		this.initData();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -112,28 +112,28 @@ CompanyViewController = BaseViewController.extend( {
 		}
 
 		var new_url = window.location.href;
-		if ( new_url.indexOf('company_id') == -1 ) {
+		if ( new_url.indexOf( 'company_id' ) == -1 ) {
 			new_url = new_url + '&company_id=' + LocalCacheData.getLoginUser().company_id;
 			Global.setURLToBrowser( new_url );
 		}
 
 	},
 
-	removeCompanyIdFromUrl: function(){
+	removeCompanyIdFromUrl: function() {
 		var new_url = window.location.href;
-		if ( new_url.indexOf('company_id') != -1 ) {
-			var parts = new_url.split('&');
+		if ( new_url.indexOf( 'company_id' ) != -1 ) {
+			var parts = new_url.split( '&' );
 			new_url = parts[0];
-			for ( var i = 1; i < ( parts.length - 1 ) ; i++ ) {
-			new_url += ('&' + parts[i]);
-		}
+			for ( var i = 1; i < ( parts.length - 1 ); i++ ) {
+				new_url += ( '&' + parts[i] );
+			}
 			Global.setURLToBrowser( new_url );
 		}
 	},
 
-	removeEditView: function(){
+	removeEditView: function() {
 		this.removeCompanyIdFromUrl();
-		this._super('removeEditView');
+		this._super( 'removeEditView' );
 
 	},
 
@@ -214,7 +214,7 @@ CompanyViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveDone: function ( result ) {
+	onSaveDone: function( result ) {
 		if ( result.isValid() && result.getResult() === true ) {
 			this.updateCurrentCompanyCache();
 			return true;
@@ -224,7 +224,7 @@ CompanyViewController = BaseViewController.extend( {
 
 	updateCurrentCompanyCache: function() {
 
-		var authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+		var authentication_api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
 		authentication_api.getCurrentCompany( { onResult: this.onGetCurrentCompany } );
 	},
 
@@ -341,15 +341,16 @@ CompanyViewController = BaseViewController.extend( {
 		var $this = this;
 		this._super( 'buildEditViewUI' );
 
-
 		var tab_model = {
 			'tab_company': { 'label': $.i18n._( 'Company' ) },
-			'tab_password_policy': { 'label': $.i18n._( 'Password Policy' ), 'init_callback': 'initSubPasswordPolicyView' },
+			'tab_password_policy': {
+				'label': $.i18n._( 'Password Policy' ),
+				'init_callback': 'initSubPasswordPolicyView'
+			},
 			'tab_ldap': { 'label': $.i18n._( 'LDAP Authentication' ) },
 			'tab_audit': true,
 		};
 		this.setTabModel( tab_model );
-
 
 		//Tab 0 start
 
@@ -440,7 +441,7 @@ CompanyViewController = BaseViewController.extend( {
 		// Administrative Contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -452,7 +453,7 @@ CompanyViewController = BaseViewController.extend( {
 		// billing contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -464,7 +465,7 @@ CompanyViewController = BaseViewController.extend( {
 		// Primary Support contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -484,11 +485,11 @@ CompanyViewController = BaseViewController.extend( {
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.terminated_user_disable_login_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Disable Terminated Employees' ), form_item_input, tab_company_column2, '' );
 
-
 		// Terminated User Disable Login After Days
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'terminated_user_disable_login_after_days', width: 25 } );
-		terminated_user_disable_login_after_days_description = $( '<div class=\'widget-h-box\'></div>' );
+
+		var terminated_user_disable_login_after_days_description = $( '<div class=\'widget-h-box\'></div>' );
 		terminated_user_disable_login_after_days_description.append( form_item_input );
 		terminated_user_disable_login_after_days_description.append( $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'Days' ) + ' )</span>' ) );
 		this.addEditFieldToColumn( $.i18n._( 'Disable Terminated Employees Login After' ), form_item_input, tab_company_column2, '', terminated_user_disable_login_after_days_description );
@@ -746,7 +747,6 @@ CompanyViewController = BaseViewController.extend( {
 
 		this.editFieldResize();
 	}
-
 
 } );
 

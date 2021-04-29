@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TList = function( options ) {
 		var opts = $.extend( {}, $.fn.TList.defaults, options );
@@ -61,7 +61,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -144,7 +144,7 @@
 
 			select_value = val;
 
-			if ( !source_data || (set_empty && source_data.length === 1) || (set_any && source_data.length === 1) ) {
+			if ( !source_data || ( set_empty && source_data.length === 1 ) || ( set_any && source_data.length === 1 ) ) {
 				set_select_item_when_set_source_data = true;
 				return;
 			}
@@ -176,7 +176,7 @@
 						}
 					}
 				} else {
-					result = !!($( this ).attr( 'value' ) === val.toString());
+					result = ( $( this ).attr( 'value' ) === val.toString() );
 				}
 
 				return result;
@@ -259,13 +259,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-								LocalCacheData.current_open_sub_controller.edit_view &&
-								LocalCacheData.current_open_sub_controller.is_viewing ) {
+							LocalCacheData.current_open_sub_controller.edit_view &&
+							LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-								LocalCacheData.current_open_primary_controller.edit_view &&
-								LocalCacheData.current_open_primary_controller.is_viewing ) {
+							LocalCacheData.current_open_primary_controller.edit_view &&
+							LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -295,4 +295,4 @@
 
 	$.fn.TList.defaults = {};
 
-})( jQuery );
+} )( jQuery );

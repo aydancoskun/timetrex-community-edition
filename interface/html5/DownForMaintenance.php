@@ -33,55 +33,56 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-$disable_database_connection = TRUE;
-require_once('../../includes/global.inc.php');
+$disable_database_connection = true;
+require_once( '../../includes/global.inc.php' );
 forceNoCacheHeaders(); //Send headers to disable caching.
 TTi18n::chooseBestLocale();
-extract	(FormVariables::GetVariables(
-										array	(
-												'exception',
-												) ) );
-$BASE_URL = './';
-$META_TITLE = TTi18n::getText('Down For Maintenance');
-require ('../../includes/Header.inc.php');
-?>
 
+/** @var string $exception */
+extract( FormVariables::GetVariables(
+		[
+				'exception',
+		] ) );
+$BASE_URL = './';
+$META_TITLE = TTi18n::getText( 'Down For Maintenance' );
+require( '../../includes/Header.inc.php' );
+?>
 <div id="contentContainer" class="content-container">
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-12">
 				<div id="contentBox-DownForMaintenance">
-					<div class="textTitle2"><?php echo TTi18n::getText('Down for Maintenance') ?></div>
-                    <div id="rowWarning" class="text-center">
+					<div class="textTitle2"><?php echo TTi18n::getText( 'Down for Maintenance' ) ?></div>
+					<div id="rowWarning" class="text-center">
 						<?php
-						if ( DEPLOYMENT_ON_DEMAND == TRUE ) {
-							if ( strtolower($exception) == 'dbtimeout' ) {
-								echo APPLICATION_NAME . ' ' . TTi18n::getText('database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.');
+						if ( DEPLOYMENT_ON_DEMAND == true ) {
+							if ( strtolower( $exception ) == 'dbtimeout' ) {
+								echo APPLICATION_NAME . ' ' . TTi18n::getText( 'database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.' );
 							} else {
-								echo APPLICATION_NAME . ' ' . TTi18n::getText('is currently undergoing maintenance. We\'re sorry for any inconvenience this may cause.');
+								echo APPLICATION_NAME . ' ' . TTi18n::getText( 'is currently undergoing maintenance. We\'re sorry for any inconvenience this may cause.' );
 							}
 						} else {
-							if ( strtolower($exception) == 'dberror' OR strtolower($exception) == 'dbconnectionfailed' ) {
-								echo APPLICATION_NAME . ' ' . TTi18n::getText('is unable to connect to its database, please make sure that the database service on your own local') . ' ' . APPLICATION_NAME . ' ' . TTi18n::getText('server has been started and is running. If you are unsure, try rebooting your server.') ;
-							} else if ( strtolower($exception) == 'dbtimeout' ) {
-								echo APPLICATION_NAME . ' ' . TTi18n::getText('database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.');
-							} else if ( strtolower($exception) == 'dbinitialize' ) {
-								echo APPLICATION_NAME . ' ' . TTi18n::getText('database has not been initialized yet, please run the installer again and follow the on screen instructions.') . '<a href="'. Environment::getBaseURL() .'/html5/index.php?installer=1&disable_db=1&external_installer=1#!m=Install&a=license&external_installer=0">' . TTi18n::getText('Click here to run the installer now.') . '</a>';
-							} else if ( strtolower($exception) == 'down_for_maintenance' ) {
-								echo APPLICATION_NAME . ' ' . TTi18n::getText('is currently undergoing maintenance. We\'re sorry for any inconvenience this may cause.');
+							if ( strtolower( $exception ) == 'dberror' || strtolower( $exception ) == 'dbconnectionfailed' ) {
+								echo APPLICATION_NAME . ' ' . TTi18n::getText( 'is unable to connect to its database, please make sure that the database service on your own local' ) . ' ' . APPLICATION_NAME . ' ' . TTi18n::getText( 'server has been started and is running. If you are unsure, try rebooting your server.' );
+							} else if ( strtolower( $exception ) == 'dbtimeout' ) {
+								echo APPLICATION_NAME . ' ' . TTi18n::getText( 'database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.' );
+							} else if ( strtolower( $exception ) == 'dbinitialize' ) {
+								echo APPLICATION_NAME . ' ' . TTi18n::getText( 'database has not been initialized yet, please run the installer again and follow the on screen instructions.' ) . '<a href="' . Environment::getBaseURL() . '/html5/index.php?installer=1&disable_db=1&external_installer=1#!m=Install&a=license&external_installer=0">' . TTi18n::getText( 'Click here to run the installer now.' ) . '</a>';
+							} else if ( strtolower( $exception ) == 'down_for_maintenance' ) {
+								echo APPLICATION_NAME . ' ' . TTi18n::getText( 'is currently undergoing maintenance. We\'re sorry for any inconvenience this may cause.' );
 							} else {
-								echo APPLICATION_NAME . ' ' . TTi18n::getText('experienced a general error, please contact technical support.');
+								echo APPLICATION_NAME . ' ' . TTi18n::getText( 'experienced a general error, please contact technical support.' );
 							}
 						}
 						?>
-                        <br>
-                        <a href='#' onClick="javascript:history.back()">Try Again?</a>
-                    </div>
+						<br>
+						<a href='#' onClick="history.back()">Try Again?</a>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 <?php
-require ('../../includes/Footer.inc.php');
+require( '../../includes/Footer.inc.php' );
 ?>

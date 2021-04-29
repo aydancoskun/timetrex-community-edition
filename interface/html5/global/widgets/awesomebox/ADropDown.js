@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.ADropDown = function( options ) {
 		var opts = $.extend( {}, $.fn.ADropDown.defaults, options );
@@ -505,12 +505,12 @@
 				target_grid = unselect_grid;
 			}
 			var source_data = target_grid.getGridParam( 'data' );
-			val && (select_item = val);
+			val && ( select_item = val );
 			if ( source_data && source_data.length > 0 ) {
 				for ( var i = 0; i < source_data.length; i++ ) {
 					var content = source_data[i];
 					var temp_val = val;
-					!val && (temp_val = source_data[0]);
+					!val && ( temp_val = source_data[0] );
 
 					var content_key = key;
 					if ( tree_mode && key == 'id' ) {
@@ -519,12 +519,10 @@
 
 					if ( content[content_key] == temp_val[key] ) {  //Some times 0, sometimes '0'
 
-
 						var content_id_key = 'id';
 						if ( tree_mode ) {
 							content_id_key = '_id_';
 						}
-
 
 						//Always use id to set select row, all record array should have id
 						target_grid.grid.find( 'tr[id="' + content[content_id_key] + '"]' ).focus();
@@ -541,7 +539,7 @@
 						}
 						target_grid.grid.jqGrid( 'setSelection', content[content_id_key], false );
 						target_grid.grid.jqGrid( 'editRow', content[content_id_key], true );
-						val && (select_item = content);
+						val && ( select_item = content );
 						return false;
 					}
 				}
@@ -557,7 +555,7 @@
 			return select_item;
 		};
 
-		this.getSelectItems = function () {
+		this.getSelectItems = function() {
 			//Save last edit row if there is editable row in grid cell;
 			if ( unselect_grid_last_row.length > 0 ) {
 				unselect_grid.grid.jqGrid( 'saveRow', unselect_grid_last_row );
@@ -584,7 +582,7 @@
 			return retval;
 		};
 
-		this.setRealSelectItems = function ( all_records, selected_ids ) {
+		this.setRealSelectItems = function( all_records, selected_ids ) {
 			real_selected_items = [];
 			if ( selected_ids != TTUUID.zero_id && selected_ids.length > 0 ) {
 				for ( var n = 0; n < all_records.length; n++ ) {
@@ -685,7 +683,7 @@
 			//only shrink smaller grids to fit container
 			if ( total_headers_width <= ( width ) || colModel.length < 5 ) {
 				//prevent resize on search.
-				width = primary_grid.grid.parents( '.unselect-grid-div, .select-grid-div' ).width() - offset ;
+				width = primary_grid.grid.parents( '.unselect-grid-div, .select-grid-div' ).width() - offset;
 			} else {
 				width = total_headers_width; //primary_grid.grid.parents( '.unselect-grid-div' ).width() - offset;
 				if ( default_width > width ) {
@@ -717,9 +715,9 @@
 				paging_widget.css( 'width', unselect_grid.width() );
 				unselect_grid.append( paging_widget );
 
-				paging_widget.click(function(){
+				paging_widget.click( function() {
 					$this.onPaging();
-				});
+				} );
 
 				if ( !pager_data || pager_data.is_last_page || pager_data.last_page_number < 0 ) {
 					paging_widget.css( 'display', 'none' );
@@ -834,12 +832,12 @@
 					},
 					beforeSelectRow: function( iRow, e ) {
 						var $td = $( e.target ).closest( 'tr.jqgrow>td' ),
-								iCol = $td.length > 0 ? $td[0].cellIndex : -1,
-								p = $( this ).jqGrid( 'getGridParam' ),
-								cm = iCol >= 0 ? p.colModel[iCol] : null;
+							iCol = $td.length > 0 ? $td[0].cellIndex : -1,
+							p = $( this ).jqGrid( 'getGridParam' ),
+							cm = iCol >= 0 ? p.colModel[iCol] : null;
 
 						if ( cm != null && cm.name === p.ExpandColumn &&
-								$( e.target ).closest( '.tree-wrap' ).length > 0 ) {
+							$( e.target ).closest( '.tree-wrap' ).length > 0 ) {
 
 							return false; // prevent row selection
 						}
@@ -868,7 +866,7 @@
 
 			var select_items = this.getSelectItems();
 			$( this ).find( 'tr' ).removeClass( 'selected-tree-cell' );
-			for ( var i = (select_items.length - 1); i >= 0; i-- ) {
+			for ( var i = ( select_items.length - 1 ); i >= 0; i-- ) {
 				$( this ).find( '.unselect-grid-div' ).find( 'tr#' + select_items[i].id ).addClass( 'selected-tree-cell' );
 			}
 		};
@@ -928,9 +926,9 @@
 			} else {
 
 				if ( new_height != default_height ) {
-					a_dropdown_this.parent().css( 'top', (top_offset - new_height - 125) );
+					a_dropdown_this.parent().css( 'top', ( top_offset - new_height - 125 ) );
 				} else {
-					a_dropdown_this.parent().css( 'top', (top_offset - new_height - 125) );
+					a_dropdown_this.parent().css( 'top', ( top_offset - new_height - 125 ) );
 				}
 
 			}
@@ -972,10 +970,10 @@
 			if ( val.length > 1 ) {
 
 				box_width = gridWidth;
-				if ( allow_multiple_selection && gridWidth > (Global.bodyWidth() / 2 - 30 - 15) ) {
-					box_width = (Global.bodyWidth() / 2 - 30 - 15);
-				} else if ( !allow_multiple_selection && gridWidth > (Global.bodyWidth() - 30 - 15) ) {
-					box_width = (Global.bodyWidth() - 30 - 15);
+				if ( allow_multiple_selection && gridWidth > ( Global.bodyWidth() / 2 - 30 - 15 ) ) {
+					box_width = ( Global.bodyWidth() / 2 - 30 - 15 );
+				} else if ( !allow_multiple_selection && gridWidth > ( Global.bodyWidth() - 30 - 15 ) ) {
+					box_width = ( Global.bodyWidth() - 30 - 15 );
 				}
 
 				this.find( '.unselect-grid-div' ).width( null );
@@ -1103,7 +1101,6 @@
 						}
 					},
 
-
 					onSelectRow: function( id ) {
 						if ( on_tree_grid_row_select ) {
 							on_tree_grid_row_select( id );
@@ -1185,9 +1182,9 @@
 					search_input.css( 'width', header.getWidth() );
 				}
 
-				search_input.on('drop', function(e){
+				search_input.on( 'drop', function( e ) {
 					e.preventDefault();
-				});
+				} );
 
 				search_input.ASearchInput( { column_model: header.getColumnModel() } ); //Make it as ASearchInout Widget;
 
@@ -1224,7 +1221,7 @@
 
 			}
 
-			var close_btn = $( '<button class="close-btn"><img src="'+ Global.getRealImagePath( 'images/close.png' ) +'"/></button>' );
+			var close_btn = $( '<button class="close-btn"><img src="' + Global.getRealImagePath( 'images/close.png' ) + '"/></button>' );
 
 			//close_btn.width( unselect_grid_header_array[0].getWidth() + 2 );
 			//close_btn.width( 22 );
@@ -1263,7 +1260,7 @@
 					for ( var i = 0; i < len; i++ ) {
 						header = unselect_grid_header_array[i + 1];
 						search_input = $( search_inputs[i] );
-						if ( i == (len - 1) ) {
+						if ( i == ( len - 1 ) ) {
 							search_input.css( 'width', header.getWidth() );
 						} else {
 							search_input.css( 'width', header.getWidth() + 1 );
@@ -1277,7 +1274,7 @@
 					search_input = $( search_inputs[i] );
 					if ( i === 0 ) {
 						search_input.css( 'width', header.getWidth() - 22 );
-					} else if ( i == (len - 1) ) {
+					} else if ( i == ( len - 1 ) ) {
 						search_input.css( 'width', header.getWidth() + 1 );
 					} else {
 						search_input.css( 'width', header.getWidth() + 1 );
@@ -1329,7 +1326,7 @@
 				for ( var i = 0; i < len; i++ ) {
 					var header = select_grid_header_array[i + 1];
 					var search_input = $( search_inputs[i] );
-					if ( i == (len - 1) ) {
+					if ( i == ( len - 1 ) ) {
 						search_input.css( 'width', header.getWidth() );
 					} else {
 						search_input.css( 'width', header.getWidth() + 1 );
@@ -1373,16 +1370,16 @@
 					search_input.css( 'width', width );
 				} else {
 					search_input = $( '<input type=\'text\' class=\'search-input\'>' );
-					if ( i == (len - 1) ) {
+					if ( i == ( len - 1 ) ) {
 						search_input.css( 'width', header.getWidth() + 1 + 'px' );
 					} else {
 						search_input.css( 'width', header.getWidth() + 'px' );
 					}
 				}
 
-				search_input.on('drop', function(e){
+				search_input.on( 'drop', function( e ) {
 					e.preventDefault();
-				});
+				} );
 
 				search_input.ASearchInput( { column_model: header.getColumnModel() } ); //Make it as ASearchInout Widget;
 
@@ -1415,7 +1412,7 @@
 
 			}
 
-			var close_btn = $( '<button class="close-btn"><img src="'+ Global.getRealImagePath( 'images/close.png') +'"/></button>' );
+			var close_btn = $( '<button class="close-btn"><img src="' + Global.getRealImagePath( 'images/close.png' ) + '"/></button>' );
 
 			if ( allow_multiple_selection ) {
 				//close_btn.width( 22 )
@@ -1441,7 +1438,7 @@
 		};
 
 		//Set select item when not allow multiple selection
-		setSelectItem = function( val ) {
+		this.setSelectItem = function( val ) {
 			select_item = val;
 		};
 
@@ -1544,7 +1541,7 @@
 			// for all static options, that don't need get reald data, the length should always be match, use temp array because val don't
 			//contains full info.
 			if ( tmp_select_items && tmp_select_items.length === val.length ||
-					(val.length > 0 && !val[0].hasOwnProperty( key )) ) {
+				( val.length > 0 && !val[0].hasOwnProperty( key ) ) ) {
 				val = tmp_select_items;
 			}
 //			val = ( Global.isSet( tmp_select_items ) ) ? tmp_select_items : val;
@@ -1663,7 +1660,7 @@
 
 					container.append( clone_row );
 				} else {
-					container.append( len +' '+ $.i18n._('item(s) selected') );
+					container.append( len + ' ' + $.i18n._( 'item(s) selected' ) );
 				}
 
 				$( 'body' ).find( '.drag-holder-table' ).remove();
@@ -1748,7 +1745,7 @@
 
 					container.append( clone_row );
 				} else {
-					container.append( len +' '+ $.i18n._('item(s) selected') );
+					container.append( len + ' ' + $.i18n._( 'item(s) selected' ) );
 				}
 
 				$( '.drag-holder-table' ).remove();
@@ -2002,7 +1999,7 @@
 			var unselect_grid_length = ( ( unselect_grid && Global.isArray( unselect_grid.getGridParam( 'data' ) ) ) ? unselect_grid.getGridParam( 'data' ).length : 0 );
 
 			// CLICK TO SHOW MORE MODE OR SHOW ALL
-			if ( LocalCacheData.paging_type === 0 || !pager_data || (pager_data && pager_data.last_page_number < 0) ) {
+			if ( LocalCacheData.paging_type === 0 || !pager_data || ( pager_data && pager_data.last_page_number < 0 ) ) {
 				if ( pager_data ) {
 					totalRows = pager_data.total_rows;
 					start = 1;
@@ -2050,7 +2047,7 @@
 					end = 0;
 					start = 0;
 				} else {
-					end = (remain_count + start);
+					end = ( remain_count + start );
 					if ( start === 1 ) {
 						end = end - 1;
 
@@ -2072,8 +2069,7 @@
 
 				total_display_span.text( $.i18n._( 'Displaying' ) + ' ' + totalInfo + ' ' + $.i18n._( 'Selected' ) + ': ' + selected_count );
 
-			}
-			else {
+			} else {
 
 				if ( end === 0 ) {
 					start = 0;
@@ -2126,22 +2122,22 @@
 
 		//Move items between 2 grids
 		this.moveItems = function( left_to_right, array, index, target_row_id ) {
-			this.removeNoResultCover('unselect_grid');
-			this.removeNoResultCover('select_grid');
+			this.removeNoResultCover( 'unselect_grid' );
+			this.removeNoResultCover( 'select_grid' );
 			var added_items = [];
 			var removed_items = [];
 			isChanged = true;
 
-			var editable_unselect_items = $(unselect_grid.grid).find('.editable');
-			for( var i = 0; i < editable_unselect_items.length; i++) {
-				$el = $( editable_unselect_items[i] );
+			var editable_unselect_items = $( unselect_grid.grid ).find( '.editable' );
+			for ( var i = 0; i < editable_unselect_items.length; i++ ) {
+				var $el = $( editable_unselect_items[i] );
 				var tr_id = $el.parents( 'tr' ).prop( 'id' );
 				unselect_grid.grid.saveRow( tr_id );
 			}
 
-			var editable_select_items = $(select_grid.grid).find('.editable');
-			for( var i = 0; i < editable_select_items.length; i++) {
-				$el = $( editable_select_items[i] );
+			var editable_select_items = $( select_grid.grid ).find( '.editable' );
+			for ( var i = 0; i < editable_select_items.length; i++ ) {
+				var $el = $( editable_select_items[i] );
 				var tr_id = $el.parents( 'tr' ).prop( 'id' );
 				select_grid.grid.saveRow( tr_id );
 			}
@@ -2164,7 +2160,7 @@
 				target_data = [];
 			}
 
-			if ( source_data[0] && source_data[0].hasOwnProperty( 'id' )  ) {
+			if ( source_data[0] && source_data[0].hasOwnProperty( 'id' ) ) {
 				if ( !Global.isSet( index ) ) {
 					array = array.reverse();
 				}
@@ -2421,7 +2417,7 @@
 						var next_select_item = false;
 						var grid_data = target_grid.getData();
 						for ( var z = 0; z < grid_data.length; z++ ) {
-							if ( grid_data[z].id == td.parents('tr').attr('id') ) {
+							if ( grid_data[z].id == td.parents( 'tr' ).attr( 'id' ) ) {
 								next_select_item = grid_data[z];
 								break;
 							}
@@ -2875,8 +2871,8 @@
 			//Move all records from target grid to another
 			function cleanAllInGrid( target, left_to_right ) {
 
-				a_dropdown_this.removeNoResultCover('unselect_grid');
-				a_dropdown_this.removeNoResultCover('select_grid');
+				a_dropdown_this.removeNoResultCover( 'unselect_grid' );
+				a_dropdown_this.removeNoResultCover( 'select_grid' );
 
 				isChanged = true;
 				var finalArray = [];
@@ -2928,4 +2924,4 @@
 
 	$.fn.ADropDown.defaults = {};
 
-})( jQuery );
+} )( jQuery );

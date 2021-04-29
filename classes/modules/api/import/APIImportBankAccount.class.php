@@ -35,7 +35,6 @@
  ********************************************************************************/
 
 
-
 /**
  * @package API\Import
  */
@@ -48,7 +47,8 @@ class APIImportBankAccount extends APIImport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

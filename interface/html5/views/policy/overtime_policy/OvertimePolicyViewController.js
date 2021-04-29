@@ -32,11 +32,11 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'over_time_policy';
 		this.context_menu_name = $.i18n._( 'Overtime Policy' );
 		this.navigation_label = $.i18n._( 'Overtime Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIOvertimePolicy' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIOvertimePolicy' ) )();
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_group_api = new (APIFactory.getAPIClass( 'APIJobGroup' ))();
-			this.job_item_group_api = new (APIFactory.getAPIClass( 'APIJobItemGroup' ))();
+			this.job_group_api = new ( APIFactory.getAPIClass( 'APIJobGroup' ) )();
+			this.job_item_group_api = new ( APIFactory.getAPIClass( 'APIJobItemGroup' ) )();
 		}
 
 		this.render();
@@ -89,13 +89,16 @@ OvertimePolicyViewController = BaseViewController.extend( {
 
 		var tab_model = {
 			'tab_overtime_policy': { 'label': $.i18n._( 'Overtime Policy' ) },
-			'tab_differential_criteria': { 'label': $.i18n._( 'Differential Criteria' ), 'init_callback': 'initSubDifferentialCriteriaView' },
+			'tab_differential_criteria': {
+				'label': $.i18n._( 'Differential Criteria' ),
+				'init_callback': 'initSubDifferentialCriteriaView'
+			},
 			'tab_audit': true,
 		};
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIOvertimePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIOvertimePolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.OVER_TIME_POLICY,
@@ -115,8 +118,11 @@ OvertimePolicyViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_overtime_policy_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+
 		//Name
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_overtime_policy_column1, '' );
@@ -133,7 +139,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -154,9 +160,9 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'trigger_time', mode: 'time_unit', need_parser_sec: true } );
 
 		// Trigger Time Adjusting Contributing Shift
-		trigger_time_adjust_contributing_shift_form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		var trigger_time_adjust_contributing_shift_form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		trigger_time_adjust_contributing_shift_form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -165,7 +171,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		} );
 
 		widgetContainer = $( '<div class=\'widget-h-box \'></div>' );
-		trigger_time_adjust_label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Adjusted By' ) + ': </span>' );
+		var trigger_time_adjust_label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Adjusted By' ) + ': </span>' );
 		widgetContainer.append( form_item_input );
 		if ( Global.getProductEdition() >= 15 ) {
 			widgetContainer.append( trigger_time_adjust_label );
@@ -176,7 +182,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -188,7 +194,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -229,7 +235,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -269,7 +275,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -343,7 +349,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -410,7 +416,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -595,7 +601,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -607,7 +613,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -619,7 +625,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'contributing_shift_policy_id',
 				layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -631,7 +637,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -643,7 +649,7 @@ OvertimePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

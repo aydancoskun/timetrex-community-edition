@@ -8,14 +8,14 @@ GeneralLedgerSummaryReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'General Ledger Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'GeneralLedgerSummaryReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIGeneralLedgerSummaryReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIGeneralLedgerSummaryReport' ) )();
 	},
 
 	onReportMenuClick: function( id ) {
 		this.onViewClick( id );
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				export: {
@@ -38,7 +38,7 @@ GeneralLedgerSummaryReportViewController = ReportBaseViewController.extend( {
 			permission: true
 		};
 
-		var export_general_ledger_result = new (APIFactory.getAPIClass( 'APIPayStub' ))().getOptions( 'export_general_ledger', { async: false } ).getResult();
+		var export_general_ledger_result = new ( APIFactory.getAPIClass( 'APIPayStub' ) )().getOptions( 'export_general_ledger', { async: false } ).getResult();
 
 		export_general_ledger_result = Global.buildRecordArray( export_general_ledger_result );
 

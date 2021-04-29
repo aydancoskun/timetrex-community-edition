@@ -41,43 +41,43 @@
 class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable();
+					from	' . $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PolicyGroupUserListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -90,25 +90,25 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PolicyGroupUserListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$pgf = new PolicyGroupFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id)
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $pgf->getTable() .' as pgf ON a.policy_group_id = pgf.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pgf->getTable() . ' as pgf ON a.policy_group_id = pgf.id
 					where	pgf.company_id = ?
 						AND ( pgf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
@@ -120,27 +120,27 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PolicyGroupUserListFactory
 	 */
-	function getByPolicyGroupId( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByPolicyGroupId( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
 		$pgf = new PolicyGroupFactory();
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $pgf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pgf->getTable() . ' as b
 					where	b.id = a.policy_group_id
 						AND a.policy_group_id = ?
 					';
@@ -153,27 +153,27 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|int
 	 */
-	function getTotalByPolicyGroupId( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getTotalByPolicyGroupId( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
 		$pgf = new PolicyGroupFactory();
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	count(*)
-					from	'. $this->getTable() .' as a,
-							'. $pgf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pgf->getTable() . ' as b
 					where	b.id = a.policy_group_id
 						AND a.policy_group_id = ?
 					';
@@ -185,26 +185,26 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PolicyGroupUserListFactory
 	 */
-	function getByUserId( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByUserId( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array();
+		$ph = [];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $uf->getTable() . ' as b
 					where	b.id = a.user_id
-						AND a.user_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
+						AND a.user_id in (' . $this->getListSQL( $id, $ph, 'uuid' ) . ')
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -215,32 +215,32 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id      UUID
 	 * @param string $user_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PolicyGroupUserListFactory
 	 */
-	function getByPolicyGroupIdAndUserId( $id, $user_id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByPolicyGroupIdAndUserId( $id, $user_id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $user_id == '') {
-			return FALSE;
+		if ( $user_id == '' ) {
+			return false;
 		}
 
 		$pgf = new PolicyGroupFactory();
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					'user_id' => TTUUID::castUUID($user_id),
-					);
+		$ph = [
+				'id'      => TTUUID::castUUID( $id ),
+				'user_id' => TTUUID::castUUID( $user_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $pgf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pgf->getTable() . ' as b
 					where	b.id = a.policy_group_id
 						AND a.policy_group_id = ?
 						AND a.user_id = ?
@@ -257,21 +257,22 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 	 * @param string $id UUID
 	 * @return array
 	 */
-	function getByPolicyGroupIdArray( $id) {
+	function getByPolicyGroupIdArray( $id ) {
 		$pgotplf = new PolicyGroupOverTimePolicyListFactory();
 
-		$pgotplf->getByPolicyGroupId($id);
+		$pgotplf->getByPolicyGroupId( $id );
 
-		$list = array();
-		foreach ($pgotplf as $obj) {
-			$list[$obj->getOverTimePolicy()] = NULL;
+		$list = [];
+		foreach ( $pgotplf as $obj ) {
+			$list[$obj->getOverTimePolicy()] = null;
 		}
 
-		if ( empty($list) == FALSE ) {
+		if ( empty( $list ) == false ) {
 			return $list;
 		}
 
-		return array();
+		return [];
 	}
 }
+
 ?>

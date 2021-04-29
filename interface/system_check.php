@@ -33,28 +33,28 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-$skip_db_error_exception = TRUE; //Skips DB error redirect
+$skip_db_error_exception = true; //Skips DB error redirect
 try {
-	require_once('../includes/global.inc.php');
-} catch(Exception $e) {
-	echo 'FAIL (100) - '. $e->getMessage();
+	require_once( '../includes/global.inc.php' );
+} catch ( Exception $e ) {
+	echo 'FAIL (100) - ' . $e->getMessage();
 	exit;
 }
 //Debug::setVerbosity(11);
 
 //First check if we are installing or down for maintenance, so we don't try to initiate any DB connections.
-if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == TRUE )
-		OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == TRUE ) ) {
+if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == true )
+		|| ( isset( $config_vars['other']['down_for_maintenance'] ) && $config_vars['other']['down_for_maintenance'] == true ) ) {
 	echo 'FAIL! (INSTALLER/DOWN FOR MAINTENANCE)';
 	exit;
 }
 
 //Confirm database connection is up and maintenance jobs have run recently...
-if ( PRODUCTION == TRUE ) {
+if ( PRODUCTION == true ) {
 	$cjlf = TTnew( 'CronJobListFactory' ); /** @var CronJobListFactory $cjlf */
 	$cjlf->getMostRecentlyRun();
 	if ( $cjlf->getRecordCount() > 0 ) {
-		$last_run_date_diff = time()-$cjlf->getCurrent()->getLastRunDate();
+		$last_run_date_diff = time() - $cjlf->getCurrent()->getLastRunDate();
 		if ( $last_run_date_diff > 1800 ) { //Must run in the last 30mins.
 			echo 'FAIL! (200)';
 			exit;
@@ -63,9 +63,9 @@ if ( PRODUCTION == TRUE ) {
 }
 
 //If caching is enabled, make sure cache directory exists and is writeable.
-if ( isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE ) {
-	if ( isset($config_vars['cache']['redis_host']) AND $config_vars['cache']['redis_host'] != '' ) {
-		$tmp_f = TTnew('SystemSettingFactory'); /** @var SystemSettingFactory $tmp_f */
+if ( isset( $config_vars['cache']['enable'] ) && $config_vars['cache']['enable'] == true ) {
+	if ( isset( $config_vars['cache']['redis_host'] ) && $config_vars['cache']['redis_host'] != '' ) {
+		$tmp_f = TTnew( 'SystemSettingFactory' ); /** @var SystemSettingFactory $tmp_f */
 		$random_value = sha1( time() );
 		$tmp_f->saveCache( $random_value, 'system_check' );
 		$result = $tmp_f->getCache( 'system_check' );
@@ -73,12 +73,12 @@ if ( isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] 
 			echo 'FAIL! (320)';
 			exit;
 		}
-		$tmp_f->removeCache('system_check');
-	} elseif ( file_exists($config_vars['cache']['dir']) == FALSE ) {
+		$tmp_f->removeCache( 'system_check' );
+	} else if ( file_exists( $config_vars['cache']['dir'] ) == false ) {
 		echo 'FAIL! (300)';
 		exit;
 	} else {
-		if ( is_writeable( $config_vars['cache']['dir'] ) == FALSE ) {
+		if ( is_writeable( $config_vars['cache']['dir'] ) == false ) {
 			echo 'FAIL (310)';
 			exit;
 		}

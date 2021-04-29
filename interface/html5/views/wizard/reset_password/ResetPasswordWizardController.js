@@ -10,7 +10,7 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 		if ( this.default_data && typeof this.default_data.api_class != 'undefined' ) {
 			this.api = this.default_data.api_class;
 		} else {
-			this.api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+			this.api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
 		}
 		this.render();
 	},
@@ -154,24 +154,24 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 			}
 
 			this.api.changePassword( this.default_data.user_name,
-					current_password,
-					new_password,
-					confirm_password
-					, {
-						onResult: function( result ) {
+				current_password,
+				new_password,
+				confirm_password,
+				{
+					onResult: function( result ) {
 
-							if ( !result.isValid() ) {
-								TAlertManager.showErrorAlert( result );
-							} else {
-								$this.onCloseClick();
+						if ( !result.isValid() ) {
+							TAlertManager.showErrorAlert( result );
+						} else {
+							$this.onCloseClick();
 
-								if ( $this.call_back ) {
-									$this.call_back();
-								}
+							if ( $this.call_back ) {
+								$this.call_back();
 							}
-
 						}
-					} );
+
+					}
+				} );
 		}
 
 	}

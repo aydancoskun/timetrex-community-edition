@@ -47,8 +47,8 @@ class SoapClientTimeout extends SoapClient {
 	 * @throws Exception
 	 */
 	public function __setTimeout( $timeout ) {
-		if ( !is_int($timeout) AND !is_null($timeout) ) {
-			throw new Exception("Invalid timeout value");
+		if ( !is_int( $timeout ) && !is_null( $timeout ) ) {
+			throw new Exception( "Invalid timeout value" );
 		}
 		$this->timeout = $timeout;
 	}
@@ -62,29 +62,29 @@ class SoapClientTimeout extends SoapClient {
 	 * @return mixed|string
 	 * @throws Exception
 	 */
-	public function __doRequest( $request, $location, $action, $version, $one_way = FALSE ) {
+	public function __doRequest( $request, $location, $action, $version, $one_way = false ) {
 		if ( !$this->timeout ) {
 			// Call via parent because we require no timeout
-			$response = parent::__doRequest($request, $location, $action, $version, $one_way);
+			$response = parent::__doRequest( $request, $location, $action, $version, $one_way );
 		} else {
 			// Call via Curl and use the timeout
-			$curl = curl_init($location);
+			$curl = curl_init( $location );
 
-			curl_setopt($curl, CURLOPT_VERBOSE, FALSE);
-			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-			curl_setopt($curl, CURLOPT_POST, TRUE);
-			curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
-			curl_setopt($curl, CURLOPT_HEADER, FALSE);
-			curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: text/xml"));
-			curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
+			curl_setopt( $curl, CURLOPT_VERBOSE, false );
+			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $curl, CURLOPT_POST, true );
+			curl_setopt( $curl, CURLOPT_POSTFIELDS, $request );
+			curl_setopt( $curl, CURLOPT_HEADER, false );
+			curl_setopt( $curl, CURLOPT_HTTPHEADER, [ "Content-Type: text/xml" ] );
+			curl_setopt( $curl, CURLOPT_TIMEOUT, $this->timeout );
 
-			$response = curl_exec($curl);
+			$response = curl_exec( $curl );
 
-			if ( curl_errno($curl) ) {
-				throw new Exception( curl_error($curl) );
+			if ( curl_errno( $curl ) ) {
+				throw new Exception( curl_error( $curl ) );
 			}
 
-			curl_close($curl);
+			curl_close( $curl );
 		}
 
 		// Return?
@@ -92,7 +92,8 @@ class SoapClientTimeout extends SoapClient {
 			return $response;
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

@@ -71,7 +71,6 @@ var APIInstall = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'setUser', arguments );
 	},
 
-
 	getProvinceOptions: function() {
 		return this.argumentsHandler( this.className, 'getProvinceOptions', arguments );
 	},
@@ -83,6 +82,5 @@ var APIInstall = ServiceCaller.extend( {
 	testConnection: function() {
 		return this.argumentsHandler( this.className, 'testConnection', arguments );
 	}
-
 
 } );

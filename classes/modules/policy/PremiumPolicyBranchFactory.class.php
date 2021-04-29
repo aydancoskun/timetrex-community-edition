@@ -42,23 +42,24 @@ class PremiumPolicyBranchFactory extends Factory {
 	protected $table = 'premium_policy_branch';
 	protected $pk_sequence_name = 'premium_policy_branch_id_seq'; //PK Sequence name
 
-	protected $branch_obj = NULL;
+	protected $branch_obj = null;
 
 	/**
 	 * @return bool|null
 	 */
 	function getBranchObject() {
-		if ( is_object($this->branch_obj) ) {
+		if ( is_object( $this->branch_obj ) ) {
 			return $this->branch_obj;
 		} else {
 			$lf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $lf */
 			$lf->getById( $this->getBranch() );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->branch_obj = $lf->getCurrent();
+
 				return $this->branch_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -73,8 +74,9 @@ class PremiumPolicyBranchFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPremiumPolicy( $value) {
+	function setPremiumPolicy( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'premium_policy_id', $value );
 	}
 
@@ -89,8 +91,9 @@ class PremiumPolicyBranchFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setBranch( $value) {
+	function setBranch( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'branch_id', $value );
 	}
 
@@ -98,9 +101,11 @@ class PremiumPolicyBranchFactory extends Factory {
 	 * @return bool
 	 */
 	function postSave() {
-		$this->removeCache( 'premium_policy-'. $this->getPremiumPolicy() );
-		return TRUE;
+		$this->removeCache( 'premium_policy-' . $this->getPremiumPolicy() );
+
+		return true;
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -110,23 +115,23 @@ class PremiumPolicyBranchFactory extends Factory {
 		//
 		//
 		if ( $this->getPremiumPolicy() != TTUUID::getZeroID() ) {
-			$this->Validator->isUUID(	'premium_policy',
-												$this->getPremiumPolicy(),
-												TTi18n::gettext('Selected Premium Policy is invalid')
+			$this->Validator->isUUID( 'premium_policy',
+									  $this->getPremiumPolicy(),
+									  TTi18n::gettext( 'Selected Premium Policy is invalid' )
 
-											);
+			);
 		}
 		// Branch
 		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
-		$this->Validator->isResultSetWithRows(	'branch',
-												$blf->getByID($this->getBranch()),
-												TTi18n::gettext('Selected Branch is invalid')
-											);
+		$this->Validator->isResultSetWithRows( 'branch',
+											   $blf->getByID( $this->getBranch() ),
+											   TTi18n::gettext( 'Selected Branch is invalid' )
+		);
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -135,105 +140,105 @@ class PremiumPolicyBranchFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -242,11 +247,12 @@ class PremiumPolicyBranchFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$obj = $this->getBranchObject();
-		if ( is_object($obj) ) {
-			return TTLog::addEntry( $this->getPremiumPolicy(), $log_action, TTi18n::getText('Branch').': '. $obj->getName(), NULL, $this->getTable() );
+		if ( is_object( $obj ) ) {
+			return TTLog::addEntry( $this->getPremiumPolicy(), $log_action, TTi18n::getText( 'Branch' ) . ': ' . $obj->getName(), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

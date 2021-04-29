@@ -23,8 +23,8 @@ LegalEntityViewController = BaseViewController.extend( {
 		this.table_name_key = 'legal_entity';
 		this.context_menu_name = $.i18n._( 'Legal Entities' );
 		this.navigation_label = $.i18n._( 'Legal Entity' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APILegalEntity' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APILegalEntity' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -241,7 +241,7 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		if ( this.navigation ) {
 			this.navigation.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
@@ -391,7 +391,6 @@ LegalEntityViewController = BaseViewController.extend( {
 			} );
 		}
 
-
 		if ( this.is_edit ) {
 			this.file_browser.setEnableDelete( true );
 			this.file_browser.bind( 'deleteClick', function( e, target ) {
@@ -405,13 +404,11 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Logo' ), this.file_browser, tab_legal_entity_column1, '', null, false, true );
 
-
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'payment_services_status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.payment_services_status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_payment_services_column1, '', null, true );
-
 
 		//User Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -584,7 +581,7 @@ LegalEntityViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -597,7 +594,7 @@ LegalEntityViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,

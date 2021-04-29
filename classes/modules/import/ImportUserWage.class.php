@@ -35,7 +35,6 @@
  ********************************************************************************/
 
 
-
 /**
  * @package Modules\Import
  */
@@ -43,41 +42,41 @@ class ImportUserWage extends Import {
 
 	public $class_name = 'APIUserWage';
 
-	public $wage_group_options = FALSE;
+	public $wage_group_options = false;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|bool|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$uwf = TTNew('UserWageFactory'); /** @var UserWageFactory $uwf */
-				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('wage_group', 'type', 'wage', 'effective_date', 'hourly_rate', 'labor_burden_percent', 'weekly_time', 'note'), Misc::trimSortPrefix( $uwf->getOptions('columns') ) ) );
+				$uwf = TTNew( 'UserWageFactory' ); /** @var UserWageFactory $uwf */
+				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( [ 'wage_group', 'type', 'wage', 'effective_date', 'hourly_rate', 'labor_burden_percent', 'weekly_time', 'note' ], Misc::trimSortPrefix( $uwf->getOptions( 'columns' ) ) ) );
 
 				break;
 			case 'column_aliases':
 				//Used for converting column names after they have been parsed.
-				$retval = array(
-								'type' => 'type_id',
-								'wage_group' => 'wage_group_id',
-								);
+				$retval = [
+						'type'       => 'type_id',
+						'wage_group' => 'wage_group_id',
+				];
 				break;
 			case 'import_options':
-				$retval = array(
-								'-1010-fuzzy_match' => TTi18n::getText('Enable smart matching.'),
-								);
+				$retval = [
+						'-1010-fuzzy_match' => TTi18n::getText( 'Enable smart matching.' ),
+				];
 				break;
 			case 'parse_hint':
-				$upf = TTnew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
+				$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 
-				$retval = array(
-								'effective_date' => $upf->getOptions('date_format'),
-								'weekly_time' => $upf->getOptions('time_unit_format'),
-								);
+				$retval = [
+						'effective_date' => $upf->getOptions( 'date_format' ),
+						'weekly_time'    => $upf->getOptions( 'time_unit_format' ),
+				];
 				break;
 		}
 
@@ -107,8 +106,8 @@ class ImportUserWage extends Import {
 	 */
 	function _postParseRow( $row_number, $raw_row ) {
 		$raw_row['user_id'] = $this->getUserIdByRowData( $raw_row );
-		if ( $raw_row['user_id'] == FALSE ) {
-			unset($raw_row['user_id']);
+		if ( $raw_row['user_id'] == false ) {
+			unset( $raw_row['user_id'] );
 		}
 
 		//If its a salary type, make sure average weekly time is always specified and hourly rate.
@@ -132,12 +131,12 @@ class ImportUserWage extends Import {
 	 */
 	function getWageGroupOptions() {
 		//Get job titles
-		$wglf = TTNew('WageGroupListFactory'); /** @var WageGroupListFactory $wglf */
+		$wglf = TTNew( 'WageGroupListFactory' ); /** @var WageGroupListFactory $wglf */
 		$wglf->getByCompanyId( $this->company_id );
-		$this->wage_group_options = (array)$wglf->getArrayByListFactory( $wglf, FALSE );
-		unset($wglf);
+		$this->wage_group_options = (array)$wglf->getArrayByListFactory( $wglf, false );
+		unset( $wglf );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -146,8 +145,8 @@ class ImportUserWage extends Import {
 	 * @param null $parse_hint
 	 * @return array|bool|int|mixed
 	 */
-	function parse_wage_group( $input, $default_value = NULL, $parse_hint = NULL ) {
-		if ( trim($input) == '' OR trim(strtolower($input)) == 'default' ) {
+	function parse_wage_group( $input, $default_value = null, $parse_hint = null ) {
+		if ( trim( $input ) == '' || trim( strtolower( $input ) ) == 'default' ) {
 			return TTUUID::getZeroID(); //Default Wage Group
 		}
 
@@ -156,7 +155,7 @@ class ImportUserWage extends Import {
 		}
 
 		$retval = $this->findClosestMatch( $input, $this->wage_group_options );
-		if ( $retval === FALSE ) {
+		if ( $retval === false ) {
 			$retval = -1; //Make sure this fails.
 		}
 
@@ -171,9 +170,10 @@ class ImportUserWage extends Import {
 	 * @param null $raw_row
 	 * @return bool|false|int
 	 */
-	function parse_effective_date( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
-		if ( isset($parse_hint) AND $parse_hint != '' ) {
+	function parse_effective_date( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
+		if ( isset( $parse_hint ) && $parse_hint != '' ) {
 			TTDate::setDateFormat( $parse_hint );
+
 			return TTDate::parseDateTime( $input );
 		} else {
 			return TTDate::strtotime( $input );
@@ -187,28 +187,28 @@ class ImportUserWage extends Import {
 	 * @param null $raw_row
 	 * @return array|bool|int|mixed
 	 */
-	function parse_type( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
-		$uwf = TTnew('UserWageFactory'); /** @var UserWageFactory $uwf */
+	function parse_type( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
+		$uwf = TTnew( 'UserWageFactory' ); /** @var UserWageFactory $uwf */
 		$options = Misc::trimSortPrefix( $uwf->getOptions( 'type' ) );
 
-		if ( isset($options[$input]) ) {
+		if ( isset( $options[$input] ) ) {
 			$retval = $input;
 		} else {
-			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
+			if ( $this->getImportOptions( 'fuzzy_match' ) == true ) {
 				$retval = $this->findClosestMatch( $input, $options, 50 );
 			} else {
-				$retval = array_search( strtolower($input), array_map('strtolower', $options) );
+				$retval = array_search( strtolower( $input ), array_map( 'strtolower', $options ) );
 			}
 		}
 
-		if ( $retval === FALSE ) {
-			if ( strtolower( $input ) == 'salary' OR strtolower( $input ) == 'salaried' OR strtolower( $input ) == 's' OR strtolower( $input ) == 'annual' ) {
+		if ( $retval === false ) {
+			if ( strtolower( $input ) == 'salary' || strtolower( $input ) == 'salaried' || strtolower( $input ) == 's' || strtolower( $input ) == 'annual' ) {
 				$retval = 20;
-			} elseif ( strtolower( $input ) == 'month' OR strtolower( $input ) == 'monthly') {
+			} else if ( strtolower( $input ) == 'month' || strtolower( $input ) == 'monthly' ) {
 				$retval = 15;
-			} elseif ( strtolower( $input ) == 'biweekly' OR strtolower( $input ) == 'bi-weekly') {
+			} else if ( strtolower( $input ) == 'biweekly' || strtolower( $input ) == 'bi-weekly' ) {
 				$retval = 13;
-			} elseif ( strtolower( $input ) == 'week' OR strtolower( $input ) == 'weekly') {
+			} else if ( strtolower( $input ) == 'week' || strtolower( $input ) == 'weekly' ) {
 				$retval = 12;
 			} else {
 				$retval = 10;
@@ -225,8 +225,8 @@ class ImportUserWage extends Import {
 	 * @param null $raw_row
 	 * @return bool|float|int|number|string
 	 */
-	function parse_weekly_time( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
-		if ( isset($parse_hint) AND $parse_hint != '' ) {
+	function parse_weekly_time( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
+		if ( isset( $parse_hint ) && $parse_hint != '' ) {
 			TTDate::setTimeUnitFormat( $parse_hint );
 		}
 
@@ -242,11 +242,12 @@ class ImportUserWage extends Import {
 	 * @param null $raw_row
 	 * @return mixed
 	 */
-	function parse_wage( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
+	function parse_wage( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
 		$val = new Validator();
-		$retval = $val->stripNonFloat($input);
+		$retval = $val->stripNonFloat( $input );
 
 		return $retval;
 	}
 }
+
 ?>

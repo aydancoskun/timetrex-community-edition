@@ -42,44 +42,42 @@ class HolidayFactory extends Factory {
 	protected $table = 'holidays';
 	protected $pk_sequence_name = 'holidays_id_seq'; //PK Sequence name
 
-	protected $holiday_policy_obj = NULL;
+	protected $holiday_policy_obj = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$retval = array(
-										'-1010-name' => TTi18n::gettext('Name'),
-										'-1020-date_stamp' => TTi18n::gettext('Date'),
+				$retval = [
+						'-1010-name'       => TTi18n::gettext( 'Name' ),
+						'-1020-date_stamp' => TTi18n::gettext( 'Date' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								'date_stamp',
-								);
+				$retval = [
+						'name',
+						'date_stamp',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								);
+				$retval = [];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array(
-								);
+				$retval = [];
 				break;
 		}
 
@@ -91,18 +89,19 @@ class HolidayFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'holiday_policy_id' => 'HolidayPolicyID',
-										'date_stamp' => 'DateStamp',
-										'name' => 'Name',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'                => 'ID',
+				'holiday_policy_id' => 'HolidayPolicyID',
+				'date_stamp'        => 'DateStamp',
+				'name'              => 'Name',
+				'deleted'           => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
 	/**
-	 * @return bool
+	 * @return bool|HolidayPolicyFactory
 	 */
 	function getHolidayPolicyObject() {
 		return $this->getGenericObject( 'HolidayPolicyListFactory', $this->getHolidayPolicyID(), 'holiday_policy_obj' );
@@ -119,8 +118,9 @@ class HolidayFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setHolidayPolicyID( $value) {
+	function setHolidayPolicyID( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'holiday_policy_id', $value );
 	}
 
@@ -128,57 +128,57 @@ class HolidayFactory extends Factory {
 	 * @param int $date_stamp EPOCH
 	 * @return bool
 	 */
-	function isUniqueDateStamp( $date_stamp) {
-		$ph = array(
-					'policy_id' => $this->getHolidayPolicyID(),
-					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					);
+	function isUniqueDateStamp( $date_stamp ) {
+		$ph = [
+				'policy_id'  => $this->getHolidayPolicyID(),
+				'date_stamp' => $this->db->BindDate( $date_stamp ),
+		];
 
-		$query = 'select id from '. $this->getTable() .'
+		$query = 'select id from ' . $this->getTable() . '
 					where holiday_policy_id = ?
 						AND date_stamp = ?
 						AND deleted=0';
-		$date_stamp_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($date_stamp_id, 'Unique Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
+		$date_stamp_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $date_stamp_id, 'Unique Date Stamp: ' . $date_stamp, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $date_stamp_id === FALSE ) {
-			return TRUE;
+		if ( $date_stamp_id === false ) {
+			return true;
 		} else {
-			if ($date_stamp_id == $this->getId() ) {
-				return TRUE;
+			if ( $date_stamp_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param bool $raw
 	 * @return bool|int
 	 */
-	function getDateStamp( $raw = FALSE ) {
+	function getDateStamp( $raw = false ) {
 		$value = $this->getGenericDataValue( 'date_stamp' );
-		if ( $value !== FALSE ) {
-			if ( $raw === TRUE ) {
+		if ( $value !== false ) {
+			if ( $raw === true ) {
 				return $value;
 			} else {
 				return TTDate::strtotime( $value );
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $value EPOCH
 	 * @return bool
 	 */
-	function setDateStamp( $value) {
-		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+	function setDateStamp( $value ) {
+		$value = ( !is_int( $value ) ) ? trim( $value ) : $value; //Dont trim integer values, as it changes them to strings.
 
 		if ( $value > 0 ) {
-			if ( $this->getDateStamp() !== $value AND $this->getOldDateStamp() != $this->getDateStamp() ) {
-				Debug::Text(' Setting Old DateStamp... Current Old DateStamp: '. (int)$this->getOldDateStamp() .' Current DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
+			if ( $this->getDateStamp() !== $value && $this->getOldDateStamp() != $this->getDateStamp() ) {
+				Debug::Text( ' Setting Old DateStamp... Current Old DateStamp: ' . (int)$this->getOldDateStamp() . ' Current DateStamp: ' . (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10 );
 				$this->setOldDateStamp( $this->getDateStamp() );
 			}
 		}
@@ -197,8 +197,9 @@ class HolidayFactory extends Factory {
 	 * @param int $value EPOCH
 	 * @return bool
 	 */
-	function setOldDateStamp( $value) {
-		Debug::Text(' Setting Old DateStamp: '. TTDate::getDate('DATE', $value ), __FILE__, __LINE__, __METHOD__, 10);
+	function setOldDateStamp( $value ) {
+		Debug::Text( ' Setting Old DateStamp: ' . TTDate::getDate( 'DATE', $value ), __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $this->setGenericTempDataValue( 'old_date_stamp', TTDate::getMiddleDayEpoch( $value ) );
 	}
 
@@ -206,16 +207,16 @@ class HolidayFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
+	function isUniqueName( $name ) {
 		//BindDate() causes a deprecated error if date_stamp is not set, so just return TRUE so we can throw a invalid date error elsewhere instead.
 		//This also causes it so we can never have a invalid date and invalid name validation errors at the same time.
 		if ( $this->getDateStamp() == '' ) {
-			return TRUE;
+			return true;
 		}
 
-		$name = trim($name);
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		//When a holiday gets moved back/forward due to falling on weekend, it can throw off the check to see if the holiday
@@ -224,16 +225,16 @@ class HolidayFactory extends Factory {
 		//
 		//I think this can only happen with New Years, or other holidays that fall within two days of the new year.
 		//So exclude the first three days of the year to allow for weekend adjustments.
-		$ph = array(
-					'policy_id' => $this->getHolidayPolicyID(),
-					'name' => TTi18n::strtolower($name),
-					'start_date1' => $this->db->BindDate( ( TTDate::getBeginYearEpoch( $this->getDateStamp() ) + (86400 * 3) ) ),
-					'end_date1' => $this->db->BindDate( TTDate::getEndYearEpoch( $this->getDateStamp() ) ),
-					'start_date2' => $this->db->BindDate( ( $this->getDateStamp() - ( 86400 * 15 ) ) ),
-					'end_date2' => $this->db->BindDate( ( $this->getDateStamp() + ( 86400 * 15 ) ) ),
-					);
+		$ph = [
+				'policy_id'   => $this->getHolidayPolicyID(),
+				'name'        => TTi18n::strtolower( $name ),
+				'start_date1' => $this->db->BindDate( ( TTDate::getBeginYearEpoch( $this->getDateStamp() ) + ( 86400 * 3 ) ) ),
+				'end_date1'   => $this->db->BindDate( TTDate::getEndYearEpoch( $this->getDateStamp() ) ),
+				'start_date2' => $this->db->BindDate( ( $this->getDateStamp() - ( 86400 * 15 ) ) ),
+				'end_date2'   => $this->db->BindDate( ( $this->getDateStamp() + ( 86400 * 15 ) ) ),
+		];
 
-		$query = 'select id from '. $this->getTable() .'
+		$query = 'select id from ' . $this->getTable() . '
 					where holiday_policy_id = ?
 						AND lower(name) = ?
 						AND
@@ -249,18 +250,18 @@ class HolidayFactory extends Factory {
 								)
 							)
 						AND deleted=0';
-		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$name_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -274,8 +275,9 @@ class HolidayFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim($value);
+	function setName( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -286,9 +288,9 @@ class HolidayFactory extends Factory {
 	 * @param bool $ignore_after_eligibility
 	 * @return bool
 	 */
-	function isEligible( $user_id, $ignore_after_eligibility = FALSE ) {
+	function isEligible( $user_id, $ignore_after_eligibility = false ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$original_time_zone = TTDate::getTimeZone(); //Store current timezone so we can return to it after.
@@ -299,28 +301,28 @@ class HolidayFactory extends Factory {
 			$user_obj = $ulf->getCurrent();
 
 			//Use CalculatePolicy to determine if they are eligible for the holiday or not.
-			$flags = array(
-								'meal' => FALSE,
-								'undertime_absence' => FALSE,
-								'break' => FALSE,
-								'holiday' => TRUE,
-								'schedule_absence' => FALSE,
-								'absence' => FALSE,
-								'regular' => FALSE,
-								'overtime' => FALSE,
-								'premium' => FALSE,
-								'accrual' => FALSE,
-								'exception' => FALSE,
+			$flags = [
+					'meal'                => false,
+					'undertime_absence'   => false,
+					'break'               => false,
+					'holiday'             => true,
+					'schedule_absence'    => false,
+					'absence'             => false,
+					'regular'             => false,
+					'overtime'            => false,
+					'premium'             => false,
+					'accrual'             => false,
+					'exception'           => false,
 
-								//Exception options
-								'exception_premature' => FALSE, //Calculates premature exceptions
-								'exception_future' => FALSE, //Calculates exceptions in the future.
+					//Exception options
+					'exception_premature' => false, //Calculates premature exceptions
+					'exception_future'    => false, //Calculates exceptions in the future.
 
-								//Calculate policies for future dates.
-								'future_dates' => FALSE, //Calculates dates in the future.
-								'past_dates' => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
-							);
-			$cp = TTNew('CalculatePolicy'); /** @var CalculatePolicy $cp */
+					//Calculate policies for future dates.
+					'future_dates'        => false, //Calculates dates in the future.
+					'past_dates'          => false, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
+			];
+			$cp = TTNew( 'CalculatePolicy' ); /** @var CalculatePolicy $cp */
 			$cp->setFlag( $flags );
 			$cp->setUserObject( $user_obj );
 			$cp->getRequiredData( $this->getDateStamp(), $this->getDateStamp() );
@@ -332,72 +334,69 @@ class HolidayFactory extends Factory {
 			return $retval;
 		}
 
-		Debug::text('ERROR: Unable to get user object...', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::text( 'ERROR: Unable to get user object...', __FILE__, __LINE__, __METHOD__, 10 );
 
+		return false;
 	}
 
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Holiday Policy
 		$hplf = TTnew( 'HolidayPolicyListFactory' ); /** @var HolidayPolicyListFactory $hplf */
-		$this->Validator->isResultSetWithRows(	'holiday_policy',
-														$hplf->getByID($this->getHolidayPolicyID()),
-														TTi18n::gettext('Holiday Policy is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'holiday_policy',
+											   $hplf->getByID( $this->getHolidayPolicyID() ),
+											   TTi18n::gettext( 'Holiday Policy is invalid' )
+		);
 		// Date stamp
-		$this->Validator->isDate(		'date_stamp',
-												$this->getDateStamp(),
-												TTi18n::gettext('Incorrect date')
-											);
-		if ( $this->Validator->isError('date_stamp') == FALSE ) {
-			$this->Validator->isTrue(		'date_stamp',
-													$this->isUniqueDateStamp( $this->getDateStamp() ),
-													TTi18n::gettext('Date is already in use by another Holiday')
-												);
+		$this->Validator->isDate( 'date_stamp',
+								  $this->getDateStamp(),
+								  TTi18n::gettext( 'Incorrect date' )
+		);
+		if ( $this->Validator->isError( 'date_stamp' ) == false ) {
+			$this->Validator->isTrue( 'date_stamp',
+									  $this->isUniqueDateStamp( $this->getDateStamp() ),
+									  TTi18n::gettext( 'Date is already in use by another Holiday' )
+			);
 		}
 
 		// Name
-		$this->Validator->isLength(	'name',
-											$this->getName(),
-											TTi18n::gettext('Name is invalid'),
-											2, 50
-										);
-		if ( $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isTrue(		'name',
-											$this->isUniqueName($this->getName()),
-											TTi18n::gettext('Name is already in use in this year, or within 30 days')
-										);
+		$this->Validator->isLength( 'name',
+									$this->getName(),
+									TTi18n::gettext( 'Name is invalid' ),
+									2, 50
+		);
+		if ( $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Name is already in use in this year, or within 30 days' )
+			);
 		}
-
-
-
 
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		if ( $this->Validator->hasError('date_stamp') == FALSE AND $this->getDateStamp() == '' ) {
-			$this->Validator->isTrue(		'date_stamp',
-											FALSE,
-											TTi18n::gettext('Date is invalid'));
+		if ( $this->Validator->hasError( 'date_stamp' ) == false && $this->getDateStamp() == '' ) {
+			$this->Validator->isTrue( 'date_stamp',
+									  false,
+									  TTi18n::gettext( 'Date is invalid' ) );
 		}
 
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -408,45 +407,45 @@ class HolidayFactory extends Factory {
 		//   Since recurring schedules still exist for up to a week in the past typically, we still want to recalculate them if the holiday has already past,
 		//   otherwise the schedule won't be updated and when the user tries to manually delete the scheduled absence shift, it will appear like its not being deleted because the recurring schedule will still show it.
 		$cutoff_date = TTDate::incrementDate( TTDate::getMiddleDayEpoch( time() ), -1, 'week' );
-		Debug::text('Cutoff Date: '. TTDate::getDate('DATE', $cutoff_date ), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Cutoff Date: ' . TTDate::getDate( 'DATE', $cutoff_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) >= TTDate::getMiddleDayEpoch( $cutoff_date )
-				OR ( $this->getOldDateStamp() != '' AND TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) >= TTDate::getMiddleDayEpoch( $cutoff_date ) ) ) {
-			Debug::text('Holiday is less than a week old, or in the future, try to recalculate recurring schedules on this date: '. TTDate::getDate('DATE', $this->getDateStamp() ) .' Old Date: '. TTDate::getDate('DATE', $this->getOldDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+				|| ( $this->getOldDateStamp() != '' && TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) >= TTDate::getMiddleDayEpoch( $cutoff_date ) ) ) {
+			Debug::text( 'Holiday is less than a week old, or in the future, try to recalculate recurring schedules on this date: ' . TTDate::getDate( 'DATE', $this->getDateStamp() ) . ' Old Date: ' . TTDate::getDate( 'DATE', $this->getOldDateStamp() ), __FILE__, __LINE__, __METHOD__, 10 );
 
-			$date_ranges = array();
-			if ( $this->getOldDateStamp() != '' AND TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) ) {
-				$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getOldDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getOldDateStamp() ) );
+			$date_ranges = [];
+			if ( $this->getOldDateStamp() != '' && TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) ) {
+				$date_ranges[] = [ 'start_date' => TTDate::getBeginDayEpoch( $this->getOldDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getOldDateStamp() ) ];
 			}
 
-			$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getDateStamp() ) );
+			$date_ranges[] = [ 'start_date' => TTDate::getBeginDayEpoch( $this->getDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getDateStamp() ) ];
 
-			foreach( $date_ranges as $date_range ) {
+			foreach ( $date_ranges as $date_range ) {
 				$start_date = $date_range['start_date'];
 				$end_date = $date_range['end_date'];
-				Debug::text('Recalculating Recurring Schedules... Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text( 'Recalculating Recurring Schedules... Start Date: ' . TTDate::getDate( 'DATE', $start_date ) . ' End Date: ' . TTDate::getDate( 'DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				//Get existing recurring_schedule rows on the holiday day, so we can figure out which recurring_schedule_control records to recalculate.
-				$recurring_schedule_control_ids = array();
+				$recurring_schedule_control_ids = [];
 
-				$rslf = TTnew('RecurringScheduleListFactory'); /** @var RecurringScheduleListFactory $rslf */
+				$rslf = TTnew( 'RecurringScheduleListFactory' ); /** @var RecurringScheduleListFactory $rslf */
 				$rslf->getByCompanyIDAndStartDateAndEndDateAndNoConflictingSchedule( $this->getHolidayPolicyObject()->getCompany(), $start_date, $end_date );
-				Debug::text('Recurring Schedule Record Count: '. $rslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text( 'Recurring Schedule Record Count: ' . $rslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 				if ( $rslf->getRecordCount() > 0 ) {
-					foreach( $rslf as $rs_obj ) {
-						if ( TTUUID::isUUID( $rs_obj->getRecurringScheduleControl() ) AND $rs_obj->getRecurringScheduleControl() != TTUUID::getZeroID() AND $rs_obj->getRecurringScheduleControl() != TTUUID::getNotExistID() ) {
+					foreach ( $rslf as $rs_obj ) {
+						if ( TTUUID::isUUID( $rs_obj->getRecurringScheduleControl() ) && $rs_obj->getRecurringScheduleControl() != TTUUID::getZeroID() && $rs_obj->getRecurringScheduleControl() != TTUUID::getNotExistID() ) {
 							$recurring_schedule_control_ids[] = $rs_obj->getRecurringScheduleControl();
 						}
 					}
 				}
-				$recurring_schedule_control_ids = array_unique($recurring_schedule_control_ids);
-				Debug::Arr($recurring_schedule_control_ids, 'Recurring Schedule Control IDs: ', __FILE__, __LINE__, __METHOD__, 10);
+				$recurring_schedule_control_ids = array_unique( $recurring_schedule_control_ids );
+				Debug::Arr( $recurring_schedule_control_ids, 'Recurring Schedule Control IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				if ( count($recurring_schedule_control_ids) > 0 ) {
+				if ( count( $recurring_schedule_control_ids ) > 0 ) {
 					//
 					//**THIS IS DONE IN RecurringScheduleControlFactory, RecurringScheduleTemplateControlFactory, HolidayFactory postSave() as well.
 					//
-					$rsf = TTnew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
+					$rsf = TTnew( 'RecurringScheduleFactory' ); /** @var RecurringScheduleFactory $rsf */
 					$rsf->StartTransaction();
 					$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $recurring_schedule_control_ids, $start_date, $end_date );
 					$rsf->addRecurringSchedulesFromRecurringScheduleControl( $this->getHolidayPolicyObject()->getCompany(), $recurring_schedule_control_ids, $start_date, $end_date );
@@ -454,10 +453,10 @@ class HolidayFactory extends Factory {
 				}
 			}
 		} else {
-			Debug::text('Holiday is older than a week or not in the future...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Holiday is older than a week or not in the future...', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -467,11 +466,11 @@ class HolidayFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						case 'date_stamp':
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( TTDate::parseDateTime( $data[$key] ) );
@@ -488,26 +487,26 @@ class HolidayFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'date_stamp':
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
@@ -519,7 +518,6 @@ class HolidayFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -533,8 +531,9 @@ class HolidayFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Holiday'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Holiday' ), null, $this->getTable(), $this );
 	}
 
 }
+
 ?>

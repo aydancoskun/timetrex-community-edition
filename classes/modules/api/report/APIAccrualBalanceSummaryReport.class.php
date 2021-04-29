@@ -47,7 +47,7 @@ class APIAccrualBalanceSummaryReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIAccrualBalanceSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array
 	 */
-	function getAccrualBalanceSummaryReport( $config = FALSE, $format = 'pdf' ) {
+	function getAccrualBalanceSummaryReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

@@ -20,13 +20,13 @@ LoginViewController = BaseViewController.extend( {
 	init: function( options ) {
 		//this._super('initialize', options );
 		var $this = this;
-		Global.setVirtualDeviceViewport('mobile'); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
-		this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
-		this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
-		this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
-		this.permission_api = new (APIFactory.getAPIClass( 'APIPermission' ))();
+		Global.setVirtualDeviceViewport( 'mobile' ); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
+		this.authentication_api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
+		this.currentUser_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
+		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
+		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.permission_api = new ( APIFactory.getAPIClass( 'APIPermission' ) )();
 		this.viewId = 'LoginView';
 		Global.topContainer().css( 'display', 'none' );
 		Global.bottomContainer().css( 'display', 'none' );
@@ -116,17 +116,19 @@ LoginViewController = BaseViewController.extend( {
 
 		var cr_text = $( "\x23\x6C\x6F\x67\x69\x6E\x5F\x63\x6F\x70\x79\x5F\x72\x69\x67\x68\x74\x5F\x69\x6E\x66\x6F" ).text();
 		var _0xee93 = ["\x6F\x6E\x6C\x6F\x61\x64", "\x74\x6F\x74\x61\x6C", "\x43\x6F\x70\x79\x72\x69\x67\x68\x74\x20", "\x69\x6E\x64\x65\x78\x4F\x66", "\x6F\x72\x67\x61\x6E\x69\x7A\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x6C\x6F\x67\x69\x6E\x44\x61\x74\x61", "\x41\x6C\x6C\x20\x52\x69\x67\x68\x74\x73\x20\x52\x65\x73\x65\x72\x76\x65\x64", "\x45\x52\x52\x4F\x52\x3A\x20\x54\x68\x69\x73\x20\x69\x6E\x73\x74\x61\x6C\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20", "\x61\x70\x70\x6C\x69\x63\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x20\x69\x73\x20\x69\x6E\x20\x76\x69\x6F\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20\x74\x68\x65\x20\x6C\x69\x63\x65\x6E\x73\x65\x20\x61\x67\x72\x65\x65\x6D\x65\x6E\x74\x21", "\x73\x68\x6F\x77\x41\x6C\x65\x72\x74", "\x67\x65\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x48\x65\x61\x64\x65\x72", "\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68", "\x54\x69\x6D\x65\x54\x72\x65\x78", "\x23\x70\x6F\x77\x65\x72\x65\x64\x5F\x62\x79", "\x6E\x61\x74\x75\x72\x61\x6C\x57\x69\x64\x74\x68", "\x6E\x61\x74\x75\x72\x61\x6C\x48\x65\x69\x67\x68\x74"];
-		if ( ( !$( _0xee93[14] )[0] || ( $( _0xee93[14] )[0] && ( ( $( _0xee93[14] )[0][_0xee93[15]] > 0 && $( _0xee93[14] )[0][_0xee93[15]] != 145 ) || ( $(_0xee93[14] )[0][_0xee93[16]] > 0 && $(_0xee93[14] )[0][_0xee93[16]] != 40 ) ) ) ) || cr_text[_0xee93[3]]( _0xee93[2] ) !== 0 || LocalCacheData[_0xee93[5]][_0xee93[8]][_0xee93[3]]( _0xee93[13] ) !== 0 || cr_text[_0xee93[3]]( _0xee93[13] ) !== 17 ) { Global.sendErrorReport( (_0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + ' iw: '+ ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[15]] : 0 ) +' ih: '+ ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[16]] : 0 ) +' c: ' + cr_text[_0xee93[3]]( _0xee93[2] ) + ' ' + cr_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.rootURL, '', '', '' );}
+		if ( ( !$( _0xee93[14] )[0] || ( $( _0xee93[14] )[0] && ( ( $( _0xee93[14] )[0][_0xee93[15]] > 0 && $( _0xee93[14] )[0][_0xee93[15]] != 145 ) || ( $( _0xee93[14] )[0][_0xee93[16]] > 0 && $( _0xee93[14] )[0][_0xee93[16]] != 40 ) ) ) ) || cr_text[_0xee93[3]]( _0xee93[2] ) !== 0 || LocalCacheData[_0xee93[5]][_0xee93[8]][_0xee93[3]]( _0xee93[13] ) !== 0 || cr_text[_0xee93[3]]( _0xee93[13] ) !== 17 ) {
+			Global.sendErrorReport( ( _0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + ' iw: ' + ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[15]] : 0 ) + ' ih: ' + ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[16]] : 0 ) + ' c: ' + cr_text[_0xee93[3]]( _0xee93[2] ) + ' ' + cr_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.rootURL, '', '', '' );
+		}
 
 		if ( this.authentication_api ) {
 			this.authentication_api.login( user_name, password, {
-				onResult: function ( e ) {
+				onResult: function( e ) {
 					if ( LocalCacheData.loadViewRequiredJSReady ) {
 						Debug.Text( 'Login Success (first try)', null, null, 'onLoginBtnClick', 10 );
 						$this.onLoginSuccess( e );
 					} else {
 						var timeout_count = 0;
-						var auto_login_timer = setInterval( function () {
+						var auto_login_timer = setInterval( function() {
 							if ( timeout_count == 100 ) {
 								clearInterval( auto_login_timer );
 								TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
@@ -142,7 +144,7 @@ LoginViewController = BaseViewController.extend( {
 						}, 600 );
 					}
 				},
-				onError: function ( e ) {
+				onError: function( e ) {
 					Debug.Text( 'Login Error...', null, null, 'onLoginBtnClick', 10 );
 					$this.doing_login = false;
 				},
@@ -210,29 +212,32 @@ LoginViewController = BaseViewController.extend( {
 	initializeLoginData: function() {
 		var $this = this;
 
-		TTPromise.add('login', 'init');
+		TTPromise.add( 'login', 'init' );
 
-		TTPromise.add('login', 'getCurrentUser');
+		TTPromise.add( 'login', 'getCurrentUser' );
 		$this.currentUser_api.getCurrentUser( { onResult: $this.onGetCurrentUser, delegate: $this } ); //Get more in result handler
 
-
-		TTPromise.add('login', 'getCurrentUserPreference');
-		$this.currentUser_api.getCurrentUserPreference( { onResult: $this.onGetCurrentUserPreference, delegate: $this } );
-
+		TTPromise.add( 'login', 'getCurrentUserPreference' );
+		$this.currentUser_api.getCurrentUserPreference( {
+			onResult: $this.onGetCurrentUserPreference,
+			delegate: $this
+		} );
 
 		//Ensure that the language chosen at the login screen is passed in so that the user's country can be appended to create a proper locale.
-		TTPromise.add('login', 'getCurrentUserLocale');
-		$this.authentication_api.getLocale( $( '.language-selector' ).val(), { onResult: $this.onGetCurrentUserLocale, delegate: $this } );
+		TTPromise.add( 'login', 'getCurrentUserLocale' );
+		$this.authentication_api.getLocale( $( '.language-selector' ).val(), {
+			onResult: $this.onGetCurrentUserLocale,
+			delegate: $this
+		} );
 
-
-		TTPromise.add('login', 'getPermission');
+		TTPromise.add( 'login', 'getPermission' );
 		$this.permission_api.getPermission( {
 			onResult: function( permissionRes ) {
-				permission_result = permissionRes.getResult();
+				var permission_result = permissionRes.getResult();
 
 				if ( permission_result != false ) {
 					LocalCacheData.setPermissionData( permission_result );
-					TTPromise.resolve('login', 'getPermission');
+					TTPromise.resolve( 'login', 'getPermission' );
 				} else {
 					//User does not have any permissions.
 					Debug.Text( 'User does not have any permissions!', 'LoginViewController.js', 'LoginViewController', 'initializeLoginData:next', 10 );
@@ -244,10 +249,9 @@ LoginViewController = BaseViewController.extend( {
 			}
 		} );
 
-
-		TTPromise.add('login', 'getCurrentCompany');
+		TTPromise.add( 'login', 'getCurrentCompany' );
 		$this.authentication_api.getCurrentCompany( {
-			onResult: function ( current_company_result ) {
+			onResult: function( current_company_result ) {
 				var com_result = current_company_result.getResult();
 
 				if ( com_result != false ) {
@@ -278,22 +282,20 @@ LoginViewController = BaseViewController.extend( {
 			}
 		} );
 
-
-		TTPromise.add('login', 'getUniqueCountry');
+		TTPromise.add( 'login', 'getUniqueCountry' );
 		$this.permission_api.getUniqueCountry( {
-			onResult: function ( country_result ) {
+			onResult: function( country_result ) {
 				LocalCacheData.setUniqueCountryArray( country_result.getResult() );
-				TTPromise.resolve('login', 'getUniqueCountry');
+				TTPromise.resolve( 'login', 'getUniqueCountry' );
 			}
 		} );
 
-
 		//Once all login promises are complete, switch to home view.
 		TTPromise.wait( 'login', null, function() {
-			$this.goToView()
-		});
+			$this.goToView();
+		} );
 
-		TTPromise.resolve('login', 'init');
+		TTPromise.resolve( 'login', 'init' );
 	},
 
 	onGetCurrentUser: function( e ) {
@@ -317,7 +319,7 @@ LoginViewController = BaseViewController.extend( {
 			}
 		} );
 
-		TTPromise.resolve('login', 'getCurrentUser');
+		TTPromise.resolve( 'login', 'getCurrentUser' );
 	},
 
 	onGetCurrentUserPreference: function( e ) {
@@ -337,7 +339,7 @@ LoginViewController = BaseViewController.extend( {
 		function handleDateTimeFormats( nextResult ) {
 			LocalCacheData.loginUserPreference = nextResult;
 
-			TTPromise.add('getCurrentUserPreference', 'getDateFormat');
+			TTPromise.add( 'getCurrentUserPreference', 'getDateFormat' );
 			login_view_this.user_preference_api.getOptions( 'moment_date_format', {
 				onResult: function( jsDateFormatRes ) {
 					var jsDateFormatResultData = jsDateFormatRes.getResult();
@@ -355,35 +357,35 @@ LoginViewController = BaseViewController.extend( {
 					LocalCacheData.loginUserPreference.date_format_1 = Global.convertTojQueryFormat( date_format ); //TDatePicker, TRangePicker
 					LocalCacheData.loginUserPreference.time_format_1 = Global.convertTojQueryFormat( LocalCacheData.loginUserPreference.time_format ); //TTimePicker
 
-					TTPromise.resolve('getCurrentUserPreference', 'getDateFormat');
+					TTPromise.resolve( 'getCurrentUserPreference', 'getDateFormat' );
 				}
 			} );
 
-			TTPromise.add('getCurrentUserPreference', 'getTimeFormat');
+			TTPromise.add( 'getCurrentUserPreference', 'getTimeFormat' );
 			login_view_this.user_preference_api.getOptions( 'moment_time_format', {
 				onResult: function( jsTimeFormatRes ) {
 					var jsTimeFormatResultData = jsTimeFormatRes.getResult();
 
 					LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
-					TTPromise.resolve('getCurrentUserPreference', 'getTimeFormat');
+					TTPromise.resolve( 'getCurrentUserPreference', 'getTimeFormat' );
 				}
 			} );
 
 			TTPromise.wait( 'getCurrentUserPreference', null, function() {
 				LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
-				TTPromise.resolve('login', 'getCurrentUserPreference');
-			});
+				TTPromise.resolve( 'login', 'getCurrentUserPreference' );
+			} );
 		}
 	},
 
 	onGetCurrentUserLocale: function( e ) {
 		var login_view_this = e.get( 'delegate' );
-		result = e.getResult();
+		var result = e.getResult();
 		if ( result ) {
 			login_view_this.user_locale = result;
 		}
 
-		TTPromise.resolve('login', 'getCurrentUserLocale');
+		TTPromise.resolve( 'login', 'getCurrentUserLocale' );
 	},
 
 	goToView: function() {
@@ -466,11 +468,10 @@ LoginViewController = BaseViewController.extend( {
 		var message_id = TTUUID.generateUUID();
 		LocalCacheData.setSessionID( '' );
 
-		if(!$('body').hasClass('mobile-device-mode')) {
+		if ( !$( 'body' ).hasClass( 'mobile-device-mode' ) ) {
 			// If not on a mobile view (Where desktop UI is forced, render the random animal on background. If mobile, no animals.
 			this.renderAnimalsForBackground();
 		}
-
 
 		$( '#login_copy_right_info' ).hide();
 		$( '#powered_by' ).hide();
@@ -492,13 +493,13 @@ LoginViewController = BaseViewController.extend( {
 		// Listen to the login form submit event, but replace default behaviour with our own.
 		// We need to trigger login via the standard form submission for browsers to properly detect a login form for autocomplete and credential storage, especially picky browsers like IE11. See git log or issue #2680 for further context.
 		// This event listener will also be triggered by keyboard ENTER, thus we do not need a separate listener for that key anymore.
-		$('#login-form').on('submit', function(e) {
+		$( '#login-form' ).on( 'submit', function( e ) {
 			// Prevent the default once submit event triggered.
 			e.preventDefault();
 
 			// Instead of submitting the form to itself, trigger the login check.
-			$this.onLoginBtnClick(e);
-		});
+			$this.onLoginBtnClick( e );
+		} );
 
 		$( '#versionNumber' ).html( 'v' + APIGlobal.pre_login_data.application_build );
 
@@ -571,7 +572,7 @@ LoginViewController = BaseViewController.extend( {
 		powered_by_img.attr( 'alt', LocalCacheData.loginData.application_name + ' Workforce Management Software' );
 		var powered_by_link = $( '<a target="_blank" href="https://' + LocalCacheData.getLoginData().organization_url + '"></a>' );
 		powered_by_link.addClass( 'powered-by-img-seo' );
-		powered_by_img.wrap(powered_by_link);
+		powered_by_img.wrap( powered_by_link );
 
 		// get copyright info from main page copyright tag
 		$( '#login_copy_right_info' ).html( $( '#copy_right_info_1' ).html() );
@@ -604,10 +605,9 @@ LoginViewController = BaseViewController.extend( {
 
 		this.lan_selector = $( '.language-selector' );
 		this.lan_selector.TComboBox();
-		var array = Global.buildRecordArray( (LocalCacheData.getLoginData().language_options) );
+		var array = Global.buildRecordArray( ( LocalCacheData.getLoginData().language_options ) );
 
 		this.lan_selector.setSourceData( array );
-
 
 		this.lan_selector.setValue( LocalCacheData.getLoginData().language );
 
@@ -640,7 +640,7 @@ LoginViewController = BaseViewController.extend( {
 
 	cleanWhenUnloadView: function( callBack ) {
 		$( '#loginViewContainer' ).remove();
-		Global.setVirtualDeviceViewport('desktop'); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
+		Global.setVirtualDeviceViewport( 'desktop' ); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
 		this._super( 'cleanWhenUnloadView', callBack );
 	},
 
@@ -650,7 +650,7 @@ LoginViewController = BaseViewController.extend( {
 		if ( station_id.length > 0 ) {
 			var station_id_arr = station_id.match( /\d{1,5}/g );
 			if ( $.isArray( station_id_arr ) ) {
-				station_id = station_id_arr.join('');
+				station_id = station_id_arr.join( '' );
 			}
 		}
 		var seed = parseInt( moment().week() + '' + station_id );

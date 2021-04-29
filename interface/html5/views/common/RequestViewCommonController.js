@@ -2,7 +2,7 @@ RequestViewCommonController = BaseViewController.extend( {
 
 	authorization_history: null,
 	selected_absence_policy_record: null,
-	enable_edit_view_ui:false,
+	enable_edit_view_ui: false,
 
 	setGridCellBackGround: function() {
 		//Error: Unable to get property 'getGridParam' of undefined or null reference
@@ -84,7 +84,7 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	buildDataForAPI: function( data ) {
-		if ( this.viewId == 'RequestAuthorization' && (!data.request_schedule_id || data.request_schedule_id <= 0) ) {
+		if ( this.viewId == 'RequestAuthorization' && ( !data.request_schedule_id || data.request_schedule_id <= 0 ) ) {
 			return data;
 		}
 
@@ -133,7 +133,7 @@ RequestViewCommonController = BaseViewController.extend( {
 					data['request_schedule_id'] = data.request_schedule.id;
 				} else if ( key == 'status_id' ) {
 					data['request_schedule_status_id'] = data.request_schedule.status_id;
-				} else if ( typeof(data[key]) == 'undefined' ) {
+				} else if ( typeof ( data[key] ) == 'undefined' ) {
 					data[key] = data.request_schedule[key];
 				} else {
 					//Debug.Text('Not overwriting: '+key+' request_schedule: '+data.request_schedule[key]+' request: '+data[key], 'RequestViewCommonController.js', 'RequestViewCommonController','buildDataFromAPI' ,10)
@@ -152,10 +152,10 @@ RequestViewCommonController = BaseViewController.extend( {
 
 	showAdvancedFields: function( update_schedule_total_time ) {
 		if (
-				Global.getProductEdition() >= 15 &&
-				( PermissionManager.validate( 'request', 'add_advanced' )
-						|| ( TTUUID.isUUID( this.current_edit_record.request_schedule_id ) && this.current_edit_record.request_schedule_id != TTUUID.zero_id && this.current_edit_record.request_schedule_id != TTUUID.not_exist_id ) )
-				&& ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) && ( !this.pre_request_schedule || this.is_add )
+			Global.getProductEdition() >= 15 &&
+			( PermissionManager.validate( 'request', 'add_advanced' )
+				|| ( TTUUID.isUUID( this.current_edit_record.request_schedule_id ) && this.current_edit_record.request_schedule_id != TTUUID.zero_id && this.current_edit_record.request_schedule_id != TTUUID.not_exist_id ) )
+			&& ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) && ( !this.pre_request_schedule || this.is_add )
 		) {
 			var advanced_field_names = this.getAdvancedFieldNames();
 			if ( this.edit_view_ui_dic ) {
@@ -262,8 +262,8 @@ RequestViewCommonController = BaseViewController.extend( {
 
 	getScheduleTotalTime: function() {
 		if ( Global.getProductEdition() >= 15
-				&& ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 )
-				&& ( this.edit_view_ui_dic && this.edit_view_ui_dic['total_time'] )
+			&& ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 )
+			&& ( this.edit_view_ui_dic && this.edit_view_ui_dic['total_time'] )
 		) {
 
 			var start_time = false;
@@ -284,8 +284,8 @@ RequestViewCommonController = BaseViewController.extend( {
 			}
 
 			if ( start_time && end_time ) {
-				var schedule_api = new (APIFactory.getAPIClass( 'APISchedule' ))();
-				result = schedule_api.getScheduleTotalTime( start_time, end_time, schedulePolicyId, user_id, { async: false } );
+				var schedule_api = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
+				var result = schedule_api.getScheduleTotalTime( start_time, end_time, schedulePolicyId, user_id, { async: false } );
 				if ( result.isValid() ) {
 					this.total_time = result.getResult();
 				} else {
@@ -320,9 +320,9 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	showAbsencePolicyField: function( type_id, request_schedule_status_id, ui_field ) {
-		if ( request_schedule_status_id == 20 && ( type_id == 30 || type_id == 40) ) {
+		if ( request_schedule_status_id == 20 && ( type_id == 30 || type_id == 40 ) ) {
 			ui_field.parents( '.edit-view-form-item-div' ).show();
-			if ( (this.viewId == 'Request' && this.is_viewing) == false ) {
+			if ( ( this.viewId == 'Request' && this.is_viewing ) == false ) {
 				this.onAvailableBalanceChange();
 			}
 		} else {
@@ -349,12 +349,12 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		if ( ( this.viewId != 'Request' || this.is_viewing == false ) &&
-				this.current_edit_record.absence_policy_id &&
-				( PermissionManager.validate( 'request', 'add_advanced' ) || ( TTUUID.isUUID( this.current_edit_record.request_schedule_id ) && this.current_edit_record.request_schedule_id != TTUUID.zero_id && this.current_edit_record.request_schedule_id != TTUUID.not_exist_id ) ) &&
-				LocalCacheData.loginUser.id &&
-				this.current_edit_record.total_time &&
-				this.current_edit_record.total_time != '00:00' &&
-				this.current_edit_record.start_date ) {
+			this.current_edit_record.absence_policy_id &&
+			( PermissionManager.validate( 'request', 'add_advanced' ) || ( TTUUID.isUUID( this.current_edit_record.request_schedule_id ) && this.current_edit_record.request_schedule_id != TTUUID.zero_id && this.current_edit_record.request_schedule_id != TTUUID.not_exist_id ) ) &&
+			LocalCacheData.loginUser.id &&
+			this.current_edit_record.total_time &&
+			this.current_edit_record.total_time != '00:00' &&
+			this.current_edit_record.start_date ) {
 
 			var days = 1;
 			if ( this.current_edit_record.start_date != this.current_edit_record.end_date ) {
@@ -369,22 +369,22 @@ RequestViewCommonController = BaseViewController.extend( {
 
 			if ( user_id && date_stamp && total_time ) {
 				this.api_absence_policy.getProjectedAbsencePolicyBalance(
-						policy_id,
-						user_id,
-						date_stamp,
-						total_time,
-						{
-							onResult: function( result ) {
-								if ( $this.edit_view_ui_dic && $this.edit_view_ui_dic.available_balance ) {
-									$this.getBalanceHandler( result, date_stamp );
-									if ( result && $this.selected_absence_policy_record ) {
-										$this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).show();
-									} else {
-										$this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).hide();
-									}
+					policy_id,
+					user_id,
+					date_stamp,
+					total_time,
+					{
+						onResult: function( result ) {
+							if ( $this.edit_view_ui_dic && $this.edit_view_ui_dic.available_balance ) {
+								$this.getBalanceHandler( result, date_stamp );
+								if ( result && $this.selected_absence_policy_record ) {
+									$this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).show();
+								} else {
+									$this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).hide();
 								}
 							}
 						}
+					}
 				);
 			}
 			// If unset or set to --None--...
@@ -394,7 +394,6 @@ RequestViewCommonController = BaseViewController.extend( {
 			}
 		}
 	},
-
 
 	getFilterColumnsFromDisplayColumns: function( authorization_history ) {
 		// Error: Unable to get property 'getGridParam' of undefined or null reference
@@ -433,7 +432,7 @@ RequestViewCommonController = BaseViewController.extend( {
 	jobUIValidate: function() {
 		//use punch permission section rather than schedule permission section as that's what they can see when they're creating punches
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				PermissionManager.validate( 'punch', 'edit_job' ) ) {
+			PermissionManager.validate( 'punch', 'edit_job' ) ) {
 			return true;
 		}
 		return false;
@@ -463,14 +462,14 @@ RequestViewCommonController = BaseViewController.extend( {
 		return false;
 	},
 
-	processAPICallbackResult: function ( result_data ) {
+	processAPICallbackResult: function( result_data ) {
 		this.current_edit_record = this.buildDataFromAPI( result_data[0] );
 		this.current_edit_record.total_time = Global.getTimeUnit( this.current_edit_record.total_time );
 
 		return result_data;
 	},
 
-	doViewClickResult: function ( result_data ) {
+	doViewClickResult: function( result_data ) {
 		if ( Global.isSet( this.current_edit_record.start_date ) && this.edit_view_tab ) {
 			this.edit_view_tab.find( '#tab_request' ).find( '.third-column' ).show();
 		}
@@ -488,76 +487,29 @@ RequestViewCommonController = BaseViewController.extend( {
 		return this.clearCurrentSelectedRecord();
 	},
 
-	onViewClick: function( editId, clear_edit_view ) {
+	onViewClick: function( edit_record, clear_edit_view ) {
 		this.real_this = this.constructor.__super__; // this seems first entry point. needed where view controller is extended twice, Base->Tree-View, used with onViewClick _super
 		if ( clear_edit_view ) {
 			this.clearEditView();
 		}
-		this._super( 'onViewClick', editId );
+		this._super( 'onViewClick', edit_record );
 	},
 
-	initSubLogView: function( tab_id ) {
-		var $this = this;
-
-		if ( !this.current_edit_record.id ) {
-			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
-			return;
+	setSubLogViewFilter: function() {
+		if ( !this.sub_log_view_controller ) {
+			return false;
 		}
 
-		if ( this.sub_log_view_controller ) {
-			this.sub_log_view_controller.buildContextMenu( true );
-			this.sub_log_view_controller.setDefaultMenu();
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
-
-				filter['table_name_object_id'] = {
-					'request': [this.parent_edit_record.id],
-					'request_schedule': [this.parent_edit_record.request_schedule_id]
-				};
-
-				return filter;
+		this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+			filter['table_name_object_id'] = {
+				'request': [this.parent_edit_record.id],
+				'request_schedule': [this.parent_edit_record.request_schedule_id]
 			};
 
-			$this.sub_log_view_controller.initData();
-			return;
-		}
+			return filter;
+		};
 
-		Global.loadScript( 'views/core/log/LogViewController.js', function() {
-			var tab = $this.edit_view_tab.find( '#' + tab_id );
-
-			var firstColumn = tab.find( '.first-column-sub-view' );
-
-			TTPromise.add( 'initSubAudit', 'init' );
-			TTPromise.wait( 'initSubAudit', 'init', function() {
-				firstColumn.css('opacity', '1');
-			} );
-
-			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
-
-			Global.trackView( 'Sub' + 'Log' + 'View' );
-			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_log_view_controller = subViewController;
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
-				filter['table_name_object_id'] = {
-					'request': [this.parent_edit_record.id],
-					'request_schedule': [this.parent_edit_record.request_schedule_id]
-				};
-
-				return filter;
-			};
-			$this.sub_log_view_controller.parent_view_controller = $this;
-			$this.sub_log_view_controller.postInit = function() {
-				this.initData();
-			}
-		}
+		return true;
 	},
 
 	/**
@@ -611,7 +563,7 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {
-		this.setCurrentEditViewState('edit');
+		this.setCurrentEditViewState( 'edit' );
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 		this.initEditView();
 		//Clear last sent message body value.
@@ -632,7 +584,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRequest' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRequest' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REQUEST,
@@ -732,7 +684,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			widgetContainer.append( fri );
 			widgetContainer.append( sat );
 
-			widgetContainer.addClass('request_edit_view_effective_days');
+			widgetContainer.addClass( 'request_edit_view_effective_days' );
 			this.addEditFieldToColumn( $.i18n._( 'Effective Days' ), [form_item_sun_checkbox, form_item_mon_checkbox, form_item_tue_checkbox, form_item_wed_checkbox, form_item_thu_checkbox, form_item_fri_checkbox, form_item_sat_checkbox], tab_request_column1, '', widgetContainer, false, true );
 
 			//Start time
@@ -753,7 +705,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			//Schedule Policy
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APISchedulePolicy' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
 				show_search_inputs: true,
@@ -765,7 +717,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			//Absence Policy
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
 				set_empty: true,
@@ -793,7 +745,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			//branch
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.BRANCH,
 				show_search_inputs: true,
@@ -808,7 +760,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			//Dept
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.DEPARTMENT,
 				show_search_inputs: true,
@@ -820,23 +772,22 @@ RequestViewCommonController = BaseViewController.extend( {
 				this.detachElement( 'department_id' );
 			}
 
-
 			if ( Global.getProductEdition() >= 20 ) {
 				//Job
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APIJob' )),
+					api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB,
 					show_search_inputs: true,
 					set_empty: true,
-					setRealValueCallBack: (function( val ) {
+					setRealValueCallBack: ( function( val ) {
 
 						if ( val ) {
 							job_coder.setValue( val.manual_id );
 						}
-					}),
+					} ),
 					field: 'job_id',
 					added_items: [
 						{ value: '-1', label: Global.default_item },
@@ -854,7 +805,6 @@ RequestViewCommonController = BaseViewController.extend( {
 				widgetContainer.append( form_item_input );
 				this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_request_column1, '', widgetContainer, true );
 
-
 				if ( !this.show_job_ui ) {
 					this.detachElement( 'job_id' );
 				}
@@ -863,17 +813,17 @@ RequestViewCommonController = BaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+					api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB_ITEM,
 					show_search_inputs: true,
 					set_empty: true,
-					setRealValueCallBack: (function( val ) {
+					setRealValueCallBack: ( function( val ) {
 
 						if ( val ) {
 							job_item_coder.setValue( val.manual_id );
 						}
-					}),
+					} ),
 					field: 'job_item_id',
 					added_items: [
 						{ value: '-1', label: Global.default_item },
@@ -891,7 +841,6 @@ RequestViewCommonController = BaseViewController.extend( {
 				widgetContainer.append( form_item_input );
 				this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_request_column1, '', widgetContainer, true );
 
-
 				if ( !this.show_job_item_ui ) {
 					this.detachElement( 'job_item_id' );
 				}
@@ -900,7 +849,6 @@ RequestViewCommonController = BaseViewController.extend( {
 
 		EmbeddedMessage.initUI( this, tab_request );
 	},
-
 
 	setAbsencePolicyFilter: function( filter ) {
 		if ( !filter.filter_data ) {
@@ -1110,9 +1058,9 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
-		var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
-			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } ).getResult();
+			var result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } ).getResult();
 		}
 
 		if ( !result ) {

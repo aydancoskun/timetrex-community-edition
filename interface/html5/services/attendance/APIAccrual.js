@@ -51,7 +51,7 @@ var APIAccrual = ServiceCaller.extend( {
 
 	},
 
-	exportAccrual: function(){
+	exportAccrual: function() {
 		return this.argumentsHandler( this.className, 'exportAccrual', arguments );
 	}
 

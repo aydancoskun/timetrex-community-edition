@@ -12,7 +12,7 @@ AbsencePolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'absence_policy';
 		this.context_menu_name = $.i18n._( 'Absence Policy' );
 		this.navigation_label = $.i18n._( 'Absence Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -40,7 +40,7 @@ AbsencePolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
@@ -78,7 +78,7 @@ AbsencePolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -90,7 +90,7 @@ AbsencePolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -177,7 +177,7 @@ AbsencePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -189,20 +189,19 @@ AbsencePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
-
 			new SearchField( {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -214,7 +213,7 @@ AbsencePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -222,6 +221,5 @@ AbsencePolicyViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

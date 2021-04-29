@@ -45,6 +45,4 @@ var APIUserGenericStatus = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

@@ -41,13 +41,13 @@
 class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
 					from	' . $this->getTable() . '
@@ -55,27 +55,27 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayrollRemittanceAgencyListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL ) {
+	function getById( $id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->rs = $this->getCache( $id );
-		if ( $this->rs === FALSE ) {
-			$ph = array(
+		if ( $this->rs === false ) {
+			$ph = [
 					'id' => TTUUID::castUUID( $id ),
-			);
+			];
 
 			$query = '
 						select	*
@@ -94,20 +94,20 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param int $limit Limit the number of records returned
+	 * @param string $id   UUID
+	 * @param int $limit   Limit the number of records returned
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayrollRemittanceAgencyListFactory
 	 */
-	function getByRemittanceSourceAccountId( $id, $limit = NULL, $where = NULL, $order = NULL ) {
+	function getByRemittanceSourceAccountId( $id, $limit = null, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
+		$ph = [
 				'remittance_source_account_id' => TTUUID::castUUID( $id ),
-		);
+		];
 
 		$query = '
 						select	*
@@ -125,22 +125,22 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayrollRemittanceAgencyListFactory
 	 * @throws DBError
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL ) {
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
 
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$lef = new LegalEntityFactory();
 
-		$ph = array(
+		$ph = [
 				'company_id' => TTUUID::castUUID( $company_id ),
-		);
+		];
 
 		$query = '
 					select	a.*
@@ -158,27 +158,27 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayrollRemittanceAgencyListFactory
 	 */
-	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL ) {
+	function getByIdAndCompanyId( $id, $company_id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$lef = new LegalEntityFactory();
 
-		$ph = array(
+		$ph = [
 				'id'         => TTUUID::castUUID( $id ),
 				'company_id' => TTUUID::castUUID( $company_id ),
-		);
+		];
 
 		$query = '
 					select	a.*
@@ -197,27 +197,27 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayrollRemittanceAgencyListFactory
 	 */
-	function getByLegalEntityIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL ) {
+	function getByLegalEntityIdAndCompanyId( $id, $company_id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$lef = new LegalEntityFactory();
 
-		$ph = array(
+		$ph = [
 				'legal_entity_id' => TTUUID::castUUID( $id ),
 				'company_id'      => TTUUID::castUUID( $company_id ),
-		);
+		];
 
 		$query = '
 					select	a.*
@@ -236,33 +236,33 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param string $agency_id UUID
+	 * @param string $id         UUID
+	 * @param string $agency_id  UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayrollRemittanceAgencyListFactory
 	 */
-	function getByLegalEntityIdAndAgencyIDAndCompanyId( $id, $agency_id, $company_id, $where = NULL, $order = NULL ) {
+	function getByLegalEntityIdAndAgencyIDAndCompanyId( $id, $agency_id, $company_id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $agency_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$lef = new LegalEntityFactory();
 
-		$ph = array(
+		$ph = [
 				'legal_entity_id' => TTUUID::castUUID( $id ),
 				'agency_id'       => (string)$agency_id, //This is a string
 				'company_id'      => TTUUID::castUUID( $company_id ),
-		);
+		];
 
 		$query = '
 					select	a.*
@@ -283,46 +283,46 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayrollRemittanceAgencyListFactory
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
-			if ( isset( $filter_data['sort_column'] ) AND $filter_data['sort_order'] ) {
-				$order = array(Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order']);
+			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
+				$order = [ Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order'] ];
 			}
 		}
 
-		$additional_order_fields = array('status_id', 'type_id', 'legal_entity_legal_name', 'agency');
+		$additional_order_fields = [ 'status_id', 'type_id', 'legal_entity_legal_name', 'agency' ];
 
-		$sort_column_aliases = array(
+		$sort_column_aliases = [
 				'status' => 'status_id',
 				'type'   => 'type_id',
 				'agency' => 'agency_id',
-		);
+		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
-		if ( $order == NULL ) {
-			$order = array('status_id' => 'asc', 'legal_name' => 'asc', 'name' => 'asc');
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'status_id' => 'asc', 'legal_name' => 'asc', 'name' => 'asc' ];
+			$strict = false;
 		} else {
 			//Always try to order by status first so INACTIVE employees go to the bottom.
 			if ( !isset( $order['status_id'] ) ) {
-				$order = Misc::prependArray( array('status_id' => 'asc'), $order );
+				$order = Misc::prependArray( [ 'status_id' => 'asc' ], $order );
 			}
 			//Always sort by last name, first name after other columns
 			if ( !isset( $order['name'] ) ) {
 				$order['name'] = 'asc';
 			}
-			$strict = TRUE;
+			$strict = true;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -331,9 +331,9 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 		$lef = new LegalEntityFactory();
 		$rsaf = new RemittanceSourceAccountFactory();
 
-		$ph = array(
+		$ph = [
 				'company_id' => TTUUID::castUUID( $company_id ),
-		);
+		];
 
 //		(
 //								CASE WHEN EXISTS ( select 1 from ' . $cdf->getTable() . ' as z where z.payroll_remittance_agency_id = a.id and z.deleted = 0 )
@@ -365,30 +365,30 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	lef.company_id = ?';
 
-		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['legal_entity_id'] ) ) ? $this->getWhereClauseSQL( 'a.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['agency_id'] ) ) ? $this->getWhereClauseSQL( 'a.agency_id', $filter_data['agency_id'], 'upper_text_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['legal_entity_id'] ) ) ? $this->getWhereClauseSQL( 'a.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['agency_id'] ) ) ? $this->getWhereClauseSQL( 'a.agency_id', $filter_data['agency_id'], 'upper_text_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : null;
 
-		if ( isset( $filter_data['status'] ) AND !is_array( $filter_data['status'] ) AND trim( $filter_data['status'] ) != '' AND !isset( $filter_data['status_id'] ) ) {
+		if ( isset( $filter_data['status'] ) && !is_array( $filter_data['status'] ) && trim( $filter_data['status'] ) != '' && !isset( $filter_data['status_id'] ) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions( 'status' ) );
 		}
-		$query .= ( isset( $filter_data['status_id'] ) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['type_id'] ) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['status_id'] ) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['type_id'] ) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : null;
 
-		$query .= ( isset( $filter_data['name'] ) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+		$query .= ( isset( $filter_data['name'] ) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : null;
 
-		$query .= ( isset( $filter_data['country'] ) ) ? $this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['province'] ) ) ? $this->getWhereClauseSQL( 'a.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
-
-
-		$query .= ( isset( $filter_data['created_date'] ) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : NULL;
-		$query .= ( isset( $filter_data['updated_date'] ) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : NULL;
+		$query .= ( isset( $filter_data['country'] ) ) ? $this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : null;
+		$query .= ( isset( $filter_data['province'] ) ) ? $this->getWhereClauseSQL( 'a.province', $filter_data['province'], 'upper_text_list', $ph ) : null;
 
 
-		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset( $filter_data['created_date'] ) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_date'] ) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : null;
+
+
+		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.created_by', 'y.first_name', 'y.last_name' ], $filter_data['created_by'], 'user_id_or_name', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.updated_by', 'z.first_name', 'z.last_name' ], $filter_data['updated_by'], 'user_id_or_name', $ph ) : null;
 
 		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );

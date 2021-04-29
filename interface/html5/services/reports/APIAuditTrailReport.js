@@ -57,6 +57,4 @@ var APIAuditTrailReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

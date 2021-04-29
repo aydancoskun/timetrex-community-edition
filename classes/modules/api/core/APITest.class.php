@@ -47,7 +47,7 @@ class APITest extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -63,34 +63,34 @@ class APITest extends APIFactory {
 	 * @return bool
 	 */
 	function delay( $seconds = 10 ) {
-		Debug::text('delay: '. $seconds, __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'delay: ' . $seconds, __FILE__, __LINE__, __METHOD__, 9 );
 
 		sleep( $seconds );
-		return TRUE;
+
+		return true;
 	}
 
 	/**
 	 * @return array
 	 */
 	function getDataGridData() {
-		$retarr = array(
-						array(
-							'first_name' => 'Jane',
-							'last_name' => 'Doe',
-						),
-						array(
-							'first_name' => 'John',
-							'last_name' => 'Doe',
-						),
-						array(
-							'first_name' => 'Ben',
-							'last_name' => 'Smith',
-						),
+		$retarr = [
+				[
+						'first_name' => 'Jane',
+						'last_name'  => 'Doe',
+				],
+				[
+						'first_name' => 'John',
+						'last_name'  => 'Doe',
+				],
+				[
+						'first_name' => 'Ben',
+						'last_name'  => 'Smith',
+				],
 
-						);
+		];
 
 		return $retarr;
-
 	}
 
 	/**
@@ -100,7 +100,7 @@ class APITest extends APIFactory {
 	 * @param string $progress_bar_id UUID
 	 * @return array
 	 */
-	function getLargeDataSet( $max_size = 100, $delay = 100000, $progress_bar_id = NULL) {
+	function getLargeDataSet( $max_size = 100, $delay = 100000, $progress_bar_id = null ) {
 		if ( $max_size > 9999 ) {
 			$max_size = 9999;
 		}
@@ -111,14 +111,15 @@ class APITest extends APIFactory {
 
 		$this->getProgressBarObject()->start( $progress_bar_id, $max_size );
 
-		$retarr = array();
-		for($i = 1; $i <= $max_size; $i++ ) {
-			$retarr[] = array('foo1' => 'bar1', 'foo2' => 'bar2', 'foo3' => 'bar3');
+		$retarr = [];
+		for ( $i = 1; $i <= $max_size; $i++ ) {
+			$retarr[] = [ 'foo1' => 'bar1', 'foo2' => 'bar2', 'foo3' => 'bar3' ];
 			usleep( $delay );
 			$this->getProgressBarObject()->set( $progress_bar_id, $i );
 		}
 
 		$this->getProgressBarObject()->stop( $progress_bar_id );
+
 		return $retarr;
 	}
 
@@ -129,24 +130,24 @@ class APITest extends APIFactory {
 	 */
 	function dateTest( $test = 1 ) {
 
-		$retarr = array();
+		$retarr = [];
 		switch ( $test ) {
 			case 1:
-				$retarr = array(
-								strtotime('30-Oct-09 5:00PM') => TTDate::getDBTimeStamp( strtotime('30-Oct-09 5:00PM') ),
-								strtotime('31-Oct-09 5:00PM') => TTDate::getDBTimeStamp( strtotime('31-Oct-09 5:00PM') ),
-								strtotime('01-Nov-09 5:00PM') => TTDate::getDBTimeStamp( strtotime('01-Nov-09 5:00PM') ),
-								strtotime('02-Nov-09 5:00PM') => TTDate::getDBTimeStamp( strtotime('02-Nov-09 5:00PM') ),
-								);
+				$retarr = [
+						strtotime( '30-Oct-09 5:00PM' ) => TTDate::getDBTimeStamp( strtotime( '30-Oct-09 5:00PM' ) ),
+						strtotime( '31-Oct-09 5:00PM' ) => TTDate::getDBTimeStamp( strtotime( '31-Oct-09 5:00PM' ) ),
+						strtotime( '01-Nov-09 5:00PM' ) => TTDate::getDBTimeStamp( strtotime( '01-Nov-09 5:00PM' ) ),
+						strtotime( '02-Nov-09 5:00PM' ) => TTDate::getDBTimeStamp( strtotime( '02-Nov-09 5:00PM' ) ),
+				];
 
 				break;
 			case 2:
-				$retarr = array(
-								strtotime('30-Oct-09 5:00PM') => TTDate::getFlexTimeStamp( strtotime('30-Oct-09 5:00PM') ),
-								strtotime('31-Oct-09 5:00PM') => TTDate::getFlexTimeStamp( strtotime('31-Oct-09 5:00PM') ),
-								strtotime('01-Nov-09 5:00PM') => TTDate::getFlexTimeStamp( strtotime('01-Nov-09 5:00PM') ),
-								strtotime('02-Nov-09 5:00PM') => TTDate::getFlexTimeStamp( strtotime('02-Nov-09 5:00PM') ),
-								);
+				$retarr = [
+						strtotime( '30-Oct-09 5:00PM' ) => TTDate::getFlexTimeStamp( strtotime( '30-Oct-09 5:00PM' ) ),
+						strtotime( '31-Oct-09 5:00PM' ) => TTDate::getFlexTimeStamp( strtotime( '31-Oct-09 5:00PM' ) ),
+						strtotime( '01-Nov-09 5:00PM' ) => TTDate::getFlexTimeStamp( strtotime( '01-Nov-09 5:00PM' ) ),
+						strtotime( '02-Nov-09 5:00PM' ) => TTDate::getFlexTimeStamp( strtotime( '02-Nov-09 5:00PM' ) ),
+				];
 
 				break;
 		}
@@ -154,4 +155,5 @@ class APITest extends APIFactory {
 		return $retarr;
 	}
 }
+
 ?>

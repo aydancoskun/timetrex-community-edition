@@ -22,10 +22,10 @@ UserContactViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_contact';
 		this.context_menu_name = $.i18n._( 'Employee Contacts' );
 		this.navigation_label = $.i18n._( 'Employee Contact' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUserContact' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-		this.ethnic_group_api = new (APIFactory.getAPIClass( 'APIEthnicGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserContact' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.ethnic_group_api = new ( APIFactory.getAPIClass( 'APIEthnicGroup' ) )();
 		this.document_object_type_id = 115;
 
 		this.render();
@@ -45,7 +45,7 @@ UserContactViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
@@ -88,7 +88,7 @@ UserContactViewController = BaseViewController.extend( {
 
 	setSelectLayout: function() {
 		if ( this.sub_view_mode ) {
-			this._super( 'setSelectLayout', [ 'employee_first_name', 'employee_last_name', 'title', 'user_group', 'default_branch', 'default_department' ] );
+			this._super( 'setSelectLayout', ['employee_first_name', 'employee_last_name', 'title', 'user_group', 'default_branch', 'default_department'] );
 		} else {
 			this._super( 'setSelectLayout' );
 		}
@@ -107,7 +107,7 @@ UserContactViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUserContact' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUserContact' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_CONTACT,
@@ -131,7 +131,7 @@ UserContactViewController = BaseViewController.extend( {
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -203,7 +203,7 @@ UserContactViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIEthnicGroup' )),
+			api_class: ( APIFactory.getAPIClass( 'APIEthnicGroup' ) ),
 			field: 'ethnic_group_id',
 			set_empty: true,
 			allow_multiple_selection: false,
@@ -368,7 +368,7 @@ UserContactViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -557,8 +557,8 @@ UserContactViewController = BaseViewController.extend( {
 		}, this ) );
 	},
 
-	searchDone: function(){
-		this._super('searchDone');
+	searchDone: function() {
+		this._super( 'searchDone' );
 		TTPromise.resolve( 'ContactView', 'init' );
 	}
 } );

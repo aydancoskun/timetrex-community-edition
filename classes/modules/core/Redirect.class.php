@@ -43,17 +43,17 @@ class Redirect {
 	 * @param null $url
 	 * @return bool
 	 */
-	static function page( $url = NULL) {
-		if ( empty($url) AND !empty($_SERVER['HTTP_REFERER']) ) {
+	static function page( $url = null ) {
+		if ( empty( $url ) && !empty( $_SERVER['HTTP_REFERER'] ) ) {
 			$url = $_SERVER['HTTP_REFERER'];
 		}
 
 		$url = Environment::stripDuplicateSlashes( $url );
-		Debug::Text('Redirect URL: '. $url, __FILE__, __LINE__, __METHOD__, 11);
+		Debug::Text( 'Redirect URL: ' . $url, __FILE__, __LINE__, __METHOD__, 11 );
 
 		if ( Debug::getVerbosity() != 11 ) {
 			forceNoCacheHeaders(); //Make sure Chrome doesn't cache redirects.
-			header('Location: '. $url);
+			header( 'Location: ' . $url );
 
 			//Prevent the rest of the script from running after redirect?
 			Debug::writeToLog();
@@ -62,7 +62,8 @@ class Redirect {
 			exit;
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

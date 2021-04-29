@@ -47,5 +47,4 @@ var APIMealPolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportMealPolicy', arguments );
 	}
 
-
 } );

@@ -16,7 +16,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 		this.viewId = 'ChangePassword';
 		this.script_name = 'ChangePasswordView';
 		this.context_menu_name = $.i18n._( 'Passwords' );
-		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 
 		this.initPermission();
 
@@ -117,7 +117,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 	},
 
 	checkTabPermissions: function( tab ) {
-		retval = false;
+		var retval = false;
 
 		switch ( tab ) {
 			case 'tab_web_password':
@@ -336,6 +336,5 @@ ChangePasswordViewController = BaseViewController.extend( {
 		form_item_input.TPasswordInput( { field: 'phone.password2', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'New Quick Punch Password (Confirm)' ), form_item_input, tab_quick_punch_password_column1, '' );
 	}
-
 
 } );

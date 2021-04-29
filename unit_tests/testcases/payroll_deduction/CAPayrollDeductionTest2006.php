@@ -38,28 +38,29 @@
  * @group CAPayrollDeductionTest2006
  */
 class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
-    public $company_id = NULL;
+	public $company_id = null;
 
-    public function setUp() {
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function setUp() {
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
+		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
 
 		$this->company_id = PRIMARY_COMPANY_ID;
 
-		TTDate::setTimeZone('Etc/GMT+8'); //Force to non-DST timezone. 'PST' isnt actually valid.
-		TTi18n::setLocale('en_US', LC_ALL, TRUE ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'Etc/GMT+8' ); //Force to non-DST timezone. 'PST' isnt actually valid.
+		TTi18n::setLocale( 'en_US', LC_ALL, true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
-		return TRUE;
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return true;
 	}
 
-	public function mf($amount) {
-		return Misc::MoneyFormat($amount, FALSE);
+	public function mf( $amount ) {
+		return Misc::MoneyFormat( $amount, false );
 	}
 
 	//
@@ -70,22 +71,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	//
 	//
 	function testCA_2006b_BiWeekly_Claim1_LowIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jul-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jul-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 8639 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -98,22 +99,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006b_BiWeekly_Claim1_MedIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jul-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jul-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 8639 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -125,22 +126,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006b_BiWeekly_Claim1_HighIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jul-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jul-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 8639 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -152,22 +153,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006b_BiWeekly_Claim5_LowIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jul-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jul-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 15103.50 ); //Claim Code5
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -179,22 +180,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006b_BiWeekly_Claim5_HighIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jul-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jul-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 15103.50 ); //Claim Code5
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -206,22 +207,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006b_SemiMonthly_Claim1_LowIncome() {
-		Debug::text('CA - SemiMonthly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jul-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jul-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 8639 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -233,22 +234,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006b_SemiMonthly_Claim1_MedIncome() {
-		Debug::text('CA - SemiMonthly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jul-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jul-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 8639 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -260,22 +261,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006b_SemiMonthly_Claim1_HighIncome() {
-		Debug::text('CA - SemiMonthly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2006 01-Jul-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jul-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jul-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 8639 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -294,22 +295,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	//
 	//
 	function testCA_2006a_BiWeekly_Claim1_LowIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -323,22 +324,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_BiWeekly_Claim1_MedIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -350,22 +351,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_BiWeekly_Claim1_HighIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -377,22 +378,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_BiWeekly_Claim5_LowIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 15503.50 ); //Claim Code5
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -404,22 +405,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_BiWeekly_Claim5_HighIncome() {
-		Debug::text('CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 15503.50 ); //Claim Code5
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -431,22 +432,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_SemiMonthly_Claim1_LowIncome() {
-		Debug::text('CA - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -458,22 +459,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_SemiMonthly_Claim1_MedIncome() {
-		Debug::text('CA - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -485,22 +486,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_SemiMonthly_Claim1_HighIncome() {
-		Debug::text('CA - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -515,22 +516,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	// BC - Provincial Taxes
 	//
 	function testBC_2006a_BiWeekly_Claim1_MedIncome() {
-		Debug::text('BC - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'BC - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 8858.00 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -539,27 +540,27 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2758.00' );
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '189.47' ); //189.45
 	}
 
 	function testBC_2006a_BiWeekly_Claim5_MedIncome() {
-		Debug::text('BC - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'BC - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 15833.50 ); //15833.50
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -567,7 +568,7 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 2758.00 );
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2758.00' );
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '173.24' ); //173.25
 	}
 
@@ -575,63 +576,63 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	// AB - Provincial Taxes
 	//
 	function testAB_2006a_BiWeekly_Claim1_LowIncome() {
-		Debug::text('AB - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'AB - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','AB');
+		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
 		//$pd_obj = new PayrollDeduction();
 		//$pd_obj->setCountry('CA');
 		//$pd_obj->setProvince('BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 14799.00 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		$pd_obj->setGrossPayPeriodIncome( 1428.00 );
 
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1428.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '76.81' );
 	}
 
 	function testAB_2006a_BiWeekly_Claim5_LowIncome() {
-		Debug::text('AB - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'AB - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','AB');
+		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
 		//$pd_obj = new PayrollDeduction();
 		//$pd_obj->setCountry('CA');
 		//$pd_obj->setProvince('BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 22429.00 ); //22429
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		$pd_obj->setGrossPayPeriodIncome( 1428.00 );
 
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1428.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '47.46' );
 	}
@@ -640,25 +641,25 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	// SK - Provincial Taxes
 	//
 	function testSK_2006a_BiWeekly_Claim1_MedIncome() {
-		Debug::text('SK - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'SK - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','SK');
+		$pd_obj = new PayrollDeduction( 'CA', 'SK' );
 		//$pd_obj = new PayrollDeduction();
 		//$pd_obj->setCountry('CA');
 		//$pd_obj->setProvince('BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 8589.00 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -667,30 +668,30 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2832.00' );
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '291.73' ); //291.75
 	}
 
 	function testSK_2006a_SemiMonthly_Claim1_MedIncome() {
-		Debug::text('SK - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'SK - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','SK');
+		$pd_obj = new PayrollDeduction( 'CA', 'SK' );
 		//$pd_obj = new PayrollDeduction();
 		//$pd_obj->setCountry('CA');
 		//$pd_obj->setProvince('BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 8589.00 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -699,7 +700,7 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2816.00' );
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '283.28' ); //283.30
 	}
 
@@ -707,25 +708,25 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	// MB - Provincial Taxes
 	//
 	function testMB_2006a_BiWeekly_Claim1_MedIncome() {
-		Debug::text('MB - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'MB - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','MB');
+		$pd_obj = new PayrollDeduction( 'CA', 'MB' );
 		//$pd_obj = new PayrollDeduction();
 		//$pd_obj->setCountry('CA');
 		//$pd_obj->setProvince('BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 7734.00 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -734,30 +735,30 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2750.00' );
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '306.97' ); //306.95
 	}
 
 	function testMB_2006a_SemiMonthly_Claim1_MedIncome() {
-		Debug::text('MB - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'MB - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','MB');
+		$pd_obj = new PayrollDeduction( 'CA', 'MB' );
 		//$pd_obj = new PayrollDeduction();
 		//$pd_obj->setCountry('CA');
 		//$pd_obj->setProvince('BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 7734.00 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -766,7 +767,7 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2702.00' );
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '284.57' ); //284.55
 	}
 
@@ -774,25 +775,25 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	// ON - Provincial Taxes
 	//
 	function testON_2006a_BiWeekly_Claim1_MedIncome() {
-		Debug::text('ON - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'ON - BiWeekly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','ON');
+		$pd_obj = new PayrollDeduction( 'CA', 'ON' );
 		//$pd_obj = new PayrollDeduction();
 		//$pd_obj->setCountry('CA');
 		//$pd_obj->setProvince('BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 8377.00 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -801,30 +802,30 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2740.00' );
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '214.13' ); //214.15
 	}
 
 	function testON_2006a_SemiMonthly_Claim1_MedIncome() {
-		Debug::text('ON - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'ON - SemiMonthly - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','ON');
+		$pd_obj = new PayrollDeduction( 'CA', 'ON' );
 		//$pd_obj = new PayrollDeduction();
 		//$pd_obj->setCountry('CA');
 		//$pd_obj->setProvince('BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 8377.00 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -833,7 +834,7 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2820.00' );
-		Debug::text('Prov Ded: '. $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'Prov Ded: ' . $pd_obj->getProvincialPayPeriodDeductions(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '213.99' ); //214.00
 	}
 
@@ -841,22 +842,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	// CPP / EI
 	//
 	function testCA_2006a_BiWeekly_CPP_LowIncome() {
-		Debug::text('CA - BiWeekly - CPP - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - CPP - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -869,22 +870,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_SemiMonthly_CPP_LowIncome() {
-		Debug::text('CA - BiWeekly - CPP - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - CPP - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -898,22 +899,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 
 
 	function testCA_2006a_SemiMonthly_MAXCPP_LowIncome() {
-		Debug::text('CA - BiWeekly - MAXCPP - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - BiWeekly - MAXCPP - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 1909.70 ); //1910.70
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -928,22 +929,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_EI_LowIncome() {
-		Debug::text('CA - EI - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - EI - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -958,22 +959,22 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2006a_MAXEI_LowIncome() {
-		Debug::text('CA - MAXEI - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text( 'CA - MAXEI - Beginning of 2006 01-Jan-06: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA','BC');
-		$pd_obj->setDate(strtotime('01-Jan-06'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-06' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 9039 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 728.30 ); //729.30 - 1.00
@@ -987,4 +988,5 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '1.40' );
 	}
 }
+
 ?>

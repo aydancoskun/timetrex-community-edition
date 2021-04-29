@@ -13,19 +13,19 @@ TopMenuManager.menus_quick_map = {}; //Save map for subMenuID to menuID, use thi
 TopMenuManager.ribbon_view_controller = null;
 
 TopMenuManager.isCurrentView = function( subMenuId ) {
-	sub_menu_id_url = Global.getBaseURL() + '#!m=' + subMenuId;
-	Debug.Text( 'URL: Current: '+ window.location.href +' Switching To: '+ sub_menu_id_url, 'TopMenuManager.js', 'TopMenuManager', 'isCurrentView', 10 );
+	var sub_menu_id_url = Global.getBaseURL() + '#!m=' + subMenuId;
+	Debug.Text( 'URL: Current: ' + window.location.href + ' Switching To: ' + sub_menu_id_url, 'TopMenuManager.js', 'TopMenuManager', 'isCurrentView', 10 );
 
 	//window.location.href.indexOf( sub_menu_id_url ) == 0 doesn't work here, as .../html5/#!m=PayStub matches when on .../html5/#!m=PayStubTransaction view.
 	//So instead use a RegEx to match the end of the string, or a & in case there are more URL arguments.
-	regex_pattern = sub_menu_id_url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') +'(&.*)?$'; //replace() escapes the URL chars.
+	var regex_pattern = sub_menu_id_url.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' ) + '(&.*)?$'; //replace() escapes the URL chars.
 
 	if ( window.location.href.match( regex_pattern ) !== null ) {
 		return true;
 	}
 
 	return false;
-},
+};
 
 TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 	if ( !TopMenuManager.ribbon_menus ) {
@@ -39,7 +39,7 @@ TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 		//#2157 - needed for selenium screenshot test to prevent hanging on
 		//various combinations of ribbon and topmenu clicks that are not a change to the hash
 		//  Check that we aren't trying to redirect back to the login screen, causing an infinite loop on logout in some cases.
-		if ( subMenuId != 'Login' && location.hash == ('#!m=' + subMenuId) ) {
+		if ( subMenuId != 'Login' && location.hash == ( '#!m=' + subMenuId ) ) {
 			TTPromise.wait();
 			$( '#refreshBtn:visible' ).click();
 		}
@@ -189,7 +189,6 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		sub_menus: []
 	} );
 
-
 	var job = new RibbonSubMenu( {
 		label: $.i18n._( 'Jobs' ),
 		id: 'Job',
@@ -296,7 +295,6 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission_result: PermissionManager.checkTopLevelPermission( 'RemittanceDestinationAccount' ),
 		permission: permission.remittance_destination_account
 	} );
-
 
 	var user_title = new RibbonSubMenu( {
 		label: $.i18n._( 'Job Titles' ),
@@ -426,7 +424,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		id: 'GEOFence',
 		group: companySubMenuGroup,
 		icon: 'map-35x35.png',
-		permission_result: (PermissionManager.checkTopLevelPermission( 'GEOFence' ) && ( PermissionManager.checkTopLevelPermission( 'Department' ) || PermissionManager.checkTopLevelPermission( 'Branch' ) )),
+		permission_result: ( PermissionManager.checkTopLevelPermission( 'GEOFence' ) && ( PermissionManager.checkTopLevelPermission( 'Department' ) || PermissionManager.checkTopLevelPermission( 'Branch' ) ) ),
 		permission: permission.geo_fence
 	} );
 
@@ -551,7 +549,6 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayStubTransaction' ),
 		permission: permission.pay_stub
 	} );
-
 
 	var government_document = new RibbonSubMenu( {
 		label: $.i18n._( 'Government<br>Documents' ),

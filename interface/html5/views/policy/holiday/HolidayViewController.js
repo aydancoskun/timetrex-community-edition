@@ -11,7 +11,7 @@ HolidayViewController = BaseViewController.extend( {
 		this.table_name_key = 'holidays';
 		this.context_menu_name = $.i18n._( 'Holiday' );
 		this.navigation_label = $.i18n._( 'Holiday' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIHoliday' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIHoliday' ) )();
 
 		this.render();
 
@@ -30,7 +30,7 @@ HolidayViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
@@ -52,7 +52,7 @@ HolidayViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIHoliday' )),
+			api_class: ( APIFactory.getAPIClass( 'APIHoliday' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HOLIDAY,

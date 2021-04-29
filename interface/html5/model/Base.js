@@ -1,8 +1,6 @@
 var Base = Backbone.Model.extend( {
 
-	defaults: {
-
-	},
+	defaults: {},
 
 	fromJSONToAttributes: function( data ) {
 		var handler = this;
@@ -10,6 +8,5 @@ var Base = Backbone.Model.extend( {
 
 		return handler;
 	}
-
 
 } );

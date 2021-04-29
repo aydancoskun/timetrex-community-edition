@@ -47,5 +47,4 @@ var APIContributingShiftPolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportContributingShiftPolicy', arguments );
 	}
 
-
 } );

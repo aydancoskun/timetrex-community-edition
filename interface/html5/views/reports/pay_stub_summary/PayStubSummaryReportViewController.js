@@ -8,14 +8,14 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Pay Stub Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'PayStubSummaryReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIPayStubSummaryReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayStubSummaryReport' ) )();
 	},
 
 	onReportMenuClick: function( id ) {
 		this.processTransactions( id );
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				pay_stub: {

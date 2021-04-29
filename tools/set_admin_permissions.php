@@ -34,18 +34,18 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: set_admin_permissions.php [user_name]\n";
 	echo $help_output;
 } else {
 	//Handle command line arguments
-	$last_arg = count($argv)-1;
+	$last_arg = count( $argv ) - 1;
 
-	if ( isset($argv[$last_arg]) AND $argv[$last_arg] != '' ) {
-		$user_name = $argv[$last_arg];
+	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
+		$user_name = $argv[ $last_arg ];
 		//Get user_id from user_name
 		$ulf = new UserListFactory();
 		$ulf->getByUserName( $user_name );
@@ -59,27 +59,27 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			$pf->StartTransaction();
 
 			//Apply all preset flags, including 0 => "system"
-			$preset_flags = array_merge( array( 0 ), array_keys( $pf->getOptions('preset_flags') ) );
+			$preset_flags = array_merge( array(0), array_keys( $pf->getOptions( 'preset_flags' ) ) );
 
 			$pcf = new PermissionControlFactory();
 			$pcf->setCompany( $u_obj->getCompany() );
-			$pcf->setLevel( 25 );
-			$pcf->setName( 'Administrator Fix ('.rand(1,1000).')' );
+			$pcf->setLevel( 100 );
+			$pcf->setName( 'Administrator Fix (' . rand( 1, 1000 ) . ')' );
 			$pcf->setDescription( 'Created By set_admin_permissions.php' );
 			if ( $pcf->isValid() ) {
-				$pcf_id = $pcf->Save(FALSE);
+				$pcf_id = $pcf->Save( false );
 
-				$pcf->setUser( array( $u_obj->getId() ) );
+				$pcf->setUser( array($u_obj->getId()) );
 
 				$pcf->Save();
 
-				if ( $pf->applyPreset($pcf_id, 40, $preset_flags ) == TRUE ) {
+				if ( $pf->applyPreset( $pcf_id, 40, $preset_flags ) == true ) {
 					echo "Success!\n";
 				}
 			}
 			//$pf->FailTransaction();
 			$pf->CommitTransaction();
-		} elseif ( $ulf->getRecordCount() > 2 ) {
+		} else if ( $ulf->getRecordCount() > 2 ) {
 			echo "Found more then one user with the same user name, not updating permissions!\n";
 		} else {
 			echo "User name not found!\n";

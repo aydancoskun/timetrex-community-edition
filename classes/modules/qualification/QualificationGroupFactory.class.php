@@ -47,31 +47,31 @@ class QualificationGroupFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
-		$retval = NULL;
-		switch( $name ) {
+	function _getFactoryOptions( $name, $parent = null ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$retval = array(
-										'-1030-name' => TTi18n::gettext('Name'),
+				$retval = [
+						'-1030-name' => TTi18n::gettext( 'Name' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'unique_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								);
+				$retval = [
+						'name',
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								);
+				$retval = [
+						'name',
+				];
 				break;
 		}
 
@@ -83,13 +83,14 @@ class QualificationGroupFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'parent_id' => 'Parent',
-										'name' => 'Name',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'         => 'ID',
+				'company_id' => 'Company',
+				'parent_id'  => 'Parent',
+				'name'       => 'Name',
+				'deleted'    => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -104,8 +105,9 @@ class QualificationGroupFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setCompany( $value) {
+	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -120,7 +122,7 @@ class QualificationGroupFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setParent( $value) {
+	function setParent( $value ) {
 		return $this->setGenericDataValue( 'parent_id', TTUUID::castUUID( $value ) );
 	}
 
@@ -128,33 +130,33 @@ class QualificationGroupFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		$name = trim($name);
+	function isUniqueName( $name ) {
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'name' => TTi18n::strtolower($name),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'name'       => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->table .'
+		$query = 'select id from ' . $this->table . '
 					where company_id = ?
 						AND lower(name) = ?
 						AND deleted = 0';
-		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$name_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -168,8 +170,9 @@ class QualificationGroupFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim($value);
+	function setName( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -177,65 +180,65 @@ class QualificationGroupFactory extends Factory {
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
 			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-			$this->Validator->isResultSetWithRows(	'company_id',
-															$clf->getByID($this->getCompany()),
-															TTi18n::gettext('Company is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'company_id',
+												   $clf->getByID( $this->getCompany() ),
+												   TTi18n::gettext( 'Company is invalid' )
+			);
 		}
 		// Name
-		$this->Validator->isLength(		'name',
-												$this->getName(),
-												TTi18n::gettext('Name is too short or too long'),
-												2,
-												100
-											);
-		if ( $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isTrue(		'name',
-												$this->isUniqueName($this->getName()),
-												TTi18n::gettext('Group already exists')
-											);
+		$this->Validator->isLength( 'name',
+									$this->getName(),
+									TTi18n::gettext( 'Name is too short or too long' ),
+									2,
+									100
+		);
+		if ( $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Group already exists' )
+			);
 		}
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
-		if ( $this->isNew() == FALSE
-				AND $this->getId() == $this->getParent() ) {
-				$this->Validator->isTrue(	'parent',
-											FALSE,
-											TTi18n::gettext('Cannot re-parent group to itself')
-											);
+		if ( $this->isNew() == false
+				&& $this->getId() == $this->getParent() ) {
+			$this->Validator->isTrue( 'parent',
+									  false,
+									  TTi18n::gettext( 'Cannot re-parent group to itself' )
+			);
 		} else {
-			if ( $this->isNew() == FALSE ) {
-				$qglf = TTnew('QualificationGroupListFactory'); /** @var QualificationGroupListFactory $qglf */
+			if ( $this->isNew() == false ) {
+				$qglf = TTnew( 'QualificationGroupListFactory' ); /** @var QualificationGroupListFactory $qglf */
 				$nodes = $qglf->getByCompanyIdArray( $this->getCompany() );
 				$children_ids = TTTree::getElementFromNodes( TTTree::flattenArray( TTTree::createNestedArrayWithDepth( $nodes, $this->getId() ) ), 'id' );
-				if ( is_array($children_ids) AND in_array( $this->getParent(), $children_ids) == TRUE ) {
-					Debug::Text(' Objects cant be re-parented to their own children...', __FILE__, __LINE__, __METHOD__, 10);
-					$this->Validator->isTrue(	'parent',
-												FALSE,
-												TTi18n::gettext('Unable to change parent to a child of itself')
-												);
+				if ( is_array( $children_ids ) && in_array( $this->getParent(), $children_ids ) == true ) {
+					Debug::Text( ' Objects cant be re-parented to their own children...', __FILE__, __LINE__, __METHOD__, 10 );
+					$this->Validator->isTrue( 'parent',
+											  false,
+											  TTi18n::gettext( 'Unable to change parent to a child of itself' )
+					);
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -246,13 +249,13 @@ class QualificationGroupFactory extends Factory {
 
 		$this->StartTransaction();
 
-		if ( $this->getDeleted() == TRUE ) {
+		if ( $this->getDeleted() == true ) {
 			//Get parent of this object, and re-parent all groups to it.
-			$qglf = TTnew('QualificationGroupListFactory'); /** @var QualificationGroupListFactory $qglf */
+			$qglf = TTnew( 'QualificationGroupListFactory' ); /** @var QualificationGroupListFactory $qglf */
 			$qglf->getByCompanyIdAndParentId( $this->getCompany(), $this->getId() );
 			if ( $qglf->getRecordCount() > 0 ) {
-				foreach( $qglf as $qg_obj ) {
-					Debug::Text(' Re-Parenting ID: '. $qg_obj->getId() .' To: '. $this->getParent(), __FILE__, __LINE__, __METHOD__, 10);
+				foreach ( $qglf as $qg_obj ) {
+					Debug::Text( ' Re-Parenting ID: ' . $qg_obj->getId() . ' To: ' . $this->getParent(), __FILE__, __LINE__, __METHOD__, 10 );
 					$qg_obj->setParent( $this->getParent() );
 					if ( $qg_obj->isValid() ) {
 						$qg_obj->Save();
@@ -264,8 +267,8 @@ class QualificationGroupFactory extends Factory {
 			$qlf = TTnew( 'QualificationListFactory' ); /** @var QualificationListFactory $qlf */
 			$qlf->getByCompanyIdAndGroupId( $this->getCompany(), $this->getId() );
 			if ( $qlf->getRecordCount() > 0 ) {
-				foreach( $qlf as $obj ) {
-					Debug::Text(' Re-Grouping Item: '. $obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+				foreach ( $qlf as $obj ) {
+					Debug::Text( ' Re-Grouping Item: ' . $obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 					$obj->setGroup( $this->getParent() );
 					$obj->Save();
 				}
@@ -275,8 +278,8 @@ class QualificationGroupFactory extends Factory {
 			$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
 			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 1090, $this->getID() );
 			if ( $cgmlf->getRecordCount() > 0 ) {
-				foreach( $cgmlf as $cgm_obj ) {
-					Debug::text('Deleting from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+				foreach ( $cgmlf as $cgm_obj ) {
+					Debug::text( 'Deleting from Company Generic Map: ' . $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
 					$cgm_obj->Delete();
 				}
 			}
@@ -284,7 +287,7 @@ class QualificationGroupFactory extends Factory {
 
 		$this->CommitTransaction();
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -294,11 +297,11 @@ class QualificationGroupFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -310,10 +313,10 @@ class QualificationGroupFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -321,25 +324,24 @@ class QualificationGroupFactory extends Factory {
 	 * @param bool $permission_children_ids
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null, $permission_children_ids = false ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();
 							}
 							break;
 					}
-
 				}
 			}
-			$this->getPermissionColumns( $data, $this->getCreatedBy(), FALSE, $permission_children_ids, $include_columns );
+			$this->getPermissionColumns( $data, $this->getCreatedBy(), false, $permission_children_ids, $include_columns );
 
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
@@ -352,7 +354,8 @@ class QualificationGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Qualification Group'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Qualification Group' ), null, $this->getTable(), $this );
 	}
 }
+
 ?>

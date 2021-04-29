@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TImageCutArea = function( options ) {
 
@@ -27,7 +27,7 @@
 
 		};
 
-		setAfterImage = function( val ) {
+		var setAfterImage = function( val ) {
 			var image = $this.children().eq( 1 ).children().eq( 1 );
 
 			if ( !val ) {
@@ -97,7 +97,7 @@
 
 		};
 
-		onImageLoad = function( image ) {
+		var onImageLoad = function( image ) {
 
 //			if ( $( image ).height() > default_height ) {
 //				$( image ).css( 'height', default_height );
@@ -114,7 +114,7 @@
 
 		};
 
-		onAfterImageLoad = function( image ) {
+		var onAfterImageLoad = function( image ) {
 
 //			if ( $( image ).height() > default_after_height ) {
 //				$( image ).css( 'height', default_after_height );
@@ -178,4 +178,4 @@
 
 	$.fn.TImageCutArea.defaults = {};
 
-})( jQuery );
+} )( jQuery );

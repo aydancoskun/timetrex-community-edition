@@ -1,13 +1,13 @@
-( function ( $ ) {
+( function( $ ) {
 
-	$.fn.TFeedback = function ( _options ) {
+	$.fn.TFeedback = function( _options ) {
 		var options = $.extend( {
 			source: '',
 			force_source: false, // does not prepend viewId to source value
 			delay: 0,
 			manual_trigger: false,
 			prompt_for_feedback: false, // Default is false so that only manual trigger, custom functions, or server input will make the feedback popup appear.
-			review_link: 'https://www.timetrex.com/r?id=review&product_edition_id='+ Global.getProductEdition()
+			review_link: 'https://www.timetrex.com/r?id=review&product_edition_id=' + Global.getProductEdition()
 		}, _options );
 
 		// DOM references for containers and pages
@@ -45,7 +45,7 @@
 				showPage( 'default' );
 
 				// Display feedback dialog either immediately or with a delay
-				if( options.delay && options.delay > 0 ) {
+				if ( options.delay && options.delay > 0 ) {
 					delayShowFeedbackContainer( options.delay );
 				} else {
 					showFeedbackContainer();
@@ -68,7 +68,7 @@
 		function delayShowFeedbackContainer( duration ) {
 			duration = duration || 0;
 			Debug.Text( 'Setting feedback display delay to ' + duration, 'TFeedback.js', 'TFeedback', 'initDefaultPage', 10 );
-			setTimeout(function() {
+			setTimeout( function() {
 				Debug.Text( 'Triggering delayed feedback display', 'TFeedback.js', 'TFeedback', 'initDefaultPage', 10 );
 				showFeedbackContainer();
 			}, duration );
@@ -94,7 +94,7 @@
 
 			default_page.find( '.positive-button' )
 				.html( $.i18n._( 'It\'s great!' ) )
-				.bind( 'click', function () {
+				.bind( 'click', function() {
 					showPage( 'positive' );
 					Debug.Text( 'Feedback Analytics: Category: feedback, Action: ' + getFeedbackType() + ', Label: ' + getFeedbackType() + ':feedback:' + options.source + ':' + feedback.POSITIVE, 'TFeedback.js', 'TFeedback', 'initDefaultPage', 10 );
 					Global.sendAnalyticsEvent( 'feedback', getFeedbackType(), getFeedbackType() + ':feedback:' + options.source + ':' + feedback.POSITIVE );
@@ -103,7 +103,7 @@
 
 			default_page.find( '.negative-button' )
 				.html( $.i18n._( 'Not so great' ) )
-				.bind( 'click', function () {
+				.bind( 'click', function() {
 					showPage( 'negative' );
 					Debug.Text( 'Feedback Analytics: Category: feedback, Action: ' + getFeedbackType() + ', Label: ' + getFeedbackType() + ':feedback:' + options.source + ':' + feedback.NEGATIVE, 'TFeedback.js', 'TFeedback', 'initDefaultPage', 10 );
 					Global.sendAnalyticsEvent( 'feedback', getFeedbackType(), getFeedbackType() + ':feedback:' + options.source + ':' + feedback.NEGATIVE );
@@ -119,7 +119,7 @@
 
 			default_page.find( '.cancel-button' )
 				.html( cancel_text )
-				.click( function () {
+				.click( function() {
 					removeFeedbackContainer();
 					Debug.Text( 'Feedback Analytics: Category: feedback, Action: ' + getFeedbackType() + ', Label: ' + getFeedbackType() + ':feedback:' + options.source + ':' + feedback.NEUTRAL, 'TFeedback.js', 'TFeedback', 'initDefaultPage', 10 );
 					Global.sendAnalyticsEvent( 'feedback', getFeedbackType(), getFeedbackType() + ':feedback:' + options.source + ':' + feedback.NEUTRAL );
@@ -138,7 +138,7 @@
 			positive_page.find( '.page-text.block3' ).text( $.i18n._( 'We\'ll select one winner each month.' ) );
 			positive_page.find( '.openReviewPageButton' )
 				.html( $.i18n._( 'Share experience' ) )
-				.bind( 'click', function () {
+				.bind( 'click', function() {
 					Debug.Text( 'Feedback Analytics: Category: feedback, Action: ' + getFeedbackType() + '-Link, Label: submit:feedback:' + options.source + ':' + feedback_rating, 'TFeedback.js', 'TFeedback', 'initPositivePage', 10 );
 					Global.sendAnalyticsEvent( 'feedback', getFeedbackType() + '-link', 'submit:' + getFeedbackType() + ':feedback:' + options.source + ':' + feedback_rating );
 					sendDataToFeedbackAPI( feedback_rating, '', false );
@@ -147,7 +147,7 @@
 				} );
 			positive_page.find( '.cancel-button' )
 				.html( $.i18n._( 'I\'m not hungry' ) ) //Skip the Lunch
-				.click( function () {
+				.click( function() {
 					triggerFeedbackReviewAPI( 0, true );
 					Debug.Text( 'Feedback: Category: feedback, Action: cancel, Label: cancel:feedback:' + options.source + ':' + feedback_rating, 'TFeedback.js', 'TFeedback', 'cancelButtonClick', 10 );
 					Global.sendAnalyticsEvent( 'feedback', 'cancel', 'cancel:feedback:' + options.source + ':' + feedback_rating );
@@ -174,7 +174,7 @@
 				.click( _sendForm );
 			negative_page.find( '.cancel-button' )
 				.html( $.i18n._( 'Back' ) )
-				.click( function () {
+				.click( function() {
 					showPage( 'default' );
 					Debug.Text( 'Feedback: Category: feedback, Action: cancel, Label: cancel:feedback:' + options.source + ':' + feedback_rating, 'TFeedback.js', 'TFeedback', 'cancelButtonClick', 10 );
 					Global.sendAnalyticsEvent( 'feedback', 'cancel', 'cancel:feedback:' + options.source + ':' + feedback_rating );
@@ -241,7 +241,7 @@
 			}
 
 			api.setUserFeedbackRating( feedback_rating, message, {
-				onResult: function ( res ) {
+				onResult: function( res ) {
 					if ( res.isValid() ) {
 						if ( close_window ) {
 							removeFeedbackContainer();
@@ -253,7 +253,7 @@
 
 		function triggerFeedbackReviewAPI( review_state, close_window ) {
 			api.setUserFeedbackReview( review_state, {
-				onResult: function ( res ) {
+				onResult: function( res ) {
 					if ( res.isValid() ) {
 						if ( close_window ) {
 							removeFeedbackContainer();

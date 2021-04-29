@@ -1,36 +1,36 @@
 .ribbon-view {
 
-    padding: 0;
-    height: 170px;
+	padding: 0;
+	height: 170px;
 }
 
 .ribbon-view .ribbon {
-    position: absolute;
-    top: 27px;
-    height: 100%;
-    width: 100%;
+	position: absolute;
+	top: 27px;
+	height: 100%;
+	width: 100%;
 }
 
 .ribbon-view .left-logo {
-    position: absolute;
-    top: 0;
-    left: 0;
-    cursor: pointer;
-    z-index: 1;
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	cursor: pointer;
+	z-index: 1;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }
 
 .ribbon-view .right-logo {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    max-width: 170px;
-    max-height: 42px;
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	max-width: 170px;
+	max-height: 42px;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }
 
 /* This section contains the logic for the double curved left edge of the white logo box.
@@ -42,58 +42,58 @@
 
 /* This is the majority of the white rectangle that sits on the navbar under part of the company logo */
 .top-container .right-tab-bg {
-    position: absolute;
-    top: 27px;
-    height: 24px; /* This can adjusted freely, other aspects should update. If smaller than before+after, then update those manually */
-    width: 186px;
-    border: 0px solid;
-    right: 0;
-    background: #fff;
-    border-bottom-left-radius: 8px; /* Set to preferred bottom left curve size */
+	position: absolute;
+	top: 27px;
+	height: 24px; /* This can adjusted freely, other aspects should update. If smaller than before+after, then update those manually */
+	width: 186px;
+	border: 0px solid;
+	right: 0;
+	background: #ffffff;
+	border-bottom-left-radius: 8px; /* Set to preferred bottom left curve size */
 }
 
 /* This is the white square that will sit behind the blue corner */
 .top-container .right-tab-bg:before, .top-container .right-tab-bg:after {
-    content: '';
-    position: absolute;
-    top:0;
-    left:-10px;
-    width: 10px;
-    height: 15px;
-    background:inherit;
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -10px;
+	width: 10px;
+	height: 15px;
+	background: inherit;
 }
 
 /* This is the blue square with top right corner curved */
 .top-container .right-tab-bg:after {
-    background: #32689b; /* Set this to the parent background color */
-    border-top-right-radius: 8px; /* Set to preferred top right curve size */
+	background: #32689b; /* Set this to the parent background color */
+	border-top-right-radius: 8px; /* Set to preferred top right curve size */
 }
 
 .top-container .ribbon-tab-out-side {
-    padding: 0;
+	padding: 0;
 }
 
 .top-container .ribbon-tab {
-    border: none;
-    background: #e6e6e6;
-    border-bottom: 1px solid #c7c7c7;
-    height: 100%;
+	border: none;
+	background: #e6e6e6;
+	border-bottom: 1px solid #c7c7c7;
+	height: 100%;
 }
 
 .top-container .context-ribbon-tab {
-    border: none;
-    background: #d8e7f4;
-    border-bottom: 1px solid #c7c7c7;
-    height: 100%;
+	border: none;
+	background: #d8e7f4;
+	border-bottom: 1px solid #c7c7c7;
+	height: 100%;
 }
 
 .top-container .ribbon-sub-menu {
-    border: none;
-    overflow: auto;
-    white-space: nowrap;
-    display: block;
-    height: 107px;
-    overflow-y: hidden;
+	border: none;
+	overflow: auto;
+	white-space: nowrap;
+	display: block;
+	height: 107px;
+	overflow-y: hidden;
 }
 
 .menu {
@@ -101,97 +101,97 @@
 }
 
 .top-container .top-ribbon-menu {
-    border: 1px solid #c2c2c2;
-    padding: 5px;
-    border-radius: 4px;
-    margin-right: 10px;
-    padding-bottom: 10px;
-    display: inline-block;
-    height: 97px;
-    background: #f9f9f9;
-    margin-top: 5px;
-    margin-left: 5px;
-    margin-bottom: 5px;
-    position: relative;
-    vertical-align: top;
+	border: 1px solid #c2c2c2;
+	padding: 5px;
+	border-radius: 4px;
+	margin-right: 10px;
+	padding-bottom: 10px;
+	display: inline-block;
+	height: 97px;
+	background: #f9f9f9;
+	margin-top: 5px;
+	margin-left: 5px;
+	margin-bottom: 5px;
+	position: relative;
+	vertical-align: top;
 }
 
 .menu .menu-bottom {
-    border: 0px solid #999999;
-    border-bottom: 0;
-    border-left: 0;
-    border-right: 0;
-    position: absolute;
-    height: 16px;
-    border-radius: 4px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    background: #32689b;
-    text-align: center;
-    color: #ffffff;
-    bottom: 0;
-    left: 0;
-    clear: both;
-    font-size: 10px;
-    width: 100%;
+	border: 0px solid #999999;
+	border-bottom: 0;
+	border-left: 0;
+	border-right: 0;
+	position: absolute;
+	height: 16px;
+	border-radius: 4px;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	background: #32689b;
+	text-align: center;
+	color: #ffffff;
+	bottom: 0;
+	left: 0;
+	clear: both;
+	font-size: 10px;
+	width: 100%;
 }
 
 .menu .menu-bottom span {
-    font-size: 10px;
-    line-height: 15px;
+	font-size: 10px;
+	line-height: 15px;
 }
 
 .menu ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    font-size: 10px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	font-size: 10px;
 
 }
 
 .menu ul li {
-    display: inline-block;
-    padding-right: 0;
-    vertical-align: top;
+	display: inline-block;
+	padding-right: 0;
+	vertical-align: top;
 
 }
 
 .menu ul li div {
-    text-align: center;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    padding-left: 5px;
-    padding-right: 5px;
-    cursor: pointer;
+	text-align: center;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	padding-left: 5px;
+	padding-right: 5px;
+	cursor: pointer;
 
 }
 
 .menu ul li div:not(.ribbon-sub-menu-nav-icon):hover {
-    /*background: #b5dafe;*/
-    background-image: -moz-linear-gradient(top, #d9eafa, #c8dcf0);
-    /* Safari & Chrome */
-    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(1, #c8dcf0), color-stop(1, #d9eafa));
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d9eafa', endColorstr='#c8dcf0', grandientType=1);
-    -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d9eafa', endColorstr='#c8dcf0', grandientType=1);
-    background-image: -ms-linear-gradient(#d9eafa, #c8dcf0, #c8dcf0);
-    background: -ms-linear-gradient(top, #d9eafa 0%, #c8dcf0 100%);
-    border-radius: 4px;
+	/*background: #b5dafe;*/
+	background-image: -moz-linear-gradient(top, #d9eafa, #c8dcf0);
+	/* Safari & Chrome */
+	background-image: -webkit-gradient(linear, left bottom, left top, color-stop(1, #c8dcf0), color-stop(1, #d9eafa));
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d9eafa', endColorstr='#c8dcf0', grandientType=1);
+	-ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d9eafa', endColorstr='#c8dcf0', grandientType=1);
+	background-image: -ms-linear-gradient(#d9eafa, #c8dcf0, #c8dcf0);
+	background: -ms-linear-gradient(top, #d9eafa 0%, #c8dcf0 100%);
+	border-radius: 4px;
 }
 
 .menu ul li .selected-menu {
-    /*background: #b5dafe;*/
-    background-image: -moz-linear-gradient(top, #c4e1fc, #b4d2ee);
-    /* Safari & Chrome */
-    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(1, #b4d2ee), color-stop(1, #c4e1fc));
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#c4e1fc', endColorstr='#b4d2ee', grandientType=1);
-    -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#c4e1fc', endColorstr='#b4d2ee', grandientType=1);
-    background: -ms-linear-gradient(top, #c4e1fc 0%, #b4d2ee 100%);
-    border: 1px solid #32689b;
-    border-radius: 4px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 4px;
-    padding-right: 4px;
+	/*background: #b5dafe;*/
+	background-image: -moz-linear-gradient(top, #c4e1fc, #b4d2ee);
+	/* Safari & Chrome */
+	background-image: -webkit-gradient(linear, left bottom, left top, color-stop(1, #b4d2ee), color-stop(1, #c4e1fc));
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#c4e1fc', endColorstr='#b4d2ee', grandientType=1);
+	-ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#c4e1fc', endColorstr='#b4d2ee', grandientType=1);
+	background: -ms-linear-gradient(top, #c4e1fc 0%, #b4d2ee 100%);
+	border: 1px solid #32689b;
+	border-radius: 4px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 4px;
+	padding-right: 4px;
 }
 
 .menu ul li .ribbon-sub-menu-icon {
@@ -199,94 +199,94 @@
 }
 
 .menu ul li .ribbon-sub-menu-nav-icon {
-    background: url("images/arrow.png") no-repeat;
-    background-position: center bottom;
+	background: url("images/arrow.png") no-repeat;
+	background-position: center bottom;
 }
 
 .menu ul li .ribbon-sub-menu-nav {
-    background: none repeat scroll 0 0 #FEFEFE;
-    border: 1px solid #AAAAAA;
-    position: fixed;
-    z-index: 100;
+	background: none repeat scroll 0 0 #fefefe;
+	border: 1px solid #aaaaaa;
+	position: fixed;
+	z-index: 100;
 }
 
 .menu ul li .ribbon-sub-menu-nav-item {
-    clear: both;
-    display: block;
-    width: 100%;
-    cursor: pointer;
+	clear: both;
+	display: block;
+	width: 100%;
+	cursor: pointer;
 
 }
 
 .menu ul li .ribbon-sub-menu-nav-item .label {
-    display: block;
-    padding: 3px 10px;
-    font-size: 11px;
+	display: block;
+	padding: 3px 10px;
+	font-size: 11px;
 }
 
 .menu ul li .ribbon-sub-menu-nav-item:hover {
-    background: #C6DCEF;
+	background: #c6dcef;
 }
 
 .menu ul li div img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 3px;
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 3px;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }
 
 /*override css styles*/
 .top-container .ui-tabs .ui-tabs-nav {
-    margin: 0;
-    padding: 0 60px 0;
-    padding-right: 0;
-    border-radius: 0;
-    height: 30px;
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	margin: 0;
+	padding: 0 60px 0;
+	padding-right: 0;
+	border-radius: 0;
+	height: 30px;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }
 
 .top-container .ui-widget-content {
-    background: #ffffff;
-    border: 0px solid #DDDDDD;
-    color: #000;
-    height: 107px;
+	background: #ffffff;
+	border: 0px solid #dddddd;
+	color: #000000;
+	height: 107px;
 }
 
 .top-container .ui-widget-header {
-    background: #32689b;
-    border: 0px solid #AED0EA;
-    color: #222222;
-    font-weight: bold;
+	background: #32689b;
+	border: 0px solid #aed0ea;
+	color: #222222;
+	font-weight: bold;
 }
 
 .top-container .ui-tabs .ui-tabs-nav li.context-menu-active {
-    background: #d8e7f4 !important;
+	background: #d8e7f4 !important;
 
 }
 
 .top-container .ui-tabs .ui-tabs-nav li.ui-tabs-selected {
-    margin-bottom: 0;
-    padding-bottom: 0;
+	margin-bottom: 0;
+	padding-bottom: 0;
 }
 
 .top-container .ui-tabs .ui-tabs-nav li {
-    top: 5px;
-    height: 24px;
+	top: 5px;
+	height: 24px;
 }
 
 .top-container .ui-state-default a, .top-container .ui-state-default a:link, .top-container .ui-state-default a:visited {
-    color: #ffffff;
-    text-decoration: none;
+	color: #ffffff;
+	text-decoration: none;
 }
 
 .top-container .ui-state-default {
-    border: none;
-    background: none;
+	border: none;
+	background: none;
 }
 
 /*.top-container .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {*/
@@ -296,82 +296,82 @@
 /*}*/
 
 .top-container .ui-state-hover a {
-    color: #ffffff;
-    text-decoration: none;
+	color: #ffffff;
+	text-decoration: none;
 
 }
 
 .top-container .ui-state-active, .top-container .ui-widget-content .ui-state-active, .top-container .ui-widget-header .ui-state-active {
-    border: 1px solid #c0bfbf;
-    background: #e9e9e9 !important;
-    font-weight: bold;
-    color: #204175;
+	border: 1px solid #c0bfbf;
+	background: #e9e9e9 !important;
+	font-weight: bold;
+	color: #204175;
 
 }
 
 .top-container .ui-tabs .ui-tabs-nav li a {
-    float: left;
-    font-size: 11px;
-    padding: 3px 6px 4px; /* Padding supplimented by border size on the parent li in SearchPanel.css (#2710) */
-    text-decoration: none;
-    font-weight: bold;
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	float: left;
+	font-size: 11px;
+	padding: 3px 6px 4px; /* Padding supplimented by border size on the parent li in SearchPanel.css (#2710) */
+	text-decoration: none;
+	font-weight: bold;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }
 
 .top-container .ui-state-active a, .top-container .ui-state-active a:link, .top-container .ui-state-active a:visited {
-    color: #204175;
-    text-decoration: none;
-    /*padding: 100px 9px 4px;*/
+	color: #204175;
+	text-decoration: none;
+	/*padding: 100px 9px 4px;*/
 }
 
 .top-container .ui-corner-all, .top-container .ui-corner-top, .top-container .ui-corner-right, .top-container .ui-corner-tr {
-    border-top-right-radius: 4px;
+	border-top-right-radius: 4px;
 }
 
 .top-container .ui-corner-all, .top-container .ui-corner-top, .top-container .ui-corner-left, .top-container .ui-corner-tl {
-    border-top-left-radius: 4px;
+	border-top-left-radius: 4px;
 }
 
 .top-container .context-menu a, .top-container .context-menu a:link, .top-container .context-menu a:visited {
-    color: #00ff00;
-    text-decoration: none;
-    /*padding: 100px 9px 4px;*/
+	color: #00ff00;
+	text-decoration: none;
+	/*padding: 100px 9px 4px;*/
 }
 
 .top-container .context-menu-active a, .top-container .context-menu-active a:link, .top-container .context-menu-active a:visited {
-    color: #204175;
-    text-decoration: none;
-    /*padding: 100px 9px 4px;*/
+	color: #204175;
+	text-decoration: none;
+	/*padding: 100px 9px 4px;*/
 }
 
 .disable-image {
-    -webkit-filter: grayscale(100%);
-    -moz-filter: grayscale(100%);
-    -ms-filter: grayscale(100%);
-    -o-filter: grayscale(100%);
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	-ms-filter: grayscale(100%);
+	-o-filter: grayscale(100%);
 
-    filter: grayscale(100%);
-    /* Chrome 53 throws 404 instead of making them grey. */
-    /*filter: url(gray.svg#grayscale);*/
+	filter: grayscale(100%);
+	/* Chrome 53 throws 404 instead of making them grey. */
+	/*filter: url(gray.svg#grayscale);*/
 
-    filter: gray;
-    opacity: 0.5;
+	filter: gray;
+	opacity: 0.5;
 }
 
 .top-container .invisible-image {
-    display: none;
+	display: none;
 }
 
 .top-container .ribbon-label {
-    font-size: 10px;
+	font-size: 10px;
 }
 
 .top-container .ui-state-hover {
-    background: none !important;
-    font-weight: bold;
-    color: #000000;
+	background: none !important;
+	font-weight: bold;
+	color: #000000;
 }
 
 /**
@@ -379,7 +379,7 @@ Workaround for selenium screen-shot unit testing due to inconsistent corner roun
 see issue 2157 for detils.
 **/
 .UNIT_TEST_MODE * {
-    -webkit-border-radius: 0 !important;
-    -moz-border-radius: 0 !important;
-    border-radius: 0 !important;
+	-webkit-border-radius: 0 !important;
+	-moz-border-radius: 0 !important;
+	border-radius: 0 !important;
 }

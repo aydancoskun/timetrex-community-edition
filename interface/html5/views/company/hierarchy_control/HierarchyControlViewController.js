@@ -17,8 +17,8 @@ HierarchyControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'hierarchy_control';
 		this.context_menu_name = $.i18n._( 'Hierarchy' );
 		this.navigation_label = $.i18n._( 'Hierarchy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIHierarchyControl' ))();
-		this.hierarchy_level_api = new (APIFactory.getAPIClass( 'APIHierarchyLevel' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIHierarchyControl' ) )();
+		this.hierarchy_level_api = new ( APIFactory.getAPIClass( 'APIHierarchyLevel' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -28,7 +28,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
@@ -56,7 +56,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIHierarchyControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIHierarchyControl' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HIERARCHY,
@@ -113,7 +113,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -232,7 +232,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		//Superiors
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			width: 132,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -246,7 +246,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		if ( typeof index != 'undefined' ) {
 
 			row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
-			this.rows_widgets_array.splice( (index), 0, widgets );
+			this.rows_widgets_array.splice( ( index ), 0, widgets );
 
 		} else {
 			$( render ).append( row );
@@ -441,7 +441,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'superior_user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -452,7 +452,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -473,7 +473,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -485,7 +485,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -518,6 +518,5 @@ HierarchyControlViewController = BaseViewController.extend( {
 		$this.current_edit_record = result_data;
 		$this.initEditView();
 	}
-
 
 } );

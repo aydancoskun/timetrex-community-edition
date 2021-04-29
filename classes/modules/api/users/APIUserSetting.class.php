@@ -47,7 +47,7 @@ class APIUserSetting extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -56,11 +56,11 @@ class APIUserSetting extends APIFactory {
 	 */
 	function getUserSetting( $name ) {
 		$retarr = UserSettingFactory::getUserSetting( $this->getCurrentUserObject()->getId(), $name );
-		if ( $retarr == TRUE ) {
+		if ( $retarr == true ) {
 			return $this->returnHandler( $retarr );
 		}
 
-		return $this->returnHandler( TRUE);
+		return $this->returnHandler( true );
 	}
 
 	/**
@@ -71,7 +71,8 @@ class APIUserSetting extends APIFactory {
 	 */
 	function setUserSetting( $name, $value, $type_id = 10 ) {
 		$retval = UserSettingFactory::setUserSetting( $this->getCurrentUserObject()->getId(), $name, $value, $type_id );
-		return $this->returnHandler($retval);
+
+		return $this->returnHandler( $retval );
 	}
 
 	/**
@@ -80,8 +81,10 @@ class APIUserSetting extends APIFactory {
 	 */
 	function deleteUserSetting( $name ) {
 		$retval = UserSettingFactory::deleteUserSetting( $this->getCurrentUserObject()->getId(), $name );
-		return $this->returnHandler($retval);
+
+		return $this->returnHandler( $retval );
 	}
 
 }
+
 ?>

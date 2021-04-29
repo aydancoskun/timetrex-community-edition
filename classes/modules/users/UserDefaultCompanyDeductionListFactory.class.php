@@ -41,43 +41,43 @@
 class UserDefaultCompanyDeductionListFactory extends UserDefaultCompanyDeductionFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable();
+					from	' . $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDefaultCompanyDeductionListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -90,25 +90,25 @@ class UserDefaultCompanyDeductionListFactory extends UserDefaultCompanyDeduction
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDefaultCompanyDeductionListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$udf = new UserDefaultFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id)
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $udf->getTable() .' as udf ON a.user_default_id = udf.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $udf->getTable() . ' as udf ON a.user_default_id = udf.id
 					where	udf.company_id = ?
 						AND ( udf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
@@ -120,24 +120,24 @@ class UserDefaultCompanyDeductionListFactory extends UserDefaultCompanyDeduction
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDefaultCompanyDeductionListFactory
 	 */
-	function getByUserDefaultId( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByUserDefaultId( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where
 						a.user_default_id = ?
 						';
@@ -149,4 +149,5 @@ class UserDefaultCompanyDeductionListFactory extends UserDefaultCompanyDeduction
 		return $this;
 	}
 }
+
 ?>

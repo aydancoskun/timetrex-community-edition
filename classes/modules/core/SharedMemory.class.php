@@ -38,13 +38,13 @@
 /**
  * @package Core
  */
-require_once( Environment::getBasePath() .'/classes/pear/System/SharedMemory.php');
+require_once( Environment::getBasePath() . '/classes/pear/System/SharedMemory.php' );
 
 /**
  * Class SharedMemory
  */
 class SharedMemory {
-	protected $obj = NULL;
+	protected $obj = null;
 
 	/**
 	 * SharedMemory constructor.
@@ -53,21 +53,21 @@ class SharedMemory {
 		global $config_vars;
 
 		$shared_memory = new System_SharedMemory();
-		if ( isset($config_vars['cache']['redis_host']) AND $config_vars['cache']['redis_host'] != '' ) {
-			$split_server = explode(',', $config_vars['cache']['redis_host'] );
+		if ( isset( $config_vars['cache']['redis_host'] ) && $config_vars['cache']['redis_host'] != '' ) {
+			$split_server = explode( ',', $config_vars['cache']['redis_host'] );
 			$host = $split_server[0]; //Use just the master server.
 
-			$this->obj = $shared_memory->Factory( 'Redis', array('host' => $host, 'db' => ( isset($config_vars['cache']['redis_db']) ) ? $config_vars['cache']['redis_db'] : '', 'timeout' => 1 ) );
+			$this->obj = $shared_memory->Factory( 'Redis', [ 'host' => $host, 'db' => ( isset( $config_vars['cache']['redis_db'] ) ) ? $config_vars['cache']['redis_db'] : '', 'timeout' => 1 ] );
 		} else {
 			if ( OPERATING_SYSTEM == 'WIN' ) {
-				$this->obj = $shared_memory->Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );
+				$this->obj = $shared_memory->Factory( 'File', [ 'tmp' => $config_vars['cache']['dir'] ] );
 			} else {
-				$this->obj = $shared_memory->Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );
+				$this->obj = $shared_memory->Factory( 'File', [ 'tmp' => $config_vars['cache']['dir'] ] );
 				////$this->obj = &System_SharedMemory::Factory( 'Systemv', array( 'size' => $size ) ); //Run into size issues all the time.
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -79,7 +79,8 @@ class SharedMemory {
 		if ( is_string( $key ) ) {
 			return $this->obj->set( $key, $value );
 		}
-		return FALSE;
+
+		return false;
 	}
 
 	/**
@@ -90,7 +91,8 @@ class SharedMemory {
 		if ( is_string( $key ) ) {
 			return $this->obj->get( $key );
 		}
-		return FALSE;
+
+		return false;
 	}
 
 	/**
@@ -101,7 +103,9 @@ class SharedMemory {
 		if ( is_string( $key ) ) {
 			return $this->obj->rm( $key );
 		}
-		return FALSE;
+
+		return false;
 	}
 }
+
 ?>

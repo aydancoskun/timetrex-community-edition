@@ -44,9 +44,9 @@ class InstallSchema_1037A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -54,50 +54,50 @@ class InstallSchema_1037A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Migrate messages from old system to new system.
 		$mlf = TTnew( 'MessageListFactory' ); /** @var MessageListFactory $mlf */
 		$mlf->StartTransaction();
-		$mlf->getAll( NULL, NULL, NULL, array('created_date' => 'asc' ) );
+		$mlf->getAll( null, null, null, [ 'created_date' => 'asc' ] );
 		if ( $mlf->getRecordCount() > 0 ) {
-			$id_map = array(); //Maps the old_id to the message_sender_id.
+			$id_map = []; //Maps the old_id to the message_sender_id.
 
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$i = 0;
 			$e = 0;
-			foreach( $mlf as $message) {
-				if ( !in_array( $message->getObjectType(), array(5, 50, 90) ) ) {
+			foreach ( $mlf as $message ) {
+				if ( !in_array( $message->getObjectType(), [ 5, 50, 90 ] ) ) {
 					continue;
 				}
 
 				//Created_by is the sender
 				//Object_id is the received if its an email, otherwise the receiver is all those in the thread.
-				if ( $message->getCreatedBy() != FALSE ) {
+				if ( $message->getCreatedBy() != false ) {
 					$ulf->getById( $message->getCreatedBy() );
 					if ( $ulf->getRecordCount() > 0 ) {
 						$created_by_user_obj = $ulf->getCurrent();
 					}
 				}
 
-				if ( isset($created_by_user_obj) AND is_object($created_by_user_obj) AND $created_by_user_obj->getCompanyObject()->getStatus() != 30 ) {
-					Debug::text('Message: Object Type: '. $message->getObjectType() .' Object ID: '. $message->getObject() .'  From User ID: '. $message->getCreatedBy() .' Subject: '. $message->getSubject(), __FILE__, __LINE__, __METHOD__, 10);
+				if ( isset( $created_by_user_obj ) && is_object( $created_by_user_obj ) && $created_by_user_obj->getCompanyObject()->getStatus() != 30 ) {
+					Debug::text( 'Message: Object Type: ' . $message->getObjectType() . ' Object ID: ' . $message->getObject() . '  From User ID: ' . $message->getCreatedBy() . ' Subject: ' . $message->getSubject(), __FILE__, __LINE__, __METHOD__, 10 );
 
 					$mcf = TTnew( 'MessageControlFactory' ); /** @var MessageControlFactory $mcf */
 
 					$mcf->migration_status = $message->getStatus();
 					$mcf->setObjectType( $message->getObjectType() );
 
-					if ( $message->getParent() > 0 AND isset($id_map[$message->getParent()]) AND $id_map[$message->getParent()] > 0 ) {
-						Debug::text('Using Parent ID: '. $id_map[$message->getParent()], __FILE__, __LINE__, __METHOD__, 10);
+					if ( $message->getParent() > 0 && isset( $id_map[$message->getParent()] ) && $id_map[$message->getParent()] > 0 ) {
+						Debug::text( 'Using Parent ID: ' . $id_map[$message->getParent()], __FILE__, __LINE__, __METHOD__, 10 );
 						$mcf->setParent( $id_map[$message->getParent()] ); //We need to use our own parent_ids.
 					}
 					$mcf->setFromUserId( $message->getCreatedBy() );
 
-					if ( $message->getObjectType() == 5 ) { //Email
+					if ( $message->getObjectType() == 5 ) {          //Email
 						$mcf->setObject( $message->getCreatedBy() ); //User ID for the sender only.
 						if ( $message->getCreatedBy() != $message->getObject() ) { //Make sure we don't save emails sent from ourselves to ourselves.
-							$mcf->setToUserId( $message->getObject() ); //Get sender of the original message, as we only reply directly to them.
+							$mcf->setToUserId( $message->getObject() );            //Get sender of the original message, as we only reply directly to them.
 						}
 					} else {
 						$mcf->setObject( $message->getObject() ); //ID of the related objet.
@@ -105,28 +105,28 @@ class InstallSchema_1037A extends InstallSchema_Base {
 						//We may never know who the message is actually sent to when its not an email, as the hierarchies and such could have changed.
 						//Try our best though using current hierarchies.
 						$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
-						$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $created_by_user_obj->getCompany(), $message->getCreatedBy(), $message->getObjectType(), TRUE, FALSE ); //Request - Immediate parents only.
+						$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $created_by_user_obj->getCompany(), $message->getCreatedBy(), $message->getObjectType(), true, false ); //Request - Immediate parents only.
 						//Debug::Arr($request_parent_level_user_ids, 'Sending message to current direct Superiors: ', __FILE__, __LINE__, __METHOD__, 10);
-						if ( $request_parent_level_user_ids !== FALSE ) {
+						if ( $request_parent_level_user_ids !== false ) {
 							$to_user_ids = (array)$request_parent_level_user_ids;
 						}
 
 						$mslf = TTnew( 'MessageSenderListFactory' ); /** @var MessageSenderListFactory $mslf */
 						$mslf->getByCompanyIdAndObjectTypeAndObjectAndNotUser( $created_by_user_obj->getCompany(), $message->getObjectType(), $message->getObject(), $message->getCreatedBy() );
 						if ( $mslf->getRecordCount() > 0 ) {
-							foreach( $mslf as $ms_obj ) {
+							foreach ( $mslf as $ms_obj ) {
 								$to_user_ids[] = $ms_obj->getUser();
 							}
 						}
 
-						if ( isset($to_user_ids) ) {
+						if ( isset( $to_user_ids ) ) {
 							$mcf->setToUserId( $to_user_ids ); //Get sender of the original message, as we only reply directly to them.
 						}
 					}
 
 					$mcf->setSubject( $message->getSubject() );
 					$mcf->setBody( $message->getBody() );
-					$mcf->setRequireAck( FALSE );
+					$mcf->setRequireAck( false );
 
 					//Match created/updated information with original message.
 					$mcf->setCreatedBy( $message->getCreatedBy() );
@@ -134,56 +134,56 @@ class InstallSchema_1037A extends InstallSchema_Base {
 					$mcf->setUpdatedBy( $message->getUpdatedBy() );
 					$mcf->setUpdatedDate( $message->getUpdatedDate() );
 
-					$mcf->setEnableEmailMessage(FALSE); //Don't email out any messages, as they have already been sent.
+					$mcf->setEnableEmailMessage( false ); //Don't email out any messages, as they have already been sent.
 					if ( $mcf->isValid() ) {
 						//Some object_id's may be invalid as the request has been deleted or something.
-						$mcf->Save(FALSE);
+						$mcf->Save( false );
 						if ( $mcf->getMessageSenderId() > 0 ) {
 							$id_map[$message->getId()] = $mcf->getMessageSenderId();
 						}
 					} else {
-						Debug::text('Failed creating message...', __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'Failed creating message...', __FILE__, __LINE__, __METHOD__, 10 );
 						$e++;
 					}
 				}
 
-				unset($created_by_user_obj, $to_user_ids, $ms_obj, $mslf, $mcf);
+				unset( $created_by_user_obj, $to_user_ids, $ms_obj, $mslf, $mcf );
 				$i++;
 			}
-			Debug::text('Converted: '. $i .' Messages, Failed: '. $e, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Converted: ' . $i . ' Messages, Failed: ' . $e, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		$mlf->CommitTransaction();
-		unset($id_map);
+		unset( $id_map );
 
 		//Go through each permission group, and enable view_schedule_summary report for anyone who can see view_timesheet_summary.
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+			foreach ( $clf as $c_obj ) {
+				Debug::text( 'Company: ' . $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 				if ( $c_obj->getStatus() != 30 ) {
 					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Sort order defaults to "level" column in newer versions which doesn't exist when this runs.
+					$pclf->getByCompanyId( $c_obj->getId(), null, null, null, [ 'name' => 'asc' ] ); //Sort order defaults to "level" column in newer versions which doesn't exist when this runs.
 					if ( $pclf->getRecordCount() > 0 ) {
-						foreach( $pclf as $pc_obj ) {
-							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+						foreach ( $pclf as $pc_obj ) {
+							Debug::text( 'Permission Group: ' . $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $c_obj->getId(), $pc_obj->getId(), 'report', 'view_timesheet_summary', 1 );
 							if ( $plf->getRecordCount() > 0 ) {
-								Debug::text('Found permission group with job analysis report enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
-								$pc_obj->setPermission( array('report' => array('view_schedule_summary' => TRUE) ) );
+								Debug::text( 'Found permission group with job analysis report enabled: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
+								$pc_obj->setPermission( [ 'report' => [ 'view_schedule_summary' => true ] ] );
 							} else {
-								Debug::text('Permission group does NOT have job analysis report enabled...', __FILE__, __LINE__, __METHOD__, 9);
+								Debug::text( 'Permission group does NOT have job analysis report enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 							}
 						}
 					}
-
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

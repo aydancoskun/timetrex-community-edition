@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.NoResultBox = function( options ) {
 
@@ -67,4 +67,4 @@
 
 	$.fn.NoResultBox.defaults = {};
 
-})( jQuery );
+} )( jQuery );

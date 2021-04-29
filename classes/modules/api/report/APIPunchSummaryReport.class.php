@@ -47,7 +47,7 @@ class APIPunchSummaryReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIPunchSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getPunchSummaryReport( $config = FALSE, $format = 'pdf' ) {
+	function getPunchSummaryReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

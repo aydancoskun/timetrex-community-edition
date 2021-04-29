@@ -25,13 +25,13 @@ var ServiceCaller = Backbone.Model.extend( {
 		var className = arguments[0];
 		var function_name = arguments[1];
 		var apiArgsAndResponseObject = arguments[2];
-		var lastApiArgsAndResponseObject = arguments[2][(apiArgsAndResponseObject.length - 1)];
+		var lastApiArgsAndResponseObject = arguments[2][( apiArgsAndResponseObject.length - 1 )];
 		var apiArgs = {};
 		var responseObject;
 		var len;
 
 		if ( Global.isSet( lastApiArgsAndResponseObject.onResult ) || Global.isSet( lastApiArgsAndResponseObject.async ) ) {
-			len = (apiArgsAndResponseObject.length - 1);
+			len = ( apiArgsAndResponseObject.length - 1 );
 
 			responseObject = new ResponseObject( lastApiArgsAndResponseObject );
 
@@ -60,7 +60,7 @@ var ServiceCaller = Backbone.Model.extend( {
 		$.each( api_args, function( index, value ) {
 
 			if ( $.type( value ) === 'object' ) {
-				key = key + '_' + JSON.stringify( value )
+				key = key + '_' + JSON.stringify( value );
 			} else {
 				key = key + '_' + value;
 			}
@@ -145,14 +145,14 @@ var ServiceCaller = Backbone.Model.extend( {
 
 	prettyPrintAPIArguments: function( apiArgs ) {
 		if ( apiArgs && apiArgs.json ) {
-			retval = [];
-			args = JSON.parse( apiArgs.json );
-			for( var property_name in args ) {
-				arg = args[property_name];
+			var retval = [];
+			var args = JSON.parse( apiArgs.json );
+			for ( var property_name in args ) {
+				var arg = args[property_name];
 				retval.push( JSON.stringify( arg, null, 2 ) ); //Pretty print JSON
 			}
 
-			return retval.join(', ');
+			return retval.join( ', ' );
 		}
 
 		return null;
@@ -164,10 +164,10 @@ var ServiceCaller = Backbone.Model.extend( {
 		var base_url = ServiceCaller.getURLWithSessionId( 'Class=' + className + '&Method=' + function_name + '&v=2' );
 		var url = base_url;
 		if ( LocalCacheData.all_url_args ) {
-			if ( LocalCacheData.all_url_args.hasOwnProperty('user_id') ) {
+			if ( LocalCacheData.all_url_args.hasOwnProperty( 'user_id' ) ) {
 				url = url + '&user_id=' + LocalCacheData.all_url_args.user_id;
 			}
-			if ( LocalCacheData.all_url_args.hasOwnProperty('company_id') ) {
+			if ( LocalCacheData.all_url_args.hasOwnProperty( 'company_id' ) ) {
 				url = url + '&company_id=' + LocalCacheData.all_url_args.company_id;
 			}
 		}
@@ -278,7 +278,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		message_id = TTUUID.generateUUID();
 
-		TTPromise.add('ServiceCaller', message_id);
+		TTPromise.add( 'ServiceCaller', message_id );
 
 		if ( className !== 'APIProgressBar' && function_name !== 'Logout' ) {
 			url = url + '&MessageID=' + message_id;
@@ -293,13 +293,13 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		}
 
-		apiArgs = {json: JSON.stringify( apiArgs )};
+		apiArgs = { json: JSON.stringify( apiArgs ) };
 
 		//Try to get a stack trace for each function call so if an error occurs we know exactly what triggered the call.
 		// IE11 doesn't support Error() like Firefox/Chrome/Edge do though, so skip the trace.
 		var stack_trace_str = null;
 		if ( typeof Error !== 'undefined' ) {
-			var stack_trace = (new Error());
+			var stack_trace = ( new Error() );
 			if ( typeof stack_trace === 'object' && stack_trace.stack && typeof stack_trace.stack === 'string' ) {
 				stack_trace_str = stack_trace.stack.split( '\n' ); //This is eventually JSONified so convert it to an array for better formatting.
 			} else {
@@ -361,18 +361,18 @@ var ServiceCaller = Backbone.Model.extend( {
 					//Debug.Arr(result, 'Response from API. message_id: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 
 					if ( Global.enable_api_tracing == true ) {
-						api_trace_label = '%cAPI Request:%c ' + className + '->' + function_name +'(...) [Expand for Details]';
+						var api_trace_label = '%cAPI Request:%c ' + className + '->' + function_name + '(...) [Expand for Details]';
 						console.groupCollapsed( api_trace_label, 'font-weight: bold', 'font-weight: normal' );
 						console.log( '%c' + className + '->' + function_name + '%c(' + $this.prettyPrintAPIArguments( apiArgs ) + ')', 'font-weight: bold', 'font-weight: normal' );
 
-						api_trace_raw_request_label = '%cRaw Request:%c [Expand for Details]';
+						var api_trace_raw_request_label = '%cRaw Request:%c [Expand for Details]';
 						console.groupCollapsed( api_trace_raw_request_label, 'font-weight: bold', 'font-weight: normal' );
 						console.log( '%cURL:%c ' + url, 'font-weight: bold', 'font-weight: normal' );
 						console.log( '%cRaw POST Body (non-URLEncoded):%c json=' + apiArgs.json + '', 'font-weight: bold', 'font-weight: normal' );
-						console.log( '%ccURL Command:%c curl -k -X POST --cookie "'+ Global.getSessionIDKey() +'=<SessionID>" --data-urlencode \'json=' + apiArgs.json + '\' "'+ base_url +'"', 'font-weight: bold', 'font-weight: normal' );
+						console.log( '%ccURL Command:%c curl -k --location --request POST --cookie "' + Global.getSessionIDKey() + '=<SessionID>" --form \'json=' + apiArgs.json + '\' "' + base_url + '"', 'font-weight: bold', 'font-weight: normal' );
 						console.groupEnd( api_trace_raw_request_label );
 
-						api_trace_response_label = '%cResponse:%c [Expand for Details]';
+						var api_trace_response_label = '%cResponse:%c [Expand for Details]';
 						console.groupCollapsed( api_trace_response_label, 'font-weight: bold', 'font-weight: normal' );
 						console.log( JSON.stringify( result, null, 2 ) );
 						console.groupEnd( api_trace_response_label );
@@ -401,9 +401,9 @@ var ServiceCaller = Backbone.Model.extend( {
 						TAlertManager.showAlert( apiReturnHandler.getDescription(), 'Error' );
 						//Error: Uncaught ReferenceError: promise_key is not defined
 						if ( typeof promise_key != 'undefined' ) {
-							TTPromise.reject('ServiceCaller', message_id);
+							TTPromise.reject( 'ServiceCaller', message_id );
 						} else {
-							Debug.Text('ERROR: Unable to release promise because key is NULL.', 'ServiceCaller.js', 'ServiceCaller', null, 10);
+							Debug.Text( 'ERROR: Unable to release promise because key is NULL.', 'ServiceCaller.js', 'ServiceCaller', null, 10 );
 						}
 						return;
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'SESSION' ) {
@@ -412,14 +412,14 @@ var ServiceCaller = Backbone.Model.extend( {
 						ServiceCaller.cancelAllError = true;
 						LocalCacheData.login_error_string = $.i18n._( 'Session expired, please login again.' );
 						Global.clearSessionCookie(); //This helps skip other API calls or prevent the UI from thinking we are still logged in.
-						if ( window.location.href == Global.getBaseURL() + '#!m=' + 'Login') {
+						if ( window.location.href == Global.getBaseURL() + '#!m=' + 'Login' ) {
 							// Prevent a partially loaded login screen when SessionID cookie is set but not valid on server.
 							window.location.reload();
 						} else {
-							var paths = Global.getBaseURL().replace(ServiceCaller.rootURL, '').split( '/' );
-							if ( paths.indexOf('quick_punch') > 0 ) {
+							var paths = Global.getBaseURL().replace( ServiceCaller.rootURL, '' ).split( '/' );
+							if ( paths.indexOf( 'quick_punch' ) > 0 ) {
 								Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + 'QuickPunchLogin' );
-							} else if ( paths.indexOf('portal') > 0 ) {
+							} else if ( paths.indexOf( 'portal' ) > 0 ) {
 								if ( LocalCacheData.all_url_args.company_id ) {
 									LocalCacheData.setPortalLoginUser( null );
 									Global.setURLToBrowser( Global.getBaseURL() + '#!m=PortalJobVacancy&company_id=' + LocalCacheData.all_url_args.company_id );
@@ -430,13 +430,13 @@ var ServiceCaller = Backbone.Model.extend( {
 								}
 							}
 						}
-						TTPromise.resolve('ServiceCaller', message_id);
+						TTPromise.resolve( 'ServiceCaller', message_id );
 						return;
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'DOWN_FOR_MAINTENANCE' ) {
 						//Before the location.replace because after that point we can't be sure of execution.
-						TTPromise.resolve('ServiceCaller', message_id);
+						TTPromise.resolve( 'ServiceCaller', message_id );
 						//replace instead of assignment to ensure that the DOWN_FOR_MAINTENANCE page does not end up in the back button history.
-						window.location.replace( ServiceCaller.rootURL + LocalCacheData.loginData.base_url  + 'html5/DownForMaintenance.php?exception=DOWN_FOR_MAINTENANCE' );
+						window.location.replace( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'html5/DownForMaintenance.php?exception=DOWN_FOR_MAINTENANCE' );
 						return;
 					} else {
 						//Debug.Text('API returned result: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
@@ -459,16 +459,16 @@ var ServiceCaller = Backbone.Model.extend( {
 						}
 
 						//Error: Function expected in /interface/html5/services/ServiceCaller.js?v=9.0.0-20150822-090205 line 269
-						if ( responseObject.get( 'onResult' ) && typeof(responseObject.get( 'onResult' )) == 'function' ) {
+						if ( responseObject.get( 'onResult' ) && typeof ( responseObject.get( 'onResult' ) ) == 'function' ) {
 							responseObject.get( 'onResult' )( apiReturnHandler );
 						}
 					}
 
-					TTPromise.resolve('ServiceCaller', message_id);
+					TTPromise.resolve( 'ServiceCaller', message_id );
 				},
 
 				error: function( jqXHR, textStatus, errorThrown ) {
-					TTPromise.reject('ServiceCaller', message_id);
+					TTPromise.reject( 'ServiceCaller', message_id );
 					if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
 						ProgressBar.removeProgressBar( message_id );
 					}
@@ -477,7 +477,7 @@ var ServiceCaller = Backbone.Model.extend( {
 						return;
 					}
 
-					Debug.Text( 'AJAX Request Error: '+ errorThrown +' Message: '+ textStatus +' HTTP Code: '+ jqXHR.status, 'ServiceCaller.js', 'ServiceCaller', 'call', 10);
+					Debug.Text( 'AJAX Request Error: ' + errorThrown + ' Message: ' + textStatus + ' HTTP Code: ' + jqXHR.status, 'ServiceCaller.js', 'ServiceCaller', 'call', 10 );
 					if ( jqXHR.responseText && jqXHR.responseText.indexOf( 'User not authenticated' ) >= 0 ) {
 						ServiceCaller.cancelAllError = true;
 
@@ -514,7 +514,7 @@ var ServiceCaller = Backbone.Model.extend( {
 							ProgressBar.cancelProgressBar();
 						}
 
-						if ( responseObject.get( 'onError' ) && typeof(responseObject.get( 'onError' )) == 'function' ) {
+						if ( responseObject.get( 'onError' ) && typeof ( responseObject.get( 'onError' ) ) == 'function' ) {
 							responseObject.get( 'onError' )( apiReturnHandler );
 						}
 
@@ -540,15 +540,15 @@ ServiceCaller.getURLWithSessionId = function( rest_url ) {
 ServiceCaller.abortAll = function() {
 	$.each( $.xhrPool, function( index, ajax_obj ) {
 		if ( typeof ajax_obj == 'object' && ajax_obj.jqXHR && typeof ajax_obj.jqXHR == 'object' && typeof ajax_obj.jqXHR.abort === 'function' ) {
-			if ( ajax_obj.url && ajax_obj.url.indexOf( 'Method=Logout') == -1 ) { //Don't abort the Logout call.
-				Debug.Text(' Aborting API call: '+ ajax_obj.url, 'ServiceCaller.js', 'ServiceCaller', 'abortAll', 10);
+			if ( ajax_obj.url && ajax_obj.url.indexOf( 'Method=Logout' ) == -1 ) { //Don't abort the Logout call.
+				Debug.Text( ' Aborting API call: ' + ajax_obj.url, 'ServiceCaller.js', 'ServiceCaller', 'abortAll', 10 );
 				ajax_obj.jqXHR.abort();
 			} else {
-				Debug.Text('Not aborting Logout API call...', 'ServiceCaller.js', 'ServiceCaller', 'abortAll', 10);
+				Debug.Text( 'Not aborting Logout API call...', 'ServiceCaller.js', 'ServiceCaller', 'abortAll', 10 );
 			}
 		}
-	});
-}
+	} );
+};
 
 ServiceCaller.hosts = null;
 

@@ -76,7 +76,7 @@ BaseWizardController = BaseWindowController.extend( {
 		BaseWizardController.call_back = null;
 		BaseWizardController.default_data = null;
 
-		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+		this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
 
 		LocalCacheData.current_open_wizard_controller = this;
 		var $this = this;
@@ -631,9 +631,8 @@ BaseWizardController = BaseWindowController.extend( {
 		return button;
 	},
 
-
 	showNoResultCover: function( grid_div ) {
-		if ( grid_div ) {
+		if ( grid_div && grid_div instanceof jQuery ) {
 			this.removeNoResultCover( grid_div );
 			var no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
 			no_result_box.NoResultBox( { related_view_controller: this, is_new: false } );
@@ -644,11 +643,10 @@ BaseWizardController = BaseWindowController.extend( {
 	},
 
 	removeNoResultCover: function( grid_div ) {
-		if ( grid_div ) {
+		if ( grid_div && grid_div instanceof jQuery ) {
 			grid_div.find( '.no-result-div' ).remove();
 		}
 	}
-
 
 } );
 

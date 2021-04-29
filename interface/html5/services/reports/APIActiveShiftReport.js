@@ -51,6 +51,4 @@ var APIActiveShiftReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

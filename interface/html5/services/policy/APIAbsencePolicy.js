@@ -9,7 +9,6 @@ var APIAbsencePolicy = ServiceCaller.extend( {
 
 	},
 
-
 	getProjectedAbsencePolicyBalance: function() {
 
 		return this.argumentsHandler( this.className, 'getProjectedAbsencePolicyBalance', arguments );
@@ -73,7 +72,5 @@ var APIAbsencePolicy = ServiceCaller.extend( {
 	exportAbsencePolicy: function() {
 		return this.argumentsHandler( this.className, 'exportAbsencePolicy', arguments );
 	}
-
-
 
 } );

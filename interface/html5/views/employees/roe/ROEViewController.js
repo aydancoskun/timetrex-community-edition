@@ -3,6 +3,8 @@ ROEViewController = BaseViewController.extend( {
 	user_api: null,
 	company_api: null,
 	pay_period_schedule_api: null,
+	user_status_array: null,
+	status_array: null,
 	code_array: null,
 	type_array: null,
 
@@ -22,12 +24,12 @@ ROEViewController = BaseViewController.extend( {
 		this.table_name_key = 'roe';
 		this.context_menu_name = $.i18n._( 'Record Of Employment' );
 		this.navigation_label = $.i18n._( 'Record Of Employment' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIROE' ))();
-		this.report_api = new (APIFactory.getAPIClass( 'APIROEReport' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-		this.pay_period_schedule_api = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
-		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIROE' ) )();
+		this.report_api = new ( APIFactory.getAPIClass( 'APIROEReport' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.pay_period_schedule_api = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
+		this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -40,6 +42,8 @@ ROEViewController = BaseViewController.extend( {
 	initOptions: function() {
 		var $this = this;
 
+		this.initDropDownOption( 'status' );
+		this.initDropDownOption( 'user_status' );
 		this.initDropDownOption( 'code' );
 
 		this.initDropDownOption( 'type', 'pay_period_type_id', this.pay_period_schedule_api, function( res ) {
@@ -57,7 +61,7 @@ ROEViewController = BaseViewController.extend( {
 		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				form: {
@@ -449,7 +453,16 @@ ROEViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
+				in_column: 1,
+				field: 'status_id',
+				multiple: true,
+				basic_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -497,7 +510,7 @@ ROEViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -509,7 +522,7 @@ ROEViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -534,7 +547,6 @@ ROEViewController = BaseViewController.extend( {
 	},
 
 	setCurrentEditRecordData: function() {
-
 
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -577,7 +589,7 @@ ROEViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIROE' )),
+			api_class: ( APIFactory.getAPIClass( 'APIROE' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ROE,
@@ -604,7 +616,7 @@ ROEViewController = BaseViewController.extend( {
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -617,6 +629,12 @@ ROEViewController = BaseViewController.extend( {
 		form_item_input.setDefaultArgs( default_args );
 
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_roe_column1, '' );
+
+		// Status
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'status_id' } );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_status_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_roe_column1 );
 
 		// Reason
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -703,7 +721,7 @@ ROEViewController = BaseViewController.extend( {
 		// Insurable Absence Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			field: 'absence_policy_ids',
@@ -721,7 +739,7 @@ ROEViewController = BaseViewController.extend( {
 		// Insurable Earnings (Box 15B)
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			field: 'insurable_earnings_psea_ids',
@@ -736,7 +754,7 @@ ROEViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			field: 'vacation_psea_ids',
@@ -941,6 +959,12 @@ ROEViewController = BaseViewController.extend( {
 			case ContextMenuIconName.e_file:
 				post_data = { 0: args, 1: 'efile_xml' };
 				this.doFormIFrameCall( post_data );
+
+				//Refresh grid within 5 seconds, hopefully the file has been downloaded by then.
+				$this = this;
+				setTimeout( function() {
+					$this.search();
+				}, 5000 );
 				break;
 			case ContextMenuIconName.export_excel:
 				this.onExportClick( 'export' + this.api.key_name );

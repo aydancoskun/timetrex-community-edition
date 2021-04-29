@@ -51,6 +51,4 @@ var APIQualificationGroup = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

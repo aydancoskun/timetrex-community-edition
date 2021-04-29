@@ -41,43 +41,43 @@
 class UserSettingListFactory extends UserSettingFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserSettingListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -90,25 +90,25 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserSettingListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id)
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON a.user_id = uf.id
 					where	uf.company_id = ?
 						AND ( uf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
@@ -124,37 +124,38 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 	 * @param $name
 	 * @return bool|UserSettingListFactory
 	 */
-	function getByUserIdAndName( $user_id, $name) {
+	function getByUserIdAndName( $user_id, $name ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $name == '') {
-			return FALSE;
+		if ( $name == '' ) {
+			return false;
 		}
 
-		$cache_id = $user_id.$name;
-		$this->rs = $this->getCache($cache_id);
-		if ( $this->rs === FALSE ) {
-			$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'name' => $name,
-			);
+		$cache_id = $user_id . $name;
+		$this->rs = $this->getCache( $cache_id );
+		if ( $this->rs === false ) {
+			$ph = [
+					'user_id' => TTUUID::castUUID( $user_id ),
+					'name'    => $name,
+			];
 
 			$query = '
 						select	*
-						from	'. $this->getTable() .'
+						from	' . $this->getTable() . '
 						where	user_id = ?
 							AND	name = ?
 							AND deleted = 0';
 
 			$this->rs = $this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs, $cache_id);
+			$this->saveCache( $this->rs, $cache_id );
 		}
 
 		return $this;
 	}
 
 }
+
 ?>

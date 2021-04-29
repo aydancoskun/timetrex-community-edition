@@ -40,32 +40,32 @@
  */
 class T4SummaryReport extends Report {
 
-	protected $user_ids = array();
+	protected $user_ids = [];
 
 	/**
 	 * T4SummaryReport constructor.
 	 */
 	function __construct() {
-		$this->title = TTi18n::getText('T4 Summary Report');
+		$this->title = TTi18n::getText( 'T4 Summary Report' );
 		$this->file_name = 't4_summary';
 
 		parent::__construct();
 
-		return TRUE;
+		return true;
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id    UUID
 	 * @param string $company_id UUID
 	 * @return bool
 	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
-		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
-				AND $this->getPermissionObject()->Check('report', 'view_t4_summary', $user_id, $company_id ) ) {
-			return TRUE;
+		if ( $this->getPermissionObject()->Check( 'report', 'enabled', $user_id, $company_id )
+				&& $this->getPermissionObject()->Check( 'report', 'view_t4_summary', $user_id, $company_id ) ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -73,61 +73,61 @@ class T4SummaryReport extends Report {
 	 * @param null $params
 	 * @return array|bool|null
 	 */
-	protected function _getOptions( $name, $params = NULL ) {
-		$retval = NULL;
-		switch( $name ) {
+	protected function _getOptions( $name, $params = null ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'output_format':
-				$retval = array_merge( parent::getOptions('default_output_format'),
-									array(
-										'-1100-pdf_form' => TTi18n::gettext('Employee (One Employee/Page)'),
-										'-1110-pdf_form_government' => TTi18n::gettext('Government (Multiple Employees/Page)'),
-										'-1120-efile_xml' => TTi18n::gettext('eFile'),
-										)
-									);
+				$retval = array_merge( parent::getOptions( 'default_output_format' ),
+									   [
+											   '-1100-pdf_form'            => TTi18n::gettext( 'Employee (One Employee/Page)' ),
+											   '-1110-pdf_form_government' => TTi18n::gettext( 'Government (Multiple Employees/Page)' ),
+											   '-1120-efile_xml'           => TTi18n::gettext( 'eFile' ),
+									   ]
+				);
 				break;
 			case 'default_setup_fields':
-				$retval = array(
-										'template',
-										'time_period',
-										'columns',
-								);
+				$retval = [
+						'template',
+						'time_period',
+						'columns',
+				];
 
 				break;
 			case 'setup_fields':
-				$retval = array(
-										//Static Columns - Aggregate functions can't be used on these.
-										'-1000-template' => TTi18n::gettext('Template'),
-										'-1010-time_period' => TTi18n::gettext('Time Period'),
-										'-2000-legal_entity_id' => TTi18n::gettext('Legal Entity'),
-										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
-										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
-										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
-										'-2040-include_user_id' => TTi18n::gettext('Employee Include'),
-										'-2050-exclude_user_id' => TTi18n::gettext('Employee Exclude'),
-										'-2060-default_branch_id' => TTi18n::gettext('Default Branch'),
-										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
-										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
+				$retval = [
+					//Static Columns - Aggregate functions can't be used on these.
+					'-1000-template'              => TTi18n::gettext( 'Template' ),
+					'-1010-time_period'           => TTi18n::gettext( 'Time Period' ),
+					'-2000-legal_entity_id'       => TTi18n::gettext( 'Legal Entity' ),
+					'-2010-user_status_id'        => TTi18n::gettext( 'Employee Status' ),
+					'-2020-user_group_id'         => TTi18n::gettext( 'Employee Group' ),
+					'-2030-user_title_id'         => TTi18n::gettext( 'Employee Title' ),
+					'-2040-include_user_id'       => TTi18n::gettext( 'Employee Include' ),
+					'-2050-exclude_user_id'       => TTi18n::gettext( 'Employee Exclude' ),
+					'-2060-default_branch_id'     => TTi18n::gettext( 'Default Branch' ),
+					'-2070-default_department_id' => TTi18n::gettext( 'Default Department' ),
+					'-2100-custom_filter'         => TTi18n::gettext( 'Custom Filter' ),
 
-										'-5000-columns' => TTi18n::gettext('Display Columns'),
-										'-5010-group' => TTi18n::gettext('Group By'),
-										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
-										'-5030-sort' => TTi18n::gettext('Sort By'),
-								);
+					'-5000-columns'   => TTi18n::gettext( 'Display Columns' ),
+					'-5010-group'     => TTi18n::gettext( 'Group By' ),
+					'-5020-sub_total' => TTi18n::gettext( 'SubTotal By' ),
+					'-5030-sort'      => TTi18n::gettext( 'Sort By' ),
+				];
 				break;
 			case 'time_period':
-				$retval = TTDate::getTimePeriodOptions( FALSE ); //Exclude Pay Period options.
+				$retval = TTDate::getTimePeriodOptions( false ); //Exclude Pay Period options.
 				break;
 			case 'date_columns':
 				//$retval = TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, TRUE );
-				$retval = array();
+				$retval = [];
 				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
-					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'T4SummaryReport', 'custom_column' );
-					if ( is_array($custom_column_labels) ) {
+					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions( 'display_column_type_ids' ), null, 'T4SummaryReport', 'custom_column' );
+					if ( is_array( $custom_column_labels ) ) {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
 				}
@@ -135,14 +135,14 @@ class T4SummaryReport extends Report {
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
-					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'T4SummaryReport', 'custom_column' );
+					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions( 'filter_column_type_ids' ), null, 'T4SummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
-					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'T4SummaryReport', 'custom_column' );
-					if ( is_array($report_dynamic_custom_column_labels) ) {
+					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions( 'display_column_type_ids' ), $rcclf->getOptions( 'dynamic_format_ids' ), 'T4SummaryReport', 'custom_column' );
+					if ( is_array( $report_dynamic_custom_column_labels ) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
 				}
@@ -150,95 +150,95 @@ class T4SummaryReport extends Report {
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
-					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'T4SummaryReport', 'custom_column' );
-					if ( is_array($report_static_custom_column_labels) ) {
+					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions( 'display_column_type_ids' ), $rcclf->getOptions( 'static_format_ids' ), 'T4SummaryReport', 'custom_column' );
+					if ( is_array( $report_static_custom_column_labels ) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
 				}
 				break;
 			case 'formula_columns':
-				$retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
+				$retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions( 'static_columns' ), (array)$this->getOptions( 'report_static_custom_column' ) ), $this->getOptions( 'dynamic_columns' ) ) );
 				break;
 			case 'filter_columns':
-				$retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
+				$retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions( 'static_columns' ), $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) ) );
 				break;
 			case 'static_columns':
-				$retval = array(
-										//Static Columns - Aggregate functions can't be used on these.
-										'-0900-legal_entity_legal_name' => TTi18n::gettext('Legal Entity Name'),
-										'-0910-legal_entity_trade_name' => TTi18n::gettext( 'Legal Entity Trade Name' ),
+				$retval = [
+					//Static Columns - Aggregate functions can't be used on these.
+					'-0900-legal_entity_legal_name' => TTi18n::gettext( 'Legal Entity Name' ),
+					'-0910-legal_entity_trade_name' => TTi18n::gettext( 'Legal Entity Trade Name' ),
 
-										'-1000-first_name' => TTi18n::gettext('First Name'),
-										'-1001-middle_name' => TTi18n::gettext('Middle Name'),
-										'-1002-last_name' => TTi18n::gettext('Last Name'),
-										'-1005-full_name' => TTi18n::gettext('Full Name'),
-										'-1030-employee_number' => TTi18n::gettext('Employee #'),
-										'-1035-sin' => TTi18n::gettext('SIN/SSN'),
-										'-1040-status' => TTi18n::gettext('Status'),
-										'-1050-title' => TTi18n::gettext('Title'),
-										'-1060-province' => TTi18n::gettext('Province/State'),
-										'-1070-country' => TTi18n::gettext('Country'),
-										'-1080-group' => TTi18n::gettext('Group'),
-										'-1090-default_branch' => TTi18n::gettext('Default Branch'),
-										'-1100-default_department' => TTi18n::gettext('Default Department'),
-										'-1110-currency' => TTi18n::gettext('Currency'),
-										//'-1111-current_currency' => TTi18n::gettext('Current Currency'),
+					'-1000-first_name'         => TTi18n::gettext( 'First Name' ),
+					'-1001-middle_name'        => TTi18n::gettext( 'Middle Name' ),
+					'-1002-last_name'          => TTi18n::gettext( 'Last Name' ),
+					'-1005-full_name'          => TTi18n::gettext( 'Full Name' ),
+					'-1030-employee_number'    => TTi18n::gettext( 'Employee #' ),
+					'-1035-sin'                => TTi18n::gettext( 'SIN/SSN' ),
+					'-1040-status'             => TTi18n::gettext( 'Status' ),
+					'-1050-title'              => TTi18n::gettext( 'Title' ),
+					'-1060-province'           => TTi18n::gettext( 'Province/State' ),
+					'-1070-country'            => TTi18n::gettext( 'Country' ),
+					'-1080-group'              => TTi18n::gettext( 'Group' ),
+					'-1090-default_branch'     => TTi18n::gettext( 'Default Branch' ),
+					'-1100-default_department' => TTi18n::gettext( 'Default Department' ),
+					'-1110-currency'           => TTi18n::gettext( 'Currency' ),
+					//'-1111-current_currency' => TTi18n::gettext('Current Currency'),
 
-										//'-1110-verified_time_sheet' => TTi18n::gettext('Verified TimeSheet'),
-										//'-1120-pending_request' => TTi18n::gettext('Pending Requests'),
+					//'-1110-verified_time_sheet' => TTi18n::gettext('Verified TimeSheet'),
+					//'-1120-pending_request' => TTi18n::gettext('Pending Requests'),
 
-										//Handled in date_columns above.
-										//'-1450-pay_period' => TTi18n::gettext('Pay Period'),
+					//Handled in date_columns above.
+					//'-1450-pay_period' => TTi18n::gettext('Pay Period'),
 
-										'-1400-permission_control' => TTi18n::gettext('Permission Group'),
-										'-1410-pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
-										'-1420-policy_group' => TTi18n::gettext('Policy Group'),
-								);
+					'-1400-permission_control'  => TTi18n::gettext( 'Permission Group' ),
+					'-1410-pay_period_schedule' => TTi18n::gettext( 'Pay Period Schedule' ),
+					'-1420-policy_group'        => TTi18n::gettext( 'Policy Group' ),
+				];
 
-				$retval = array_merge( $retval, $this->getOptions('date_columns'), (array)$this->getOptions('report_static_custom_column') );
-				ksort($retval);
+				$retval = array_merge( $retval, $this->getOptions( 'date_columns' ), (array)$this->getOptions( 'report_static_custom_column' ) );
+				ksort( $retval );
 				break;
 			case 'dynamic_columns':
-				$retval = array(
-										//Dynamic - Aggregate functions can be used
-										'-2100-income' => TTi18n::gettext('Income (14)'),
-										'-2110-tax' => TTi18n::gettext('Income Tax (22)'),
-										'-2120-employee_cpp' => TTi18n::gettext('Employee CPP (16)'),
-										'-2125-ei_earnings' => TTi18n::gettext('EI Insurable Earnings (24)'),
-										'-2126-cpp_earnings' => TTi18n::gettext('CPP Pensionable Earnings (26)'),
-										'-2130-employee_ei' => TTi18n::gettext('Employee EI (18)'),
-										'-2140-union_dues' => TTi18n::gettext('Union Dues (44)'),
-										'-2150-employer_cpp' => TTi18n::gettext('Employer CPP'),
-										'-2160-employer_ei' => TTi18n::gettext('Employer EI'),
-										'-2170-rpp' => TTi18n::gettext('RPP Contributions (20)'),
-										'-2180-charity' => TTi18n::gettext('Charity Donations (46)'),
-										'-2190-pension_adjustment' => TTi18n::gettext('Pension Adjustment (52)'),
-										'-2200-other_box_0' => TTi18n::gettext('Other Box 1'),
-										'-2210-other_box_1' => TTi18n::gettext('Other Box 2'),
-										'-2220-other_box_2' => TTi18n::gettext('Other Box 3'),
-										'-2220-other_box_3' => TTi18n::gettext('Other Box 4'),
-										'-2220-other_box_4' => TTi18n::gettext('Other Box 5'),
-										'-2220-other_box_5' => TTi18n::gettext('Other Box 6'),
-							);
+				$retval = [
+					//Dynamic - Aggregate functions can be used
+					'-2100-income'             => TTi18n::gettext( 'Income (14)' ),
+					'-2110-tax'                => TTi18n::gettext( 'Income Tax (22)' ),
+					'-2120-employee_cpp'       => TTi18n::gettext( 'Employee CPP (16)' ),
+					'-2125-ei_earnings'        => TTi18n::gettext( 'EI Insurable Earnings (24)' ),
+					'-2126-cpp_earnings'       => TTi18n::gettext( 'CPP Pensionable Earnings (26)' ),
+					'-2130-employee_ei'        => TTi18n::gettext( 'Employee EI (18)' ),
+					'-2140-union_dues'         => TTi18n::gettext( 'Union Dues (44)' ),
+					'-2150-employer_cpp'       => TTi18n::gettext( 'Employer CPP' ),
+					'-2160-employer_ei'        => TTi18n::gettext( 'Employer EI' ),
+					'-2170-rpp'                => TTi18n::gettext( 'RPP Contributions (20)' ),
+					'-2180-charity'            => TTi18n::gettext( 'Charity Donations (46)' ),
+					'-2190-pension_adjustment' => TTi18n::gettext( 'Pension Adjustment (52)' ),
+					'-2200-other_box_0'        => TTi18n::gettext( 'Other Box 1' ),
+					'-2210-other_box_1'        => TTi18n::gettext( 'Other Box 2' ),
+					'-2220-other_box_2'        => TTi18n::gettext( 'Other Box 3' ),
+					'-2220-other_box_3'        => TTi18n::gettext( 'Other Box 4' ),
+					'-2220-other_box_4'        => TTi18n::gettext( 'Other Box 5' ),
+					'-2220-other_box_5'        => TTi18n::gettext( 'Other Box 6' ),
+				];
 				break;
 			case 'columns':
-				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
-				ksort($retval);
+				$retval = array_merge( $this->getOptions( 'static_columns' ), $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) );
+				ksort( $retval );
 				break;
 			case 'column_format':
 				//Define formatting function for each column.
-				$columns = array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_custom_column') );
-				if ( is_array($columns) ) {
-					foreach($columns as $column => $name ) {
+				$columns = array_merge( $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_custom_column' ) );
+				if ( is_array( $columns ) ) {
+					foreach ( $columns as $column => $name ) {
 						$retval[$column] = 'currency';
 					}
 				}
 				break;
 			case 'aggregates':
-				$retval = array();
-				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
-				if ( is_array($dynamic_columns ) ) {
-					foreach( $dynamic_columns as $column ) {
+				$retval = [];
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) ) ) );
+				if ( is_array( $dynamic_columns ) ) {
+					foreach ( $dynamic_columns as $column ) {
 						switch ( $column ) {
 							default:
 								$retval[$column] = 'sum';
@@ -248,56 +248,56 @@ class T4SummaryReport extends Report {
 
 				break;
 			case 'type':
-				$retval = array(
-											'-1010-O' => TTi18n::getText('Original'),
-											'-1020-A' => TTi18n::getText('Amended'),
-											'-1030-C' => TTi18n::getText('Cancel'),
-										);
+				$retval = [
+						'-1010-O' => TTi18n::getText( 'Original' ),
+						'-1020-A' => TTi18n::getText( 'Amended' ),
+						'-1030-C' => TTi18n::getText( 'Cancel' ),
+				];
 				break;
 			case 'templates':
-				$retval = array(
-										//'-1010-by_month' => TTi18n::gettext('by Month'),
-										'-1020-by_employee' => TTi18n::gettext('by Employee'),
-										'-1030-by_branch' => TTi18n::gettext('by Branch'),
-										'-1040-by_department' => TTi18n::gettext('by Department'),
-										'-1050-by_branch_by_department' => TTi18n::gettext('by Branch/Department'),
+				$retval = [
+					//'-1010-by_month' => TTi18n::gettext('by Month'),
+					'-1020-by_employee'             => TTi18n::gettext( 'by Employee' ),
+					'-1030-by_branch'               => TTi18n::gettext( 'by Branch' ),
+					'-1040-by_department'           => TTi18n::gettext( 'by Department' ),
+					'-1050-by_branch_by_department' => TTi18n::gettext( 'by Branch/Department' ),
 
-										//'-1060-by_month_by_employee' => TTi18n::gettext('by Month/Employee'),
-										//'-1070-by_month_by_branch' => TTi18n::gettext('by Month/Branch'),
-										//'-1080-by_month_by_department' => TTi18n::gettext('by Month/Department'),
-										//'-1090-by_month_by_branch_by_department' => TTi18n::gettext('by Month/Branch/Department'),
-								);
+					//'-1060-by_month_by_employee' => TTi18n::gettext('by Month/Employee'),
+					//'-1070-by_month_by_branch' => TTi18n::gettext('by Month/Branch'),
+					//'-1080-by_month_by_department' => TTi18n::gettext('by Month/Department'),
+					//'-1090-by_month_by_branch_by_department' => TTi18n::gettext('by Month/Branch/Department'),
+				];
 
 				break;
 			case 'template_config':
 				$template = strtolower( Misc::trimSortPrefix( $params['template'] ) );
-				if ( isset($template) AND $template != '' ) {
-					switch( $template ) {
+				if ( isset( $template ) && $template != '' ) {
+					switch ( $template ) {
 						case 'default':
 							//Proper settings to generate the form.
 							//$retval['-1010-time_period']['time_period'] = 'last_quarter';
 
-							$retval['columns'] = $this->getOptions('columns');
+							$retval['columns'] = $this->getOptions( 'columns' );
 
 							$retval['group'][] = 'date_quarter_month';
 
-							$retval['sort'][] = array('date_quarter_month' => 'asc');
+							$retval['sort'][] = [ 'date_quarter_month' => 'asc' ];
 
-							$retval['other']['grand_total'] = TRUE;
+							$retval['other']['grand_total'] = true;
 
 							break;
 						default:
-							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
-							$retval['columns'] = array();
+							Debug::Text( ' Parsing template name: ' . $template, __FILE__, __LINE__, __METHOD__, 10 );
+							$retval['columns'] = [];
 							$retval['-1010-time_period']['time_period'] = 'last_year';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
-							$template_keywords = explode('+', $template );
-							if ( is_array($template_keywords) ) {
-								foreach( $template_keywords as $template_keyword ) {
-									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__, 10);
+							$template_keywords = explode( '+', $template );
+							if ( is_array( $template_keywords ) ) {
+								foreach ( $template_keywords as $template_keyword ) {
+									Debug::Text( ' Keyword: ' . $template_keyword, __FILE__, __LINE__, __METHOD__, 10 );
 
-									switch( $template_keyword ) {
+									switch ( $template_keyword ) {
 										//Columns
 
 										//Filter
@@ -309,7 +309,7 @@ class T4SummaryReport extends Report {
 
 											$retval['group'][] = 'date_month';
 
-											$retval['sort'][] = array('date_month' => 'asc');
+											$retval['sort'][] = [ 'date_month' => 'asc' ];
 											break;
 										case 'by_employee':
 											$retval['columns'][] = 'first_name';
@@ -318,22 +318,22 @@ class T4SummaryReport extends Report {
 											$retval['group'][] = 'first_name';
 											$retval['group'][] = 'last_name';
 
-											$retval['sort'][] = array('last_name' => 'asc');
-											$retval['sort'][] = array('first_name' => 'asc');
+											$retval['sort'][] = [ 'last_name' => 'asc' ];
+											$retval['sort'][] = [ 'first_name' => 'asc' ];
 											break;
 										case 'by_branch':
 											$retval['columns'][] = 'default_branch';
 
 											$retval['group'][] = 'default_branch';
 
-											$retval['sort'][] = array('default_branch' => 'asc');
+											$retval['sort'][] = [ 'default_branch' => 'asc' ];
 											break;
 										case 'by_department':
 											$retval['columns'][] = 'default_department';
 
 											$retval['group'][] = 'default_department';
 
-											$retval['sort'][] = array('default_department' => 'asc');
+											$retval['sort'][] = [ 'default_department' => 'asc' ];
 											break;
 										case 'by_branch_by_department':
 											$retval['columns'][] = 'default_branch';
@@ -344,8 +344,8 @@ class T4SummaryReport extends Report {
 
 											$retval['sub_total'][] = 'default_branch';
 
-											$retval['sort'][] = array('default_branch' => 'asc');
-											$retval['sort'][] = array('default_department' => 'asc');
+											$retval['sort'][] = [ 'default_branch' => 'asc' ];
+											$retval['sort'][] = [ 'default_department' => 'asc' ];
 											break;
 										case 'by_month_by_employee':
 											$retval['columns'][] = 'date_month';
@@ -358,9 +358,9 @@ class T4SummaryReport extends Report {
 
 											$retval['sub_total'][] = 'date_month';
 
-											$retval['sort'][] = array('date_month' => 'asc');
-											$retval['sort'][] = array('last_name' => 'asc');
-											$retval['sort'][] = array('first_name' => 'asc');
+											$retval['sort'][] = [ 'date_month' => 'asc' ];
+											$retval['sort'][] = [ 'last_name' => 'asc' ];
+											$retval['sort'][] = [ 'first_name' => 'asc' ];
 											break;
 										case 'by_month_by_branch':
 											$retval['columns'][] = 'date_month';
@@ -371,8 +371,8 @@ class T4SummaryReport extends Report {
 
 											$retval['sub_total'][] = 'date_month';
 
-											$retval['sort'][] = array('date_month' => 'asc');
-											$retval['sort'][] = array('default_branch' => 'asc');
+											$retval['sort'][] = [ 'date_month' => 'asc' ];
+											$retval['sort'][] = [ 'default_branch' => 'asc' ];
 											break;
 										case 'by_month_by_department':
 											$retval['columns'][] = 'date_month';
@@ -383,8 +383,8 @@ class T4SummaryReport extends Report {
 
 											$retval['sub_total'][] = 'date_month';
 
-											$retval['sort'][] = array('date_month' => 'asc');
-											$retval['sort'][] = array('default_department' => 'asc');
+											$retval['sort'][] = [ 'date_month' => 'asc' ];
+											$retval['sort'][] = [ 'default_department' => 'asc' ];
 											break;
 										case 'by_month_by_branch_by_department':
 											$retval['columns'][] = 'date_month';
@@ -398,16 +398,15 @@ class T4SummaryReport extends Report {
 											$retval['sub_total'][] = 'date_month';
 											$retval['sub_total'][] = 'default_branch';
 
-											$retval['sort'][] = array('date_month' => 'asc');
-											$retval['sort'][] = array('default_branch' => 'asc');
-											$retval['sort'][] = array('default_department' => 'asc');
+											$retval['sort'][] = [ 'date_month' => 'asc' ];
+											$retval['sort'][] = [ 'default_branch' => 'asc' ];
+											$retval['sort'][] = [ 'default_department' => 'asc' ];
 											break;
-
 									}
 								}
 							}
 
-							$retval['columns'] = array_merge( $retval['columns'], array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) ) );
+							$retval['columns'] = array_merge( $retval['columns'], array_keys( Misc::trimSortPrefix( $this->getOptions( 'dynamic_columns' ) ) ) );
 
 							break;
 					}
@@ -417,27 +416,27 @@ class T4SummaryReport extends Report {
 				$retval['-1000-template'] = $template;
 
 				//Add sort prefixes so Flex can maintain order.
-				if ( isset($retval['filter']) ) {
+				if ( isset( $retval['filter'] ) ) {
 					$retval['-5000-filter'] = $retval['filter'];
-					unset($retval['filter']);
+					unset( $retval['filter'] );
 				}
-				if ( isset($retval['columns']) ) {
+				if ( isset( $retval['columns'] ) ) {
 					$retval['-5010-columns'] = $retval['columns'];
-					unset($retval['columns']);
+					unset( $retval['columns'] );
 				}
-				if ( isset($retval['group']) ) {
+				if ( isset( $retval['group'] ) ) {
 					$retval['-5020-group'] = $retval['group'];
-					unset($retval['group']);
+					unset( $retval['group'] );
 				}
-				if ( isset($retval['sub_total']) ) {
+				if ( isset( $retval['sub_total'] ) ) {
 					$retval['-5030-sub_total'] = $retval['sub_total'];
-					unset($retval['sub_total']);
+					unset( $retval['sub_total'] );
 				}
-				if ( isset($retval['sort']) ) {
+				if ( isset( $retval['sort'] ) ) {
 					$retval['-5040-sort'] = $retval['sort'];
-					unset($retval['sort']);
+					unset( $retval['sort'] );
 				}
-				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Arr( $retval, ' Template Config for: ' . $template, __FILE__, __LINE__, __METHOD__, 10 );
 
 				break;
 			default:
@@ -453,15 +452,16 @@ class T4SummaryReport extends Report {
 	 * @return mixed
 	 */
 	function getFormObject() {
-		if ( !isset($this->form_obj['gf']) OR !is_object($this->form_obj['gf']) ) {
+		if ( !isset( $this->form_obj['gf'] ) || !is_object( $this->form_obj['gf'] ) ) {
 			//
 			//Get all data for the form.
 			//
-			require_once( Environment::getBasePath() .'/classes/GovernmentForms/GovernmentForms.class.php');
+			require_once( Environment::getBasePath() . '/classes/GovernmentForms/GovernmentForms.class.php' );
 
 			$gf = new GovernmentForms();
 
 			$this->form_obj['gf'] = $gf;
+
 			return $this->form_obj['gf'];
 		}
 
@@ -472,17 +472,18 @@ class T4SummaryReport extends Report {
 	 * @return bool
 	 */
 	function clearFormObject() {
-		$this->form_obj['gf'] = FALSE;
+		$this->form_obj['gf'] = false;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	function getT4Object() {
-		if ( !isset($this->form_obj['t4']) OR !is_object($this->form_obj['t4']) ) {
+		if ( !isset( $this->form_obj['t4'] ) || !is_object( $this->form_obj['t4'] ) ) {
 			$this->form_obj['t4'] = $this->getFormObject()->getFormObject( 'T4', 'CA' );
+
 			return $this->form_obj['t4'];
 		}
 
@@ -493,17 +494,18 @@ class T4SummaryReport extends Report {
 	 * @return bool
 	 */
 	function clearT4Object() {
-		$this->form_obj['t4'] = FALSE;
+		$this->form_obj['t4'] = false;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	function getT4SumObject() {
-		if ( !isset($this->form_obj['t4sum']) OR !is_object($this->form_obj['t4sum']) ) {
+		if ( !isset( $this->form_obj['t4sum'] ) || !is_object( $this->form_obj['t4sum'] ) ) {
 			$this->form_obj['t4sum'] = $this->getFormObject()->getFormObject( 'T4Sum', 'CA' );
+
 			return $this->form_obj['t4sum'];
 		}
 
@@ -514,17 +516,18 @@ class T4SummaryReport extends Report {
 	 * @return bool
 	 */
 	function clearT4SumObject() {
-		$this->form_obj['t4sum'] = FALSE;
+		$this->form_obj['t4sum'] = false;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	function getT619Object() {
-		if ( !isset($this->form_obj['t619']) OR !is_object($this->form_obj['t619']) ) {
+		if ( !isset( $this->form_obj['t619'] ) || !is_object( $this->form_obj['t619'] ) ) {
 			$this->form_obj['t619'] = $this->getFormObject()->getFormObject( 'T619', 'CA' );
+
 			return $this->form_obj['t619'];
 		}
 
@@ -535,42 +538,43 @@ class T4SummaryReport extends Report {
 	 * @return bool
 	 */
 	function clearT619Object() {
-		$this->form_obj['t619'] = FALSE;
+		$this->form_obj['t619'] = false;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return array
 	 */
 	function formatFormConfig() {
-		$default_include_exclude_arr = array( 'include_pay_stub_entry_account' => array(), 'exclude_pay_stub_entry_account' => array() );
+		$default_include_exclude_arr = [ 'include_pay_stub_entry_account' => [], 'exclude_pay_stub_entry_account' => [] ];
 
-		$default_arr = array(
-				'income' => $default_include_exclude_arr,
-				'tax' => $default_include_exclude_arr,
-				'employee_cpp' => $default_include_exclude_arr,
-				'employer_cpp' => $default_include_exclude_arr,
-				'employee_ei' => $default_include_exclude_arr,
-				'employer_ei' => $default_include_exclude_arr,
-				'ei_earnings' => $default_include_exclude_arr,
-				'cpp_earnings' => $default_include_exclude_arr,
-				'union_dues' => $default_include_exclude_arr,
-				'rpp' => $default_include_exclude_arr,
-				'charity' => $default_include_exclude_arr,
+		$default_arr = [
+				'income'             => $default_include_exclude_arr,
+				'tax'                => $default_include_exclude_arr,
+				'employee_cpp'       => $default_include_exclude_arr,
+				'employer_cpp'       => $default_include_exclude_arr,
+				'employee_ei'        => $default_include_exclude_arr,
+				'employer_ei'        => $default_include_exclude_arr,
+				'ei_earnings'        => $default_include_exclude_arr,
+				'cpp_earnings'       => $default_include_exclude_arr,
+				'union_dues'         => $default_include_exclude_arr,
+				'rpp'                => $default_include_exclude_arr,
+				'charity'            => $default_include_exclude_arr,
 				'pension_adjustment' => $default_include_exclude_arr,
-				'other_box' => array(
-									0 => $default_include_exclude_arr,
-									1 => $default_include_exclude_arr,
-									2 => $default_include_exclude_arr,
-									3 => $default_include_exclude_arr,
-									4 => $default_include_exclude_arr,
-									5 => $default_include_exclude_arr,
-									6 => $default_include_exclude_arr,
-									),
-			);
+				'other_box'          => [
+						0 => $default_include_exclude_arr,
+						1 => $default_include_exclude_arr,
+						2 => $default_include_exclude_arr,
+						3 => $default_include_exclude_arr,
+						4 => $default_include_exclude_arr,
+						5 => $default_include_exclude_arr,
+						6 => $default_include_exclude_arr,
+				],
+		];
 
 		$retarr = array_merge( $default_arr, (array)$this->getFormConfig() );
+
 		return $retarr;
 	}
 
@@ -579,8 +583,8 @@ class T4SummaryReport extends Report {
 	 * @param null $format
 	 * @return bool
 	 */
-	function _getData( $format = NULL ) {
-		$this->tmp_data = array('pay_stub_entry' => array(), 'user' => array(), 'legal_entity' => array());
+	function _getData( $format = null ) {
+		$this->tmp_data = [ 'pay_stub_entry' => [], 'user' => [], 'legal_entity' => [] ];
 
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
@@ -589,14 +593,14 @@ class T4SummaryReport extends Report {
 		//Figure out province/CPP/EI wages/taxes.
 		//
 		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
-		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
-		$tax_deductions = array();
-		$tax_deduction_users = array();
-		$user_deduction_data = array();
+		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), [ 10, 20 ], 10 );
+		$tax_deductions = [];
+		$tax_deduction_users = [];
+		$user_deduction_data = [];
 		if ( $cdlf->getRecordCount() > 0 ) {
-			foreach( $cdlf as $cd_obj ) {
-				if ( in_array( $cd_obj->getCalculation(), array(200, 90, 91) ) ) { //Only consider Province, CPP, EI records.
-					Debug::Text('Company Deduction: ID: ' . $cd_obj->getID() . ' Name: ' . $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+			foreach ( $cdlf as $cd_obj ) {
+				if ( in_array( $cd_obj->getCalculation(), [ 200, 90, 91 ] ) ) { //Only consider Province, CPP, EI records.
+					Debug::Text( 'Company Deduction: ID: ' . $cd_obj->getID() . ' Name: ' . $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 					$tax_deductions[$cd_obj->getId()] = $cd_obj;
 					$tax_deduction_users[$cd_obj->getId()] = $cd_obj->getUser(); //Optimization so we don't have to get assigned users more than once per obj, as its used lower down in a tighter loop.
 
@@ -604,7 +608,7 @@ class T4SummaryReport extends Report {
 					$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 					$udlf->getByCompanyIdAndCompanyDeductionId( $cd_obj->getCompany(), $cd_obj->getId() );
 					if ( $udlf->getRecordCount() > 0 ) {
-						foreach( $udlf as $ud_obj ) {
+						foreach ( $udlf as $ud_obj ) {
 							//Debug::Text('  User Deduction: ID: '. $ud_obj->getID() .' User ID: '. $ud_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
 							$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = $ud_obj;
 						}
@@ -618,22 +622,22 @@ class T4SummaryReport extends Report {
 
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		if ( $pself->getRecordCount() > 0 ) {
-			foreach( $pself as $key => $pse_obj ) {
+			foreach ( $pself as $key => $pse_obj ) {
 				$user_id = $this->user_ids[] = $pse_obj->getColumn( 'user_id' );
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
 				if ( !isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] ) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = [
 							'date_stamp'                  => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
 							'birth_date'                  => strtotime( $pse_obj->getColumn( 'birth_date' ) ),
 							'pay_period_start_date'       => strtotime( $pse_obj->getColumn( 'pay_stub_start_date' ) ),
 							'pay_period_end_date'         => strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) ),
 							'pay_period_transaction_date' => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
 							'pay_period'                  => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
-					);
+					];
 				}
 
 				if ( isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] ) ) {
@@ -645,7 +649,7 @@ class T4SummaryReport extends Report {
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 
-			if ( isset( $this->tmp_data['pay_stub_entry'] ) AND is_array( $this->tmp_data['pay_stub_entry'] ) ) {
+			if ( isset( $this->tmp_data['pay_stub_entry'] ) && is_array( $this->tmp_data['pay_stub_entry'] ) ) {
 				foreach ( $this->tmp_data['pay_stub_entry'] as $user_id => $data_a ) {
 					foreach ( $data_a as $date_stamp => $data_b ) {
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income']['include_pay_stub_entry_account'], $form_data['income']['exclude_pay_stub_entry_account'] );
@@ -664,7 +668,7 @@ class T4SummaryReport extends Report {
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_earnings'] = 0;
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_earnings'] = 0;
 
-						if ( is_array( $data_b['psen_ids'] ) AND isset( $tax_deductions ) AND isset( $user_deduction_data ) ) {
+						if ( is_array( $data_b['psen_ids'] ) && isset( $tax_deductions ) && isset( $user_deduction_data ) ) {
 							//Support multiple tax/deductions that deposit to the same pay stub account.
 							//Also make sure we handle tax/deductions that may not have anything deducted/withheld, but do have wages to be displayed.
 							//  For example an employee not earning enough to have tax taken off yet.
@@ -672,12 +676,12 @@ class T4SummaryReport extends Report {
 							//  while still accounting for cases where nothing is deducted/withheld but still needs to be displayed.
 							foreach ( $tax_deductions as $tax_deduction_id => $tax_deduction_obj ) {
 								//Found Tax/Deduction associated with this pay stub account.
-								if ( in_array( $user_id, (array)$tax_deduction_users[$tax_deduction_id] ) AND isset( $user_deduction_data[$tax_deduction_id][$user_id] ) ) {
+								if ( in_array( $user_id, (array)$tax_deduction_users[$tax_deduction_id] ) && isset( $user_deduction_data[$tax_deduction_id][$user_id] ) ) {
 									//Debug::Text('Found User ID: '. $user_id .' in Tax Deduction Name: '. $tax_deduction_obj->getName() .'('.$tax_deduction_obj->getID().') Calculation ID: '. $tax_deduction_obj->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
 
-									if ( $tax_deduction_obj->isActiveDate( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_transaction_date'] ) == TRUE
-											AND $tax_deduction_obj->isActiveLengthOfService( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ) == TRUE
-											AND $tax_deduction_obj->isActiveUserAge( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['birth_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_transaction_date'] ) == TRUE
+									if ( $tax_deduction_obj->isActiveDate( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_transaction_date'] ) == true
+											&& $tax_deduction_obj->isActiveLengthOfService( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ) == true
+											&& $tax_deduction_obj->isActiveUserAge( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['birth_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_transaction_date'] ) == true
 									) {
 										//Debug::Text('  Is Eligible... Date: '. TTDate::getDate('DATE', $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -696,7 +700,7 @@ class T4SummaryReport extends Report {
 						}
 
 						for ( $n = 0; $n <= 5; $n++ ) {
-							if ( isset($form_data['other_box'][$n]) ) {
+							if ( isset( $form_data['other_box'][$n] ) ) {
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['other_box_' . $n] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['other_box'][$n]['include_pay_stub_entry_account'], $form_data['other_box'][$n]['exclude_pay_stub_entry_account'] );
 							}
 						}
@@ -716,7 +720,7 @@ class T4SummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Employee Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Employee Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Employee Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
@@ -729,10 +733,10 @@ class T4SummaryReport extends Report {
 		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		//Debug::Text( ' User Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
 		if ( $lelf->getRecordCount() > 0 ) {
 			foreach ( $lelf as $key => $le_obj ) {
-				if ( $format == 'html' OR $format == 'pdf' ) {
+				if ( $format == 'html' || $format == 'pdf' ) {
 					$this->tmp_data['legal_entity'][$le_obj->getId()] = Misc::addKeyPrefix( 'legal_entity_', (array)$le_obj->getObjectAsArray( Misc::removeKeyPrefix( 'legal_entity_', $this->getColumnDataConfig() ) ) );
 					$this->tmp_data['legal_entity'][$le_obj->getId()]['legal_entity_id'] = $le_obj->getId();
 				} else {
@@ -742,13 +746,13 @@ class T4SummaryReport extends Report {
 			}
 		}
 
-		$this->tmp_data['remittance_agency'] = array();
+		$this->tmp_data['remittance_agency'] = [];
 
-		$filter_data['agency_id'] = array('10:CA:00:00:0010'); //CA federal
+		$filter_data['agency_id'] = [ '10:CA:00:00:0010' ]; //CA federal
 		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		//Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
 		if ( $ralf->getRecordCount() > 0 ) {
 			foreach ( $ralf as $key => $ra_obj ) {
 				$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()] = $ra_obj;
@@ -756,7 +760,7 @@ class T4SummaryReport extends Report {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -764,23 +768,22 @@ class T4SummaryReport extends Report {
 	 * @param null $format
 	 * @return bool
 	 */
-	function _preProcess( $format = NULL ) {
+	function _preProcess( $format = null ) {
 		//Merge time data with user data
 		$key = 0;
-		if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
+		if ( isset( $this->tmp_data['pay_stub_entry'] ) && is_array( $this->tmp_data['pay_stub_entry'] ) ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
-			$sort_columns = $this->getSortConfig();
+			//$sort_columns = $this->getSortConfig();
 
-			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
-				foreach( $level_1 as $date_stamp => $row ) {
-					$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-					$processed_data	 = array(
-											//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-											);
+			foreach ( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
+				foreach ( $level_1 as $date_stamp => $row ) {
+					$date_columns = TTDate::getReportDates( null, $date_stamp, false, $this->getUserObject(), [ 'pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date'] ] );
+					$processed_data = [//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
+					];
 
-					$tmp_legal_array = array();
-					if ( isset($this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']]) ) {
+					$tmp_legal_array = [];
+					if ( isset( $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']] ) ) {
 						$tmp_legal_array = $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']];
 					}
 					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $tmp_legal_array );
@@ -789,21 +792,21 @@ class T4SummaryReport extends Report {
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $processed_data, $tmp_legal_array);
+			unset( $this->tmp_data, $row, $date_columns, $processed_data, $tmp_legal_array );
 
 			//Total data per employee for the T4 forms. Just include the columns that are necessary for the form.
-			if ( is_array($this->data) AND !($format == 'html' OR $format == 'pdf') ) {
-				$t4_dollar_columns = array('income', 'tax', 'employee_cpp', 'ei_earnings', 'cpp_earnings', 'employee_ei', 'union_dues', 'rpp', 'charity', 'pension_adjustment', 'employer_ei', 'employer_cpp', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4' );
+			if ( is_array( $this->data ) && !( $format == 'html' || $format == 'pdf' ) ) {
+				$t4_dollar_columns = [ 'income', 'tax', 'employee_cpp', 'ei_earnings', 'cpp_earnings', 'employee_ei', 'union_dues', 'rpp', 'charity', 'pension_adjustment', 'employer_ei', 'employer_cpp', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4' ];
 
-				Debug::Text('Calculating Form Data...', __FILE__, __LINE__, __METHOD__, 10);
-				foreach( $this->data as $row ) {
-					if ( !isset($this->form_data['user'][$row['legal_entity_id']][$row['user_id']]) ) {
-						$this->form_data['user'][$row['legal_entity_id']][$row['user_id']] = array( 'user_id' => $row['user_id'] );
+				Debug::Text( 'Calculating Form Data...', __FILE__, __LINE__, __METHOD__, 10 );
+				foreach ( $this->data as $row ) {
+					if ( !isset( $this->form_data['user'][$row['legal_entity_id']][$row['user_id']] ) ) {
+						$this->form_data['user'][$row['legal_entity_id']][$row['user_id']] = [ 'user_id' => $row['user_id'] ];
 					}
 
-					foreach( $row as $key => $value ) {
-						if ( in_array( $key, $t4_dollar_columns) ) {
-							if ( !isset($this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key]) ) {
+					foreach ( $row as $key => $value ) {
+						if ( in_array( $key, $t4_dollar_columns ) ) {
+							if ( !isset( $this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] ) ) {
 								$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = 0;
 							}
 							$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = bcadd( $this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key], $value );
@@ -817,14 +820,14 @@ class T4SummaryReport extends Report {
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->form_data, 'Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @param null $format
 	 * @return array|bool
 	 */
-	function _outputPDFForm( $format = NULL ) {
+	function _outputPDFForm( $format = null ) {
 		Debug::Text( 'Generating Form... Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$setup_data = $this->getFormConfig();
@@ -834,13 +837,13 @@ class T4SummaryReport extends Report {
 		//Debug::Arr($this->data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$current_company = $this->getUserObject()->getCompanyObject();
-		if ( is_object( $current_company ) == FALSE ) {
+		if ( is_object( $current_company ) == false ) {
 			Debug::Text( 'Invalid company object...', __FILE__, __LINE__, __METHOD__, 10 );
 
-			return FALSE;
+			return false;
 		}
 
-		if ( !isset( $setup_data['status_id'] ) OR ( is_numeric( $setup_data['status_id'] ) AND $setup_data['status_id'] == 0 ) ) {
+		if ( !isset( $setup_data['status_id'] ) || ( is_numeric( $setup_data['status_id'] ) && $setup_data['status_id'] == 0 ) ) {
 			$setup_data['status_id'] = 'O'; //Original
 		}
 
@@ -850,41 +853,41 @@ class T4SummaryReport extends Report {
 			$form_type = 'employee';
 		}
 		Debug::Text( 'Form Type: ' . $form_type, __FILE__, __LINE__, __METHOD__, 10 );
-		$file_arr = array();
-		$file_name = NULL;
-		if ( isset( $this->form_data['user'] ) AND is_array( $this->form_data['user'] ) ) {
+		$file_arr = [];
+		$file_name = null;
+		if ( isset( $this->form_data['user'] ) && is_array( $this->form_data['user'] ) ) {
 			$file_name = 't4_summary.ext';
 
 			$this->sortFormData(); //Make sure forms are sorted.
 
 			foreach ( $this->form_data['user'] as $legal_entity_id => $user_rows ) {
-				if ( isset( $this->form_data['legal_entity'][ $legal_entity_id ] ) == FALSE ) {
+				if ( isset( $this->form_data['legal_entity'][$legal_entity_id] ) == false ) {
 					Debug::Text( 'Missing Legal Entity: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
 					continue;
 				}
 
-				if ( isset( $this->form_data['remittance_agency'][ $legal_entity_id ] ) == FALSE ) {
+				if ( isset( $this->form_data['remittance_agency'][$legal_entity_id] ) == false ) {
 					Debug::Text( 'Missing Remittance Agency: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
 					continue;
 				}
 
 				$x = 0; //Progress bar only.
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($user_rows), NULL, TTi18n::getText('Generating Forms...') );
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $user_rows ), null, TTi18n::getText( 'Generating Forms...' ) );
 
-				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
+				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 				$company_name = $legal_entity_obj->getTradeName(); //T4s show Operating/Trade name on the forms.
 
-				if ( is_object( $this->form_data['remittance_agency'][ $legal_entity_id ] ) ) {
-					$contact_user_obj = $this->form_data['remittance_agency'][ $legal_entity_id ]->getContactUserObject();
+				if ( is_object( $this->form_data['remittance_agency'][$legal_entity_id] ) ) {
+					$contact_user_obj = $this->form_data['remittance_agency'][$legal_entity_id]->getContactUserObject();
 				}
-				if ( !isset( $contact_user_obj ) OR !is_object( $contact_user_obj ) ) {
+				if ( !isset( $contact_user_obj ) || !is_object( $contact_user_obj ) ) {
 					$contact_user_obj = $this->getUserObject();
 				}
 
-				if ( $format == 'efile_xml' OR $format == 'payment_services' ) {
+				if ( $format == 'efile_xml' || $format == 'payment_services' ) {
 					$t619 = $this->getT619Object();
 					$t619->setStatus( $setup_data['status_id'] );
-					$t619->transmitter_number = $this->form_data['remittance_agency'][ $legal_entity_id ]->getSecondaryIdentification();
+					$t619->transmitter_number = $this->form_data['remittance_agency'][$legal_entity_id]->getSecondaryIdentification();
 
 					$t619->transmitter_name = $legal_entity_obj->getTradeName();
 					$t619->transmitter_address1 = $legal_entity_obj->getAddress1();
@@ -895,25 +898,25 @@ class T4SummaryReport extends Report {
 
 					$t619->contact_name = $contact_user_obj->getFullName();
 					$t619->contact_phone = $contact_user_obj->getWorkPhone();
-					$t619->contact_email = ( $contact_user_obj->getWorkEmail() != '' ) ? $contact_user_obj->getWorkEmail() : ( ( $contact_user_obj->getHomeEmail() != '' ) ? $contact_user_obj->getHomeEmail() : NULL );
+					$t619->contact_email = ( $contact_user_obj->getWorkEmail() != '' ) ? $contact_user_obj->getWorkEmail() : ( ( $contact_user_obj->getHomeEmail() != '' ) ? $contact_user_obj->getHomeEmail() : null );
 					$t619->company_name = $company_name;
 					$this->getFormObject()->addForm( $t619 );
 				}
 
 				$t4 = $this->getT4Object();
-				if ( isset( $setup_data['include_t4_back'] ) AND $setup_data['include_t4_back'] == 1 ) {
-					$t4->setShowInstructionPage( TRUE );
+				if ( isset( $setup_data['include_t4_back'] ) && $setup_data['include_t4_back'] == 1 ) {
+					$t4->setShowInstructionPage( true );
 				}
 				$t4->setType( $form_type );
 				$t4->setStatus( $setup_data['status_id'] );
 				$t4->year = TTDate::getYear( $filter_data['start_date'] );
 
-				if ( isset( $this->form_data['remittance_agency'][ $legal_entity_id ] ) ) {
-					$t4->payroll_account_number = $this->form_data['remittance_agency'][ $legal_entity_id ]->getPrimaryIdentification();//( isset( $setup_data['payroll_account_number'] ) AND $setup_data['payroll_account_number'] != '' ) ? $setup_data['payroll_account_number'] : $current_company->getBusinessNumber();
+				if ( isset( $this->form_data['remittance_agency'][$legal_entity_id] ) ) {
+					$t4->payroll_account_number = $this->form_data['remittance_agency'][$legal_entity_id]->getPrimaryIdentification();//( isset( $setup_data['payroll_account_number'] ) AND $setup_data['payroll_account_number'] != '' ) ? $setup_data['payroll_account_number'] : $current_company->getBusinessNumber();
 					$t4->company_name = $company_name;
 				}
 
-				$report_meta_data = array();
+				$report_meta_data = [];
 				foreach ( $user_rows as $user_row_key => $row ) {
 					if ( !isset( $row['user_id'] ) ) {
 						Debug::Text( 'User ID not set!', __FILE__, __LINE__, __METHOD__, 10 );
@@ -937,32 +940,31 @@ class T4SummaryReport extends Report {
 						if ( isset( $setup_data['tax']['include_pay_stub_entry_account'] ) ) {
 							$cdlf->getByCompanyIDAndUserIdAndCalculationIdAndPayStubEntryAccountID( $current_company->getId(), $user_obj->getId(), 200, $setup_data['tax']['include_pay_stub_entry_account'] );
 							if ( $setup_data['tax']['include_pay_stub_entry_account'] != 0
-									AND $cdlf->getRecordCount() > 0
+									&& $cdlf->getRecordCount() > 0
 							) {
 								//Loop through all Tax/Deduction records to find one
 								foreach ( $cdlf as $cd_obj ) {
-									if ( $cd_obj->getStatus() == 10 AND strtolower( $cd_obj->getCountry() ) == 'ca' ) {
+									if ( $cd_obj->getStatus() == 10 && strtolower( $cd_obj->getCountry() ) == 'ca' ) {
 										$employment_province = $cd_obj->getProvince();
 										Debug::Text( '  Deduction Province of Employment: ' . $employment_province, __FILE__, __LINE__, __METHOD__, 10 );
 									}
-
 								}
 							}
 						}
 						unset( $cdlf, $cd_obj );
 						Debug::Text( '  Final Province of Employment: ' . $employment_province, __FILE__, __LINE__, __METHOD__, 10 );
 
-						$ee_data = array(
+						$ee_data = [
 								'first_name'          => $user_obj->getFirstName(),
 								'middle_name'         => $user_obj->getMiddleName(),
 								'last_name'           => $user_obj->getLastName(),
 								'address1'            => $user_obj->getAddress1(),
 								'address2'            => $user_obj->getAddress2(),
 								'city'                => $user_obj->getCity(),
-								'province'            => ( ( $user_obj->getCountry() == 'CA' OR $user_obj->getCountry() == 'US' ) ? ( ( $user_obj->getProvince() != '00' ) ? $user_obj->getProvince() : NULL ) : 'ZZ' ),
+								'province'            => ( ( $user_obj->getCountry() == 'CA' || $user_obj->getCountry() == 'US' ) ? ( ( $user_obj->getProvince() != '00' ) ? $user_obj->getProvince() : null ) : 'ZZ' ),
 								'country'             => Option::getByKey( $user_obj->getCountry(), $current_company->getOptions( 'country' ) ),
 								'country_code'        => $user_obj->getCountry(),
-								'employment_province' => ( $employment_province != '00' ) ? $employment_province : NULL,
+								'employment_province' => ( $employment_province != '00' ) ? $employment_province : null,
 								'postal_code'         => $user_obj->getPostalCode(),
 								'sin'                 => $user_obj->getSIN(),
 								'employee_number'     => $user_obj->getEmployeeNumber(),
@@ -971,7 +973,7 @@ class T4SummaryReport extends Report {
 								'l14'                 => $row['income'],
 								'l22'                 => $row['tax'],
 								'l16'                 => $row['employee_cpp'],
-								'l17'                 => NULL, //QPP
+								'l17'                 => null, //QPP
 								'l24'                 => $row['ei_earnings'],
 								'l26'                 => $row['cpp_earnings'],
 								'l18'                 => $row['employee_ei'],
@@ -979,31 +981,31 @@ class T4SummaryReport extends Report {
 								'l20'                 => $row['rpp'],
 								'l46'                 => $row['charity'],
 								'l52'                 => $row['pension_adjustment'],
-								'l50'                 => isset( $setup_data['rpp_number'] ) ? $setup_data['rpp_number'] : NULL,
+								'l50'                 => isset( $setup_data['rpp_number'] ) ? $setup_data['rpp_number'] : null,
 
 								//Employer data, needed for totals.
 								'l19'                 => $row['employer_ei'],
 								'l27'                 => $row['employer_cpp'],
 								//If lines with dollar amounts change, update $amount_boxes below.
 
-								'cpp_exempt'       => FALSE,
-								'ei_exempt'        => FALSE,
-								'other_box_0_code' => NULL,
-								'other_box_0'      => NULL,
-								'other_box_1_code' => NULL,
-								'other_box_1'      => NULL,
-								'other_box_2_code' => NULL,
-								'other_box_2'      => NULL,
-								'other_box_3_code' => NULL,
-								'other_box_3'      => NULL,
-								'other_box_4_code' => NULL,
-								'other_box_4'      => NULL,
-								'other_box_5_code' => NULL,
-								'other_box_5'      => NULL,
-						);
+								'cpp_exempt'       => false,
+								'ei_exempt'        => false,
+								'other_box_0_code' => null,
+								'other_box_0'      => null,
+								'other_box_1_code' => null,
+								'other_box_1'      => null,
+								'other_box_2_code' => null,
+								'other_box_2'      => null,
+								'other_box_3_code' => null,
+								'other_box_3'      => null,
+								'other_box_4_code' => null,
+								'other_box_4'      => null,
+								'other_box_5_code' => null,
+								'other_box_5'      => null,
+						];
 
 						//Boxes that contain dollar amounts, so we can determine if the T4 is "blank" or not.
-						$amount_boxes = array( 'l14', 'l22', 'l16', 'l17', 'l24', 'l26', 'l18', 'l44', 'l20', 'l46', 'l52', 'l19', 'l27', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4', 'other_box_5' );
+						$amount_boxes = [ 'l14', 'l22', 'l16', 'l17', 'l24', 'l26', 'l18', 'l44', 'l20', 'l46', 'l52', 'l19', 'l27', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4', 'other_box_5' ];
 
 
 						//CPP Exempt:
@@ -1017,21 +1019,21 @@ class T4SummaryReport extends Report {
 						//  Cases in TimeTrex are as follows:
 						//    Not assigned to the CPP Tax/Deduction record, and no CPP earnings/deductions = CPP Exempt
 						//    Assigned to CPP Tax/Deduction Record, but too young, or too old and no CPP earnings/deductions = CPP Exempt
-						if ( $ee_data['l16'] == 0 AND $ee_data['l17'] == 0 AND $ee_data['l26'] == 0 ) {
+						if ( $ee_data['l16'] == 0 && $ee_data['l17'] == 0 && $ee_data['l26'] == 0 ) {
 							//Debug::Text('CPP Exempt!', __FILE__, __LINE__, __METHOD__, 10);
-							$ee_data['cpp_exempt'] = TRUE;
+							$ee_data['cpp_exempt'] = true;
 						}
 
 						//Check to see if the user has a end date set on their deduction record, signifying that they elected to stop CPP contributions.
-						if ( $ee_data['l26'] == 0 AND isset( $setup_data['employee_cpp']['include_pay_stub_entry_account'] ) AND $setup_data['employee_cpp']['include_pay_stub_entry_account'] != TTUUID::getZeroID() ) {
+						if ( $ee_data['l26'] == 0 && isset( $setup_data['employee_cpp']['include_pay_stub_entry_account'] ) && $setup_data['employee_cpp']['include_pay_stub_entry_account'] != TTUUID::getZeroID() ) {
 							//Get User Tax / Deductions by Pay Stub Account.
 							$udlf = TTnew( 'UserDeductionListFactory' ); /** @var UserDeductionListFactory $udlf */
 							$udlf->getByUserIdAndPayStubEntryAccountID( $user_obj->getId(), $setup_data['employee_cpp']['include_pay_stub_entry_account'] );
 							if ( $udlf->getRecordCount() > 0 ) {
 								$ud_obj = $udlf->getCurrent();
-								if ( $ud_obj->getEndDate() != '' AND $ud_obj->getEndDate() < $filter_data['end_date'] ) {
-									$ee_data['cpp_exempt'] = FALSE;
-									Debug::Text('CPP NOT Exempt!', __FILE__, __LINE__, __METHOD__, 10);
+								if ( $ud_obj->getEndDate() != '' && $ud_obj->getEndDate() < $filter_data['end_date'] ) {
+									$ee_data['cpp_exempt'] = false;
+									Debug::Text( 'CPP NOT Exempt!', __FILE__, __LINE__, __METHOD__, 10 );
 								}
 							}
 							unset( $udlf, $ud_obj ); //Don't unset $udlf as its used below.
@@ -1040,51 +1042,51 @@ class T4SummaryReport extends Report {
 						//EI Exempt:
 						//Leave this box blank if you reported an amount greater than "0" in box 18 or 24.
 						// Enter an "X" or a check mark in the "EI" box only if you did not have to withhold EI premiums from the earnings for the entire reporting period.
-						if ( $ee_data['l18'] == 0 AND $ee_data['l24'] == 0 ) {
-							$ee_data['ei_exempt'] = TRUE;
+						if ( $ee_data['l18'] == 0 && $ee_data['l24'] == 0 ) {
+							$ee_data['ei_exempt'] = true;
 						}
 
 
-						if ( isset( $row['other_box_0'] ) AND $row['other_box_0'] > 0 AND isset( $setup_data['other_box'][0]['box'] ) AND $setup_data['other_box'][0]['box'] != '' ) {
+						if ( isset( $row['other_box_0'] ) && $row['other_box_0'] > 0 && isset( $setup_data['other_box'][0]['box'] ) && $setup_data['other_box'][0]['box'] != '' ) {
 							$ee_data['other_box_0_code'] = $setup_data['other_box'][0]['box'];
 							$ee_data['other_box_0'] = $row['other_box_0'];
 						}
 
-						if ( isset( $row['other_box_1'] ) AND $row['other_box_1'] > 0 AND isset( $setup_data['other_box'][1]['box'] ) AND $setup_data['other_box'][1]['box'] != '' ) {
+						if ( isset( $row['other_box_1'] ) && $row['other_box_1'] > 0 && isset( $setup_data['other_box'][1]['box'] ) && $setup_data['other_box'][1]['box'] != '' ) {
 							$ee_data['other_box_1_code'] = $setup_data['other_box'][1]['box'];
 							$ee_data['other_box_1'] = $row['other_box_1'];
 						}
 
-						if ( isset( $row['other_box_2'] ) AND $row['other_box_2'] > 0 AND isset( $setup_data['other_box'][2]['box'] ) AND $setup_data['other_box'][2]['box'] != '' ) {
+						if ( isset( $row['other_box_2'] ) && $row['other_box_2'] > 0 && isset( $setup_data['other_box'][2]['box'] ) && $setup_data['other_box'][2]['box'] != '' ) {
 							$ee_data['other_box_2_code'] = $setup_data['other_box'][2]['box'];
 							$ee_data['other_box_2'] = $row['other_box_2'];
 						}
 
-						if ( isset( $row['other_box_3'] ) AND $row['other_box_3'] > 0 AND isset( $setup_data['other_box'][3]['box'] ) AND $setup_data['other_box'][3]['box'] != '' ) {
+						if ( isset( $row['other_box_3'] ) && $row['other_box_3'] > 0 && isset( $setup_data['other_box'][3]['box'] ) && $setup_data['other_box'][3]['box'] != '' ) {
 							$ee_data['other_box_3_code'] = $setup_data['other_box'][3]['box'];
 							$ee_data['other_box_3'] = $row['other_box_3'];
 						}
 
-						if ( isset( $row['other_box_4'] ) AND $row['other_box_4'] > 0 AND isset( $setup_data['other_box'][4]['box'] ) AND $setup_data['other_box'][4]['box'] != '' ) {
+						if ( isset( $row['other_box_4'] ) && $row['other_box_4'] > 0 && isset( $setup_data['other_box'][4]['box'] ) && $setup_data['other_box'][4]['box'] != '' ) {
 							$ee_data['other_box_4_code'] = $setup_data['other_box'][4]['box'];
 							$ee_data['other_box_4'] = $row['other_box_4'];
 						}
-						if ( isset( $row['other_box_5'] ) AND $row['other_box_5'] > 0 AND isset( $setup_data['other_box'][5]['box'] ) AND $setup_data['other_box'][5]['box'] != '' ) {
+						if ( isset( $row['other_box_5'] ) && $row['other_box_5'] > 0 && isset( $setup_data['other_box'][5]['box'] ) && $setup_data['other_box'][5]['box'] != '' ) {
 							$ee_data['other_box_5_code'] = $setup_data['other_box'][5]['box'];
 							$ee_data['other_box_5'] = $row['other_box_5'];
 						}
 
 						//Make sure there is actually data on the T4, otherwise skip the employee.
 						$tmp_total_amount_boxes = 0;
-						foreach( $amount_boxes as $amount_box ) {
-							if ( isset($ee_data[$amount_box]) AND is_numeric($ee_data[$amount_box]) ) {
+						foreach ( $amount_boxes as $amount_box ) {
+							if ( isset( $ee_data[$amount_box] ) && is_numeric( $ee_data[$amount_box] ) ) {
 								$tmp_total_amount_boxes += $ee_data[$amount_box];
 							}
 						}
 
 						if ( $tmp_total_amount_boxes != 0 ) {
 							if ( $format == 'payment_services' ) {
-								$report_meta_data['t4'][] = array('remote_id' => $row['user_id'], 'first_name' => $user_obj->getFirstName(), 'last_name' => $user_obj->getLastName(), 'sin' => $user_obj->getSIN(), 'l14' => $ee_data['l14'], 'l22' => $ee_data['l22']);
+								$report_meta_data['t4'][] = [ 'remote_id' => $row['user_id'], 'first_name' => $user_obj->getFirstName(), 'last_name' => $user_obj->getLastName(), 'sin' => $user_obj->getSIN(), 'l14' => $ee_data['l14'], 'l22' => $ee_data['l22'] ];
 							}
 
 							$t4->addRecord( $ee_data );
@@ -1096,8 +1098,8 @@ class T4SummaryReport extends Report {
 								$this->getFormObject()->clearForms();
 							}
 						} else {
-							Debug::Text('  No amounts on T4 skipping: '. $user_obj->getFullName(), __FILE__, __LINE__, __METHOD__, 10);
-							unset($user_rows[$user_row_key]); //Remove user data from arrow does it doesn't get added to totals or counted as an employee.
+							Debug::Text( '  No amounts on T4 skipping: ' . $user_obj->getFullName(), __FILE__, __LINE__, __METHOD__, 10 );
+							unset( $user_rows[$user_row_key] ); //Remove user data from arrow does it doesn't get added to totals or counted as an employee.
 						}
 						unset( $ee_data );
 					}
@@ -1110,10 +1112,11 @@ class T4SummaryReport extends Report {
 
 				if ( $format == 'pdf_form_publish_employee' ) {
 					$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
+
 					return $user_generic_status_batch_id;
 				}
 
-				if ( $t4->countRecords() > 0 AND ( $form_type == 'government' OR $format == 'efile_xml' OR $format == 'payment_services' ) ) {
+				if ( $t4->countRecords() > 0 && ( $form_type == 'government' || $format == 'efile_xml' || $format == 'payment_services' ) ) {
 					//Handle T4Summary
 					$t4s = $this->getT4SumObject();
 					$t4s->setStatus( $setup_data['status_id'] );
@@ -1134,38 +1137,38 @@ class T4SummaryReport extends Report {
 					$total_row = $t4->getRecordsTotal();
 
 					$t4s->l88 = $t4->countRecords();
-					$t4s->l14 = ( isset( $total_row['l14'] ) ) ? $total_row['l14'] : NULL;
-					$t4s->l22 = ( isset( $total_row['l22'] ) ) ? $total_row['l22'] : NULL;
-					$t4s->l16 = ( isset( $total_row['l16'] ) ) ? $total_row['l16'] : NULL;
-					$t4s->l18 = ( isset( $total_row['l18'] ) ) ? $total_row['l18'] : NULL;
-					$t4s->l27 = ( isset( $total_row['l27'] ) ) ? $total_row['l27'] : NULL;
-					$t4s->l19 = ( isset( $total_row['l19'] ) ) ? $total_row['l19'] : NULL;
-					$t4s->l20 = ( isset( $total_row['l20'] ) ) ? $total_row['l20'] : NULL;
-					$t4s->l52 = ( isset( $total_row['l52'] ) ) ? $total_row['l52'] : NULL;
+					$t4s->l14 = ( isset( $total_row['l14'] ) ) ? $total_row['l14'] : null;
+					$t4s->l22 = ( isset( $total_row['l22'] ) ) ? $total_row['l22'] : null;
+					$t4s->l16 = ( isset( $total_row['l16'] ) ) ? $total_row['l16'] : null;
+					$t4s->l18 = ( isset( $total_row['l18'] ) ) ? $total_row['l18'] : null;
+					$t4s->l27 = ( isset( $total_row['l27'] ) ) ? $total_row['l27'] : null;
+					$t4s->l19 = ( isset( $total_row['l19'] ) ) ? $total_row['l19'] : null;
+					$t4s->l20 = ( isset( $total_row['l20'] ) ) ? $total_row['l20'] : null;
+					$t4s->l52 = ( isset( $total_row['l52'] ) ) ? $total_row['l52'] : null;
 
-					$total_deductions = Misc::MoneyFormat( Misc::sumMultipleColumns( $total_row, array('l16', 'l27', 'l18', 'l19', 'l22') ), FALSE );
+					$total_deductions = Misc::MoneyFormat( Misc::sumMultipleColumns( $total_row, [ 'l16', 'l27', 'l18', 'l19', 'l22' ] ), false );
 
-					if ( isset( $setup_data['remittances_paid'] ) AND $setup_data['remittances_paid'] != '' ) {
+					if ( isset( $setup_data['remittances_paid'] ) && $setup_data['remittances_paid'] != '' ) {
 						$t4s->l82 = (float)$setup_data['remittances_paid'];
 					} else {
 						$t4s->l82 = $total_deductions;
 					}
 
 					if ( $format == 'payment_services' ) {
-						$report_meta_data['t4s'] = array( 'total_employees' => $t4->countRecords(), 'l14' => $t4s->l14, 'l22' => $t4s->l22, 'l80' => $total_deductions, 'l82' => $t4s->l82, 'balance' => bcsub( $total_deductions, $t4s->l82 ) );
+						$report_meta_data['t4s'] = [ 'total_employees' => $t4->countRecords(), 'l14' => $t4s->l14, 'l22' => $t4s->l22, 'l80' => $total_deductions, 'l82' => $t4s->l82, 'balance' => bcsub( $total_deductions, $t4s->l82 ) ];
 					}
 
 					$this->getFormObject()->addForm( $t4s );
 				}
 
 				if ( $t4->countRecords() > 0 ) {
-					if ( $format == 'efile_xml' OR $format == 'payment_services' ) {
+					if ( $format == 'efile_xml' || $format == 'payment_services' ) {
 						$output_format = 'XML';
-						$file_name = 't4_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.xml';
+						$file_name = 't4_efile_' . date( 'Y_m_d' ) . '_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.xml';
 						$mime_type = 'applications/octet-stream'; //Force file to download.
 					} else {
 						$output_format = 'PDF';
-						$file_name = 't4_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][ $legal_entity_id ]->getTradeName() ) . '.pdf';
+						$file_name = 't4_' . Misc::sanitizeFileName( $this->form_data['legal_entity'][$legal_entity_id]->getTradeName() ) . '.pdf';
 						$mime_type = $this->file_mime_type;
 					}
 					$file_output = $this->getFormObject()->output( $output_format );
@@ -1182,25 +1185,25 @@ class T4SummaryReport extends Report {
 							$tmp_output['metadata'] = $report_meta_data;
 							$file_output = $tmp_output;
 						}
-						$file_arr[] = array('file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output);
+						$file_arr[] = [ 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $file_output ];
 						unset( $file_output );
 					} else {
 						return $file_output;
 					}
 				} else {
-					return FALSE; //No records.
+					return false; //No records.
 				}
 			}
 		}
 
 		$zip_filename = explode( '.', $file_name );
-		if ( isset( $zip_filename[ ( count( $zip_filename ) - 1 ) ] ) ) {
-			$zip_filename = str_replace( '.', '', str_replace( $zip_filename[ ( count( $zip_filename ) - 1 ) ], '', $file_name ) ) . '.zip';
+		if ( isset( $zip_filename[( count( $zip_filename ) - 1 )] ) ) {
+			$zip_filename = str_replace( '.', '', str_replace( $zip_filename[( count( $zip_filename ) - 1 )], '', $file_name ) ) . '.zip';
 		} else {
 			$zip_filename = str_replace( '.', '', $file_name ) . '.zip';
 		}
 
-		return Misc::zip( $file_arr, $zip_filename, TRUE );
+		return Misc::zip( $file_arr, $zip_filename, true );
 	}
 
 	/**
@@ -1208,10 +1211,11 @@ class T4SummaryReport extends Report {
 	 * @param null $format
 	 * @return bool
 	 */
-	function _postProcess( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'payment_services' OR $format == 'pdf_form_publish_employee' ) {
-			Debug::Text('Skipping postProcess! Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
-			return TRUE;
+	function _postProcess( $format = null ) {
+		if ( ( $format == 'pdf_form' || $format == 'pdf_form_government' ) || ( $format == 'pdf_form_print' || $format == 'pdf_form_print_government' ) || $format == 'efile_xml' || $format == 'payment_services' || $format == 'pdf_form_publish_employee' ) {
+			Debug::Text( 'Skipping postProcess! Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return true;
 		} else {
 			return parent::_postProcess( $format );
 		}
@@ -1221,8 +1225,8 @@ class T4SummaryReport extends Report {
 	 * @param null $format
 	 * @return array|bool
 	 */
-	function _output( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'payment_services' OR $format == 'pdf_form_publish_employee' ) {
+	function _output( $format = null ) {
+		if ( ( $format == 'pdf_form' || $format == 'pdf_form_government' ) || ( $format == 'pdf_form_print' || $format == 'pdf_form_print_government' ) || $format == 'efile_xml' || $format == 'payment_services' || $format == 'pdf_form_publish_employee' ) {
 			return $this->_outputPDFForm( $format );
 		} else {
 			return parent::_output( $format );
@@ -1239,16 +1243,16 @@ class T4SummaryReport extends Report {
 	 */
 	function getPaymentServicesData( $prae_obj, $pra_obj, $rs_obj, $pra_user_obj ) {
 		$output_data = $this->getOutput( 'payment_services' );
-		Debug::Arr( $output_data, 'Raw Report data!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $output_data, 'Raw Report data!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $this->hasData() AND isset( $output_data['data'] ) AND isset( $output_data['data']['metadata']['t4s']['total_employees'] ) AND $output_data['data']['metadata']['t4s']['total_employees'] > 0 ) {
+		if ( $this->hasData() && isset( $output_data['data'] ) && isset( $output_data['data']['metadata']['t4s']['total_employees'] ) && $output_data['data']['metadata']['t4s']['total_employees'] > 0 ) {
 			$batch_id = date( 'M d', $prae_obj->getEndDate() );
 
-			$retarr = array(
+			$retarr = [
 					'object'               => __CLASS__,
 					'user_success_message' => TTi18n::gettext( 'T4s submitted successfully' ),
 
-					'agency_report_data'   => array(
+					'agency_report_data' => [
 							'type_id'         => 'R', //R=Report
 							'total_employees' => (int)$output_data['data']['metadata']['t4s']['total_employees'],
 							'subject_wages'   => $output_data['data']['metadata']['t4s']['l14'],
@@ -1257,23 +1261,25 @@ class T4SummaryReport extends Report {
 							'amount_due'      => $output_data['data']['metadata']['t4s']['balance'],
 							'due_date'        => $prae_obj->getDueDate(),
 							'extra_data'      => $output_data['data']['metadata'],
-							'xml_data'		  => $output_data['data']['xml'],
+							'xml_data'        => $output_data['data']['xml'],
 
-							'remote_batch_id'  => $batch_id,
+							'remote_batch_id' => $batch_id,
 
 							//Generate a consistent remote_id based on the exact time period, the remittance agency event, and batch ID.
 							//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
 							//  This needs to take into account different start/end date periods, so we don't try to overwrite records from last year.
-							'remote_id' => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $prae_obj->getStartDate() . $prae_obj->getEndDate() ) ),
+							'remote_id'       => TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $prae_obj->getStartDate() . $prae_obj->getEndDate() ) ),
 
-					),
-			);
+					],
+			];
 
 			return $retarr;
 		}
 
-		Debug::Text('No report data!', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::Text( 'No report data!', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 }
+
 ?>

@@ -1,1 +1,0 @@
-alter table system_setting change value value text;

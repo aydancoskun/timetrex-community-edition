@@ -47,7 +47,7 @@ class APIT4ASummaryReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIT4ASummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getT4ASummaryReport( $config = FALSE, $format = 'pdf' ) {
+	function getT4ASummaryReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

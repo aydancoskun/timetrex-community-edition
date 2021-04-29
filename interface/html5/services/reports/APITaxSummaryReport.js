@@ -63,6 +63,4 @@ var APITaxSummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

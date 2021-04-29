@@ -1,78 +1,73 @@
 <div class="login-view login-view-bg" id="loginViewContainer" style="opacity: 0;">
-    <div class="login-view-main-content">
-        <div class="logo-container box-edge-spacing">
-            <img class="company-logo" id="companyLogo" alt="Workforce Management Software"/>
-            <img class="app-type" id="appTypeLogo" alt="Time and Attendance Software"/>
-        </div>
-
-        <form class="form-container" id="login-form">
-            <hr class="hr-form-top">
-            <table id="form" class="form box-edge-spacing">
-                <colgroup>
-                    <col width="48%">
-                    <col width="4%">
-                    <col width="48%">
-                </colgroup>
-                <tr>
-                    <td colspan="3" class="error-info"></td>
-                </tr>
-                <tr>
-                    <td colspan="3" class="secure-login"><%= secure_login %></td>
-                </tr>
-                <tr>
-                    <td colspan="3"><input class="form-input" type="text" placeholder="<%= user_name %>" title="<%= user_name %>" id="user_name" name="username" autocomplete="username"/></td>
-                </tr>
-                <tr>
-                    <td><input class="form-input" type="password" placeholder="<%= password %>" title="<%= password %>" id="password" name="password" autocomplete="current-password"/></td>
-                    <td>&nbsp;</td>
-                    <td>
-                        <select class="form-selector language-selector" title="<%= language %>">
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <span id="forgot_password" class="forgot-password"><%= forgot_your_password %>?</span>
-                    </td>
-                </tr>
-            </table>
-            <hr>
-
-            <table id="form2" class="form button-form box-edge-spacing">
-                <colgroup>
-                    <col width="48%">
-                    <col width="4%">
-                    <col width="48%">
-                </colgroup>
-                <tr>
-                    <td class="login-button-container">
-                        <button type="submit" id="login_btn" class="login-button">
-                            <%= login %>
-                        </button>
-                    </td>
-                    <td>&nbsp;</td>
-                    <td class="quick-punch-button-container">
-                        <button type="button" id="quick_punch" class="quick-punch-button">
-                            <%= quick_punch %>
-                        </button>
-                    </td>
-                </tr>
-            </table>
-        </form>
-        <div id="versionNumber" class="version-label"></div>
-
-    </div>
-    <div id="login-footer">
-        <div id="social_div" class="social-div">
-            <a href="https://www.timetrex.com/r?id=451" target="_blank"><img class="facebook-img" border="0"></a>
-            <a href="https://www.timetrex.com/r?id=455" target="_blank"><img class="twitter-img" border="0"></a>
-        </div>
-
-        <div class="logo_container_powered_by"><img id="powered_by" alt="Workforce Management Software"/></div>
-        <div class="logo_container_copyright"><span id="login_copy_right_info" class="copy-right-info-1"></span></div>
-    </div>
+	<div class="login-view-main-content">
+		<div class="logo-container box-edge-spacing">
+			<img class="company-logo" id="companyLogo" alt="Workforce Management Software"/>
+			<img class="app-type" id="appTypeLogo" alt="Time and Attendance Software"/>
+		</div>
+		<form class="form-container" id="login-form">
+			<hr class="hr-form-top">
+			<table id="form" class="form box-edge-spacing">
+				<colgroup>
+					<col width="48%">
+					<col width="4%">
+					<col width="48%">
+				</colgroup>
+				<tr>
+					<td colspan="3" class="error-info"></td>
+				</tr>
+				<tr>
+					<td colspan="3" class="secure-login"><%= secure_login %></td>
+				</tr>
+				<tr>
+					<td colspan="3"><input class="form-input" type="text" placeholder="<%= user_name %>" title="<%= user_name %>" id="user_name" name="username" autocomplete="username"/></td>
+				</tr>
+				<tr>
+					<td><input class="form-input" type="password" placeholder="<%= password %>" title="<%= password %>" id="password" name="password" autocomplete="current-password"/></td>
+					<td>&nbsp;</td>
+					<td>
+						<select class="form-selector language-selector" title="<%= language %>">
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<span id="forgot_password" class="forgot-password"><%= forgot_your_password %>?</span>
+					</td>
+				</tr>
+			</table>
+			<hr>
+			<table id="form2" class="form button-form box-edge-spacing">
+				<colgroup>
+					<col width="48%">
+					<col width="4%">
+					<col width="48%">
+				</colgroup>
+				<tr>
+					<td class="login-button-container">
+						<button type="submit" id="login_btn" class="login-button">
+							<%= login %>
+						</button>
+					</td>
+					<td>&nbsp;</td>
+					<td class="quick-punch-button-container">
+						<button type="button" id="quick_punch" class="quick-punch-button">
+							<%= quick_punch %>
+						</button>
+					</td>
+				</tr>
+			</table>
+		</form>
+		<div id="versionNumber" class="version-label"></div>
+	</div>
+	<div id="login-footer">
+		<div id="social_div" class="social-div">
+			<a href="https://www.timetrex.com/r?id=451" target="_blank"><img class="facebook-img" border="0"></a>
+			<a href="https://www.timetrex.com/r?id=455" target="_blank"><img class="twitter-img" border="0"></a>
+		</div>
+		<div class="logo_container_powered_by"><img id="powered_by" alt="Workforce Management Software"/></div>
+		<div class="logo_container_copyright"><span id="login_copy_right_info" class="copy-right-info-1"></span></div>
+	</div>
 </div>
-
 <script type="text/javascript">
-    var loginViewController = new LoginViewController();
+	var loginViewController = new LoginViewController();
 </script>

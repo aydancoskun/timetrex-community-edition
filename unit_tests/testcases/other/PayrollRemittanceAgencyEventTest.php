@@ -38,23 +38,23 @@
  * @group DateTime
  */
 class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
-	protected $company_id = NULL;
-	protected $user_id = NULL;
-	protected $pay_period_schedule_id = NULL;
-	protected $pay_period_objs = NULL;
-	protected $pay_stub_account_link_arr = NULL;
-	protected $legal_entity_id = NULL;
-	protected $agency_id = NULL;
+	protected $company_id = null;
+	protected $user_id = null;
+	protected $pay_period_schedule_id = null;
+	protected $pay_period_objs = null;
+	protected $pay_stub_account_link_arr = null;
+	protected $legal_entity_id = null;
+	protected $agency_id = null;
 
 	public function setUp() {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', TRUE ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_' . uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -72,7 +72,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//Use a consistent hire date, otherwise its difficult to get things correct due to the hire date being in different parts or different pay periods.
 		//Make sure it is not on a pay period start date though.
 		$user_obj->setHireDate( strtotime( '05-Mar-2017' ) ); //Must not be in the future either, otherwise it could cause failures when the date passes into the past.
-		$user_obj->Save( FALSE );
+		$user_obj->Save( false );
 
 		$rsa_obj = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsa_obj */
 		$rsa_obj->setName( 'Test source account' );
@@ -100,57 +100,57 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$this->agency_id = $praf->Save();
 
-		$this->assertEquals( TRUE, TTUUID::isUUID( $this->user_id ), 'company_id is not a UUID' );
-		$this->assertEquals( TRUE, TTUUID::isUUID( $this->company_id ), 'user_id is not a UUID' );
-		$this->assertEquals( TRUE, TTUUID::isUUID( $this->agency_id ), 'agency_id is not a UUID' );
+		$this->assertEquals( true, TTUUID::isUUID( $this->user_id ), 'company_id is not a UUID' );
+		$this->assertEquals( true, TTUUID::isUUID( $this->company_id ), 'user_id is not a UUID' );
+		$this->assertEquals( true, TTUUID::isUUID( $this->agency_id ), 'agency_id is not a UUID' );
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayStubAccounts() {
-		Debug::text('Saving.... Employee Deduction - Other', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Saving.... Employee Deduction - Other', __FILE__, __LINE__, __METHOD__, 10 );
 		$pseaf = new PayStubEntryAccountFactory();
 		$pseaf->setCompany( $this->company_id );
-		$pseaf->setStatus(10);
-		$pseaf->setType(20);
-		$pseaf->setName('Other');
-		$pseaf->setOrder(290);
+		$pseaf->setStatus( 10 );
+		$pseaf->setType( 20 );
+		$pseaf->setName( 'Other' );
+		$pseaf->setOrder( 290 );
 
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
 
-		Debug::text('Saving.... Employee Deduction - Other2', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Saving.... Employee Deduction - Other2', __FILE__, __LINE__, __METHOD__, 10 );
 		$pseaf = new PayStubEntryAccountFactory();
 		$pseaf->setCompany( $this->company_id );
-		$pseaf->setStatus(10);
-		$pseaf->setType(20);
-		$pseaf->setName('Other2');
-		$pseaf->setOrder(291);
+		$pseaf->setStatus( 10 );
+		$pseaf->setType( 20 );
+		$pseaf->setName( 'Other2' );
+		$pseaf->setOrder( 291 );
 
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
 
-		Debug::text('Saving.... Employee Deduction - EI', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Saving.... Employee Deduction - EI', __FILE__, __LINE__, __METHOD__, 10 );
 		$pseaf = new PayStubEntryAccountFactory();
 		$pseaf->setCompany( $this->company_id );
-		$pseaf->setStatus(10);
-		$pseaf->setType(20);
-		$pseaf->setName('EI');
-		$pseaf->setOrder(292);
+		$pseaf->setStatus( 10 );
+		$pseaf->setType( 20 );
+		$pseaf->setName( 'EI' );
+		$pseaf->setOrder( 292 );
 
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
 
-		Debug::text('Saving.... Employee Deduction - CPP', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Saving.... Employee Deduction - CPP', __FILE__, __LINE__, __METHOD__, 10 );
 		$pseaf = new PayStubEntryAccountFactory();
 		$pseaf->setCompany( $this->company_id );
-		$pseaf->setStatus(10);
-		$pseaf->setType(20);
-		$pseaf->setName('CPP');
-		$pseaf->setOrder(293);
+		$pseaf->setStatus( 10 );
+		$pseaf->setType( 20 );
+		$pseaf->setName( 'CPP' );
+		$pseaf->setOrder( 293 );
 
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
@@ -161,13 +161,13 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pseallf->getByCompanyId( $this->company_id );
 		if ( $pseallf->getRecordCount() > 0 ) {
 			$pseal_obj = $pseallf->getCurrent();
-			$pseal_obj->setEmployeeEI( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'EI') );
-			$pseal_obj->setEmployeeCPP( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'CPP') );
+			$pseal_obj->setEmployeeEI( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'EI' ) );
+			$pseal_obj->setEmployeeCPP( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 20, 'CPP' ) );
 			$pseal_obj->Save();
 		}
 
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayPeriodSchedule() {
@@ -188,19 +188,19 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartDayOfWeek( TTDate::getDayOfWeek( $anchor_date ) );
 		$ppsf->setTransactionDate( 7 );
 
-		$ppsf->setTransactionDateBusinessDay( TRUE );
-		$ppsf->setTimeZone('PST8PDT');
+		$ppsf->setTransactionDateBusinessDay( true );
+		$ppsf->setTimeZone( 'PST8PDT' );
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4 * 3600) );
-		$ppsf->setMaximumShiftTime( (16 * 3600) );
+		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
+		$ppsf->setMaximumShiftTime( ( 16 * 3600 ) );
 
-		$ppsf->setEnableInitialPayPeriods( FALSE );
+		$ppsf->setEnableInitialPayPeriods( false );
 		if ( $ppsf->isValid() ) {
-			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			$insert_id = $ppsf->Save( false );
+			Debug::Text( 'Pay Period Schedule ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-			$ppsf->setUser( array($this->user_id) );
+			$ppsf->setUser( [ $this->user_id ] );
 			$ppsf->Save();
 
 			$this->pay_period_schedule_id = $insert_id;
@@ -208,19 +208,18 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
-
+		return false;
 	}
 
-	function addUserToPayPeriodSchedule($pay_period_schedule_id, $user_id ) {
-			$ppsuf = new PayPeriodScheduleUserFactory();
-			$ppsuf->setUser($user_id);
-			$ppsuf->setPayPeriodSchedule($pay_period_schedule_id);
-			if ( $ppsuf->isValid() ) {
-				$ppsuf->save();
-			}
+	function addUserToPayPeriodSchedule( $pay_period_schedule_id, $user_id ) {
+		$ppsuf = new PayPeriodScheduleUserFactory();
+		$ppsuf->setUser( $user_id );
+		$ppsuf->setPayPeriodSchedule( $pay_period_schedule_id );
+		if ( $ppsuf->isValid() ) {
+			$ppsuf->save();
+		}
 	}
 
 	function createPayPeriods( $initial_date, $pay_period_schedule_id ) {
@@ -233,7 +232,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					if ( $initial_date !== FALSE ) {
+					if ( $initial_date !== false ) {
 						$end_date = $initial_date;
 					} else {
 						$end_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) );
@@ -242,24 +241,23 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'I: ' . $i . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, ( 86400 + 3600 ), false ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
-
 		}
 
-		return TRUE;
+		return true;
 	}
 
 
-	function getAllPayPeriods($pay_period_schedule_id) {
+	function getAllPayPeriods( $pay_period_schedule_id ) {
 		$pplf = new PayPeriodListFactory();
 		//$pplf->getByCompanyId( $this->company_id );
 		$pplf->getByPayPeriodScheduleId( $pay_period_schedule_id );
 		if ( $pplf->getRecordCount() > 0 ) {
-			foreach( $pplf as $pp_obj ) {
-				Debug::text('Pay Period... Start: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			foreach ( $pplf as $pp_obj ) {
+				Debug::text( 'Pay Period... Start: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getStartDate() ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				$this->pay_period_objs[] = $pp_obj;
 			}
@@ -267,7 +265,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$this->pay_period_objs = array_reverse( $this->pay_period_objs );
 
-		return TRUE;
+		return true;
 	}
 
 	function getUserObject( $user_id ) {
@@ -277,13 +275,13 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 			return $ulf->getCurrent();
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	public function tearDown() {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -291,7 +289,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testWeekly() {
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setDayOfWeek( 0 );
 		$praef->setFrequency( 5100 );
 
@@ -486,7 +484,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testMonthly() {
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 4100 );
 		$praef->setPrimaryDayOfMonth( 10 );
 		$praef->setEffectiveDate( strtotime( '01-Dec-2016' ) );
@@ -561,7 +559,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		for ( $x = 0; $x <= 365; $x++ ) {
 //			Debug::Text( 'testLoopMonthly '.$x.' seed_date: '. TTDate::getDate('DATE+TIME', $seed_date), __FILE__, __LINE__, __METHOD__, 10);
 
-			$due_date = TTDate::getDateOfNextDayOfMonth( ( $seed_date + 86400 ), FALSE, $praef->getPrimaryDayOfMonth() );
+			$due_date = TTDate::getDateOfNextDayOfMonth( ( $seed_date + 86400 ), false, $praef->getPrimaryDayOfMonth() );
 			$month_before_due_date = TTDate::incrementDate( $due_date, -1, 'month' );
 
 			$start_date = TTDate::getBeginDayEpoch( TTDate::getBeginMonthEpoch( $month_before_due_date ) );
@@ -602,7 +600,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testAnnual() {
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 2000 );
 		$praef->setPrimaryDayOfMonth( 1 );
 		$praef->setPrimaryMonth( 12 );
@@ -627,7 +625,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Dec-2017 12:00PM' ) ) );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 2000 );
 		$praef->setPrimaryDayOfMonth( 12 );
 		$praef->setPrimaryMonth( 2 );
@@ -661,7 +659,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//chained test ( like wizard )
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 2000 );
 		$praef->setPrimaryDayOfMonth( 12 );
 		$praef->setPrimaryMonth( 2 );
@@ -928,13 +926,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '20-Sep-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '22-Sep-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '27-Sep-2017 12:00PM' ) ) );
-
 	}
 
 	function testAcceleratedThreshold1() {
 		// 10th and 25th of each month. If transaction date falls between 1-15th of the month, pay by 25th. If it falls between 16th and last day, pay on the 10th of the next month.
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 50000 );
 		$praef->setEffectiveDate( strtotime( '01-Jul-2017' ) );
 
@@ -1026,12 +1023,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Nov-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Nov-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Dec-2017 12:00PM' ) ) );
-
 	}
 
 	function testAcceleratedThreshold2() {
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 51000 );
 		$praef->setEffectiveDate( strtotime( '01-Jul-2017' ) );
 		$result = $praef->calculateNextDate( strtotime( '01-Jul-2017 12:00PM' ) );
@@ -1089,7 +1085,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praf->getById( $this->agency_id );
 		$pra_obj = $praf->getCurrent();
 
-		$this->assertEquals( TRUE, is_object($pra_obj), 'agency is not an object' );
+		$this->assertEquals( true, is_object( $pra_obj ), 'agency is not an object' );
 
 		/**
 		 * 0 => TTi18n::gettext('No'),
@@ -1101,10 +1097,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 //
 		$pra_obj->setAlwaysOnWeekDay( 0 ); //no weekend check.
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 5100 );
 		$praef->setDayOfWeek( 0 );
 		$result = $praef->calculateNextDate( strtotime( '01-Dec-2016 12:01AM' ) );
@@ -1113,10 +1109,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//
 		$pra_obj->setAlwaysOnWeekDay( 2 ); //2=Forward
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 5100 );
 		$praef->setDayOfWeek( 0 );
 
@@ -1125,10 +1121,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 
 		$pra_obj->setAlwaysOnWeekDay( 3 ); //3=closest business day
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 5100 );
 		$praef->setDayOfWeek( 0 );
 
@@ -1137,27 +1133,26 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '05-Dec-2016 12:00PM' ) ) );
 
 		$pra_obj->setAlwaysOnWeekDay( 1 ); //1=Backwards
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 5100 );
 		$praef->setDayOfWeek( 0 );
 		$result = $praef->calculateNextDate( strtotime( '01-Dec-2016 12:01AM' ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '02-Dec-2016 12:00PM' ) ) );
 
-		unset($pra_obj, $praef);
-
+		unset( $pra_obj, $praef );
 	}
 
 	function testHolidayAvoidance() {
 		$praf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $praf */
-		$praf->getById($this->agency_id);
+		$praf->getById( $this->agency_id );
 		$pra_obj = $praf->getCurrent();
 
-		$this->assertEquals( TRUE, is_object($pra_obj), 'agency is not an object' );
+		$this->assertEquals( true, is_object( $pra_obj ), 'agency is not an object' );
 
-		$holiday_policy_ids = array();
+		$holiday_policy_ids = [];
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setId( $praef->getNextInsertId() );
@@ -1168,7 +1163,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setPrimaryDayOfMonth( 25 );
 		$praef->setStatus( 10 );
 		$praef->setEffectiveDate( strtotime( '05-Dec-2017 12:00AM' ) );
-		$praef->save( FALSE );
+		$praef->save( false );
 
 		$rhf_xmas = TTNew( 'RecurringHolidayFactory' ); /** @var RecurringHolidayFactory $rhf_xmas */
 		$rhf_xmas->setCompany( $this->company_id );
@@ -1196,10 +1191,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 
 		$pra_obj->setAlwaysOnWeekDay( 0 ); //1=Backwards
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setType( 10 );
 		$praef->setReminderDays( 2 );
 		$praef->setFrequency( 4100 );
@@ -1210,10 +1205,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Dec-2017 12:00PM' ) ) );
 
 		$pra_obj->setAlwaysOnWeekDay( 1 ); //1=Backwards
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setType( 10 );
 		$praef->setReminderDays( 2 );
 		$praef->setFrequency( 4100 );
@@ -1224,10 +1219,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '22-Dec-2017 12:00PM' ) ) );
 
 		$pra_obj->setAlwaysOnWeekDay( 2 ); //1=Backwards
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setType( 10 );
 		$praef->setReminderDays( 2 );
 		$praef->setFrequency( 4100 );
@@ -1238,10 +1233,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '27-Dec-2017 12:00PM' ) ) );
 
 		$pra_obj->setAlwaysOnWeekDay( 3 ); //1=Backwards
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setType( 10 );
 		$praef->setReminderDays( 2 );
 		$praef->setFrequency( 4100 );
@@ -1254,10 +1249,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 
 	function testWeekLongHolidayAvoidance() {
-		$holiday_policy_ids = array();
+		$holiday_policy_ids = [];
 
 		$praf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $praf */
-		$praf->getById($this->agency_id);
+		$praf->getById( $this->agency_id );
 		$pra_obj = $praf->getCurrent();
 
 
@@ -1329,7 +1324,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		 */
 
 		$pra_obj->setAlwaysOnWeekDay( 0 ); //1=none
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
@@ -1348,7 +1343,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Dec-2017 12:00PM' ) ) );
 
 		$pra_obj->setAlwaysOnWeekDay( 1 ); //1=Backwards
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
@@ -1366,10 +1361,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '22-Dec-2017 12:00PM' ) ) );
 
 		$pra_obj->setAlwaysOnWeekDay( 2 ); //2=next
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setEffectiveDate( strtotime( '05-Dec-2017 12:00AM' ) );
 		$praef->setLastDueDate( strtotime( '05-Dec-2017 12:00AM' ) );
 		$praef->setType( 10 );
@@ -1383,7 +1378,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '01-Jan-2018 12:00PM' ) ) );
 
 		$pra_obj->setAlwaysOnWeekDay( 3 ); //closest
-		$pra_obj->save( FALSE );
+		$pra_obj->save( false );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
@@ -1403,12 +1398,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	function testSemiMonthlyFrequency() {
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 4200 );
 
-		$praef->setPrimaryDayOfMonth(7);
-		$praef->setSecondaryDayOfMonth(22);
-		$praef->setDueDateDelayDays(3);
+		$praef->setPrimaryDayOfMonth( 7 );
+		$praef->setSecondaryDayOfMonth( 22 );
+		$praef->setDueDateDelayDays( 3 );
 		$praef->setEffectiveDate( strtotime( '01-Jul-2017' ) );
 
 		$result = $praef->calculateNextDate( strtotime( '01-Jul-2017 12:00PM' ) );
@@ -1461,9 +1456,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Aug-2017 12:00PM' ) ) );
 
 
-		$praef->setPrimaryDayOfMonth(10);
-		$praef->setSecondaryDayOfMonth(25);
-		$praef->setDueDateDelayDays(6);
+		$praef->setPrimaryDayOfMonth( 10 );
+		$praef->setSecondaryDayOfMonth( 25 );
+		$praef->setDueDateDelayDays( 6 );
 		$praef->setEffectiveDate( strtotime( '01-Jul-2017' ) );
 
 		$result = $praef->calculateNextDate( strtotime( '01-Jul-2017 12:00PM' ) );
@@ -1509,9 +1504,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//ca threshold1
 		// 10th and 25th of each month. If transaction date falls between 1-15th of the month, pay by 25th. If it falls between 16th and last day, pay on the 10th of the next month.
-		$praef->setPrimaryDayOfMonth(15);
-		$praef->setSecondaryDayOfMonth(31);
-		$praef->setDueDateDelayDays(10);
+		$praef->setPrimaryDayOfMonth( 15 );
+		$praef->setSecondaryDayOfMonth( 31 );
+		$praef->setDueDateDelayDays( 10 );
 		$praef->setEffectiveDate( strtotime( '01-Jul-2017' ) );
 
 		$result = $praef->calculateNextDate( strtotime( '01-Jul-2017 12:00PM' ) );
@@ -1569,27 +1564,27 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Aug-2017 12:00PM' ) ) );
 
 		//chained tests (like wizard)
-		$result = $praef->calculateNextDate( $result['due_date']); //10-Aug-2017 12:00P
+		$result = $praef->calculateNextDate( $result['due_date'] ); //10-Aug-2017 12:00P
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Aug-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '15-Aug-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Aug-2017 12:00PM' ) ) );
-		$result = $praef->calculateNextDate( $result['due_date']); //25-Aug-2017 12:00P
+		$result = $praef->calculateNextDate( $result['due_date'] ); //25-Aug-2017 12:00P
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Aug-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Aug-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Sep-2017 12:00PM' ) ) );
-		$result = $praef->calculateNextDate( $result['due_date']); //10-Sep-2017 12:00P
+		$result = $praef->calculateNextDate( $result['due_date'] ); //10-Sep-2017 12:00P
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Sep-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '15-Sep-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Sep-2017 12:00PM' ) ) );
-		$result = $praef->calculateNextDate( $result['due_date']); //25-Sep-2017 12:00P
+		$result = $praef->calculateNextDate( $result['due_date'] ); //25-Sep-2017 12:00P
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Sep-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Oct-2017 12:00PM' ) ) );
-		$result = $praef->calculateNextDate( $result['due_date']); //10-Oct-2017 12:00P
+		$result = $praef->calculateNextDate( $result['due_date'] ); //10-Oct-2017 12:00P
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Oct-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '15-Oct-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Oct-2017 12:00PM' ) ) );
-		$result = $praef->calculateNextDate( $result['due_date']); //25-Oct-2017 12:00P
+		$result = $praef->calculateNextDate( $result['due_date'] ); //25-Oct-2017 12:00P
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Oct-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Oct-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Nov-2017 12:00PM' ) ) );
@@ -1598,14 +1593,14 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	function testSemiAnnual() {
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 2200 );
 
-		$praef->setPrimaryMonth(1);
-		$praef->setPrimaryDayOfMonth(10);
-		$praef->setSecondaryMonth(6);
-		$praef->setSecondaryDayOfMonth(15);
-		$praef->setDueDateDelayDays(5);
+		$praef->setPrimaryMonth( 1 );
+		$praef->setPrimaryDayOfMonth( 10 );
+		$praef->setSecondaryMonth( 6 );
+		$praef->setSecondaryDayOfMonth( 15 );
+		$praef->setDueDateDelayDays( 5 );
 		$praef->setEffectiveDate( strtotime( '01-Jan-2015' ) );
 
 		$result = $praef->calculateNextDate( strtotime( '01-Jul-2017 12:00PM' ) );
@@ -1668,12 +1663,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testYearToDate() {
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 2100 );
 
-		$praef->setPrimaryMonth(6); //Jun
-		$praef->setPrimaryDayOfMonth(20);
-		$praef->setDueDateDelayDays(5);
+		$praef->setPrimaryMonth( 6 ); //Jun
+		$praef->setPrimaryDayOfMonth( 20 );
+		$praef->setDueDateDelayDays( 5 );
 
 		$result = $praef->calculateNextDate( strtotime( '01-Feb-2017 12:00PM' ) );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017  12:00AM' ) ) );
@@ -1749,12 +1744,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testYearToDateB() {
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 2100 );
 
-		$praef->setPrimaryMonth(12); //Dec
-		$praef->setPrimaryDayOfMonth(1);
-		$praef->setDueDateDelayDays(0);
+		$praef->setPrimaryMonth( 12 ); //Dec
+		$praef->setPrimaryDayOfMonth( 1 );
+		$praef->setDueDateDelayDays( 0 );
 
 		$result = $praef->calculateNextDate( strtotime( '30-Nov-2017 12:00PM' ) );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017  12:00AM' ) ) );
@@ -1785,7 +1780,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testEighthMonthly() {
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 63000 );
 
 		$result = $praef->calculateNextDate( strtotime( '01-Jan-2017 12:00PM' ) );
@@ -1927,19 +1922,17 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '26-Feb-2017  12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '28-Feb-2017  11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Mar-2017 12:00PM' ) ) );
-
-
 	}
 
 	function testTwiceMonthly() {
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
-		$praef->setPayrollRemittanceAgencyId($this->agency_id);
+		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
 		$praef->setFrequency( 61000 );
 
 		//increase the upper bound to test a wider range.
 		$testrange = 5;
 		//test edges across 5 years
-		for( $year = (date('Y') - $testrange); $year <= ( date('Y') + $testrange ); $year++ ) {
+		for ( $year = ( date( 'Y' ) - $testrange ); $year <= ( date( 'Y' ) + $testrange ); $year++ ) {
 			//January
 			$result = $praef->calculateNextDate( strtotime( '01-Jan--' . $year . '12:00PM' ) );
 			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . $year . ' 12:00AM' ) ) );
@@ -2088,41 +2081,41 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 			$result = $praef->calculateNextDate( strtotime( '16-Dec-' . $year . '12:00PM' ) );
 			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Dec-' . $year . ' 12:00AM' ) ) );
 			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', TTDate::getEndMonthEpoch( $result['start_date'] ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1) .'12:00PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '12:00PM' ) ) );
 			$result = $praef->calculateNextDate( strtotime( '17-Dec-' . $year . '12:00PM' ) );
 			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Dec-' . $year . ' 12:00AM' ) ) );
 			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', TTDate::getEndMonthEpoch( $result['start_date'] ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1) .'12:00PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '12:00PM' ) ) );
 			$result = $praef->calculateNextDate( strtotime( '30-Dec-' . $year . '12:00PM' ) );
 			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Dec-' . $year . ' 12:00AM' ) ) );
 			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', TTDate::getEndMonthEpoch( $result['start_date'] ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1) .'12:00PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '12:00PM' ) ) );
 			$result = $praef->calculateNextDate( strtotime( '31-Dec-' . $year . '12:00PM' ) );
 			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Dec-' . $year . ' 12:00AM' ) ) );
 			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', TTDate::getEndMonthEpoch( $result['start_date'] ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1) .'12:00PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '12:00PM' ) ) );
 
 			//next jan
-			$result = $praef->calculateNextDate( strtotime( '01-Jan-' . ($year + 1 ) . '12:00PM' ) );
-			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ($year + 1 ) . '12:00AM' ) ) );
-			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1 ) . '11:59:59PM' ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ($year + 1 ) . '12:00PM' ) ) );
-			$result = $praef->calculateNextDate( strtotime( '02-Jan-' . ($year + 1 ) . '12:00PM' ) );
-			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ($year + 1 ) . '12:00AM' ) ) );
-			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1 ) . '11:59:59PM' ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ($year + 1 ) . '12:00PM' ) ) );
-			$result = $praef->calculateNextDate( strtotime( '15-Jan-' . ($year + 1 ) . '12:00PM' ) );
-			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ($year + 1 ) . '12:00AM' ) ) );
-			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1 ) . '11:59:59PM' ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ($year + 1 ) . '12:00PM' ) ) );
-			$result = $praef->calculateNextDate( strtotime( '30-Jan-' . ($year + 1 ) . '12:00PM' ) );
-			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ($year + 1 ) . '12:00AM' ) ) );
-			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1 ) . '11:59:59PM' ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ($year + 1 ) . '12:00PM' ) ) );
-			$result = $praef->calculateNextDate( strtotime( '31-Jan-' . ($year + 1 ) . '12:00PM' ) );
-			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ($year + 1 ) . '12:00AM' ) ) );
-			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ($year + 1 ) . '11:59:59PM' ) ) );
-			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ($year + 1 ) . '12:00PM' ) ) );
+			$result = $praef->calculateNextDate( strtotime( '01-Jan-' . ( $year + 1 ) . '12:00PM' ) );
+			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ( $year + 1 ) . '12:00AM' ) ) );
+			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '11:59:59PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ( $year + 1 ) . '12:00PM' ) ) );
+			$result = $praef->calculateNextDate( strtotime( '02-Jan-' . ( $year + 1 ) . '12:00PM' ) );
+			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ( $year + 1 ) . '12:00AM' ) ) );
+			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '11:59:59PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ( $year + 1 ) . '12:00PM' ) ) );
+			$result = $praef->calculateNextDate( strtotime( '15-Jan-' . ( $year + 1 ) . '12:00PM' ) );
+			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ( $year + 1 ) . '12:00AM' ) ) );
+			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '11:59:59PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ( $year + 1 ) . '12:00PM' ) ) );
+			$result = $praef->calculateNextDate( strtotime( '30-Jan-' . ( $year + 1 ) . '12:00PM' ) );
+			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ( $year + 1 ) . '12:00AM' ) ) );
+			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '11:59:59PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ( $year + 1 ) . '12:00PM' ) ) );
+			$result = $praef->calculateNextDate( strtotime( '31-Jan-' . ( $year + 1 ) . '12:00PM' ) );
+			$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-' . ( $year + 1 ) . '12:00AM' ) ) );
+			$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-' . ( $year + 1 ) . '11:59:59PM' ) ) );
+			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Feb-' . ( $year + 1 ) . '12:00PM' ) ) );
 		}
 
 		//chained  tests (like wizard)
@@ -2175,31 +2168,31 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	function setupPayPeriodTest( $seed_date ) {
 		$pay_period_schedule_id = $this->createPayPeriodSchedule();
 
-		$this->assertEquals( TRUE, TTUUID::isUUID($pay_period_schedule_id), '$pay_period_schedule_id is not a uuid ');
+		$this->assertEquals( true, TTUUID::isUUID( $pay_period_schedule_id ), '$pay_period_schedule_id is not a uuid ' );
 
 		$psa_id = $this->createPayStubAccounts();
 
 		$cdf = new CompanyDeductionFactory();
-		$cdf->setPayrollRemittanceAgency($this->agency_id);
-		$cdf->setCompany($this->company_id);
-		$cdf->setCountry('CA');
-		$cdf->setProvince('BC');
-		$cdf->setLegalEntity($this->legal_entity_id);
-		$cdf->setStatus(10);
-		$cdf->setType(10);
-		$cdf->setName('Auto-generated Company Deduction');
-		$cdf->setCalculation(15);
-		$cdf->setCalculationOrder(186);
-		$cdf->setPayStubEntryAccount($psa_id);
-		$cd_id = $cdf->save( FALSE);
+		$cdf->setPayrollRemittanceAgency( $this->agency_id );
+		$cdf->setCompany( $this->company_id );
+		$cdf->setCountry( 'CA' );
+		$cdf->setProvince( 'BC' );
+		$cdf->setLegalEntity( $this->legal_entity_id );
+		$cdf->setStatus( 10 );
+		$cdf->setType( 10 );
+		$cdf->setName( 'Auto-generated Company Deduction' );
+		$cdf->setCalculation( 15 );
+		$cdf->setCalculationOrder( 186 );
+		$cdf->setPayStubEntryAccount( $psa_id );
+		$cd_id = $cdf->save( false );
 
 		$udf = new UserDeductionFactory();
-		$udf->setUser($this->user_id);
-		$udf->setCompanyDeduction($cd_id);
+		$udf->setUser( $this->user_id );
+		$udf->setCompanyDeduction( $cd_id );
 		$udf->save();
 
-		$this->createPayPeriods($seed_date, $pay_period_schedule_id);
-		$this->getAllPayPeriods($pay_period_schedule_id);
+		$this->createPayPeriods( $seed_date, $pay_period_schedule_id );
+		$this->getAllPayPeriods( $pay_period_schedule_id );
 
 		//return the payperiodschedule object so that we can call $ppsf->createNextPayPeriod( $date ) in our tests;
 		return $pay_period_schedule_id;
@@ -2207,9 +2200,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 	function testPayPeriodA() {
 		$test_start_date = strtotime( '01-Jan-2017 12:00PM' ); //should be day before first pay perdio start date.
-		$ppsf_id = $this->setupPayPeriodTest($test_start_date);
+		$ppsf_id = $this->setupPayPeriodTest( $test_start_date );
 
-		$this->assertEquals( TRUE, TTUUID::isUUID($ppsf_id), 'Pay period schedule must be an object.' );
+		$this->assertEquals( true, TTUUID::isUUID( $ppsf_id ), 'Pay period schedule must be an object.' );
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setId( $praef->getNextInsertId() );
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
@@ -2218,9 +2211,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setFrequency( 1000 );
 		$praef->setDueDateDelayDays( 0 );
 		$praef->setReminderDays( 3 );
-		$praef->setPayPeriodSchedule( array( $ppsf_id ) );
+		$praef->setPayPeriodSchedule( [ $ppsf_id ] );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
 
 
@@ -2234,12 +2227,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'Loop Test...', __FILE__, __LINE__, __METHOD__, 10 );
 		//testing every day in every pay period:
 		$result = $praef->calculateNextDate( $test_date );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be an array.' );
-		$this->assertEquals(4, count( $result ), '$result should have 3 elements.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be an array.' );
+		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', ( $pp_obj->getTransactionDate() + ( $praef->getDueDateDelayDays() * 86400 ) ) ), 'Due date Matches.' );
 
 		$loop_counter = 1;
-		while ( $test_date <= $pp_obj->getEndDate() AND $test_date < strtotime('01-Jan-2020') ) {
+		while ( $test_date <= $pp_obj->getEndDate() && $test_date < strtotime( '01-Jan-2020' ) ) {
 			$test_date = TTDate::incrementDate( $test_date, 1, 'day' );
 			$result = $praef->calculateNextDate( $test_date );
 			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', ( $pp_obj->getTransactionDate() + ( $praef->getDueDateDelayDays() * 86400 ) ) ), 'Due date Matches.' );
@@ -2252,33 +2245,33 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setDueDateDelayDays( 0 );
 		$pp_obj = $this->pay_period_objs[0];
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$pp_obj = $this->pay_period_objs[1];
 		$praef->setDueDateDelayDays( 3 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '20-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$pp_obj = $this->pay_period_objs[2];
 		$praef->setDueDateDelayDays( 6 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '09-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 		$pp_obj = $this->pay_period_objs[3];
 		$praef->setDueDateDelayDays( 9 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '26-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 
@@ -2288,32 +2281,32 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//chained tests (like wizard) also iterates through all 4 pay periods
 		$pp_obj = $this->pay_period_objs[0];
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setDueDateDelayDays( 3 );
 		//Needs to use end_date, because due_date can be all over the map due to the due date delay.
-		$result = $praef->calculateNextDate($result['end_date']); //03-Feb-2017 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( $result['end_date'] ); //03-Feb-2017 12:00:00
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '20-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setDueDateDelayDays( 6 );
-		$result = $praef->calculateNextDate($result['end_date']); //17-Feb-2017 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( $result['end_date'] ); //17-Feb-2017 12:00:00
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '09-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setDueDateDelayDays( 9 );
-		$result = $praef->calculateNextDate($result['end_date']); //17-Mar-2017 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( $result['end_date'] ); //17-Mar-2017 12:00:00
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '26-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 	}
 
 	function testPayPeriodB() {
 		$test_start_date = strtotime( '01-Jan-2017 12:00PM' ); //should be day before first pay perdio start date.
-		$ppsf_id = $this->setupPayPeriodTest($test_start_date);
+		$ppsf_id = $this->setupPayPeriodTest( $test_start_date );
 
-		$this->assertEquals( TRUE, TTUUID::isUUID($ppsf_id), 'Pay period schedule must be an object.' );
+		$this->assertEquals( true, TTUUID::isUUID( $ppsf_id ), 'Pay period schedule must be an object.' );
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setId( $praef->getNextInsertId() );
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
@@ -2322,9 +2315,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setFrequency( 1000 );
 		$praef->setDueDateDelayDays( 1 );
 		$praef->setReminderDays( 3 );
-		$praef->setPayPeriodSchedule( array( $ppsf_id ) );
+		$praef->setPayPeriodSchedule( [ $ppsf_id ] );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
 
 
@@ -2338,12 +2331,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'Loop Test...', __FILE__, __LINE__, __METHOD__, 10 );
 		//testing every day in every pay period:
 		$result = $praef->calculateNextDate( $test_date );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be an array.' );
-		$this->assertEquals(4, count( $result ), '$result should have 3 elements.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be an array.' );
+		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', ( $pp_obj->getTransactionDate() + ( $praef->getDueDateDelayDays() * 86400 ) ) ), 'Due date Matches.' );
 
 		$loop_counter = 1;
-		while ( $test_date <= $pp_obj->getEndDate() AND $test_date < strtotime('01-Jan-2020') ) {
+		while ( $test_date <= $pp_obj->getEndDate() && $test_date < strtotime( '01-Jan-2020' ) ) {
 			$test_date = TTDate::incrementDate( $test_date, 1, 'day' );
 			$result = $praef->calculateNextDate( $test_date );
 			$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', ( $pp_obj->getTransactionDate() + ( $praef->getDueDateDelayDays() * 86400 ) ) ), 'Due date Matches.' );
@@ -2356,33 +2349,33 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setDueDateDelayDays( 0 );
 		$pp_obj = $this->pay_period_objs[0];
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$pp_obj = $this->pay_period_objs[1];
 		$praef->setDueDateDelayDays( 3 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '20-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$pp_obj = $this->pay_period_objs[2];
 		$praef->setDueDateDelayDays( 6 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '09-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 		$pp_obj = $this->pay_period_objs[3];
 		$praef->setDueDateDelayDays( 9 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '26-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 
@@ -2392,32 +2385,32 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//chained tests (like wizard) also iterates through all 4 pay periods
 		$pp_obj = $this->pay_period_objs[0];
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setDueDateDelayDays( 3 );
 		//Needs to use end_date, because due_date can be all over the map due to the due date delay.
-		$result = $praef->calculateNextDate($result['end_date']); //03-Feb-2017 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( $result['end_date'] ); //03-Feb-2017 12:00:00
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '20-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setDueDateDelayDays( 6 );
-		$result = $praef->calculateNextDate($result['end_date']); //17-Feb-2017 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( $result['end_date'] ); //17-Feb-2017 12:00:00
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '09-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setDueDateDelayDays( 9 );
-		$result = $praef->calculateNextDate($result['end_date']); //17-Mar-2017 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( $result['end_date'] ); //17-Mar-2017 12:00:00
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '26-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 	}
 
 	function testPayPeriodC() {
 		$test_start_date = strtotime( '01-Jan-2017 12:00PM' ); //should be day before first pay perdio start date.
-		$ppsf_id = $this->setupPayPeriodTest($test_start_date);
+		$ppsf_id = $this->setupPayPeriodTest( $test_start_date );
 
-		$this->assertEquals( TRUE, TTUUID::isUUID($ppsf_id), 'Pay period schedule must be an object.' );
+		$this->assertEquals( true, TTUUID::isUUID( $ppsf_id ), 'Pay period schedule must be an object.' );
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setId( $praef->getNextInsertId() );
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
@@ -2426,9 +2419,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setFrequency( 1000 );
 		$praef->setDueDateDelayDays( 1 );
 		$praef->setReminderDays( 3 );
-		$praef->setPayPeriodSchedule( array( $ppsf_id ) );
+		$praef->setPayPeriodSchedule( [ $ppsf_id ] );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
 
 
@@ -2438,40 +2431,40 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		Debug::text( 'Static Test...', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '03-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '03-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $praef->getEndDate() ), date( 'r', strtotime( '20-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '21-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setLastDueDate( $praef->getDueDate() );
 
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $praef->getEndDate() ), date( 'r', strtotime( '03-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '04-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setLastDueDate( $praef->getDueDate() );
 
 
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $praef->getEndDate() ), date( 'r', strtotime( '17-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '18-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setLastDueDate( $praef->getDueDate() );
 
 
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $praef->getEndDate() ), date( 'r', strtotime( '03-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '04-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 		$praef->setLastDueDate( $praef->getDueDate() );
@@ -2486,148 +2479,148 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$result = $praef->calculateNextDate( strtotime( '01-Jan-2017 12:00PM' ) );
 
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('02-Jan-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '02-Jan-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('16-Jan-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '16-Jan-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('30-Jan-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '30-Jan-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('31-Jan-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '31-Jan-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Feb-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Feb-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Feb-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '28-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('28-Feb-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Feb-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '28-Feb-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '28-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Mar-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Mar-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Mar-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Mar-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('31-Mar-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Mar-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '31-Mar-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Mar-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Apr-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Apr-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Apr-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-May-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('30-Apr-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '30-Apr-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Apr-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-May-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-May-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-May-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-May-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-May-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-May-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Jun-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('31-May-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-May-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '31-May-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-May-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-May-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Jun-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Jun-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jun-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Jun-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jun-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jul-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('30-Jun-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jun-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '30-Jun-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jun-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jul-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Jul-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Jul-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jul-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Aug-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('31-Jul-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '31-Jul-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jul-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Aug-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Aug-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Aug-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Aug-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Aug-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Aug-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Sep-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('31-Aug-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Aug-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '31-Aug-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Aug-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Aug-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Sep-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$test_start_date = strtotime('01-Sep-2017 12:00PM');
+		$test_start_date = strtotime( '01-Sep-2017 12:00PM' );
 		$result = $praef->calculateNextDate( $test_start_date );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Sep-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Sep-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Oct-2017 12:00:00' ) ), 'Due date Matches.' );
-		$test_start_date = strtotime('30-Sep-2017 12:00PM');
+		$test_start_date = strtotime( '30-Sep-2017 12:00PM' );
 		$result = $praef->calculateNextDate( $test_start_date );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Sep-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Sep-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Oct-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Oct-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Oct-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Oct-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Oct-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Oct-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Nov-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('31-Oct-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Oct-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '31-Oct-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Oct-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Oct-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Nov-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Nov-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Nov-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Nov-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Nov-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Nov-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Dec-2017 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('30-Nov-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Nov-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '30-Nov-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Nov-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Nov-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Dec-2017 12:00:00' ) ), 'Due date Matches.' );
 
-		$result = $praef->calculateNextDate( strtotime('01-Dec-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Dec-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Dec-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Dec-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Dec-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-2018 12:00:00' ) ), 'Due date Matches.' );
-		$result = $praef->calculateNextDate( strtotime('31-Dec-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Dec-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '31-Dec-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Dec-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Dec-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-2018 12:00:00' ) ), 'Due date Matches.' );
 
 		//chained testing (like wizard)
-		$result = $praef->calculateNextDate( strtotime('01-Dec-2017 12:00PM') );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Dec-2017' ) ), 'Start date Matches.');
+		$result = $praef->calculateNextDate( strtotime( '01-Dec-2017 12:00PM' ) );
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Dec-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Dec-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jan-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//31-Jan-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Feb-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//15-Feb-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Feb-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Feb-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '28-Feb-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Mar-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//31-Mar-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Mar-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Mar-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//30-Apr-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Apr-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-May-2018 12:00:00' ) ), 'Due date Matches.' );
 	}
@@ -2647,88 +2640,88 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$result = $praef->calculateNextDate( strtotime( '01-Jan-2017 12:00PM' ) );
 
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '07-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '07-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '07-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		$result = $praef->calculateNextDate( strtotime( '08-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '08-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '08-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '15-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '18-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '11-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '08-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '08-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '15-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '18-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '15-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '08-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '08-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '15-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '18-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		$result = $praef->calculateNextDate( strtotime( '16-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '22-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '18-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '22-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '22-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '22-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		$result = $praef->calculateNextDate( strtotime( '23-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '28-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '31-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		$result = $praef->calculateNextDate( strtotime( '23-Feb-2018 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Feb-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Feb-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '28-Feb-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Mar-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '28-Feb-2018 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Feb-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Feb-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '28-Feb-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Mar-2018 12:00:00' ) ), 'Due date Matches.' );
 
 
 		//chained test(like wizard)
 		$result = $praef->calculateNextDate( strtotime( '28-Feb-2018 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Feb-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Feb-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '28-Feb-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Mar-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//03-Mar-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Mar-2018 00:00:00' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Mar-2018 00:00:00' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '07-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Mar-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//10-Mar-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '08-Mar-2018 00:00:00' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '08-Mar-2018 00:00:00' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '15-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '18-Mar-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//18-Mar-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Mar-2018 00:00:00' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '16-Mar-2018 00:00:00' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '22-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '25-Mar-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//25-Mar-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Mar-2018 00:00:00' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '23-Mar-2018 00:00:00' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Apr-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//03-Apr-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2018 00:00:00' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2018 00:00:00' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '07-Apr-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Apr-2018 12:00:00' ) ), 'Due date Matches.' );
 	}
@@ -2742,99 +2735,99 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$result = $praef->calculateNextDate( strtotime( '01-Jan-2017 12:00PM' ) );
 
 		//sanity check
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 
 		//Q1
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '15-Jan-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		$result = $praef->calculateNextDate( strtotime( '15-Mar-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '31-Mar-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		//Q2.
 		$result = $praef->calculateNextDate( strtotime( '01-Apr-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jul-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '15-Apr-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jul-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		$result = $praef->calculateNextDate( strtotime( '15-Jun-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jul-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '30-Jun-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jul-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		//Q3.
 		$result = $praef->calculateNextDate( strtotime( '01-Jul-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Oct-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '15-Jul-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Oct-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		$result = $praef->calculateNextDate( strtotime( '15-Sep-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Oct-2017 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '30-Sep-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Oct-2017 12:00:00' ) ), 'Due date Matches.' );
 
 		//Q4
 		$result = $praef->calculateNextDate( strtotime( '01-Oct-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '15-Oct-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2018 12:00:00' ) ), 'Due date Matches.' );
 
 		$result = $praef->calculateNextDate( strtotime( '15-Dec-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( strtotime( '31-Dec-2017 12:00PM' ) );
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2018 12:00:00' ) ), 'Due date Matches.' );
 
 		//chained tests  (like wizard)
 		$result = $praef->calculateNextDate( $result['due_date'] );//30-Apr-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jul-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//31-Jul-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2018' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jul-2018' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Sep-2018 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Oct-2018 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//31-Oct-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2019' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2019' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Mar-2019 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '30-Apr-2019 12:00:00' ) ), 'Due date Matches.' );
 		$result = $praef->calculateNextDate( $result['due_date'] );//30-Apr-2018 12:00:00
-		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2019' ) ), 'Start date Matches.');
+		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Apr-2019' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '30-Jun-2019 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '31-Jul-2019 12:00:00' ) ), 'Due date Matches.' );
 	}
@@ -2849,7 +2842,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$result = $praef->calculateNextDate( strtotime( '01-Jan-2017 12:00PM' ) );
 
 		//sanity check
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
@@ -3015,9 +3008,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setHireDate( strtotime( '05-Jun-2016' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
@@ -3028,16 +3021,16 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setReminderDays( 0 );
 		$praef->setFrequency( 90100 ); //On Hire Event Frequency
 		$praef->setEffectiveDate( strtotime( '05-Jun-2016' ) );
-		$this->assertEquals( TRUE, $praef->isValid() );
+		$this->assertEquals( true, $praef->isValid() );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
 
-		$result = $praef->calculateNextDate( NULL, strtotime( '05-Jun-2016' ) );
+		$result = $praef->calculateNextDate( null, strtotime( '05-Jun-2016' ) );
 		Debug::Arr( $result, 'FIRST RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//sanity check
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
@@ -3053,12 +3046,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setHireDate( strtotime( '07-Jun-2016' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
-		$result = $praef->calculateNextDate( NULL, strtotime( '07-Jun-2016' ) );
+		$result = $praef->calculateNextDate( null, strtotime( '07-Jun-2016' ) );
 		Debug::Arr( $result, 'SECOND RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '05-Jun-2016 00:00:00' ) ), 'Start date Matches.' );
@@ -3071,11 +3064,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setHireDate( strtotime( '20-Jun-2016' ) );
 
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
-		$result = $praef->calculateNextDate( NULL, strtotime( '20-Jun-2016' ) );
+		$result = $praef->calculateNextDate( null, strtotime( '20-Jun-2016' ) );
 		Debug::Arr( $result, 'THIRD RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '20-Jun-2016 00:00:00' ) ), 'Start date Matches.' );
@@ -3091,9 +3084,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//ensure that we set the admin user's hire date to  some time in the past so it doesn't interfere with the following tests.
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setHireDate( TTDate::incrementDate( $now, -5, 'month' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
 
@@ -3102,9 +3095,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setHireDate( TTDate::incrementDate( $now, -5, 'day' ) );
 		Debug::Text( 'FIRST User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
 
@@ -3116,19 +3109,19 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setReminderDays( 0 );
 		$praef->setFrequency( 90100 ); //On Hire Event Frequency
 		$praef->setEffectiveDate( $now );
-		$this->assertEquals( TRUE, $praef->isValid() );
+		$this->assertEquals( true, $praef->isValid() );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$praef->getPayrollRemittanceAgencyObject()->setAlwaysOnWeekDay(0);
+		$praef->getPayrollRemittanceAgencyObject()->setAlwaysOnWeekDay( 0 );
 		$praef->getPayrollRemittanceAgencyObject()->save();
 
 
-		$result = $praef->calculateNextDate(NULL, $now);
+		$result = $praef->calculateNextDate( null, $now );
 		//Debug::Arr( $result, 'FIRST RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//sanity check
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
@@ -3145,12 +3138,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setHireDate( $now );
 		Debug::Text( 'SECOND User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
-		$result = $praef->calculateNextDate( NULL, $now );
+		$result = $praef->calculateNextDate( null, $now );
 		//Debug::Arr( $result, 'SECOND RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', TTDate::getBeginDayEpoch( TTDate::incrementDate( $now, -5, 'day' ) ) ), 'Start date Matches.' );
@@ -3162,12 +3155,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::Text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setHireDate( TTDate::incrementDate( $now, 30, 'day' ) );
-		Debug::Text( 'THIRD User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ).' User ID: '.$this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		Debug::Text( 'THIRD User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ) . ' User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
-		$result = $praef->calculateNextDate( NULL, $now );
+		$result = $praef->calculateNextDate( null, $now );
 		//Debug::Arr( $result, 'THIRD RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', TTDate::getBeginDayEpoch( TTDate::incrementDate( $now, -5, 'day' ) ) ), 'Start date Matches.' );
@@ -3176,30 +3169,30 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 
 		//test gap. should return empty dates
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$result = $praef->calculateNextDate( NULL, TTDate::incrementDate( $now, 20, 'day' ) );
+		$result = $praef->calculateNextDate( null, TTDate::incrementDate( $now, 20, 'day' ) );
 		//Debug::Arr( $result, 'FOURTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 		$this->assertEmpty( $result['start_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['end_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['due_date'], '$result elements should  be empty.' );
 
 
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
 
-		Debug::Text( 'Expected User ID: '.$this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
-		$result = $praef->calculateNextDate( NULL, TTDate::incrementDate( $now, 31, 'day' ) );
+		Debug::Text( 'Expected User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
+		$result = $praef->calculateNextDate( null, TTDate::incrementDate( $now, 31, 'day' ) );
 		//Debug::Arr( $result, 'FIFTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
@@ -3211,7 +3204,6 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-
 	function testOnTermination() {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
@@ -3220,9 +3212,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setTerminationDate( strtotime( '05-Jun-2016' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
@@ -3233,18 +3225,18 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setReminderDays( 0 );
 		$praef->setFrequency( 90200 ); //On Termination Event Frequency
 		$praef->setEffectiveDate( strtotime( '05-Jun-2016' ) );
-		$this->assertEquals( TRUE, $praef->isValid() );
+		$this->assertEquals( true, $praef->isValid() );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$praef->getPayrollRemittanceAgencyObject()->setAlwaysOnWeekDay(0);
+		$praef->getPayrollRemittanceAgencyObject()->setAlwaysOnWeekDay( 0 );
 		$praef->getPayrollRemittanceAgencyObject()->save();
 
-		$result = $praef->calculateNextDate( NULL, strtotime( '05-Jun-2016' ) );
+		$result = $praef->calculateNextDate( null, strtotime( '05-Jun-2016' ) );
 		Debug::Arr( $result, 'FIRST RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//sanity check
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
@@ -3260,12 +3252,12 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setTerminationDate( strtotime( '07-Jun-2016' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
-		$result = $praef->calculateNextDate( NULL, strtotime( '07-Jun-2016' ) );
+		$result = $praef->calculateNextDate( null, strtotime( '07-Jun-2016' ) );
 		Debug::Arr( $result, 'SECOND RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '05-Jun-2016 00:00:00' ) ), 'Start date Matches.' );
@@ -3277,11 +3269,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setTerminationDate( strtotime( '20-Jun-2016' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
-		$result = $praef->calculateNextDate( NULL, strtotime( '20-Jun-2016' ) );
+		$result = $praef->calculateNextDate( null, strtotime( '20-Jun-2016' ) );
 		Debug::Arr( $result, 'THIRD RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '20-Jun-2016 00:00:00' ) ), 'Start date Matches.' );
@@ -3299,9 +3291,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setTerminationDate( TTDate::incrementDate( $now, -5, 'day' ) );
 		Debug::Text( 'FIRST User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
 
@@ -3313,16 +3305,16 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setReminderDays( 0 );
 		$praef->setFrequency( 90200 ); //On Hire Event Frequency
 		$praef->setEffectiveDate( $now );
-		$this->assertEquals( TRUE, $praef->isValid() );
+		$this->assertEquals( true, $praef->isValid() );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
 
 		$result = $praef->calculateNextDate();
 		//Debug::Arr( $result, 'FIRST RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//sanity check
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
@@ -3339,9 +3331,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setTerminationDate( strtotime( $now ) );
 		Debug::Text( 'SECOND User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 
 		$result = $praef->calculateNextDate();
@@ -3357,9 +3349,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setTerminationDate( TTDate::incrementDate( $now, 30, 'day' ) );
 		Debug::Text( 'THIRD User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
-			$user_obj->Save( FALSE );
+			$user_obj->Save( false );
 		}
 		$result = $praef->calculateNextDate();
 		//Debug::Arr( $result, 'THIRD RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
@@ -3370,28 +3362,28 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 
 		//test gap. should return empty dates
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$result = $praef->calculateNextDate( NULL, TTDate::incrementDate( $now, 20, 'day' ) );
+		$result = $praef->calculateNextDate( null, TTDate::incrementDate( $now, 20, 'day' ) );
 		//Debug::Arr( $result, 'FOURTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 		$this->assertEmpty( $result['start_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['end_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['due_date'], '$result elements should  be empty.' );
 
 
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
-		$result = $praef->calculateNextDate( NULL, TTDate::incrementDate( $now, 31, 'day' ) );
+		$result = $praef->calculateNextDate( null, TTDate::incrementDate( $now, 31, 'day' ) );
 		//Debug::Arr( $result, 'FIFTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
@@ -3405,9 +3397,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		$test_start_date = strtotime( '01-Jan-2017 12:00PM' ); //should be day before first pay perdio start date.
-		$ppsf_id = $this->setupPayPeriodTest($test_start_date);
+		$ppsf_id = $this->setupPayPeriodTest( $test_start_date );
 
-		$this->assertEquals( TRUE, TTUUID::isUUID($ppsf_id), 'Pay period schedule id must be a UUID.' );
+		$this->assertEquals( true, TTUUID::isUUID( $ppsf_id ), 'Pay period schedule id must be a UUID.' );
 
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
 		$praef->setPayrollRemittanceAgencyId( $this->agency_id );
@@ -3418,32 +3410,32 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setStatus( 10 ); //enabled
 		$praef->setEffectiveDate( strtotime( '01-Jan-2017' ) );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 
 		//workaround for set requiring an object_id
-		$praef->setPayPeriodSchedule( array($ppsf_id ) );
+		$praef->setPayPeriodSchedule( [ $ppsf_id ] );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 
 		$user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 999 );
 		Debug::text( 'User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $user_id );
 		$user_obj->setTerminationDate( strtotime( '01-Jan-2017' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
 			$user_obj->Save();
 		}
-		$this->addUserToPayPeriodSchedule($ppsf_id, $user_id );
+		$this->addUserToPayPeriodSchedule( $ppsf_id, $user_id );
 
 		$fake_time = strtotime( '01-Jan-2017' );
-		$result = $praef->calculateNextDate( NULL, $fake_time );
+		$result = $praef->calculateNextDate( null, $fake_time );
 
 		Debug::Arr( $result, 'FIRST RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//sanity check
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 
 		//failure.
@@ -3460,14 +3452,14 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $user_id );
 		$user_obj->setTerminationDate( strtotime( '10-Jan-2017' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
 			$user_obj->Save();
 		}
-		$this->addUserToPayPeriodSchedule($ppsf_id, $user_id );
+		$this->addUserToPayPeriodSchedule( $ppsf_id, $user_id );
 
 		$fake_time = strtotime( '01-Jan-2017' );
-		$result = $praef->calculateNextDate( NULL, $fake_time );
+		$result = $praef->calculateNextDate( null, $fake_time );
 
 		Debug::Arr( $result, 'SECOND RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -3480,14 +3472,14 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $user_id );
 		$user_obj->setTerminationDate( strtotime( '10-Feb-2017' ) );
-		$this->assertEquals( TRUE, $user_obj->isValid() );
+		$this->assertEquals( true, $user_obj->isValid() );
 		if ( $user_obj->isValid() ) {
 			$user_obj->Save();
 		}
-		$this->addUserToPayPeriodSchedule($ppsf_id, $user_id );
+		$this->addUserToPayPeriodSchedule( $ppsf_id, $user_id );
 
 		$fake_time = strtotime( '10-Jan-2017' );
-		$result = $praef->calculateNextDate( NULL, $fake_time );
+		$result = $praef->calculateNextDate( null, $fake_time );
 
 		Debug::Arr( $result, 'SECOND RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -3496,22 +3488,22 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '24-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
 
 
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE );
+			$praef->Save( false );
 		}
 
 		$fake_time = strtotime( '25-Jan-2017' );
-		$result = $praef->calculateNextDate( NULL, $fake_time );
+		$result = $praef->calculateNextDate( null, $fake_time );
 
-		$this->assertEquals( TRUE, is_array( $result ), '$result should be  an array.' );
+		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
 		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
 		$this->assertEmpty( $result['start_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['end_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['due_date'], '$result elements should  be empty.' );
 
 		$fake_time = strtotime( '09-Feb-2017' );
-		$result = $praef->calculateNextDate( NULL, $fake_time );
+		$result = $praef->calculateNextDate( null, $fake_time );
 		//$result = $praef->calculateNextDate();
 
 		Debug::Arr( $result, 'THIRD RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
@@ -3535,7 +3527,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setStatus( 10 ); //enabled
 
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 
 		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '01-Nov-2016  12:00AM' ) ) );
@@ -3543,9 +3535,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '10-Dec-2016 12:00PM' ) ) );
 
 		$praef->setEffectiveDate( strtotime( '01-Jan-2017' ) );
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 
 		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '01-Dec-2016  12:00AM' ) ) );
@@ -3553,9 +3545,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '10-Jan-2017 12:00PM' ) ) );
 
 		$praef->setEffectiveDate( strtotime( '01-Feb-2017' ) );
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 
 		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '01-Jan-2017  12:00AM' ) ) );
@@ -3563,9 +3555,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '10-Feb-2017 12:00PM' ) ) );
 
 		$praef->setEffectiveDate( strtotime( '01-Mar-2017' ) );
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 
 		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '01-Feb-2017  12:00AM' ) ) );
@@ -3573,9 +3565,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $praef->getDueDate() ), date( 'r', strtotime( '10-Mar-2017 12:00PM' ) ) );
 
 		$praef->setEffectiveDate( strtotime( '01-Apr-2017' ) );
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 
 		$this->assertEquals( date( 'r', $praef->getStartDate() ), date( 'r', strtotime( '01-Mar-2017  12:00AM' ) ) );
@@ -3596,9 +3588,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$praef->setReminderDays( 0 );
 		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '10-Jan-2016 12:00PM' ) ) );
 
@@ -3614,9 +3606,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$praef->setReminderDays( 3 );
 		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '07-Jan-2016 12:00PM' ) ) );
 
@@ -3632,9 +3624,9 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$praef->setReminderDays( 5 );
 		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 		$this->assertEquals( date( 'r', $praef->getNextReminderDate() ), date( 'r', strtotime( '05-Jan-2016 12:00PM' ) ) );
 
@@ -3650,11 +3642,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$praef->setReminderDays( -5 );
 		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
-		$praef->setEnableRecalculateDates( TRUE );
+		$praef->setEnableRecalculateDates( true );
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
-		$this->assertEquals( date( 'r', $praef->getNextReminderDate(TRUE) ), date( 'r', strtotime( '15-Jan-2016 12:00PM' ) ) );
+		$this->assertEquals( date( 'r', $praef->getNextReminderDate( true ) ), date( 'r', strtotime( '15-Jan-2016 12:00PM' ) ) );
 
 		//Make sure you test the case where this is no due date, and therefore no reminder date.
 		$praef = TTnew( 'PayrollRemittanceAgencyEventFactory' ); /** @var PayrollRemittanceAgencyEventFactory $praef */
@@ -3671,7 +3663,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
 
 		//not saved. no due date means no reminder date.
-		$this->assertEquals( $praef->getNextReminderDate(TRUE), FALSE );
+		$this->assertEquals( $praef->getNextReminderDate( true ), false );
 
 
 		//Make sure you test the case where this is no due date, and therefore no reminder date.
@@ -3685,14 +3677,14 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
 
 		//not saved. no due date means no reminder date.
-		$this->assertEquals( $praef->getNextReminderDate(TRUE), FALSE );
-		$praef->setEnableRecalculateDates( TRUE );
+		$this->assertEquals( $praef->getNextReminderDate( true ), false );
+		$praef->setEnableRecalculateDates( true );
 
 		if ( $praef->isValid() ) {
-			$praef->Save( FALSE, TRUE );
+			$praef->Save( false, true );
 		}
 		//saved. should not be able to calculate a due date because no payperiods exist.
-		$this->assertEquals( $praef->getNextReminderDate(TRUE), FALSE );
+		$this->assertEquals( $praef->getNextReminderDate( true ), false );
 	}
 }
 

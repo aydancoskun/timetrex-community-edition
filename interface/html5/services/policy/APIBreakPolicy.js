@@ -47,5 +47,4 @@ var APIBreakPolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportBreakPolicy', arguments );
 	}
 
-
 } );

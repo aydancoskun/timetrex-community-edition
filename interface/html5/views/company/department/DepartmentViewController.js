@@ -17,7 +17,7 @@ DepartmentViewController = BaseViewController.extend( {
 		this.table_name_key = 'department';
 		this.context_menu_name = $.i18n._( 'Departments' );
 		this.navigation_label = $.i18n._( 'Department' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIDepartment' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIDepartment' ) )();
 
 		this.render();
 
@@ -47,7 +47,7 @@ DepartmentViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
@@ -81,7 +81,6 @@ DepartmentViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_department_column1 );
 		form_item_input.parent().width( '45%' );
 
-
 		// Code
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -93,7 +92,7 @@ DepartmentViewController = BaseViewController.extend( {
 		if ( Global.getProductEdition() >= 20 ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIGEOFence' )),
+				api_class: ( APIFactory.getAPIClass( 'APIGEOFence' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.GEO_FENCE,
 				show_search_inputs: true,
@@ -154,7 +153,7 @@ DepartmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -166,7 +165,7 @@ DepartmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

@@ -44,123 +44,125 @@ class InstallSchema_1000A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 
 	/**
 	 * @return bool
+	 * @noinspection PhpUnusedLocalVariableInspection
 	 */
 	function postInstall() {
 		// @codingStandardsIgnoreStart
 		global $config_vars;
 		// @codingStandardsIgnoreEnd
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Immediately after '1000A' schema version is completed, try to get a registration key so help with UUID generation.
 		// Also seed InstallSchema_Base->replaceSQLVariables(), as it needs to run a similar check.
-		Debug::text('Initializing database, after first schema file executed, setting registration key/UUID seed...', __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'Initializing database, after first schema file executed, setting registration key/UUID seed...', __FILE__, __LINE__, __METHOD__, 9 );
 		$ttsc = new TimeTrexSoapClient();
 		$ttsc->saveRegistrationKey();
 
-		if ( TTUUID::generateSeed() === FALSE ) { //Generate UUID seed and save it to config file.
-			Debug::text('ERROR: Failed writing seed to config file... Failing!', __FILE__, __LINE__, __METHOD__, 9);
-			return FALSE;
+		if ( TTUUID::generateSeed() === false ) { //Generate UUID seed and save it to config file.
+			Debug::text( 'ERROR: Failed writing seed to config file... Failing!', __FILE__, __LINE__, __METHOD__, 9 );
+
+			return false;
 		}
 
-		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR .'maint'. DIRECTORY_SEPARATOR;
+		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR . 'maint' . DIRECTORY_SEPARATOR;
 		if ( PHP_OS == 'WINNT' ) {
-			$cron_job_base_command = 'php-win.exe '. $maint_base_path;
+			$cron_job_base_command = 'php-win.exe ' . $maint_base_path;
 		} else {
-			$cron_job_base_command = 'php '. $maint_base_path;
+			$cron_job_base_command = 'php ' . $maint_base_path;
 		}
-		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'Cron Job Base Command: ' . $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9 );
 
 		// >> /dev/null 2>&1
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('AddPayPeriod');
-		$cjf->setMinute(0);
-		$cjf->setHour(0);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'AddPayPeriod.php');
+		$cjf->setName( 'AddPayPeriod' );
+		$cjf->setMinute( 0 );
+		$cjf->setHour( 0 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'AddPayPeriod.php' );
 		$cjf->Save();
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('AddUserDate');
-		$cjf->setMinute(15);
-		$cjf->setHour(0);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'AddUserDate.php');
+		$cjf->setName( 'AddUserDate' );
+		$cjf->setMinute( 15 );
+		$cjf->setHour( 0 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'AddUserDate.php' );
 		$cjf->Save();
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('calcExceptions');
-		$cjf->setMinute(30);
-		$cjf->setHour(0);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'calcExceptions.php');
+		$cjf->setName( 'calcExceptions' );
+		$cjf->setMinute( 30 );
+		$cjf->setHour( 0 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'calcExceptions.php' );
 		$cjf->Save();
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('AddRecurringPayStubAmendment');
-		$cjf->setMinute(45);
-		$cjf->setHour(0);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'AddRecurringPayStubAmendment.php');
+		$cjf->setName( 'AddRecurringPayStubAmendment' );
+		$cjf->setMinute( 45 );
+		$cjf->setHour( 0 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'AddRecurringPayStubAmendment.php' );
 		$cjf->Save();
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('AddRecurringHoliday');
-		$cjf->setMinute(55);
-		$cjf->setHour(0);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'AddRecurringHoliday.php');
+		$cjf->setName( 'AddRecurringHoliday' );
+		$cjf->setMinute( 55 );
+		$cjf->setHour( 0 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'AddRecurringHoliday.php' );
 		$cjf->Save();
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('UserCount');
-		$cjf->setMinute(15);
-		$cjf->setHour(1);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'UserCount.php');
+		$cjf->setName( 'UserCount' );
+		$cjf->setMinute( 15 );
+		$cjf->setHour( 1 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'UserCount.php' );
 		$cjf->Save();
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('AddRecurringScheduleShift');
-		$cjf->setMinute('20, 50');
-		$cjf->setHour('*');
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'AddRecurringScheduleShift.php');
+		$cjf->setName( 'AddRecurringScheduleShift' );
+		$cjf->setMinute( '20, 50' );
+		$cjf->setHour( '*' );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'AddRecurringScheduleShift.php' );
 		$cjf->Save();
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('CheckForUpdate');
-		$cjf->setMinute( rand(0, 59) ); //Random time once a day for load balancing
-		$cjf->setHour( rand(0, 23) ); //Random time once a day for load balancing
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'CheckForUpdate.php');
+		$cjf->setName( 'CheckForUpdate' );
+		$cjf->setMinute( rand( 0, 59 ) ); //Random time once a day for load balancing
+		$cjf->setHour( rand( 0, 23 ) );   //Random time once a day for load balancing
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'CheckForUpdate.php' );
 		$cjf->Save();
 
-		return TRUE;
-
+		return true;
 	}
 }
+
 ?>

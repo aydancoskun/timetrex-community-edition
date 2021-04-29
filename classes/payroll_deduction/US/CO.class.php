@@ -40,114 +40,114 @@
  */
 class PayrollDeduction_US_CO extends PayrollDeduction_US {
 
-	var $state_income_tax_rate_options = array(
-		20200101 => array(
-				10 => array(
-						array('income' => 4000, 'rate' => 0, 'constant' => 0),
-						array('income' => 4000, 'rate' => 4.63, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 8000, 'rate' => 0, 'constant' => 0),
-						array('income' => 8000, 'rate' => 4.63, 'constant' => 0),
-				),
-		),
-		//2018 - No Change
-		20170101 => array(
-				10 => array(
-						array('income' => 2300, 'rate' => 0, 'constant' => 0),
-						array('income' => 2300, 'rate' => 4.63, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 8650, 'rate' => 0, 'constant' => 0),
-						array('income' => 8650, 'rate' => 4.63, 'constant' => 0),
-				),
-		),
-		20150101 => array(
-				10 => array(
-						array('income' => 2300, 'rate' => 0, 'constant' => 0),
-						array('income' => 2300, 'rate' => 4.63, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 8600, 'rate' => 0, 'constant' => 0),
-						array('income' => 8600, 'rate' => 4.63, 'constant' => 0),
-				),
-		),
-		20130101 => array(
-				10 => array(
-						array('income' => 2200, 'rate' => 0, 'constant' => 0),
-						array('income' => 2200, 'rate' => 4.63, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 8300, 'rate' => 0, 'constant' => 0),
-						array('income' => 8300, 'rate' => 4.63, 'constant' => 0),
-				),
-		),
-		20110101 => array(
-				10 => array(
-						array('income' => 2100, 'rate' => 0, 'constant' => 0),
-						array('income' => 2100, 'rate' => 4.63, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 7900, 'rate' => 0, 'constant' => 0),
-						array('income' => 7900, 'rate' => 4.63, 'constant' => 0),
-				),
-		),
-		20090101 => array(
-				10 => array(
-						array('income' => 2050, 'rate' => 0, 'constant' => 0),
-						array('income' => 2050, 'rate' => 4.63, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 7750, 'rate' => 0, 'constant' => 0),
-						array('income' => 7750, 'rate' => 4.63, 'constant' => 0),
-				),
-		),
-		20070101 => array(
-				10 => array(
-						array('income' => 1900, 'rate' => 0, 'constant' => 0),
-						array('income' => 1900, 'rate' => 4.63, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 7200, 'rate' => 0, 'constant' => 0),
-						array('income' => 7200, 'rate' => 4.63, 'constant' => 0),
-				),
-		),
-		20060101 => array(
-				10 => array(
-						array('income' => 1850, 'rate' => 0, 'constant' => 0),
-						array('income' => 1850, 'rate' => 4.63, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 7000, 'rate' => 0, 'constant' => 0),
-						array('income' => 7000, 'rate' => 4.63, 'constant' => 0),
-				),
-		),
-	);
+	var $state_income_tax_rate_options = [
+			20200101 => [
+					10 => [
+							[ 'income' => 4000, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 4000, 'rate' => 4.63, 'constant' => 0 ],
+					],
+					20 => [
+							[ 'income' => 8000, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 8000, 'rate' => 4.63, 'constant' => 0 ],
+					],
+			],
+			//2018 - No Change
+			20170101 => [
+					10 => [
+							[ 'income' => 2300, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 2300, 'rate' => 4.63, 'constant' => 0 ],
+					],
+					20 => [
+							[ 'income' => 8650, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 8650, 'rate' => 4.63, 'constant' => 0 ],
+					],
+			],
+			20150101 => [
+					10 => [
+							[ 'income' => 2300, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 2300, 'rate' => 4.63, 'constant' => 0 ],
+					],
+					20 => [
+							[ 'income' => 8600, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 8600, 'rate' => 4.63, 'constant' => 0 ],
+					],
+			],
+			20130101 => [
+					10 => [
+							[ 'income' => 2200, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 2200, 'rate' => 4.63, 'constant' => 0 ],
+					],
+					20 => [
+							[ 'income' => 8300, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 8300, 'rate' => 4.63, 'constant' => 0 ],
+					],
+			],
+			20110101 => [
+					10 => [
+							[ 'income' => 2100, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 2100, 'rate' => 4.63, 'constant' => 0 ],
+					],
+					20 => [
+							[ 'income' => 7900, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 7900, 'rate' => 4.63, 'constant' => 0 ],
+					],
+			],
+			20090101 => [
+					10 => [
+							[ 'income' => 2050, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 2050, 'rate' => 4.63, 'constant' => 0 ],
+					],
+					20 => [
+							[ 'income' => 7750, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 7750, 'rate' => 4.63, 'constant' => 0 ],
+					],
+			],
+			20070101 => [
+					10 => [
+							[ 'income' => 1900, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 1900, 'rate' => 4.63, 'constant' => 0 ],
+					],
+					20 => [
+							[ 'income' => 7200, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 7200, 'rate' => 4.63, 'constant' => 0 ],
+					],
+			],
+			20060101 => [
+					10 => [
+							[ 'income' => 1850, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 1850, 'rate' => 4.63, 'constant' => 0 ],
+					],
+					20 => [
+							[ 'income' => 7000, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 7000, 'rate' => 4.63, 'constant' => 0 ],
+					],
+			],
+	];
 
-	var $state_options = array(
+	var $state_options = [
 		//2018 - No Change
-		20170101 => array(
+		20170101 => [
 				'allowance' => 4050,
-		),
-		20150101 => array(
+		],
+		20150101 => [
 				'allowance' => 4000,
-		),
-		20130101 => array(
+		],
+		20130101 => [
 				'allowance' => 3900,
-		),
-		20110101 => array(
+		],
+		20110101 => [
 				'allowance' => 3700,
-		),
-		20090101 => array(
+		],
+		20090101 => [
 				'allowance' => 3650,
-		),
-		20070101 => array(
+		],
+		20070101 => [
 				'allowance' => 3400,
-		),
-		20060101 => array(
+		],
+		20060101 => [
 				'allowance' => 3300,
-		),
-	);
+		],
+	];
 
 	function getStatePayPeriodDeductionRoundedValue( $amount ) {
 		return $this->RoundNearestDollar( $amount );
@@ -166,9 +166,8 @@ class PayrollDeduction_US_CO extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['allowance'];

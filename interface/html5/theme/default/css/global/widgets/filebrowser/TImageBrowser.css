@@ -10,69 +10,69 @@
 }
 
 .file-browser .browser {
-    max-width: 200px;
+	max-width: 200px;
 }
 
 .edit-view-form-item-input-div .file-browser .browser {
-    margin-top: 3px;
+	margin-top: 3px;
 }
 
 .file-browser .image {
-    max-width: 500px;
+	max-width: 500px;
 }
 
 .t-image-cut {
-    padding-top: 10px;
+	padding-top: 10px;
 }
 
 .t-image-cut .before-div {
-    display: inline-block;
-    width: 400px;
-    height: 300px;
+	display: inline-block;
+	width: 400px;
+	height: 300px;
 }
 
 .t-image-cut .after-div {
-    display: inline-block;
-    width: 200px;
-    height: 150px;
-    margin-left: 20px;
+	display: inline-block;
+	width: 200px;
+	height: 150px;
+	margin-left: 20px;
 }
 
 .t-image-cut .label {
-    display: block;
-    width: 100%;
-    text-align: center;
+	display: block;
+	width: 100%;
+	text-align: center;
 }
 
 .t-image-cut .before-img {
-    display: block;
-    max-width: 400px;
-    max-height: 300px;
+	display: block;
+	max-width: 400px;
+	max-height: 300px;
 }
 
 .t-image-cut .after-img {
-    display: block;
-    max-width: 200px;
-    max-height: 150px;
+	display: block;
+	max-width: 200px;
+	max-height: 150px;
 }
 
 .file-browser .video-div {
-    margin: auto;
-    position: relative;
-    width: 400px;
+	margin: auto;
+	position: relative;
+	width: 400px;
 }
 
 .file-browser .video-display {
-    background: none repeat scroll 0 0 #666666;
-    position: relative;
+	background: none repeat scroll 0 0 #666666;
+	position: relative;
 }
 
 .file-browser .video-capture {
-    background: none repeat scroll 0 0 #ffffff;
-    left: 0;
-    top: 0;
-    position: absolute;
-    z-index: -1;
+	background: none repeat scroll 0 0 #ffffff;
+	left: 0;
+	top: 0;
+	position: absolute;
+	z-index: -1;
 }
 
 .file-browser .buttons {

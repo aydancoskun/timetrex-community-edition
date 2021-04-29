@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TDatePicker = function( options ) {
 		var opts = $.extend( {}, $.fn.TDatePicker.defaults, options );
@@ -68,7 +68,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -194,7 +194,11 @@
 				} else if ( mode === 'date_time' ) {
 					example_width = Global.calculateTextWidth( example_display + ' ' + LocalCacheData.getLoginUserPreference().time_format_display );
 				}
-				content_width = Global.calculateTextWidth( date_picker_input.val(), { min_width: example_width, max_width: (example_width + 100), padding: 28 } );
+				content_width = Global.calculateTextWidth( date_picker_input.val(), {
+					min_width: example_width,
+					max_width: ( example_width + 100 ),
+					padding: 28
+				} );
 				$this.width( content_width + 'px' );
 			}
 		};
@@ -226,7 +230,7 @@
 					date_picker_input.datepicker( 'show' );
 					is_open = true;
 				} else {
-					date_picker_input.datepicker( 'hide');
+					date_picker_input.datepicker( 'hide' );
 					is_open = false;
 				}
 			} );
@@ -385,13 +389,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-								LocalCacheData.current_open_sub_controller.edit_view &&
-								LocalCacheData.current_open_sub_controller.is_viewing ) {
+							LocalCacheData.current_open_sub_controller.edit_view &&
+							LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-								LocalCacheData.current_open_primary_controller.edit_view &&
-								LocalCacheData.current_open_primary_controller.is_viewing ) {
+							LocalCacheData.current_open_primary_controller.edit_view &&
+							LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -425,7 +429,6 @@
 
 	};
 
-
 	$.fn.TDatePicker.defaults = {};
 
-})( jQuery );
+} )( jQuery );

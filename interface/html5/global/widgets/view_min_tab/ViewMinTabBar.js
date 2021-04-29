@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.ViewMinTabBar = function( options ) {
 		var opts = $.extend( {}, $.fn.ViewMinTabBar.defaults, options );
@@ -81,4 +81,4 @@
 
 	$.fn.ViewMinTabBar.defaults = {};
 
-})( jQuery );
+} )( jQuery );

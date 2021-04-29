@@ -40,48 +40,48 @@
  */
 class PayrollDeduction_US_MI extends PayrollDeduction_US {
 
-	var $state_options = array(
-			20200101 => array(
+	var $state_options = [
+			20200101 => [
 					'rate'      => 4.25,
 					'allowance' => 4750,
-			),
-			20190101 => array(
+			],
+			20190101 => [
 					'rate'      => 4.25,
 					'allowance' => 4400,
-			),
-			20180101 => array(
+			],
+			20180101 => [
 					'rate'      => 4.25,
 					'allowance' => 4050,
-			),
-			20140101 => array(
+			],
+			20140101 => [
 					'rate'      => 4.25,
 					'allowance' => 4000,
-			),
-			20130101 => array(
+			],
+			20130101 => [
 					'rate'      => 4.25,
 					'allowance' => 3950,
-			),
-			20110101 => array(
+			],
+			20110101 => [
 					'rate'      => 4.35,
 					'allowance' => 3700,
-			),
-			20090101 => array(
+			],
+			20090101 => [
 					'rate'      => 4.35,
 					'allowance' => 3600,
-			),
-			20071001 => array( //01-Oct-07
-							   'rate'      => 4.35,
-							   'allowance' => 3400,
-			),
-			20070101 => array(
+			],
+			20071001 => [ //01-Oct-07
+						  'rate'      => 4.35,
+						  'allowance' => 3400,
+			],
+			20070101 => [
 					'rate'      => 3.9,
 					'allowance' => 3400,
-			),
-			20060101 => array(
+			],
+			20060101 => [
 					'rate'      => 3.9,
 					'allowance' => 3300,
-			),
-	);
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -98,8 +98,8 @@ class PayrollDeduction_US_MI extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance = $retarr['allowance'];
@@ -118,8 +118,8 @@ class PayrollDeduction_US_MI extends PayrollDeduction_US {
 
 		if ( $annual_income > 0 ) {
 			$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-			if ( $retarr == FALSE ) {
-				return FALSE;
+			if ( $retarr == false ) {
+				return false;
 			}
 
 			$rate = bcdiv( $retarr['rate'], 100 );

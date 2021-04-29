@@ -35,24 +35,24 @@
  ********************************************************************************/
 
 class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
-	protected $company_id = NULL;
-	protected $user_id = NULL;
-	protected $pay_period_schedule_id = NULL;
-	protected $pay_period_objs = NULL;
-	protected $pay_stub_account_link_arr = NULL;
+	protected $company_id = null;
+	protected $user_id = null;
+	protected $pay_period_schedule_id = null;
+	protected $pay_period_objs = null;
+	protected $pay_stub_account_link_arr = null;
 
 	public function setUp() {
 		global $dd;
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->currency_id = $dd->createCurrency( $this->company_id, 10 );
 
@@ -65,18 +65,18 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
-		$dd->createPayrollRemittanceAgency( $this->company_id, NULL, $this->legal_entity_id ); //Must go before createCompanyDeduction()
+		$dd->createPayrollRemittanceAgency( $this->company_id, null, $this->legal_entity_id ); //Must go before createCompanyDeduction()
 
 		//Company Deductions
-		$dd->createCompanyDeduction( $this->company_id, NULL, $this->legal_entity_id );
+		$dd->createCompanyDeduction( $this->company_id, null, $this->legal_entity_id );
 
 		//Create multiple state tax/deductions.
-		$sp = TTNew('SetupPresets'); /** @var SetupPresets $sp */
+		$sp = TTNew( 'SetupPresets' ); /** @var SetupPresets $sp */
 		$sp->setCompany( $this->company_id );
-		$sp->setUser( NULL );
+		$sp->setUser( null );
 		$sp->PayStubAccounts( 'US', 'CA' );
-		$sp->PayrollRemittanceAgencys( 'US', 'CA', NULL, NULL, $this->legal_entity_id );
-		$sp->CompanyDeductions( 'US', 'CA', NULL, NULL, $this->legal_entity_id );
+		$sp->PayrollRemittanceAgencys( 'US', 'CA', null, null, $this->legal_entity_id );
+		$sp->CompanyDeductions( 'US', 'CA', null, null, $this->legal_entity_id );
 
 		//Need to define the California State Unemployment Percent.
 		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
@@ -88,7 +88,7 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 				$cd_obj->Save();
 			}
 		} else {
-			$this->assertTrue( FALSE, 'CA - Unemployment Insurance failed to be created.' );
+			$this->assertTrue( false, 'CA - Unemployment Insurance failed to be created.' );
 		}
 
 		//Need to define the California State Unemployment Percent.
@@ -101,20 +101,20 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 				$cd_obj->Save();
 			}
 		} else {
-			$this->assertTrue( FALSE, 'NY - Unemployment Insurance failed to be created.' );
+			$this->assertTrue( false, 'NY - Unemployment Insurance failed to be created.' );
 		}
 
 
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 10  ); // Check
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 20  ); // US - EFT
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 30  ); // CA - EFT
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 10 ); // Check
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 20 ); // US - EFT
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 30 ); // CA - EFT
 
 		//createUser() also handles remittance destination accounts.
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 11, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids ); //Different State
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids ); //Different State
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 11, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20, null, null, null, null, null, null, null, $remittance_source_account_ids ); //Different State
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21, null, null, null, null, null, null, null, $remittance_source_account_ids ); //Different State
 
 
 		//Get User Object.
@@ -130,27 +130,27 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id[0] );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	function getPayStubAccountLinkArray() {
-		$this->pay_stub_account_link_arr = array(
-			'total_gross' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Gross'),
-			'total_deductions' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Deductions'),
-			'employer_contribution' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 40, 'Employer Total Contributions'),
-			'net_pay' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 40, 'Net Pay'),
-			'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
-			'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
-			'vacation_accrual' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 50, 'Vacation Accrual'),
-			);
+		$this->pay_stub_account_link_arr = [
+				'total_gross'              => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Gross' ),
+				'total_deductions'         => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Deductions' ),
+				'employer_contribution'    => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Employer Total Contributions' ),
+				'net_pay'                  => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Net Pay' ),
+				'regular_time'             => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ),
+				'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Vacation - Accrual Release' ),
+				'vacation_accrual'         => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 50, 'Vacation Accrual' ),
+		];
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayPeriodSchedule() {
@@ -171,17 +171,17 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartDayOfWeek( TTDate::getDayOfWeek( $anchor_date ) );
 		$ppsf->setTransactionDate( 7 );
 
-		$ppsf->setTransactionDateBusinessDay( TRUE );
-		$ppsf->setTimeZone('PST8PDT');
+		$ppsf->setTransactionDateBusinessDay( true );
+		$ppsf->setTimeZone( 'PST8PDT' );
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4 * 3600) );
-		$ppsf->setMaximumShiftTime( (16 * 3600) );
+		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
+		$ppsf->setMaximumShiftTime( ( 16 * 3600 ) );
 
-		$ppsf->setEnableInitialPayPeriods( FALSE );
+		$ppsf->setEnableInitialPayPeriods( false );
 		if ( $ppsf->isValid() ) {
-			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			$insert_id = $ppsf->Save( false );
+			Debug::Text( 'Pay Period Schedule ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 			$ppsf->setUser( $this->user_id );
 			$ppsf->Save();
@@ -191,10 +191,9 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
-
+		return false;
 	}
 
 	function createPayPeriods() {
@@ -207,19 +206,18 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-2019') );
+					$end_date = TTDate::getBeginYearEpoch( strtotime( '01-Jan-2019' ) );
 				} else {
 					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'I: ' . $i . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, ( 86400 + 3600 ), false ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
-
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function getAllPayPeriods() {
@@ -227,8 +225,8 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		//$pplf->getByCompanyId( $this->company_id );
 		$pplf->getByPayPeriodScheduleId( $this->pay_period_schedule_id );
 		if ( $pplf->getRecordCount() > 0 ) {
-			foreach( $pplf as $pp_obj ) {
-				Debug::text('Pay Period... Start: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			foreach ( $pplf as $pp_obj ) {
+				Debug::text( 'Pay Period... Start: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getStartDate() ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				$this->pay_period_objs[] = $pp_obj;
 			}
@@ -236,21 +234,21 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 
 		$this->pay_period_objs = array_reverse( $this->pay_period_objs );
 
-		return TRUE;
+		return true;
 	}
 
 	function getPayStubEntryArray( $pay_stub_id ) {
 		//Check Pay Stub to make sure it was created correctly.
 		$pself = new PayStubEntryListFactory();
-		$pself->getByPayStubId( $pay_stub_id ) ;
+		$pself->getByPayStubId( $pay_stub_id );
 		if ( $pself->getRecordCount() > 0 ) {
-			foreach( $pself as $pse_obj ) {
-				$ps_entry_arr[$pse_obj->getPayStubEntryNameId()][] = array(
-					'rate' => $pse_obj->getRate(),
-					'units' => $pse_obj->getUnits(),
-					'amount' => $pse_obj->getAmount(),
-					'ytd_amount' => $pse_obj->getYTDAmount(),
-					);
+			foreach ( $pself as $pse_obj ) {
+				$ps_entry_arr[$pse_obj->getPayStubEntryNameId()][] = [
+						'rate'       => $pse_obj->getRate(),
+						'units'      => $pse_obj->getUnits(),
+						'amount'     => $pse_obj->getAmount(),
+						'ytd_amount' => $pse_obj->getYTDAmount(),
+				];
 			}
 		}
 
@@ -258,7 +256,7 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 			return $ps_entry_arr;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function createPayStubAmendment( $pay_stub_entry_name_id, $amount, $effective_date, $user_id ) {
@@ -274,25 +272,25 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 
 		$psaf->setEffectiveDate( $effective_date );
 
-		$psaf->setAuthorized(TRUE);
+		$psaf->setAuthorized( true );
 		if ( $psaf->isValid() ) {
 			$psaf->Save();
 		} else {
-			Debug::text(' ERROR: Pay Stub Amendment Failed!', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( ' ERROR: Pay Stub Amendment Failed!', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayStub( $user_id ) {
-		for( $i = 0; $i <= 12; $i++ ) { //Calculate pay stubs for each pay period.
+		for ( $i = 0; $i <= 12; $i++ ) { //Calculate pay stubs for each pay period.
 			$cps = new CalculatePayStub();
 			$cps->setUser( $user_id );
 			$cps->setPayPeriod( $this->pay_period_objs[$i]->getId() );
 			$cps->calculate();
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function getCompanyDeductionIDByName( $name ) {
@@ -303,10 +301,10 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 
 			return $cd_obj->getId();
 		} else {
-			Debug::text(' ERROR: Unable to find Company Deduction record! Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( ' ERROR: Unable to find Company Deduction record! Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -358,10 +356,10 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setFormConfig( $form_config );
 
 		//$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
-		$report_config['columns'] = array('full_name', 'transaction-date_quarter_year', 'transaction-pay_period', 'subject_wages', 'taxable_wages', 'tax_withheld');
-		$report_config['group'] = array('full_name', 'transaction-date_quarter_year', 'transaction-pay_period');
-		$report_config['sub_total'] = array('full_name', 'transaction-date_quarter_year');
-		$report_config['sort'] = array(array('full_name' => 'asc'), array('transaction-date_quarter_year' => 'asc'), array('transaction-pay_period' => 'asc'));
+		$report_config['columns'] = [ 'full_name', 'transaction-date_quarter_year', 'transaction-pay_period', 'subject_wages', 'taxable_wages', 'tax_withheld' ];
+		$report_config['group'] = [ 'full_name', 'transaction-date_quarter_year', 'transaction-pay_period' ];
+		$report_config['sub_total'] = [ 'full_name', 'transaction-date_quarter_year' ];
+		$report_config['sort'] = [ [ 'full_name' => 'asc' ], [ 'transaction-date_quarter_year' => 'asc' ], [ 'transaction-pay_period' => 'asc' ] ];
 
 		$report_config['time_period']['time_period'] = 'custom_date';
 		$report_dates = TTDate::getTimePeriodDates( 'this_year_1st_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
@@ -374,326 +372,326 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array(
+		$should_match_arr = [
 				0  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				1  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				2  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				3  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				4  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				5  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				6  =>
-						array(
+						[
 								'full_name'     => 'Administrator, Mr.',
 								'subject_wages' => '5053.20',
 								'taxable_wages' => '5053.20',
 								'tax_withheld'  => '30.30',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				7  =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				8  =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				9  =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				10 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				11 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				12 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				13 =>
-						array(
+						[
 								'full_name'     => 'Doe, Jane',
 								'subject_wages' => '5053.20',
 								'taxable_wages' => '5053.20',
 								'tax_withheld'  => '30.30',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				14 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				15 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				16 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				17 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				18 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				19 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				20 =>
-						array(
+						[
 								'full_name'     => 'Doe, John',
 								'subject_wages' => '5053.20',
 								'taxable_wages' => '5053.20',
 								'tax_withheld'  => '30.30',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				21 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				22 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				23 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				24 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				25 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				26 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				27 =>
-						array(
+						[
 								'full_name'     => 'Erschoff, Tamera',
 								'subject_wages' => '5053.20',
 								'taxable_wages' => '5053.20',
 								'tax_withheld'  => '30.30',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				28 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				29 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				30 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				31 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				32 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				33 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				34 =>
-						array(
+						[
 								'full_name'     => 'Simmons, Theodora',
 								'subject_wages' => '5053.20',
 								'taxable_wages' => '5053.20',
 								'tax_withheld'  => '30.30',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				35 =>
-						array(
+						[
 								'transaction-pay_period' => 'Grand Total[25]:',
 								'subject_wages'          => '25266.00',
 								'taxable_wages'          => '25266.00',
 								'tax_withheld'           => '151.50',
-								'_total'                 => TRUE,
-						),
-		);
+								'_total'                 => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -705,10 +703,10 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setFormConfig( $form_config );
 
 		//$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
-		$report_config['columns'] = array('full_name', 'transaction-date_quarter_year', 'transaction-pay_period', 'subject_wages', 'taxable_wages', 'tax_withheld');
-		$report_config['group'] = array('full_name', 'transaction-date_quarter_year', 'transaction-pay_period');
-		$report_config['sub_total'] = array('full_name', 'transaction-date_quarter_year');
-		$report_config['sort'] = array(array('full_name' => 'asc'), array('transaction-date_quarter_year' => 'asc'), array('transaction-pay_period' => 'asc'));
+		$report_config['columns'] = [ 'full_name', 'transaction-date_quarter_year', 'transaction-pay_period', 'subject_wages', 'taxable_wages', 'tax_withheld' ];
+		$report_config['group'] = [ 'full_name', 'transaction-date_quarter_year', 'transaction-pay_period' ];
+		$report_config['sub_total'] = [ 'full_name', 'transaction-date_quarter_year' ];
+		$report_config['sort'] = [ [ 'full_name' => 'asc' ], [ 'transaction-date_quarter_year' => 'asc' ], [ 'transaction-pay_period' => 'asc' ] ];
 
 		$report_config['time_period']['time_period'] = 'custom_date';
 		$report_dates = TTDate::getTimePeriodDates( 'this_year_2nd_quarter', TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
@@ -721,417 +719,417 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export( $report_output );
 
-		$should_match_arr = array(
+		$should_match_arr = [
 				0  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				1  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				2  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				3  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				4  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				5  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				6  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				7  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				8  =>
-						array(
+						[
 								'full_name'     => 'Administrator, Mr.',
 								'subject_wages' => '7073.84',
 								'taxable_wages' => '1946.80',
 								'tax_withheld'  => '11.68',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				9  =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				10 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				11 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				12 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				13 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				14 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				15 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				16 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				17 =>
-						array(
+						[
 								'full_name'     => 'Doe, Jane',
 								'subject_wages' => '7073.84',
 								'taxable_wages' => '1946.80',
 								'tax_withheld'  => '11.68',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				18 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				19 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				20 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				21 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				22 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				23 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				24 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				25 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				26 =>
-						array(
+						[
 								'full_name'     => 'Doe, John',
 								'subject_wages' => '7073.84',
 								'taxable_wages' => '1946.80',
 								'tax_withheld'  => '11.68',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				27 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				28 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				29 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				30 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				31 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				32 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				33 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				34 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				35 =>
-						array(
+						[
 								'full_name'     => 'Erschoff, Tamera',
 								'subject_wages' => '7073.84',
 								'taxable_wages' => '1946.80',
 								'tax_withheld'  => '11.68',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				36 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				37 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				38 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				39 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				40 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				41 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				42 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				43 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				44 =>
-						array(
+						[
 								'full_name'     => 'Simmons, Theodora',
 								'subject_wages' => '7073.84',
 								'taxable_wages' => '1946.80',
 								'tax_withheld'  => '11.68',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				45 =>
-						array(
+						[
 								'transaction-pay_period' => 'Grand Total[35]:',
 								'subject_wages'          => '35369.20',
 								'taxable_wages'          => '9734.00',
 								'tax_withheld'           => '58.40',
-								'_total'                 => TRUE,
-						),
+								'_total'                 => true,
+						],
 
-		);
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -1143,10 +1141,10 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setFormConfig( $form_config );
 
 		//$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
-		$report_config['columns'] = array('full_name', 'transaction-date_quarter_year', 'transaction-pay_period', 'subject_wages', 'taxable_wages', 'tax_withheld');
-		$report_config['group'] = array('full_name', 'transaction-date_quarter_year', 'transaction-pay_period');
-		$report_config['sub_total'] = array('full_name', 'transaction-date_quarter_year');
-		$report_config['sort'] = array(array('full_name' => 'asc'), array('transaction-date_quarter_year' => 'asc'), array('transaction-pay_period' => 'asc'));
+		$report_config['columns'] = [ 'full_name', 'transaction-date_quarter_year', 'transaction-pay_period', 'subject_wages', 'taxable_wages', 'tax_withheld' ];
+		$report_config['group'] = [ 'full_name', 'transaction-date_quarter_year', 'transaction-pay_period' ];
+		$report_config['sub_total'] = [ 'full_name', 'transaction-date_quarter_year' ];
+		$report_config['sort'] = [ [ 'full_name' => 'asc' ], [ 'transaction-date_quarter_year' => 'asc' ], [ 'transaction-pay_period' => 'asc' ] ];
 
 		$report_config['time_period']['time_period'] = 'custom_date';
 		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
@@ -1158,689 +1156,690 @@ class TaxSummaryReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array(
+		$should_match_arr = [
 				0  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				1  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				2  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				3  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				4  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				5  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				6  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				7  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				8  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				9  =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				10 =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				11 =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				12 =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				13 =>
-						array(
+						[
 								'full_name'                     => 'Administrator, Mr.',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				14 =>
-						array(
+						[
 								'full_name'     => 'Administrator, Mr.',
 								'subject_wages' => '12127.04',
 								'taxable_wages' => '7000.00',
 								'tax_withheld'  => '41.98',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				15 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				16 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				17 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				18 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				19 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				20 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				21 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				22 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				23 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				24 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				25 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				26 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				27 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				28 =>
-						array(
+						[
 								'full_name'                     => 'Doe, Jane',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				29 =>
-						array(
+						[
 								'full_name'     => 'Doe, Jane',
 								'subject_wages' => '12127.04',
 								'taxable_wages' => '7000.00',
 								'tax_withheld'  => '41.98',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				30 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				31 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				32 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				33 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				34 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				35 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				36 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				37 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				38 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				39 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				40 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				41 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				42 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				43 =>
-						array(
+						[
 								'full_name'                     => 'Doe, John',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				44 =>
-						array(
+						[
 								'full_name'     => 'Doe, John',
 								'subject_wages' => '12127.04',
 								'taxable_wages' => '7000.00',
 								'tax_withheld'  => '41.98',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				45 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				46 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				47 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				48 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				49 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				50 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				51 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				52 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				53 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				54 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				55 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				56 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				57 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				58 =>
-						array(
+						[
 								'full_name'                     => 'Erschoff, Tamera',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				59 =>
-						array(
+						[
 								'full_name'     => 'Erschoff, Tamera',
 								'subject_wages' => '12127.04',
 								'taxable_wages' => '7000.00',
 								'tax_withheld'  => '41.98',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				60 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '06-Jan-19 -> 19-Jan-19',
 								'subject_wages'                 => '1010.68',
 								'taxable_wages'                 => '1010.68',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				61 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '20-Jan-19 -> 02-Feb-19',
 								'subject_wages'                 => '1010.66',
 								'taxable_wages'                 => '1010.66',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				62 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Feb-19 -> 16-Feb-19',
 								'subject_wages'                 => '1010.64',
 								'taxable_wages'                 => '1010.64',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				63 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '17-Feb-19 -> 02-Mar-19',
 								'subject_wages'                 => '1010.62',
 								'taxable_wages'                 => '1010.62',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				64 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'transaction-pay_period'        => '03-Mar-19 -> 16-Mar-19',
 								'subject_wages'                 => '1010.60',
 								'taxable_wages'                 => '1010.60',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				65 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '1-2019',
 								'subject_wages'                 => '5053.20',
 								'taxable_wages'                 => '5053.20',
 								'tax_withheld'                  => '30.30',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				66 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '17-Mar-19 -> 30-Mar-19',
 								'subject_wages'                 => '1010.58',
 								'taxable_wages'                 => '1010.58',
 								'tax_withheld'                  => '6.06',
-						),
+						],
 				67 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '31-Mar-19 -> 13-Apr-19',
 								'subject_wages'                 => '1010.56',
 								'taxable_wages'                 => '936.22',
 								'tax_withheld'                  => '5.62',
-						),
+						],
 				68 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '14-Apr-19 -> 27-Apr-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				69 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '28-Apr-19 -> 11-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				70 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '12-May-19 -> 25-May-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				71 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '26-May-19 -> 08-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				72 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'transaction-pay_period'        => '09-Jun-19 -> 22-Jun-19',
 								'subject_wages'                 => '1010.54',
 								'taxable_wages'                 => '0.00',
 								'tax_withheld'                  => '0.00',
-						),
+						],
 				73 =>
-						array(
+						[
 								'full_name'                     => 'Simmons, Theodora',
 								'transaction-date_quarter_year' => '2-2019',
 								'subject_wages'                 => '7073.84',
 								'taxable_wages'                 => '1946.80',
 								'tax_withheld'                  => '11.68',
-								'_subtotal'                     => TRUE,
-						),
+								'_subtotal'                     => true,
+						],
 				74 =>
-						array(
+						[
 								'full_name'     => 'Simmons, Theodora',
 								'subject_wages' => '12127.04',
 								'taxable_wages' => '7000.00',
 								'tax_withheld'  => '41.98',
-								'_subtotal'     => TRUE,
-						),
+								'_subtotal'     => true,
+						],
 				75 =>
-						array(
+						[
 								'transaction-pay_period' => 'Grand Total[60]:',
 								'subject_wages'          => '60635.20',
 								'taxable_wages'          => '35000.00',
 								'tax_withheld'           => '209.90',
-								'_total'                 => TRUE,
-						),
-		);
+								'_total'                 => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

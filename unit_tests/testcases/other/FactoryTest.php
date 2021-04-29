@@ -38,24 +38,24 @@
  * @group JobApplication
  */
 class FactoryTest extends PHPUnit_Framework_TestCase {
-	protected $company_id = NULL;
-	protected $user_id = NULL;
-	protected $currency_id = NULL;
-	protected $branch_ids = NULL;
-	protected $department_ids = NULL;
-	protected $user_title_ids = NULL;
-	protected $user_ids = NULL;
+	protected $company_id = null;
+	protected $user_id = null;
+	protected $currency_id = null;
+	protected $branch_ids = null;
+	protected $department_ids = null;
+	protected $user_title_ids = null;
+	protected $user_ids = null;
 
 	public function setUp() {
 		global $dd;
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -78,13 +78,13 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	//Test to make sure the FactoryListIterator is properly clearing objects/sub-objects (ie: Validator) between loop iterations.
@@ -92,28 +92,28 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		//Create some test records.
 		$utf = new UserTitleFactory();
 		$utf->setCompany( $this->company_id );
-		$utf->setName('Test0');
+		$utf->setName( 'Test0' );
 		if ( $utf->isValid() ) {
 			$utf->Save();
 		}
 
 		$utf = new UserTitleFactory();
 		$utf->setCompany( $this->company_id );
-		$utf->setName('Test1');
+		$utf->setName( 'Test1' );
 		if ( $utf->isValid() ) {
 			$utf->Save();
 		}
 
 		$utf = new UserTitleFactory();
 		$utf->setCompany( $this->company_id );
-		$utf->setName('Test2');
+		$utf->setName( 'Test2' );
 		if ( $utf->isValid() ) {
 			$utf->Save();
 		}
 
 		$utf = new UserTitleFactory();
 		$utf->setCompany( $this->company_id );
-		$utf->setName('Test3');
+		$utf->setName( 'Test3' );
 		if ( $utf->isValid() ) {
 			$utf->Save();
 		}
@@ -123,22 +123,22 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThanOrEqual( 3, $utlf->getRecordCount() );
 		if ( $utlf->getRecordCount() > 0 ) {
 			$i = 0;
-			foreach( $utlf as $ut_obj ) {
+			foreach ( $utlf as $ut_obj ) {
 				if ( $i == 0 ) {
 					$this->assertTrue( $ut_obj->isValid() );
 					if ( $ut_obj->isValid() ) {
 						$ut_obj->Save();
 					}
-				} elseif ( $i == 1 ) {
-					$ut_obj->setName('');
+				} else if ( $i == 1 ) {
+					$ut_obj->setName( '' );
 					$this->assertFalse( $ut_obj->isValid() );
-				} elseif ( $i == 2 ) {
+				} else if ( $i == 2 ) {
 					$this->assertTrue( $ut_obj->isValid() );
 					if ( $ut_obj->isValid() ) {
 						$ut_obj->Save();
 					}
-				} elseif ( $i == 3 ) {
-					$ut_obj->setName('');
+				} else if ( $i == 3 ) {
+					$ut_obj->setName( '' );
 					$this->assertFalse( $ut_obj->isValid() );
 				}
 
@@ -146,17 +146,17 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function testUserPre1970BirthDates() {
-		TTDate::setTimeZone( 'PST8PDT', TRUE ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
-		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
 		$u_obj = $ulf->getById( $this->user_id )->getCurrent();
 		$data = $u_obj->getObjectAsArray();
-		unset($data['permission_control_id']);
+		unset( $data['permission_control_id'] );
 		$data['birth_date'] = '31-Jul-69';
 		$u_obj->setObjectFromArray( $data );
 		if ( $u_obj->isValid() ) {
@@ -167,7 +167,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		//Save it multiple times to ensure it doesn't change.
 		$u_obj = $ulf->getById( $this->user_id )->getCurrent();
 		$data = $u_obj->getObjectAsArray();
-		unset($data['permission_control_id']);
+		unset( $data['permission_control_id'] );
 		$this->assertEquals( $data['birth_date'], '31-Jul-69' );
 		$data['birth_date'] = '31-Jul-69';
 		$u_obj->setObjectFromArray( $data );
@@ -179,7 +179,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		//Save it multiple times to ensure it doesn't change.
 		$u_obj = $ulf->getById( $this->user_id )->getCurrent();
 		$data = $u_obj->getObjectAsArray();
-		unset($data['permission_control_id']);
+		unset( $data['permission_control_id'] );
 		$this->assertEquals( $data['birth_date'], '31-Jul-69' );
 		$data['birth_date'] = '31-Jul-69';
 		$u_obj->setObjectFromArray( $data );
@@ -189,4 +189,5 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		unset( $u_obj );
 	}
 }
+
 ?>

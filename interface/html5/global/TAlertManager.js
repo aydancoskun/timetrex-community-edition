@@ -1,4 +1,4 @@
-var TAlertManager = (function() {
+var TAlertManager = ( function() {
 
 	var view = null;
 
@@ -25,12 +25,12 @@ var TAlertManager = (function() {
 		}
 
 		if ( textStatus == 'parsererror' ) {
-			Global.sendErrorReport(textStatus + ' ('+ jqXHR.status +'): "'+ errorThrown +'" FROM TAlertManager::showNetworkErrorAlert():\n\n'+ (jqXHR.responseText ? jqXHR.responseText : 'N/A'), false, false, jqXHR);
+			Global.sendErrorReport( textStatus + ' (' + jqXHR.status + '): "' + errorThrown + '" FROM TAlertManager::showNetworkErrorAlert():\n\n' + ( jqXHR.responseText ? jqXHR.responseText : 'N/A' ), false, false, jqXHR );
 			return;
 		}
 
 		if ( !isShownNetworkAlert ) {
-			TAlertManager.showAlert( Global.network_lost_msg + '<br><br>' + 'Error: ' + textStatus + ' ('+ jqXHR.status +'): <br>"'+ errorThrown +'"' + '<br><hr>' + (jqXHR.responseText ? jqXHR.responseText : 'N/A') + ' (' + jqXHR.status + ')', 'Error', function() {
+			TAlertManager.showAlert( Global.network_lost_msg + '<br><br>' + 'Error: ' + textStatus + ' (' + jqXHR.status + '): <br>"' + errorThrown + '"' + '<br><hr>' + ( jqXHR.responseText ? jqXHR.responseText : 'N/A' ) + ' (' + jqXHR.status + ')', 'Error', function() {
 				isShownNetworkAlert = false;
 			} );
 			isShownNetworkAlert = true;
@@ -40,9 +40,9 @@ var TAlertManager = (function() {
 
 	var showPreSessionAlert = function() {
 		var result = $( '<div class="session-alert"> ' +
-				'<span class="close-icon">X</span>' +
-				'<span class="content"/>' +
-				'</div>' );
+			'<span class="close-icon">X</span>' +
+			'<span class="content"/>' +
+			'</div>' );
 		setTimeout( function() {
 			$( 'body' ).append( result );
 			result.find( '.content' ).html( $.i18n._( 'Previous Session' ) );
@@ -85,7 +85,7 @@ var TAlertManager = (function() {
 
 			setCookie( 'AlternateSessionData', JSON.stringify( alternate_session_data ), 1, previous_cookie_path, host );
 
-			Global.setURLToBrowser( url +'#!m=Login' );
+			Global.setURLToBrowser( url + '#!m=Login' );
 			Global.needReloadBrowser = true;
 
 			result.remove();
@@ -156,12 +156,12 @@ var TAlertManager = (function() {
 		}
 
 		var result = $( '<div class="t-alert">' +
-				'<div class="content-div"><span class="content"/></div>' +
-				'<span class="title"/>' +
-				'<div class="bottom-bar">' +
-				'<button class="t-button">Close</button>' +
-				'</div>' +
-				'</div>' );
+			'<div class="content-div"><span class="content"/></div>' +
+			'<span class="title"/>' +
+			'<div class="bottom-bar">' +
+			'<button class="t-button">Close</button>' +
+			'</div>' +
+			'</div>' );
 		setTimeout( function() {
 			if ( view !== null ) {
 
@@ -226,13 +226,13 @@ var TAlertManager = (function() {
 			remove();
 		}
 		var result = $( '<div class="confirm-alert"> ' +
-				'<div class="content-div"><span class="content"/></div>' +
-				'<span class="title"></span>' +
-				'<div class="bottom-bar">' +
-				'<button id="yesBtn" class="t-button bottom-bar-yes-btn"></button>' +
-				'<button id="noBtn" class="t-button"></button>' +
-				'</div>' +
-				'</div>' );
+			'<div class="content-div"><span class="content"/></div>' +
+			'<span class="title"></span>' +
+			'<div class="bottom-bar">' +
+			'<button id="yesBtn" class="t-button bottom-bar-yes-btn"></button>' +
+			'<button id="noBtn" class="t-button"></button>' +
+			'</div>' +
+			'</div>' );
 		view = result;
 		$( 'body' ).append( result );
 
@@ -277,4 +277,4 @@ var TAlertManager = (function() {
 		showNetworkErrorAlert: showNetworkErrorAlert
 	};
 
-})();
+} )();

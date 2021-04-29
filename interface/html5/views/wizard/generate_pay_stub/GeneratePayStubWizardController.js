@@ -41,7 +41,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				var form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
 				var form_item_label = form_item.find( '.form-item-label' );
 				var form_item_input_div = form_item.find( '.form-item-input-div' );
-				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayPeriod' )), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriod' ) ), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 				a_combobox.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 					$this.saveCurrentStep();
 					$this.onPayPeriodChange( true );
@@ -115,7 +115,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) );
 
-				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIUser' )), true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIUser' ) ), true, ALayoutIDs.USER, 'user_id', true );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -129,7 +129,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 	},
 
 	setPayRun: function( pay_period_id ) {
-		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
+		var api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
 		var step_2_ui = this.stepsWidgetDic[2];
 		api.getCurrentPayRun( pay_period_id, {
 			onResult: function( result ) {
@@ -181,7 +181,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 			$this.onCloseClick();
 		}
 
-		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
+		var api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
 		var pay_period_ids = this.stepsDataDic[2].pay_period_id;
 		var user_ids = this.stepsDataDic[3].user_id;
 		var type_id = this.stepsDataDic[2].type_id;
@@ -230,9 +230,9 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		var current_step_data = this.stepsDataDic[this.current_step];
 		//Error: Uncaught TypeError: Cannot read property 'hide' of undefined in /interface/html5/index.php#!m=PayStub line 221
 		if ( !current_step_ui ||
-				!current_step_ui['run_id_row'] ||
-				!current_step_ui['carry_forward_to_date_row'] ||
-				!current_step_ui['transaction_date_row'] ) {
+			!current_step_ui['run_id_row'] ||
+			!current_step_ui['carry_forward_to_date_row'] ||
+			!current_step_ui['transaction_date_row'] ) {
 			return;
 		}
 		current_step_ui['run_id_row'].hide();
@@ -288,8 +288,8 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		var $this = this;
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var current_step_data = this.stepsDataDic[this.current_step];
-		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
-		var api_pay_period = new (APIFactory.getAPIClass( 'APIPayPeriod' ))();
+		var api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+		var api_pay_period = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
 		var args = {};
 		args.filter_data = {};
 		args.filter_data.id = current_step_data.pay_period_id;

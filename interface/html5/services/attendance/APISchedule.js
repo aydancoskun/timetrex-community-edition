@@ -3,7 +3,6 @@ var APISchedule = ServiceCaller.extend( {
 	key_name: 'Schedule',
 	className: 'APISchedule',
 
-
 	getCombinedSchedule: function() {
 
 		return this.argumentsHandler( this.className, 'getCombinedSchedule', arguments );
@@ -82,11 +81,10 @@ var APISchedule = ServiceCaller.extend( {
 
 	},
 
-	addPunchesFromScheduledShifts: function () {
+	addPunchesFromScheduledShifts: function() {
 
 		return this.argumentsHandler( this.className, 'addPunchesFromScheduledShifts', arguments );
 
 	}
-
 
 } );

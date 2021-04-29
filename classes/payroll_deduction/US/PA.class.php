@@ -40,11 +40,11 @@
  */
 class PayrollDeduction_US_PA extends PayrollDeduction_US {
 
-	var $state_options = array(
-			20060101 => array(
+	var $state_options = [
+			20060101 => [
 					'rate' => 3.07,
-			),
-	);
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -61,8 +61,8 @@ class PayrollDeduction_US_PA extends PayrollDeduction_US {
 
 		if ( $annual_income > 0 ) {
 			$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-			if ( $retarr == FALSE ) {
-				return FALSE;
+			if ( $retarr == false ) {
+				return false;
 			}
 
 			$rate = bcdiv( $retarr['rate'], 100 );

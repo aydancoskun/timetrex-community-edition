@@ -10,7 +10,7 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 	init: function() {
 		this.render();
 
-		this.api = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
 
 	},
 
@@ -45,6 +45,15 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 				return false;
 				break;
 		}
+	},
+
+	isRequiredButtonsClicked: function() {
+		//Check to see if every button on this step has been clicked.
+		if ( Object.keys( this.clicked_buttons ).length >= Object.keys( this.buttons ).length ) {
+			return true;
+		}
+
+		return false;
 	},
 
 	_render: function() {

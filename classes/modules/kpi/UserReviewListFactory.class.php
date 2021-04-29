@@ -38,17 +38,16 @@
 /**
  * @package Modules\KPI
  */
-class UserReviewListFactory extends UserReviewFactory implements IteratorAggregate
-{
+class UserReviewListFactory extends UserReviewFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 
 		$urcf = new UserReviewControlFactory();
 		$query = '
@@ -58,27 +57,27 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 					WHERE a.deleted = 0 AND urcf.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserReviewListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL ) {
+	function getById( $id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->rs = $this->getCache( $id );
-		if ( $this->rs === FALSE ) {
+		if ( $this->rs === false ) {
 			$urcf = new UserReviewControlFactory();
 
-			$ph = array( 'id' => TTUUID::castUUID($id), );
+			$ph = [ 'id' => TTUUID::castUUID( $id ), ];
 
 			$query = '
 						select	a.*
@@ -97,17 +96,17 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserReviewListFactory
 	 */
-	function getByUserReviewControlId( $id, $order = NULL ) {
+	function getByUserReviewControlId( $id, $order = null ) {
 
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'user_review_control_id' => TTUUID::castUUID($id), );
+		$ph = [ 'user_review_control_id' => TTUUID::castUUID( $id ), ];
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a
@@ -122,17 +121,17 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserReviewListFactory
 	 */
-	function getByKpiId( $id, $order = NULL ) {
+	function getByKpiId( $id, $order = null ) {
 
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'kpi_id' => TTUUID::castUUID($id), );
+		$ph = [ 'kpi_id' => TTUUID::castUUID( $id ), ];
 		$query = '
                     select  *
                     from    ' . $this->getTable() . ' as a
@@ -147,18 +146,18 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserReviewListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL ) {
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
 
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
+		$ph = [ 'company_id' => TTUUID::castUUID( $company_id ), ];
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a
@@ -174,25 +173,25 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserReviewListFactory
 	 */
-	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL ) {
+	function getByIdAndCompanyId( $id, $company_id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
 
-		$ph = array( 'id' => TTUUID::castUUID($id), 'company_id' => TTUUID::castUUID($company_id), );
+		$ph = [ 'id' => TTUUID::castUUID( $id ), 'company_id' => TTUUID::castUUID( $company_id ), ];
 
 		$query = '
 					select	a.*
@@ -212,32 +211,32 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserReviewListFactory
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
-			if ( isset( $filter_data['sort_column'] ) AND $filter_data['sort_order'] ) {
-				$order = array(Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order']);
+			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
+				$order = [ Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order'] ];
 			}
 		}
 
-		$additional_order_fields = array();
-		$sort_column_aliases = array();
+		$additional_order_fields = [];
+		$sort_column_aliases = [];
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
-		if ( $order == NULL ) {
-			$order = array('kf.name' => 'asc');
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'kf.name' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -245,7 +244,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		$uf = new UserFactory();
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
-		$ph = array('company_id' => TTUUID::castUUID( $company_id ),);
+		$ph = [ 'company_id' => TTUUID::castUUID( $company_id ), ];
 		$query = '
 					select	a.*,
 							kf.name,
@@ -266,21 +265,21 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	kf.company_id = ? AND urcf.deleted = 0';
-		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'urcf.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'urcf.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
 		//$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['user_review_control_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_review_control_id', $filter_data['user_review_control_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['kpi_id'] ) ) ? $this->getWhereClauseSQL( 'a.kpi_id', $filter_data['kpi_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['term_id'] ) ) ? $this->getWhereClauseSQL( 'urcf.term_id', $filter_data['term_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['severity_id'] ) ) ? $this->getWhereClauseSQL( 'urcf.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset( $filter_data['rating'] ) ) ? $this->getWhereClauseSQL( 'a.rating', $filter_data['rating'], 'numeric', $ph ) : NULL;
-		$query .= ( isset( $filter_data['note'] ) ) ? $this->getWhereClauseSQL( 'a.note', $filter_data['note'], 'text', $ph ) : NULL;
-		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'a.id', array('company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 330, 'tag' => $filter_data['tag']), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_review_control_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_review_control_id', $filter_data['user_review_control_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['kpi_id'] ) ) ? $this->getWhereClauseSQL( 'a.kpi_id', $filter_data['kpi_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['term_id'] ) ) ? $this->getWhereClauseSQL( 'urcf.term_id', $filter_data['term_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['severity_id'] ) ) ? $this->getWhereClauseSQL( 'urcf.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['rating'] ) ) ? $this->getWhereClauseSQL( 'a.rating', $filter_data['rating'], 'numeric', $ph ) : null;
+		$query .= ( isset( $filter_data['note'] ) ) ? $this->getWhereClauseSQL( 'a.note', $filter_data['note'], 'text', $ph ) : null;
+		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'a.id', [ 'company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 330, 'tag' => $filter_data['tag'] ], 'tag', $ph ) : null;
 
-		$query .= ( isset( $filter_data['created_date'] ) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : NULL;
-		$query .= ( isset( $filter_data['updated_date'] ) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : NULL;
-		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset( $filter_data['created_date'] ) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_date'] ) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : null;
+		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.created_by', 'y.first_name', 'y.last_name' ], $filter_data['created_by'], 'user_id_or_name', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.updated_by', 'z.first_name', 'z.last_name' ], $filter_data['updated_by'], 'user_id_or_name', $ph ) : null;
 
 		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );

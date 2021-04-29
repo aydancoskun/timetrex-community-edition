@@ -36,16 +36,17 @@
 
 class MiscTest extends PHPUnit_Framework_TestCase {
 	public function setUp() {
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTi18n::setLocale( 'en_US', LC_ALL, TRUE ); //This fixes problems with NumberFormat when the locale is changed and not changed back.
+		TTi18n::setLocale( 'en_US', LC_ALL, true ); //This fixes problems with NumberFormat when the locale is changed and not changed back.
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
-		return TRUE;
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return true;
 	}
 
 	/**
@@ -83,13 +84,12 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( $visa_unencrypted, $decrypted_str );
 
 			//decrypt unencrypted data
-			$this->assertEquals( $visa_unencrypted,  Misc::decrypt( $visa_unencrypted ) );
+			$this->assertEquals( $visa_unencrypted, Misc::decrypt( $visa_unencrypted ) );
 		}
 
 		//check the case for the colon.
 		$x = 'x:z';
-		$this->assertEquals( $x,  Misc::decrypt( $x ) );
-
+		$this->assertEquals( $x, Misc::decrypt( $x ) );
 	}
 
 	/**
@@ -98,7 +98,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerA() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 
 		$db = new ADOdbLoadBalancer();
@@ -106,31 +106,31 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 100 ),
-						  array( $host, 'master', 100 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 100 ],
+				[ $host, 'master', 100 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			//if ( $db_host_arr[2] == 100 ) {
 			//	$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'].'9', $config_vars['database']['password'], $config_vars['database']['database_name'] );
 			//} else {
-				$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
+			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
 			//}
 			//Debug::Arr( $db_connection_obj,  'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$retarr = array();
+		$retarr = [];
 		$max = 1000;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			$connection_id = $db->getConnectionByWeight( 'master' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -150,38 +150,38 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerB() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 100 ),
-						  array( $host, 'master', 200 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 100 ],
+				[ $host, 'master', 200 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			//if ( $db_host_arr[2] == 100 ) {
 			//	$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'].'9', $config_vars['database']['password'], $config_vars['database']['database_name'] );
 			//} else {
-				$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
+			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
 			//}
 			//Debug::Arr( $db_connection_obj,  'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$retarr = array();
+		$retarr = [];
 		$max = 1000;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			$connection_id = $db->getConnectionByWeight( 'master' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -201,33 +201,33 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerC() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 0 ),
-						  array( $host, 'master', 100 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 0 ],
+				[ $host, 'master', 100 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$retarr = array( 0 => 0, 1 => 0 );
+		$retarr = [ 0 => 0, 1 => 0 ];
 		$max = 1000;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			$connection_id = $db->getConnectionByWeight( 'master' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -244,34 +244,34 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerD() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 0 ),
-						  array( $host, 'slave', 100 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 0 ],
+				[ $host, 'slave', 100 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$retarr = array( 0 => 0, 1 => 0 );
+		$retarr = [ 0 => 0, 1 => 0 ];
 		$max = 1000;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			//$connection_id = $db->getConnectionByWeight( 'master' );
 			$connection_id = $db->getLoadBalancedConnection( 'master' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -288,35 +288,35 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerE() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 10 ),
-						  array( $host, 'slave', 100 ),
-						  array( $host, 'slave', 200 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 10 ],
+				[ $host, 'slave', 100 ],
+				[ $host, 'slave', 200 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$retarr = array( 0 => 0, 1 => 0, 2 => 0 );
+		$retarr = [ 0 => 0, 1 => 0, 2 => 0 ];
 		$max = 1000;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			$connection_id = $db->getConnectionByWeight( 'slave' );
 			//$connection_id = $db->getLoadBalancedConnection( 'master' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -339,37 +339,37 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerF() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 10 ),
-						  array( $host, 'slave', 100 ),
-						  array( $host, 'slave', 200 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 10 ],
+				[ $host, 'slave', 100 ],
+				[ $host, 'slave', 200 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$db->removeConnection(1); //Remove first slave to test failover.
+		$db->removeConnection( 1 ); //Remove first slave to test failover.
 
-		$retarr = array( 0 => 0, 1 => 0, 2 => 0 );
+		$retarr = [ 0 => 0, 1 => 0, 2 => 0 ];
 		$max = 1000;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			//$connection_id = $db->getConnectionByWeight( 'slave' );
 			$connection_id = $db->getLoadBalancedConnection( 'slave' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -391,36 +391,36 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerG() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 100 ),
-						  array( $host, 'slave', 100 ),
-						  array( $host, 'slave', 100 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 100 ],
+				[ $host, 'slave', 100 ],
+				[ $host, 'slave', 100 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$retarr = array( 0 => 0, 1 => 0, 2 => 0 );
+		$retarr = [ 0 => 0, 1 => 0, 2 => 0 ];
 		$max = 100;
-		for( $i = 0; $i < $max; $i++ ) {
-			$db->Execute('SELECT 1');
+		for ( $i = 0; $i < $max; $i++ ) {
+			$db->Execute( 'SELECT 1' );
 			//$connection_id = $db->getConnectionByWeight( 'slave' );
 			$connection_id = $db->getLoadBalancedConnection( 'slave' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -431,11 +431,11 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( 100, $retarr[0] );
 			$this->assertEquals( 0, $retarr[1] );
 			$this->assertEquals( 0, $retarr[2] );
-		} elseif ( $retarr[1] > 0 ) {
+		} else if ( $retarr[1] > 0 ) {
 			$this->assertEquals( 0, $retarr[0] );
 			$this->assertEquals( 100, $retarr[1] );
 			$this->assertEquals( 0, $retarr[2] );
-		} elseif ( $retarr[2] > 0 ) {
+		} else if ( $retarr[2] > 0 ) {
 			$this->assertEquals( 0, $retarr[0] );
 			$this->assertEquals( 0, $retarr[1] );
 			$this->assertEquals( 100, $retarr[2] );
@@ -448,44 +448,44 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerH() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 0 ),
-						  array( $host, 'slave', 100 ),
-						  array( $host, 'slave', 100 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 0 ],
+				[ $host, 'slave', 100 ],
+				[ $host, 'slave', 100 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$retarr = array( 0 => 0, 1 => 0, 2 => 0 );
+		$retarr = [ 0 => 0, 1 => 0, 2 => 0 ];
 		$max = 100;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			//Test going in/out of transactions to make sure they are pinned to the master properly.
-			if ( $i == 10 OR $i == 80 ) {
+			if ( $i == 10 || $i == 80 ) {
 				$db->BeginTrans();
 			}
-			$db->Execute('SELECT 1');
+			$db->Execute( 'SELECT 1' );
 
-			if ( $i == 20 OR $i == 90 ) {
+			if ( $i == 20 || $i == 90 ) {
 				$db->CommitTrans();
 			}
 
 			$connection_id = $db->getLoadBalancedConnection( 'slave' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -507,44 +507,44 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerI() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 0 ),
-						  array( $host, 'slave', 100 ),
-						  array( $host, 'slave', 100 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 0 ],
+				[ $host, 'slave', 100 ],
+				[ $host, 'slave', 100 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		$retarr = array( 0 => 0, 1 => 0, 2 => 0 );
+		$retarr = [ 0 => 0, 1 => 0, 2 => 0 ];
 		$max = 100;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			//Test going in/out of *nested* transactions to make sure they are pinned to the master properly.
-			if ( $i == 10 OR $i == 15 ) {
+			if ( $i == 10 || $i == 15 ) {
 				$db->StartTrans();
 			}
-			$db->Execute('SELECT 1');
+			$db->Execute( 'SELECT 1' );
 
-			if ( $i == 20 OR $i == 25 ) {
+			if ( $i == 20 || $i == 25 ) {
 				$db->CompleteTrans();
 			}
 
 			$connection_id = $db->getLoadBalancedConnection( 'slave' );
-			if ( !isset($retarr[$connection_id]) ) {
+			if ( !isset( $retarr[$connection_id] ) ) {
 				$retarr[$connection_id] = 0;
 			}
 			$retarr[$connection_id]++;
@@ -566,44 +566,44 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerSessionVarsA() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 100 ),
-						  array( $host, 'slave', 100 ),
-						  array( $host, 'slave', 100 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 100 ],
+				[ $host, 'slave', 100 ],
+				[ $host, 'slave', 100 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		if ( strncmp($db->databaseType, 'postgres', 8) == 0 ) {
-			$db->_getConnection(0);
-			$db->_getConnection(1);
+		if ( strncmp( $db->databaseType, 'postgres', 8 ) == 0 ) {
+			$db->_getConnection( 0 );
+			$db->_getConnection( 1 );
 
 			$time_zone = 'EST5EDT';
 
 			//SET calls should be intercepted and run on the entire cluster automatically.
-			$db->Execute('SET SESSION TIME ZONE '. $time_zone );
-			$results = $db->ClusterExecute( 'SHOW TIME ZONE', FALSE, TRUE, TRUE ); //Only existing connections.
+			$db->Execute( 'SET SESSION TIME ZONE ' . $time_zone );
+			$results = $db->ClusterExecute( 'SHOW TIME ZONE', false, true, true ); //Only existing connections.
 			//var_dump($result);
-			$this->assertEquals( 2, count($results) ); //Only two connections established so far.
-			foreach( $results as $key => $rs ) {
-				Debug::Text( 'Testing result from connection: '. $key .' Result: '. $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1);
+			$this->assertEquals( 2, count( $results ) ); //Only two connections established so far.
+			foreach ( $results as $key => $rs ) {
+				Debug::Text( 'Testing result from connection: ' . $key . ' Result: ' . $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1 );
 				if ( !$rs ) {
-					Debug::Text( 'Testing result from connection: '. $key, __FILE__, __LINE__, __METHOD__, 1);
+					Debug::Text( 'Testing result from connection: ' . $key, __FILE__, __LINE__, __METHOD__, 1 );
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'], 'Query failed!' );
 				} else {
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'] );
@@ -614,21 +614,20 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 			//Test cluster wide execution.
 			//
 
-			$results = $db->ClusterExecute( 'SET SESSION TIME ZONE '. $db->qstr($time_zone), FALSE, TRUE, FALSE );
-			$results = $db->ClusterExecute( 'SHOW TIME ZONE', FALSE, TRUE, FALSE );
+			$results = $db->ClusterExecute( 'SET SESSION TIME ZONE ' . $db->qstr( $time_zone ), false, true, false );
+			$results = $db->ClusterExecute( 'SHOW TIME ZONE', false, true, false );
 
 			//var_dump($result);
-			$this->assertEquals( 3, count($results) );
-			foreach( $results as $key => $rs ) {
-				Debug::Text( 'Testing result from connection: '. $key .' Result: '. $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1);
+			$this->assertEquals( 3, count( $results ) );
+			foreach ( $results as $key => $rs ) {
+				Debug::Text( 'Testing result from connection: ' . $key . ' Result: ' . $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1 );
 				if ( !$rs ) {
-					Debug::Text( 'Testing result from connection: '. $key, __FILE__, __LINE__, __METHOD__, 1);
+					Debug::Text( 'Testing result from connection: ' . $key, __FILE__, __LINE__, __METHOD__, 1 );
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'], 'Query failed!' );
 				} else {
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'] );
 				}
 			}
-
 		}
 	}
 
@@ -638,63 +637,63 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testDatabaseLoadBalancerSessionVarsB() {
 		global $config_vars;
 
-		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
+		require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'adodb' . DIRECTORY_SEPARATOR . 'adodb-loadbalancer.inc.php' );
 
 		$db = new ADOdbLoadBalancer();
 
 		//In case load balancing is used, parse out just the first host.
 		$host_arr = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 		$host = $host_arr[0][0];
-		$db_hosts = array(
-						  array( $host, 'master', 100 ),
-						  array( $host, 'slave', 100 ),
-						  array( $host, 'slave', 100 ),
-						);
+		$db_hosts = [
+				[ $host, 'master', 100 ],
+				[ $host, 'slave', 100 ],
+				[ $host, 'slave', 100 ],
+		];
 
-		foreach( $db_hosts as $db_host_arr ) {
-			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+		foreach ( $db_hosts as $db_host_arr ) {
+			Debug::Text( 'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1 );
 			$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
-			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
+			$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
+			$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
 			$db->addConnection( $db_connection_obj );
 		}
-		unset($type, $db_connection_obj);
+		unset( $type, $db_connection_obj );
 
-		if ( strncmp($db->databaseType, 'postgres', 8) == 0 ) {
+		if ( strncmp( $db->databaseType, 'postgres', 8 ) == 0 ) {
 			$time_zone = 'EST5EDT';
 			$db->setSessionVariable( 'TIME ZONE', $time_zone );
 
-			$db->_getConnection(0);
-			$db->_getConnection(1);
+			$db->_getConnection( 0 );
+			$db->_getConnection( 1 );
 
-			$results = $db->ClusterExecute( 'SHOW TIME ZONE', FALSE, TRUE, TRUE ); //Only existing connections.
+			$results = $db->ClusterExecute( 'SHOW TIME ZONE', false, true, true ); //Only existing connections.
 			//var_dump($result);
-			$this->assertEquals( 2, count($results) ); //Only two connections established so far.
-			foreach( $results as $key => $rs ) {
-				Debug::Text( 'Testing result from connection: '. $key .' Result: '. $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1);
+			$this->assertEquals( 2, count( $results ) ); //Only two connections established so far.
+			foreach ( $results as $key => $rs ) {
+				Debug::Text( 'Testing result from connection: ' . $key . ' Result: ' . $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1 );
 				if ( !$rs ) {
-					Debug::Text( 'Testing result from connection: '. $key, __FILE__, __LINE__, __METHOD__, 1);
+					Debug::Text( 'Testing result from connection: ' . $key, __FILE__, __LINE__, __METHOD__, 1 );
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'], 'Query failed!' );
 				} else {
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'] );
 				}
 			}
 
-			$db->_getConnection(2);
+			$db->_getConnection( 2 );
 
 			//
 			//Test cluster wide execution.
 			//
 
-			$results = $db->ClusterExecute( 'SHOW TIME ZONE', FALSE, TRUE, FALSE );
+			$results = $db->ClusterExecute( 'SHOW TIME ZONE', false, true, false );
 
 			//var_dump($result);
-			$this->assertEquals( 3, count($results) );
-			foreach( $results as $key => $rs ) {
-				Debug::Text( 'Testing result from connection: '. $key .' Result: '. $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1);
+			$this->assertEquals( 3, count( $results ) );
+			foreach ( $results as $key => $rs ) {
+				Debug::Text( 'Testing result from connection: ' . $key . ' Result: ' . $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1 );
 				if ( !$rs ) {
-					Debug::Text( 'Testing result from connection: '. $key, __FILE__, __LINE__, __METHOD__, 1);
+					Debug::Text( 'Testing result from connection: ' . $key, __FILE__, __LINE__, __METHOD__, 1 );
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'], 'Query failed!' );
 				} else {
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'] );
@@ -709,20 +708,19 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 			//Test cluster wide execution.
 			//
 
-			$results = $db->ClusterExecute( 'SHOW TIME ZONE', FALSE, TRUE, FALSE );
+			$results = $db->ClusterExecute( 'SHOW TIME ZONE', false, true, false );
 
 			//var_dump($result);
-			$this->assertEquals( 3, count($results) );
-			foreach( $results as $key => $rs ) {
-				Debug::Text( 'Testing result from connection: '. $key .' Result: '. $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1);
+			$this->assertEquals( 3, count( $results ) );
+			foreach ( $results as $key => $rs ) {
+				Debug::Text( 'Testing result from connection: ' . $key . ' Result: ' . $rs->fields['TimeZone'], __FILE__, __LINE__, __METHOD__, 1 );
 				if ( !$rs ) {
-					Debug::Text( 'Testing result from connection: '. $key, __FILE__, __LINE__, __METHOD__, 1);
+					Debug::Text( 'Testing result from connection: ' . $key, __FILE__, __LINE__, __METHOD__, 1 );
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'], 'Query failed!' );
 				} else {
 					$this->assertEquals( $time_zone, $rs->fields['TimeZone'] );
 				}
 			}
-
 		}
 	}
 
@@ -755,47 +753,47 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::getAfterDecimal( 1 ), '0' );
 		$this->assertEquals( Misc::getAfterDecimal( 3 ), '0' );
 		$this->assertEquals( Misc::getAfterDecimal( -3 ), '0' );
-		$this->assertEquals( Misc::getAfterDecimal( -3.1, TRUE ), '10' );
-		$this->assertEquals( Misc::getAfterDecimal( -3.1, FALSE ), '1' );
+		$this->assertEquals( Misc::getAfterDecimal( -3.1, true ), '10' );
+		$this->assertEquals( Misc::getAfterDecimal( -3.1, false ), '1' );
 		$this->assertEquals( Misc::getAfterDecimal( 3.14 ), '14' );
 		$this->assertEquals( Misc::getAfterDecimal( -3.14 ), '14' );
 		$this->assertEquals( Misc::getAfterDecimal( 510.9 ), '90' );
 		$this->assertEquals( Misc::getAfterDecimal( -510.9 ), '90' );
-		$this->assertEquals( Misc::getAfterDecimal( -123456789.123456789, TRUE ), '12' );
+		$this->assertEquals( Misc::getAfterDecimal( -123456789.123456789, true ), '12' );
 
-		$this->assertEquals( Misc::getAfterDecimal( 123456789012.12, FALSE ), '12' );
-		$this->assertEquals( Misc::getAfterDecimal( 1234567890.1234, FALSE ), '1234' );
-		$this->assertEquals( Misc::getAfterDecimal( 123456789.123456789, FALSE ), '12346' ); // Float precision overflow
-		$this->assertEquals( Misc::getAfterDecimal( '123456789.123456789', FALSE ), '123456789' ); //Passed as string, so no float precision overflow.
+		$this->assertEquals( Misc::getAfterDecimal( 123456789012.12, false ), '12' );
+		$this->assertEquals( Misc::getAfterDecimal( 1234567890.1234, false ), '1234' );
+		$this->assertEquals( Misc::getAfterDecimal( 123456789.123456789, false ), '12346' ); // Float precision overflow
+		$this->assertEquals( Misc::getAfterDecimal( '123456789.123456789', false ), '123456789' ); //Passed as string, so no float precision overflow.
 
-		$this->assertEquals( Misc::getAfterDecimal( -123456789012.12, FALSE ), '12' );
-		$this->assertEquals( Misc::getAfterDecimal( -1234567890.1234, FALSE ), '1234' );
-		$this->assertEquals( Misc::getAfterDecimal( -123456789.123456789, FALSE ), '12346' ); // Float precision overflow
-		$this->assertEquals( Misc::getAfterDecimal( '-123456789.123456789', FALSE ), '123456789' ); //Passed as string, so no float precision overflow.
+		$this->assertEquals( Misc::getAfterDecimal( -123456789012.12, false ), '12' );
+		$this->assertEquals( Misc::getAfterDecimal( -1234567890.1234, false ), '1234' );
+		$this->assertEquals( Misc::getAfterDecimal( -123456789.123456789, false ), '12346' ); // Float precision overflow
+		$this->assertEquals( Misc::getAfterDecimal( '-123456789.123456789', false ), '123456789' ); //Passed as string, so no float precision overflow.
 	}
 
 	/**
 	 * @group MiscTest_testFormatNumber
 	 */
 	function testFormatNumber() {
-		$this->assertSame( TTi18n::FormatNumber( '100.00', TRUE ), '100.00' );
-		$this->assertSame( TTi18n::FormatNumber( '100', TRUE ), '100.00' );
-		$this->assertSame( TTi18n::FormatNumber( '100.01000', TRUE ), '100.01' );
-		$this->assertSame( TTi18n::FormatNumber( '100.0101', TRUE ), '100.0101' );
+		$this->assertSame( TTi18n::FormatNumber( '100.00', true ), '100.00' );
+		$this->assertSame( TTi18n::FormatNumber( '100', true ), '100.00' );
+		$this->assertSame( TTi18n::FormatNumber( '100.01000', true ), '100.01' );
+		$this->assertSame( TTi18n::FormatNumber( '100.0101', true ), '100.0101' );
 
-		$this->assertSame( TTi18n::FormatNumber( '100.0100', TRUE, 1, 2 ), '100.01' );
-		$this->assertSame( TTi18n::FormatNumber( '100.0123', TRUE, 1, 2 ), '100.01' );
-		$this->assertSame( TTi18n::FormatNumber( '100.1', TRUE, 1, 2 ), '100.1' );
-		$this->assertSame( TTi18n::FormatNumber( '100', TRUE, 1, 2 ), '100.0' );
+		$this->assertSame( TTi18n::FormatNumber( '100.0100', true, 1, 2 ), '100.01' );
+		$this->assertSame( TTi18n::FormatNumber( '100.0123', true, 1, 2 ), '100.01' );
+		$this->assertSame( TTi18n::FormatNumber( '100.1', true, 1, 2 ), '100.1' );
+		$this->assertSame( TTi18n::FormatNumber( '100', true, 1, 2 ), '100.0' );
 
-		$this->assertSame( TTi18n::FormatNumber( '100.1000', FALSE, 1, 2 ), '100.1' );
-		$this->assertSame( TTi18n::FormatNumber( '100.1234', FALSE, 1, 2 ), '100.12' );
-		$this->assertSame( TTi18n::FormatNumber( '100', FALSE, 1, 2 ), '100' );
-		$this->assertSame( TTi18n::FormatNumber( '100', FALSE ), '100' );
-		$this->assertSame( TTi18n::FormatNumber( '100.12345', FALSE ), '100.12' );
+		$this->assertSame( TTi18n::FormatNumber( '100.1000', false, 1, 2 ), '100.1' );
+		$this->assertSame( TTi18n::FormatNumber( '100.1234', false, 1, 2 ), '100.12' );
+		$this->assertSame( TTi18n::FormatNumber( '100', false, 1, 2 ), '100' );
+		$this->assertSame( TTi18n::FormatNumber( '100', false ), '100' );
+		$this->assertSame( TTi18n::FormatNumber( '100.12345', false ), '100.12' );
 
-		$this->assertSame( TTi18n::FormatNumber( '100.0000', TRUE, 0, 2 ), '100' );
-		$this->assertSame( TTi18n::FormatNumber( '100.0000', TRUE, 0, 2 ), '100' ); //Make sure we don't get "100."
+		$this->assertSame( TTi18n::FormatNumber( '100.0000', true, 0, 2 ), '100' );
+		$this->assertSame( TTi18n::FormatNumber( '100.0000', true, 0, 2 ), '100' ); //Make sure we don't get "100."
 	}
 
 	/**
@@ -803,27 +801,27 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testMoneyFormat() {
 		//see the I18nTest that compares this function to the numberformat in i18n.
-		Debug::Text( 'Thousands Separator: '. TTi18n::getThousandsSymbol() .' Decimal Symbol: '. TTi18n::getDecimalSymbol(), __FILE__, __LINE__, __METHOD__, 1);
-		if ( TTi18n::getThousandsSymbol() == ',' AND TTi18n::getDecimalSymbol() == '.' ) {
-			$this->assertEquals( Misc::MoneyFormat( 12345.152, TRUE ), '12,345.15' );
-			$this->assertEquals( Misc::MoneyFormat( 12345.151, FALSE ), '12345.15' );
-			$this->assertEquals( Misc::MoneyFormat( 12345.15, TRUE ), '12,345.15' );
-			$this->assertEquals( Misc::MoneyFormat( 12345.15, FALSE ), '12345.15' );
-			$this->assertEquals( Misc::MoneyFormat( 12345.1, TRUE ), '12,345.10' );
-			$this->assertEquals( Misc::MoneyFormat( 12345.5, FALSE ), '12345.50' );
+		Debug::Text( 'Thousands Separator: ' . TTi18n::getThousandsSymbol() . ' Decimal Symbol: ' . TTi18n::getDecimalSymbol(), __FILE__, __LINE__, __METHOD__, 1 );
+		if ( TTi18n::getThousandsSymbol() == ',' && TTi18n::getDecimalSymbol() == '.' ) {
+			$this->assertEquals( Misc::MoneyFormat( 12345.152, true ), '12,345.15' );
+			$this->assertEquals( Misc::MoneyFormat( 12345.151, false ), '12345.15' );
+			$this->assertEquals( Misc::MoneyFormat( 12345.15, true ), '12,345.15' );
+			$this->assertEquals( Misc::MoneyFormat( 12345.15, false ), '12345.15' );
+			$this->assertEquals( Misc::MoneyFormat( 12345.1, true ), '12,345.10' );
+			$this->assertEquals( Misc::MoneyFormat( 12345.5, false ), '12345.50' );
 			$this->assertEquals( Misc::MoneyFormat( 12345.12345 ), '12,345.12' );
 			$this->assertEquals( Misc::MoneyFormat( -12345.12345 ), '-12,345.12' );
 		} else {
-			Debug::Text( 'ERROR: Locale differs, skipping unit tests...', __FILE__, __LINE__, __METHOD__, 1);
+			Debug::Text( 'ERROR: Locale differs, skipping unit tests...', __FILE__, __LINE__, __METHOD__, 1 );
 		}
 
 		TTi18n::setLocale( 'es_ES' );
-		Debug::Text( 'Thousands Separator: '. TTi18n::getThousandsSymbol() .' Decimal Symbol: '. TTi18n::getDecimalSymbol(), __FILE__, __LINE__, __METHOD__, 1);
-		if ( TTi18n::getThousandsSymbol() == '.' AND TTi18n::getDecimalSymbol() == ',' ) {
+		Debug::Text( 'Thousands Separator: ' . TTi18n::getThousandsSymbol() . ' Decimal Symbol: ' . TTi18n::getDecimalSymbol(), __FILE__, __LINE__, __METHOD__, 1 );
+		if ( TTi18n::getThousandsSymbol() == '.' && TTi18n::getDecimalSymbol() == ',' ) {
 			$this->assertEquals( Misc::MoneyFormat( 12345.12345 ), '12.345,12' );
 			$this->assertEquals( Misc::MoneyFormat( -12345.12345 ), '-12.345,12' );
 		} else {
-			Debug::Text( 'ERROR: Locale differs, skipping unit tests...', __FILE__, __LINE__, __METHOD__, 1);
+			Debug::Text( 'ERROR: Locale differs, skipping unit tests...', __FILE__, __LINE__, __METHOD__, 1 );
 		}
 	}
 
@@ -839,7 +837,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( UnitConvert::convert( 'm', 'km', 1 ), 0.001 );
 
 		$this->assertEquals( UnitConvert::convert( 'mi', 'mm', 1 ), 1609344 );
-		$this->assertEquals( UnitConvert::convert( 'mm', 'mi', 1 ), (1 / 1609344) );
+		$this->assertEquals( UnitConvert::convert( 'mm', 'mi', 1 ), ( 1 / 1609344 ) );
 
 		$this->assertEquals( UnitConvert::convert( 'km', 'mi', 1 ), 0.62137119223733395 );
 		$this->assertEquals( UnitConvert::convert( 'mi', 'km', 1 ), 1.6093439999999999 );
@@ -851,121 +849,121 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testPasswordStrength() {
 		//Numbers
-		$this->assertEquals( TTPassword::getPasswordStrength('1'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('12'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '1' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '12' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('123'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('1234'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '123' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '1234' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('12345'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('123456'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('1234567'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '12345' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '123456' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '1234567' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('12345678'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('123456789'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '12345678' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '123456789' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('1234567890'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('12345678901'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('123456789012'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('1234567890123'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '1234567890' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '12345678901' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '123456789012' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '1234567890123' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('12345678901234'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('123456789012345'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '12345678901234' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '123456789012345' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('987654321'), 1 ); //Backwards
+		$this->assertEquals( TTPassword::getPasswordStrength( '987654321' ), 1 ); //Backwards
 
 		//Letters
-		$this->assertEquals( TTPassword::getPasswordStrength('a'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('ab'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abc'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcd'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'a' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'ab' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abc' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcd' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('abcde'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdef'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefg'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefgh'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcde' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdef' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefg' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefgh' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghi'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghij'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijk'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijkl'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijklm'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefghi' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefghij' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefghijk' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefghijkl' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefghijklm' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijklmn'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefghijklmno'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefghijklmn' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefghijklmno' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('ihgfedcba'), 1 ); //Backwards
+		$this->assertEquals( TTPassword::getPasswordStrength( 'ihgfedcba' ), 1 ); //Backwards
 
 		//Half letters, half numbers
-		$this->assertEquals( TTPassword::getPasswordStrength('a1'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('ab12'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abc123'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcd1234'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcde12345'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdef123456'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefg1234567'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdefgh12345678'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'a1' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'ab12' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abc123' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcd1234' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcde12345' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdef123456' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefg1234567' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdefgh12345678' ), 1 );
 
 
 		//All the same char.
-		$this->assertEquals( TTPassword::getPasswordStrength('aaaaaa'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('aaabbb'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('aaaccc'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('111111'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('111222'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('111333'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('123123'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'aaaaaa' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'aaabbb' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'aaaccc' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '111111' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '111222' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '111333' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '123123' ), 1 );
 
 		//Some what real passwords.
-		$this->assertEquals( TTPassword::getPasswordStrength('test'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('pear'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('orange'), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'test' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'pear' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'orange' ), 1 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('!Qa12'), 2 ); //Unique, but not enough characters to make it difficult.
-		$this->assertEquals( TTPassword::getPasswordStrength('2000'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('696969'), 2 );
-		$this->assertEquals( TTPassword::getPasswordStrength('trustno1'), 2 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '!Qa12' ), 2 ); //Unique, but not enough characters to make it difficult.
+		$this->assertEquals( TTPassword::getPasswordStrength( '2000' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '696969' ), 2 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'trustno1' ), 2 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('abababababababab'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcabcabcabcabc'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcdabcdabcdabcd'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abcd.abcd^abcd#abcd'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('abc123'), 1 );
-		$this->assertEquals( TTPassword::getPasswordStrength('test123'), 2 );
-		$this->assertEquals( TTPassword::getPasswordStrength('admin123'), 3 );
-		$this->assertEquals( TTPassword::getPasswordStrength('pear123'), 3 );
-		$this->assertEquals( TTPassword::getPasswordStrength('pear1234'), 3 );
-		$this->assertEquals( TTPassword::getPasswordStrength('pear12345'), 3 );
-		$this->assertEquals( TTPassword::getPasswordStrength('orange123456'), 4 );
-		$this->assertEquals( TTPassword::getPasswordStrength('car123456789'), 1 ); //Too many consecutive.
-		$this->assertEquals( TTPassword::getPasswordStrength('cars123456789'), 1 ); //Too many consecutive.
-		$this->assertEquals( TTPassword::getPasswordStrength('orange123456789'), 1 ); //Too many consecutive.
-		$this->assertEquals( TTPassword::getPasswordStrength('superabundant123456789'), 6 ); //Too many consecutive.
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abababababababab' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcabcabcabcabc' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcdabcdabcdabcd' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abcd.abcd^abcd#abcd' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'abc123' ), 1 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'test123' ), 2 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'admin123' ), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'pear123' ), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'pear1234' ), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'pear12345' ), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'orange123456' ), 4 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'car123456789' ), 1 ); //Too many consecutive.
+		$this->assertEquals( TTPassword::getPasswordStrength( 'cars123456789' ), 1 ); //Too many consecutive.
+		$this->assertEquals( TTPassword::getPasswordStrength( 'orange123456789' ), 1 ); //Too many consecutive.
+		$this->assertEquals( TTPassword::getPasswordStrength( 'superabundant123456789' ), 6 ); //Too many consecutive.
 
-		$this->assertEquals( TTPassword::getPasswordStrength('cars.8.apple'), 4 );
-		$this->assertEquals( TTPassword::getPasswordStrength('cars.8#apple'), 4 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'cars.8.apple' ), 4 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'cars.8#apple' ), 4 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('password'), 1 ); //Dictionary word
-		$this->assertEquals( TTPassword::getPasswordStrength('Password'), 1 ); //Dictionary word
-		$this->assertEquals( TTPassword::getPasswordStrength('password1'), 1 ); //Dictionary word with one extra char.
-		$this->assertEquals( TTPassword::getPasswordStrength('password11'), 3 );
-		$this->assertEquals( TTPassword::getPasswordStrength('1password'), 1 ); //Dictionary word with one extra char.
-		$this->assertEquals( TTPassword::getPasswordStrength('password!'), 1 ); //Dictionary word with one extra char.
-		$this->assertEquals( TTPassword::getPasswordStrength('!password'), 1 ); //Dictionary word with one extra char.
-		$this->assertEquals( TTPassword::getPasswordStrength('qwerty'), 1 ); //Dictionary word
-		$this->assertEquals( TTPassword::getPasswordStrength('dragon'), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength( 'password' ), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength( 'Password' ), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength( 'password1' ), 1 ); //Dictionary word with one extra char.
+		$this->assertEquals( TTPassword::getPasswordStrength( 'password11' ), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength( '1password' ), 1 ); //Dictionary word with one extra char.
+		$this->assertEquals( TTPassword::getPasswordStrength( 'password!' ), 1 ); //Dictionary word with one extra char.
+		$this->assertEquals( TTPassword::getPasswordStrength( '!password' ), 1 ); //Dictionary word with one extra char.
+		$this->assertEquals( TTPassword::getPasswordStrength( 'qwerty' ), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength( 'dragon' ), 1 ); //Dictionary word
 
-		$this->assertEquals( TTPassword::getPasswordStrength('superabundant'), 1 ); //Dictionary word
-		$this->assertEquals( TTPassword::getPasswordStrength('Super.Abundant#41'), 5 ); //Dictionary word
-		$this->assertEquals( TTPassword::getPasswordStrength('pearappleorange'), 3 );
-		$this->assertEquals( TTPassword::getPasswordStrength('pear.apple@orange#strawberry'), 5 );
-		$this->assertEquals( TTPassword::getPasswordStrength('superabundant123'), 4 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'superabundant' ), 1 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength( 'Super.Abundant#41' ), 5 ); //Dictionary word
+		$this->assertEquals( TTPassword::getPasswordStrength( 'pearappleorange' ), 3 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'pear.apple@orange#strawberry' ), 5 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'superabundant123' ), 4 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('Superabundant.123'), 5 );
-		$this->assertEquals( TTPassword::getPasswordStrength('Super^91Pear.87'), 5 );
-		$this->assertEquals( TTPassword::getPasswordStrength('Super^91Bop.87'), 5 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'Superabundant.123' ), 5 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'Super^91Pear.87' ), 5 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'Super^91Bop.87' ), 5 );
 
-		$this->assertEquals( TTPassword::getPasswordStrength('a1j8U4y7K2qA.#@5.'), 7 );
+		$this->assertEquals( TTPassword::getPasswordStrength( 'a1j8U4y7K2qA.#@5.' ), 7 );
 	}
 
 	/**
@@ -985,55 +983,55 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		global $config_vars;
 
 		$lock_file_name = $config_vars['cache']['dir'] . DIRECTORY_SEPARATOR . 'unit_test' . '.lock';
-		@unlink($lock_file_name);
+		@unlink( $lock_file_name );
 
 		//Test with default timeout.
 		$lock_file = new LockFile( $lock_file_name );
-		if ( $lock_file->exists() == FALSE ) {
+		if ( $lock_file->exists() == false ) {
 			$lock_file->create();
 
 			$this->assertGreaterThan( 0, $lock_file->getCurrentPID() );
-			$this->assertEquals( $lock_file->isPIDRunning( $lock_file->getCurrentPID() ), TRUE );
-			$this->assertEquals( $lock_file->exists(), TRUE );
+			$this->assertEquals( $lock_file->isPIDRunning( $lock_file->getCurrentPID() ), true );
+			$this->assertEquals( $lock_file->exists(), true );
 		}
 
 		$lock_file->delete();
-		$this->assertEquals( $lock_file->exists(), FALSE );
+		$this->assertEquals( $lock_file->exists(), false );
 
 		//Test with really short timeout
 		$lock_file = new LockFile( $lock_file_name );
 		$lock_file->max_lock_file_age = 1;
-		if ( $lock_file->exists() == FALSE ) {
+		if ( $lock_file->exists() == false ) {
 			$lock_file->create();
 
 			Debug::Text( '  Sleeping...', __FILE__, __LINE__, __METHOD__, 10 );
-			sleep(2);
+			sleep( 2 );
 
 			$this->assertGreaterThan( 0, $lock_file->getCurrentPID() );
-			$this->assertEquals( $lock_file->isPIDRunning( $lock_file->getCurrentPID() ), TRUE );
-			$this->assertEquals( $lock_file->exists(), TRUE );
+			$this->assertEquals( $lock_file->isPIDRunning( $lock_file->getCurrentPID() ), true );
+			$this->assertEquals( $lock_file->exists(), true );
 		}
 
 		$lock_file->delete();
-		$this->assertEquals( $lock_file->exists(), FALSE );
+		$this->assertEquals( $lock_file->exists(), false );
 
 
 		//Test without PID
 		$lock_file = new LockFile( $lock_file_name );
-		$lock_file->use_pid = FALSE;
+		$lock_file->use_pid = false;
 		$lock_file->max_lock_file_age = 1;
-		if ( $lock_file->exists() == FALSE ) {
+		if ( $lock_file->exists() == false ) {
 			$lock_file->create();
 
-			sleep(2);
+			sleep( 2 );
 
-			$this->assertEquals( FALSE, $lock_file->getCurrentPID() );
-			$this->assertEquals( $lock_file->isPIDRunning( $lock_file->getCurrentPID() ), FALSE );
-			$this->assertEquals( $lock_file->exists(), FALSE );
+			$this->assertEquals( false, $lock_file->getCurrentPID() );
+			$this->assertEquals( $lock_file->isPIDRunning( $lock_file->getCurrentPID() ), false );
+			$this->assertEquals( $lock_file->exists(), false );
 		}
 
 		$lock_file->delete();
-		$this->assertEquals( $lock_file->exists(), FALSE );
+		$this->assertEquals( $lock_file->exists(), false );
 	}
 
 	/**
@@ -1042,46 +1040,46 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testRemoteHTTP() {
 		$url = 'www.timetrex.com/blank.html';
 
-		$header_size = (int)Misc::getRemoteHTTPFileSize('http://'.$url);
+		$header_size = (int)Misc::getRemoteHTTPFileSize( 'http://' . $url );
 		$this->assertEquals( (int)$header_size, 30 ); //30 Bytes.
 
-		$header_size = (int)Misc::getRemoteHTTPFileSize('https://'.$url);
+		$header_size = (int)Misc::getRemoteHTTPFileSize( 'https://' . $url );
 		$this->assertEquals( (int)$header_size, 30 ); //30 Bytes.
 
 
 		$temp_file_name = tempnam( '/tmp/', 'unit_test_http_' );
-		$size = Misc::downloadHTTPFile( 'http://'.$url, $temp_file_name );
+		$size = Misc::downloadHTTPFile( 'http://' . $url, $temp_file_name );
 		//Debug::Text( ' Temp File Name: '. $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertEquals( (int)$size, (int)$header_size ); //Make sure the downloaded size matches the header size too.
 		$this->assertEquals( (int)$size, 30 ); //30 Bytes.
-		$this->assertEquals( filesize($temp_file_name), (int)$size ); //30 Bytes.
-		unlink($temp_file_name);
+		$this->assertEquals( filesize( $temp_file_name ), (int)$size ); //30 Bytes.
+		unlink( $temp_file_name );
 
 		$temp_file_name = tempnam( '/tmp/', 'unit_test_http_' );
 		//Debug::Text( ' Temp File Name: '. $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
-		$size = (int)Misc::downloadHTTPFile( 'https://'.$url, $temp_file_name );
+		$size = (int)Misc::downloadHTTPFile( 'https://' . $url, $temp_file_name );
 		$this->assertEquals( (int)$size, (int)$header_size ); //Make sure the downloaded size matches the header size too.
 		$this->assertEquals( (int)$size, 30 ); //30 Bytes.
-		$this->assertEquals( filesize($temp_file_name), (int)$size ); //30 Bytes.
-		unlink($temp_file_name);
+		$this->assertEquals( filesize( $temp_file_name ), (int)$size ); //30 Bytes.
+		unlink( $temp_file_name );
 
 
 		//Test downloading to the same file that should already exist from above.
 		//Debug::Text( ' Temp File Name: '. $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
-		$size = (int)Misc::downloadHTTPFile( 'https://'.$url, $temp_file_name );
+		$size = (int)Misc::downloadHTTPFile( 'https://' . $url, $temp_file_name );
 		$this->assertEquals( (int)$size, (int)$header_size ); //Make sure the downloaded size matches the header size too.
 		$this->assertEquals( (int)$size, 30 ); //30 Bytes.
-		$this->assertEquals( filesize($temp_file_name), (int)$size ); //30 Bytes.
-		unlink($temp_file_name);
+		$this->assertEquals( filesize( $temp_file_name ), (int)$size ); //30 Bytes.
+		unlink( $temp_file_name );
 
 
 		//Test downloading to a directory without permissions, or one that doesn't exist.
-		$temp_file_name = '/root'.tempnam( '/tmp/', 'unit_test_http_' );
-		Debug::Text( ' Temp File Name: '. $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
-		$retval = Misc::downloadHTTPFile( 'https://'.$url, $temp_file_name );
+		$temp_file_name = '/root' . tempnam( '/tmp/', 'unit_test_http_' );
+		Debug::Text( ' Temp File Name: ' . $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
+		$retval = Misc::downloadHTTPFile( 'https://' . $url, $temp_file_name );
 
-		$this->assertEquals( $retval, FALSE ); //Download should fail without PHP warnings.
-		@unlink($temp_file_name);
+		$this->assertEquals( $retval, false ); //Download should fail without PHP warnings.
+		@unlink( $temp_file_name );
 	}
 
 	/**
@@ -1142,13 +1140,13 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::getAmountToLimit( -0, -100 ), -0 );
 
 		//Test non-float/integer limit
-		$this->assertEquals( Misc::getAmountToLimit( 100, FALSE ), 100 );
-		$this->assertEquals( Misc::getAmountToLimit( 100, TRUE ), 100 );
-		$this->assertEquals( Misc::getAmountToLimit( 100, NULL ), 100 );
+		$this->assertEquals( Misc::getAmountToLimit( 100, false ), 100 );
+		$this->assertEquals( Misc::getAmountToLimit( 100, true ), 100 );
+		$this->assertEquals( Misc::getAmountToLimit( 100, null ), 100 );
 		$this->assertEquals( Misc::getAmountToLimit( 100, '' ), 100 );
-		$this->assertEquals( Misc::getAmountToLimit( -100, FALSE ), -100 );
-		$this->assertEquals( Misc::getAmountToLimit( -100, TRUE ), -100 );
-		$this->assertEquals( Misc::getAmountToLimit( -100, NULL ), -100 );
+		$this->assertEquals( Misc::getAmountToLimit( -100, false ), -100 );
+		$this->assertEquals( Misc::getAmountToLimit( -100, true ), -100 );
+		$this->assertEquals( Misc::getAmountToLimit( -100, null ), -100 );
 		$this->assertEquals( Misc::getAmountToLimit( -100, '' ), -100 );
 
 		//Test float/int 0 limit
@@ -1242,86 +1240,86 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testIsSubDirectory() {
 		$parent_dir = '/';
 		$child_dir = '/var';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), TRUE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), true );
 
 		$parent_dir = '/var';
 		$child_dir = '/usr';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), false );
 
 		$parent_dir = '/var';
 		$child_dir = '/usr/';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), false );
 
 		$parent_dir = '/var/';
 		$child_dir = '/usr/';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), false );
 
 		//Test with directories that do not exist.
 		$parent_dir = '/var/www/TimeTrex556688';
 		$child_dir = '/var/www/TimeTrex556688Test';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), false );
 
 		$parent_dir = '/var/www/TimeTrex556688/';
 		$child_dir = '/var/www/TimeTrex556688Test/';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), false );
 
 
 		$parent_dir = '/var/www/TimeTrex556688Test';
 		$child_dir = '/var/www/TimeTrex556688';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), false );
 
 		$parent_dir = '/var/www/TimeTrex556688';
 		$child_dir = '/var/www/TimeTrex556688/storage';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), TRUE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), true );
 
 		$parent_dir = '/var/www/TimeTrex556688/';
 		$child_dir = '/var/www/TimeTrex556688/storage/';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), TRUE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), true );
 
 		//This directory should exist for this test to be accurate.
 		$parent_dir = '/etc/cron.d';
 		$child_dir = '/etc/cron.daily';
-		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), false );
 	}
 
 	/**
 	 * @group testSOAPClient
 	 */
 	function testSOAPClient() {
-		$ttsc = TTnew('TimeTrexSoapClient'); /** @var TimeTrexSoapClient $ttsc */
-		$this->assertEquals( $ttsc->ping(), TRUE );
+		$ttsc = TTnew( 'TimeTrexSoapClient' ); /** @var TimeTrexSoapClient $ttsc */
+		$this->assertEquals( $ttsc->ping(), true );
 	}
 
 	/**
 	 * @group testCensorString
 	 */
 	function testCensorString() {
-		$this->assertEquals( Misc::censorString('0'), 'X' );
-		$this->assertEquals( Misc::censorString('00'), 'XX' );
-		$this->assertEquals( Misc::censorString('000'), '0X0' );
-		$this->assertEquals( Misc::censorString('0000'), '0XX0' );
-		$this->assertEquals( Misc::censorString('00000'), '0XXX0' );
-		$this->assertEquals( Misc::censorString('000000'), '00XX00' );
-		$this->assertEquals( Misc::censorString('0000000'), '00XXX00' );
-		$this->assertEquals( Misc::censorString('00000000'), '00XXXX00' );
-		$this->assertEquals( Misc::censorString('000000000'), '000XXX000' );
-		$this->assertEquals( Misc::censorString('123456789'), '123XXX789' );
-		$this->assertEquals( Misc::censorString('12345678901234567890'), '123456XXXXXXXX567890' );
+		$this->assertEquals( Misc::censorString( '0' ), 'X' );
+		$this->assertEquals( Misc::censorString( '00' ), 'XX' );
+		$this->assertEquals( Misc::censorString( '000' ), '0X0' );
+		$this->assertEquals( Misc::censorString( '0000' ), '0XX0' );
+		$this->assertEquals( Misc::censorString( '00000' ), '0XXX0' );
+		$this->assertEquals( Misc::censorString( '000000' ), '00XX00' );
+		$this->assertEquals( Misc::censorString( '0000000' ), '00XXX00' );
+		$this->assertEquals( Misc::censorString( '00000000' ), '00XXXX00' );
+		$this->assertEquals( Misc::censorString( '000000000' ), '000XXX000' );
+		$this->assertEquals( Misc::censorString( '123456789' ), '123XXX789' );
+		$this->assertEquals( Misc::censorString( '12345678901234567890' ), '123456XXXXXXXX567890' );
 
 		//censorString( $str, $censor_char = 'X', $min_first_chunk_size = NULL, $max_first_chunk_size = NULL, $min_last_chunk_size = NULL, $max_last_chunk_size = NULL )
-		$this->assertEquals( Misc::censorString('4111222233334444', 'X', 4, 4, 4, 4), '4111XXXXXXXX4444' );
+		$this->assertEquals( Misc::censorString( '4111222233334444', 'X', 4, 4, 4, 4 ), '4111XXXXXXXX4444' );
 
-		$uf = TTnew('UserFactory'); /** @var UserFactory $uf */
-		$this->assertEquals( $uf->getSecureSIN('0'), 'X' );
-		$this->assertEquals( $uf->getSecureSIN('00'), 'XX' );
-		$this->assertEquals( $uf->getSecureSIN('000'), 'XXX' );
-		$this->assertEquals( $uf->getSecureSIN('0000'), 'XXXX' );
-		$this->assertEquals( $uf->getSecureSIN('00000'), 'XXXXX' );
-		$this->assertEquals( $uf->getSecureSIN('000000'), 'XXXXXX' );
-		$this->assertEquals( $uf->getSecureSIN('0000000'), '0XX0000' );
-		$this->assertEquals( $uf->getSecureSIN('00000000'), '0XXX0000' );
-		$this->assertEquals( $uf->getSecureSIN('000000000'), '0XXXX0000' );
-		$this->assertEquals( $uf->getSecureSIN('123456789'), '1XXXX6789' );
+		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
+		$this->assertEquals( $uf->getSecureSIN( '0' ), 'X' );
+		$this->assertEquals( $uf->getSecureSIN( '00' ), 'XX' );
+		$this->assertEquals( $uf->getSecureSIN( '000' ), 'XXX' );
+		$this->assertEquals( $uf->getSecureSIN( '0000' ), 'XXXX' );
+		$this->assertEquals( $uf->getSecureSIN( '00000' ), 'XXXXX' );
+		$this->assertEquals( $uf->getSecureSIN( '000000' ), 'XXXXXX' );
+		$this->assertEquals( $uf->getSecureSIN( '0000000' ), '0XX0000' );
+		$this->assertEquals( $uf->getSecureSIN( '00000000' ), '0XXX0000' );
+		$this->assertEquals( $uf->getSecureSIN( '000000000' ), '0XXXX0000' );
+		$this->assertEquals( $uf->getSecureSIN( '123456789' ), '1XXXX6789' );
 	}
 
 	/**
@@ -1330,12 +1328,12 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testUUID() {
 		//Make sure UUIDs are unique at least across 1 million tight iterations.
 		$max = 1000000;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			$uuid_arr[] = TTUUID::generateUUID();
 		}
-		$unique_uuid_arr = array_unique($uuid_arr);
+		$unique_uuid_arr = array_unique( $uuid_arr );
 
-		$this->assertEquals( count($uuid_arr) , count($unique_uuid_arr) );
+		$this->assertEquals( count( $uuid_arr ), count( $unique_uuid_arr ) );
 		unset( $uuid_arr, $unique_uuid_arr );
 	}
 
@@ -1344,11 +1342,11 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testTruncateUUID() {
 		//Make sure UUIDs converted from INTs still get the most unique UUID data first.
-		$this->assertEquals( TTUUID::truncateUUID( TTUUID::getConversionPrefix().'-000000192136', 12, FALSE ), '000000192136' );
-		$this->assertEquals( TTUUID::truncateUUID( TTUUID::getConversionPrefix().'-000000191922', 12, FALSE ), '000000191922' );
-		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-9af4-7bc0-af20-999999191922', 12, FALSE ), '9af47bc0af20' );
-		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-24dc-7bc0-af20-21ea65522ba3', 12, FALSE ), '24dc7bc0af20' );
-		$this->assertEquals( TTUUID::truncateUUID( '11e7a84a-9af4-e9e0-b077-21ea65522ba3', 12, FALSE ), '9af4e9e0b077' );
+		$this->assertEquals( TTUUID::truncateUUID( TTUUID::getConversionPrefix() . '-000000192136', 12, false ), '000000192136' );
+		$this->assertEquals( TTUUID::truncateUUID( TTUUID::getConversionPrefix() . '-000000191922', 12, false ), '000000191922' );
+		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-9af4-7bc0-af20-999999191922', 12, false ), '9af47bc0af20' );
+		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-24dc-7bc0-af20-21ea65522ba3', 12, false ), '24dc7bc0af20' );
+		$this->assertEquals( TTUUID::truncateUUID( '11e7a84a-9af4-e9e0-b077-21ea65522ba3', 12, false ), '9af4e9e0b077' );
 	}
 
 	/**
@@ -1358,18 +1356,18 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		//Make sure UUIDs converted from INTs still get the most unique UUID data first.
 		$this->assertEquals( TTUUID::castUUID( ' 11e7b349-9af4-7bc0-af20-999999191922 ' ), '11e7b349-9af4-7bc0-af20-999999191922' );
 		$this->assertEquals( TTUUID::castUUID( '11e7b349-9af4-7bc0-af20-999999191922' ), '11e7b349-9af4-7bc0-af20-999999191922' );
-		$this->assertEquals( TTUUID::castUUID( array( '11e7b349-9af4-7bc0-af20-999999191922' ) ), '00000000-0000-0000-0000-000000000000' );
+		$this->assertEquals( TTUUID::castUUID( [ '11e7b349-9af4-7bc0-af20-999999191922' ] ), '00000000-0000-0000-0000-000000000000' );
 		$this->assertEquals( TTUUID::castUUID( '' ), '00000000-0000-0000-0000-000000000000' );
-		$this->assertEquals( TTUUID::castUUID( NULL, TRUE ), NULL ); //Allow NULLs
-		$this->assertEquals( TTUUID::castUUID( NULL, FALSE ), '00000000-0000-0000-0000-000000000000' ); //Don't allow NULLs
-		$this->assertEquals( TTUUID::castUUID( FALSE ), '00000000-0000-0000-0000-000000000000' );
-		$this->assertEquals( TTUUID::castUUID( TRUE ), '00000000-0000-0000-0000-000000000000' );
+		$this->assertEquals( TTUUID::castUUID( null, true ), null ); //Allow NULLs
+		$this->assertEquals( TTUUID::castUUID( null, false ), '00000000-0000-0000-0000-000000000000' ); //Don't allow NULLs
+		$this->assertEquals( TTUUID::castUUID( false ), '00000000-0000-0000-0000-000000000000' );
+		$this->assertEquals( TTUUID::castUUID( true ), '00000000-0000-0000-0000-000000000000' );
 		$this->assertEquals( TTUUID::castUUID( 0 ), '00000000-0000-0000-0000-000000000000' );
 		$this->assertEquals( TTUUID::castUUID( '0' ), '00000000-0000-0000-0000-000000000000' );
 
-		$this->assertEquals( TTUUID::isUUID( '11e7b349-9af4-7bc0-af20-999999191922' ), TRUE );
-		$this->assertEquals( TTUUID::isUUID( array( '11e7b349-9af4-7bc0-af20-999999191922' ) ), FALSE );
-		$this->assertEquals( TTUUID::isUUID( ' 11e7b349-9af4-7bc0-af20-999999191922 ' ), FALSE ); //This is not trimmed as it has to be able to go straight into PostgreSQL without complaint.
+		$this->assertEquals( TTUUID::isUUID( '11e7b349-9af4-7bc0-af20-999999191922' ), true );
+		$this->assertEquals( TTUUID::isUUID( [ '11e7b349-9af4-7bc0-af20-999999191922' ] ), false );
+		$this->assertEquals( TTUUID::isUUID( ' 11e7b349-9af4-7bc0-af20-999999191922 ' ), false ); //This is not trimmed as it has to be able to go straight into PostgreSQL without complaint.
 	}
 
 	/**
@@ -1378,31 +1376,45 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	function testUUIDSorting() {
 		//Make sure UUIDs can be sorted and appear in time order as they were created.
 		$max = 10000;
-		for( $i = 0; $i < $max; $i++ ) {
+		for ( $i = 0; $i < $max; $i++ ) {
 			$uuid_arr[] = TTUUID::generateUUID();
 		}
 		$sorted_uuid_arr = $uuid_arr;
 
-		sort($sorted_uuid_arr);
-		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr);
-		$this->assertEquals( count($diff_uuid_arr), 0 );
+		sort( $sorted_uuid_arr );
+		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr );
+		$this->assertEquals( count( $diff_uuid_arr ), 0 );
 
 		//Reverse the sort and confirm all differences.
-		rsort($sorted_uuid_arr);
-		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr);
-		$this->assertEquals( count($diff_uuid_arr), $max );
+		rsort( $sorted_uuid_arr );
+		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr );
+		$this->assertEquals( count( $diff_uuid_arr ), $max );
 
 		//Use a strcmp sort and confirm it still is in the correct order.
-		usort($sorted_uuid_arr, 'strcmp');
-		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr);
-		$this->assertEquals( count($diff_uuid_arr), 0 );
+		usort( $sorted_uuid_arr, 'strcmp' );
+		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr );
+		$this->assertEquals( count( $diff_uuid_arr ), 0 );
 
 		//Natural sort will be the wrong order and therefore have many differences.
-		usort($sorted_uuid_arr, 'strnatcasecmp');
-		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr);
-		$this->assertGreaterThan( 0, count($diff_uuid_arr) );
+		usort( $sorted_uuid_arr, 'strnatcasecmp' );
+		$diff_uuid_arr = array_diff_assoc( $uuid_arr, $sorted_uuid_arr );
+		$this->assertGreaterThan( 0, count( $diff_uuid_arr ) );
 
 		unset( $uuid_arr, $sorted_uuid_arr, $diff_uuid_arr );
+	}
+
+	/**
+	 * @group testStringToUUID
+	 */
+	function testStringToUUID() {
+		$this->assertEquals( TTUUID::convertStringToUUID( false ), 'ffffffff-ffff-ffff-ffff-ffffffffffff' );
+		$this->assertEquals( TTUUID::convertStringToUUID( null ), 'ffffffff-ffff-ffff-ffff-ffffffffffff' );
+		$this->assertEquals( TTUUID::convertStringToUUID(''), 'ffffffff-ffff-ffff-ffff-ffffffffffff' );
+		$this->assertEquals( TTUUID::convertStringToUUID('1'), 'ffffffff-ffff-ffff-ffff-fffffffffff1' );
+		$this->assertEquals( TTUUID::convertStringToUUID('123456789012'), 'ffffffff-ffff-ffff-ffff-123456789012' );
+
+		$this->assertEquals( TTUUID::convertStringToUUID('12345678901234567890123456789012'), '12345678-9012-3456-7890-123456789012' );
+		$this->assertEquals( TTUUID::convertStringToUUID('12345678901234567890123456789012ZZZZZZ'), '12345678-9012-3456-7890-123456789012' );
 	}
 
 	/**
@@ -1437,13 +1449,13 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::removeTrailingZeros( '-12.9000' ), '-12.90' );
 		$this->assertEquals( Misc::removeTrailingZeros( '-12.9000', 3 ), '-12.900' );
 
-		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9', 1) ), '12.90' );
-		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,90', 2) ), '12.90' );
-		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,900', 3) ), '12.90' );
-		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9000', 4) ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,9', 1 ) ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,90', 2 ) ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,900', 3 ) ), '12.90' );
+		$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,9000', 4 ) ), '12.90' );
 
 		TTi18n::setLocale( 'es_ES' );
-		if ( TTi18n::getThousandsSymbol() == '.' AND TTi18n::getDecimalSymbol() == ',' ) {
+		if ( TTi18n::getThousandsSymbol() == '.' && TTi18n::getDecimalSymbol() == ',' ) {
 			$this->assertEquals( Misc::removeTrailingZeros( 12.9 ), 12.9 );
 			$this->assertEquals( Misc::removeTrailingZeros( 12.90 ), '12.90' );
 			$this->assertEquals( Misc::removeTrailingZeros( 12.900 ), '12.90' );
@@ -1468,15 +1480,15 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( Misc::removeTrailingZeros( '-12.9000' ), '-12.90' );
 			$this->assertEquals( Misc::removeTrailingZeros( '-12.9000', 3 ), '-12.900' );
 
-			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9', 1) ), '12.90' );
-			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,90', 2) ), '12.90' );
-			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,900', 3) ), '12.90' );
-			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9000', 4) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,9', 1 ) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,90', 2 ) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,900', 3 ) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,9000', 4 ) ), '12.90' );
 
-			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9', 1) ), '12.90' );
-			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,90', 2) ), '12.90' );
-			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,900', 3) ), '12.90' );
-			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat('12,9000', 4) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,9', 1 ) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,90', 2 ) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,900', 3 ) ), '12.90' );
+			$this->assertEquals( Misc::removeTrailingZeros( TTi18n::parseFloat( '12,9000', 4 ) ), '12.90' );
 		}
 	}
 
@@ -1495,34 +1507,34 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$currency_obj = new CurrencyFactory();
 		$currency_obj->setRoundDecimalPlaces( 3 );
 
-		$this->assertEquals( Misc::MoneyRound( 1.1234, NULL, $currency_obj ), 1.123 );
-		$this->assertEquals( Misc::MoneyRound( 1.12444, NULL, $currency_obj ), 1.124 );
-		$this->assertEquals( Misc::MoneyRound( 1.1256, NULL, $currency_obj ), 1.126);
+		$this->assertEquals( Misc::MoneyRound( 1.1234, null, $currency_obj ), 1.123 );
+		$this->assertEquals( Misc::MoneyRound( 1.12444, null, $currency_obj ), 1.124 );
+		$this->assertEquals( Misc::MoneyRound( 1.1256, null, $currency_obj ), 1.126 );
 
 		$this->assertEquals( Misc::MoneyRound( 1.1234, 2, $currency_obj ), 1.123 );
 		$this->assertEquals( Misc::MoneyRound( 1.12444, 2, $currency_obj ), 1.124 );
-		$this->assertEquals( Misc::MoneyRound( 1.1256, 2, $currency_obj ), 1.126);
+		$this->assertEquals( Misc::MoneyRound( 1.1256, 2, $currency_obj ), 1.126 );
 	}
 
 	/**
 	 * @group testInArrayKey
 	 */
 	function testOptionGetByValue() {
-		$options = array(
+		$options = [
 				10 => 'test1',
 				20 => 'Test2',
-				30 => 'TEST3'
-		);
+				30 => 'TEST3',
+		];
 
-		$this->assertEquals(  Option::getByValue( 'test1', $options ), 10 );
-		$this->assertEquals(  Option::getByValue( 'Test1', $options ), 10 ); //Test case insensitive match
-		$this->assertEquals(  Option::getByValue( 'TEST1', $options ), 10 ); //Test case insensitive match
+		$this->assertEquals( Option::getByValue( 'test1', $options ), 10 );
+		$this->assertEquals( Option::getByValue( 'Test1', $options ), 10 ); //Test case insensitive match
+		$this->assertEquals( Option::getByValue( 'TEST1', $options ), 10 ); //Test case insensitive match
 
-		$this->assertEquals(  Option::getByValue( 'Test2', $options ), 20 );
-		$this->assertEquals(  Option::getByValue( 'test2', $options ), 20 ); //Test case insensitive match
-		$this->assertEquals(  Option::getByValue( 'TEST2', $options ), 20 ); //Test case insensitive match
+		$this->assertEquals( Option::getByValue( 'Test2', $options ), 20 );
+		$this->assertEquals( Option::getByValue( 'test2', $options ), 20 ); //Test case insensitive match
+		$this->assertEquals( Option::getByValue( 'TEST2', $options ), 20 ); //Test case insensitive match
 
-		$this->assertEquals(  Option::getByValue( 'TEST3', $options ), 30 );
+		$this->assertEquals( Option::getByValue( 'TEST3', $options ), 30 );
 	}
 
 	function testFloatComparison() {
@@ -1532,15 +1544,15 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$added_floats = ( $float1 + $float2 ); //860.22
 
 		if ( $added_floats == $float3 ) {
-			$this->assertTrue( FALSE ); //This is to show the float comparison problem. Actual value should be opposite of this.
+			$this->assertTrue( false ); //This is to show the float comparison problem. Actual value should be opposite of this.
 		} else {
-			$this->assertTrue( TRUE );
+			$this->assertTrue( true );
 		}
 
 		if ( $added_floats >= $float3 ) {
-			$this->assertTrue( FALSE ); //This is to show the float comparison problem. Actual value should be opposite of this.
+			$this->assertTrue( false ); //This is to show the float comparison problem. Actual value should be opposite of this.
 		} else {
-			$this->assertTrue( TRUE );
+			$this->assertTrue( true );
 		}
 
 		$this->assertEquals( bccomp( $added_floats, $float3 ), 0 ); //0=Equal
@@ -1548,38 +1560,38 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( bccomp( $added_floats, (float)860.21 ), 1 ); //1=Greater Than
 		$this->assertEquals( bccomp( $added_floats, (float)860.23 ), -1 ); //-1=Less Than
 
-		$this->assertEquals( Misc::compareFloat( $added_floats, $float3, '==' ), TRUE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '==' ), TRUE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '==' ), FALSE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, $float3, '==' ), true );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '==' ), true );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '==' ), false );
 
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '>=' ), TRUE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '>=' ), TRUE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.01, '>=' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '>=' ), true );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '>=' ), true );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.01, '>=' ), true );
 
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '<=' ), TRUE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.23, '<=' ), TRUE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.33, '<=' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '<=' ), true );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.23, '<=' ), true );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.33, '<=' ), true );
 
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '>' ), FALSE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '>' ), TRUE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.01, '>' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '>' ), false );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.21, '>' ), true );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.01, '>' ), true );
 
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '<' ), FALSE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.23, '<' ), TRUE );
-		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.33, '<' ), TRUE );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.22, '<' ), false );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.23, '<' ), true );
+		$this->assertEquals( Misc::compareFloat( $added_floats, (float)860.33, '<' ), true );
 	}
 
 	function testStripDuplicateSlashes() {
-		$this->assertEquals( Environment::stripDuplicateSlashes('http://www.domain.com//test//test2//test3/api.php'), 'http://www.domain.com/test/test2/test3/api.php' );
-		$this->assertEquals( Environment::stripDuplicateSlashes('www.domain.com//test//test2//test3/api.php'), 'www.domain.com/test/test2/test3/api.php' );
-		$this->assertEquals( Environment::stripDuplicateSlashes('/api//json//api.php'), '/api/json/api.php' );
-		$this->assertEquals( Environment::stripDuplicateSlashes('//api//json//api.php'), '/api/json/api.php' );
-		$this->assertEquals( Environment::stripDuplicateSlashes('//////api///////json//////api.php'), '/api/json/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes( 'http://www.domain.com//test//test2//test3/api.php' ), 'http://www.domain.com/test/test2/test3/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes( 'www.domain.com//test//test2//test3/api.php' ), 'www.domain.com/test/test2/test3/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes( '/api//json//api.php' ), '/api/json/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes( '//api//json//api.php' ), '/api/json/api.php' );
+		$this->assertEquals( Environment::stripDuplicateSlashes( '//////api///////json//////api.php' ), '/api/json/api.php' );
 	}
 
 	function testAuthenticationParseEndPointAPI() {
 		global $config_vars;
-		define('TIMETREX_JSON_API', TRUE ); //Need to have at least API define() set.
+		define( 'TIMETREX_JSON_API', true ); //Need to have at least API define() set.
 
 		$authentication = new Authentication;
 
@@ -1634,7 +1646,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 
 	function testAuthenticationParseEndPointLegacySOAP() {
 		global $config_vars;
-		define('TIMETREX_LEGACY_SOAP_API', TRUE ); //Its possible TIMETREX_JSON_API is still defined when this run, if the above function runs first.
+		define( 'TIMETREX_LEGACY_SOAP_API', true ); //Its possible TIMETREX_JSON_API is still defined when this run, if the above function runs first.
 
 		$authentication = new Authentication;
 
@@ -1645,5 +1657,6 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $authentication->parseEndPointID( '/timetrex//soap/server.php' ), 'soap/server' );
 	}
 }
+
 ?>
 

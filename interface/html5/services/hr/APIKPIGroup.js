@@ -51,6 +51,4 @@ var APIKPIGroup = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

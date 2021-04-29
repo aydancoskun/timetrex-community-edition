@@ -39,7 +39,7 @@
  * @package API\Core
  */
 class APIAbout extends APIFactory {
-	protected $main_class = FALSE;
+	protected $main_class = false;
 
 	/**
 	 * APIAbout constructor.
@@ -47,7 +47,7 @@ class APIAbout extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -56,7 +56,7 @@ class APIAbout extends APIFactory {
 	 * @param bool $all_companies
 	 * @return array
 	 */
-	function getAboutData( $ytd = 0, $all_companies = FALSE ) {
+	function getAboutData( $ytd = 0, $all_companies = false ) {
 		global $config_vars;
 
 		$clf = new CompanyListFactory();
@@ -67,7 +67,7 @@ class APIAbout extends APIFactory {
 			$primary_company = $clf->getCurrent();
 		}
 		$current_user = $this->getCurrentUserObject();
-		if ( isset($primary_company) AND PRIMARY_COMPANY_ID == $current_user->getCompany() ) {
+		if ( isset( $primary_company ) && PRIMARY_COMPANY_ID == $current_user->getCompany() ) {
 			$current_company = $primary_company;
 		} else {
 			$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();
@@ -77,99 +77,99 @@ class APIAbout extends APIFactory {
 		$data = $system_settings;
 
 		//Only show new version notice if they are ONSITE or PRIMARY company.
-		if ( ( isset($data['new_version']) AND $data['new_version'] == TRUE ) AND ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) ) {
-			$data['new_version'] = TRUE;
+		if ( ( isset( $data['new_version'] ) && $data['new_version'] == true ) && ( ( DEPLOYMENT_ON_DEMAND == false && $current_company->getId() == 1 ) || ( isset( $config_vars['other']['primary_company_id'] ) && $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) ) {
+			$data['new_version'] = true;
 		} else {
-			$data['new_version'] = FALSE;
+			$data['new_version'] = false;
 		}
 
-		$data['product_edition'] = Option::getByKey( ( DEPLOYMENT_ON_DEMAND == TRUE ) ? $current_company->getProductEdition() : getTTProductEdition(), $current_company->getOptions('product_edition') );
+		$data['product_edition'] = Option::getByKey( ( DEPLOYMENT_ON_DEMAND == true ) ? $current_company->getProductEdition() : getTTProductEdition(), $current_company->getOptions( 'product_edition' ) );
 		$data['application_name'] = APPLICATION_NAME;
 		$data['organization_url'] = ORGANIZATION_URL;
 
-		if ( DEPLOYMENT_ON_DEMAND == FALSE ) {
+		if ( DEPLOYMENT_ON_DEMAND == false ) {
 			$data['operating_system'] = PHP_OS;
 			$data['php_version'] = PHP_VERSION;
 		} else {
-			$data['operating_system'] = FALSE;
-			$data['php_version'] = FALSE;
+			$data['operating_system'] = false;
+			$data['php_version'] = false;
 		}
 
 		//Get Employee counts for this month, and last month
 		$month_of_year_arr = TTDate::getMonthOfYearArray();
 
 		//This month
-		if ( isset($ytd) AND $ytd == 1 ) {
+		if ( isset( $ytd ) && $ytd == 1 ) {
 			$begin_month_epoch = strtotime( '-2 years' );
 		} else {
 			$begin_month_epoch = TTDate::getBeginMonthEpoch( ( TTDate::getBeginMonthEpoch( time() ) - 86400 ) );
 		}
 		$cuclf = TTnew( 'CompanyUserCountListFactory' ); /** @var CompanyUserCountListFactory $cuclf */
-		if ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] AND $all_companies == TRUE ) {
-			$cuclf->getTotalMonthlyMinAvgMaxByCompanyStatusAndStartDateAndEndDate( 10, $begin_month_epoch, TTDate::getEndMonthEpoch( time() ), NULL, NULL, NULL, array('date_stamp' => 'desc') );
+		if ( isset( $config_vars['other']['primary_company_id'] ) && $current_company->getId() == $config_vars['other']['primary_company_id'] && $all_companies == true ) {
+			$cuclf->getTotalMonthlyMinAvgMaxByCompanyStatusAndStartDateAndEndDate( 10, $begin_month_epoch, TTDate::getEndMonthEpoch( time() ), null, null, null, [ 'date_stamp' => 'desc' ] );
 		} else {
-			$cuclf->getMonthlyMinAvgMaxByCompanyIdAndStartDateAndEndDate( $current_company->getId(), $begin_month_epoch, TTDate::getEndMonthEpoch( time() ), NULL, NULL, NULL, array('date_stamp' => 'desc') );
+			$cuclf->getMonthlyMinAvgMaxByCompanyIdAndStartDateAndEndDate( $current_company->getId(), $begin_month_epoch, TTDate::getEndMonthEpoch( time() ), null, null, null, [ 'date_stamp' => 'desc' ] );
 		}
-		Debug::Text('Company User Count Rows: '. $cuclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Company User Count Rows: ' . $cuclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( $cuclf->getRecordCount() > 0 ) {
-			foreach( $cuclf as $cuc_obj ) {
-				$data['user_counts'][] = array(
-																//'label' => $month_of_year_arr[TTDate::getMonth( $begin_month_epoch )] .' '. TTDate::getYear($begin_month_epoch),
-																'label' => $month_of_year_arr[TTDate::getMonth( TTDate::strtotime( $cuc_obj->getColumn('date_stamp') ) )] .' '. TTDate::getYear( TTDate::strtotime( $cuc_obj->getColumn('date_stamp') ) ),
-																'max_active_users' => $cuc_obj->getColumn('max_active_users'),
-																'max_inactive_users' => $cuc_obj->getColumn('max_inactive_users'),
-																'max_deleted_users' => $cuc_obj->getColumn('max_deleted_users'),
-																);
+			foreach ( $cuclf as $cuc_obj ) {
+				$data['user_counts'][] = [
+					//'label' => $month_of_year_arr[TTDate::getMonth( $begin_month_epoch )] .' '. TTDate::getYear($begin_month_epoch),
+					'label'              => $month_of_year_arr[TTDate::getMonth( TTDate::strtotime( $cuc_obj->getColumn( 'date_stamp' ) ) )] . ' ' . TTDate::getYear( TTDate::strtotime( $cuc_obj->getColumn( 'date_stamp' ) ) ),
+					'max_active_users'   => $cuc_obj->getColumn( 'max_active_users' ),
+					'max_inactive_users' => $cuc_obj->getColumn( 'max_inactive_users' ),
+					'max_deleted_users'  => $cuc_obj->getColumn( 'max_deleted_users' ),
+				];
 			}
 		}
 
-		if ( isset($data['user_counts']) == FALSE ) {
-			$data['user_counts'] = array();
+		if ( isset( $data['user_counts'] ) == false ) {
+			$data['user_counts'] = [];
 		}
 
 		$cjlf = TTnew( 'CronJobListFactory' ); /** @var CronJobListFactory $cjlf */
 		$cjlf->getMostRecentlyRun();
 		if ( $cjlf->getRecordCount() > 0 ) {
 			$cj_obj = $cjlf->getCurrent();
-			$data['cron'] = array(
-								'last_run_date' => ( $cj_obj->getLastRunDate() == FALSE ) ? TTi18n::getText('Never') : TTDate::getDate('DATE+TIME', $cj_obj->getLastRunDate() ),
-								);
+			$data['cron'] = [
+					'last_run_date' => ( $cj_obj->getLastRunDate() == false ) ? TTi18n::getText( 'Never' ) : TTDate::getDate( 'DATE+TIME', $cj_obj->getLastRunDate() ),
+			];
 		}
-		$data['show_license_data'] = FALSE;
+		$data['show_license_data'] = false;
 
 		$license = new TTLicense();
 		$data['hardware_id'] = $license->getHardwareID();
 
-		if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) AND getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+		if ( ( ( DEPLOYMENT_ON_DEMAND == false && $current_company->getId() == 1 ) || ( isset( $config_vars['other']['primary_company_id'] ) && $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) && getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 
-			if ( !isset($system_settings['license']) ) {
-				$system_settings['license'] = NULL;
+			if ( !isset( $system_settings['license'] ) ) {
+				$system_settings['license'] = null;
 			}
-			$data['show_license_data'] = TRUE;
+			$data['show_license_data'] = true;
 			//Set this so the license upload area at least shows up regardles of edition.
-			$data['license_data'] = array();
+			$data['license_data'] = [];
 
 			$retval = $license->validateLicense( $system_settings['license'] );
 
-			if ( $retval == TRUE ) {
-				$data['license_data'] = array(
-										'organization_name' => $license->getOrganizationName(),
-										'major_version' => $license->getMajorVersion(),
-										'minor_version' => $license->getMinorVersion(),
-										'product_name' => $license->getProductName(),
-										'active_employee_licenses' => $license->getActiveEmployeeLicenses(),
-										'issue_date' => TTDate::getDate('DATE', $license->getIssueDate() ),
-										'expire_date' => $license->getExpireDate(),
-										'expire_date_display' => TTDate::getDate('DATE', $license->getExpireDate() ),
-										'registration_key' => $license->getRegistrationKey(),
-										'message' => $license->getFullErrorMessage( $retval ),
-										'retval' => $retval,
-										);
+			if ( $retval == true ) {
+				$data['license_data'] = [
+						'organization_name'        => $license->getOrganizationName(),
+						'major_version'            => $license->getMajorVersion(),
+						'minor_version'            => $license->getMinorVersion(),
+						'product_name'             => $license->getProductName(),
+						'active_employee_licenses' => $license->getActiveEmployeeLicenses(),
+						'issue_date'               => TTDate::getDate( 'DATE', $license->getIssueDate() ),
+						'expire_date'              => $license->getExpireDate(),
+						'expire_date_display'      => TTDate::getDate( 'DATE', $license->getExpireDate() ),
+						'registration_key'         => $license->getRegistrationKey(),
+						'message'                  => $license->getFullErrorMessage( $retval ),
+						'retval'                   => $retval,
+				];
 			}
 		}
 
-		$data['system_version'] = $data['system_version'].' ( '.TTDate::getDate('DATE+TIME', $data['system_version_install_date']) . ' )';
+		$data['system_version'] = $data['system_version'] . ' ( ' . TTDate::getDate( 'DATE+TIME', $data['system_version_install_date'] ) . ' )';
 
 		//Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $this->returnHandler( $data );
@@ -180,8 +180,8 @@ class APIAbout extends APIFactory {
 	 * @param bool $all_companies
 	 * @return array
 	 */
-	function isNewVersionAvailable( $ytd = 0, $all_companies = FALSE ) {
-		Debug::Text('Check For Update!', __FILE__, __LINE__, __METHOD__, 10);
+	function isNewVersionAvailable( $ytd = 0, $all_companies = false ) {
+		Debug::Text( 'Check For Update!', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$current_company = $this->getCurrentCompanyObject();
 
@@ -190,25 +190,26 @@ class APIAbout extends APIFactory {
 		$ttsc = new TimeTrexSoapClient();
 		//We must ensure that the data is up to date
 		//Otherwise version check will fail.
-		$ttsc->sendCompanyData( $current_company->getId(), TRUE );
+		$ttsc->sendCompanyData( $current_company->getId(), true );
 		$ttsc->sendCompanyUserLocationData( $current_company->getId() );
 		$ttsc->sendCompanyUserCountData( $current_company->getId() );
 		$ttsc->sendCompanyVersionData( $current_company->getId() );
 
 		$license = new TTLicense();
-		$license->getLicenseFile( FALSE ); //Download updated license file if one exists.
+		$license->getLicenseFile( false ); //Download updated license file if one exists.
 
 		$latest_version = $ttsc->isLatestVersion( $current_company->getId() );
-		if( $latest_version == FALSE ) {
+		if ( $latest_version == false ) {
 			SystemSettingFactory::setSystemSetting( 'new_version', 1 );
-			$data['new_version'] = TRUE;
+			$data['new_version'] = true;
 		} else {
 			SystemSettingFactory::setSystemSetting( 'new_version', 0 );
-			$data['new_version'] = FALSE;
+			$data['new_version'] = false;
 		}
-		return $this->returnHandler( $data );
 
+		return $this->returnHandler( $data );
 	}
 
 }
+
 ?>

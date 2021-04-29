@@ -1,167 +1,161 @@
 <div class="container" id="quick_punch_container">
-    <form class="form-horizontal quick-punch-form-container" role="form" autocomplete="off">
-        <div class="form-group row">
-            <label class="col-4 control-label"><%= $.i18n._('Employee') %></label>
-            <div class="col-8 input-panel">
-                <p  name="user_full_name" data-toggle="tooltip" class="form-control-static"><%= first_name %> <%= last_name %></p>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label class="col-4 control-label"><%= $.i18n._('Time') %></label>
-            <div class="col-8 input-panel">
-                <p name="punch_time" data-toggle="tooltip" class="form-control-static"><%= punch_time %></p>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label class="col-4 control-label"><%= $.i18n._('Date') %></label>
-            <div class="col-8 input-panel">
-                <p name="punch_date" class="form-control-static"><%= punch_date %></p>
-            </div>
-        </div>
-        <% if (show_transfer_ui) { %>
-        <div class="form-group row">
-            <label class="col-4 control-label"><%= $.i18n._('Transfer') %></label>
-            <div class="col-8 input-panel">
-                <div class="checkbox">
-                    <div>
-                        <input tabindex="1" data-toggle="tooltip" id="transfer" name="transfer" <% if ( transfer ) { %> checked <% } %> type="checkbox">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <% } %>
-        <div class="form-group row">
-            <label for="type_id" class="col-4 control-label"><%= $.i18n._('Punch Type') %></label>
-            <div class="col-8 input-panel">
-                <select tabindex="2" data-toggle="tooltip" id="type_id" <% if ( transfer ) { %> disabled <% } %>  name="type_id" class="form-control">
-
-                </select>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label class="col-4 control-label"><%= $.i18n._('In/Out') %></label>
-            <div class="col-8 input-panel">
-                <select tabindex="3" data-toggle="tooltip" id="status_id" <% if ( transfer ) { %> disabled <% } %> name="status_id" class="form-control">
-
-                </select>
-            </div>
-        </div>
-        <% if (show_branch_ui) {  %>
-        <div class="form-group branch_id  row">
-            <label class="col-4 control-label"><%= $.i18n._('Branch') %></label>
-            <div class="col-8 input-panel">
-                <select tabindex="4" data-toggle="tooltip" id="branch_id" name="branch_id" class="form-control">
-
-                </select>
-            </div>
-        </div>
-        <% } %>
-        <% if ( show_department_ui ) { %>
-        <div class="form-group department_id row">
-            <label class="col-4 control-label"><%= $.i18n._('Department') %></label>
-            <div class="col-8 input-panel">
-                <select tabindex="5" data-toggle="tooltip" id="department_id" name="department_id" class="form-control">
-
-                </select>
-            </div>
-        </div>
-        <% } %>
-        <% if (Global.getProductEdition() >= 20) { %>
-        <% if( show_job_ui ) {  %>
-        <div class="form-group job_id row">
-            <label class="col-4 control-label"><%= $.i18n._('Job') %></label>
-            <div class="col-8 input-panel">
-                <div class="row">
-                    <div class="col-3" style="padding-right: 5px;"><input style="padding:0;" tabindex="6"  data-toggle="tooltip" type="text" name="job_quick_search" autocomplete="off" class="form-control"></div>
-                    <div class="col-9" style="padding-left: 5px;">
-                        <select tabindex="7" data-toggle="tooltip" id="job_id" name="job_id" class="form-control">
-
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <% } %>
-        <% if (show_job_item_ui) { %>
-        <div class="form-group job_item_id row">
-            <label class="col-4 control-label"><%= $.i18n._('Task') %></label>
-            <div class="col-8 input-panel">
-                <div class="row">
-                    <div class="col-3" style="padding-right: 5px;"><input style="padding:0;" tabindex="8" data-toggle="tooltip" type="text" name="job_item_quick_search" autocomplete="off" class="form-control"></div>
-                    <div class="col-9" style="padding-left: 5px;">
-                        <select tabindex="9"  data-toggle="tooltip" id="job_item_id" name="job_item_id" class="form-control">
-
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <% } %>
-        <% } %>
-        <% if (Global.getProductEdition() >= 20) { %>
-        <% if ( show_bad_quantity_ui && show_good_quantity_ui ) { %>
-        <div class="form-group quantity row">
-            <label class="col-4 control-label"><%= $.i18n._('Quantity') %></label>
-            <div class="col-8 input-panel">
-                <div class="row">
-                    <div class="good-label"><%= $.i18n._('Good') %></div>
-                    <div class="col"><input tabindex="10" data-toggle="tooltip" style="padding: 2px;" value="<%= quantity %>" autocomplete="off" name="quantity" type="text" class="form-control"></div>
-                    <div class="bad-label" style="padding: 0;"> / <%= $.i18n._('Bad') %></div>
-                    <div class="col"><input tabindex="11" data-toggle="tooltip" style="padding: 2px;" value="<%= bad_quantity %>" autocomplete="off" name="bad_quantity" type="text" class="form-control"></div>
-                </div>
-            </div>
-        </div>
-        <% } else if ( show_good_quantity_ui ) { %>
-        <div class="form-group quantity row">
-            <label class="col-4 control-label"><%= $.i18n._('Quantity') %></label>
-            <div class="col-8 input-panel">
-                <div class="row">
-                    <div class="col-3 good-label"><%= $.i18n._('Good') %></div>
-                    <div class="col-3"><input tabindex="10" autocomplete="off" data-toggle="tooltip" style="padding: 2px;" value="<%= quantity %>" name="quantity" type="text" class="form-control"></div>
-                </div>
-            </div>
-        </div>
-        <% } else if ( show_bad_quantity_ui ) { %>
-        <div class="form-group quantity row">
-            <label class="col-4 control-label"><%= $.i18n._('Quantity') %></label>
-            <div class="col-8 input-panel">
-                <div class="row">
-                    <div class="col-3 bad-label">   <%= $.i18n._('Bad') %></div>
-                    <div class="col-3"><input tabindex="11" autocomplete="off" data-toggle="tooltip" style="padding: 2px;" value="<%= bad_quantity %>" name="bad_quantity" type="text" class="form-control"></div>
-                </div>
-            </div>
-        </div>
-        <% } %>
-        <% } %>
-        <% if ( _.size(other_fields) > 0 ) { %>
-        <% var i = 100; %>
-        <%
-        _.each( other_fields, function( other_field ) {
-            i++;
-            %>
-            <div class="form-group row">
-                <label class="col-4 control-label"><%= other_field['label'] %></label>
-                <div class="col-8 input-panel">
-                    <input tabindex="<%= i %>" autocomplete="off" data-toggle="tooltip" type="text" name="<%= other_field['field'] %>" value="<%= other_field['value'] %>" class="form-control">
-                </div>
-            </div>
-            <%
-        })
-        %>
-        <% } %>
-        <% if ( show_node_ui ) { %>
-        <div class="form-group row">
-            <label class="col-4 control-label"><%= $.i18n._('Note') %></label>
-            <div class="col-8 input-panel">
-                <textarea tabindex="1000" data-toggle="tooltip" name="note" class="form-control"><%= note %></textarea>
-            </div>
-        </div>
-        <% } %>
-        <div class="form-group row">
-            <div class="col-8 offset-md-4 input-panel">
-                <button id="save_btn" tabindex="5000"  class="btn btn-lg btn-primary" style="width: 45%;  display:inline-block" type="button"><%= $.i18n._('Save') %> <span id="timedRedirect"></span></button>
-                <button id="cancel_btn" tabindex="5001" tab-end class="btn btn-lg btn-danger" style="width: 45%; display:inline-block;" type="button"><%= $.i18n._('Cancel') %><span>&nbsp;</span></button>
-            </div>
-        </div>
-    </form>
+	<form class="form-horizontal quick-punch-form-container" role="form" autocomplete="off">
+		<div class="form-group row">
+			<label class="col-4 control-label"><%= $.i18n._('Employee') %></label>
+			<div class="col-8 input-panel">
+				<p name="user_full_name" data-toggle="tooltip" class="form-control-static"><%= first_name %> <%= last_name %></p>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-4 control-label"><%= $.i18n._('Time') %></label>
+			<div class="col-8 input-panel">
+				<p name="punch_time" data-toggle="tooltip" class="form-control-static"><%= punch_time %></p>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-4 control-label"><%= $.i18n._('Date') %></label>
+			<div class="col-8 input-panel">
+				<p name="punch_date" class="form-control-static"><%= punch_date %></p>
+			</div>
+		</div>
+		<% if (show_transfer_ui) { %>
+		<div class="form-group row">
+			<label class="col-4 control-label"><%= $.i18n._('Transfer') %></label>
+			<div class="col-8 input-panel">
+				<div class="checkbox">
+					<div>
+						<input tabindex="1" data-toggle="tooltip" id="transfer" name="transfer" <% if ( transfer ) { %> checked <% } %> type="checkbox">
+					</div>
+				</div>
+			</div>
+		</div>
+		<% } %>
+		<div class="form-group row">
+			<label for="type_id" class="col-4 control-label"><%= $.i18n._('Punch Type') %></label>
+			<div class="col-8 input-panel">
+				<select tabindex="2" data-toggle="tooltip" id="type_id" <% if ( transfer ) { %> disabled <% } %> name="type_id" class="form-control">
+				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-4 control-label"><%= $.i18n._('In/Out') %></label>
+			<div class="col-8 input-panel">
+				<select tabindex="3" data-toggle="tooltip" id="status_id" <% if ( transfer ) { %> disabled <% } %> name="status_id" class="form-control">
+				</select>
+			</div>
+		</div>
+		<% if (show_branch_ui) { %>
+		<div class="form-group branch_id  row">
+			<label class="col-4 control-label"><%= $.i18n._('Branch') %></label>
+			<div class="col-8 input-panel">
+				<select tabindex="4" data-toggle="tooltip" id="branch_id" name="branch_id" class="form-control">
+				</select>
+			</div>
+		</div>
+		<% } %>
+		<% if ( show_department_ui ) { %>
+		<div class="form-group department_id row">
+			<label class="col-4 control-label"><%= $.i18n._('Department') %></label>
+			<div class="col-8 input-panel">
+				<select tabindex="5" data-toggle="tooltip" id="department_id" name="department_id" class="form-control">
+				</select>
+			</div>
+		</div>
+		<% } %>
+		<% if (Global.getProductEdition() >= 20) { %>
+		<% if( show_job_ui ) { %>
+		<div class="form-group job_id row">
+			<label class="col-4 control-label"><%= $.i18n._('Job') %></label>
+			<div class="col-8 input-panel">
+				<div class="row">
+					<div class="col-3" style="padding-right: 5px;"><input style="padding:0;" tabindex="6" data-toggle="tooltip" type="text" name="job_quick_search" autocomplete="off" class="form-control"></div>
+					<div class="col-9" style="padding-left: 5px;">
+						<select tabindex="7" data-toggle="tooltip" id="job_id" name="job_id" class="form-control">
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+		<% } %>
+		<% if (show_job_item_ui) { %>
+		<div class="form-group job_item_id row">
+			<label class="col-4 control-label"><%= $.i18n._('Task') %></label>
+			<div class="col-8 input-panel">
+				<div class="row">
+					<div class="col-3" style="padding-right: 5px;"><input style="padding:0;" tabindex="8" data-toggle="tooltip" type="text" name="job_item_quick_search" autocomplete="off" class="form-control"></div>
+					<div class="col-9" style="padding-left: 5px;">
+						<select tabindex="9" data-toggle="tooltip" id="job_item_id" name="job_item_id" class="form-control">
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+		<% } %>
+		<% } %>
+		<% if (Global.getProductEdition() >= 20) { %>
+		<% if ( show_bad_quantity_ui && show_good_quantity_ui ) { %>
+		<div class="form-group quantity row">
+			<label class="col-4 control-label"><%= $.i18n._('Quantity') %></label>
+			<div class="col-8 input-panel">
+				<div class="row">
+					<div class="good-label"><%= $.i18n._('Good') %></div>
+					<div class="col"><input tabindex="10" data-toggle="tooltip" style="padding: 2px;" value="<%= quantity %>" autocomplete="off" name="quantity" type="text" class="form-control"></div>
+					<div class="bad-label" style="padding: 0;"> / <%= $.i18n._('Bad') %></div>
+					<div class="col"><input tabindex="11" data-toggle="tooltip" style="padding: 2px;" value="<%= bad_quantity %>" autocomplete="off" name="bad_quantity" type="text" class="form-control"></div>
+				</div>
+			</div>
+		</div>
+		<% } else if ( show_good_quantity_ui ) { %>
+		<div class="form-group quantity row">
+			<label class="col-4 control-label"><%= $.i18n._('Quantity') %></label>
+			<div class="col-8 input-panel">
+				<div class="row">
+					<div class="col-3 good-label"><%= $.i18n._('Good') %></div>
+					<div class="col-3"><input tabindex="10" autocomplete="off" data-toggle="tooltip" style="padding: 2px;" value="<%= quantity %>" name="quantity" type="text" class="form-control"></div>
+				</div>
+			</div>
+		</div>
+		<% } else if ( show_bad_quantity_ui ) { %>
+		<div class="form-group quantity row">
+			<label class="col-4 control-label"><%= $.i18n._('Quantity') %></label>
+			<div class="col-8 input-panel">
+				<div class="row">
+					<div class="col-3 bad-label"> <%= $.i18n._('Bad') %></div>
+					<div class="col-3"><input tabindex="11" autocomplete="off" data-toggle="tooltip" style="padding: 2px;" value="<%= bad_quantity %>" name="bad_quantity" type="text" class="form-control"></div>
+				</div>
+			</div>
+		</div>
+		<% } %>
+		<% } %>
+		<% if ( _.size(other_fields) > 0 ) { %>
+		<% var i = 100; %>
+		<%
+		_.each( other_fields, function( other_field ) {
+		i++;
+		%>
+		<div class="form-group row">
+			<label class="col-4 control-label"><%= other_field['label'] %></label>
+			<div class="col-8 input-panel">
+				<input tabindex="<%= i %>" autocomplete="off" data-toggle="tooltip" type="text" name="<%= other_field['field'] %>" value="<%= other_field['value'] %>" class="form-control">
+			</div>
+		</div>
+		<%
+		})
+		%>
+		<% } %>
+		<% if ( show_node_ui ) { %>
+		<div class="form-group row">
+			<label class="col-4 control-label"><%= $.i18n._('Note') %></label>
+			<div class="col-8 input-panel">
+				<textarea tabindex="1000" data-toggle="tooltip" name="note" class="form-control"><%= note %></textarea>
+			</div>
+		</div>
+		<% } %>
+		<div class="form-group row">
+			<div class="col-8 offset-md-4 input-panel">
+				<button id="save_btn" tabindex="5000" class="btn btn-lg btn-primary" style="width: 45%;  display:inline-block" type="button"><%= $.i18n._('Save') %> <span id="timedRedirect"></span></button>
+				<button id="cancel_btn" tabindex="5001" tab-end class="btn btn-lg btn-danger" style="width: 45%; display:inline-block;" type="button"><%= $.i18n._('Cancel') %><span>&nbsp;</span></button>
+			</div>
+		</div>
+	</form>
 </div>

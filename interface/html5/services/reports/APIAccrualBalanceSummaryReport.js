@@ -51,6 +51,4 @@ var APIAccrualBalanceSummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

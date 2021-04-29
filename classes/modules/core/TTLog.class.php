@@ -43,30 +43,30 @@ class TTLog {
 	 * @param string $object_id UUID
 	 * @param int $action_id
 	 * @param $description
-	 * @param string $user_id UUID
+	 * @param string $user_id   UUID
 	 * @param $table
 	 * @param null $object
 	 * @return bool
 	 */
-	static function addEntry( $object_id, $action_id, $description, $user_id, $table, $object = NULL ) {
+	static function addEntry( $object_id, $action_id, $description, $user_id, $table, $object = null ) {
 		global $config_vars;
 
-		if ( isset($config_vars['other']['disable_audit_log']) AND $config_vars['other']['disable_audit_log'] == TRUE ) {
-			return TRUE;
+		if ( isset( $config_vars['other']['disable_audit_log'] ) && $config_vars['other']['disable_audit_log'] == true ) {
+			return true;
 		}
 
-		if ( $object_id == ''  ) {
-			return FALSE;
+		if ( $object_id == '' ) {
+			return false;
 		}
 
 		if ( $action_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
 			global $current_user;
-			if ( is_object( $current_user ) AND is_a( $current_user, 'UserFactory' ) ) { //Make sure we ignore Portal users.
-				Debug::text('User Class: '. get_class( $current_user ) .' Full Name: '. $current_user->getFullName(), __FILE__, __LINE__, __METHOD__, 10);
+			if ( is_object( $current_user ) && is_a( $current_user, 'UserFactory' ) ) { //Make sure we ignore Portal users.
+				Debug::text( 'User Class: ' . get_class( $current_user ) . ' Full Name: ' . $current_user->getFullName(), __FILE__, __LINE__, __METHOD__, 10 );
 				$user_id = $current_user->getId();
 			} else {
 				$user_id = TTUUID::getZeroID();
@@ -74,7 +74,7 @@ class TTLog {
 		}
 
 		if ( $table == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$lf = TTnew( 'LogFactory' ); /** @var LogFactory $lf */
@@ -82,31 +82,32 @@ class TTLog {
 		$lf->setObject( $object_id );
 		$lf->setAction( $action_id );
 		$lf->setTableName( $table );
-		$lf->setUser( TTUUID::castUUID($user_id) );
+		$lf->setUser( TTUUID::castUUID( $user_id ) );
 		$lf->setDescription( $description );
 		$lf->setDate( time() );
 
 		//Debug::text('Object ID: '. $object_id .' Action ID: '. $action_id .' Table: '. $table .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
-		if ( $lf->isValid() === TRUE ) {
+		if ( $lf->isValid() === true ) {
 			$insert_id = $lf->Save();
 
-			if (	(
-					!isset($config_vars['other']['disable_audit_log_detail'])
-						OR ( isset($config_vars['other']['disable_audit_log_detail']) AND $config_vars['other']['disable_audit_log_detail'] != TRUE )
+			if ( (
+							!isset( $config_vars['other']['disable_audit_log_detail'] )
+							|| ( isset( $config_vars['other']['disable_audit_log_detail'] ) && $config_vars['other']['disable_audit_log_detail'] != true )
 					)
-					AND is_object($object) AND $object->getEnableSystemLogDetail() == TRUE ) {
+					&& is_object( $object ) && $object->getEnableSystemLogDetail() == true ) {
 
 				$ldf = TTnew( 'LogDetailFactory' ); /** @var LogDetailFactory $ldf */
 				$ldf->addLogDetail( $action_id, $insert_id, $object );
 			} else {
-				Debug::text('LogDetail Disabled... Object ID: '. $object_id .' Action ID: '. $action_id .' Table: '. $table .' Description: '. $description.' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text( 'LogDetail Disabled... Object ID: ' . $object_id . ' Action ID: ' . $action_id . ' Table: ' . $table . ' Description: ' . $description . ' User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 				//Debug::text('LogDetail Disabled... Config: '. (int)$config_vars['other']['disable_audit_log_detail'] .' Function: '. (int)$object->getEnableSystemLogDetail(), __FILE__, __LINE__, __METHOD__, 10);
 			}
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

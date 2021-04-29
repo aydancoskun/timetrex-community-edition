@@ -41,44 +41,44 @@
 class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return AccrualPolicyMilestoneListFactory|bool
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -91,25 +91,25 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return AccrualPolicyMilestoneListFactory|bool
 	 */
-	function getByCompanyID( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyID( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$apf = new AccrualPolicyFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $apf->getTable() .' as b ON a.accrual_policy_id = b.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $apf->getTable() . ' as b ON a.accrual_policy_id = b.id
 					where	b.company_id = ?
 						AND ( a.deleted = 0 AND b.deleted = 0)';
 		$query .= $this->getWhereSQL( $where );
@@ -121,32 +121,32 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return AccrualPolicyMilestoneListFactory|bool
 	 */
-	function getByIdAndCompanyID( $id, $company_id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByIdAndCompanyID( $id, $company_id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $company_id == '') {
-			return FALSE;
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'id'         => TTUUID::castUUID( $id ),
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$apf = new AccrualPolicyFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $apf->getTable() .' as b ON a.accrual_policy_id = b.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $apf->getTable() . ' as b ON a.accrual_policy_id = b.id
 					where	a.id = ?
 						AND b.company_id = ?
 						AND ( a.deleted = 0 AND b.deleted = 0)';
@@ -159,31 +159,31 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return AccrualPolicyMilestoneListFactory|bool
 	 */
-	function getByAccrualPolicyId( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByAccrualPolicyId( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'length_of_service_days' => 'asc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'length_of_service_days' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	accrual_policy_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -195,29 +195,29 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param $length_of_service_days
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return AccrualPolicyMilestoneListFactory|bool
 	 */
-	function getByAccrualPolicyIdAndLengthOfServiceDays( $id, $length_of_service_days, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByAccrualPolicyIdAndLengthOfServiceDays( $id, $length_of_service_days, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $length_of_service_days == '') {
-			return FALSE;
+		if ( $length_of_service_days == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					'length_of_service_days' => $length_of_service_days,
-					);
+		$ph = [
+				'id'                     => TTUUID::castUUID( $id ),
+				'length_of_service_days' => $length_of_service_days,
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	accrual_policy_id = ?
 						AND length_of_service_days <= ?
 						AND deleted = 0
@@ -234,40 +234,40 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return AccrualPolicyMilestoneListFactory|bool
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( !is_array($order) ) {
+		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
+			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
+				$order = [ Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order'] ];
 			}
 		}
 
-		$additional_order_fields = array();
+		$additional_order_fields = [];
 
-		if ( $order == NULL ) {
-			$order = array( 'type_id' => 'asc', 'name' => 'asc', 'length_of_service_days' => 'asc');
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'type_id' => 'asc', 'name' => 'asc', 'length_of_service_days' => 'asc' ];
+			$strict = false;
 		} else {
-			if ( !isset($order['type_id']) ) {
-				$order = Misc::prependArray( array('type_id' => 'asc'), $order );
+			if ( !isset( $order['type_id'] ) ) {
+				$order = Misc::prependArray( [ 'type_id' => 'asc' ], $order );
 			}
-			if ( !isset($order['name']) ) {
+			if ( !isset( $order['name'] ) ) {
 				$order['name'] = 'asc';
 			}
-			if ( !isset($order['length_of_service_days']) ) {
+			if ( !isset( $order['length_of_service_days'] ) ) {
 				$order['length_of_service_days'] = 'asc';
 			}
-			$strict = TRUE;
+			$strict = true;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -275,9 +275,9 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 		$uf = new UserFactory();
 		$apf = new AccrualPolicyFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*,
@@ -287,23 +287,23 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $apf->getTable() .' as b ON ( a.accrual_policy_id = b.id AND b.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $apf->getTable() . ' as b ON ( a.accrual_policy_id = b.id AND b.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	b.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['accrual_policy_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_id', $filter_data['accrual_policy_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['accrual_policy_id'] ) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_id', $filter_data['accrual_policy_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.created_by', 'y.first_name', 'y.last_name' ], $filter_data['created_by'], 'user_id_or_name', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.updated_by', 'z.first_name', 'z.last_name' ], $filter_data['updated_by'], 'user_id_or_name', $ph ) : null;
 
-		$query .=	' AND a.deleted = 0 ';
+		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
@@ -312,4 +312,5 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 		return $this;
 	}
 }
+
 ?>

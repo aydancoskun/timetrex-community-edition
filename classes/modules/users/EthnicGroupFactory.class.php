@@ -47,35 +47,35 @@ class EthnicGroupFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$retval = array(
-										'-1000-name' => TTi18n::gettext('Name'),
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+				$retval = [
+						'-1000-name'         => TTi18n::gettext( 'Name' ),
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								'created_by',
-								'created_date',
-								'updated_by',
-								'updated_date',
-								);
+				$retval = [
+						'name',
+						'created_by',
+						'created_date',
+						'updated_by',
+						'updated_date',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								'name',
-								);
+				$retval = [
+						'name',
+				];
 				break;
 		}
 
@@ -87,12 +87,13 @@ class EthnicGroupFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'name' => 'Name',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'         => 'ID',
+				'company_id' => 'Company',
+				'name'       => 'Name',
+				'deleted'    => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -109,6 +110,7 @@ class EthnicGroupFactory extends Factory {
 	 */
 	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -116,34 +118,34 @@ class EthnicGroupFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		$name = trim($name);
+	function isUniqueName( $name ) {
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'name' => TTi18n::strtolower($name),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'name'       => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->table .'
+		$query = 'select id from ' . $this->table . '
 					where company_id = ?
 						AND lower(name) = ?
 						AND deleted = 0';
-		$name_id = $this->db->GetOne($query, $ph);
+		$name_id = $this->db->GetOne( $query, $ph );
 
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -158,9 +160,11 @@ class EthnicGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setName( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -171,35 +175,36 @@ class EthnicGroupFactory extends Factory {
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
 			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-			$this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($this->getCompany()),
-															TTi18n::gettext('Company is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'company',
+												   $clf->getByID( $this->getCompany() ),
+												   TTi18n::gettext( 'Company is invalid' )
+			);
 		}
 		// Ethnic group
-		$this->Validator->isLength(		'name',
-											$this->getName(),
-											TTi18n::gettext('Ethnic group is too short or too long'),
-											2,
-											100
-										);
-		if ( $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isTrue(		'name',
-												$this->isUniqueName($this->getName()),
-												TTi18n::gettext('Ethnic group already exists')
-											);
+		$this->Validator->isLength( 'name',
+									$this->getName(),
+									TTi18n::gettext( 'Ethnic group is too short or too long' ),
+									2,
+									100
+		);
+		if ( $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Ethnic group already exists' )
+			);
 		}
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
+
 	function postSave() {
-		if ( $this->getDeleted() == TRUE ) {
-			Debug::Text('UnAssign ethnic group from employees: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->getDeleted() == true ) {
+			Debug::Text( 'UnAssign ethnic group from employees: ' . $this->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 			$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
-			$query = 'update '. $uf->getTable() .' set ethnic_group_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND ethnic_group_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $uf->getTable() . ' set ethnic_group_id = \'' . TTUUID::getZeroID() . '\' where company_id = \'' . TTUUID::castUUID( $this->getCompany() ) . '\' AND ethnic_group_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 		}
 	}
 
@@ -212,11 +217,11 @@ class EthnicGroupFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -228,10 +233,10 @@ class EthnicGroupFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 
@@ -239,22 +244,21 @@ class EthnicGroupFactory extends Factory {
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -268,7 +272,8 @@ class EthnicGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Ethnic Group').': '. $this->getName(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Ethnic Group' ) . ': ' . $this->getName(), null, $this->getTable(), $this );
 	}
 }
+
 ?>

@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TTimePicker = function( options ) {
 		var opts = $.extend( {}, $.fn.TTimePicker.defaults, options );
@@ -54,7 +54,7 @@
 			mass_edit_mode = val;
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -160,7 +160,11 @@
 			var content_width, example_width;
 			if ( !is_static_width ) {
 				example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().time_format_display );
-				content_width = Global.calculateTextWidth( time_picker_input.val(), { min_width: example_width, max_width: (example_width + 100), padding: 28 } );
+				content_width = Global.calculateTextWidth( time_picker_input.val(), {
+					min_width: example_width,
+					max_width: ( example_width + 100 ),
+					padding: 28
+				} );
 				$this.width( content_width + 'px' );
 			}
 		};
@@ -253,13 +257,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-								LocalCacheData.current_open_sub_controller.edit_view &&
-								LocalCacheData.current_open_sub_controller.is_viewing ) {
+							LocalCacheData.current_open_sub_controller.edit_view &&
+							LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-								LocalCacheData.current_open_primary_controller.edit_view &&
-								LocalCacheData.current_open_primary_controller.is_viewing ) {
+							LocalCacheData.current_open_primary_controller.edit_view &&
+							LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -289,4 +293,4 @@
 
 	$.fn.TTimePicker.defaults = {};
 
-})( jQuery );
+} )( jQuery );

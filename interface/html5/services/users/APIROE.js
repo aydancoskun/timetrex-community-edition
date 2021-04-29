@@ -47,6 +47,4 @@ var APIROE = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportROE', arguments );
 	},
 
-
-
 } );

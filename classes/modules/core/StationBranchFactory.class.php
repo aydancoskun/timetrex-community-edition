@@ -42,7 +42,7 @@ class StationBranchFactory extends Factory {
 	protected $table = 'station_branch';
 	protected $pk_sequence_name = 'station_branch_id_seq'; //PK Sequence name
 
-	var $branch_obj = NULL;
+	var $branch_obj = null;
 
 	/**
 	 * @return mixed
@@ -55,8 +55,9 @@ class StationBranchFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setStation( $value) {
+	function setStation( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'station_id', $value );
 	}
 
@@ -64,17 +65,18 @@ class StationBranchFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getBranchObject() {
-		if ( is_object($this->branch_obj) ) {
+		if ( is_object( $this->branch_obj ) ) {
 			return $this->branch_obj;
 		} else {
 			$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 			$blf->getById( $this->getBranch() );
 			if ( $blf->getRecordCount() == 1 ) {
 				$this->branch_obj = $blf->getCurrent();
+
 				return $this->branch_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -89,8 +91,9 @@ class StationBranchFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setBranch( $value) {
+	function setBranch( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'branch_id', $value );
 	}
 
@@ -104,132 +107,132 @@ class StationBranchFactory extends Factory {
 		//
 		// Station
 		if ( $this->getStation() != TTUUID::getZeroID() ) {
-			$this->Validator->isUUID(	'station',
-												$this->getStation(),
-												TTi18n::gettext('Selected Station is invalid')
-											/*
-															$this->Validator->isResultSetWithRows(	'station',
-																								$slf->getByID($id),
-																								TTi18n::gettext('Selected Station is invalid')
-											*/
-											);
+			$this->Validator->isUUID( 'station',
+									  $this->getStation(),
+									  TTi18n::gettext( 'Selected Station is invalid' )
+			/*
+							$this->Validator->isResultSetWithRows(	'station',
+																$slf->getByID($id),
+																TTi18n::gettext('Selected Station is invalid')
+			*/
+			);
 		}
 		// Branch
 		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
-		$this->Validator->isResultSetWithRows(	'branch',
-														$blf->getByID($this->getBranch()),
-														TTi18n::gettext('Selected Branch is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'branch',
+											   $blf->getByID( $this->getBranch() ),
+											   TTi18n::gettext( 'Selected Branch is invalid' )
+		);
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -238,11 +241,12 @@ class StationBranchFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$b_obj = $this->getBranchObject();
-		if ( is_object($b_obj) ) {
-			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText('Branch').': '. $b_obj->getName(), NULL, $this->getTable() );
+		if ( is_object( $b_obj ) ) {
+			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText( 'Branch' ) . ': ' . $b_obj->getName(), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

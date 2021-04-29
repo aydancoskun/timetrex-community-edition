@@ -42,7 +42,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	protected $table = 'round_interval_policy';
 	protected $pk_sequence_name = 'round_interval_policy_id_seq'; //PK Sequence name
 
-	protected $company_obj = NULL;
+	protected $company_obj = null;
 
 	/**
 	 * Just need relations for each actual Punch Type
@@ -50,96 +50,94 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'round_type':
-				$retval = array(
-										10 => TTi18n::gettext('Down'),
-										20 => TTi18n::gettext('Average'),
-										25 => TTi18n::gettext('Average (Partial Min. Down)'),
-										27 => TTi18n::gettext('Average (Partial Min. Up)'),
-										30 => TTi18n::gettext('Up')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Down' ),
+						20 => TTi18n::gettext( 'Average' ),
+						25 => TTi18n::gettext( 'Average (Partial Min. Down)' ),
+						27 => TTi18n::gettext( 'Average (Partial Min. Up)' ),
+						30 => TTi18n::gettext( 'Up' ),
+				];
 				break;
 			case 'punch_type':
-				$retval = array(
-										10 => TTi18n::gettext('All Punches'),
-										20 => TTi18n::gettext('All In (incl. Lunch/Break)'),
-										30 => TTi18n::gettext('All Out (incl. Lunch/Break)'),
-										40 => TTi18n::gettext('Normal - In'),
-										50 => TTi18n::gettext('Normal - Out'),
-										60 => TTi18n::gettext('Lunch - In'),
-										70 => TTi18n::gettext('Lunch - Out'),
-										80 => TTi18n::gettext('Break - In'),
-										90 => TTi18n::gettext('Break - Out'),
-										95 => TTi18n::gettext('Transfer Punches'),
-										100 => TTi18n::gettext('Lunch Total'),
-										110 => TTi18n::gettext('Break Total'),
-										120 => TTi18n::gettext('Day Total'),
-									);
+				$retval = [
+						10  => TTi18n::gettext( 'All Punches' ),
+						20  => TTi18n::gettext( 'All In (incl. Lunch/Break)' ),
+						30  => TTi18n::gettext( 'All Out (incl. Lunch/Break)' ),
+						40  => TTi18n::gettext( 'Normal - In' ),
+						50  => TTi18n::gettext( 'Normal - Out' ),
+						60  => TTi18n::gettext( 'Lunch - In' ),
+						70  => TTi18n::gettext( 'Lunch - Out' ),
+						80  => TTi18n::gettext( 'Break - In' ),
+						90  => TTi18n::gettext( 'Break - Out' ),
+						95  => TTi18n::gettext( 'Transfer Punches' ),
+						100 => TTi18n::gettext( 'Lunch Total' ),
+						110 => TTi18n::gettext( 'Break Total' ),
+						120 => TTi18n::gettext( 'Day Total' ),
+				];
 				break;
 			case 'punch_type_relation':
-				$retval = array(
-										40 => array(10, 20),
-										50 => array(10, 30, 120),
-										60 => array(10, 20, 100),
-										70 => array(10, 30),
-										80 => array(10, 20, 110),
-										90 => array(10, 30),
-										95 => array(), //Return blank array, which will automatically append 95 in getByPolicyGroupUserIdAndTypeId().
-									);
+				$retval = [
+						40 => [ 10, 20 ],
+						50 => [ 10, 30, 120 ],
+						60 => [ 10, 20, 100 ],
+						70 => [ 10, 30 ],
+						80 => [ 10, 20, 110 ],
+						90 => [ 10, 30 ],
+						95 => [], //Return blank array, which will automatically append 95 in getByPolicyGroupUserIdAndTypeId().
+				];
 				break;
 			case 'condition_type':
-				$retval = array(
-										0 => TTi18n::gettext('Disabled'),
-										10 => TTi18n::gettext('Scheduled Time'),
-										20 => TTi18n::gettext('Scheduled Time or Not Scheduled'),
-										30 => TTi18n::gettext('Static Time'), //For specific time of day, ie: 8AM
-										40 => TTi18n::gettext('Static Total Time'), //For Day/Lunch/Break total.
-									);
+				$retval = [
+						0  => TTi18n::gettext( 'Disabled' ),
+						10 => TTi18n::gettext( 'Scheduled Time' ),
+						20 => TTi18n::gettext( 'Scheduled Time or Not Scheduled' ),
+						30 => TTi18n::gettext( 'Static Time' ), //For specific time of day, ie: 8AM
+						40 => TTi18n::gettext( 'Static Total Time' ), //For Day/Lunch/Break total.
+				];
 				break;
 			case 'columns':
-				$retval = array(
-										'-1010-punch_type' => TTi18n::gettext('Punch Type'),
-										'-1020-round_type' => TTi18n::gettext('Round Type'),
-										'-1030-name' => TTi18n::gettext('Name'),
-										'-1035-description' => TTi18n::gettext('Description'),
+				$retval = [
+						'-1010-punch_type'  => TTi18n::gettext( 'Punch Type' ),
+						'-1020-round_type'  => TTi18n::gettext( 'Round Type' ),
+						'-1030-name'        => TTi18n::gettext( 'Name' ),
+						'-1035-description' => TTi18n::gettext( 'Description' ),
 
-										'-1040-round_interval' => TTi18n::gettext('Interval'),
+						'-1040-round_interval' => TTi18n::gettext( 'Interval' ),
 
-										'-1900-in_use' => TTi18n::gettext('In Use'),
+						'-1900-in_use' => TTi18n::gettext( 'In Use' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								'description',
-								'punch_type',
-								'round_type',
-								'updated_date',
-								'updated_by',
-								);
+				$retval = [
+						'name',
+						'description',
+						'punch_type',
+						'round_type',
+						'updated_date',
+						'updated_by',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								'name',
-								);
+				$retval = [
+						'name',
+				];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array(
-								);
+				$retval = [];
 				break;
-
 		}
 
 		return $retval;
@@ -150,28 +148,29 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'name' => 'Name',
-										'description' => 'Description',
-										'round_type_id' => 'RoundType',
-										'round_type' => FALSE,
-										'punch_type_id' => 'PunchType',
-										'punch_type' => FALSE,
-										'round_interval' => 'Interval',
-										'grace' => 'Grace',
-										'strict' => 'Strict',
+		$variable_function_map = [
+				'id'             => 'ID',
+				'company_id'     => 'Company',
+				'name'           => 'Name',
+				'description'    => 'Description',
+				'round_type_id'  => 'RoundType',
+				'round_type'     => false,
+				'punch_type_id'  => 'PunchType',
+				'punch_type'     => false,
+				'round_interval' => 'Interval',
+				'grace'          => 'Grace',
+				'strict'         => 'Strict',
 
-										'condition_type_id' => 'ConditionType',
-										'condition_static_time' => 'ConditionStaticTime',
-										'condition_static_total_time' => 'ConditionStaticTotalTime',
-										'condition_start_window' => 'ConditionStartWindow',
-										'condition_stop_window' => 'ConditionStopWindow',
+				'condition_type_id'           => 'ConditionType',
+				'condition_static_time'       => 'ConditionStaticTime',
+				'condition_static_total_time' => 'ConditionStaticTotalTime',
+				'condition_start_window'      => 'ConditionStartWindow',
+				'condition_stop_window'       => 'ConditionStopWindow',
 
-										'in_use' => FALSE,
-										'deleted' => 'Deleted',
-										);
+				'in_use'  => false,
+				'deleted' => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -193,10 +192,11 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setCompany( $value) {
+	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
 
-		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Company ID: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -206,16 +206,16 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $transfer
 	 * @return bool|int
 	 */
-	function getPunchTypeFromPunchStatusAndType( $status, $type, $transfer) {
+	function getPunchTypeFromPunchStatusAndType( $status, $type, $transfer ) {
 		if ( $status == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $type == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $transfer == TRUE ) {
+		if ( $transfer == true ) {
 			$punch_type = 95; //Transfer
 		} else {
 			switch ( $type ) {
@@ -240,7 +240,7 @@ class RoundIntervalPolicyFactory extends Factory {
 					} else {
 						$punch_type = 90;
 					}
-				break;
+					break;
 			}
 		}
 
@@ -251,30 +251,30 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		$name = trim($name);
+	function isUniqueName( $name ) {
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'name' => TTi18n::strtolower($name),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'name'       => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
-		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'select id from ' . $this->getTable() . ' where company_id = ? AND lower(name) = ? AND deleted=0';
+		$id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $id, 'Unique: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $id === FALSE ) {
-			return TRUE;
+		if ( $id === false ) {
+			return true;
 		} else {
-			if ($id == $this->getId() ) {
-				return TRUE;
+			if ( $id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -288,8 +288,9 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim($value);
+	function setName( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -304,8 +305,9 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setDescription( $value) {
-		$value = trim($value);
+	function setDescription( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'description', $value );
 	}
 
@@ -320,8 +322,9 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setRoundType( $value) {
-		$value = (int)trim($value);
+	function setRoundType( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'round_type_id', $value );
 	}
 
@@ -336,8 +339,9 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setPunchType( $value) {
-		$value = (int)trim($value);
+	function setPunchType( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'punch_type_id', $value );
 	}
 
@@ -352,12 +356,12 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setInterval( $value) {
-		$value = trim($value);
+	function setInterval( $value ) {
+		$value = trim( $value );
 		//If someone is using hour parse format ie: 0.12 we need to round to the nearest
 		//minute other wise it'll be like 7mins and 23seconds messing up rounding.
 		//$this->setGenericDataValue( 'round_interval', $value );
-		return $this->setGenericDataValue( 'round_interval', TTDate::roundTime($value, 60, 20) );
+		return $this->setGenericDataValue( 'round_interval', TTDate::roundTime( $value, 60, 20 ) );
 	}
 
 	/**
@@ -371,12 +375,12 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setGrace( $value) {
-		$value = trim($value);
+	function setGrace( $value ) {
+		$value = trim( $value );
 		//If someone is using hour parse format ie: 0.12 we need to round to the nearest
 		//minute other wise it'll be like 7mins and 23seconds messing up rounding.
 		//$this->setGenericDataValue( 'grace', $value );
-		return $this->setGenericDataValue( 'grace', TTDate::roundTime($value, 60, 20) );
+		return $this->setGenericDataValue( 'grace', TTDate::roundTime( $value, 60, 20 ) );
 	}
 
 	/**
@@ -390,26 +394,27 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setStrict( $value) {
-		return $this->setGenericDataValue( 'strict', $this->toBool($value) );
+	function setStrict( $value ) {
+		return $this->setGenericDataValue( 'strict', $this->toBool( $value ) );
 	}
 
 	/**
-	 * @param int $epoch EPOCH
+	 * @param int $epoch        EPOCH
 	 * @param int $window_epoch EPOCH
 	 * @return bool
 	 */
 	function inConditionWindow( $epoch, $window_epoch ) {
 		if (
 				$epoch >= ( $window_epoch - $this->getConditionStartWindow() )
-				AND
+				&&
 				$epoch <= ( $window_epoch + $this->getConditionStopWindow() )
-			) {
-			return TRUE;
+		) {
+			return true;
 		}
 
-		Debug::Text('Not in Condition Window... Epoch: '. TTDate::getDate('DATE+TIME', $epoch ) .' Window Epoch: '. TTDate::getDate('DATE+TIME', $window_epoch ) .' Window Start: '. $this->getConditionStartWindow() .' Stop: '. $this->getConditionStopWindow(), __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::Text( 'Not in Condition Window... Epoch: ' . TTDate::getDate( 'DATE+TIME', $epoch ) . ' Window Epoch: ' . TTDate::getDate( 'DATE+TIME', $window_epoch ) . ' Window Start: ' . $this->getConditionStartWindow() . ' Stop: ' . $this->getConditionStopWindow(), __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 
 	/**
@@ -419,42 +424,43 @@ class RoundIntervalPolicyFactory extends Factory {
 	 */
 	function isConditionTrue( $epoch, $schedule_time ) {
 		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
-			return TRUE;
+			return true;
 		}
 
-		Debug::Text('Punch Time: '. TTDate::getDate('DATE+TIME', $epoch ) .' Schedule Time: '. TTDate::getDate('DATE+TIME', $schedule_time ), __FILE__, __LINE__, __METHOD__, 10);
-		$retval = FALSE;
-		switch( $this->getConditionType() ) {
+		Debug::Text( 'Punch Time: ' . TTDate::getDate( 'DATE+TIME', $epoch ) . ' Schedule Time: ' . TTDate::getDate( 'DATE+TIME', $schedule_time ), __FILE__, __LINE__, __METHOD__, 10 );
+		$retval = false;
+		switch ( $this->getConditionType() ) {
 			case 10: //Scheduled Time
 			case 20: //Scheduled Time or Not Scheduled.
-				if ( $this->getConditionType() == 20 AND $schedule_time == '' ) {
-					Debug::Text('Not scheduled, returning TRUE...', __FILE__, __LINE__, __METHOD__, 10);
-					$retval = TRUE;
+				if ( $this->getConditionType() == 20 && $schedule_time == '' ) {
+					Debug::Text( 'Not scheduled, returning TRUE...', __FILE__, __LINE__, __METHOD__, 10 );
+					$retval = true;
 				} else {
-					Debug::Text('Scheduled...', __FILE__, __LINE__, __METHOD__, 10);
-					if ( $this->inConditionWindow( $epoch, $schedule_time ) == TRUE ) {
-						$retval = TRUE;
+					Debug::Text( 'Scheduled...', __FILE__, __LINE__, __METHOD__, 10 );
+					if ( $this->inConditionWindow( $epoch, $schedule_time ) == true ) {
+						$retval = true;
 					}
 				}
 				break;
 			case 30: //Static Time
 				//If static time after start/stop window is near midnight, due to using TimeLockedDate we need check the current day and the day after when evaluating this condition.
-				if ( $this->inConditionWindow( $epoch, TTDate::getTimeLockedDate( $this->getConditionStaticTime(), $epoch) ) == TRUE
-					OR ( $this->inConditionWindow( $epoch, TTDate::getTimeLockedDate( $this->getConditionStaticTime(), ( $epoch + 86400 ) ) ) == TRUE ) ) {
-					$retval = TRUE;
+				if ( $this->inConditionWindow( $epoch, TTDate::getTimeLockedDate( $this->getConditionStaticTime(), $epoch ) ) == true
+						|| ( $this->inConditionWindow( $epoch, TTDate::getTimeLockedDate( $this->getConditionStaticTime(), ( $epoch + 86400 ) ) ) == true ) ) {
+					$retval = true;
 				}
 				break;
 			case 40: //Static Total Time
-				if ( $this->inConditionWindow( $epoch, $this->getConditionStaticTotalTime() ) == TRUE ) {
-					$retval = TRUE;
+				if ( $this->inConditionWindow( $epoch, $this->getConditionStaticTotalTime() ) == true ) {
+					$retval = true;
 				}
 				break;
 			case 0: //Disabled
-				$retval = TRUE;
+				$retval = true;
 				break;
 		}
 
-		Debug::Text('Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Retval: ' . (int)$retval, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $retval;
 	}
 
@@ -469,8 +475,9 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setConditionType( $value) {
-		$value = (int)trim($value);
+	function setConditionType( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'condition_type_id', $value );
 	}
 
@@ -478,25 +485,26 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param bool $raw
 	 * @return bool|int
 	 */
-	function getConditionStaticTime( $raw = FALSE ) {
+	function getConditionStaticTime( $raw = false ) {
 		$value = $this->getGenericDataValue( 'condition_static_time' );
-		if ( $value !== FALSE ) {
-			if ( $raw === TRUE) {
+		if ( $value !== false ) {
+			if ( $raw === true ) {
 				return $value;
 			} else {
 				return TTDate::strtotime( $value );
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $value
 	 * @return bool
 	 */
-	function setConditionStaticTime( $value) {
-		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+	function setConditionStaticTime( $value ) {
+		$value = ( !is_int( $value ) ) ? trim( $value ) : $value; //Dont trim integer values, as it changes them to strings.
+
 		return $this->setGenericDataValue( 'condition_static_time', $value );
 	}
 
@@ -511,12 +519,12 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setConditionStaticTotalTime( $value) {
-		$value = trim($value);
+	function setConditionStaticTotalTime( $value ) {
+		$value = trim( $value );
 		//If someone is using hour parse format ie: 0.12 we need to round to the nearest
 		//minute other wise it'll be like 7mins and 23seconds messing up rounding.
 		//$this->setGenericDataValue( 'round_interval', $value );
-		return $this->setGenericDataValue( 'condition_static_total_time', TTDate::roundTime($value, 60, 20) );
+		return $this->setGenericDataValue( 'condition_static_total_time', TTDate::roundTime( $value, 60, 20 ) );
 	}
 
 	/**
@@ -530,12 +538,12 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setConditionStartWindow( $value) {
-		$value = trim($value);
+	function setConditionStartWindow( $value ) {
+		$value = trim( $value );
 		//If someone is using hour parse format ie: 0.12 we need to round to the nearest
 		//minute other wise it'll be like 7mins and 23seconds messing up rounding.
 		//$this->setGenericDataValue( 'round_interval', $value );
-		return $this->setGenericDataValue( 'condition_start_window', TTDate::roundTime($value, 60, 20) );
+		return $this->setGenericDataValue( 'condition_start_window', TTDate::roundTime( $value, 60, 20 ) );
 	}
 
 	/**
@@ -549,151 +557,151 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setConditionStopWindow( $value) {
-		$value = trim($value);
+	function setConditionStopWindow( $value ) {
+		$value = trim( $value );
 		//If someone is using hour parse format ie: 0.12 we need to round to the nearest
 		//minute other wise it'll be like 7mins and 23seconds messing up rounding.
 		//$this->setGenericDataValue( 'round_interval', $value );
-		return $this->setGenericDataValue( 'condition_stop_window', TTDate::roundTime($value, 60, 20) );
+		return $this->setGenericDataValue( 'condition_stop_window', TTDate::roundTime( $value, 60, 20 ) );
 	}
 
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-		$this->Validator->isResultSetWithRows(	'company',
-														$clf->getByID($this->getCompany()),
-														TTi18n::gettext('Company is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'company',
+											   $clf->getByID( $this->getCompany() ),
+											   TTi18n::gettext( 'Company is invalid' )
+		);
 		// Name
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == false ) {
 			//Don't check the below when mass editing.
 			if ( $this->getName() == '' ) {
-				$this->Validator->isTRUE(	'name',
-											FALSE,
-											TTi18n::gettext('Please specify a name') );
+				$this->Validator->isTRUE( 'name',
+										  false,
+										  TTi18n::gettext( 'Please specify a name' ) );
 			}
 		}
-		if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isLength(	'name',
-												$this->getName(),
-												TTi18n::gettext('Name is too short or too long'),
-												2, 50
-											);
+		if ( $this->getName() != '' && $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isLength( 'name',
+										$this->getName(),
+										TTi18n::gettext( 'Name is too short or too long' ),
+										2, 50
+			);
 		}
-		if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isTrue(	'name',
-												$this->isUniqueName($this->getName()),
-												TTi18n::gettext('Name is already in use')
-											);
+		if ( $this->getName() != '' && $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Name is already in use' )
+			);
 		}
 		// Description
 		if ( $this->getDescription() != '' ) {
-			$this->Validator->isLength(	'description',
-												$this->getDescription(),
-												TTi18n::gettext('Description is invalid'),
-												1, 250
-											);
+			$this->Validator->isLength( 'description',
+										$this->getDescription(),
+										TTi18n::gettext( 'Description is invalid' ),
+										1, 250
+			);
 		}
 		// Round Type
-		if ( $this->getRoundType() !== FALSE ) {
-			$this->Validator->inArrayKey(	'round_type',
-												$this->getRoundType(),
-												TTi18n::gettext('Incorrect Round Type'),
-												$this->getOptions('round_type')
-											);
+		if ( $this->getRoundType() !== false ) {
+			$this->Validator->inArrayKey( 'round_type',
+										  $this->getRoundType(),
+										  TTi18n::gettext( 'Incorrect Round Type' ),
+										  $this->getOptions( 'round_type' )
+			);
 		}
 		// Punch Type
-		if ( $this->getPunchType() !== FALSE ) {
-			$this->Validator->inArrayKey(	'punch_type',
-												$this->getPunchType(),
-												TTi18n::gettext('Incorrect Punch Type'),
-												$this->getOptions('punch_type')
-											);
+		if ( $this->getPunchType() !== false ) {
+			$this->Validator->inArrayKey( 'punch_type',
+										  $this->getPunchType(),
+										  TTi18n::gettext( 'Incorrect Punch Type' ),
+										  $this->getOptions( 'punch_type' )
+			);
 		}
 		// Interval
-		if ( $this->getInterval() !== FALSE ) {
-			$this->Validator->isNumeric(		'interval',
-												$this->getInterval(),
-												TTi18n::gettext('Incorrect Interval')
-											);
+		if ( $this->getInterval() !== false ) {
+			$this->Validator->isNumeric( 'interval',
+										 $this->getInterval(),
+										 TTi18n::gettext( 'Incorrect Interval' )
+			);
 		}
 		// Grace
-		if ( $this->getGrace() !== FALSE ) {
-			$this->Validator->isNumeric(		'grace',
-													$this->getGrace(),
-													TTi18n::gettext('Incorrect grace value')
-												);
+		if ( $this->getGrace() !== false ) {
+			$this->Validator->isNumeric( 'grace',
+										 $this->getGrace(),
+										 TTi18n::gettext( 'Incorrect grace value' )
+			);
 		}
 		// Condition Type
-		$this->Validator->inArrayKey(	'condition_type',
-												$this->getConditionType(),
-												TTi18n::gettext('Incorrect Condition Type'),
-												$this->getOptions('condition_type')
-											);
+		$this->Validator->inArrayKey( 'condition_type',
+									  $this->getConditionType(),
+									  TTi18n::gettext( 'Incorrect Condition Type' ),
+									  $this->getOptions( 'condition_type' )
+		);
 		// Static time
 		if ( $this->getConditionStaticTime() != '' ) {
-			$this->Validator->isDate(		'condition_static_time',
-													$this->getConditionStaticTime(),
-													TTi18n::gettext('Incorrect Static time')
-												);
+			$this->Validator->isDate( 'condition_static_time',
+									  $this->getConditionStaticTime(),
+									  TTi18n::gettext( 'Incorrect Static time' )
+			);
 		}
 		// Static Total Time
-		if ( $this->getConditionStaticTotalTime() !== FALSE ) {
-			$this->Validator->isNumeric(		'condition_static_total_time',
-													$this->getConditionStaticTotalTime(),
-													TTi18n::gettext('Incorrect Static Total Time')
-												);
+		if ( $this->getConditionStaticTotalTime() !== false ) {
+			$this->Validator->isNumeric( 'condition_static_total_time',
+										 $this->getConditionStaticTotalTime(),
+										 TTi18n::gettext( 'Incorrect Static Total Time' )
+			);
 		}
 		// Start Window
-		if ( $this->getConditionStartWindow() !== FALSE ) {
-			$this->Validator->isNumeric(		'condition_start_window',
-													$this->getConditionStartWindow(),
-													TTi18n::gettext('Incorrect Start Window')
-												);
+		if ( $this->getConditionStartWindow() !== false ) {
+			$this->Validator->isNumeric( 'condition_start_window',
+										 $this->getConditionStartWindow(),
+										 TTi18n::gettext( 'Incorrect Start Window' )
+			);
 		}
 		// Stop Window
-		if ( $this->getConditionStopWindow() !== FALSE ) {
-			$this->Validator->isNumeric(		'condition_stop_window',
-													$this->getConditionStopWindow(),
-													TTi18n::gettext('Incorrect Stop Window')
-												);
+		if ( $this->getConditionStopWindow() !== false ) {
+			$this->Validator->isNumeric( 'condition_stop_window',
+										 $this->getConditionStopWindow(),
+										 TTi18n::gettext( 'Incorrect Stop Window' )
+			);
 		}
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
-		if ( $this->getDeleted() == TRUE ) {
+		if ( $this->getDeleted() == true ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
 			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
-			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('round_interval_policy' => $this->getId() ), 1 );
+			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), [ 'round_interval_policy' => $this->getId() ], 1 );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by policy groups' ) );
 			}
 		}
 
-		if ( $ignore_warning == FALSE ) {
+		if ( $ignore_warning == false ) {
 			if ( $this->getInterval() == 0 ) {
 				$this->Validator->Warning( 'round_interval', TTi18n::gettext( 'An interval of 0 will result in punches being saved to the nearest second, consider using 1 minute instead' ) );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -702,7 +710,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -712,11 +720,11 @@ class RoundIntervalPolicyFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						case 'condition_static_time':
 							$this->$function( TTDate::parseDateTime( $data[$key] ) );
 							break;
@@ -731,37 +739,37 @@ class RoundIntervalPolicyFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'in_use':
 							$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'punch_type':
 						case 'round_type':
-							$function = 'get'.str_replace('_', '', $variable);
+							$function = 'get' . str_replace( '_', '', $variable );
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
 							break;
 						case 'condition_static_time':
-							$data[$variable] = ( defined('TIMETREX_API') ) ? TTDate::getAPIDate( 'TIME', TTDate::strtotime( $this->$function() ) ) : $this->$function();
+							$data[$variable] = ( defined( 'TIMETREX_API' ) ) ? TTDate::getAPIDate( 'TIME', TTDate::strtotime( $this->$function() ) ) : $this->$function();
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
@@ -769,7 +777,6 @@ class RoundIntervalPolicyFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -783,7 +790,8 @@ class RoundIntervalPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Round Interval Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Round Interval Policy' ), null, $this->getTable(), $this );
 	}
 }
+
 ?>

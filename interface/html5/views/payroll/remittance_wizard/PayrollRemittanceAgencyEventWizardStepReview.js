@@ -7,7 +7,7 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 	init: function() {
 		var $this = this;
 		require( this._required_files, function() {
-			$this.api = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
+			$this.api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
 			$this.render();
 		} );
 	},
@@ -22,7 +22,7 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 
 	_render: function() {
 		this.setTitle( $.i18n._( 'Review and Verify Information' ) );
-		this.setInstructions( $.i18n._( 'Review and verify all necessary information') + ': ' );
+		this.setInstructions( $.i18n._( 'Review and verify all necessary information' ) + ': ' );
 
 		var $this = this;
 		this.getWizardObject().getPayrollRemittanceAgencyEventById( this.getWizardObject().selected_remittance_agency_event_id, null, function( result ) {
@@ -35,148 +35,148 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 			var tax_button = false;
 
 			switch ( $this.getWizardObject().selected_remittance_agency_event.type_id ) {
-					//Canada
+				//Canada
 				case 'T4':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.tax_reports,
-							$.i18n._( 'Summary Report' ),
-							$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
+						Icons.tax_reports,
+						$.i18n._( 'Summary Report' ),
+						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 
 					$this.addButton( 'GovernmentT4',
-							Icons.view_detail,
-							$.i18n._( 'T4 Forms' ),
-							$.i18n._( 'Generate T4 forms to review and verify that all necessary boxes are properly filled out.' )
+						Icons.view_detail,
+						$.i18n._( 'T4 Forms' ),
+						$.i18n._( 'Generate T4 forms to review and verify that all necessary boxes are properly filled out.' )
 					);
 
 					$this.addButton( 'T4FormSetup',
-							Icons.save_setup,
-							$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
-							$.i18n._( 'In the event that the T4 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
+						Icons.save_setup,
+						$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
+						$.i18n._( 'In the event that the T4 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
 					);
 					break;
 				case 'T4A':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.tax_reports,
-							$.i18n._( 'Summary Report' ),
-							$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
+						Icons.tax_reports,
+						$.i18n._( 'Summary Report' ),
+						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 
 					$this.addButton( 'GovernmentT4A',
-							Icons.view_detail,
-							$.i18n._( 'T4A Forms' ),
-							$.i18n._( 'Generate T4A forms to review and verify that all necessary boxes are properly filled out.' )
+						Icons.view_detail,
+						$.i18n._( 'T4A Forms' ),
+						$.i18n._( 'Generate T4A forms to review and verify that all necessary boxes are properly filled out.' )
 					);
 
 					$this.addButton( 'T4AFormSetup',
-							Icons.save_setup,
-							$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
-							$.i18n._( 'In the event that the T4A report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
+						Icons.save_setup,
+						$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
+						$.i18n._( 'In the event that the T4A report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
 					);
 					break;
 
-					//US
+				//US
 				case 'FW2':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.tax_reports,
-							$.i18n._( 'Summary Report' ),
-							$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
+						Icons.tax_reports,
+						$.i18n._( 'Summary Report' ),
+						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 
 					$this.addButton( 'GovernmentW2',
-							Icons.view_detail,
-							$.i18n._( 'W2 Forms' ),
-							$.i18n._( 'Generate W2 forms to review and verify that all necessary boxes are properly filled out.' )
+						Icons.view_detail,
+						$.i18n._( 'W2 Forms' ),
+						$.i18n._( 'Generate W2 forms to review and verify that all necessary boxes are properly filled out.' )
 					);
 
 					$this.addButton( 'W2FormSetup',
-							Icons.save_setup,
-							$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
-							$.i18n._( 'In the event that the W2 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
+						Icons.save_setup,
+						$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
+						$.i18n._( 'In the event that the W2 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
 					);
 					break;
 				case 'F1099MISC':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.tax_reports,
-							$.i18n._( 'Summary Report' ),
-							$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
+						Icons.tax_reports,
+						$.i18n._( 'Summary Report' ),
+						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 
 					$this.addButton( 'Government1099Misc',
-							Icons.view_detail,
-							$.i18n._( '1099-MISC Forms' ),
-							$.i18n._( 'Generate 1099-MISC forms to review and verify that all necessary boxes are properly filled out.' )
+						Icons.view_detail,
+						$.i18n._( '1099-MISC Forms' ),
+						$.i18n._( 'Generate 1099-MISC forms to review and verify that all necessary boxes are properly filled out.' )
 					);
 
 					$this.addButton( '1099MiscFormSetup',
-							Icons.save_setup,
-							$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
-							$.i18n._( 'In the event that the 1099-MISC report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
+						Icons.save_setup,
+						$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
+						$.i18n._( 'In the event that the 1099-MISC report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
 					);
 					break;
 				case 'F940':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.tax_reports,
-							$.i18n._( 'Summary Report' ),
-							$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
+						Icons.tax_reports,
+						$.i18n._( 'Summary Report' ),
+						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 
 					$this.addButton( 'Government940',
-							Icons.view_detail,
-							$.i18n._( '940 Form' ),
-							$.i18n._( 'Generate the 940 form to review and verify that all necessary boxes are properly filled out.' )
+						Icons.view_detail,
+						$.i18n._( '940 Form' ),
+						$.i18n._( 'Generate the 940 form to review and verify that all necessary boxes are properly filled out.' )
 					);
 
 					$this.addButton( '940FormSetup',
-							Icons.save_setup,
-							$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
-							$.i18n._( 'In the event that the 940 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
+						Icons.save_setup,
+						$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
+						$.i18n._( 'In the event that the 940 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
 					);
 					break;
 				case 'F941':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.tax_reports,
-							$.i18n._( 'Summary Report' ),
-							$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
+						Icons.tax_reports,
+						$.i18n._( 'Summary Report' ),
+						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 
 					$this.addButton( 'Government941',
-							Icons.view_detail,
-							$.i18n._( '941 Form' ),
-							$.i18n._( 'Generate the 941 form to review and verify that all necessary boxes are properly filled out.' )
+						Icons.view_detail,
+						$.i18n._( '941 Form' ),
+						$.i18n._( 'Generate the 941 form to review and verify that all necessary boxes are properly filled out.' )
 					);
 
 					$this.addButton( '941FormSetup',
-							Icons.save_setup,
-							$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
-							$.i18n._( 'In the event that the 941 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
+						Icons.save_setup,
+						$.i18n._( 'Form Setup' ) + ' (' + $.i18n._( 'Optional' ) + ')',
+						$.i18n._( 'In the event that the 941 report or forms are not showing the correct information, use this Form Setup icon to make adjustments and try again.' )
 					);
 					break;
 				case 'PBJ':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.tax_reports,
-							$.i18n._( 'Summary Report' ),
-							$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
+						Icons.tax_reports,
+						$.i18n._( 'Summary Report' ),
+						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 
 					$this.addButton( 'PBJExportSetup',
-							Icons.save_setup,
-							$.i18n._( 'Export Setup' ),
-							$.i18n._( 'In the event that the export format is not showing the correct information, use this icon to make adjustments and try again.' )
+						Icons.save_setup,
+						$.i18n._( 'Export Setup' ),
+						$.i18n._( 'In the event that the export format is not showing the correct information, use this icon to make adjustments and try again.' )
 					);
 					break;
 				case 'ROE':
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.view,
-							$.i18n._( 'ROE Forms' ),
-							$.i18n._( 'View ROE forms to review and verify that all necessary boxes are properly filled out.' )
+						Icons.view,
+						$.i18n._( 'ROE Forms' ),
+						$.i18n._( 'View ROE forms to review and verify that all necessary boxes are properly filled out.' )
 					);
 					break;
 				default:
 					tax_button = $this.addButton( ContextMenuIconName.tax_reports,
-							Icons.tax_reports,
-							$.i18n._( 'Summary Report' ),
-							$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
+						Icons.tax_reports,
+						$.i18n._( 'Summary Report' ),
+						$.i18n._( 'View a summary report to quickly review and verify information for each employee.' )
 					);
 			}
 

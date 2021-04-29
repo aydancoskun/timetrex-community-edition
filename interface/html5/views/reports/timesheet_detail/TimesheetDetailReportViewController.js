@@ -11,10 +11,10 @@ TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'TimeSheet Detail' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'TimesheetDetailReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APITimesheetDetailReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APITimesheetDetailReport' ) )();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				timesheet: {
@@ -53,6 +53,5 @@ TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 
 		this.onViewClick( id );
 	}
-
 
 } );

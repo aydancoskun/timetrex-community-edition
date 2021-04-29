@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUndefinedVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -37,27 +37,27 @@
 /*
  * Automatically performans an upgrade if a new version is available...
  */
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( DEPLOYMENT_ON_DEMAND == FALSE
-		AND ( !isset($config_vars['other']['disable_auto_upgrade']) OR isset($config_vars['other']['disable_auto_upgrade']) AND $config_vars['other']['disable_auto_upgrade'] != TRUE ) ) {
-	Debug::Text('Auto Upgrade is enabled, checking for new version...', __FILE__, __LINE__, __METHOD__, 10);
+if ( DEPLOYMENT_ON_DEMAND == false
+		&& ( !isset( $config_vars['other']['disable_auto_upgrade'] ) || isset( $config_vars['other']['disable_auto_upgrade'] ) && $config_vars['other']['disable_auto_upgrade'] != true ) ) {
+	Debug::Text( 'Auto Upgrade is enabled, checking for new version...', __FILE__, __LINE__, __METHOD__, 10 );
 
-	sleep( rand(0, 60) ); //Further randomize when calls are made.
-	
+	sleep( rand( 0, 60 ) ); //Further randomize when calls are made.
+
 	$php_cli = $config_vars['path']['php_cli'];
 	if ( is_executable( $php_cli ) ) {
 		ini_set( 'max_execution_time', 0 );
-		
-		$command = $php_cli .' '. Environment::getBasePath() . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR .'unattended_upgrade.php';
+
+		$command = $php_cli . ' ' . Environment::getBasePath() . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'unattended_upgrade.php';
 		system( $command, $output );
-		Debug::Arr($output, 'Auto Upgrade Command: '. $command .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $output, 'Auto Upgrade Command: ' . $command . ' Output: ', __FILE__, __LINE__, __METHOD__, 10 );
 	} else {
-		Debug::Text('ERROR PHP CLI not executable!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'ERROR PHP CLI not executable!', __FILE__, __LINE__, __METHOD__, 10 );
 	}
 } else {
-	Debug::Text('Auto Upgrade is disabled!', __FILE__, __LINE__, __METHOD__, 10);
+	Debug::Text( 'Auto Upgrade is disabled!', __FILE__, __LINE__, __METHOD__, 10 );
 }
 Debug::writeToLog();
 Debug::Display();

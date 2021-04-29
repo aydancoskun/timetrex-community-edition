@@ -7,11 +7,10 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 
 	el: $( '.wizard.process_transactions_wizard' ),
 
-
 	init: function() {
-		filter_data = {
+		var filter_data = {
 			filter_data: {
-				'status_id': [ 10, 15 ], //10=Enabled (Self Service) 15=Enabled (Full Service)
+				'status_id': [10, 15], //10=Enabled (Self Service) 15=Enabled (Full Service)
 				'payroll_remittance_agency_status_id': 10, //Enabled
 				'start_date': ( ( new Date() / 1000 ) + ( 86400 * 14 ) ) //Move start date into the future by 14 days so per Pay Period frequencies will still appear well in advance.
 			},
@@ -38,7 +37,7 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 
 		var $this = this;
 
-		var api_payroll_remittance_agency_event = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
+		var api_payroll_remittance_agency_event = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
 
 		api_payroll_remittance_agency_event.getPayrollRemittanceAgencyEvent( filter_data, {
 			onResult: function( result ) {
@@ -84,9 +83,9 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 				}
 
 				$this.addButton( 'PayrollRemittanceAgency',
-						Icons.view_detail,
-						$.i18n._( 'Edit Remittance Agency' ),
-						$.i18n._( 'In the event of incorrect dates, edit the selected remittance agency and its events to make corrections.' )
+					Icons.view_detail,
+					$.i18n._( 'Edit Remittance Agency' ),
+					$.i18n._( 'In the event of incorrect dates, edit the selected remittance agency and its events to make corrections.' )
 				);
 			} );
 
@@ -114,7 +113,7 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 			var item = data[i];
 
 			if ( item.in_time_period == true ) {
-				$( '#'+this.grid.ui_id ).find( 'tr[id=\'' + item.id + '\']' ).css( 'color', '#ccc' );
+				$( '#' + this.grid.ui_id ).find( 'tr[id=\'' + item.id + '\']' ).css( 'color', '#ccc' );
 			}
 
 		}

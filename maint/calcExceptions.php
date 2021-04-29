@@ -40,105 +40,105 @@
  *
  * Run this once a day. AFTER AddUserDate
  */
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
 //Debug::setVerbosity(5);
 
 $execution_time = time();
 
-$flags = array(
-				//Since this needs to calculate 'undertime_absence', it pretty much needs to calculate all other policies too.
-				//Its less error prone if we calculate them all as well.
-				'meal' => FALSE,
-				'undertime_absence' => TRUE, //Required to properly handle undertime absences when no shifts were worked. See comments in CalculatePolicy->calculateUnderTimeAbsencePolicy()
-				'break' => FALSE,
-				'holiday' => FALSE,
-				'schedule_absence' => FALSE,
-				'absence' => FALSE,
-				'regular' => FALSE,
-				'overtime' => FALSE,
-				'premium' => FALSE,
-				'accrual' => FALSE,
+$flags = [
+	//Since this needs to calculate 'undertime_absence', it pretty much needs to calculate all other policies too.
+	//Its less error prone if we calculate them all as well.
+	'meal'              => false,
+	'undertime_absence' => true, //Required to properly handle undertime absences when no shifts were worked. See comments in CalculatePolicy->calculateUnderTimeAbsencePolicy()
+	'break'             => false,
+	'holiday'           => false,
+	'schedule_absence'  => false,
+	'absence'           => false,
+	'regular'           => false,
+	'overtime'          => false,
+	'premium'           => false,
+	'accrual'           => false,
 
-				'exception' => TRUE,
-				//Exception options
-				'exception_premature' => TRUE, //Calculates premature exceptions, this will automatically disable itself if based on the current time.
-				'exception_future' => FALSE, //Calculates exceptions in the future.
+	'exception'           => true,
+	//Exception options
+	'exception_premature' => true, //Calculates premature exceptions, this will automatically disable itself if based on the current time.
+	'exception_future'    => false, //Calculates exceptions in the future.
 
-				//Calculate policies for future dates.
-				'future_dates' => FALSE, //Calculates dates in the future.
-				);
+	//Calculate policies for future dates.
+	'future_dates'        => false, //Calculates dates in the future.
+];
 
 $clf = new CompanyListFactory();
-$clf->getByStatusID( array(10,20,23), NULL, array('a.id' => 'asc') );
+$clf->getByStatusID( [ 10, 20, 23 ], null, [ 'a.id' => 'asc' ] );
 $x = 0;
 if ( $clf->getRecordCount() > 0 ) {
 	foreach ( $clf as $c_obj ) {
 		if ( $c_obj->getStatus() != 30 ) {
-			$company_start_time = microtime(TRUE);
-			Debug::text('Company: '. $c_obj->getName() .' ('.$c_obj->getId().')', __FILE__, __LINE__, __METHOD__,5);
+			$company_start_time = microtime( true );
+			Debug::text( 'Company: ' . $c_obj->getName() . ' (' . $c_obj->getId() . ')', __FILE__, __LINE__, __METHOD__, 5 );
 
 			TTDate::setTimeZone(); //Reset timezone to system defaults for each company.
 
 			//Recalculate at least the last two days.
-			$start_date = TTDate::getMiddleDayEpoch( ( $execution_time - (86400 * 2) ) ) ;
-			$end_date = TTDate::getMiddleDayEpoch( ( $execution_time - 86400 ) ) ;
-			Debug::text('X: '. $x .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,5);
+			$start_date = TTDate::getMiddleDayEpoch( ( $execution_time - ( 86400 * 2 ) ) );
+			$end_date = TTDate::getMiddleDayEpoch( ( $execution_time - 86400 ) );
+			Debug::text( 'X: ' . $x . ' Start Date: ' . TTDate::getDate( 'DATE+TIME', $start_date ) . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 5 );
 
 			//Get the last time cron ran this script.
 			$cjlf = new CronJobListFactory();
-			$cjlf->getByName( 'calcExceptions');
+			$cjlf->getByName( 'calcExceptions' );
 			if ( $cjlf->getRecordCount() > 0 ) {
-				foreach( $cjlf as $cj_obj ) {
+				foreach ( $cjlf as $cj_obj ) {
 					$tmp_start_date = TTDate::getMiddleDayEpoch( $cj_obj->getLastRunDate() );
-					if ( $tmp_start_date != '' AND $tmp_start_date < $start_date ) {
+					if ( $tmp_start_date != '' && $tmp_start_date < $start_date ) {
 						$start_date = $tmp_start_date;
-						Debug::text('  CRON Job hasnt run in more then 48hrs, reducing Start Date to: '. TTDate::getDate('DATE+TIME', $start_date ) , __FILE__, __LINE__, __METHOD__,5);
+						Debug::text( '  CRON Job hasnt run in more then 48hrs, reducing Start Date to: ' . TTDate::getDate( 'DATE+TIME', $start_date ), __FILE__, __LINE__, __METHOD__, 5 );
 					}
 				}
 			}
-			unset($cjlf, $cj_obj, $tmp_start_date);
+			unset( $cjlf, $cj_obj, $tmp_start_date );
 
 			//Get maximum shift time for each pay period schedule, so we know how far back
 			//we have to recalculate days at the minimum.
 			$ppslf = new PayPeriodScheduleListFactory();
 			$ppslf->getByCompanyId( $c_obj->getId() );
 			if ( $ppslf->getRecordCount() > 0 ) {
-				foreach( $ppslf as $pps_obj ) {
+				foreach ( $ppslf as $pps_obj ) {
 					$tmp_start_date = TTDate::getMiddleDayEpoch( $execution_time ) - $pps_obj->getMaximumShiftTime();
-					if ( $tmp_start_date != '' AND $tmp_start_date < $start_date ) {
+					if ( $tmp_start_date != '' && $tmp_start_date < $start_date ) {
 						$start_date = $tmp_start_date;
-						Debug::text('  Maximum Shift Time is greater then 48hrs, reducing Start Date to: '. TTDate::getDate('DATE+TIME', $start_date ) , __FILE__, __LINE__, __METHOD__,5);
+						Debug::text( '  Maximum Shift Time is greater then 48hrs, reducing Start Date to: ' . TTDate::getDate( 'DATE+TIME', $start_date ), __FILE__, __LINE__, __METHOD__, 5 );
 					}
 				}
 			}
-			unset($ppslf, $pps_obj, $tmp_start_date);
+			unset( $ppslf, $pps_obj, $tmp_start_date );
 
 			//Get earliest pre_mature exception in a NON-closed pay period.
 			//Cap the limit at going back 90 days. This prevents the case where they open pay periods in the previous year and forget to close them.
 			//  If that happens we don't want to start trying to recalculate pay periods from a year ago.
 			$elf = new ExceptionListFactory();
-			$elf->getByCompanyIDAndTypeAndPayPeriodStatusAndMinimumDateStamp($c_obj->getId(), 5, array(10,12,15,30), ( $end_date - ( 86400 * 90 ) ), 1, NULL, NULL, array( 'a.date_stamp' => 'asc' ) ); //Limit 1
+			$elf->getByCompanyIDAndTypeAndPayPeriodStatusAndMinimumDateStamp( $c_obj->getId(), 5, [ 10, 12, 15, 30 ], ( $end_date - ( 86400 * 90 ) ), 1, null, null, [ 'a.date_stamp' => 'asc' ] ); //Limit 1
 			if ( $elf->getRecordCount() > 0 ) {
-				foreach( $elf as $e_obj ) {
+				foreach ( $elf as $e_obj ) {
 					$tmp_start_date = TTDate::getMiddleDayEpoch( $e_obj->getDateStamp() );
-					if ( $tmp_start_date != '' AND $tmp_start_date < $start_date ) {
+					if ( $tmp_start_date != '' && $tmp_start_date < $start_date ) {
 						$start_date = $tmp_start_date;
-						Debug::text('  Pre-Mature exceptions occur before start date, reducing to: '. TTDate::getDate('DATE+TIME', $start_date ) .'('. $e_obj->getId().')', __FILE__, __LINE__, __METHOD__,5);
+						Debug::text( '  Pre-Mature exceptions occur before start date, reducing to: ' . TTDate::getDate( 'DATE+TIME', $start_date ) . '(' . $e_obj->getId() . ')', __FILE__, __LINE__, __METHOD__, 5 );
 					}
 				}
 			}
-			unset($elf, $e_obj, $tmp_start_date);
+			unset( $elf, $e_obj, $tmp_start_date );
 
 			$date_arr = TTDate::getDateArray( $start_date, $end_date );
-			if ( is_array($date_arr) ) {
+			if ( is_array( $date_arr ) ) {
 				//Loop over all employees
-				$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$ulf->getByCompanyIdAndStatus( $c_obj->getId(), 10 ); //Only active employees
 				if ( $ulf->getRecordCount() > 0 ) {
 					$i = 0;
-					foreach( $ulf as $u_obj ) {
+					foreach ( $ulf as $u_obj ) {
 						//Timezone is set in calculate() function below.
 
 						//Recalculate system time, and exceptions for the day.
@@ -158,10 +158,10 @@ if ( $clf->getRecordCount() > 0 ) {
 						//Problem is a late shift on say Monday: 2:00PM to 11:00PM won't trigger the exception at 1AM the next day,
 						//but by 1AM the following day (2days later) its too late and emails are disabled if enable_premature_exceptions are disabled.
 						//**With new CalculatePolicy code we can calculate multiple days in a single pass, so always enable pre-mature exceptions, and they will be disabled automatically in CalculatePolicy if necessary.
-						Debug::text($x .': ('.$i.'). User: '. $u_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,5);
+						Debug::text( $x . ': (' . $i . '). User: ' . $u_obj->getID() . ' Start Date: ' . TTDate::getDate( 'DATE+TIME', $start_date ) . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 5 );
 
-						$transaction_function = function() use ( $u_obj, $flags, $date_arr ) {
-							$cp = TTNew('CalculatePolicy'); /** @var CalculatePolicy $cp */
+						$transaction_function = function () use ( $u_obj, $flags, $date_arr ) {
+							$cp = TTNew( 'CalculatePolicy' ); /** @var CalculatePolicy $cp */
 							$cp->setFlag( $flags );
 							$cp->setUserObject( $u_obj );
 							$cp->getUserObject()->setTransactionMode( 'REPEATABLE READ' );
@@ -170,7 +170,7 @@ if ( $clf->getRecordCount() > 0 ) {
 							$cp->Save();
 							$cp->getUserObject()->setTransactionMode(); //Back to default isolation level.
 
-							return TRUE;
+							return true;
 						};
 
 						$u_obj->RetryTransaction( $transaction_function, 2, 3 ); //Set retry_sleep this fairly high so real-time punches have a chance to get saved between retries.
@@ -182,7 +182,7 @@ if ( $clf->getRecordCount() > 0 ) {
 
 			$x++; //Company counter
 
-			Debug::text('Company: '. $c_obj->getName() .'('.$c_obj->getId().') Finished In: '. (microtime(TRUE)-$company_start_time) .'s', __FILE__, __LINE__, __METHOD__,5);
+			Debug::text( 'Company: ' . $c_obj->getName() . '(' . $c_obj->getId() . ') Finished In: ' . ( microtime( true ) - $company_start_time ) . 's', __FILE__, __LINE__, __METHOD__, 5 );
 		}
 	}
 }

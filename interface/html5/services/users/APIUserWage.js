@@ -54,6 +54,4 @@ var APIUserWage = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportUserWage', arguments );
 	}
 
-
-
 } );

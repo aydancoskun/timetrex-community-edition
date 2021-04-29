@@ -45,27 +45,27 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 	public $xml_schema = 'PayrollExtractXmlV2.xsd'; //http://www.esdc.gc.ca/en/ei/roe/user_requirements/appendix_d.page
 	public $pdf_template = 'roe.pdf';
 
-	public $template_offsets = array(-10, 0);
+	public $template_offsets = [ -10, 0 ];
 
 	/*
 	public $payment_cutoff_amount = 7000; //Line5
 	*/
 
 	function getOptions( $name ) {
-		$retval = NULL;
+		$retval = null;
 		switch ( $name ) {
 			case 'status':
-				$retval = array(
+				$retval = [
 						'-1010-O' => TTi18n::getText( 'Original' ),
 						'-1020-A' => TTi18n::getText( 'Amended' ),
 						'-1030-C' => TTi18n::getText( 'Cancel' ),
-				);
+				];
 				break;
 			case 'type':
-				$retval = array(
+				$retval = [
 						'government' => TTi18n::gettext( 'Government (Multiple Employees/Page)' ),
 						'employee'   => TTi18n::gettext( 'Employee (One Employee/Page)' ),
-				);
+				];
 				break;
 		}
 
@@ -79,13 +79,13 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			return $this->type;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setType( $value ) {
 		$this->type = trim( $value );
 
-		return TRUE;
+		return true;
 	}
 
 	//Set the submission status. Original, Amended, Cancel.
@@ -100,7 +100,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 	function setStatus( $value ) {
 		$this->status = strtoupper( trim( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	function getShowInstructionPage() {
@@ -108,562 +108,562 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 			return $this->show_instruction_page;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setShowInstructionPage( $value ) {
 		$this->show_instruction_page = (bool)trim( $value );
 
-		return TRUE;
+		return true;
 	}
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 				'year' => 'isNumeric',
 				//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		);
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array(
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [
 			//Initialize page1, replace years on template.
-			array(
+			[
 					'page'          => 1,
 					'template_page' => 1,
-					'on_background' => TRUE,
-			),
+					'on_background' => true,
+			],
 
 			//Serial
-			'serial'       => array(
-					'coordinates' => array(
+			'serial' => [
+					'coordinates' => [
 							'x'      => 35,
 							'y'      => 58,
 							'h'      => 8,
 							'w'      => 115,
 							'halign' => 'R',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-			),
+					],
+			],
 
-			'payroll_reference_number'       => array(
-					'coordinates' => array(
+			'payroll_reference_number' => [
+					'coordinates' => [
 							'x'      => 370,
 							'y'      => 58,
 							'h'      => 10,
 							'w'      => 210,
 							'halign' => 'R',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-			),
+					],
+			],
 
 			//Employer Info
 			//Company information
-			'company_name' => array(
-					'coordinates' => array(
+			'company_name'             => [
+					'coordinates' => [
 							'x'      => 35,
 							'y'      => 90,
 							'h'      => 10,
 							'w'      => 310,
 							'halign' => 'L',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-			),
+					],
+			],
 
-			'company_address'     => array(
-					'function'    => array('filterCompanyAddress', 'drawNormal'),
-					'coordinates' => array(
+			'company_address'     => [
+					'function'    => [ 'filterCompanyAddress', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 35,
 							'y'      => 105,
 							'h'      => 10,
 							'w'      => 310,
 							'halign' => 'L',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-					'multicell'   => TRUE,
-			),
-			'company_postal_code' => array(
+					],
+					'multicell'   => true,
+			],
+			'company_postal_code' => [
 
-					'coordinates' => array(
+					'coordinates' => [
 							'x'      => 280,
 							'y'      => 138,
 							'h'      => 10,
 							'w'      => 65,
 							'halign' => 'C',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 10,
 							'type' => '',
-					),
-			),
+					],
+			],
 
 			//Business Number
-			'business_number'     => array(
-					'coordinates' => array(
+			'business_number'     => [
+					'coordinates' => [
 							'x'      => 370,
 							'y'      => 85,
 							'h'      => 10,
 							'w'      => 210,
 							'halign' => 'R',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-			),
+					],
+			],
 			//Employee info
-			'employee_full_name'  => array(
-					'coordinates' => array(
+			'employee_full_name'  => [
+					'coordinates' => [
 							'x'      => 35,
 							'y'      => 165,
 							'h'      => 10,
 							'w'      => 310,
 							'halign' => 'L',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-			),
+					],
+			],
 
-			'employee_address' => array(
-					'function'    => array('filterEmployeeAddress', 'drawNormal'),
-					'coordinates' => array(
+			'employee_address' => [
+					'function'    => [ 'filterEmployeeAddress', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 35,
 							'y'      => 180,
 							'h'      => 10,
 							'w'      => 310,
 							'halign' => 'L',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-					'multicell'   => TRUE,
-			),
+					],
+					'multicell'   => true,
+			],
 
 			//Pay Period Type
-			'pay_period_type'  => array(
+			'pay_period_type'  => [
 
-					'coordinates' => array(
+					'coordinates' => [
 							'x'      => 370,
 							'y'      => 112,
 							'h'      => 10,
 							'w'      => 210,
 							'halign' => 'R',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-			),
+					],
+			],
 			//SIN
-			'sin'              => array(
-					'coordinates' => array(
+			'sin'              => [
+					'coordinates' => [
 							'x'      => 370,
 							'y'      => 136,
 							'h'      => 10,
 							'w'      => 210,
 							'halign' => 'R',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-			),
+					],
+			],
 
 			//Employee Title
-			'title'            => array(
-					'coordinates' => array(
+			'title'            => [
+					'coordinates' => [
 							'x'      => 35,
 							'y'      => 240,
 							'h'      => 10,
 							'w'      => 310,
 							'halign' => 'L',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => '',
-					),
-			),
+					],
+			],
 			//First Day Worked
-			'first_date'       => array(
-					'function'    => array('filterDate', 'drawSegments'),
-					'coordinates' => array(
-							array(
+			'first_date'       => [
+					'function'    => [ 'filterDate', 'drawSegments' ],
+					'coordinates' => [
+							[
 									'x'      => 490,
 									'y'      => 160,
 									'h'      => 15,
 									'w'      => 20,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 512,
 									'y'      => 160,
 									'h'      => 15,
 									'w'      => 26,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 540,
 									'y'      => 160,
 									'h'      => 15,
 									'w'      => 40,
 									'halign' => 'C',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'size' => 10,
 							'type' => '',
-					),
-			),
+					],
+			],
 
 
 			//Last day paid
 
-			'last_date'           => array(
-					'function'    => array('filterDate', 'drawSegments'),
-					'coordinates' => array(
-							array(
+			'last_date'           => [
+					'function'    => [ 'filterDate', 'drawSegments' ],
+					'coordinates' => [
+							[
 									'x'      => 490,
 									'y'      => 185,
 									'h'      => 17,
 									'w'      => 21,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 513,
 									'y'      => 185,
 									'h'      => 17,
 									'w'      => 25,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 540,
 									'y'      => 185,
 									'h'      => 17,
 									'w'      => 40,
 									'halign' => 'C',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
+					],
+			],
 
 			//Pay Period End Date
-			'pay_period_end_date' => array(
-					'function'    => array('filterDate', 'drawSegments'),
-					'coordinates' => array(
-							array(
+			'pay_period_end_date' => [
+					'function'    => [ 'filterDate', 'drawSegments' ],
+					'coordinates' => [
+							[
 									'x'      => 490,
 									'y'      => 210,
 									'h'      => 18,
 									'w'      => 21,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 513,
 									'y'      => 210,
 									'h'      => 18,
 									'w'      => 25,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 540,
 									'y'      => 210,
 									'h'      => 18,
 									'w'      => 40,
 									'halign' => 'C',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
+					],
+			],
 
-			'recall_date'     => array(
-					'function'    => array('filterDate', 'drawSegments'),
-					'coordinates' => array(
-							array(
+			'recall_date'        => [
+					'function'    => [ 'filterDate', 'drawSegments' ],
+					'coordinates' => [
+							[
 									'x'      => 490,
 									'y'      => 240,
 									'h'      => 18,
 									'w'      => 21,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 513,
 									'y'      => 240,
 									'h'      => 18,
 									'w'      => 25,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 540,
 									'y'      => 240,
 									'h'      => 18,
 									'w'      => 40,
 									'halign' => 'C',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
+					],
 
-			),
+			],
 
 			// not returning
-			'not_returning'   => array(
+			'not_returning'      => [
 					'function'    => 'drawCheckBox',
-					'coordinates' => array(
-							array(
+					'coordinates' => [
+							[
 									'x'      => 423,
 									'y'      => 242,
 									'h'      => 8,
 									'w'      => 11,
 									'halign' => 'C',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
+					],
+			],
 			//Insurable Hours
-			'insurable_hours' => array(
-					'coordinates' => array(
+			'insurable_hours'    => [
+					'coordinates' => [
 							'x'      => 170,
 							'y'      => 268,
 							'h'      => 10,
 							'w'      => 85,
 							'halign' => 'R',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
+					],
 
-			),
+			],
 
 			//Insurable Earnings
-			'insurable_earnings'             => array(
+			'insurable_earnings' => [
 					'function'    => 'drawSplitDecimalFloat',
-					'coordinates' => array(
-							array(
+					'coordinates' => [
+							[
 									'x'      => 180,
 									'y'      => 298,
 									'h'      => 10,
 									'w'      => 60,
 									'halign' => 'R',
-							),
-							array(
+							],
+							[
 									'x'      => 239,
 									'y'      => 298,
 									'h'      => 10,
 									'w'      => 15,
 									'halign' => 'L',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
 							//'text_color' => array( 255, 0, 0 ),
-					),
-			),
+					],
+			],
 
-			'insurable_earnings_pay_periods' => array(
-					'function'    => array('filterInsurableEarningsPayPeriods', 'drawNormal'),
-					'coordinates' => array(
+			'insurable_earnings_pay_periods' => [
+					'function'    => [ 'filterInsurableEarningsPayPeriods', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 37,
 							'y'      => 304,
 							'h'      => 5,
 							'w'      => 70,
 							'halign' => 'C',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 8,
-					),
-			),
+					],
+			],
 
 			//Enter Code
-			'code_id'                        => array(
-					'coordinates' => array(
+			'code_id'                        => [
+					'coordinates' => [
 							'x'      => 544,
 							'y'      => 268,
 							'h'      => 10,
 							'w'      => 15,
 							'halign' => 'C',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
+					],
+			],
 			//Further Information Contact Name
-			'created_user_full_name'         => array(
+			'created_user_full_name'         => [
 
 					'function' => 'drawPiecemeal',
 
-					'coordinates' => array(
-							array(
+					'coordinates' => [
+							[
 									'x'      => 270,
 									'y'      => 294,
 									'h'      => 10,
 									'w'      => 310,
 									'halign' => 'L',
-							),
-							array(
+							],
+							[
 									'x'      => 275,
 									'y'      => 710,
 									'h'      => 10,
 									'w'      => 210,
 									'halign' => 'L',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
-			'created_user_work_phone'        => array(
+					],
+			],
+			'created_user_work_phone'        => [
 
 					'function'    => 'drawPiecemeal',
-					'coordinates' => array(
-							array(
+					'coordinates' => [
+							[
 									'x'      => 330,
 									'y'      => 305,
 									'h'      => 8,
 									'w'      => 250,
 									'halign' => 'L',
-							),
-							array(
+							],
+							[
 									'x'      => 155,
 									'y'      => 715,
 									'h'      => 10,
 									'w'      => 110,
 									'halign' => 'L',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
+					],
+			],
 
 
-			'vacation_pay' => array(
-					'function'    => array( 'drawSplitDecimalFloat', 'showVacationPayWarning' ),
-					'coordinates' => array(
-							array(
+			'vacation_pay' => [
+					'function'    => [ 'drawSplitDecimalFloat', 'showVacationPayWarning' ],
+					'coordinates' => [
+							[
 									'x'      => 510,
 									'y'      => 351,
 									'h'      => 10,
 									'w'      => 42,
 									'halign' => 'R',
-							),
-							array(
+							],
+							[
 									'x'      => 552,
 									'y'      => 351,
 									'h'      => 10,
 									'w'      => 16,
 									'halign' => 'L',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
+					],
 
-			),
-			'comments'     => array(
-					'coordinates' => array(
+			],
+			'comments'     => [
+					'coordinates' => [
 							'x'      => 290,
 							'y'      => 540,
 							'h'      => 45,
 							'w'      => 290,
 							'halign' => 'L',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
+					],
+			],
 
 			//English
-			'english'      => array(
+			'english'      => [
 					'function'    => 'drawCheckBox',
-					'coordinates' => array(
-							array(
+					'coordinates' => [
+							[
 									'x'      => 40,
 									'y'      => 713,
 									'h'      => 8,
 									'w'      => 15,
 									'halign' => 'L',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
+					],
+			],
 
-			'created_date' => array(
-					'function'    => array('filterDate', 'drawSegments'),
-					'coordinates' => array(
-							array(
+			'created_date' => [
+					'function'    => [ 'filterDate', 'drawSegments' ],
+					'coordinates' => [
+							[
 									'x'      => 490,
 									'y'      => 717,
 									'h'      => 8,
 									'w'      => 25,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 518,
 									'y'      => 717,
 									'h'      => 8,
 									'w'      => 25,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 544,
 									'y'      => 717,
 									'h'      => 8,
 									'w'      => 35,
 									'halign' => 'C',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
+					],
 
-			),
+			],
 
-			'pay_period_earnings' => array(
+			'pay_period_earnings' => [
 					'function'    => 'drawGrid',
-					'grid'        => array(
+					'grid'        => [
 							'column'     => 3, // total columns
 							'top_left_x' => 35, // start x
 							'top_left_y' => 368,   // start y
@@ -671,257 +671,257 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 							'w'          => 60, // Each of the width of the grid
 							'step_x'     => 84,
 							'step_y'     => 18,
-					),
-					'coordinates' => array(
+					],
+					'coordinates' => [
 							'halign' => 'R',
 							// not in here handle .
 							//'x' => 35,
 							//'y' => 368,
 							//'h' => 18,
 							//'w' => 60,
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 8,
-					),
-			),
-			'statutory_holiday'   => array(
+					],
+			],
+			'statutory_holiday'   => [
 					'function'    => 'drawSplitDecimalFloatGrid',
-					'coordinates' => array(
-							array(
-									array(
+					'coordinates' => [
+							[
+									[
 											'x'      => 352,
 											'y'      => 380,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 396,
 											'y'      => 380,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
 
-									),
+									],
 
-							),
-							array(
-									array(
+							],
+							[
+									[
 											'x'      => 507,
 											'y'      => 380,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 551,
 											'y'      => 380,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 352,
 											'y'      => 397,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
 
-									),
-									array(
+									],
+									[
 											'x'      => 396,
 											'y'      => 397,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 507,
 											'y'      => 397,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 551,
 											'y'      => 397,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 352,
 											'y'      => 414,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 396,
 											'y'      => 414,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 507,
 											'y'      => 414,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 551,
 											'y'      => 414,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 352,
 											'y'      => 429,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 396,
 											'y'      => 429,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 507,
 											'y'      => 429,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 551,
 											'y'      => 429,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 352,
 											'y'      => 446,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 396,
 											'y'      => 446,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 507,
 											'y'      => 446,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 551,
 											'y'      => 446,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
+									],
+							],
 
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
+					],
 
 
-			),
-			'other_monies'        => array(
+			],
+			'other_monies'        => [
 					'function'    => 'drawSplitDecimalFloatGrid',
-					'coordinates' => array(
-							array(
-									array(
+					'coordinates' => [
+							[
+									[
 											'x'      => 507,
 											'y'      => 477,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 551,
 											'y'      => 477,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 507,
 											'y'      => 495,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 551,
 											'y'      => 495,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-							array(
-									array(
+									],
+							],
+							[
+									[
 											'x'      => 507,
 											'y'      => 515,
 											'h'      => 10,
 											'w'      => 47,
 											'halign' => 'R',
-									),
-									array(
+									],
+									[
 											'x'      => 551,
 											'y'      => 515,
 											'h'      => 10,
 											'w'      => 17,
 											'halign' => 'L',
-									),
-							),
-					),
-					'font'        => array(
+									],
+							],
+					],
+					'font'        => [
 							'type' => '',
 							'size' => 10,
-					),
-			),
+					],
+			],
 
 
-		);
+		];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -939,18 +939,18 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 	function filterCompanyAddress( $value ) {
 		//Combine company address for multicell display.
 		//Dont specify postal code though, as thats in a separate box.
-		return Misc::formatAddress( NULL, $this->company_address1, $this->company_address2, $this->company_city, $this->company_province );
+		return Misc::formatAddress( null, $this->company_address1, $this->company_address2, $this->company_city, $this->company_province );
 	}
 
 	function filterEmployeeAddress( $value ) {
 		//Combine employee address for multicell display.
-		return Misc::formatAddress( NULL, $this->employee_address1, $this->employee_address2, $this->employee_city, $this->employee_province, $this->employee_postal_code );
+		return Misc::formatAddress( null, $this->employee_address1, $this->employee_address2, $this->employee_city, $this->employee_province, $this->employee_postal_code );
 	}
 
 	function filterDate( $value ) {
-		if ( $value != '' OR $value != NULL ) {
+		if ( $value != '' || $value != null ) {
 			$value = getdate( $value );
-			$value = array($value['mday'], $value['mon'], $value['year']);
+			$value = [ $value['mday'], $value['mon'], $value['year'] ];
 		}
 
 		return $value;
@@ -960,38 +960,38 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 		$retval = (int)$value;
 		$total_pay_periods_with_earnings = ( is_array( $this->pay_period_earnings ) ) ? count( $this->pay_period_earnings ) : 0;
 		if ( $value > $total_pay_periods_with_earnings ) {
-			return NULL; //No need to display this msg as all PPs are included.
+			return null; //No need to display this msg as all PPs are included.
 		} else {
-			return '*' . TTi18n::getText( 'Includes PP: 1 to %1', array($retval) );
+			return '*' . TTi18n::getText( 'Includes PP: 1 to %1', [ $retval ] );
 		}
 	}
 
 	function showVacationPayWarning() {
-		if ( isset( $this->vacation_pay ) AND $this->vacation_pay > 0 AND isset($this->pay_period_earnings) AND is_array( $this->pay_period_earnings ) AND count( $this->pay_period_earnings ) > 0 AND isset($this->pay_period_earnings[0]) ) {
+		if ( isset( $this->vacation_pay ) && $this->vacation_pay > 0 && isset( $this->pay_period_earnings ) && is_array( $this->pay_period_earnings ) && count( $this->pay_period_earnings ) > 0 && isset( $this->pay_period_earnings[0] ) ) {
 			$last_pay_period_earnings = $this->pay_period_earnings[0];
-			Debug::Text( 'First PP Earnings: '. $last_pay_period_earnings .' Vacation Pay: ' . $this->vacation_pay, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'First PP Earnings: ' . $last_pay_period_earnings . ' Vacation Pay: ' . $this->vacation_pay, __FILE__, __LINE__, __METHOD__, 10 );
 
 			if ( $this->vacation_pay >= $last_pay_period_earnings ) {
 				Debug::Text( 'Vacation Pay equals or exceeds last PP earnings, which is not allowed, as there must also be some insurable earnings in that pay period too.', __FILE__, __LINE__, __METHOD__, 10 );
 				$pdf = $this->getPDFObject();
 
 				$pdf->setTextColor( 255, 0, 0 );
-				$pdf->setXY( ( 322 + $this->getTempPageOffsets( 'x' ) + $this->getPageMargins( 'x') ), ( 330 + $this->getTempPageOffsets( 'y' ) + $this->getPageMargins( 'y') ) );
+				$pdf->setXY( ( 322 + $this->getTempPageOffsets( 'x' ) + $this->getPageMargins( 'x' ) ), ( 330 + $this->getTempPageOffsets( 'y' ) + $this->getPageMargins( 'y' ) ) );
 
-				$pdf->Cell( 249, 10, 'WARNING: Vacation pay must not match Pay Period #1 earnings', 1, 0, 'R', 1, FALSE, 1 );
+				$pdf->Cell( 249, 10, 'WARNING: Vacation pay must not match Pay Period #1 earnings', 1, 0, 'R', 1, false, 1 );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function _outputXML() {
 		$records = $this->getRecords();
 		Debug::Arr( $records, 'Output XML Records: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( is_array( $records ) AND count( $records ) > 0 ) {
+		if ( is_array( $records ) && count( $records ) > 0 ) {
 
-			$pay_period_type_options = array(
+			$pay_period_type_options = [
 				//5 => TTi18n::gettext('Manual'),
 				10  => 'W',
 				20  => 'B',
@@ -999,7 +999,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 				50  => 'M',
 				100 => 'W', //Weekly 53/year
 				200 => 'B', //Bi-Weekly 27/year
-			);
+			];
 
 
 			$xml = new SimpleXMLElement( '<ROEHEADER FileVersion="W-2.0" SoftwareVendor="' . APPLICATION_NAME . '" ProductName="' . APPLICATION_NAME . '"></ROEHEADER>' );
@@ -1012,64 +1012,64 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 				$this->arrayToObject( $employee_data ); //Convert record array to object
 
 				$xml->addChild( 'ROE' );
-				$xml->ROE[ $e ]->addAttribute( 'PrintingLanguage', 'E' ); //E=English, F=French
-				$xml->ROE[ $e ]->addAttribute( 'Issue', 'S' ); //S=Submit, D=Draft
+				$xml->ROE[$e]->addAttribute( 'PrintingLanguage', 'E' );                                           //E=English, F=French
+				$xml->ROE[$e]->addAttribute( 'Issue', 'S' );                                                      //S=Submit, D=Draft
 
 				// Box2
 				if ( $this->serial != '' ) {
-					$xml->ROE[ $e ]->addChild( 'B2', substr( $this->serial, 0, 9 ) ); //maxLength 9  minOccurs="0"
+					$xml->ROE[$e]->addChild( 'B2', substr( $this->serial, 0, 9 ) ); //maxLength 9  minOccurs="0"
 				}
 
 				// Box3
 				if ( $this->payroll_reference_number != '' ) {
-					$xml->ROE[ $e ]->addChild( 'B3', substr( $this->payroll_reference_number, 0, 15 ) ); //maxLength 15  minOccurs="0"
+					$xml->ROE[$e]->addChild( 'B3', substr( $this->payroll_reference_number, 0, 15 ) ); //maxLength 15  minOccurs="0"
 				}
 				// Box5
-				$xml->ROE[ $e ]->addChild( 'B5', substr( str_replace(' ', '', $this->business_number ), 0, 15 ) ); //maxLength 15 - Remove any spaces as well, to prevent business numbers like: 123456789 RP 0001 from causing problems.
+				$xml->ROE[$e]->addChild( 'B5', substr( str_replace( ' ', '', $this->business_number ), 0, 15 ) ); //maxLength 15 - Remove any spaces as well, to prevent business numbers like: 123456789 RP 0001 from causing problems.
 				// Box6
-				$xml->ROE[ $e ]->addChild( 'B6', $pay_period_type_options[ $this->pay_period_type_id ] ); //maxLength 1
+				$xml->ROE[$e]->addChild( 'B6', $pay_period_type_options[$this->pay_period_type_id] );             //maxLength 1
 				// Box8
-				$xml->ROE[ $e ]->addChild( 'B8', ( $this->sin != '' ) ? $this->sin : '999999999' ); //maxLength 9 - This must be specified, but allow all 9's for cases where the employee may be out of the country?
+				$xml->ROE[$e]->addChild( 'B8', ( $this->sin != '' ) ? $this->sin : '999999999' );                 //maxLength 9 - This must be specified, but allow all 9's for cases where the employee may be out of the country?
 				// Box9
-				$xml->ROE[ $e ]->addChild( 'B9' );
-				$xml->ROE[ $e ]->B9->addChild( 'FN', $this->first_name ); //maxLength 20
+				$xml->ROE[$e]->addChild( 'B9' );
+				$xml->ROE[$e]->B9->addChild( 'FN', $this->first_name ); //maxLength 20
 				if ( $this->middle_name != '' ) {
-					$xml->ROE[ $e ]->B9->addChild( 'MN', substr( $this->middle_name, 0, 4 ) );//maxLength 4  minOccurs="0"
+					$xml->ROE[$e]->B9->addChild( 'MN', substr( $this->middle_name, 0, 4 ) );//maxLength 4  minOccurs="0"
 				}
-				$xml->ROE[ $e ]->B9->addChild( 'LN', $this->last_name );    //maxLength 28
-				$xml->ROE[ $e ]->B9->addChild( 'A1', substr( Misc::stripHTMLSpecialChars( $this->employee_address1 ) . ' ' . Misc::stripHTMLSpecialChars( $this->employee_address2 ), 0, 35 ) );//maxLength 35
+				$xml->ROE[$e]->B9->addChild( 'LN', $this->last_name );                                                                                                                        //maxLength 28
+				$xml->ROE[$e]->B9->addChild( 'A1', substr( Misc::stripHTMLSpecialChars( $this->employee_address1 ) . ' ' . Misc::stripHTMLSpecialChars( $this->employee_address2 ), 0, 35 ) );//maxLength 35
 				if ( $this->employee_city != '' ) {
-					$xml->ROE[ $e ]->B9->addChild( 'A2', $this->employee_city );//maxLength 35  minOccurs="0"
+					$xml->ROE[$e]->B9->addChild( 'A2', $this->employee_city );//maxLength 35  minOccurs="0"
 				}
 				if ( $this->employee_province != '' ) {
-					$xml->ROE[ $e ]->B9->addChild( 'A3', $this->employee_province ); //maxLength 35  minOccurs="0"
+					$xml->ROE[$e]->B9->addChild( 'A3', $this->employee_province ); //maxLength 35  minOccurs="0"
 				}
 				if ( $this->employee_postal_code != '' ) {
-					$xml->ROE[ $e ]->B9->addChild( 'PC', $this->employee_postal_code );
+					$xml->ROE[$e]->B9->addChild( 'PC', $this->employee_postal_code );
 				}
 
 				// Box10
-				$xml->ROE[ $e ]->addChild( 'B10', date( 'Y-m-d', $this->first_date ) ); //maxLength 8
+				$xml->ROE[$e]->addChild( 'B10', date( 'Y-m-d', $this->first_date ) );                                                                                                         //maxLength 8
 				// Box11
-				$xml->ROE[ $e ]->addChild( 'B11', date( 'Y-m-d', $this->last_date ) ); //maxLength 8
+				$xml->ROE[$e]->addChild( 'B11', date( 'Y-m-d', $this->last_date ) );                                                                                                          //maxLength 8
 				// Box12
-				$xml->ROE[ $e ]->addChild( 'B12', date( 'Y-m-d', $this->pay_period_end_date ) ); //maxLength 8
+				$xml->ROE[$e]->addChild( 'B12', date( 'Y-m-d', $this->pay_period_end_date ) );                                                                                                //maxLength 8
 				// Box13
 				if ( $this->title != '' ) {
-					$xml->ROE[ $e ]->addChild( 'B13', Misc::stripHTMLSpecialChars( $this->title ) ); //maxLength 40  minOccurs="0"
+					$xml->ROE[$e]->addChild( 'B13', Misc::stripHTMLSpecialChars( $this->title ) ); //maxLength 40  minOccurs="0"
 				}
 				// Box14
-				$xml->ROE[ $e ]->addChild( 'B14' ); // minOccurs="0"
-				$xml->ROE[ $e ]->B14->addChild( 'CD', ( ( $this->recall_date != '' ) ? 'Y' : 'N' ) ); //maxLength 1
-				$xml->ROE[ $e ]->B14->addChild( 'DT', ( ( $this->recall_date != '' ) ? date( 'Y-m-d', $this->recall_date ) : '' ) ); //maxLength 8   minOccurs="0"
+				$xml->ROE[$e]->addChild( 'B14' );                                                                                                                                             // minOccurs="0"
+				$xml->ROE[$e]->B14->addChild( 'CD', ( ( $this->recall_date != '' ) ? 'Y' : 'N' ) );                                                                                           //maxLength 1
+				$xml->ROE[$e]->B14->addChild( 'DT', ( ( $this->recall_date != '' ) ? date( 'Y-m-d', $this->recall_date ) : '' ) );                                                            //maxLength 8   minOccurs="0"
 
 				// Box15A
-				$xml->ROE[ $e ]->addChild( 'B15A', substr( round( $this->insurable_hours ), 0, 4 ) ); //maxLength 4
+				$xml->ROE[$e]->addChild( 'B15A', substr( round( $this->insurable_hours ), 0, 4 ) );                                                                                           //maxLength 4
 				// Box15B
 				//$xml->ROE[$e]->addChild('B15B', (float)substr($this->insurable_earnings, -9, 9)); //maxLength 9
 
 				// Box15C
-				$xml->ROE[ $e ]->addChild( 'B15C' );
+				$xml->ROE[$e]->addChild( 'B15C' );
 
 				if ( is_array( $this->pay_period_earnings ) ) {
 					$i = 1;
@@ -1078,49 +1078,48 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 						if ( $x == 53 ) {
 							break;
 						}
-						$xml->ROE[ $e ]->B15C->addChild( 'PP' ); //maxOccurs="53"
-						$xml->ROE[ $e ]->B15C->PP[ $x ]->addAttribute( 'nbr', $i );
-						$xml->ROE[ $e ]->B15C->PP[ $x ]->addChild( 'AMT', (float)substr( $pay_period_earning, -9, 9 ) ); //maxLength 9
+						$xml->ROE[$e]->B15C->addChild( 'PP' ); //maxOccurs="53"
+						$xml->ROE[$e]->B15C->PP[$x]->addAttribute( 'nbr', $i );
+						$xml->ROE[$e]->B15C->PP[$x]->addChild( 'AMT', (float)substr( $pay_period_earning, -9, 9 ) ); //maxLength 9
 						$i++;
 						$x++;
 					}
 				} else {
-					$xml->ROE[ $e ]->B15C->addChild( 'PP' ); //maxOccurs="53"
-					$xml->ROE[ $e ]->B15C->PP->addAttribute( 'nbr', 1 );
-					$xml->ROE[ $e ]->B15C->PP->addChild( 'AMT', 0 ); //maxLength 9
+					$xml->ROE[$e]->B15C->addChild( 'PP' ); //maxOccurs="53"
+					$xml->ROE[$e]->B15C->PP->addAttribute( 'nbr', 1 );
+					$xml->ROE[$e]->B15C->PP->addChild( 'AMT', 0 ); //maxLength 9
 				}
 				// Box16
-				$xml->ROE[ $e ]->addChild( 'B16' );
-				$xml->ROE[ $e ]->B16->addChild( 'CD', $this->code_id ); //maxLength 1
-				$xml->ROE[ $e ]->B16->addChild( 'FN', $this->created_user_first_name ); //maxLength 20
-				$xml->ROE[ $e ]->B16->addChild( 'LN', $this->created_user_last_name ); //maxLength 28
+				$xml->ROE[$e]->addChild( 'B16' );
+				$xml->ROE[$e]->B16->addChild( 'CD', $this->code_id );                 //maxLength 1
+				$xml->ROE[$e]->B16->addChild( 'FN', $this->created_user_first_name ); //maxLength 20
+				$xml->ROE[$e]->B16->addChild( 'LN', $this->created_user_last_name );  //maxLength 28
 
 				if ( $this->created_user_work_phone != '' ) {
 					$phone = $this->created_user_work_phone;
-				} elseif ( $this->company_work_phone != '' ) {
+				} else if ( $this->company_work_phone != '' ) {
 					$phone = $this->company_work_phone;
-
 				}
 
 				$validator = new Validator();
 				$phone = $validator->stripNonNumeric( $phone );
 
-				$xml->ROE[ $e ]->B16->addChild( 'AC', substr( $phone, 0, 3 ) ); //maxLength 3
-				$xml->ROE[ $e ]->B16->addChild( 'TEL', substr( $phone, 3, 7 ) ); //maxLength 7
+				$xml->ROE[$e]->B16->addChild( 'AC', substr( $phone, 0, 3 ) );  //maxLength 3
+				$xml->ROE[$e]->B16->addChild( 'TEL', substr( $phone, 3, 7 ) ); //maxLength 7
 
 				// Box17A
 				if ( $this->vacation_pay > 0 ) {
 					//$xml->ROE[$e]->addChild('B17A', (float)substr($this->vacation_pay, -9, 9)); // maxLength 9   minOccurs="0"
-					$xml->ROE[ $e ]->addChild( 'B17A' );
-					$xml->ROE[ $e ]->B17A->addChild( 'VP' );
-					$xml->ROE[ $e ]->B17A->VP->addAttribute( 'nbr', 1 );
-					$xml->ROE[ $e ]->B17A->VP->addChild( 'CD', 2 ); //1=Included with each pay, 2=Paid because no longer working
-					$xml->ROE[ $e ]->B17A->VP->addChild( 'AMT', (float)substr( $this->vacation_pay, -9, 9 ) );
+					$xml->ROE[$e]->addChild( 'B17A' );
+					$xml->ROE[$e]->B17A->addChild( 'VP' );
+					$xml->ROE[$e]->B17A->VP->addAttribute( 'nbr', 1 );
+					$xml->ROE[$e]->B17A->VP->addChild( 'CD', 2 ); //1=Included with each pay, 2=Paid because no longer working
+					$xml->ROE[$e]->B17A->VP->addChild( 'AMT', (float)substr( $this->vacation_pay, -9, 9 ) );
 				}
 
 				// Box17B
 				if ( is_array( $this->statutory_holiday ) ) {
-					$xml->ROE[ $e ]->addChild( 'B17B' ); // minOccurs="0"
+					$xml->ROE[$e]->addChild( 'B17B' ); // minOccurs="0"
 
 					$x = 0;
 					$i = 0;
@@ -1130,10 +1129,10 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 							break;
 						}
 						if ( is_array( $holiday ) ) {
-							$xml->ROE[ $e ]->B17B->addChild( 'SH' ); //minOccurs="0" maxOccurs="3"
-							$xml->ROE[ $e ]->B17B->SH[ $x ]->addAttribute( 'nbr', $i );
-							$xml->ROE[ $e ]->B17B->SH[ $x ]->addChild( 'DT', date( 'Y-m-d', $holiday['date'] ) ); //maxLength 8
-							$xml->ROE[ $e ]->B17B->SH[ $x ]->addChild( 'AMT', (float)substr( $holiday['amount'], -9, 9 ) ); //maxLength 9
+							$xml->ROE[$e]->B17B->addChild( 'SH' ); //minOccurs="0" maxOccurs="3"
+							$xml->ROE[$e]->B17B->SH[$x]->addAttribute( 'nbr', $i );
+							$xml->ROE[$e]->B17B->SH[$x]->addChild( 'DT', date( 'Y-m-d', $holiday['date'] ) );           //maxLength 8
+							$xml->ROE[$e]->B17B->SH[$x]->addChild( 'AMT', (float)substr( $holiday['amount'], -9, 9 ) ); //maxLength 9
 
 							$x++;
 							$i++;
@@ -1146,7 +1145,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 				// Box17C
 				if ( is_array( $this->other_monies ) ) {
-					$xml->ROE[ $e ]->addChild( 'B17C' ); //minOccurs="0"
+					$xml->ROE[$e]->addChild( 'B17C' ); //minOccurs="0"
 
 					$x = 0;
 					$i = 0;
@@ -1155,10 +1154,10 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 							break;
 						}
 						if ( is_array( $monies ) ) {
-							$xml->ROE[ $e ]->B17C->addChild( 'OM' ); //minOccurs="0" maxOccurs="3"
-							$xml->ROE[ $e ]->B17C->OM[ $x ]->addAttribute( 'nbr', $i );
-							$xml->ROE[ $e ]->B17C->OM[ $x ]->addChild( 'CD', $monies['other_monies_code'] ); //maxLength 1
-							$xml->ROE[ $e ]->B17C->OM[ $x ]->addChild( 'AMT', (float)substr( $monies['amount'], -9, 9 ) ); //maxLength 9
+							$xml->ROE[$e]->B17C->addChild( 'OM' ); //minOccurs="0" maxOccurs="3"
+							$xml->ROE[$e]->B17C->OM[$x]->addAttribute( 'nbr', $i );
+							$xml->ROE[$e]->B17C->OM[$x]->addChild( 'CD', $monies['other_monies_code'] );               //maxLength 1
+							$xml->ROE[$e]->B17C->OM[$x]->addChild( 'AMT', (float)substr( $monies['amount'], -9, 9 ) ); //maxLength 9
 
 							$x++;
 							$i++;
@@ -1170,7 +1169,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 				// Box18
 				if ( $this->comments != '' ) {
-					$xml->ROE[ $e ]->addChild( 'B18', $this->comments ); //minOccurs="0"
+					$xml->ROE[$e]->addChild( 'B18', $this->comments ); //minOccurs="0"
 				}
 
 
@@ -1178,15 +1177,13 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 
 				// Box20
-				$xml->ROE[ $e ]->addChild( 'B20', 'E' ); //Language //minOccurs="0"  //maxLength 1
+				$xml->ROE[$e]->addChild( 'B20', 'E' );                         //Language //minOccurs="0"  //maxLength 1
 
 				$e++;
 			}
-
-
 		}
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -1194,7 +1191,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
-		if ( $this->getShowBackground() == TRUE ) {
+		if ( $this->getShowBackground() == true ) {
 
 			$pdf->setSourceFile( $this->getTemplateDirectory() . DIRECTORY_SEPARATOR . $this->pdf_template );
 
@@ -1209,7 +1206,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 		//Get location map, start looping over each variable and drawing
 		$records = $this->getRecords();
-		if ( is_array( $records ) AND count( $records ) > 0 ) {
+		if ( is_array( $records ) && count( $records ) > 0 ) {
 
 			$template_schema = $this->getTemplateSchema();
 
@@ -1231,7 +1228,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 		$this->clearRecords();
 
-		return TRUE;
+		return true;
 	}
 }
 

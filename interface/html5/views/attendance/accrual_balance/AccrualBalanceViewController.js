@@ -16,10 +16,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		this.table_name_key = 'accrual';
 		this.context_menu_name = $.i18n._( 'Accrual Balances' );
 		this.navigation_label = $.i18n._( 'Accrual Balance' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIAccrualBalance' ))();
-		this.accrual_api = new (APIFactory.getAPIClass( 'APIAccrual' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIAccrualBalance' ) )();
+		this.accrual_api = new ( APIFactory.getAPIClass( 'APIAccrual' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
 
 		this.initPermission();
 		this.render();
@@ -79,7 +79,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrualBalance' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAccrualBalance' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_BALANCE,
@@ -94,7 +94,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -121,7 +121,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				default_args: default_args,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -144,7 +144,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'accrual_policy_account_id',
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
-				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
+				api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -156,7 +156,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -168,7 +168,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -201,7 +201,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			for ( var i = 0; i < data.length; i++ ) {
 				data[i].id = data[i]['user_id'] + '_' + data[i]['accrual_policy_account_id'];
 			}
-		} else if( data && data['user_id'] && data['accrual_policy_account_id']) {
+		} else if ( data && data['user_id'] && data['accrual_policy_account_id'] ) {
 			data.id = data['user_id'] + '_' + data['accrual_policy_account_id'];
 		} else {
 			Debug.Text( 'ERROR: Data format is invalid.', 'AccrualBalanceViewController.js', 'AccrualBalanceViewController', '__createRowId', 1 );
@@ -317,7 +317,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		return id;
 	},
 
-	getAPIFilters: function () {
+	getAPIFilters: function() {
 		var composite_id = this.getCurrentSelectedRecord();
 
 		var filter = {};
@@ -329,7 +329,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		return filter;
 	},
 
-	doViewClickResult: function ( result_data ) {
+	doViewClickResult: function( result_data ) {
 		var $this = this;
 		var filter = {};
 		filter.filter_data = {};
@@ -424,10 +424,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 			TTPromise.add( 'initSubAccrualView', 'init' );
 			TTPromise.wait( 'initSubAccrualView', 'init', function() {
-				firstColumn.css('opacity', '1');
+				firstColumn.css( 'opacity', '1' );
 			} );
 
-			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
+			firstColumn.css( 'opacity', '0' ); //Hide the grid while its loading/sizing.
 
 			Global.trackView( 'Sub' + 'Accrual' + 'View' );
 			AccrualViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
@@ -448,65 +448,16 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 	},
 
-	initSubLogView: function( tab_id ) {
-		var $this = this;
-
-		if ( !this.current_edit_record.id ) {
-			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
-			return;
+	setSubLogViewFilter: function() {
+		if ( !this.sub_log_view_controller ) {
+			return false;
 		}
 
-		if ( this.sub_log_view_controller ) {
-			this.sub_log_view_controller.buildContextMenu( true );
-			this.sub_log_view_controller.setDefaultMenu();
-			$this.sub_log_view_controller.parent_key = 'object_id';
-			$this.sub_log_view_controller.parent_value = $this.log_object_ids;
-			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.parent_view_controller = $this;
+		this.sub_log_view_controller.parent_key = 'object_id';
+		this.sub_log_view_controller.parent_value = this.log_object_ids;
+		this.sub_log_view_controller.table_name_key = this.table_name_key;
 
-			$this.sub_log_view_controller.initData();
-			return;
-		}
-
-		Global.loadScript( 'views/core/log/LogViewController.js', function() {
-			var tab = $this.edit_view_tab.find( '#' + tab_id );
-
-			var firstColumn = tab.find( '.first-column-sub-view' );
-
-			TTPromise.add( 'initSubAudit', 'init' );
-			TTPromise.wait( 'initSubAudit', 'init', function() {
-				firstColumn.css('opacity', '1');
-			} );
-
-			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
-
-			Global.trackView( 'Sub' + 'Log' + 'View' );
-			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			// Can't directly open Audit in this case, because Audit need data from Sub Accrual View and it not
-			// be loaded if directly open audit from url
-			if ( !$this.log_object_ids ) {
-				$this.edit_view_tab.tabs( 'option', 'active', 0 );
-				return;
-			}
-			$this.sub_log_view_controller = subViewController;
-			$this.sub_log_view_controller.parent_key = 'object_id';
-			$this.sub_log_view_controller.parent_value = $this.log_object_ids;
-			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.parent_view_controller = $this;
-
-			$this.sub_log_view_controller.postInit = function() {
-				this.initData();
-			};
-		}
+		return true;
 	},
 
 	removeEditView: function() {
@@ -519,7 +470,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		var $this = this;
 		this.navigation.setPossibleDisplayColumns( this.buildDisplayColumnsByColumnModel( this.grid.getGridParam( 'colModel' ) ),
-				this.buildDisplayColumns( this.default_display_columns ) );
+			this.buildDisplayColumns( this.default_display_columns ) );
 
 		this.navigation.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 

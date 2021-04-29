@@ -18,10 +18,10 @@ WidgetTestViewController = BaseViewController.extend( {
 		this.table_name_key = 'awesomebox_test';
 		this.context_menu_name = $.i18n._( 'Widget Test' );
 		this.navigation_label = $.i18n._( 'Widget Test' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 		this.select_company_id = LocalCacheData.getCurrentCompany().id;
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 		this.user_id_array = [];
 
 		this.render();
@@ -57,7 +57,6 @@ WidgetTestViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0] = [];
 		this.edit_view_tabs[0].push( tab_employee_column1 );
 
-
 		var form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( { label: $.i18n._( 'Separated_box: if you see this, the test is passing.' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_employee_column1 );
@@ -73,7 +72,6 @@ WidgetTestViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( { field: 'datepicker' } );
 		this.addEditFieldToColumn( $.i18n._( 'TDatePicker' ), form_item_input, tab_employee_column1, '', null );
-
 
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TRangePicker( { field: 'daterange', validation_field: 'date_stamp' } );
@@ -114,7 +112,7 @@ WidgetTestViewController = BaseViewController.extend( {
 			form_item_input.FormulaBuilder( {
 				field: 'formula', width: '100%', onFormulaBtnClick: function() {
 
-					var custom_column_api = new (APIFactory.getAPIClass( 'APIReportCustomColumn' ))();
+					var custom_column_api = new ( APIFactory.getAPIClass( 'APIReportCustomColumn' ) )();
 
 					custom_column_api.getOptions( 'formula_functions', {
 						onResult: function( fun_result ) {
@@ -226,7 +224,7 @@ WidgetTestViewController = BaseViewController.extend( {
 		this.search_fields = [];
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -241,14 +239,16 @@ WidgetTestViewController = BaseViewController.extend( {
 	//override that forces same data to grid at all times.
 	search: function() {
 		var $this = this;
-		this.api.getUser( {}, true, { onResult: function(r){
+		this.api.getUser( {}, true, {
+			onResult: function( r ) {
 				var result_data = r.getResult();
 				$this.user_id_array = result_data;
 				result_data = $this.processResultData( result_data );
 				$this.grid.setData( result_data );
 				$this.grid.setGridColumnsWidth();
 				$this.onEditClick( result_data[0].id );
-			}});
+			}
+		} );
 	},
 
 	setEditViewDataDone: function() {
@@ -260,13 +260,12 @@ WidgetTestViewController = BaseViewController.extend( {
 				}
 			} );
 			$this.setTabOVisibility( true );
-			$('.edit-view-tab-bar').css('opacity', 1);
+			$( '.edit-view-tab-bar' ).css( 'opacity', 1 );
 			TTPromise.resolve( 'init', 'init' );
 		}, 2500 );
 
-		this._super('setEditViewDataDone');
+		this._super( 'setEditViewDataDone' );
 	},
-
 
 	runTests: function() {
 		var $this = this;
@@ -320,7 +319,6 @@ WidgetTestViewController = BaseViewController.extend( {
 		this.testText();
 		this.testPassword();
 		this.testTextarea();
-
 
 		//Extra tests that should be added to test non-form widgets
 		//todo: TAlert

@@ -4,7 +4,6 @@ PayrollRemittanceAgencyEventWizardController = BaseWindowController.extend( {
 
 	wizard_obj: null,
 
-
 	init: function() {
 		var wizard_id = 'PayrollRemittanceAgencyEventWizard';
 		//LocalCacheData[this.wizard_id] is set when the wizard is minimized due to external navigation
@@ -21,6 +20,5 @@ PayrollRemittanceAgencyEventWizardController = BaseWindowController.extend( {
 	getRequiredFiles: function() {
 		return ['APIPayrollRemittanceAgencyEvent', 'Wizard', 'WizardStep', 'views/payroll/remittance_wizard/PayrollRemittanceAgencyEventWizard'];
 	}
-
 
 } );

@@ -4,26 +4,27 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title><?php echo ( ( isset($META_TITLE) AND $META_TITLE != '' ) ? $META_TITLE . ' | ' : '' ) . APPLICATION_NAME?></title>
-    <base href="<?php echo $BASE_URL; ?>">
+	<title><?php echo ( ( isset( $META_TITLE ) && $META_TITLE != '' ) ? $META_TITLE . ' | ' : '' ) . APPLICATION_NAME ?></title>
+	<base href="<?php echo $BASE_URL; ?>">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-	<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
-
-	<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="global/APIGlobal.js.php?disable_db=1&v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<meta name="Description"
+		  content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
+	<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD ?>"></script>
+	<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD ?>"></script>
+	<script src="global/APIGlobal.js.php?disable_db=1&v=<?php echo APPLICATION_BUILD ?>"></script>
+	<script src="framework/jquery.min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
+	<script src="framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
+	<script src="framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
+	<script src="global/Global.js?v=<?php echo APPLICATION_BUILD ?>"></script>
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 	<!--[if lt IE 9]>
-	<script src="./framework/html5shiv.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<script src="./framework/respond.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="./framework/html5shiv.min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
+	<script src="./framework/respond.min.js?v=<?php echo APPLICATION_BUILD ?>"></script>
 	<![endif]-->
-    <script src="./framework/bootstrap/js/bootstrap.bundle.js?v=<?php echo APPLICATION_BUILD?>"></script>
-	<link rel="stylesheet" type="text/css" href="./framework/bootstrap/css/bootstrap.min.css?v=<?php echo APPLICATION_BUILD?>">
+	<script src="./framework/bootstrap/js/bootstrap.bundle.js?v=<?php echo APPLICATION_BUILD ?>"></script>
+	<link rel="stylesheet" type="text/css"
+		  href="./framework/bootstrap/css/bootstrap.min.css?v=<?php echo APPLICATION_BUILD ?>">
 	<style rel="stylesheet" type="text/css">
 		body {
 			min-height: 100%;
@@ -31,6 +32,7 @@
 			width: 100%;
 			position: absolute;
 		}
+
 		.footer {
 			/*min-height: 68px;*/
 			height: 68px;
@@ -44,23 +46,29 @@
 			bottom: 0;
 			left: 0;
 		}
+
 		.footer .footer-menu a:hover {
 			text-decoration: none;
 			cursor: pointer;
 		}
+
 		.footer .footer-copyright {
 			color: #787878;
 			margin: 0;
 		}
+
 		.company-logo img {
 			max-height: 51px;
 		}
+
 		.navbar-DownForMaintenance {
 			margin: 5px -15px 5px -15px;
 		}
+
 		.navbar-DownForMaintenance .company-logo img {
 			max-height: 51px;
 		}
+
 		#contentBox {
 			background: #fff;
 			margin: 0 auto;
@@ -71,6 +79,7 @@
 			max-width: 768px;
 			/*padding: 15px;*/
 		}
+
 		#contentBox-DownForMaintenance, #contentBox-ConfirmEmail, #contentBox-ForgotPassword {
 			background: #fff;
 			margin: 0 auto;
@@ -81,6 +90,7 @@
 			border: 1px solid #779bbe;
 			text-align: center;
 		}
+
 		.textTitle2 {
 			color: #036;
 			font-size: 16px;
@@ -89,44 +99,51 @@
 			padding-left: 10px;
 			margin: 0;
 		}
-        #contentBox-ForgotPassword .form-control-static {
-            text-align: left;
-        }
-        #contentBox-DownForMaintenance .textTitle2, #contentBox-ConfirmEmail .textTitle2,#contentBox-ForgotPassword .textTitle2 {
-            padding-left: 0;
-            margin: 0;
-            height: 60px;
-            background: rgb(49,84,130);
-            line-height: 60px;
-            color: #fff;
-        }
-        /*#contentBox-ForgotPassword .textTitle2 {*/
-            /*padding-left: 0;*/
-            /*margin: 0;*/
-            /*height: 60px;*/
-            /*background: rgb(49,84,130);*/
-            /*line-height: 60px;*/
-            /*color: #fff;*/
-            /*margin-bottom: 15px;*/
-        /*}*/
-        #contentBox-ForgotPassword .form-horizontal {
-            margin: 15px;
-        }
-        #contentBox-ForgotPassword label {
-            color: rgb(49,84,130);
-        }
-        @media (max-width: 767px) {
-            #contentBox-ForgotPassword label {
-                text-align: left;
-            }
-        }
-        #contentBox-ForgotPassword .form-control {
-            border-color: rgb(49,84,130);;
-        }
-        #contentBox-ForgotPassword .button {
-            background: rgb(49,84,130);
-            color: #FFFFFF;
-        }
+
+		#contentBox-ForgotPassword .form-control-static {
+			text-align: left;
+		}
+
+		#contentBox-DownForMaintenance .textTitle2, #contentBox-ConfirmEmail .textTitle2, #contentBox-ForgotPassword .textTitle2 {
+			padding-left: 0;
+			margin: 0;
+			height: 60px;
+			background: rgb(49, 84, 130);
+			line-height: 60px;
+			color: #fff;
+		}
+
+		/*#contentBox-ForgotPassword .textTitle2 {*/
+		/*padding-left: 0;*/
+		/*margin: 0;*/
+		/*height: 60px;*/
+		/*background: rgb(49,84,130);*/
+		/*line-height: 60px;*/
+		/*color: #fff;*/
+		/*margin-bottom: 15px;*/
+		/*}*/
+		#contentBox-ForgotPassword .form-horizontal {
+			margin: 15px;
+		}
+
+		#contentBox-ForgotPassword label {
+			color: rgb(49, 84, 130);
+		}
+
+		@media (max-width: 767px) {
+			#contentBox-ForgotPassword label {
+				text-align: left;
+			}
+		}
+
+		#contentBox-ForgotPassword .form-control {
+			border-color: rgb(49, 84, 130);;
+		}
+
+		#contentBox-ForgotPassword .button {
+			background: rgb(49, 84, 130);
+			color: #FFFFFF;
+		}
 
 		#rowWarning {
 			margin: 15px 30px;
@@ -135,14 +152,16 @@
 			background: #FFFF00;
 			font-weight: bold;
 		}
-        #contentBox-DownForMaintenance #rowWarning, #contentBox-ConfirmEmail #rowWarning, #contentBox-ForgotPassword #rowWarning{
-            margin: 0;
-            padding-top: 20px;
-            padding-bottom: 20px;
-            background: #FFFFFF;
-            /*line-height: 60px;*/
-            /*height: 60px;*/
-        }
+
+		#contentBox-DownForMaintenance #rowWarning, #contentBox-ConfirmEmail #rowWarning, #contentBox-ForgotPassword #rowWarning {
+			margin: 0;
+			padding-top: 20px;
+			padding-bottom: 20px;
+			background: #FFFFFF;
+			/*line-height: 60px;*/
+			/*height: 60px;*/
+		}
+
 		#rowError {
 			margin: 15px 30px;
 			padding: 5px;
@@ -160,10 +179,10 @@
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<div class="navbar-header">
 					<a tabindex="-1" class="company-logo" href="https://<?php echo ORGANIZATION_URL; ?>">
-						<img src="<?php if ( isset($exception) AND $exception == 'dberror' ) { ?>
-							<?php echo Environment::getImagesURL()/timetrex_logo_wbg_small2.png ?>
+						<img src="<?php if ( isset( $exception ) && $exception == 'dberror' ) { ?>
+							<?php echo Environment::getImagesURL() ?>/timetrex_logo_wbg_small2.png
 						<?php } else { ?>
-							<?php echo Environment::getBaseURL() ;?>/send_file.php?disable_db=1&object_type=primary_company_logo
+							<?php echo Environment::getBaseURL(); ?>/send_file.php?disable_db=1&object_type=primary_company_logo
 						<?php } ?>
 						" alt="<?php echo ORGANIZATION_NAME; ?>">
 					</a>

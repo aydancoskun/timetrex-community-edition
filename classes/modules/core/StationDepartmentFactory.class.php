@@ -42,7 +42,7 @@ class StationDepartmentFactory extends Factory {
 	protected $table = 'station_department';
 	protected $pk_sequence_name = 'station_department_id_seq'; //PK Sequence name
 
-	var $department_obj = NULL;
+	var $department_obj = null;
 
 	/**
 	 * @return mixed
@@ -55,8 +55,9 @@ class StationDepartmentFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setStation( $value) {
+	function setStation( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'station_id', $value );
 	}
 
@@ -64,17 +65,18 @@ class StationDepartmentFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getDepartmentObject() {
-		if ( is_object($this->department_obj) ) {
+		if ( is_object( $this->department_obj ) ) {
 			return $this->department_obj;
 		} else {
 			$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 			$dlf->getById( $this->getDepartment() );
 			if ( $dlf->getRecordCount() == 1 ) {
 				$this->department_obj = $dlf->getCurrent();
+
 				return $this->department_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -89,10 +91,12 @@ class StationDepartmentFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setDepartment( $value) {
+	function setDepartment( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'department_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -102,27 +106,27 @@ class StationDepartmentFactory extends Factory {
 		//
 		// Station
 		if ( $this->getStation() != TTUUID::getZeroID() ) {
-			$this->Validator->isUUID(	'station',
-												$this->getStation(),
-												TTi18n::gettext('Selected Station is invalid')
-											/*
-															$this->Validator->isResultSetWithRows(	'station',
-																								$slf->getByID($id),
-																								TTi18n::gettext('Selected Station is invalid')
-											*/
-											);
+			$this->Validator->isUUID( 'station',
+									  $this->getStation(),
+									  TTi18n::gettext( 'Selected Station is invalid' )
+			/*
+							$this->Validator->isResultSetWithRows(	'station',
+																$slf->getByID($id),
+																TTi18n::gettext('Selected Station is invalid')
+			*/
+			);
 		}
 		// Department
 		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
-		$this->Validator->isResultSetWithRows(	'department',
-														$dlf->getByID($this->getDepartment()),
-														TTi18n::gettext('Selected Department is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'department',
+											   $dlf->getByID( $this->getDepartment() ),
+											   TTi18n::gettext( 'Selected Department is invalid' )
+		);
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -130,105 +134,105 @@ class StationDepartmentFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -237,11 +241,12 @@ class StationDepartmentFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$d_obj = $this->getDepartmentObject();
-		if ( is_object($d_obj) ) {
-			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText('Department').': '. $d_obj->getName(), NULL, $this->getTable() );
+		if ( is_object( $d_obj ) ) {
+			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText( 'Department' ) . ': ' . $d_obj->getName(), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

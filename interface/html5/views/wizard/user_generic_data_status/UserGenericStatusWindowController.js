@@ -32,7 +32,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 			this.callback = this.options.callback;
 		}
 
-		this.api = new (APIFactory.getAPIClass( 'APIUserGenericStatus' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserGenericStatus' ) )();
 		this.render();
 		this.initData();
 
@@ -211,7 +211,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 			this.grid = null;
 		}
 
-		this.grid = new TTGrid( 'user_generic_data_status_grid-'+ this.batch_id, {
+		this.grid = new TTGrid( 'user_generic_data_status_grid-' + this.batch_id, {
 			altRows: true,
 			onSelectRow: $.proxy( this.onGridSelectRow, this ),
 			data: [],
@@ -261,7 +261,7 @@ UserGenericStatusWindowController.open = function( batch_id, user_id, callback )
 		//UserGenericStatusWindowController.instance.callback = callback;
 
 		new UserGenericStatusWindowController( {
-			el: '#'+ batch_id,
+			el: '#' + batch_id,
 			batch_id: batch_id,
 			user_id: user_id,
 			can_cache_controller: false,

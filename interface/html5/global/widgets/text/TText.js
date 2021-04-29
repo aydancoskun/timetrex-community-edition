@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TText = function( options ) {
 		var opts = $.extend( {}, $.fn.TText.defaults, options );
@@ -65,4 +65,4 @@
 
 	$.fn.TText.defaults = {};
 
-})( jQuery );
+} )( jQuery );

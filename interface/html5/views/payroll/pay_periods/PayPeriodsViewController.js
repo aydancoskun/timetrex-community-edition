@@ -16,8 +16,8 @@ PayPeriodsViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_period';
 		this.context_menu_name = $.i18n._( 'Pay Period' );
 		this.navigation_label = $.i18n._( 'Pay Period' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPayPeriod' ))();
-		this.pay_period_schedule_api = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
+		this.pay_period_schedule_api = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
 
 		this.render();
 
@@ -44,7 +44,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 		this._super( 'removeEditView' );
 
 		if ( this.parent_view_controller &&
-				( this.parent_view_controller.viewId === 'TimeSheet' || this.parent_view_controller.viewId === 'PayStub' ) ) {
+			( this.parent_view_controller.viewId === 'TimeSheet' || this.parent_view_controller.viewId === 'PayStub' ) ) {
 			this.parent_view_controller.onSubViewRemoved( is_cancel );
 		}
 	},
@@ -120,7 +120,6 @@ PayPeriodsViewController = BaseViewController.extend( {
 			if ( !this.edit_view ) {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
-
 
 		}
 
@@ -441,7 +440,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_schedule_id',
 				layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
 				multiple: true,
 				basic_search: true,
 				script_name: 'PayPeriodScheduleView',
@@ -470,7 +469,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -481,7 +480,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -506,7 +505,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
 				id: this.script_name + '_navigation',
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.PAY_PERIOD,
 				navigation_mode: true,
@@ -540,7 +539,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 			show_search_inputs: true,

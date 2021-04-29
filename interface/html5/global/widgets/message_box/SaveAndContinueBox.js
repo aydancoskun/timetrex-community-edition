@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.SaveAndContinueBox = function( options ) {
 		var opts = $.extend( {}, $.fn.SaveAndContinueBox.defaults, options );
@@ -52,4 +52,4 @@
 
 	$.fn.SaveAndContinueBox.defaults = {};
 
-})( jQuery );
+} )( jQuery );

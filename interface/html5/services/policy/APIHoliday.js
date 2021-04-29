@@ -43,5 +43,4 @@ var APIHoliday = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'copyHoliday', arguments );
 	}
 
-
 } );

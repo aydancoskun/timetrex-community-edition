@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.NoHierarchyBox = function( options ) {
 		var opts = $.extend( {}, $.fn.NoHierarchyBox.defaults, options );
@@ -46,4 +46,4 @@
 
 	$.fn.NoHierarchyBox.defaults = {};
 
-})( jQuery );
+} )( jQuery );

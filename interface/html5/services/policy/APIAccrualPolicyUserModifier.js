@@ -51,6 +51,4 @@ var APIAccrualPolicyUserModifier = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

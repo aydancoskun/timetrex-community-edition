@@ -41,7 +41,7 @@
 class MessageSenderFactory extends Factory {
 	protected $table = 'message_sender';
 	protected $pk_sequence_name = 'message_sender_id_seq'; //PK Sequence name
-	protected $obj_handler = NULL;
+	protected $obj_handler = null;
 
 	/**
 	 * @return mixed
@@ -54,8 +54,9 @@ class MessageSenderFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -70,8 +71,9 @@ class MessageSenderFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setParent( $value) {
+	function setParent( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'parent_id', $value );
 	}
 
@@ -86,10 +88,12 @@ class MessageSenderFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setMessageControl( $value) {
+	function setMessageControl( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'message_control_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -100,37 +104,38 @@ class MessageSenderFactory extends Factory {
 		// Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-			$this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($this->getUser()),
-															TTi18n::gettext('Invalid Employee')
-														);
+			$this->Validator->isResultSetWithRows( 'user',
+												   $ulf->getByID( $this->getUser() ),
+												   TTi18n::gettext( 'Invalid Employee' )
+			);
 		}
 		// Parent
 		if ( $this->getParent() != TTUUID::getZeroID() ) {
 			$mslf = TTnew( 'MessageSenderListFactory' ); /** @var MessageSenderListFactory $mslf */
-			$this->Validator->isResultSetWithRows(	'parent',
-															$mslf->getByID($this->getParent()),
-															TTi18n::gettext('Parent is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'parent',
+												   $mslf->getByID( $this->getParent() ),
+												   TTi18n::gettext( 'Parent is invalid' )
+			);
 		}
 		// Message Control
 		$mclf = TTnew( 'MessageControlListFactory' ); /** @var MessageControlListFactory $mclf */
-		$this->Validator->isResultSetWithRows(	'message_control_id',
-														$mclf->getByID($this->getMessageControl()),
-														TTi18n::gettext('Message Control is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'message_control_id',
+											   $mclf->getByID( $this->getMessageControl() ),
+											   TTi18n::gettext( 'Message Control is invalid' )
+		);
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postSave() {
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

@@ -24,10 +24,10 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'accrual_policy';
 		this.context_menu_name = $.i18n._( 'Accrual Policy' );
 		this.navigation_label = $.i18n._( 'Accrual Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIAccrualPolicy' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
-		this.accrual_policy_milestone_api = new (APIFactory.getAPIClass( 'APIAccrualPolicyMilestone' ))();
-		this.accrual_policy_user_modifier_api = new (APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.accrual_policy_milestone_api = new ( APIFactory.getAPIClass( 'APIAccrualPolicyMilestone' ) )();
+		this.accrual_policy_user_modifier_api = new ( APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ) )();
 		this.month_of_quarter_array = Global.buildRecordArray( { 1: 1, 2: 2, 3: 3 } );
 		this.render();
 		this.buildContextMenu();
@@ -156,7 +156,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 	setEditMenuReCalAccrualWizardIcon: function( context_btn ) {
 		if ( PermissionManager.validate( 'accrual_policy', 'enabled' ) &&
-				(PermissionManager.validate( 'accrual_policy', 'edit' ) || PermissionManager.validate( 'accrual_policy', 'edit_child' ) || PermissionManager.validate( 'accrual_policy', 'edit_own' ) )
+			( PermissionManager.validate( 'accrual_policy', 'edit' ) || PermissionManager.validate( 'accrual_policy', 'edit_child' ) || PermissionManager.validate( 'accrual_policy', 'edit_own' ) )
 		) {
 			context_btn.removeClass( 'invisible-image' );
 
@@ -174,7 +174,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 	setDefaultMenuReCalAccrualWizardIcon: function( context_btn, grid_selected_length ) {
 		if ( PermissionManager.validate( 'accrual_policy', 'enabled' ) &&
-				(PermissionManager.validate( 'accrual_policy', 'edit' ) || PermissionManager.validate( 'accrual_policy', 'edit_child' ) || PermissionManager.validate( 'accrual_policy', 'edit_own' ) )
+			( PermissionManager.validate( 'accrual_policy', 'edit' ) || PermissionManager.validate( 'accrual_policy', 'edit_child' ) || PermissionManager.validate( 'accrual_policy', 'edit_own' ) )
 		) {
 			context_btn.removeClass( 'invisible-image' );
 
@@ -199,13 +199,17 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		var tab_model = {
 			'tab_accrual_policy': { 'label': $.i18n._( 'Accrual Policy' ) },
 			'tab_length_of_service_milestones': { 'label': $.i18n._( 'Length Of Service Milestones' ) },
-			'tab_employee_settings': { 'label': $.i18n._( 'Employee Settings' ), 'init_callback': 'initSubAccrualPolicyUserModifier', 'display_on_mass_edit': false },
+			'tab_employee_settings': {
+				'label': $.i18n._( 'Employee Settings' ),
+				'init_callback': 'initSubAccrualPolicyUserModifier',
+				'display_on_mass_edit': false
+			},
 			'tab_audit': true,
 		};
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY,
@@ -252,7 +256,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -265,7 +269,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		// Accrual Account
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
 			show_search_inputs: true,
@@ -278,7 +282,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		//Length of Service contributing pay codes.
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingPayCodePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingPayCodePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
 			show_search_inputs: true,
@@ -613,7 +617,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			data = {};
 		}
 
-		var row_id = (data.id && this.parent_controller.current_edit_record.id) ? data.id : TTUUID.generateUUID();
+		var row_id = ( data.id && this.parent_controller.current_edit_record.id ) ? data.id : TTUUID.generateUUID();
 
 		var $this = this;
 		var row = this.getRowRender(); //Get Row render
@@ -729,7 +733,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		if ( typeof index != 'undefined' ) {
 
 			row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
-			this.rows_widgets_array.splice( (index), 0, widgets );
+			this.rows_widgets_array.splice( ( index ), 0, widgets );
 
 		} else {
 			$( render ).append( row );
@@ -825,7 +829,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			args.filter_data.accrual_policy_id = this.current_edit_record.id ? this.current_edit_record.id : this.copied_record_id;
 			this.copied_record_id = '';
 			this.accrual_policy_milestone_api.getAccrualPolicyMilestone( args, true, {
-				onResult: function ( res ) {
+				onResult: function( res ) {
 					if ( !$this.edit_view ) {
 						return;
 					}
@@ -1086,7 +1090,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1098,7 +1102,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1136,7 +1140,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		}
 
 		if ( Global.getProductEdition() >= 15 ) {
-			Global.loadScript( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function () {
+			Global.loadScript( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function() {
 				var tab_accrual_policy = $this.edit_view_tab.find( '#tab_employee_settings' );
 
 				var firstColumn = tab_accrual_policy.find( '.first-column-sub-view' );
@@ -1157,7 +1161,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_view_controller = $this;
-			TTPromise.wait( 'BaseViewController', 'initialize', function () {
+			TTPromise.wait( 'BaseViewController', 'initialize', function() {
 				$this.sub_accrual_policy_user_modifier_view_controller.initData(); //Init data in this parent view
 			} );
 		}

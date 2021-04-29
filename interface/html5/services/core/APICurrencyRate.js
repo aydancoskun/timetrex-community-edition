@@ -1,6 +1,5 @@
 var APICurrencyRate = ServiceCaller.extend( {
 
-
 	key_name: 'CurrencyRate',
 	className: 'APICurrencyRate',
 
@@ -39,7 +38,5 @@ var APICurrencyRate = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'copyCurrencyRate', arguments );
 
 	}
-
-
 
 } );

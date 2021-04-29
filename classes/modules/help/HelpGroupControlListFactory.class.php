@@ -41,52 +41,52 @@
 class HelpGroupControlListFactory extends HelpGroupControlFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 
-		$strict_order = TRUE;
-		if ( $order == NULL ) {
-			$order = array('created_date' => 'desc');
+		$strict_order = true;
+		if ( $order == null ) {
+			$order = [ 'created_date' => 'desc' ];
 			//$strict_order = FALSE;
 		}
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted=0
 				';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HelpGroupControlListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
+	function getById( $id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 						AND deleted=0';
 		$query .= $this->getWhereSQL( $where );
@@ -104,23 +104,23 @@ class HelpGroupControlListFactory extends HelpGroupControlFactory implements Ite
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HelpGroupControlListFactory
 	 */
-	function getByScriptAndName( $script, $name = NULL, $where = NULL, $order = NULL) {
+	function getByScriptAndName( $script, $name = null, $where = null, $order = null ) {
 		if ( $script == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $name == '' ) {
-			$name = NULL;
+			$name = null;
 		}
 
-		$ph = array(
-					'script' => $script,
-					'name' => $name,
-					);
+		$ph = [
+				'script' => $script,
+				'name'   => $name,
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	script_name = ?
 						AND name = ?
 						AND deleted=0';
@@ -133,4 +133,5 @@ class HelpGroupControlListFactory extends HelpGroupControlFactory implements Ite
 	}
 
 }
+
 ?>

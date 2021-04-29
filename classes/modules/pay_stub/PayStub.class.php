@@ -45,7 +45,7 @@ class PayStub extends PayStubFactory {
 	function childConstruct() {
 		$this->StartTransaction();
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -53,21 +53,23 @@ class PayStub extends PayStubFactory {
 	 * @return bool
 	 */
 	function Done() {
-		Debug::Arr($this->tmp_data, 'Pay Stub TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $this->tmp_data, 'Pay Stub TMP Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 		//Call pre-save() first, so calculates the totals.
-		$this->setEnableCalcTotal(TRUE);
+		$this->setEnableCalcTotal( true );
 		$this->preSave();
 
 		if ( $this->Validate() ) {
 			$this->CommitTransaction();
+
 			//$this->FailTransaction();
-			return TRUE;
+			return true;
 		}
 
-		$this->FailTransaction(); //Fails Transaction
+		$this->FailTransaction();   //Fails Transaction
 		$this->CommitTransaction(); //Rollback occurs here. This is important when looping over many employees that may have a pay stub that fails.
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

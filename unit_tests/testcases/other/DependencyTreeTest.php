@@ -39,84 +39,86 @@
  */
 class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 	public function setUp() {
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
-		require_once( Environment::getBasePath().'/classes/modules/core/DependencyTree.class.php');
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
+		require_once( Environment::getBasePath() . '/classes/modules/core/DependencyTree.class.php' );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
-		return TRUE;
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return true;
 	}
 
-	function indexOf($tofind,$arr) {
-		   foreach($arr as $k => $v) {
-				   if($tofind == $v) { return $k; }
-		   }
+	function indexOf( $tofind, $arr ) {
+		foreach ( $arr as $k => $v ) {
+			if ( $tofind == $v ) {
+				return $k;
+			}
+		}
 
-		   return -1;
+		return -1;
 	}
 
 	function testSimple_1() {
 		//Unit Test 1 - Simple
 		$deptree = new DependencyTree();
-		$deptree->addNode('A-1', array(8), array(10) );
-		$deptree->addNode('A-2', array(10), array(12) );
-		$deptree->addNode('A-3', array(12), array(13) );
+		$deptree->addNode( 'A-1', [ 8 ], [ 10 ] );
+		$deptree->addNode( 'A-2', [ 10 ], [ 12 ] );
+		$deptree->addNode( 'A-3', [ 12 ], [ 13 ] );
 
 		$result = $deptree->_buildTree();
 
-		$should_match = array(
-					0 => 'A-1',
-					1 => 'A-2',
-					2 => 'A-3',
-					);
+		$should_match = [
+				0 => 'A-1',
+				1 => 'A-2',
+				2 => 'A-3',
+		];
 
-		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'A-2', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'A-2', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'A-2', $result ) < $this->indexOf( 'A-3', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'A-2', $result ) < $this->indexOf( 'A-3', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test3 = $this->indexOf( 'A-3', $result ) == 2 ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'A-3', $result ) == 2 ? true : false;
+		$this->assertEquals( $test3, true );
 	}
 
 	function testModerate_1() {
 		//Unit Test 2 - Moderate
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('A-1', array(8), array(10) );
-		$deptree->addNode('A-2', array(10), array(12) );
-		$deptree->addNode('A-3', array(12), array(13) );
+		$deptree->addNode( 'A-1', [ 8 ], [ 10 ] );
+		$deptree->addNode( 'A-2', [ 10 ], [ 12 ] );
+		$deptree->addNode( 'A-3', [ 12 ], [ 13 ] );
 
-		$deptree->addNode('B-1', array(10), array(20) );
-		$deptree->addNode('B-2', array(20), array(22) );
+		$deptree->addNode( 'B-1', [ 10 ], [ 20 ] );
+		$deptree->addNode( 'B-2', [ 20 ], [ 22 ] );
 
 		$result = $deptree->_buildTree();
 
 		//var_dump($result);
-		$should_match = array(
-					0 => 'A-1',
-					1 => 'A-2',
-					2 => 'A-3',
-					3 => 'B-1',
-					4 => 'B-2',
-					);
+		$should_match = [
+				0 => 'A-1',
+				1 => 'A-2',
+				2 => 'A-3',
+				3 => 'B-1',
+				4 => 'B-2',
+		];
 
-		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'A-2', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'A-2', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'A-2', $result ) < $this->indexOf( 'A-3', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'A-2', $result ) < $this->indexOf( 'A-3', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test3 = $this->indexOf( 'B-1', $result ) < $this->indexOf( 'B-2', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'B-1', $result ) < $this->indexOf( 'B-2', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
 
-		$test4 = $this->indexOf( 'B-1', $result ) > $this->indexOf( 'A-2', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test4, TRUE );
-
+		$test4 = $this->indexOf( 'B-1', $result ) > $this->indexOf( 'A-2', $result ) ? true : false;
+		$this->assertEquals( $test4, true );
 	}
 
 	function testCircularDependency_1() {
@@ -124,18 +126,18 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//Unit Test 3 - Simple Circ. Dep test
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('A', array('B'), array('A'), 2 );
-		$deptree->addNode('B', array('A'), array('B'), 1 );
+		$deptree->addNode( 'A', [ 'B' ], [ 'A' ], 2 );
+		$deptree->addNode( 'B', [ 'A' ], [ 'B' ], 1 );
 
 		$result = $deptree->_buildTree();
 
-		$should_match = array(
-					0 => 'B',
-					1 => 'A',
-					);
+		$should_match = [
+				0 => 'B',
+				1 => 'A',
+		];
 
-		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 	}
 
 	function testCircularDependency_1B() {
@@ -143,19 +145,19 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//Unit Test 3 - Simple Circ. Dep test
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('A', array('B'), array('A') ); //No sort order
-		$deptree->addNode('B', array('A'), array('B') ); //No sort order
+		$deptree->addNode( 'A', [ 'B' ], [ 'A' ] ); //No sort order
+		$deptree->addNode( 'B', [ 'A' ], [ 'B' ] ); //No sort order
 
 		$result = $deptree->_buildTree();
 
-		$should_match = array(
+		$should_match = [
 				0 => 'A',
 				1 => 'B',
 
-		);
+		];
 
-		$test1 = $this->indexOf( 'A', $result ) < $this->indexOf( 'B', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'A', $result ) < $this->indexOf( 'B', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 	}
 
 	function testCircularDependency_2() {
@@ -163,18 +165,18 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//Unit Test 3 - Simple Circ. Dep test with large string based orders.
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('A', array('B'), array('A'), 'BTEST12345678901234567890123456789012345678901234567890123456789012345678901234567890' );
-		$deptree->addNode('B', array('A'), array('B'), 'ATEST12345678901234567890123456789012345678901234567890123456789012345678901234567890' );
+		$deptree->addNode( 'A', [ 'B' ], [ 'A' ], 'BTEST12345678901234567890123456789012345678901234567890123456789012345678901234567890' );
+		$deptree->addNode( 'B', [ 'A' ], [ 'B' ], 'ATEST12345678901234567890123456789012345678901234567890123456789012345678901234567890' );
 
 		$result = $deptree->_buildTree();
 
-		$should_match = array(
+		$should_match = [
 				0 => 'B',
 				1 => 'A',
-		);
+		];
 
-		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 	}
 
 	function testCircularDependency_3() {
@@ -182,18 +184,18 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//Unit Test 3 - Simple Circ. Dep test with large string based orders.
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('A', array('B'), array('A'), 'A12345678901234567890123456789012345678901234567890123456789012345678901234567890B' );
-		$deptree->addNode('B', array('A'), array('B'), 'A12345678901234567890123456789012345678901234567890123456789012345678901234567890A' );
+		$deptree->addNode( 'A', [ 'B' ], [ 'A' ], 'A12345678901234567890123456789012345678901234567890123456789012345678901234567890B' );
+		$deptree->addNode( 'B', [ 'A' ], [ 'B' ], 'A12345678901234567890123456789012345678901234567890123456789012345678901234567890A' );
 
 		$result = $deptree->_buildTree();
 
-		$should_match = array(
+		$should_match = [
 				0 => 'B',
 				1 => 'A',
-		);
+		];
 
-		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 	}
 
 	function testCircularDependency_4() {
@@ -201,26 +203,26 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//Unit Test 4 - Simple Circ. Dep test within the same node
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('SS-EE', array('HSA'), array('EE'), '50000800000000122' );
-		$deptree->addNode('SS-ER', array('HSA'), array('ER'), '60000810000000123' );
-		$deptree->addNode('HSA', array('HSA'), array('HSA'), '50001000000001778' );
+		$deptree->addNode( 'SS-EE', [ 'HSA' ], [ 'EE' ], '50000800000000122' );
+		$deptree->addNode( 'SS-ER', [ 'HSA' ], [ 'ER' ], '60000810000000123' );
+		$deptree->addNode( 'HSA', [ 'HSA' ], [ 'HSA' ], '50001000000001778' );
 
 		$result = $deptree->_buildTree();
 
-		$should_match = array(
+		$should_match = [
 				0 => 'HSA',
 				1 => 'SS-EE',
 				2 => 'SS-ER',
-		);
+		];
 
-		$test1 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-EE', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-EE', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-ER', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-ER', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test3 = $this->indexOf( 'SS-EE', $result ) < $this->indexOf( 'SS-ER', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'SS-EE', $result ) < $this->indexOf( 'SS-ER', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
 	}
 
 	function testCircularDependency_4b() {
@@ -228,211 +230,210 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//Unit Test 4 - Simple Circ. Dep test within the same node
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('SS-EE', array('HSA'), array('EE'), '50000800000000122' );
-		$deptree->addNode('SS-ER', array('HSA'), array('ER'), '60000810000000123' );
-		$deptree->addNode('HSA', array('HSA', 'HSA2'), array('HSA'), '50001000000001778' );
-		$deptree->addNode('HSA2', array(), array('HSA2'), '50001000000001779' );
+		$deptree->addNode( 'SS-EE', [ 'HSA' ], [ 'EE' ], '50000800000000122' );
+		$deptree->addNode( 'SS-ER', [ 'HSA' ], [ 'ER' ], '60000810000000123' );
+		$deptree->addNode( 'HSA', [ 'HSA', 'HSA2' ], [ 'HSA' ], '50001000000001778' );
+		$deptree->addNode( 'HSA2', [], [ 'HSA2' ], '50001000000001779' );
 
 		$result = $deptree->_buildTree();
 
-		$should_match = array(
+		$should_match = [
 				0 => 'HSA2',
 				1 => 'HSA',
 				2 => 'SS-EE',
 				3 => 'SS-ER',
-		);
+		];
 
-		$test1 = $this->indexOf( 'HSA2', $result ) < $this->indexOf( 'HSA', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'HSA2', $result ) < $this->indexOf( 'HSA', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-EE', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-EE', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test3 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-ER', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-ER', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
 
-		$test4 = $this->indexOf( 'SS-EE', $result ) < $this->indexOf( 'SS-ER', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test4, TRUE );
+		$test4 = $this->indexOf( 'SS-EE', $result ) < $this->indexOf( 'SS-ER', $result ) ? true : false;
+		$this->assertEquals( $test4, true );
 	}
 
 	function testHard_1() {
 		//Unit Test 4 - Harder
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('A-2', array(10,30), array(20) );
-		$deptree->addNode('A-1', array(), array(10) );
-		$deptree->addNode('B-1', array(), array(30) );
+		$deptree->addNode( 'A-2', [ 10, 30 ], [ 20 ] );
+		$deptree->addNode( 'A-1', [], [ 10 ] );
+		$deptree->addNode( 'B-1', [], [ 30 ] );
 
 		$result = $deptree->_buildTree();
 
-		$should_match = array(
-					0 => 'A-1',
-					1 => 'B-1',
-					2 => 'A-2',
-					);
+		$should_match = [
+				0 => 'A-1',
+				1 => 'B-1',
+				2 => 'A-2',
+		];
 
-		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'B-1', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'B-1', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'B-1', $result ) < $this->indexOf( 'A-2', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'B-1', $result ) < $this->indexOf( 'A-2', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test3 = $this->indexOf( 'A-2', $result ) == 2 ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'A-2', $result ) == 2 ? true : false;
+		$this->assertEquals( $test3, true );
 	}
 
 	function testHard_2() {
 		//Unit Test 5 - Hardest
 		$deptree = new DependencyTree();
 
-		$deptree->addNode(' Test2', array(40), array(200) );
-		$deptree->addNode('VacAccrual', array(10,20,40), array(99), 50 );
-		$deptree->addNode('VacRelease', array(99), array(20), 100 );
+		$deptree->addNode( ' Test2', [ 40 ], [ 200 ] );
+		$deptree->addNode( 'VacAccrual', [ 10, 20, 40 ], [ 99 ], 50 );
+		$deptree->addNode( 'VacRelease', [ 99 ], [ 20 ], 100 );
 
-		$deptree->addNode('Test1', array(), array(40) );
-		$deptree->addNode('Test3', array(), array(10) );
+		$deptree->addNode( 'Test1', [], [ 40 ] );
+		$deptree->addNode( 'Test3', [], [ 10 ] );
 
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = array(
-					0 => 'Test1',
-					1 => 'Test3',
-					2 => 'VacAccrual',
-					3 => 'VacRelease',
-					4 => ' Test2',
-					);
+		$should_match = [
+				0 => 'Test1',
+				1 => 'Test3',
+				2 => 'VacAccrual',
+				3 => 'VacRelease',
+				4 => ' Test2',
+		];
 
-		$test1 = $this->indexOf( 'Test1', $result ) < $this->indexOf( 'Test3', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Test1', $result ) < $this->indexOf( 'Test3', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'Test3', $result ) < $this->indexOf( 'VacAccrual', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'Test3', $result ) < $this->indexOf( 'VacAccrual', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test2b = $this->indexOf( ' Test2', $result ) < $this->indexOf( 'VacAccrual', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2b, TRUE );
+		$test2b = $this->indexOf( ' Test2', $result ) < $this->indexOf( 'VacAccrual', $result ) ? true : false;
+		$this->assertEquals( $test2b, true );
 
-		$test3 = $this->indexOf( 'VacAccrual', $result ) < $this->indexOf( 'VacRelease', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'VacAccrual', $result ) < $this->indexOf( 'VacRelease', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
 
-		$test4 = $this->indexOf( 'VacRelease', $result ) == 4 ? TRUE : FALSE;
-		$this->assertEquals( $test4, TRUE );
+		$test4 = $this->indexOf( 'VacRelease', $result ) == 4 ? true : false;
+		$this->assertEquals( $test4, true );
 	}
 
 	function testHard_3() {
 		//Unit Test 6 - Double Hardest
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('Test5', array(200,99,20,40,10,500), array(999) );
+		$deptree->addNode( 'Test5', [ 200, 99, 20, 40, 10, 500 ], [ 999 ] );
 
-		$deptree->addNode(' Test2', array(40), array(200) );
-		$deptree->addNode('VacAccrual', array(10,20,40), array(99), 50 );
-		$deptree->addNode('VacRelease', array(99), array(20), 100 );
+		$deptree->addNode( ' Test2', [ 40 ], [ 200 ] );
+		$deptree->addNode( 'VacAccrual', [ 10, 20, 40 ], [ 99 ], 50 );
+		$deptree->addNode( 'VacRelease', [ 99 ], [ 20 ], 100 );
 
-		$deptree->addNode('Test1', array(), array(40) );
-		$deptree->addNode('Test3', array(), array(10) );
+		$deptree->addNode( 'Test1', [], [ 40 ] );
+		$deptree->addNode( 'Test3', [], [ 10 ] );
 
-		$deptree->addNode('Test4', array(20), array(500) );
+		$deptree->addNode( 'Test4', [ 20 ], [ 500 ] );
 
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = array(
-					0 => 'Test1',
-					1 => 'Test3',
-					2 => 'VacAccrual',
-					3 => 'VacRelease',
-					4 => ' Test2',
-					5 => 'Test4',
-					6 => 'Test5',
-					);
+		$should_match = [
+				0 => 'Test1',
+				1 => 'Test3',
+				2 => 'VacAccrual',
+				3 => 'VacRelease',
+				4 => ' Test2',
+				5 => 'Test4',
+				6 => 'Test5',
+		];
 
-		$test1 = $this->indexOf( 'Test1', $result ) < $this->indexOf( 'Test3', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Test1', $result ) < $this->indexOf( 'Test3', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'Test3', $result ) < $this->indexOf( 'VacAccrual', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'Test3', $result ) < $this->indexOf( 'VacAccrual', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test2b = $this->indexOf( ' Test2', $result ) < $this->indexOf( 'Test4', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2b, TRUE );
+		$test2b = $this->indexOf( ' Test2', $result ) < $this->indexOf( 'Test4', $result ) ? true : false;
+		$this->assertEquals( $test2b, true );
 
-		$test2c = $this->indexOf( ' Test4', $result ) < $this->indexOf( 'VacAccrual', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2b, TRUE );
+		$test2c = $this->indexOf( ' Test4', $result ) < $this->indexOf( 'VacAccrual', $result ) ? true : false;
+		$this->assertEquals( $test2b, true );
 
-		$test3 = $this->indexOf( 'VacAccrual', $result ) < $this->indexOf( 'VacRelease', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'VacAccrual', $result ) < $this->indexOf( 'VacRelease', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
 
-		$test4 = $this->indexOf( 'Test5', $result ) > $this->indexOf( 'Test4', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
-		$test4b = $this->indexOf( 'Test5', $result ) > $this->indexOf( 'VacAccrual', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test4 = $this->indexOf( 'Test5', $result ) > $this->indexOf( 'Test4', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
+		$test4b = $this->indexOf( 'Test5', $result ) > $this->indexOf( 'VacAccrual', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
 
-		$test5 = $this->indexOf( 'Test5', $result ) == 6 ? TRUE : FALSE;
-		$this->assertEquals( $test5, TRUE );
-
+		$test5 = $this->indexOf( 'Test5', $result ) == 6 ? true : false;
+		$this->assertEquals( $test5, true );
 	}
 
 	function testPerf_1() {
 		//Unit Test 7 - Performance test
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('U1288', array(143), array(146), 60 );
-		$deptree->addNode('U1287', array(159,136), array(143), 50 );
-		$deptree->addNode('U1289', array(159,136), array(144), 50 );
-		$deptree->addNode('U1290', array(144), array(147), 60 );
-		$deptree->addNode('U1291', array(159,136), array(148), 60 );
-		$deptree->addNode('U1292', array(159,136), array(140), 50 );
-		$deptree->addNode('U1293', array(159,136), array(141), 50 );
+		$deptree->addNode( 'U1288', [ 143 ], [ 146 ], 60 );
+		$deptree->addNode( 'U1287', [ 159, 136 ], [ 143 ], 50 );
+		$deptree->addNode( 'U1289', [ 159, 136 ], [ 144 ], 50 );
+		$deptree->addNode( 'U1290', [ 144 ], [ 147 ], 60 );
+		$deptree->addNode( 'U1291', [ 159, 136 ], [ 148 ], 60 );
+		$deptree->addNode( 'U1292', [ 159, 136 ], [ 140 ], 50 );
+		$deptree->addNode( 'U1293', [ 159, 136 ], [ 141 ], 50 );
 
-		$deptree->addNode('U1294', array(159,136,159), array(151), 50 );
-		$deptree->addNode('P2458', array(151), array(159), 40 );
-		$deptree->addNode('P2265', array(), array(136), 40 );
+		$deptree->addNode( 'U1294', [ 159, 136, 159 ], [ 151 ], 50 );
+		$deptree->addNode( 'P2458', [ 151 ], [ 159 ], 40 );
+		$deptree->addNode( 'P2265', [], [ 136 ], 40 );
 
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = array(
-					0 => 'P2265',
-					1 => 'P2458',
-					2 => 'U1294',
-					3 => 'U1287',
-					4 => 'U1288',
-					5 => 'U1289',
-					6 => 'U1290',
-					7 => 'U1291',
-					8 => 'U1292',
-					9 => 'U1293',
-					);
+		$should_match = [
+				0 => 'P2265',
+				1 => 'P2458',
+				2 => 'U1294',
+				3 => 'U1287',
+				4 => 'U1288',
+				5 => 'U1289',
+				6 => 'U1290',
+				7 => 'U1291',
+				8 => 'U1292',
+				9 => 'U1293',
+		];
 
-		$test1 = $this->indexOf( 'P2265', $result ) < $this->indexOf( 'P2458', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'P2265', $result ) < $this->indexOf( 'P2458', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'P2458', $result ) < $this->indexOf( 'U1287', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'P2458', $result ) < $this->indexOf( 'U1287', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test3 = $this->indexOf( 'U1287', $result ) < $this->indexOf( 'U1289', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'U1287', $result ) < $this->indexOf( 'U1289', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
 
-		$test4 = $this->indexOf( 'U1289', $result ) < $this->indexOf( 'U1292', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test4, TRUE );
+		$test4 = $this->indexOf( 'U1289', $result ) < $this->indexOf( 'U1292', $result ) ? true : false;
+		$this->assertEquals( $test4, true );
 
-		$test5 = $this->indexOf( 'U1292', $result ) < $this->indexOf( 'U1293', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test5, TRUE );
+		$test5 = $this->indexOf( 'U1292', $result ) < $this->indexOf( 'U1293', $result ) ? true : false;
+		$this->assertEquals( $test5, true );
 
-		$test6 = $this->indexOf( 'U1293', $result ) < $this->indexOf( 'U1294', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test6, TRUE );
+		$test6 = $this->indexOf( 'U1293', $result ) < $this->indexOf( 'U1294', $result ) ? true : false;
+		$this->assertEquals( $test6, true );
 
-		$test7 = $this->indexOf( 'U1294', $result ) < $this->indexOf( 'U1291', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test7, TRUE );
+		$test7 = $this->indexOf( 'U1294', $result ) < $this->indexOf( 'U1291', $result ) ? true : false;
+		$this->assertEquals( $test7, true );
 
-		$test8 = $this->indexOf( 'U1291', $result ) < $this->indexOf( 'U1288', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test8, TRUE );
+		$test8 = $this->indexOf( 'U1291', $result ) < $this->indexOf( 'U1288', $result ) ? true : false;
+		$this->assertEquals( $test8, true );
 
-		$test9 = $this->indexOf( 'U1288', $result ) < $this->indexOf( 'U1290', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test9, TRUE );
+		$test9 = $this->indexOf( 'U1288', $result ) < $this->indexOf( 'U1290', $result ) ? true : false;
+		$this->assertEquals( $test9, true );
 
-		$test10 = $this->indexOf( 'U1290', $result ) == 9 ? TRUE : FALSE;
-		$this->assertEquals( $test10, TRUE );
+		$test10 = $this->indexOf( 'U1290', $result ) == 9 ? true : false;
+		$this->assertEquals( $test10, true );
 	}
 
 	function testHard_4() {
@@ -443,43 +444,43 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//
 		//
 
-		$deptree->addNode('U2022', array(268,266), array(265), 30 );
-		$deptree->addNode('U2130', array(268,266), array(260), 50 );
-		$deptree->addNode('U2129', array(268,266), array(257), 50 );
+		$deptree->addNode( 'U2022', [ 268, 266 ], [ 265 ], 30 );
+		$deptree->addNode( 'U2130', [ 268, 266 ], [ 260 ], 50 );
+		$deptree->addNode( 'U2129', [ 268, 266 ], [ 257 ], 50 );
 
-		$deptree->addNode('P3072', array(), array(268), 40 );
-		$deptree->addNode('P3071', array(265), array(266), 40 );
-		$deptree->addNode('P3073', array(), array(283), 50 );
+		$deptree->addNode( 'P3072', [], [ 268 ], 40 );
+		$deptree->addNode( 'P3071', [ 265 ], [ 266 ], 40 );
+		$deptree->addNode( 'P3073', [], [ 283 ], 50 );
 
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = array(
-					0 => 'P3072',
-					1 => 'U2022',
-					2 => 'P3071',
-					3 => 'U2129',
-					4 => 'U2130',
-					5 => 'P3073',
-					);
+		$should_match = [
+				0 => 'P3072',
+				1 => 'U2022',
+				2 => 'P3071',
+				3 => 'U2129',
+				4 => 'U2130',
+				5 => 'P3073',
+		];
 
-		$test1 = $this->indexOf( 'P3072', $result ) < $this->indexOf( 'P3073', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'P3072', $result ) < $this->indexOf( 'P3073', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test2 = $this->indexOf( 'P3073', $result ) < $this->indexOf( 'U2022', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test2, TRUE );
+		$test2 = $this->indexOf( 'P3073', $result ) < $this->indexOf( 'U2022', $result ) ? true : false;
+		$this->assertEquals( $test2, true );
 
-		$test3 = $this->indexOf( 'U2022', $result ) < $this->indexOf( 'P3071', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test3, TRUE );
+		$test3 = $this->indexOf( 'U2022', $result ) < $this->indexOf( 'P3071', $result ) ? true : false;
+		$this->assertEquals( $test3, true );
 
-		$test4 = $this->indexOf( 'P3071', $result ) < $this->indexOf( 'U2129', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test4, TRUE );
+		$test4 = $this->indexOf( 'P3071', $result ) < $this->indexOf( 'U2129', $result ) ? true : false;
+		$this->assertEquals( $test4, true );
 
-		$test5 = $this->indexOf( 'U2129', $result ) < $this->indexOf( 'U2130', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test5, TRUE );
+		$test5 = $this->indexOf( 'U2129', $result ) < $this->indexOf( 'U2130', $result ) ? true : false;
+		$this->assertEquals( $test5, true );
 
-		$test10 = $this->indexOf( 'U2130', $result ) == 5 ? TRUE : FALSE;
-		$this->assertEquals( $test10, TRUE );
+		$test10 = $this->indexOf( 'U2130', $result ) == 5 ? true : false;
+		$this->assertEquals( $test10, true );
 	}
 
 	function testHard_5() {
@@ -756,112 +757,112 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		*/
 		$deptree = new DependencyTree();
 
-		$deptree->addNode('U2029',
-							array(101,102,120,254,128,103,104,123,124,125,126,129,130,256,105,119),
-							array(254), 40 );
+		$deptree->addNode( 'U2029',
+						   [ 101, 102, 120, 254, 128, 103, 104, 123, 124, 125, 126, 129, 130, 256, 105, 119 ],
+						   [ 254 ], 40 );
 
-		$deptree->addNode('U2060',
-							array(101,102,120,254,128,103,104,123,124,125,126,129,130,256,105,119, 255),
-							array(110), 50 );
+		$deptree->addNode( 'U2060',
+						   [ 101, 102, 120, 254, 128, 103, 104, 123, 124, 125, 126, 129, 130, 256, 105, 119, 255 ],
+						   [ 110 ], 50 );
 
-		$deptree->addNode('U2061',
-							array(110),
-							array(113), 60 );
+		$deptree->addNode( 'U2061',
+						   [ 110 ],
+						   [ 113 ], 60 );
 
-		$deptree->addNode('U2062',
-							array(101,102,120,254,128,103,104,123,124,125,126,129,130,256,105,119, 255),
-							array(111), 50 );
+		$deptree->addNode( 'U2062',
+						   [ 101, 102, 120, 254, 128, 103, 104, 123, 124, 125, 126, 129, 130, 256, 105, 119, 255 ],
+						   [ 111 ], 50 );
 
-		$deptree->addNode('U2063',
-							array(111),
-							array(114), 60 );
+		$deptree->addNode( 'U2063',
+						   [ 111 ],
+						   [ 114 ], 60 );
 
-		$deptree->addNode('U2064',
-							array(101,102,120,254,128,103,104,123,124,125,126,129,130,256,105,119),
-							array(115), 60 );
+		$deptree->addNode( 'U2064',
+						   [ 101, 102, 120, 254, 128, 103, 104, 123, 124, 125, 126, 129, 130, 256, 105, 119 ],
+						   [ 115 ], 60 );
 
-		$deptree->addNode('U2065',
-							array(101,102,120,254,128,103,104,123,124,125,126,129,130,256,105,119),
-							array(127), 50 );
+		$deptree->addNode( 'U2065',
+						   [ 101, 102, 120, 254, 128, 103, 104, 123, 124, 125, 126, 129, 130, 256, 105, 119 ],
+						   [ 127 ], 50 );
 
-		$deptree->addNode('U2066',
-							array(101,102,120,254,128,103,104,123,124,125,126,129,130,256,105,119, 127),
-							array(107), 50 );
+		$deptree->addNode( 'U2066',
+						   [ 101, 102, 120, 254, 128, 103, 104, 123, 124, 125, 126, 129, 130, 256, 105, 119, 127 ],
+						   [ 107 ], 50 );
 
-		$deptree->addNode('U2067',
-							array(),
-							array(109), 50 );
+		$deptree->addNode( 'U2067',
+						   [],
+						   [ 109 ], 50 );
 
-		$deptree->addNode('U2068',
-							array(101,102,120,254,128,103,104,123,124,125,126,129,130,256,105,119, 127, 121),
-							array(108), 50 );
+		$deptree->addNode( 'U2068',
+						   [ 101, 102, 120, 254, 128, 103, 104, 123, 124, 125, 126, 129, 130, 256, 105, 119, 127, 121 ],
+						   [ 108 ], 50 );
 
-		$deptree->addNode('P3217', array(NULL), array(256), 40 );
+		$deptree->addNode( 'P3217', [ null ], [ 256 ], 40 );
 
 		//
 		//Uncomment any of the ADDNODE lines below to cause the infinite loop
 		//
-		$deptree->addNode('P3290', array(NULL), array(256), 40 );
-		$deptree->addNode('P3294', array(NULL), array(256), 40 );
+		$deptree->addNode( 'P3290', [ null ], [ 256 ], 40 );
+		$deptree->addNode( 'P3294', [ null ], [ 256 ], 40 );
 
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
 		//THIS MAY NOT BE CORRECT...
-		$should_match = array(
-					0 => 'P3217',
-					1 => 'P3290',
-					2 => 'P3294',
-					3 => 'U2029',
-					4 => 'U2060',
-					5 => 'U2061',
-					6 => 'U2062',
-					7 => 'U2063',
-					8 => 'U2064',
-					9 => 'U2065',
-					10 => 'U2066',
-					11 => 'U2068',
-					12 => 'U2067',
-					);
+		$should_match = [
+				0  => 'P3217',
+				1  => 'P3290',
+				2  => 'P3294',
+				3  => 'U2029',
+				4  => 'U2060',
+				5  => 'U2061',
+				6  => 'U2062',
+				7  => 'U2063',
+				8  => 'U2064',
+				9  => 'U2065',
+				10 => 'U2066',
+				11 => 'U2068',
+				12 => 'U2067',
+		];
 
-		$test1 = $this->indexOf( 'P3217', $result ) < $this->indexOf( 'P3290', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'P3217', $result ) < $this->indexOf( 'P3290', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'P3290', $result ) < $this->indexOf( 'P3294', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'P3290', $result ) < $this->indexOf( 'P3294', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'P3294', $result ) < $this->indexOf( 'U2067', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'P3294', $result ) < $this->indexOf( 'U2067', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2067', $result ) < $this->indexOf( 'U2029', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2067', $result ) < $this->indexOf( 'U2029', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2029', $result ) < $this->indexOf( 'U2060', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2029', $result ) < $this->indexOf( 'U2060', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2060', $result ) < $this->indexOf( 'U2062', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2060', $result ) < $this->indexOf( 'U2062', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2062', $result ) < $this->indexOf( 'U2065', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2062', $result ) < $this->indexOf( 'U2065', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2065', $result ) < $this->indexOf( 'U2064', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2065', $result ) < $this->indexOf( 'U2064', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2064', $result ) < $this->indexOf( 'U2066', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2064', $result ) < $this->indexOf( 'U2066', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2066', $result ) < $this->indexOf( 'U2068', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2066', $result ) < $this->indexOf( 'U2068', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2068', $result ) < $this->indexOf( 'U2061', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2068', $result ) < $this->indexOf( 'U2061', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U2061', $result ) < $this->indexOf( 'U2063', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U2061', $result ) < $this->indexOf( 'U2063', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test10 = $this->indexOf( 'U2063', $result ) == 12 ? TRUE : FALSE;
-		$this->assertEquals( $test10, TRUE );
+		$test10 = $this->indexOf( 'U2063', $result ) == 12 ? true : false;
+		$this->assertEquals( $test10, true );
 	}
 
 	function testHard_6() {
@@ -1023,48 +1024,48 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//
 		//U4452 should be above U149 always!!
 		//
-		$deptree->addNode('U156', array(254), array(254), 40 );
+		$deptree->addNode( 'U156', [ 254 ], [ 254 ], 40 );
 
 		//$deptree->addNode('U4452', array(254), array(255), 60 ); //Works if I put this here
 
-		$deptree->addNode('U149', array(254,255), array(110), 50 );
-		$deptree->addNode('U153', array(254), array(115), 60 );
+		$deptree->addNode( 'U149', [ 254, 255 ], [ 110 ], 50 );
+		$deptree->addNode( 'U153', [ 254 ], [ 115 ], 60 );
 
-		$deptree->addNode('U4452', array(254), array(255), 60 ); //Fails if I put it here
+		$deptree->addNode( 'U4452', [ 254 ], [ 255 ], 60 ); //Fails if I put it here
 
-		$deptree->addNode('U998', array(254), array(127), 50 );
+		$deptree->addNode( 'U998', [ 254 ], [ 127 ], 50 );
 
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = array(
-					0 => 'U156',
-					1 => 'U4452',
-					2 => 'U149',
-					3 => 'U153',
-					4 => 'U998',
-					);
+		$should_match = [
+				0 => 'U156',
+				1 => 'U4452',
+				2 => 'U149',
+				3 => 'U153',
+				4 => 'U998',
+		];
 
 
-		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test5 = $this->indexOf( 'U149', $result ) == 4 ? TRUE : FALSE;
-		$this->assertEquals( $test5, TRUE );
+		$test5 = $this->indexOf( 'U149', $result ) == 4 ? true : false;
+		$this->assertEquals( $test5, true );
 	}
 
 	function testTwoTrees_1() {
 		$deptree = new DependencyTree();
-		$deptree->setTreeOrdering( TRUE );
+		$deptree->setTreeOrdering( true );
 
 
 		//
@@ -1072,68 +1073,67 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//
 
 		//Tree 1
-		$deptree->addNode('U156', array(254), array(254), 40 );
-		$deptree->addNode('U149', array(254,255), array(110), 50 );
-		$deptree->addNode('U153', array(254), array(115), 60 );
-		$deptree->addNode('U4452', array(254), array(255), 60 ); //Fails if I put it here
-		$deptree->addNode('U998', array(254), array(127), 50 );
+		$deptree->addNode( 'U156', [ 254 ], [ 254 ], 40 );
+		$deptree->addNode( 'U149', [ 254, 255 ], [ 110 ], 50 );
+		$deptree->addNode( 'U153', [ 254 ], [ 115 ], 60 );
+		$deptree->addNode( 'U4452', [ 254 ], [ 255 ], 60 ); //Fails if I put it here
+		$deptree->addNode( 'U998', [ 254 ], [ 127 ], 50 );
 
 		//Tree 2
-		$deptree->addNode('Z156', array(2540), array(2540), 40 );
-		$deptree->addNode('Z149', array(2540,2550), array(1100), 50 );
-		$deptree->addNode('Z153', array(2540), array(1150), 60 );
-		$deptree->addNode('Z4452', array(2540), array(2550), 60 ); //Fails if I put it here
-		$deptree->addNode('Z998', array(2540), array(1270), 50 );
+		$deptree->addNode( 'Z156', [ 2540 ], [ 2540 ], 40 );
+		$deptree->addNode( 'Z149', [ 2540, 2550 ], [ 1100 ], 50 );
+		$deptree->addNode( 'Z153', [ 2540 ], [ 1150 ], 60 );
+		$deptree->addNode( 'Z4452', [ 2540 ], [ 2550 ], 60 ); //Fails if I put it here
+		$deptree->addNode( 'Z998', [ 2540 ], [ 1270 ], 50 );
 
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = array(
-					0 => 'U156',
-					1 => 'U4452',
-					2 => 'U149',
-					3 => 'U153',
-					4 => 'U998',
-					);
+		$should_match = [
+				0 => 'U156',
+				1 => 'U4452',
+				2 => 'U149',
+				3 => 'U153',
+				4 => 'U998',
+		];
 
 
 		//Tree 1
-		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test5 = $this->indexOf( 'U149', $result ) == 4 ? TRUE : FALSE;
-		$this->assertEquals( $test5, TRUE );
+		$test5 = $this->indexOf( 'U149', $result ) == 4 ? true : false;
+		$this->assertEquals( $test5, true );
 
 		//Tree 2
-		$test1 = $this->indexOf( 'Z156', $result ) < $this->indexOf( 'Z998', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Z156', $result ) < $this->indexOf( 'Z998', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'Z998', $result ) < $this->indexOf( 'Z153', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Z998', $result ) < $this->indexOf( 'Z153', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'Z153', $result ) < $this->indexOf( 'Z4452', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Z153', $result ) < $this->indexOf( 'Z4452', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'Z4452', $result ) < $this->indexOf( 'Z149', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Z4452', $result ) < $this->indexOf( 'Z149', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test5 = $this->indexOf( 'Z149', $result ) == 9 ? TRUE : FALSE;
-		$this->assertEquals( $test5, TRUE );
-
+		$test5 = $this->indexOf( 'Z149', $result ) == 9 ? true : false;
+		$this->assertEquals( $test5, true );
 	}
 
 	function testTwoTrees_2() {
 		$deptree = new DependencyTree();
-		$deptree->setTreeOrdering( FALSE );
+		$deptree->setTreeOrdering( false );
 
 
 		//
@@ -1141,84 +1141,83 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//
 
 		//Tree 1
-		$deptree->addNode('U156', array(254), array(254), 40 );
-		$deptree->addNode('U149', array(254,255), array(110), 50 );
-		$deptree->addNode('U153', array(254), array(115), 60 );
-		$deptree->addNode('U4452', array(254), array(255), 60 ); //Fails if I put it here
-		$deptree->addNode('U998', array(254), array(127), 50 );
+		$deptree->addNode( 'U156', [ 254 ], [ 254 ], 40 );
+		$deptree->addNode( 'U149', [ 254, 255 ], [ 110 ], 50 );
+		$deptree->addNode( 'U153', [ 254 ], [ 115 ], 60 );
+		$deptree->addNode( 'U4452', [ 254 ], [ 255 ], 60 ); //Fails if I put it here
+		$deptree->addNode( 'U998', [ 254 ], [ 127 ], 50 );
 
 		//Tree 2
-		$deptree->addNode('Z156', array(2540), array(2540), 40 );
-		$deptree->addNode('Z149', array(2540,2550), array(1100), 50 );
-		$deptree->addNode('Z153', array(2540), array(1150), 60 );
-		$deptree->addNode('Z4452', array(2540), array(2550), 60 ); //Fails if I put it here
-		$deptree->addNode('Z998', array(2540), array(1270), 50 );
+		$deptree->addNode( 'Z156', [ 2540 ], [ 2540 ], 40 );
+		$deptree->addNode( 'Z149', [ 2540, 2550 ], [ 1100 ], 50 );
+		$deptree->addNode( 'Z153', [ 2540 ], [ 1150 ], 60 );
+		$deptree->addNode( 'Z4452', [ 2540 ], [ 2550 ], 60 ); //Fails if I put it here
+		$deptree->addNode( 'Z998', [ 2540 ], [ 1270 ], 50 );
 
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = array(
-					0 => 'U156',
-					1 => 'U4452',
-					2 => 'U149',
-					3 => 'U153',
-					4 => 'U998',
-					);
+		$should_match = [
+				0 => 'U156',
+				1 => 'U4452',
+				2 => 'U149',
+				3 => 'U153',
+				4 => 'U998',
+		];
 
 
 		//Tree 1
-		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
 		//Tree 2
-		$test1 = $this->indexOf( 'Z156', $result ) < $this->indexOf( 'Z998', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Z156', $result ) < $this->indexOf( 'Z998', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'Z998', $result ) < $this->indexOf( 'Z153', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Z998', $result ) < $this->indexOf( 'Z153', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'Z153', $result ) < $this->indexOf( 'Z4452', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Z153', $result ) < $this->indexOf( 'Z4452', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'Z4452', $result ) < $this->indexOf( 'Z149', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'Z4452', $result ) < $this->indexOf( 'Z149', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
 		//Combined Trees
-		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'Z156', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'Z156', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'Z153', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'Z153', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'Z4452', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
+		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'Z4452', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 
-		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'Z149', $result ) ? TRUE : FALSE;
-		$this->assertEquals( $test1, TRUE );
-
-
+		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'Z149', $result ) ? true : false;
+		$this->assertEquals( $test1, true );
 	}
-/*
-$deptree->addNode('P17', 	array(), 			array(124), 6000380 );
+	/*
+	$deptree->addNode('P17', 	array(), 			array(124), 6000380 );
 
-$deptree->addNode('U7897', 	array(104,121), 	array(120), 6000100 ); //Average Vacation Rate (per Day)
-$deptree->addNode('U7905', 	array(120), 		array(104), 4000200 ); //Vacation Pay (Based on Average Rate/Day)
-$deptree->addNode('U7907', 	array(104,121), 	array(121), 4000100 ); //Vac Normalization
-$deptree->addNode('U7909', 	array(121,104), 	array(92), 	5000205 ); //Income Tax
+	$deptree->addNode('U7897', 	array(104,121), 	array(120), 6000100 ); //Average Vacation Rate (per Day)
+	$deptree->addNode('U7905', 	array(120), 		array(104), 4000200 ); //Vacation Pay (Based on Average Rate/Day)
+	$deptree->addNode('U7907', 	array(104,121), 	array(121), 4000100 ); //Vac Normalization
+	$deptree->addNode('U7909', 	array(121,104), 	array(92), 	5000205 ); //Income Tax
 
 
-U7905 (R: 120 P: 104) -> U7897 (R:104,121 P: 120)
-						 U7907 (R:104,121 P: 121)
+	U7905 (R: 120 P: 104) -> U7897 (R:104,121 P: 120)
+							 U7907 (R:104,121 P: 121)
 
- */
+	 */
 }
+
 ?>

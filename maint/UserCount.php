@@ -38,54 +38,54 @@
  * Counts the total active/inactive/deleted users for each company once a day.
  *
  */
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
 $cuclf = new CompanyUserCountListFactory();
 $cuclf->getActiveUsers();
 if ( $cuclf->getRecordCount() > 0 ) {
-	foreach( $cuclf as $cuc_obj ) {
-		$user_counts[$cuc_obj->getColumn('company_id')]['active'] = $cuc_obj->getColumn('total');
+	foreach ( $cuclf as $cuc_obj ) {
+		$user_counts[$cuc_obj->getColumn( 'company_id' )]['active'] = $cuc_obj->getColumn( 'total' );
 	}
 }
 
 $cuclf->getInActiveUsers();
 if ( $cuclf->getRecordCount() > 0 ) {
-	foreach( $cuclf as $cuc_obj ) {
-		$user_counts[$cuc_obj->getColumn('company_id')]['inactive'] = $cuc_obj->getColumn('total');
+	foreach ( $cuclf as $cuc_obj ) {
+		$user_counts[$cuc_obj->getColumn( 'company_id' )]['inactive'] = $cuc_obj->getColumn( 'total' );
 	}
 }
 
 $cuclf->getDeletedUsers();
 if ( $cuclf->getRecordCount() > 0 ) {
-	foreach( $cuclf as $cuc_obj ) {
-		$user_counts[$cuc_obj->getColumn('company_id')]['deleted'] = $cuc_obj->getColumn('total');
+	foreach ( $cuclf as $cuc_obj ) {
+		$user_counts[$cuc_obj->getColumn( 'company_id' )]['deleted'] = $cuc_obj->getColumn( 'total' );
 	}
 }
 
 $cuclf->StartTransaction();
-if ( isset($user_counts) AND count($user_counts) > 0 ) {
-	foreach( $user_counts as $company_id => $user_count_arr) {
+if ( isset( $user_counts ) && count( $user_counts ) > 0 ) {
+	foreach ( $user_counts as $company_id => $user_count_arr ) {
 
 		$cucf = new CompanyUserCountFactory();
 		$cucf->setCompany( $company_id );
 		$cucf->setDateStamp( time() );
-		if ( !isset($user_count_arr['active']) ) {
+		if ( !isset( $user_count_arr['active'] ) ) {
 			$user_count_arr['active'] = 0;
 		}
 		$cucf->setActiveUsers( $user_count_arr['active'] );
 
-		if ( !isset($user_count_arr['inactive']) ) {
+		if ( !isset( $user_count_arr['inactive'] ) ) {
 			$user_count_arr['inactive'] = 0;
 		}
 		$cucf->setInActiveUsers( $user_count_arr['inactive'] );
 
-		if ( !isset($user_count_arr['deleted']) ) {
+		if ( !isset( $user_count_arr['deleted'] ) ) {
 			$user_count_arr['deleted'] = 0;
 		}
-		$cucf->setDeletedUsers( $user_count_arr['deleted']);
+		$cucf->setDeletedUsers( $user_count_arr['deleted'] );
 
-		Debug::text('Company ID: '. $company_id .' Active: '. $user_count_arr['active'] .' InActive: '. $user_count_arr['inactive'] .' Deleted: '. $user_count_arr['deleted'], __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $company_id . ' Active: ' . $user_count_arr['active'] . ' InActive: ' . $user_count_arr['inactive'] . ' Deleted: ' . $user_count_arr['deleted'], __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( $cucf->isValid() ) {
 			$cucf->Save();

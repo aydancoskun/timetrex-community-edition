@@ -1,124 +1,125 @@
 .a-dropdown {
-    float: left;
-    margin-bottom: 5px;
-    white-space: nowrap;
+	float: left;
+	margin-bottom: 5px;
+	white-space: nowrap;
 }
 
 .a-dropdown .unselect-grid-div {
-    background-color: #34628D;
-    border-radius: 4px;
-    height: auto;
-    /*padding-bottom: 10px;*/
-    width: 450px;
-    float: left;
+	background-color: #34628d;
+	border-radius: 4px;
+	height: auto;
+	/*padding-bottom: 10px;*/
+	width: 450px;
+	float: left;
 }
 
 .a-dropdown .search-input-place-holder {
-    opacity: 0;
+	opacity: 0;
 }
 
 .a-dropdown .search-input {
-    outline: none;
-    border-style: solid;
-    border-right: none;
-    border-width: 1px;
-    height: 20px;
+	outline: none;
+	border-style: solid;
+	border-right: none;
+	border-width: 1px;
+	height: 20px;
 }
 
 .a-dropdown .search-input-focus-out {
 
-    font-size: 12px;
-    text-align: center;
-    color: #777777;
+	font-size: 12px;
+	text-align: center;
+	color: #777777;
 }
 
 .a-dropdown .search-input-focus-in {
 
-    font-size: 12px;
-    text-align: left;
-    color: #333333;
+	font-size: 12px;
+	text-align: left;
+	color: #333333;
 }
 
 .a-dropdown .unselect-grid-div .unselect-grid-title-bar {
-    height: 30px;
-    left: 10px;
-    position: relative;
-    top: 7px;
-    color: #ffffff;
+	height: 30px;
+	left: 10px;
+	position: relative;
+	top: 7px;
+	color: #ffffff;
 }
 
 .a-dropdown .unselect-grid-div .unselect-grid-search-div {
-    position: relative;
+	position: relative;
 
 }
 
 .a-dropdown .unselect-grid-div .unselect-grid-border-div {
-    position: relative;
-    left: 10px;
-    border: 2px solid red;
-    width: 432px;
-    overflow-x: auto;
+	position: relative;
+	left: 10px;
+	border: 2px solid red;
+	width: 432px;
+	overflow-x: auto;
 
 }
 
 .a-dropdown .unselect-grid-div .single-mode-border {
-    border: 2px solid #00ff00;
+	border: 2px solid #00ff00;
 }
 
 .a-dropdown .unselect-grid-div .unselect-grid-bottom-bar {
-    height: 25px;
-    text-align: center;
-    position: relative;
+	height: 25px;
+	text-align: center;
+	position: relative;
 }
 
 .a-dropdown .unselect-grid-div .disable-unselect-grid-bottom-bar {
-    height: 10px;
-    text-align: center;
+	height: 10px;
+	text-align: center;
 }
 
 .a-dropdown .unselect-grid-div .unselect-grid-bottom-bar .total-number-span {
-    color: #FFFFFF;
-    line-height: 25px;
-    vertical-align: middle;
-    font-size: 10px;
-    float: left;
-    width: 260px;
-    left: 50%;
-    position: absolute;
-    margin-left: -130px;
+	color: #ffffff;
+	line-height: 25px;
+	vertical-align: middle;
+	font-size: 10px;
+	float: left;
+	width: 260px;
+	left: 50%;
+	position: absolute;
+	margin-left: -130px;
 }
 
 .a-dropdown .ui-jqgrid {
-    min-height: 100px;
+	min-height: 100px;
 }
+
 .a-dropdown .unselect-grid-div .ui-jqgrid {
-    position: relative;
-    border-radius: 0;
+	position: relative;
+	border-radius: 0;
 }
 
 .a-dropdown .select-grid-div {
-    background-color: #34628D;
-    border-radius: 4px;
-    height: auto;
-    padding-bottom: 10px;
-    width: 450px;
-    display: inline-block;
+	background-color: #34628d;
+	border-radius: 4px;
+	height: auto;
+	padding-bottom: 10px;
+	width: 450px;
+	display: inline-block;
 }
 
 .a-dropdown .select-grid-div .select-grid-title-bar {
-    height: 30px;
-    left: 10px;
-    position: relative;
-    top: 7px;
-    color: #ffffff;
+	height: 30px;
+	left: 10px;
+	position: relative;
+	top: 7px;
+	color: #ffffff;
 }
 
 .a-dropdown .select-grid-div .select-grid-border-div {
-    position: relative;
-    left: 10px;
-    border: 2px solid #00ff00;
-    width: 432px;
-    overflow: auto;
+	position: relative;
+	left: 10px;
+	border: 2px solid #00ff00;
+	width: 432px;
+	overflow: auto;
 
 }
 
@@ -127,25 +128,25 @@
 }
 
 .a-dropdown .select-grid-div .ui-jqgrid {
-    position: relative;
-    border-radius: 0;
+	position: relative;
+	border-radius: 0;
 
 }
 
 .a-dropdown .left-and-right-div {
 
-    background-color: #34628D;
-    float: left;
-    height: 60px;
-    position: relative;
-    text-align: center;
-    top: 75px;
-    width: 30px;
+	background-color: #34628d;
+	float: left;
+	height: 60px;
+	position: relative;
+	text-align: center;
+	top: 75px;
+	width: 30px;
 }
 
 .a-dropdown .left-and-right-div .right-arrow-div {
 
-    margin-top: 6px;
+	margin-top: 6px;
 }
 
 .a-dropdown .left-and-right-div .left-arrow-div {
@@ -153,166 +154,166 @@
 }
 
 .a-dropdown .left-and-right-div .right-arrow-div .a-grid-right-arrow {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .a-dropdown .left-and-right-div .left-arrow-div .a-grid-left-arrow {
-    cursor: pointer;
+	cursor: pointer;
 
 }
 
 .a-dropdown .a-grid-title {
-    font-size: 13px;
-    float: left;
+	font-size: 13px;
+	float: left;
 
 }
 
 .a-dropdown .a-grid-button {
-    position: relative;
-    top: -2px;
-    background-color: #1B3E60;
-    border: 1px solid #6687A6;
-    border-radius: 4px;
-    color: #FFFFFF;
-    font-size: 10px;
-    padding-bottom: 2px;
-    padding-top: 2px;
-    float: right;
-    right: 20px;
-    cursor: pointer;
-    margin-left: 2px;
+	position: relative;
+	top: -2px;
+	background-color: #1b3e60;
+	border: 1px solid #6687a6;
+	border-radius: 4px;
+	color: #ffffff;
+	font-size: 10px;
+	padding-bottom: 2px;
+	padding-top: 2px;
+	float: right;
+	right: 20px;
+	cursor: pointer;
+	margin-left: 2px;
 }
 
 .a-dropdown .a-grid-close-button {
-    background: url("images/close.png") repeat scroll 0 0 transparent;
-    border: medium none;
-    cursor: pointer;
-    float: right;
-    height: 18px;
-    position: relative;
-    right: 18px;
-    width: 18px;
+	background: url("images/close.png") repeat scroll 0 0 transparent;
+	border: medium none;
+	cursor: pointer;
+	float: right;
+	height: 18px;
+	position: relative;
+	right: 18px;
+	width: 18px;
 }
 
 .a-dropdown .a-grid-checkbox {
-    float: right;
-    position: relative;
-    right: 25px;
-    top: -2px;
+	float: right;
+	position: relative;
+	right: 25px;
+	top: -2px;
 }
 
 .a-dropdown .a-grid-checkbox-label {
-    float: right;
-    font-size: 11px;
-    position: relative;
-    right: 25px;
-    top: 1px;
+	float: right;
+	font-size: 11px;
+	position: relative;
+	right: 25px;
+	top: 1px;
 }
 
 .a-dropdown .left-buttons-div {
-    float: left;
-    color: #ffffff;
-    margin-left: 10px;
-    margin-top: 1px;
+	float: left;
+	color: #ffffff;
+	margin-left: 10px;
+	margin-top: 1px;
 
 }
 
 .a-dropdown .right-buttons-div {
-    float: right;
-    color: #ffffff;
-    margin-right: 7px;
-    margin-top: 1px;
+	float: right;
+	color: #ffffff;
+	margin-right: 7px;
+	margin-top: 1px;
 
 }
 
 .a-dropdown .disabled {
-    color: #999999;
-    -webkit-filter: grayscale(100%);
-    -moz-filter: grayscale(100%);
-    -ms-filter: grayscale(100%);
-    -o-filter: grayscale(100%);
+	color: #999999;
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	-ms-filter: grayscale(100%);
+	-o-filter: grayscale(100%);
 
-    filter: grayscale(100%);
-    /*filter: url(gray.svg#grayscale);*/
+	filter: grayscale(100%);
+	/*filter: url(gray.svg#grayscale);*/
 
-    filter: gray;
+	filter: gray;
 }
 
 .a-dropdown .double-left-arrow {
-    background: url("../../../../images/double_left_arrow.png");
-    height: 14px;
-    width: 17px;
-    float: left;
-    margin-top: 4px;
+	background: url("../../../../images/double_left_arrow.png");
+	height: 14px;
+	width: 17px;
+	float: left;
+	margin-top: 4px;
 
 }
 
 .a-dropdown .double-right-arrow {
-    float: left;
-    background: url("../../../../images/double_right_arrow.png");
-    height: 14px;
-    width: 17px;
-    float: left;
-    margin-top: 4px;
+	float: left;
+	background: url("../../../../images/double_right_arrow.png");
+	height: 14px;
+	width: 17px;
+	float: left;
+	margin-top: 4px;
 }
 
 .a-dropdown .right-arrow {
-    background: url("../../../../images/right_arrow.png");
-    height: 14px;
-    width: 12px;
-    float: left;
-    margin-top: 4px;
+	background: url("../../../../images/right_arrow.png");
+	height: 14px;
+	width: 12px;
+	float: left;
+	margin-top: 4px;
 }
 
 .a-dropdown .left-arrow {
-    background: url("../../../../images/left_arrow.png");
-    height: 14px;
-    width: 12px;
-    float: left;
-    margin-top: 4px;
+	background: url("../../../../images/left_arrow.png");
+	height: 14px;
+	width: 12px;
+	float: left;
+	margin-top: 4px;
 }
 
 .a-dropdown .paging-2-span {
-    float: left;
-    margin-right: 2px;
-    margin-top: 3px;
-    cursor: pointer;
-    font-size: 11px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+	float: left;
+	margin-right: 2px;
+	margin-top: 3px;
+	cursor: pointer;
+	font-size: 11px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .a-dropdown .drop-position {
-    background: red;
+	background: red;
 }
 
 .a-dropdown .search-input-close {
-    position: relative;
-    right: -6px;
-    color: #ffffff;
-    cursor: pointer;
-    background: url("../../../../images/close.png") repeat scroll 0 0 rgba(0, 0, 0, 0);
-    width: 12px;
-    height: 12px;
+	position: relative;
+	right: -6px;
+	color: #ffffff;
+	cursor: pointer;
+	background: url("../../../../images/close.png") repeat scroll 0 0 rgba(0, 0, 0, 0);
+	width: 12px;
+	height: 12px;
 }
 
 .a-dropdown .close-btn {
-    background: rgba(0, 0, 0, 0);
-    border: medium none;
-    cursor: pointer;
-    height: 12px;
-    position: relative;
-    padding: 0;
-    width: 21px !important;
+	background: rgba(0, 0, 0, 0);
+	border: medium none;
+	cursor: pointer;
+	height: 12px;
+	position: relative;
+	padding: 0;
+	width: 21px !important;
 }
 
 .a-dropdown .edit-columnIcon-div {
-    float: left;
-    width: 20px;
+	float: left;
+	width: 20px;
 
 }
 
@@ -321,15 +322,15 @@
 }
 
 .a-dropdown .selected-tree-cell {
-    color: #8c8c8c;
+	color: #8c8c8c;
 }
 
 .a-dropdown .a-grid-button {
-    top: -3px;
-    padding-bottom: 4px;
-    padding-top: 4px;
+	top: -3px;
+	padding-bottom: 4px;
+	padding-top: 4px;
 }
 
 .a-dropdown .a-grid-close-button {
-    top: -2px;
+	top: -2px;
 }

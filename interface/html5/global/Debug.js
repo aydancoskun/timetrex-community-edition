@@ -3,7 +3,7 @@ var Debug = function() {
 //Global variables and functions will be used everywhere
 
 Debug.data = {};
-Debug.data.start_execution_time = (new Date()).getTime();
+Debug.data.start_execution_time = ( new Date() ).getTime();
 
 Debug.Arr = function( arr, text, file, class_name, function_name, verbosity ) {
 	if ( this.getEnable() && verbosity <= this.getVerbosity() ) {
@@ -15,7 +15,7 @@ Debug.Arr = function( arr, text, file, class_name, function_name, verbosity ) {
 
 Debug.Text = function( text, file, class_name, function_name, verbosity ) {
 	if ( this.getEnable() && verbosity <= this.getVerbosity() ) {
-		var time = ('00000' + Debug.getExecutionTime()).slice( -5 );
+		var time = ( '00000' + Debug.getExecutionTime() ).slice( -5 );
 		var output = ' DEBUG [' + time + 'ms] ';
 		if ( file != undefined ) {
 			output += file + '::';
@@ -37,7 +37,7 @@ Debug.Text = function( text, file, class_name, function_name, verbosity ) {
 };
 
 // Used to temporarily highlight text and values during development. Default can be level 1 as function use should be temporary, and not committed in code
-Debug.Highlight = function ( text, variable, verbosity ) {
+Debug.Highlight = function( text, variable, verbosity ) {
 	verbosity = verbosity || 1;
 	if ( this.getEnable() && verbosity <= this.getVerbosity() ) {
 		var time = ( '00000' + Debug.getExecutionTime() ).slice( -5 );
@@ -67,8 +67,7 @@ Debug.Highlight = function ( text, variable, verbosity ) {
 
 		if ( variable == true ) {
 			style_boolean += ';background:green';
-		}
-		else if ( variable == false ) {
+		} else if ( variable == false ) {
 			style_boolean += ';background:red';
 		}
 
@@ -96,7 +95,7 @@ Debug.getVerbosity = function() {
 };
 
 Debug.getExecutionTime = function() {
-	return (new Date()).getTime() - this.data.start_execution_time;
+	return ( new Date() ).getTime() - this.data.start_execution_time;
 };
 
 Debug.getEnable = function() {
@@ -185,7 +184,6 @@ Debug.varDump = function( obj ) {
 	return result.replace( /,\n$/, '' );
 };
 
-
 Debug.save = function() {
 	if ( typeof this.data != 'undefined' ) {
 		//LocalCacheData object doesn't exist when this object is instantiated
@@ -221,10 +219,10 @@ window.addEventListener( 'keydown', function( e ) {
 	//CTRL+ALT+SHIFT+F11(122) -- Enable API call tracing to browser console
 	if ( evt.ctrlKey && evt.shiftKey && evt.altKey && keyCode == 122 ) {
 		if ( Global.enable_api_tracing && Global.enable_api_tracing == true ) {
-			alert( 'API Tracing is disabled.');
+			alert( 'API Tracing is disabled.' );
 			Global.enable_api_tracing = false;
 		} else {
-			alert( 'API Tracing is enabled, please open your browsers developer console to view.');
+			alert( 'API Tracing is enabled, please open your browsers developer console to view.' );
 			Global.enable_api_tracing = true;
 		}
 	}

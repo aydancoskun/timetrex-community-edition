@@ -44,1821 +44,1821 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 	public $pdf_template = '941sb.pdf';
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 				'year' => 'isNumeric',
-				'ein'  => array('stripNonNumeric', 'isNumeric'),
-		);
+				'ein'  => [ 'stripNonNumeric', 'isNumeric' ],
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array(
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [
 			//Initialize page1, replace years on template.
-			array(
+			[
 					'page'          => 1,
 					'template_page' => 1,
 					'value'         => '(Rev. ' . $this->year . ')',
-					'on_background' => TRUE,
-					'coordinates'   => array(
+					'on_background' => true,
+					'coordinates'   => [
 							'x'          => 32,
 							'y'          => 100,
 							'h'          => 11,
 							'w'          => 70,
 							'halign'     => 'L',
-							'fill_color' => array(255, 255, 255),
-					),
-					'font'          => array(
+							'fill_color' => [ 255, 255, 255 ],
+					],
+					'font'          => [
 							'size' => 7,
-					),
-			),
-			array(
+					],
+			],
+			[
 					'value'         => '(Rev. ' . $this->year . ')',
-					'on_background' => TRUE,
-					'coordinates'   => array(
+					'on_background' => true,
+					'coordinates'   => [
 							'x'          => 521,
 							'y'          => 778,
 							'h'          => 11,
 							'w'          => 40,
 							'halign'     => 'C',
-							'fill_color' => array(255, 255, 255),
-					),
-					'font'          => array(
+							'fill_color' => [ 255, 255, 255 ],
+					],
+					'font'          => [
 							'size' => 7,
-					),
-			),
+					],
+			],
 			//Finish initializing page 1.
 
-			'ein' => array(
+			'ein' => [
 					'page'          => 1,
 					'template_page' => 1,
 					'function'      => 'drawChars', //custom drawing function.
-					'coordinates'   => array(
-							array(
+					'coordinates'   => [
+							[
 									'type'   => 'static', //static or relative
 									'x'      => 142,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 167,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 205,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 229,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 254,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 279,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 304,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 328,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 353,
 									'y'      => 119,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-					),
-					'font'          => array(
+							],
+					],
+					'font'          => [
 							'size' => 12,
 							'type' => 'B',
-					),
-			),
+					],
+			],
 
-			'name'    => array(
-					'coordinates' => array(
+			'name'    => [
+					'coordinates' => [
 							'x'      => 126,
 							'y'      => 140,
 							'h'      => 18,
 							'w'      => 246,
 							'halign' => 'L',
-					),
-			),
-			'year'    => array(
+					],
+			],
+			'year'    => [
 					'function'    => 'drawChars', //custom drawing function.
-					'coordinates' => array(
-							array(
+					'coordinates' => [
+							[
 									'type'   => 'static', //static or relative
 									'x'      => 143,
 									'y'      => 162,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 167,
 									'y'      => 162,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 192,
 									'y'      => 162,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-							array(
+							],
+							[
 									'x'      => 217,
 									'y'      => 162,
 									'h'      => 17,
 									'w'      => 19,
 									'halign' => 'C',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'size' => 12,
 							'type' => 'B',
-					),
-			),
-			'quarter' => array(
+					],
+			],
+			'quarter' => [
 					'function'    => 'drawCheckBox',
-					'coordinates' => array(
-							1 => array(
+					'coordinates' => [
+							1 => [
 									'x'      => 412,
 									'y'      => 147,
 									'h'      => 11,
 									'w'      => 12,
 									'halign' => 'C',
-							),
-							2 => array(
+							],
+							2 => [
 									'x'      => 412,
 									'y'      => 165,
 									'h'      => 11,
 									'w'      => 12,
 									'halign' => 'C',
-							),
-							3 => array(
+							],
+							3 => [
 									'x'      => 412,
 									'y'      => 182,
 									'h'      => 11,
 									'w'      => 12,
 									'halign' => 'C',
-							),
-							4 => array(
+							],
+							4 => [
 									'x'      => 412,
 									'y'      => 200,
 									'h'      => 11,
 									'w'      => 12,
 									'halign' => 'C',
-							),
-					),
-					'font'        => array(
+							],
+					],
+					'font'        => [
 							'size' => 10,
 							'type' => 'B',
-					),
-			),
+					],
+			],
 
-			'month1' => array(
+			'month1' => [
 					'function'    => 'drawSplitDecimalFloatGrid',
-					'coordinates' => array(
+					'coordinates' => [
 						//Column 1
-						1  => array(
-								array(
+						1  => [
+								[
 										'x'      => 41,
 										'y'      => 299,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 299,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						2  => array(
-								array(
+								],
+						],
+						2  => [
+								[
 										'x'      => 41,
 										'y'      => 317,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 317,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						3  => array(
-								array(
+								],
+						],
+						3  => [
+								[
 										'x'      => 41,
 										'y'      => 334,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 334,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						4  => array(
-								array(
+								],
+						],
+						4  => [
+								[
 										'x'      => 41,
 										'y'      => 351,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 351,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						5  => array(
-								array(
+								],
+						],
+						5  => [
+								[
 										'x'      => 41,
 										'y'      => 368,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 368,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						6  => array(
-								array(
+								],
+						],
+						6  => [
+								[
 										'x'      => 41,
 										'y'      => 386,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 386,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						7  => array(
-								array(
+								],
+						],
+						7  => [
+								[
 										'x'      => 41,
 										'y'      => 403,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 403,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						8  => array(
-								array(
+								],
+						],
+						8  => [
+								[
 										'x'      => 41,
 										'y'      => 421,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 421,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 
 						//Column 2
-						9  => array(
-								array(
+						9  => [
+								[
 										'x'      => 143,
 										'y'      => 299,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 299,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						10 => array(
-								array(
+								],
+						],
+						10 => [
+								[
 										'x'      => 143,
 										'y'      => 317,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 317,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						11 => array(
-								array(
+								],
+						],
+						11 => [
+								[
 										'x'      => 143,
 										'y'      => 334,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 334,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						12 => array(
-								array(
+								],
+						],
+						12 => [
+								[
 										'x'      => 143,
 										'y'      => 351,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 351,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						13 => array(
-								array(
+								],
+						],
+						13 => [
+								[
 										'x'      => 143,
 										'y'      => 368,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 368,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						14 => array(
-								array(
+								],
+						],
+						14 => [
+								[
 										'x'      => 143,
 										'y'      => 386,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 386,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						15 => array(
-								array(
+								],
+						],
+						15 => [
+								[
 										'x'      => 143,
 										'y'      => 403,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 403,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						16 => array(
-								array(
+								],
+						],
+						16 => [
+								[
 										'x'      => 143,
 										'y'      => 421,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 421,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 
 						//Column 3
-						17 => array(
-								array(
+						17 => [
+								[
 										'x'      => 245,
 										'y'      => 299,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 299,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						18 => array(
-								array(
+								],
+						],
+						18 => [
+								[
 										'x'      => 245,
 										'y'      => 317,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 317,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						19 => array(
-								array(
+								],
+						],
+						19 => [
+								[
 										'x'      => 245,
 										'y'      => 334,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 334,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						20 => array(
-								array(
+								],
+						],
+						20 => [
+								[
 										'x'      => 245,
 										'y'      => 351,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 351,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						21 => array(
-								array(
+								],
+						],
+						21 => [
+								[
 										'x'      => 245,
 										'y'      => 368,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 368,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						22 => array(
-								array(
+								],
+						],
+						22 => [
+								[
 										'x'      => 245,
 										'y'      => 386,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 386,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						23 => array(
-								array(
+								],
+						],
+						23 => [
+								[
 										'x'      => 245,
 										'y'      => 403,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 403,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						24 => array(
-								array(
+								],
+						],
+						24 => [
+								[
 										'x'      => 245,
 										'y'      => 421,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 421,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 
 						//Column 3
-						25 => array(
-								array(
+						25 => [
+								[
 										'x'      => 347,
 										'y'      => 299,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 299,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						26 => array(
-								array(
+								],
+						],
+						26 => [
+								[
 										'x'      => 347,
 										'y'      => 317,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 317,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						27 => array(
-								array(
+								],
+						],
+						27 => [
+								[
 										'x'      => 347,
 										'y'      => 334,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 334,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						28 => array(
-								array(
+								],
+						],
+						28 => [
+								[
 										'x'      => 347,
 										'y'      => 351,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 351,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						29 => array(
-								array(
+								],
+						],
+						29 => [
+								[
 										'x'      => 347,
 										'y'      => 368,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 368,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						30 => array(
-								array(
+								],
+						],
+						30 => [
+								[
 										'x'      => 347,
 										'y'      => 386,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 386,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						31 => array(
-								array(
+								],
+						],
+						31 => [
+								[
 										'x'      => 347,
 										'y'      => 403,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 403,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 
-					),
-			),
-			'month2' => array(
+					],
+			],
+			'month2' => [
 					'function'    => 'drawSplitDecimalFloatGrid',
-					'coordinates' => array(
+					'coordinates' => [
 						//Column 1
-						1  => array(
-								array(
+						1  => [
+								[
 										'x'      => 41,
 										'y'      => 452,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 452,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						2  => array(
-								array(
+								],
+						],
+						2  => [
+								[
 										'x'      => 41,
 										'y'      => 469,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 469,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						3  => array(
-								array(
+								],
+						],
+						3  => [
+								[
 										'x'      => 41,
 										'y'      => 486,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 486,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						4  => array(
-								array(
+								],
+						],
+						4  => [
+								[
 										'x'      => 41,
 										'y'      => 503,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 503,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						5  => array(
-								array(
+								],
+						],
+						5  => [
+								[
 										'x'      => 41,
 										'y'      => 521,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 521,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						6  => array(
-								array(
+								],
+						],
+						6  => [
+								[
 										'x'      => 41,
 										'y'      => 539,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 539,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						7  => array(
-								array(
+								],
+						],
+						7  => [
+								[
 										'x'      => 41,
 										'y'      => 556,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 556,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						8  => array(
-								array(
+								],
+						],
+						8  => [
+								[
 										'x'      => 41,
 										'y'      => 573,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 573,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 
 						//Column 2
-						9  => array(
-								array(
+						9  => [
+								[
 										'x'      => 143,
 										'y'      => 452,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 452,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						10 => array(
-								array(
+								],
+						],
+						10 => [
+								[
 										'x'      => 143,
 										'y'      => 469,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 469,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						11 => array(
-								array(
+								],
+						],
+						11 => [
+								[
 										'x'      => 143,
 										'y'      => 486,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 486,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						12 => array(
-								array(
+								],
+						],
+						12 => [
+								[
 										'x'      => 143,
 										'y'      => 503,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 503,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						13 => array(
-								array(
+								],
+						],
+						13 => [
+								[
 										'x'      => 143,
 										'y'      => 521,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 521,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						14 => array(
-								array(
+								],
+						],
+						14 => [
+								[
 										'x'      => 143,
 										'y'      => 539,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 539,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						15 => array(
-								array(
+								],
+						],
+						15 => [
+								[
 										'x'      => 143,
 										'y'      => 556,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 556,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						16 => array(
-								array(
+								],
+						],
+						16 => [
+								[
 										'x'      => 143,
 										'y'      => 573,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 573,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 
 
 						//Column 3
-						17 => array(
-								array(
+						17 => [
+								[
 										'x'      => 245,
 										'y'      => 452,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 452,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						18 => array(
-								array(
+								],
+						],
+						18 => [
+								[
 										'x'      => 245,
 										'y'      => 469,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 469,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						19 => array(
-								array(
+								],
+						],
+						19 => [
+								[
 										'x'      => 245,
 										'y'      => 486,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 486,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						20 => array(
-								array(
+								],
+						],
+						20 => [
+								[
 										'x'      => 245,
 										'y'      => 503,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 503,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						21 => array(
-								array(
+								],
+						],
+						21 => [
+								[
 										'x'      => 245,
 										'y'      => 521,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 521,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						22 => array(
-								array(
+								],
+						],
+						22 => [
+								[
 										'x'      => 245,
 										'y'      => 539,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 539,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						23 => array(
-								array(
+								],
+						],
+						23 => [
+								[
 										'x'      => 245,
 										'y'      => 556,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 556,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						24 => array(
-								array(
+								],
+						],
+						24 => [
+								[
 										'x'      => 245,
 										'y'      => 573,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 573,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 						//Column 4
-						25 => array(
-								array(
+						25 => [
+								[
 										'x'      => 347,
 										'y'      => 452,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 452,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						26 => array(
-								array(
+								],
+						],
+						26 => [
+								[
 										'x'      => 347,
 										'y'      => 469,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 469,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						27 => array(
-								array(
+								],
+						],
+						27 => [
+								[
 										'x'      => 347,
 										'y'      => 486,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 486,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						28 => array(
-								array(
+								],
+						],
+						28 => [
+								[
 										'x'      => 347,
 										'y'      => 503,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 503,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						29 => array(
-								array(
+								],
+						],
+						29 => [
+								[
 										'x'      => 347,
 										'y'      => 521,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 521,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						30 => array(
-								array(
+								],
+						],
+						30 => [
+								[
 										'x'      => 347,
 										'y'      => 539,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 539,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						31 => array(
-								array(
+								],
+						],
+						31 => [
+								[
 										'x'      => 347,
 										'y'      => 556,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 556,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-					),
-			),
-			'month3' => array(
+								],
+						],
+					],
+			],
+			'month3' => [
 					'function'    => 'drawSplitDecimalFloatGrid',
-					'coordinates' => array(
+					'coordinates' => [
 						//Column 1
-						1  => array(
-								array(
+						1  => [
+								[
 										'x'      => 41,
 										'y'      => 604,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 604,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						2  => array(
-								array(
+								],
+						],
+						2  => [
+								[
 										'x'      => 41,
 										'y'      => 621,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 621,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						3  => array(
-								array(
+								],
+						],
+						3  => [
+								[
 										'x'      => 41,
 										'y'      => 639,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 639,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						4  => array(
-								array(
+								],
+						],
+						4  => [
+								[
 										'x'      => 41,
 										'y'      => 656,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 656,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						5  => array(
-								array(
+								],
+						],
+						5  => [
+								[
 										'x'      => 41,
 										'y'      => 673,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 673,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						6  => array(
-								array(
+								],
+						],
+						6  => [
+								[
 										'x'      => 41,
 										'y'      => 691,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 691,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						7  => array(
-								array(
+								],
+						],
+						7  => [
+								[
 										'x'      => 41,
 										'y'      => 708,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 708,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						8  => array(
-								array(
+								],
+						],
+						8  => [
+								[
 										'x'      => 41,
 										'y'      => 726,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 110,
 										'y'      => 726,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 						//Column 2
-						9  => array(
-								array(
+						9  => [
+								[
 										'x'      => 143,
 										'y'      => 604,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 604,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						10 => array(
-								array(
+								],
+						],
+						10 => [
+								[
 										'x'      => 143,
 										'y'      => 621,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 621,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						11 => array(
-								array(
+								],
+						],
+						11 => [
+								[
 										'x'      => 143,
 										'y'      => 639,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 639,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						12 => array(
-								array(
+								],
+						],
+						12 => [
+								[
 										'x'      => 143,
 										'y'      => 656,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 656,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						13 => array(
-								array(
+								],
+						],
+						13 => [
+								[
 										'x'      => 143,
 										'y'      => 673,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 673,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						14 => array(
-								array(
+								],
+						],
+						14 => [
+								[
 										'x'      => 143,
 										'y'      => 691,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 691,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						15 => array(
-								array(
+								],
+						],
+						15 => [
+								[
 										'x'      => 143,
 										'y'      => 708,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 708,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						16 => array(
-								array(
+								],
+						],
+						16 => [
+								[
 										'x'      => 143,
 										'y'      => 726,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 212,
 										'y'      => 726,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 
 						//Column 3
-						17 => array(
-								array(
+						17 => [
+								[
 										'x'      => 245,
 										'y'      => 604,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 604,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						18 => array(
-								array(
+								],
+						],
+						18 => [
+								[
 										'x'      => 245,
 										'y'      => 621,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 621,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						19 => array(
-								array(
+								],
+						],
+						19 => [
+								[
 										'x'      => 245,
 										'y'      => 639,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 639,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						20 => array(
-								array(
+								],
+						],
+						20 => [
+								[
 										'x'      => 245,
 										'y'      => 656,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 656,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						21 => array(
-								array(
+								],
+						],
+						21 => [
+								[
 										'x'      => 245,
 										'y'      => 673,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 673,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						22 => array(
-								array(
+								],
+						],
+						22 => [
+								[
 										'x'      => 245,
 										'y'      => 691,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 691,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						23 => array(
-								array(
+								],
+						],
+						23 => [
+								[
 										'x'      => 245,
 										'y'      => 708,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 708,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						24 => array(
-								array(
+								],
+						],
+						24 => [
+								[
 										'x'      => 245,
 										'y'      => 726,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 314,
 										'y'      => 726,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
+								],
+						],
 
 						//Column 4
-						25 => array(
-								array(
+						25 => [
+								[
 										'x'      => 347,
 										'y'      => 604,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 604,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						26 => array(
-								array(
+								],
+						],
+						26 => [
+								[
 										'x'      => 347,
 										'y'      => 621,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 621,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						27 => array(
-								array(
+								],
+						],
+						27 => [
+								[
 										'x'      => 347,
 										'y'      => 639,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 639,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						28 => array(
-								array(
+								],
+						],
+						28 => [
+								[
 										'x'      => 347,
 										'y'      => 656,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 656,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						29 => array(
-								array(
+								],
+						],
+						29 => [
+								[
 										'x'      => 347,
 										'y'      => 673,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 673,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						30 => array(
-								array(
+								],
+						],
+						30 => [
+								[
 										'x'      => 347,
 										'y'      => 691,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 691,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-						31 => array(
-								array(
+								],
+						],
+						31 => [
+								[
 										'x'      => 347,
 										'y'      => 708,
 										'h'      => 14,
 										'w'      => 66,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 416,
 										'y'      => 708,
 										'h'      => 14,
 										'w'      => 22,
 										'halign' => 'C',
-								),
-						),
-					),
-			),
+								],
+						],
+					],
+			],
 
-			'month1_total' => array(
-					'function'    => array('calcMonth1Total', 'drawSplitDecimalFloat'),
-					'coordinates' => array(
-							array(
+			'month1_total' => [
+					'function'    => [ 'calcMonth1Total', 'drawSplitDecimalFloat' ],
+					'coordinates' => [
+							[
 									'x'      => 442,
 									'y'      => 320,
 									'h'      => 14,
 									'w'      => 95,
 									'halign' => 'R',
-							),
-							array(
+							],
+							[
 									'x'      => 540,
 									'y'      => 320,
 									'h'      => 14,
 									'w'      => 20,
 									'halign' => 'C',
-							),
-					),
-			),
-			'month2_total' => array(
-					'function'    => array('calcMonth2Total', 'drawSplitDecimalFloat'),
-					'coordinates' => array(
-							array(
+							],
+					],
+			],
+			'month2_total' => [
+					'function'    => [ 'calcMonth2Total', 'drawSplitDecimalFloat' ],
+					'coordinates' => [
+							[
 									'x'      => 442,
 									'y'      => 473,
 									'h'      => 14,
 									'w'      => 95,
 									'halign' => 'R',
-							),
-							array(
+							],
+							[
 									'x'      => 540,
 									'y'      => 473,
 									'h'      => 14,
 									'w'      => 20,
 									'halign' => 'C',
-							),
-					),
-			),
-			'month3_total' => array(
-					'function'    => array('calcMonth3Total', 'drawSplitDecimalFloat'),
-					'coordinates' => array(
-							array(
+							],
+					],
+			],
+			'month3_total' => [
+					'function'    => [ 'calcMonth3Total', 'drawSplitDecimalFloat' ],
+					'coordinates' => [
+							[
 									'x'      => 442,
 									'y'      => 627,
 									'h'      => 14,
 									'w'      => 95,
 									'halign' => 'R',
-							),
-							array(
+							],
+							[
 									'x'      => 540,
 									'y'      => 627,
 									'h'      => 14,
 									'w'      => 20,
 									'halign' => 'C',
-							),
-					),
-			),
-			'total'        => array(
-					'function'    => array('calcTotal', 'drawSplitDecimalFloat'),
-					'coordinates' => array(
-							array(
+							],
+					],
+			],
+			'total'        => [
+					'function'    => [ 'calcTotal', 'drawSplitDecimalFloat' ],
+					'coordinates' => [
+							[
 									'x'      => 442,
 									'y'      => 758,
 									'h'      => 14,
 									'w'      => 95,
 									'halign' => 'R',
-							),
-							array(
+							],
+							[
 									'x'      => 540,
 									'y'      => 758,
 									'h'      => 14,
 									'w'      => 20,
 									'halign' => 'C',
-							),
-					),
-			),
+							],
+					],
+			],
 
-		);
+		];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -1885,7 +1885,7 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 	}
 
 	function calcTotal( $value, $schema ) {
-		$this->total = bcadd( bcadd($this->month1_total, $this->month2_total ), $this->month3_total );
+		$this->total = bcadd( bcadd( $this->month1_total, $this->month2_total ), $this->month3_total );
 
 		return $this->total;
 	}
@@ -1894,7 +1894,7 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
-		if ( $this->getShowBackground() == TRUE ) {
+		if ( $this->getShowBackground() == true ) {
 			$pdf->setSourceFile( $this->getTemplateDirectory() . DIRECTORY_SEPARATOR . $this->pdf_template );
 
 			$this->template_index[1] = $pdf->ImportPage( 1 );
@@ -1908,14 +1908,14 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 		$template_schema = $this->getTemplateSchema();
 		if ( is_array( $template_schema ) ) {
 
-			$template_page = NULL;
+			$template_page = null;
 
 			foreach ( $template_schema as $field => $schema ) {
 				$this->Draw( $this->$field, $schema );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 }
 

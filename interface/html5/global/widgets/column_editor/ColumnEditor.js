@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.ColumnEditor = function( options ) {
 		var opts = $.extend( {}, $.fn.ColumnEditor.defaults, options );
@@ -85,7 +85,7 @@
 			a_dropdown_div.append( a_dropdown );
 
 			//Add Self to UI
-			$( 'body' ).append( $( this ).css('visibility', 'hidden') ); // #2734 - Add to DOM but invisible so code can do calculations, but user does not see flashes.
+			$( 'body' ).append( $( this ).css( 'visibility', 'hidden' ) ); // #2734 - Add to DOM but invisible so code can do calculations, but user does not see flashes.
 
 			a_dropdown.setColumns( [
 				{ name: 'label', index: 'label', label: $.i18n._( 'Column Name' ), width: 100, sortable: false }
@@ -108,12 +108,12 @@
 
 			var $$this = this;
 			setTimeout( function() {
-				if ( ($( $$this ).height() + $( parent_awesome_box ).offset().top + 50 ) > Global.bodyHeight() ) {
-					$( $$this ).css( 'top', (Global.bodyHeight() - $( $$this ).height() - 25 ) );
+				if ( ( $( $$this ).height() + $( parent_awesome_box ).offset().top + 50 ) > Global.bodyHeight() ) {
+					$( $$this ).css( 'top', ( Global.bodyHeight() - $( $$this ).height() - 25 ) );
 				} else {
 					$( $$this ).css( 'top', $( parent_awesome_box ).offset().top + 25 );
 				}
-				$( $$this ).css('visibility', 'visible'); // show once all positions and sizes are done calculating and moving.
+				$( $$this ).css( 'visibility', 'visible' ); // show once all positions and sizes are done calculating and moving.
 			}, 100 );
 
 			$( this ).mouseenter( function() {
@@ -149,66 +149,66 @@
 			} );
 
 			user_generic_data_api.getUserGenericData( { filter_data: { script: script_name, deleted: false } },
-					{
-						onResult: function( results ) {
+				{
+					onResult: function( results ) {
 
-							var result_data = results.getResult();
+						var result_data = results.getResult();
 
-							//Save layout array
-							related_layout_Array = result_data;
+						//Save layout array
+						related_layout_Array = result_data;
 
-							if ( result_data && result_data.length > 0 ) {
+						if ( result_data && result_data.length > 0 ) {
 
-								result_data.sort( function( a, b ) {
+							result_data.sort( function( a, b ) {
 
-									return Global.compare( a, b, 'name' );
+								return Global.compare( a, b, 'name' );
 
-								} );
+							} );
 
-								$( layout_selector ).empty();
+							$( layout_selector ).empty();
 
-								var source_data = [];
+							var source_data = [];
 
-								source_data.push( { label: $.i18n._( Global.customize_item ), value: -1 } );
+							source_data.push( { label: $.i18n._( Global.customize_item ), value: -1 } );
 
-								var len = result_data.length;
-								for ( var i = 0; i < len; i++ ) {
-									var item = result_data[i];
-									source_data.push( { label: item.name, value: item.id } );
+							var len = result_data.length;
+							for ( var i = 0; i < len; i++ ) {
+								var item = result_data[i];
+								source_data.push( { label: item.name, value: item.id } );
+							}
+
+							layout_selector.setSourceData( source_data );
+
+							if ( layout && Global.isSet( layout.data.type ) && layout.data.type === ALayoutType.saved_layout ) {
+								$( $( layout_selector ).find( 'option' ) ).filter( function() {
+									return parseInt( $( this ).attr( 'value' ) ) === layout.data.layout_id;
+								} ).prop( 'selected', true ).attr( 'selected', true );
+
+								var select_id = layout_selector.getValue();
+
+								//If saved layout is deleted. Show first one and show columns setting
+								if ( select_id === -1 ) {
+									a_dropdown_div.css( 'display', 'block' );
+									rows_per_page_div.css( 'display', 'block' );
 								}
+							}
 
-								layout_selector.setSourceData( source_data );
+						} else {
 
-								if ( layout && Global.isSet( layout.data.type ) && layout.data.type === ALayoutType.saved_layout ) {
-									$( $( layout_selector ).find( 'option' ) ).filter( function() {
-										return parseInt( $( this ).attr( 'value' ) ) === layout.data.layout_id;
-									} ).prop( 'selected', true ).attr( 'selected', true );
+							source_data = [];
 
-									var select_id = layout_selector.getValue();
-
-									//If saved layout is deleted. Show first one and show columns setting
-									if ( select_id === -1 ) {
-										a_dropdown_div.css( 'display', 'block' );
-										rows_per_page_div.css( 'display', 'block' );
-									}
-								}
-
-							} else {
-
-								source_data = [];
-
-								source_data.push( { label: $.i18n._( Global.customize_item ), value: -1 } );
+							source_data.push( { label: $.i18n._( Global.customize_item ), value: -1 } );
 
 //						$( layout_selector ).append( '<option value="' + -1 + '">' + Global.customize_item + '</option>' );
 
-								layout_selector.setSourceData( source_data );
-								//If saved layout is deleted. Show first one and show columns setting
-								a_dropdown_div.css( 'display', 'block' );
-								rows_per_page_div.css( 'display', 'block' );
-							}
-
+							layout_selector.setSourceData( source_data );
+							//If saved layout is deleted. Show first one and show columns setting
+							a_dropdown_div.css( 'display', 'block' );
+							rows_per_page_div.css( 'display', 'block' );
 						}
-					} );
+
+					}
+				} );
 
 		};
 
@@ -283,7 +283,7 @@
 
 			var save_btn = $( this ).find( '#save_btn' );
 
-			user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+			user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
 
 			parent_awesome_box = o.parent_awesome_box;
 
@@ -331,4 +331,4 @@
 
 	$.fn.ColumnEditor.defaults = {};
 
-})( jQuery );
+} )( jQuery );

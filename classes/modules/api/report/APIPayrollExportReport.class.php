@@ -47,7 +47,7 @@ class APIPayrollExportReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,9 +55,11 @@ class APIPayrollExportReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getPayrollExportReport( $config = FALSE, $format = 'pdf' ) {
+	function getPayrollExportReport( $config = false, $format = 'pdf' ) {
 		$config = $this->getReportObject()->getExportTypeTemplate( $config, $format );
+
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

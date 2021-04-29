@@ -42,23 +42,24 @@ class PremiumPolicyDepartmentFactory extends Factory {
 	protected $table = 'premium_policy_department';
 	protected $pk_sequence_name = 'premium_policy_department_id_seq'; //PK Sequence name
 
-	protected $department_obj = NULL;
+	protected $department_obj = null;
 
 	/**
 	 * @return bool|null
 	 */
 	function getDepartmentObject() {
-		if ( is_object($this->department_obj) ) {
+		if ( is_object( $this->department_obj ) ) {
 			return $this->department_obj;
 		} else {
 			$lf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $lf */
 			$lf->getById( $this->getDepartment() );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->department_obj = $lf->getCurrent();
+
 				return $this->department_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -73,8 +74,9 @@ class PremiumPolicyDepartmentFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPremiumPolicy( $value) {
+	function setPremiumPolicy( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'premium_policy_id', $value );
 	}
 
@@ -89,10 +91,12 @@ class PremiumPolicyDepartmentFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setDepartment( $value) {
+	function setDepartment( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'department_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -102,31 +106,32 @@ class PremiumPolicyDepartmentFactory extends Factory {
 		//
 		// Premium Policy
 		if ( $this->getPremiumPolicy() != TTUUID::getZeroID() ) {
-			$this->Validator->isUUID(	'premium_policy',
-												$this->getPremiumPolicy(),
-												TTi18n::gettext('Selected Premium Policy is invalid')
-											);
+			$this->Validator->isUUID( 'premium_policy',
+									  $this->getPremiumPolicy(),
+									  TTi18n::gettext( 'Selected Premium Policy is invalid' )
+			);
 		}
 		// Department
 		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
-		$this->Validator->isResultSetWithRows(	'department',
-													$dlf->getByID($this->getDepartment()),
-													TTi18n::gettext('Selected Department is invalid')
-												);
+		$this->Validator->isResultSetWithRows( 'department',
+											   $dlf->getByID( $this->getDepartment() ),
+											   TTi18n::gettext( 'Selected Department is invalid' )
+		);
 
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postSave() {
-		$this->removeCache( 'premium_policy-'. $this->getPremiumPolicy() );
-		return TRUE;
+		$this->removeCache( 'premium_policy-' . $this->getPremiumPolicy() );
+
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -135,105 +140,105 @@ class PremiumPolicyDepartmentFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -242,11 +247,12 @@ class PremiumPolicyDepartmentFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$obj = $this->getDepartmentObject();
-		if ( is_object($obj) ) {
-			return TTLog::addEntry( $this->getPremiumPolicy(), $log_action, TTi18n::getText('Department').': '. $obj->getName(), NULL, $this->getTable() );
+		if ( is_object( $obj ) ) {
+			return TTLog::addEntry( $this->getPremiumPolicy(), $log_action, TTi18n::getText( 'Department' ) . ': ' . $obj->getName(), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

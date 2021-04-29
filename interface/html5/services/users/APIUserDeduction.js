@@ -50,6 +50,4 @@ var APIUserDeduction = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

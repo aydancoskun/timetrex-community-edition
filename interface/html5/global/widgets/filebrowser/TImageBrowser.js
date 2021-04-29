@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TImageBrowser = function( options ) {
 		Global.addCss( 'global/widgets/filebrowser/TImageBrowser.css' );
@@ -94,7 +94,7 @@
 
 		};
 
-		onImageLoad = function( image ) {
+		var onImageLoad = function( image ) {
 
 			var image_height = $( image ).height() > 0 ? $( image ).height() : image.naturalHeight;
 			var image_width = $( image ).width() > 0 ? $( image ).width() : image.naturalWidth;
@@ -219,4 +219,4 @@
 
 	$.fn.TImageBrowser.defaults = {};
 
-})( jQuery );
+} )( jQuery );

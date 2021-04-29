@@ -42,45 +42,44 @@ class HierarchyLevelFactory extends Factory {
 	protected $table = 'hierarchy_level';
 	protected $pk_sequence_name = 'hierarchy_level_id_seq'; //PK Sequence name
 
-	var $hierarchy_control_obj = NULL;
-	var $user_obj = NULL;
+	var $hierarchy_control_obj = null;
+	var $user_obj = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$retval = array(
-										'-1010-level' => TTi18n::gettext('Level'),
-										'-1020-user' => TTi18n::gettext('Superior'),
+				$retval = [
+						'-1010-level' => TTi18n::gettext( 'Level' ),
+						'-1020-user'  => TTi18n::gettext( 'Superior' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'level',
-								'user',
-								);
+				$retval = [
+						'level',
+						'user',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array();
+				$retval = [];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array();
+				$retval = [];
 				break;
-
 		}
 
 		return $retval;
@@ -91,13 +90,14 @@ class HierarchyLevelFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'hierarchy_control_id' => 'HierarchyControl',
-										'level' => 'Level',
-										'user_id' => 'User',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'                   => 'ID',
+				'hierarchy_control_id' => 'HierarchyControl',
+				'level'                => 'Level',
+				'user_id'              => 'User',
+				'deleted'              => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -105,17 +105,18 @@ class HierarchyLevelFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
+		if ( is_object( $this->user_obj ) ) {
 			return $this->user_obj;
 		} else {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
+
 				return $this->user_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -123,7 +124,7 @@ class HierarchyLevelFactory extends Factory {
 	 * @return null
 	 */
 	function getHierarchyControlObject() {
-		if ( is_object($this->hierarchy_control_obj) ) {
+		if ( is_object( $this->hierarchy_control_obj ) ) {
 			return $this->hierarchy_control_obj;
 		} else {
 			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
@@ -144,8 +145,9 @@ class HierarchyLevelFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setHierarchyControl( $value) {
+	function setHierarchyControl( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		//This is a sub-class, need to support setting HierachyControlID before its created.
 		return $this->setGenericDataValue( 'hierarchy_control_id', $value );
 	}
@@ -161,15 +163,16 @@ class HierarchyLevelFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setLevel( $value) {
-		$value = trim($value);
+	function setLevel( $value ) {
+		$value = trim( $value );
 		if ( $value <= 0 ) {
 			$value = 1; //1 is the lowest level
 		}
-		if	( $value > 0 ) {
+		if ( $value > 0 ) {
 			return $this->setGenericDataValue( 'level', $value );
 		}
-		return FALSE;
+
+		return false;
 	}
 
 	/**
@@ -183,15 +186,15 @@ class HierarchyLevelFactory extends Factory {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUser( $id) {
-		$id = trim($id);
+	function setUser( $id ) {
+		$id = trim( $id );
 
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$hllf = TTnew( 'HierarchyLevelListFactory' ); /** @var HierarchyLevelListFactory $hllf */
 		//$hulf = TTnew( 'HierarchyUserListFactory' );
 
-		if ( $this->getHierarchyControl() == FALSE ) {
-			return FALSE;
+		if ( $this->getHierarchyControl() == false ) {
+			return false;
 		}
 
 		//Get user object so we can get the users full name to display as an error message.
@@ -203,46 +206,46 @@ class HierarchyLevelFactory extends Factory {
 		//Don't allow a level to be set without a superior assigned to it.
 		//$id == 0
 		if (
-				(
-				$this->Validator->isResultSetWithRows(	'user',
-														$ulf->getByID($id),
-														TTi18n::gettext('No superior defined for level').' ('. (int)$this->getLevel().')'
-														)
-				AND
-					/*
-					//Allow superiors to be assigned as subordinates in the same hierarchy to make it easier to administer hierarchies
-					//that have superiors sharing responsibility.
-					//For example Super1 and Super2 look after 10 subordinates as well as each other. This would require 3 hierarchies normally,
-					//but if we allow Super1 and Super2 to be subordinates in the same hierarchy, it can be done with a single hierarchy.
-					//The key with this though is to have Permission->getPermissionChildren() *not* return the current user, even if they are a subordinates,
-					//as that could cause a conflict with view_own and view_child permissions (as a child would imply view_own)
-					(
-					$ulf->getRecordCount() > 0
-					AND
-					$this->Validator->isNotResultSetWithRows(	'user',
-																$hulf->getByHierarchyControlAndUserId( $this->getHierarchyControl(), $id ),
-																$ulf->getCurrent()->getFullName() .' '. TTi18n::gettext('is assigned as both a superior and subordinate')
-																)
-					)
-					AND
-					*/
-					(
-						$this->Validator->hasError('user') == FALSE
-						AND
-						$this->Validator->isNotResultSetWithRows(	'user',
-																$hllf->getByHierarchyControlIdAndUserIdAndExcludeId( $this->getHierarchyControl(), $id, $this->getID() ),
-																$ulf->getCurrent()->getFullName() .' '. TTi18n::gettext('is already assigned as a superior')
-																)
-
-					)
+		(
+				$this->Validator->isResultSetWithRows( 'user',
+													   $ulf->getByID( $id ),
+													   TTi18n::gettext( 'No superior defined for level' ) . ' (' . (int)$this->getLevel() . ')'
 				)
-				) {
+				&&
+				/*
+				//Allow superiors to be assigned as subordinates in the same hierarchy to make it easier to administer hierarchies
+				//that have superiors sharing responsibility.
+				//For example Super1 and Super2 look after 10 subordinates as well as each other. This would require 3 hierarchies normally,
+				//but if we allow Super1 and Super2 to be subordinates in the same hierarchy, it can be done with a single hierarchy.
+				//The key with this though is to have Permission->getPermissionChildren() *not* return the current user, even if they are a subordinates,
+				//as that could cause a conflict with view_own and view_child permissions (as a child would imply view_own)
+				(
+				$ulf->getRecordCount() > 0
+				AND
+				$this->Validator->isNotResultSetWithRows(	'user',
+															$hulf->getByHierarchyControlAndUserId( $this->getHierarchyControl(), $id ),
+															$ulf->getCurrent()->getFullName() .' '. TTi18n::gettext('is assigned as both a superior and subordinate')
+															)
+				)
+				AND
+				*/
+				(
+						$this->Validator->hasError( 'user' ) == false
+						&&
+						$this->Validator->isNotResultSetWithRows( 'user',
+																  $hllf->getByHierarchyControlIdAndUserIdAndExcludeId( $this->getHierarchyControl(), $id, $this->getID() ),
+																  $ulf->getCurrent()->getFullName() . ' ' . TTi18n::gettext( 'is already assigned as a superior' )
+						)
+
+				)
+		)
+		) {
 			$this->setGenericDataValue( 'user_id', $id );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -250,31 +253,31 @@ class HierarchyLevelFactory extends Factory {
 	 * @return array|bool
 	 */
 	static function RemoveDuplicateHierarchyLevels( $hierarchy_level_data ) {
-		if ( !is_array($hierarchy_level_data) ) {
-			return FALSE;
+		if ( !is_array( $hierarchy_level_data ) ) {
+			return false;
 		}
-		Debug::Arr($hierarchy_level_data, ' aHierarchy Users:', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $hierarchy_level_data, ' aHierarchy Users:', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$tmp_hierarchy_users = array();
-		foreach( $hierarchy_level_data as $hierarchy_level_id => $hierarchy_level ) {
+		$tmp_hierarchy_users = [];
+		foreach ( $hierarchy_level_data as $hierarchy_level_id => $hierarchy_level ) {
 			$tmp_hierarchy_users[$hierarchy_level_id] = $hierarchy_level['user_id'];
 		}
 
 		//Remove duplicate superiors.
 		$unique_hierarchy_users = array_unique( $tmp_hierarchy_users );
-		if ( count($tmp_hierarchy_users) != count( $unique_hierarchy_users ) ) {
+		if ( count( $tmp_hierarchy_users ) != count( $unique_hierarchy_users ) ) {
 			//Duplicate superiors found.
 			$diff_hierarchy_users = array_diff_assoc( $tmp_hierarchy_users, $unique_hierarchy_users );
-			Debug::Arr($diff_hierarchy_users, ' Diff Hierarchy Users:', __FILE__, __LINE__, __METHOD__, 10);
-			if ( is_array($diff_hierarchy_users) ) {
-				foreach( $diff_hierarchy_users as $diff_hierarchy_key => $diff_hierarchy_value ) {
-					unset($hierarchy_level_data[$diff_hierarchy_key]);
+			Debug::Arr( $diff_hierarchy_users, ' Diff Hierarchy Users:', __FILE__, __LINE__, __METHOD__, 10 );
+			if ( is_array( $diff_hierarchy_users ) ) {
+				foreach ( $diff_hierarchy_users as $diff_hierarchy_key => $diff_hierarchy_value ) {
+					unset( $hierarchy_level_data[$diff_hierarchy_key] );
 				}
 			}
 		}
-		unset($tmp_hierarchy_users, $unique_hierarchy_users, $diff_hierarchy_users, $diff_hierarchy_key, $diff_hierarchy_value);
+		unset( $tmp_hierarchy_users, $unique_hierarchy_users, $diff_hierarchy_users, $diff_hierarchy_key, $diff_hierarchy_value );
 
-		Debug::Arr($hierarchy_level_data, ' bHierarchy Users:', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $hierarchy_level_data, ' bHierarchy Users:', __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $hierarchy_level_data;
 	}
@@ -286,20 +289,20 @@ class HierarchyLevelFactory extends Factory {
 	 * @return bool
 	 */
 	static function ReMapHierarchyLevels( $hierarchy_level_data ) {
-		if ( !is_array($hierarchy_level_data) ) {
-			return FALSE;
+		if ( !is_array( $hierarchy_level_data ) ) {
+			return false;
 		}
 
-		$remapped_hierarchy_levels = FALSE;
-		$tmp_hierarchy_levels = array();
-		foreach( $hierarchy_level_data as $hierarchy_level ) {
+		$remapped_hierarchy_levels = false;
+		$tmp_hierarchy_levels = [];
+		foreach ( $hierarchy_level_data as $hierarchy_level ) {
 			$tmp_hierarchy_levels[] = $hierarchy_level['level'];
 		}
-		sort($tmp_hierarchy_levels);
+		sort( $tmp_hierarchy_levels );
 
 		$level = 0;
-		$prev_level = FALSE;
-		foreach( $tmp_hierarchy_levels as $hierarchy_level ) {
+		$prev_level = false;
+		foreach ( $tmp_hierarchy_levels as $hierarchy_level ) {
 			if ( $prev_level != $hierarchy_level ) {
 				$level++;
 			}
@@ -320,7 +323,7 @@ class HierarchyLevelFactory extends Factory {
 	 * @param null $type_id_column
 	 * @return bool|string
 	 */
-	static function convertHierarchyLevelMapToSQL( $hierarchy_level_map, $object_table = 'a.', $hierarchy_user_table = 'z.', $type_id_column = NULL ) {
+	static function convertHierarchyLevelMapToSQL( $hierarchy_level_map, $object_table = 'a.', $hierarchy_user_table = 'z.', $type_id_column = null ) {
 		/*
 				( z.hierarchy_control_id = 469 AND a.authorization_level = 1 )
 					OR ( z.hierarchy_control_id = 471 AND a.authorization_level = 2 )
@@ -333,40 +336,41 @@ class HierarchyLevelFactory extends Factory {
 					OR ( z.hierarchy_control_id = 470 AND a.authorization_level = 3 AND a.type_id in (100) )
 		*/
 
-		if ( is_array($hierarchy_level_map) ) {
+		if ( is_array( $hierarchy_level_map ) ) {
 			$rf = new RequestFactory();
-			$clause_arr = array();
-			foreach( $hierarchy_level_map as $hierarchy_data ) {
-				if ( !isset( $hierarchy_data['hierarchy_control_id'] ) OR !isset( $hierarchy_data['level'] ) ) {
+			$clause_arr = [];
+			foreach ( $hierarchy_level_map as $hierarchy_data ) {
+				if ( !isset( $hierarchy_data['hierarchy_control_id'] ) || !isset( $hierarchy_data['level'] ) ) {
 					continue;
 				}
 
-				if ( isset($hierarchy_data['last_level']) AND $hierarchy_data['last_level'] == TRUE ) {
+				if ( isset( $hierarchy_data['last_level'] ) && $hierarchy_data['last_level'] == true ) {
 					$operator = ' >= ';
 				} else {
 					$operator = ' = ';
 				}
 
-				$object_type_clause = NULL;
-				if ( $type_id_column != '' AND isset($hierarchy_data['object_type_id']) AND count($hierarchy_data['object_type_id']) > 0 ) {
+				$object_type_clause = null;
+				if ( $type_id_column != '' && isset( $hierarchy_data['object_type_id'] ) && count( $hierarchy_data['object_type_id'] ) > 0 ) {
 					$hierarchy_data['object_type_id'] = $rf->getTypeIdFromHierarchyTypeId( $hierarchy_data['object_type_id'] );
-					$object_type_clause = ' AND '. $type_id_column .' in ('. implode(',', $hierarchy_data['object_type_id'] ) .')';
+					$object_type_clause = ' AND ' . $type_id_column . ' in (' . implode( ',', $hierarchy_data['object_type_id'] ) . ')';
 				}
-				$clause_arr[] = '( '. $hierarchy_user_table.'hierarchy_control_id = \''. TTUUID::castUUID($hierarchy_data['hierarchy_control_id']) .'\' AND '.$object_table.'authorization_level '. $operator .' '. (int)$hierarchy_data['level'] . $object_type_clause .' )';
+				$clause_arr[] = '( ' . $hierarchy_user_table . 'hierarchy_control_id = \'' . TTUUID::castUUID( $hierarchy_data['hierarchy_control_id'] ) . '\' AND ' . $object_table . 'authorization_level ' . $operator . ' ' . (int)$hierarchy_data['level'] . $object_type_clause . ' )';
 			}
-			$retval = implode(' OR ', $clause_arr );
+			$retval = implode( ' OR ', $clause_arr );
+
 			//Debug::Text(' Hierarchy Filter SQL: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 			return $retval;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -376,11 +380,11 @@ class HierarchyLevelFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -392,32 +396,31 @@ class HierarchyLevelFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -432,33 +435,33 @@ class HierarchyLevelFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
-		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText('Superior') .': '. $u_obj->getFullName() .' '. TTi18n::getText('Level').': '. $this->getLevel(), NULL, $this->getTable(), $this );
+		if ( is_object( $u_obj ) ) {
+			return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText( 'Superior' ) . ': ' . $u_obj->getFullName() . ' ' . TTi18n::getText( 'Level' ) . ': ' . $this->getLevel(), null, $this->getTable(), $this );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Hierarchy Control
 		$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
-		$this->Validator->isResultSetWithRows(	'hierarchy_control_id',
-														$hclf->getByID($this->getHierarchyControl()),
-														TTi18n::gettext('Invalid Hierarchy Control')
-													);
+		$this->Validator->isResultSetWithRows( 'hierarchy_control_id',
+											   $hclf->getByID( $this->getHierarchyControl() ),
+											   TTi18n::gettext( 'Invalid Hierarchy Control' )
+		);
 		// Level
-		if ( $this->getLevel() !== FALSE AND $this->getLevel() > 0 ) {
-			$this->Validator->isNumeric(		'level',
-														$this->getLevel(),
-														TTi18n::gettext('Level is invalid')
-													);
+		if ( $this->getLevel() !== false && $this->getLevel() > 0 ) {
+			$this->Validator->isNumeric( 'level',
+										 $this->getLevel(),
+										 TTi18n::gettext( 'Level is invalid' )
+			);
 		}
 
 		//
@@ -466,19 +469,20 @@ class HierarchyLevelFactory extends Factory {
 		//
 
 
-		if ( $this->getUser() === FALSE or TTUUID::isUUID( $this->getUser() ) ==  FALSE ) {
+		if ( $this->getUser() === false || TTUUID::isUUID( $this->getUser() ) == false ) {
 			$this->Validator->isTrue( 'user_id',
-									  FALSE,
-									  TTi18n::gettext('A superior must be specified')
+									  false,
+									  TTi18n::gettext( 'A superior must be specified' )
 			);
 		}
 
-		if ( $this->getDeleted() == TRUE ) {
-			return TRUE;
+		if ( $this->getDeleted() == true ) {
+			return true;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 }
+
 ?>

@@ -8,10 +8,10 @@ $TIMETREX_PASSWORD = 'demo';
 
 //Build URL given a Class and Method to call.
 //Format is: http://demo.timetrex.com/api/json/api.php?Class=<CLASS>&Method=<METHOD>&SessionID=<SessionID>
-function buildURL( $class, $method, $session_id = FALSE ) {
+function buildURL( $class, $method, $session_id = false ) {
 	global $TIMETREX_URL, $TIMETREX_SESSION_ID;
 	$url = $TIMETREX_URL . '?Class=' . $class . '&Method=' . $method;
-	if ( $session_id != '' OR $TIMETREX_SESSION_ID != '' ) {
+	if ( $session_id != '' || $TIMETREX_SESSION_ID != '' ) {
 		if ( $session_id == '' ) {
 			$session_id = $TIMETREX_SESSION_ID;
 		}
@@ -22,16 +22,16 @@ function buildURL( $class, $method, $session_id = FALSE ) {
 }
 
 //Handle complex result.
-function handleResult( $result, $raw = FALSE ) {
-	if ( is_array( $result ) AND isset( $result['api_retval'] ) ) {
-		if ( $raw === TRUE ) {
+function handleResult( $result, $raw = false ) {
+	if ( is_array( $result ) && isset( $result['api_retval'] ) ) {
+		if ( $raw === true ) {
 			return $result;
 		} else {
-			if ( $result['api_retval'] === FALSE ) {
+			if ( $result['api_retval'] === false ) {
 				//Display any error messages that might be returned.
 				$output[] = '  Returned:';
-				$output[] = ( $result['api_retval'] === TRUE ) ? '    IsValid: YES' : '    IsValid: NO';
-				if ( $result['api_retval'] === TRUE ) {
+				$output[] = ( $result['api_retval'] === true ) ? '    IsValid: YES' : '    IsValid: NO';
+				if ( $result['api_retval'] === true ) {
 					$output[] = '    Return Value: ' . $result['api_retval'];
 				} else {
 					$output[] = '    Code: ' . $result['api_details']['code'];
@@ -65,11 +65,11 @@ function handleResult( $result, $raw = FALSE ) {
 }
 
 //Post data (array of arguments) to URL
-function postToURL( $url, $data = NULL, $raw_result = FALSE ) {
+function postToURL( $url, $data = null, $raw_result = false ) {
 	$curl_connection = curl_init( $url );
 	curl_setopt( $curl_connection, CURLOPT_CONNECTTIMEOUT, 600 );
-	curl_setopt( $curl_connection, CURLOPT_RETURNTRANSFER, TRUE );
-	curl_setopt( $curl_connection, CURLOPT_SSL_VERIFYPEER, FALSE );
+	curl_setopt( $curl_connection, CURLOPT_RETURNTRANSFER, true );
+	curl_setopt( $curl_connection, CURLOPT_SSL_VERIFYPEER, false );
 	curl_setopt( $curl_connection, CURLOPT_FOLLOWLOCATION, 1 );
 	curl_setopt( $curl_connection, CURLOPT_REFERER, $url ); //**IMPORTANT: Referer should always be sent to avoid requests being rejected due to CSRF security checks.
 
@@ -85,7 +85,7 @@ function postToURL( $url, $data = NULL, $raw_result = FALSE ) {
 	echo "==============================================================\n";
 	echo "Posting data to URL: " . $url . "\n";
 
-	if ( $data !== NULL ) {
+	if ( $data !== null ) {
 		$post_data = 'json=' . urlencode( json_encode( $data ) );
 		curl_setopt( $curl_connection, CURLOPT_POSTFIELDS, $post_data );
 
@@ -96,19 +96,19 @@ function postToURL( $url, $data = NULL, $raw_result = FALSE ) {
 	$result = curl_exec( $curl_connection );
 	curl_close( $curl_connection );
 
-	return handleResult( json_decode( $result, TRUE ), $raw_result );
+	return handleResult( json_decode( $result, true ), $raw_result );
 }
 
 //IMPORTANT: When passing separate arguments to a function the order must be maintained and proper.
 //           So when passing named key => value pairs always ensure that the order is preserved when the data is JSON encoded.
-$arguments = array( 'user_name' => $TIMETREX_USERNAME, 'password' => $TIMETREX_PASSWORD );
+$arguments = [ 'user_name' => $TIMETREX_USERNAME, 'password' => $TIMETREX_PASSWORD ];
 
 //      Alternatively you can send integer key => value pairs, similar to the below which may help to ensure order is maintained.
 //$arguments = array( $TIMETREX_USERNAME, $TIMETREX_PASSWORD);  //Or
 //$arguments = array( 0 => $TIMETREX_USERNAME, 1 => $TIMETREX_PASSWORD);
 
 $TIMETREX_SESSION_ID = postToURL( buildURL( 'APIAuthentication', 'Login' ), $arguments );
-if ( $TIMETREX_SESSION_ID == FALSE ) {
+if ( $TIMETREX_SESSION_ID == false ) {
 	echo "Login Failed!<br>\n";
 	exit;
 }
@@ -118,13 +118,13 @@ echo "Session ID: $TIMETREX_SESSION_ID<br>\n";
 //Get data for two employees by user_name or primary key/ID.
 // - Many other filter methods can be used, such as branch, department, province, state, etc...
 //
-$arguments = array(
-		'filter_data' => array(
+$arguments = [
+		'filter_data' => [
 			//'id' => array('11e817cb-7dcc-7130-b939-5431e6810149','11e817cb-8385-8e50-97f3-5431e6810149')
-			'user_name' => array('jane.doe1', 'tristen.braun1'),
-		),
-);
-$user_data = postToURL( buildURL( 'APIUser', 'getUser' ), array($arguments) );
+			'user_name' => [ 'jane.doe1', 'tristen.braun1' ],
+		],
+];
+$user_data = postToURL( buildURL( 'APIUser', 'getUser' ), [ $arguments ] );
 //var_dump( $user_data );
 /* //Example returned data: )
 array(2) {
@@ -514,8 +514,8 @@ if ( isset( $user_data[1] ) ) {
 	$user_data[1]['status_id'] = 20; //Terminated
 	$user_data[1]['termination_date'] = '02-Jan-18';
 
-	$result = postToURL( buildURL( 'APIUser', 'setUser' ), array($user_data[1]) );
-	if ( $result === TRUE ) {
+	$result = postToURL( buildURL( 'APIUser', 'setUser' ), [ $user_data[1] ] );
+	if ( $result === true ) {
 		echo "Employee data saved successfully.<br>\n";
 	} else {
 		echo "Employee save failed.<br>\n";
@@ -527,13 +527,13 @@ if ( isset( $user_data[1] ) ) {
 //
 //Update employee record in a single operation. Several records can be updated in a single operation as well.
 //
-$user_data = array(
+$user_data = [
 		'id'               => $user_data[1]['id'], //UUID: 11e7fa4c-f8c2-f040-8ad8-21ea65522ba3
 		'termination_date' => '02-Jan-18',
-);
+];
 
-$result = postToURL( buildURL( 'APIUser', 'setUser' ), array($user_data) );
-if ( $result === TRUE ) {
+$result = postToURL( buildURL( 'APIUser', 'setUser' ), [ $user_data ] );
+if ( $result === true ) {
 	echo "Employee data saved successfully.<br>\n";
 } else {
 	echo "Employee save failed.<br>\n";
@@ -544,13 +544,13 @@ if ( $result === TRUE ) {
 //
 //Get new hire defaults so we pull data from that rather than have to manually specify it each time.
 //
-$new_hire_defaults = postToURL( buildURL( 'APIUserDefault', 'getUserDefault' ), array() )[0];
+$new_hire_defaults = postToURL( buildURL( 'APIUserDefault', 'getUserDefault' ), [] )[0];
 
 
 //
 //Add new employee, several new employees can be added in a single operation as well.
 //
-$user_data = array(
+$user_data = [
 		'status_id'       => 10, //Active
 		'first_name'      => 'Michael',
 		'last_name'       => 'Jackson',
@@ -559,10 +559,10 @@ $user_data = array(
 		'password'        => 'whiteglove123',
 		'hire_date'       => '01-Oct-09',
 		'currency_id'     => $new_hire_defaults['currency_id'],
-);
+];
 
-$result = postToURL( buildURL( 'APIUser', 'setUser' ), array($user_data) );
-if ( $result !== FALSE ) {
+$result = postToURL( buildURL( 'APIUser', 'setUser' ), [ $user_data ] );
+if ( $result !== false ) {
 	echo "Employee added successfully.<br>\n";
 	$insert_id = $result; //Get employees new ID on success.
 } else {
@@ -574,7 +574,7 @@ if ( $result !== FALSE ) {
 //
 //Add new punch for a specific employee
 //
-$punch_data = array(
+$punch_data = [
 		'user_id' => $insert_id, //ID from above newly added employee
 
 		'type_id'   => 10, //Normal
@@ -586,10 +586,10 @@ $punch_data = array(
 		'department_id' => $new_hire_defaults['default_department_id'], //Department
 		'job_id'        => $new_hire_defaults['default_job_id'], //Job
 		'job_item_id'   => $new_hire_defaults['default_job_item_id'], //Task
-);
+];
 
-$result = postToURL( buildURL( 'APIPunch', 'setPunch' ), array($punch_data) );
-if ( $result !== FALSE ) {
+$result = postToURL( buildURL( 'APIPunch', 'setPunch' ), [ $punch_data ] );
+if ( $result !== false ) {
 	echo "Punch added successfully.<br>\n";
 	$insert_id = $result; //Get employees new ID on success.
 } else {
@@ -601,8 +601,8 @@ if ( $result !== FALSE ) {
 //
 //Get TimeSheet Summary report data in raw PHP native array format. 'csv' and 'pdf' are also valid formats.
 //
-$config = postToURL( buildURL( 'APITimesheetSummaryReport', 'getTemplate' ), array('by_employee+all_time') );
-$result = postToURL( buildURL( 'APITimesheetSummaryReport', 'getTimesheetSummaryReport' ), array($config, 'raw') );
+$config = postToURL( buildURL( 'APITimesheetSummaryReport', 'getTemplate' ), [ 'by_employee+all_time' ] );
+$result = postToURL( buildURL( 'APITimesheetSummaryReport', 'getTimesheetSummaryReport' ), [ $config, 'raw' ] );
 echo "Report Data: <br>\n";
 var_dump( $result );
 

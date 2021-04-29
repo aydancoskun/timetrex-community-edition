@@ -53,6 +53,4 @@ var APIPayrollRemittanceAgency = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'getDistrictOptions', arguments );
 	}
 
-
-
 } );

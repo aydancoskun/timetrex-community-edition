@@ -51,6 +51,4 @@ var APIScheduleSummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

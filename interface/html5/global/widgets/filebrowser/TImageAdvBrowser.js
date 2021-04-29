@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TImageAdvBrowser = function( options ) {
 
@@ -94,7 +94,6 @@
 
 		};
 
-
 		this.setEnableDelete = function( val ) {
 			var image = $this.find( '.image' );
 			if ( !val ) {
@@ -174,4 +173,4 @@
 
 	$.fn.TImageAdvBrowser.defaults = {};
 
-})( jQuery );
+} )( jQuery );

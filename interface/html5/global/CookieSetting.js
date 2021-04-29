@@ -32,7 +32,7 @@ function setCookie( name, value, expire_days, path, domain, secure ) {
 	d.setTime( d.getTime() + ( expire_days * 24 * 60 * 60 * 1000 ) );
 	var expires = 'expires=' + d.toGMTString();
 
-	cookie_str = name + '=' + value + '; ' + expires + '; path=' + path;
+	var cookie_str = name + '=' + value + '; ' + expires + '; path=' + path;
 	if ( domain ) {
 		cookie_str += '; domain=' + domain;
 	}
@@ -51,7 +51,7 @@ function deleteCookie( name, path, domain ) {
 	}
 
 	//To delete a cookie we must set 'name=' without any value.
-	cookie_str = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=' + path;
+	var cookie_str = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=' + path;
 	if ( domain ) {
 		cookie_str += '; domain=' + domain;
 	}

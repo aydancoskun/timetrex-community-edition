@@ -35,24 +35,24 @@
  ********************************************************************************/
 
 class Form941ReportTest extends PHPUnit_Framework_TestCase {
-	protected $company_id = NULL;
-	protected $user_id = NULL;
-	protected $pay_period_schedule_id = NULL;
-	protected $pay_period_objs = NULL;
-	protected $pay_stub_account_link_arr = NULL;
+	protected $company_id = null;
+	protected $user_id = null;
+	protected $pay_period_schedule_id = null;
+	protected $pay_period_objs = null;
+	protected $pay_stub_account_link_arr = null;
 
 	public function setUp() {
 		global $dd;
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->currency_id = $dd->createCurrency( $this->company_id, 10 );
 
@@ -70,12 +70,12 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 10  ); // Check
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 20  ); // US - EFT
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 30  ); // CA - EFT
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 10 ); // Check
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 20 ); // US - EFT
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 30 ); // CA - EFT
 
 		//createUser() also handles remittance destination accounts.
-		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, null, null, null, null, null, null, null, $remittance_source_account_ids );
 
 		//Get User Object.
 		$ulf = new UserListFactory();
@@ -90,27 +90,27 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	function getPayStubAccountLinkArray() {
-		$this->pay_stub_account_link_arr = array(
-			'total_gross' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Gross'),
-			'total_deductions' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Deductions'),
-			'employer_contribution' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 40, 'Employer Total Contributions'),
-			'net_pay' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 40, 'Net Pay'),
-			'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
-			'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
-			'vacation_accrual' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 50, 'Vacation Accrual'),
-			);
+		$this->pay_stub_account_link_arr = [
+				'total_gross'              => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Gross' ),
+				'total_deductions'         => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Deductions' ),
+				'employer_contribution'    => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Employer Total Contributions' ),
+				'net_pay'                  => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Net Pay' ),
+				'regular_time'             => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ),
+				'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Vacation - Accrual Release' ),
+				'vacation_accrual'         => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 50, 'Vacation Accrual' ),
+		];
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayPeriodSchedule() {
@@ -131,19 +131,19 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartDayOfWeek( TTDate::getDayOfWeek( $anchor_date ) );
 		$ppsf->setTransactionDate( 7 );
 
-		$ppsf->setTransactionDateBusinessDay( TRUE );
-		$ppsf->setTimeZone('PST8PDT');
+		$ppsf->setTransactionDateBusinessDay( true );
+		$ppsf->setTimeZone( 'PST8PDT' );
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4 * 3600) );
-		$ppsf->setMaximumShiftTime( (16 * 3600) );
+		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
+		$ppsf->setMaximumShiftTime( ( 16 * 3600 ) );
 
-		$ppsf->setEnableInitialPayPeriods( FALSE );
+		$ppsf->setEnableInitialPayPeriods( false );
 		if ( $ppsf->isValid() ) {
-			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			$insert_id = $ppsf->Save( false );
+			Debug::Text( 'Pay Period Schedule ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-			$ppsf->setUser( array($this->user_id) );
+			$ppsf->setUser( [ $this->user_id ] );
 			$ppsf->Save();
 
 			$this->pay_period_schedule_id = $insert_id;
@@ -151,10 +151,9 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
-
+		return false;
 	}
 
 	function createPayPeriods() {
@@ -167,19 +166,18 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-2019') );
+					$end_date = TTDate::getBeginYearEpoch( strtotime( '01-Jan-2019' ) );
 				} else {
 					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'I: ' . $i . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, ( 86400 + 3600 ), false ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
-
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function getAllPayPeriods() {
@@ -187,8 +185,8 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		//$pplf->getByCompanyId( $this->company_id );
 		$pplf->getByPayPeriodScheduleId( $this->pay_period_schedule_id );
 		if ( $pplf->getRecordCount() > 0 ) {
-			foreach( $pplf as $pp_obj ) {
-				Debug::text('Pay Period... Start: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			foreach ( $pplf as $pp_obj ) {
+				Debug::text( 'Pay Period... Start: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getStartDate() ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				$this->pay_period_objs[] = $pp_obj;
 			}
@@ -196,21 +194,21 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 
 		$this->pay_period_objs = array_reverse( $this->pay_period_objs );
 
-		return TRUE;
+		return true;
 	}
 
 	function getPayStubEntryArray( $pay_stub_id ) {
 		//Check Pay Stub to make sure it was created correctly.
 		$pself = new PayStubEntryListFactory();
-		$pself->getByPayStubId( $pay_stub_id ) ;
+		$pself->getByPayStubId( $pay_stub_id );
 		if ( $pself->getRecordCount() > 0 ) {
-			foreach( $pself as $pse_obj ) {
-				$ps_entry_arr[$pse_obj->getPayStubEntryNameId()][] = array(
-					'rate' => $pse_obj->getRate(),
-					'units' => $pse_obj->getUnits(),
-					'amount' => $pse_obj->getAmount(),
-					'ytd_amount' => $pse_obj->getYTDAmount(),
-					);
+			foreach ( $pself as $pse_obj ) {
+				$ps_entry_arr[$pse_obj->getPayStubEntryNameId()][] = [
+						'rate'       => $pse_obj->getRate(),
+						'units'      => $pse_obj->getUnits(),
+						'amount'     => $pse_obj->getAmount(),
+						'ytd_amount' => $pse_obj->getYTDAmount(),
+				];
 			}
 		}
 
@@ -218,7 +216,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 			return $ps_entry_arr;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function createPayStubAmendment( $pay_stub_entry_name_id, $amount, $effective_date ) {
@@ -234,25 +232,25 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 
 		$psaf->setEffectiveDate( $effective_date );
 
-		$psaf->setAuthorized(TRUE);
+		$psaf->setAuthorized( true );
 		if ( $psaf->isValid() ) {
 			$psaf->Save();
 		} else {
-			Debug::text(' ERROR: Pay Stub Amendment Failed!', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( ' ERROR: Pay Stub Amendment Failed!', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayStub( $max = 12 ) {
-		for( $i = 0; $i <= $max; $i++ ) { //Calculate pay stubs for each pay period.
+		for ( $i = 0; $i <= $max; $i++ ) { //Calculate pay stubs for each pay period.
 			$cps = new CalculatePayStub();
 			$cps->setUser( $this->user_id );
 			$cps->setPayPeriod( $this->pay_period_objs[$i]->getId() );
 			$cps->calculate();
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -260,36 +258,36 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testMonthlyDepositA() {
 		//1st Quarter - Stay below 200,000 medicare limit and 132,900 social security limit
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
 
 		//2nd Quarter - Cross medicare and social security limit
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
 
 		//Extra pay period outside the 1st and 2nd quarter.
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
 
 		$this->createPayStub();
 
@@ -361,7 +359,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5d, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l7z, 15308.10 );
 		$this->assertEquals( $form_objs->objs[0]->l5_actual_deducted, 15308.10 );
-		$this->assertEquals( $form_objs->objs[0]->l15b, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l15b, true );
 		$this->assertEquals( $form_objs->objs[0]->l16_month1, 9064.86 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month2, 18129.70 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month3, 18129.67 );
@@ -373,11 +371,11 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5c2, 2901.54 );
 		$this->assertEquals( $form_objs->objs[0]->l5d2, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l5e, 15308.14 );
-		$this->assertEquals( $form_objs->objs[0]->l4, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l4, true );
 		$this->assertEquals( $form_objs->objs[0]->l6, 45324.27 );
 		$this->assertEquals( $form_objs->objs[0]->l7, -0.04 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 45324.23);
-		$this->assertEquals( $form_objs->objs[0]->l12, 45324.23);
+		$this->assertEquals( $form_objs->objs[0]->l10, 45324.23 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 45324.23 );
 
 
 		//Generate Report for 2nd Quarter
@@ -448,7 +446,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5d, 40127.04 );
 		$this->assertEquals( $form_objs->objs[0]->l7z, 8496.23 );
 		$this->assertEquals( $form_objs->objs[0]->l5_actual_deducted, 8496.23 );
-		$this->assertEquals( $form_objs->objs[0]->l15b, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l15b, true );
 		$this->assertEquals( $form_objs->objs[0]->l16_month1, 17240.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month2, 19751.42 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month3, 13527.16 );
@@ -460,11 +458,11 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5c2, 4062.14 );
 		$this->assertEquals( $form_objs->objs[0]->l5d2, 361.14 );
 		$this->assertEquals( $form_objs->objs[0]->l5e, 8496.28 );
-		$this->assertEquals( $form_objs->objs[0]->l4, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l4, true );
 		$this->assertEquals( $form_objs->objs[0]->l6, 50518.63 );
 		$this->assertEquals( $form_objs->objs[0]->l7, -0.05 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 50518.58);
-		$this->assertEquals( $form_objs->objs[0]->l12, 50518.58);
+		$this->assertEquals( $form_objs->objs[0]->l10, 50518.58 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 50518.58 );
 
 
 		//Generate Report for entire year
@@ -476,8 +474,8 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('30-Jun-2019');
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '30-Jun-2019' );
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
@@ -540,7 +538,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $report_output[6]['additional_medicare_tax'], 361.13 );
 		$this->assertEquals( $report_output[6]['total_tax'], 95842.81 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -548,32 +546,32 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testMonthlyDepositB() {
 		//1st Quarter - Stay below 200,000 medicare limit and 132,900 social security limit
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
 
 		//2nd Quarter - Stay below 200,000 medicare limit and 132,900 social security limit
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
 
 		//3rd Quarter - Cross medicare and social security limit
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[13]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[14]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[15]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[16]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[17]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[18]->getEndDate() ) );
 
 		//4th Quarter
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 9221.40, TTDate::getMiddleDayEpoch( $this->pay_period_objs[19]->getEndDate() ) );
 
 		$this->createPayStub( 19 );
 
@@ -645,7 +643,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5d, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l7z, 7054.40 );
 		$this->assertEquals( $form_objs->objs[0]->l5_actual_deducted, 7054.40 );
-		$this->assertEquals( $form_objs->objs[0]->l15b, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l15b, true );
 		$this->assertEquals( $form_objs->objs[0]->l16_month1, 3633.12 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month2, 7266.24 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month3, 7266.24 );
@@ -657,11 +655,11 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5c2, 1337.10 );
 		$this->assertEquals( $form_objs->objs[0]->l5d2, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l5e, 7054.37 );
-		$this->assertEquals( $form_objs->objs[0]->l4, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l4, true );
 		$this->assertEquals( $form_objs->objs[0]->l6, 18165.57 );
 		$this->assertEquals( $form_objs->objs[0]->l7, 0.03 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 18165.60);
-		$this->assertEquals( $form_objs->objs[0]->l12, 18165.60);
+		$this->assertEquals( $form_objs->objs[0]->l10, 18165.60 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 18165.60 );
 
 
 		//Generate Report for 2nd Quarter
@@ -732,7 +730,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5d, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l7z, 9876.16 );
 		$this->assertEquals( $form_objs->objs[0]->l5_actual_deducted, 9876.16 );
-		$this->assertEquals( $form_objs->objs[0]->l15b, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l15b, true );
 		$this->assertEquals( $form_objs->objs[0]->l16_month1, 7266.24 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month2, 10899.36 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month3, 7266.24 );
@@ -744,11 +742,11 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5c2, 1871.94 );
 		$this->assertEquals( $form_objs->objs[0]->l5d2, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l5e, 9876.12 );
-		$this->assertEquals( $form_objs->objs[0]->l4, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l4, true );
 		$this->assertEquals( $form_objs->objs[0]->l6, 25431.80 );
 		$this->assertEquals( $form_objs->objs[0]->l7, 0.04 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 25431.84);
-		$this->assertEquals( $form_objs->objs[0]->l12, 25431.84);
+		$this->assertEquals( $form_objs->objs[0]->l10, 25431.84 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 25431.84 );
 
 
 		//Generate Report for 3rd Quarter
@@ -819,7 +817,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5d, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l7z, 4362.60 );
 		$this->assertEquals( $form_objs->objs[0]->l5_actual_deducted, 4362.60 );
-		$this->assertEquals( $form_objs->objs[0]->l15b, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l15b, true );
 		$this->assertEquals( $form_objs->objs[0]->l16_month1, 7266.24 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month2, 5450.48 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month3, 4979.32 );
@@ -831,11 +829,11 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5c2, 1604.52 );
 		$this->assertEquals( $form_objs->objs[0]->l5d2, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l5e, 4362.68 );
-		$this->assertEquals( $form_objs->objs[0]->l4, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l4, true );
 		$this->assertEquals( $form_objs->objs[0]->l6, 17696.12 );
 		$this->assertEquals( $form_objs->objs[0]->l7, -0.08 ); //Since the user reached the social security maximum contribution, we have to back out the fractions of the cent from previous quarters, at least to within 0.01.
-		$this->assertEquals( $form_objs->objs[0]->l10, 17696.04);
-		$this->assertEquals( $form_objs->objs[0]->l12, 17696.04);
+		$this->assertEquals( $form_objs->objs[0]->l10, 17696.04 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 17696.04 );
 
 
 		//Generate Report for entire year
@@ -847,8 +845,8 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('30-Sep-2019');
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '30-Sep-2019' );
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
@@ -935,7 +933,7 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $report_output[9]['additional_medicare_tax'], 0.00 );
 		$this->assertEquals( $report_output[9]['total_tax'], 61293.48 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -943,12 +941,12 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testMonthlyDepositLargePayPeriod() {
 		//1st Quarter - Exceed all limits in first pay period
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 250000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 200.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 250000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 200.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
 
 		//Skip a month, then a small pay period.
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 10000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 10000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
 
 		$this->createPayStub();
 
@@ -1014,11 +1012,11 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5d, 60211.36 );
 		$this->assertEquals( $form_objs->objs[0]->l7z, 24567.63 );
 		$this->assertEquals( $form_objs->objs[0]->l5_actual_deducted, 24567.63 );
-		$this->assertEquals( $form_objs->objs[0]->l15b, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l15b, true );
 		$this->assertEquals( $form_objs->objs[0]->l16_month1, 115360.77 );
 		//$this->assertEquals( $form_objs->objs[0]->l16_month2, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month3, 2878.89 );
-		$this->assertEquals( $form_objs->objs[0]->l16_month_total, 118239.66);
+		$this->assertEquals( $form_objs->objs[0]->l16_month_total, 118239.66 );
 		$this->assertEquals( $form_objs->objs[0]->l16_month_total, $form_objs->objs[0]->l12 );
 
 		$this->assertEquals( $form_objs->objs[0]->l5a2, 16454.76 );
@@ -1026,13 +1024,13 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5c2, 7546.13 );
 		$this->assertEquals( $form_objs->objs[0]->l5d2, 541.90 );
 		$this->assertEquals( $form_objs->objs[0]->l5e, 24567.63 );
-		$this->assertEquals( $form_objs->objs[0]->l4, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l4, true );
 		$this->assertEquals( $form_objs->objs[0]->l6, 118239.66 );
 		$this->assertEquals( $form_objs->objs[0]->l7, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 118239.66);
-		$this->assertEquals( $form_objs->objs[0]->l12, 118239.66);
+		$this->assertEquals( $form_objs->objs[0]->l10, 118239.66 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 118239.66 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -1040,36 +1038,36 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testSemiWeeklyDeposit() {
 		//1st Quarter - Stay below 200,000 medicare limit and 132,900 social security limit
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.33, TTDate::getMiddleDayEpoch( $this->pay_period_objs[1]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.32, TTDate::getMiddleDayEpoch( $this->pay_period_objs[2]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.31, TTDate::getMiddleDayEpoch( $this->pay_period_objs[3]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.30, TTDate::getMiddleDayEpoch( $this->pay_period_objs[4]->getEndDate() ) );
 
 		//2nd Quarter - Cross medicare and social security limit
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.29, TTDate::getMiddleDayEpoch( $this->pay_period_objs[5]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.28, TTDate::getMiddleDayEpoch( $this->pay_period_objs[6]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[7]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[8]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[9]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[10]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[11]->getEndDate() ) );
 
 		//Extra pay period outside the 1st and 2nd quarter.
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
-		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips'), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 20000.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
+		$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.27, TTDate::getMiddleDayEpoch( $this->pay_period_objs[12]->getEndDate() ) );
 
 		$this->createPayStub();
 
@@ -1143,10 +1141,10 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5d, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l7z, 15308.10 );
 		$this->assertEquals( $form_objs->objs[0]->l5_actual_deducted, 15308.10 );
-		$this->assertEquals( $form_objs->objs[0]->l15b, TRUE );
-		$this->assertEquals( $form_objs->objs[0]->l16_month1, FALSE );
-		$this->assertEquals( $form_objs->objs[0]->l16_month2, FALSE );
-		$this->assertEquals( $form_objs->objs[0]->l16_month3, FALSE );
+		$this->assertEquals( $form_objs->objs[0]->l15b, true );
+		$this->assertEquals( $form_objs->objs[0]->l16_month1, false );
+		$this->assertEquals( $form_objs->objs[0]->l16_month2, false );
+		$this->assertEquals( $form_objs->objs[0]->l16_month3, false );
 		$this->assertEquals( $form_objs->objs[0]->l16_month_total, 0.00 );
 		//$this->assertEquals( $form_objs->objs[0]->l16_month_total, $form_objs->objs[0]->l12 );
 
@@ -1155,11 +1153,11 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5c2, 2901.54 );
 		$this->assertEquals( $form_objs->objs[0]->l5d2, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l5e, 15308.14 );
-		$this->assertEquals( $form_objs->objs[0]->l4, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l4, true );
 		$this->assertEquals( $form_objs->objs[0]->l6, 45324.27 );
 		$this->assertEquals( $form_objs->objs[0]->l7, -0.04 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 45324.23);
-		$this->assertEquals( $form_objs->objs[0]->l12, 45324.23);
+		$this->assertEquals( $form_objs->objs[0]->l10, 45324.23 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 45324.23 );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
@@ -1249,10 +1247,10 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5d, 40127.04 );
 		$this->assertEquals( $form_objs->objs[0]->l7z, 8496.23 );
 		$this->assertEquals( $form_objs->objs[0]->l5_actual_deducted, 8496.23 );
-		$this->assertEquals( $form_objs->objs[0]->l15b, TRUE );
-		$this->assertEquals( $form_objs->objs[0]->l16_month1, FALSE );
-		$this->assertEquals( $form_objs->objs[0]->l16_month2, FALSE );
-		$this->assertEquals( $form_objs->objs[0]->l16_month3, FALSE );
+		$this->assertEquals( $form_objs->objs[0]->l15b, true );
+		$this->assertEquals( $form_objs->objs[0]->l16_month1, false );
+		$this->assertEquals( $form_objs->objs[0]->l16_month2, false );
+		$this->assertEquals( $form_objs->objs[0]->l16_month3, false );
 		$this->assertEquals( $form_objs->objs[0]->l16_month_total, 0.00 );
 		//$this->assertEquals( $form_objs->objs[0]->l16_month_total, $form_objs->objs[0]->l12 );
 
@@ -1261,11 +1259,11 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l5c2, 4062.14 );
 		$this->assertEquals( $form_objs->objs[0]->l5d2, 361.14 );
 		$this->assertEquals( $form_objs->objs[0]->l5e, 8496.28 );
-		$this->assertEquals( $form_objs->objs[0]->l4, TRUE );
+		$this->assertEquals( $form_objs->objs[0]->l4, true );
 		$this->assertEquals( $form_objs->objs[0]->l6, 50518.63 );
 		$this->assertEquals( $form_objs->objs[0]->l7, -0.05 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 50518.58);
-		$this->assertEquals( $form_objs->objs[0]->l12, 50518.58);
+		$this->assertEquals( $form_objs->objs[0]->l10, 50518.58 );
+		$this->assertEquals( $form_objs->objs[0]->l12, 50518.58 );
 
 		//Schedule B
 		//var_dump($form_objs->objs[1]->data);
@@ -1295,8 +1293,8 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('30-Jun-2019');
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '30-Jun-2019' );
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
@@ -1359,8 +1357,9 @@ class Form941ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $report_output[6]['additional_medicare_tax'], 361.13 );
 		$this->assertEquals( $report_output[6]['total_tax'], 95842.81 );
 
-		return TRUE;
+		return true;
 	}
 
 }
+
 ?>

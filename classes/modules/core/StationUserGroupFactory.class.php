@@ -42,7 +42,7 @@ class StationUserGroupFactory extends Factory {
 	protected $table = 'station_user_group';
 	protected $pk_sequence_name = 'station_user_group_id_seq'; //PK Sequence name
 
-	var $group_obj = NULL;
+	var $group_obj = null;
 
 	/**
 	 * @return mixed
@@ -55,8 +55,9 @@ class StationUserGroupFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setStation( $value) {
+	function setStation( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'station_id', $value );
 	}
 
@@ -64,17 +65,18 @@ class StationUserGroupFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getGroupObject() {
-		if ( is_object($this->group_obj) ) {
+		if ( is_object( $this->group_obj ) ) {
 			return $this->group_obj;
 		} else {
 			$uglf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $uglf */
 			$uglf->getById( $this->getGroup() );
 			if ( $uglf->getRecordCount() == 1 ) {
 				$this->group_obj = $uglf->getCurrent();
+
 				return $this->group_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -89,8 +91,9 @@ class StationUserGroupFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setGroup( $value) {
+	function setGroup( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'group_id', $value );
 	}
 
@@ -103,28 +106,28 @@ class StationUserGroupFactory extends Factory {
 		//
 		// Station
 		if ( $this->getStation() != TTUUID::getZeroID() ) {
-			$this->Validator->isUUID(	'station',
-												$this->getStation(),
-												TTi18n::gettext('Selected Station is invalid')
-											/*
-															$this->Validator->isResultSetWithRows(	'station',
-																								$slf->getByID($id),
-																								TTi18n::gettext('Selected Station is invalid')
-											*/
-											);
+			$this->Validator->isUUID( 'station',
+									  $this->getStation(),
+									  TTi18n::gettext( 'Selected Station is invalid' )
+			/*
+							$this->Validator->isResultSetWithRows(	'station',
+																$slf->getByID($id),
+																TTi18n::gettext('Selected Station is invalid')
+			*/
+			);
 		}
 		// Group
 		if ( $this->getGroup() != TTUUID::getZeroID() ) {
 			$uglf = TTnew( 'UserGroupListFactory' ); /** @var UserGroupListFactory $uglf */
-			$this->Validator->isResultSetWithRows(	'group',
-															$uglf->getByID($this->getGroup()),
-															TTi18n::gettext('Selected Group is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'group',
+												   $uglf->getByID( $this->getGroup() ),
+												   TTi18n::gettext( 'Selected Group is invalid' )
+			);
 		}
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -133,105 +136,105 @@ class StationUserGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -240,11 +243,12 @@ class StationUserGroupFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$g_obj = $this->getGroupObject();
-		if ( is_object($g_obj) ) {
-			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText('Group').': '. $g_obj->getName(), NULL, $this->getTable() );
+		if ( is_object( $g_obj ) ) {
+			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText( 'Group' ) . ': ' . $g_obj->getName(), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

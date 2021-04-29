@@ -39,10 +39,11 @@
  * @package API\Report
  */
 class APIReport extends APIFactory {
-	public $report_obj = NULL;
+	public $report_obj = null;
 
 	/**
 	 * APIReport constructor.
+	 * @noinspection PhpPossiblePolymorphicInvocationInspection
 	 */
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
@@ -53,7 +54,7 @@ class APIReport extends APIFactory {
 
 		$this->setMainClassObject( $report_obj );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -67,7 +68,7 @@ class APIReport extends APIFactory {
 	 * @param bool $name
 	 * @return array|bool
 	 */
-	function getTemplate( $name = FALSE ) {
+	function getTemplate( $name = false ) {
 		return $this->returnHandler( $this->getReportObject()->getTemplate( $name ) );
 	}
 
@@ -82,7 +83,7 @@ class APIReport extends APIFactory {
 	 * @param bool $data
 	 * @return array|bool
 	 */
-	function setConfig( $data = FALSE ) {
+	function setConfig( $data = false ) {
 		return $this->returnHandler( $this->getReportObject()->setConfig( $data ) );
 	}
 
@@ -104,23 +105,23 @@ class APIReport extends APIFactory {
 	 * @param bool $data
 	 * @return array|bool
 	 */
-	function setCompanyFormConfig( $data = FALSE ) {
-		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
+	function setCompanyFormConfig( $data = false ) {
+		if ( $this->getReportObject()->checkPermissions() == true ) {
 			return $this->returnHandler( $this->getReportObject()->setCompanyFormConfig( $data ) );
 		}
 
-		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('PERMISSION DENIED') );
+		return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'PERMISSION DENIED' ) );
 	}
 
 	/**
 	 * @return array|bool
 	 */
 	function getCompanyFormConfig() {
-		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
+		if ( $this->getReportObject()->checkPermissions() == true ) {
 			return $this->returnHandler( $this->getReportObject()->getCompanyFormConfig() );
 		}
 
-		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('PERMISSION DENIED') );
+		return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'PERMISSION DENIED' ) );
 	}
 
 	/**
@@ -128,16 +129,16 @@ class APIReport extends APIFactory {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function validateReport( $config = FALSE, $format = 'pdf' ) {
+	function validateReport( $config = false, $format = 'pdf' ) {
 		$this->getReportObject()->setConfig( $config ); //Set config first, so checkPermissions can check/modify data in the config for Printing timesheets for regular employees.
-		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
+		if ( $this->getReportObject()->checkPermissions() == true ) {
 			$validation_obj = $this->getReportObject()->validateConfig( $format );
-			if ( $validation_obj->isValid() == FALSE ) {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), array( 0 => $validation_obj->getErrorsArray() ), array('total_records' => 1, 'valid_records' => 0 ) );
+			if ( $validation_obj->isValid() == false ) {
+				return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), [ 0 => $validation_obj->getErrorsArray() ], [ 'total_records' => 1, 'valid_records' => 0 ] );
 			}
 		}
 
-		return $this->returnHandler( TRUE );
+		return $this->returnHandler( true );
 	}
 
 	/**
@@ -146,65 +147,69 @@ class APIReport extends APIFactory {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getReport( $config = FALSE, $format = 'pdf' ) {
-		if ( is_string( $format ) == FALSE OR $format == '' ) {
-			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Format is invalid') );
+	function getReport( $config = false, $format = 'pdf' ) {
+		if ( is_string( $format ) == false || $format == '' ) {
+			return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'Format is invalid' ) );
 		}
 
-		if ( Misc::isSystemLoadValid() == FALSE ) {
-			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later...') );
+		if ( Misc::isSystemLoadValid() == false ) {
+			return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'Please try again later...' ) );
 		}
 
-		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
 			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
-		if ( is_object( $this->getReportObject()->getUserObject() ) AND $this->getReportObject()->getUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
-			return $this->getPermissionObject()->PermissionDenied( FALSE, TTi18n::getText( 'Employee status must be Active to view reports' ) );
+		if ( is_object( $this->getReportObject()->getUserObject() ) && $this->getReportObject()->getUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
+			return $this->getPermissionObject()->PermissionDenied( false, TTi18n::getText( 'Employee status must be Active to view reports' ) );
 		}
 
 		$format = Misc::trimSortPrefix( $format );
-		Debug::Text('Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getReportObject()->setConfig( $config ); //Set config first, so checkPermissions can check/modify data in the config for Printing timesheets for regular employees.
-		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
+		if ( $this->getReportObject()->checkPermissions() == true ) {
 			$this->getReportObject()->setAMFMessageID( $this->getAMFMessageID() ); //This must be set *after* the all constructor functions are called, as its primarily called from JSON.
 
 			$validation_obj = $this->getReportObject()->validateConfig( $format );
-			if ( $validation_obj->isValid() == TRUE ) {
+			if ( $validation_obj->isValid() == true ) {
 				//return Misc::APIFileDownload( 'report.pdf', 'application/pdf', $this->getReportObject()->getOutput( $format ) );
 				$output_arr = $this->getReportObject()->getOutput( $format );
 
-				if ( isset($output_arr['file_name']) AND isset($output_arr['mime_type']) AND isset($output_arr['data']) ) {
+				if ( isset( $output_arr['file_name'] ) && isset( $output_arr['mime_type'] ) && isset( $output_arr['data'] ) ) {
 					//If using the SOAP API, return data base64 encoded so it can be decoded on the client side.
-					if ( defined('TIMETREX_SOAP_API') AND TIMETREX_SOAP_API == TRUE ) {
+					if ( defined( 'TIMETREX_SOAP_API' ) && TIMETREX_SOAP_API == true ) {
 						$output_arr['data'] = base64_encode( $output_arr['data'] );
+
 						return $this->returnHandler( $output_arr );
 					} else {
 						if ( $output_arr['mime_type'] === 'text/html' ) {
 							return $this->returnHandler( $output_arr['data'] );
 						} else {
 							Misc::APIFileDownload( $output_arr['file_name'], $output_arr['mime_type'], $output_arr['data'] );
-							return NULL; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
+
+							return null; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
 						}
 					}
-				} elseif ( isset($output_arr['api_retval']) ) { //Pass through validation errors.
-					Debug::Text('Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__, 10);
+				} else if ( isset( $output_arr['api_retval'] ) ) { //Pass through validation errors.
+					Debug::Text( 'Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__, 10 );
+
 					return $this->returnHandler( $output_arr['api_retval'], $output_arr['api_details']['code'], $output_arr['api_details']['description'] );
 					//return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later...') );
-				} elseif ( $output_arr !== FALSE ) {
+				} else if ( $output_arr !== false ) {
 					//Likely RAW data, return untouched.
 					return $this->returnHandler( $output_arr );
 				} else {
 					//getOutput() returned FALSE, some error occurred. Likely load too high though.
 					//return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Error generating report...') );
-					return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: Report is too large, please try again later or narrow your search criteria to decrease the size of your report').'...' );
+					return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'ERROR: Report is too large, please try again later or narrow your search criteria to decrease the size of your report' ) . '...' );
 				}
 			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), array( 0 => $validation_obj->getErrorsArray() ), array('total_records' => 1, 'valid_records' => 0 ) );
+				return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), [ 0 => $validation_obj->getErrorsArray() ], [ 'total_records' => 1, 'valid_records' => 0 ] );
 			}
 		}
 
-		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('PERMISSION DENIED') );
+		return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'PERMISSION DENIED' ) );
 	}
 }
+
 ?>

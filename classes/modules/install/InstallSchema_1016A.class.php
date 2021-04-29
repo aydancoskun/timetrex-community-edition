@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnusedLocalVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -40,15 +40,15 @@
  */
 class InstallSchema_1016A extends InstallSchema_Base {
 
-	protected $station_users = array();
+	protected $station_users = [];
 
 	/**
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -60,19 +60,19 @@ class InstallSchema_1016A extends InstallSchema_Base {
 		//assumed needed elsewhere
 		// @codingStandardsIgnoreEnd
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'l: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		$cjlf = TTnew( 'CronJobListFactory' ); /** @var CronJobListFactory $cjlf */
 		$cjlf->getAll();
 		if ( $cjlf->getRecordCount() > 0 ) {
-			foreach( $cjlf as $cj_obj ) {
-				Debug::text('Original Command: '.  $cj_obj->getCommand(), __FILE__, __LINE__, __METHOD__, 9);
-				preg_match('/([A-Za-z0-9]+\.php)/i', $cj_obj->getCommand(), $matches );
+			foreach ( $cjlf as $cj_obj ) {
+				Debug::text( 'Original Command: ' . $cj_obj->getCommand(), __FILE__, __LINE__, __METHOD__, 9 );
+				preg_match( '/([A-Za-z0-9]+\.php)/i', $cj_obj->getCommand(), $matches );
 
-				if ( isset($matches[0]) AND $matches[0] != '' ) {
-					Debug::text('New Command: '. $matches[0], __FILE__, __LINE__, __METHOD__, 9);
+				if ( isset( $matches[0] ) && $matches[0] != '' ) {
+					Debug::text( 'New Command: ' . $matches[0], __FILE__, __LINE__, __METHOD__, 9 );
 					$cj_obj->setCommand( $matches[0] );
 					if ( $cj_obj->isValid() ) {
 						$cj_obj->Save();
@@ -81,7 +81,8 @@ class InstallSchema_1016A extends InstallSchema_Base {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

@@ -49,29 +49,29 @@ class UnitConvert {
 	//Convert weight units to grams, first.
 	//Convert dimension units to mm, first.
 	//Handle square and cubic (exponent) calculations as well.
-	static $units = array(
-						// 1 Unit = X G
-						'oz' => 28.349523125,
-						'lb' => 453.59237,
-						'lbs' => 453.59237,
-						'g'	 => 1,
-						'kg' => 1000,
+	static $units = [
+		// 1 Unit = X G
+		'oz'  => 28.349523125,
+		'lb'  => 453.59237,
+		'lbs' => 453.59237,
+		'g'   => 1,
+		'kg'  => 1000,
 
-						//1 Unit = X MM
-						'mm' => 1,
-						'in' => 25.4,
-						'cm' => 10,
-						'ft' => 304.8,
-						'm' => 1000,
-						'km' => 1000000,
-						'mi' => 1609344,
-					);
+		//1 Unit = X MM
+		'mm'  => 1,
+		'in'  => 25.4,
+		'cm'  => 10,
+		'ft'  => 304.8,
+		'm'   => 1000,
+		'km'  => 1000000,
+		'mi'  => 1609344,
+	];
 
 	//Only units in the same array can be converted to one another.
-	static $valid_unit_groups = array(
-									'g' => array('g', 'oz', 'lb', 'lbs', 'kg'),
-									'mm' => array('mm', 'in', 'cm', 'ft', 'm', 'km', 'mi')
-									);
+	static $valid_unit_groups = [
+			'g'  => [ 'g', 'oz', 'lb', 'lbs', 'kg' ],
+			'mm' => [ 'mm', 'in', 'cm', 'ft', 'm', 'km', 'mi' ],
+	];
 
 	/**
 	 * @param $src_unit
@@ -81,42 +81,43 @@ class UnitConvert {
 	 * @return bool|float|int
 	 */
 	static function convert( $src_unit, $dst_unit, $measurement, $exponent = 1 ) {
-		$src_unit = strtolower($src_unit);
-		$dst_unit = strtolower($dst_unit);
+		$src_unit = strtolower( $src_unit );
+		$dst_unit = strtolower( $dst_unit );
 
-		if ( !isset(self::$units[$src_unit]) ) {
-			return FALSE;
+		if ( !isset( self::$units[$src_unit] ) ) {
+			return false;
 		}
-		if ( !isset(self::$units[$dst_unit]) ) {
-			return FALSE;
+		if ( !isset( self::$units[$dst_unit] ) ) {
+			return false;
 		}
 
-		if (  $src_unit == $dst_unit ) {
+		if ( $src_unit == $dst_unit ) {
 			return $measurement;
 		}
 
 		//Make sure we can convert from one unit to another.
-		$valid_conversion = FALSE;
-		foreach( self::$valid_unit_groups as $valid_units ) {
-			if ( in_array($src_unit, $valid_units) AND in_array($dst_unit, $valid_units) ) {
+		$valid_conversion = false;
+		foreach ( self::$valid_unit_groups as $valid_units ) {
+			if ( in_array( $src_unit, $valid_units ) && in_array( $dst_unit, $valid_units ) ) {
 				//Valid conversion
-				$valid_conversion = TRUE;
+				$valid_conversion = true;
 			}
 		}
 
-		if ( $valid_conversion == FALSE ) {
-			return FALSE;
+		if ( $valid_conversion == false ) {
+			return false;
 		}
 
-		$base_measurement = ( pow( self::$units[$src_unit], $exponent) * $measurement );
+		$base_measurement = ( pow( self::$units[$src_unit], $exponent ) * $measurement );
 		//Debug::Text(' Base Measurement: '. $base_measurement, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $base_measurement != 0 ) {
-			$retval = ( (1 / pow(self::$units[$dst_unit], $exponent) ) * $base_measurement );
+			$retval = ( ( 1 / pow( self::$units[$dst_unit], $exponent ) ) * $base_measurement );
 
 			return $retval;
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

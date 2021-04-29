@@ -18,9 +18,9 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'recurring_schedule_control';
 		this.context_menu_name = $.i18n._( 'Recurring Schedules' );
 		this.navigation_label = $.i18n._( 'Recurring Schedule' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRecurringScheduleControl' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRecurringScheduleControl' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -71,7 +71,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		var widgetContainer;
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRecurringScheduleControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRecurringScheduleControl' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.RECURRING_SCHEDULE_CONTROL,
@@ -95,7 +95,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.RECURRING_TEMPLATE_CONTROL,
 			show_search_inputs: true,
@@ -145,7 +145,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		var default_args = {};
 		if ( ( Global.getProductEdition() >= 15 ) ) {
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.USER,
 				show_search_inputs: true,
@@ -173,7 +173,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			form_item_input.setDefaultArgs( default_args );
 		} else {
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.USER,
 				show_search_inputs: true,
@@ -210,7 +210,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'recurring_schedule_template_control_id',
 				layout_name: ALayoutIDs.RECURRING_TEMPLATE_CONTROL,
-				api_class: (APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' )),
+				api_class: ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -222,7 +222,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -247,7 +247,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -259,7 +259,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -272,7 +272,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -285,7 +285,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -297,7 +297,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -331,7 +331,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		return source_data;
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [],
 			include: [
@@ -362,7 +362,6 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				break;
 		}
 	},
-
 
 	//set tab 0 visible after all data set done. This be hide when init edit view data
 	setEditViewDataDone: function() {
@@ -417,9 +416,9 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
  	* Common functions used by view and edit onclick logic
  	*/
 
-	processAPICallbackResult: function ( result_data ) {
+	processAPICallbackResult: function( result_data ) {
 		var composite_id = this.getCurrentSelectedRecord();
-		var	user_id = this.parseToUserId( composite_id );
+		var user_id = this.parseToUserId( composite_id );
 
 		if ( !result_data ) {
 			result_data = [];
@@ -439,7 +438,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		return [result_data[index]]; // Wrapped in array as BaseViewController.handleViewAPICallbackResult() pulls off the first record after getting this result back.
 	},
 
-	getAPIFilters: function () {
+	getAPIFilters: function() {
 		var composite_id = this.getCurrentSelectedRecord();
 		var record_id = this.parseToRecordId( composite_id );
 
@@ -511,9 +510,9 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	},
 
-	getCopyAsNewFilter: function ( filter ) {
+	getCopyAsNewFilter: function( filter ) {
 		var old_selected_id = filter.filter_data.id[0];
-		filter.filter_data.id = [ this.parseToRecordId( old_selected_id )];
+		filter.filter_data.id = [this.parseToRecordId( old_selected_id )];
 		return filter;
 	},
 
@@ -547,7 +546,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 	getDeleteSelectedRecordId: function() {
 		var retval = {};
 		if ( this.edit_view ) {
-			retval[ this.parseToRecordId( this.current_edit_record.id ) ] = [ this.parseToUserId( this.current_edit_record.id ) ];
+			retval[this.parseToRecordId( this.current_edit_record.id )] = [this.parseToUserId( this.current_edit_record.id )];
 		} else {
 			var grid_selected_id_array = this.getGridSelectIdArray().slice();
 			for ( var i = 0; i < grid_selected_id_array.length; i++ ) {
@@ -1043,61 +1042,5 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			context_btn.addClass( 'disable-image' );
 		}
 
-	},
-
-	initSubLogView: function( tab_id ) {
-		var $this = this;
-
-		if ( !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id ) {
-			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
-			return;
-		}
-
-		if ( this.sub_log_view_controller ) {
-			this.sub_log_view_controller.buildContextMenu( true );
-			this.sub_log_view_controller.setDefaultMenu();
-			$this.sub_log_view_controller.parent_value = $this.parseToRecordId( $this.current_edit_record.id ); //Need to parse to record ID before passing to Audit tab.
-			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-
-			this.sub_log_view_controller.search();
-		} else {
-
-			Global.loadScript( 'views/core/log/LogViewController.js', function() {
-				if ( !$this.edit_view_tab ) {
-					return;
-				}
-				var tab = $this.edit_view_tab.find( '#' + tab_id );
-				var firstColumn = tab.find( '.first-column-sub-view' );
-
-				TTPromise.add( 'initSubAudit', 'init' );
-				TTPromise.wait( 'initSubAudit', 'init', function() {
-					firstColumn.css('opacity', '1');
-				} );
-
-				firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
-
-				Global.trackView( 'Sub' + 'Log' + 'View', LocalCacheData.current_doing_context_action );
-				LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-			} );
-		}
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_log_view_controller = subViewController;
-			$this.sub_log_view_controller.parent_key = 'object_id';
-			$this.sub_log_view_controller.parent_value = $this.parseToRecordId( $this.current_edit_record.id ); //Need to parse to record ID before passing to Audit tab.
-			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.parent_view_controller = $this;
-
-			$this.sub_log_view_controller.postInit = function() {
-				this.initData();
-			};
-
-		}
 	}
 } );

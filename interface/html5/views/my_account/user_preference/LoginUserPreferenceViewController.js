@@ -1,6 +1,5 @@
 LoginUserPreferenceViewController = BaseViewController.extend( {
 
-
 	_required_files: ['APIUserPreference', 'APIDate', 'APICurrentUser', 'APIUserPreference'],
 
 	language_array: null,
@@ -31,10 +30,10 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		this.script_name = 'LoginUserPreferenceView';
 		this.table_name_key = 'user_preference';
 		this.context_menu_name = $.i18n._( 'Preferences' );
-		this.api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
-		this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-		this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.currentUser_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
+		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
 
 		this.render();
 
@@ -109,7 +108,6 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 	},
 
 	setCurrentEditRecordData: function() {
-
 
 		//Set current edit record data to all widgets
 
@@ -302,7 +300,10 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 		var tab_model = {
 			'tab_preferences': { 'label': $.i18n._( 'Preferences' ) },
-			'tab_schedule_synchronization': { 'label': $.i18n._( 'Schedule Synchronization' ), 'init_callback': 'initSubScheduleSynchronizationView' },
+			'tab_schedule_synchronization': {
+				'label': $.i18n._( 'Schedule Synchronization' ),
+				'init_callback': 'initSubScheduleSynchronizationView'
+			},
 		};
 		this.setTabModel( tab_model );
 

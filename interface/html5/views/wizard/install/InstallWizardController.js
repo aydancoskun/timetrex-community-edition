@@ -24,7 +24,7 @@ InstallWizardController = BaseWizardController.extend( {
 		this.steps = 5;
 		this.script_name = 'wizard_install';
 		this.wizard_id = 'InstallWizard';
-		this.api = new (APIFactory.getAPIClass( 'APIInstall' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIInstall' ) )();
 		ServiceCaller.extra_url = '&disable_db=1';
 		if ( _.size( LocalCacheData.all_url_args ) > 0 ) {
 			var url_args = LocalCacheData.all_url_args;
@@ -55,8 +55,7 @@ InstallWizardController = BaseWizardController.extend( {
 		var $this = this;
 
 		if ( step ) {
-		}
-		else {
+		} else {
 			step = this.current_step;
 		}
 
@@ -343,26 +342,26 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'requirements':
 
 				var step_title_htm = $.i18n._( 'In order for your' ) + ' '
-						+ $.i18n._( stepData.application_name ) + ' '
-						+ $.i18n._( 'installation to function properly, please ensure all of the system check items listed below are marked as' ) + ' '
-						+ '<b>OK</b>' + '. '
-						+ $.i18n._( 'If any are red, please take the necessary steps to fix them.' );
+					+ $.i18n._( stepData.application_name ) + ' '
+					+ $.i18n._( 'installation to function properly, please ensure all of the system check items listed below are marked as' ) + ' '
+					+ '<b>OK</b>' + '. '
+					+ $.i18n._( 'If any are red, please take the necessary steps to fix them.' );
 
 				if ( stepData.check_all_requirements != 0 ) {
 
-					if (stepData.tt_product_edition > 10) {
+					if ( stepData.tt_product_edition > 10 ) {
 						step_title_htm = step_title_htm
 							+ '<p style="background-color: #FFFF00">'
-							+ $.i18n._('For installation assistance, please contact') + ' '
-							+ '<a href="https://www.timetrex.com/contact-us" target="_blank">' + $.i18n._('TimeTrex support') + '</a>';
-					} else if (stepData.tt_product_edition == 10) {
+							+ $.i18n._( 'For installation assistance, please contact' ) + ' '
+							+ '<a href="https://www.timetrex.com/contact-us" target="_blank">' + $.i18n._( 'TimeTrex support' ) + '</a>';
+					} else if ( stepData.tt_product_edition == 10 ) {
 
 						step_title_htm = step_title_htm
 							+ '<p style="background-color: #FFFF00">'
-							+ $.i18n._('For installation assistance, please join our community') + ' '
-							+ '<a href="https://forums.timetrex.com" target="_blank">' + $.i18n._('forums') + '</a>'
-							+ ' ' + $.i18n._('or contact a TimeTrex support expert for') + ' '
-							+ '<a href="https://www.timetrex.com/setup-support" target="_blank">' + $.i18n._('Implementation Support Services') + '</a></p>';
+							+ $.i18n._( 'For installation assistance, please join our community' ) + ' '
+							+ '<a href="https://forums.timetrex.com" target="_blank">' + $.i18n._( 'forums' ) + '</a>'
+							+ ' ' + $.i18n._( 'or contact a TimeTrex support expert for' ) + ' '
+							+ '<a href="https://www.timetrex.com/setup-support" target="_blank">' + $.i18n._( 'Implementation Support Services' ) + '</a></p>';
 					}
 
 				}
@@ -622,11 +621,11 @@ InstallWizardController = BaseWizardController.extend( {
 				break;
 			case 'user':
 				step_title.html( $.i18n._( 'Please enter the administrator user name and password' )
-						+ '<br>'
-						+ '<br>'
-						+ '<b>' + '*' + $.i18n._( 'IMPORTANT' ) + '*' + ':' + '</b>' + ' '
-						+ $.i18n._( 'Please write this information down, as you will need it later to login to' ) + ' '
-						+ $.i18n._( stepData.application_name )
+					+ '<br>'
+					+ '<br>'
+					+ '<b>' + '*' + $.i18n._( 'IMPORTANT' ) + '*' + ':' + '</b>' + ' '
+					+ $.i18n._( 'Please write this information down, as you will need it later to login to' ) + ' '
+					+ $.i18n._( stepData.application_name )
 				);
 				this.title_1.text( $.i18n._( 'Administrator Login' ) );
 				var user_column1 = user.find( '.first-column' );
@@ -755,11 +754,11 @@ InstallWizardController = BaseWizardController.extend( {
 				widgetContainer.append( form_item_host_input );
 
 				var form_item_url_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				form_item_url_input.TTextInput( {field: 'base_url', width: 200} );
+				form_item_url_input.TTextInput( { field: 'base_url', width: 200 } );
 
 				widgetContainer.append( form_item_url_input );
 
-				var ie_label = $( '<span class=\'widget-right-label\'>('+ $.i18n._( 'No trailing slash' ) +')</span>' );
+				var ie_label = $( '<span class=\'widget-right-label\'>(' + $.i18n._( 'No trailing slash' ) + ')</span>' );
 
 				widgetContainer.append( ie_label );
 				this.addEditFieldToColumn( $.i18n._( 'URL' ), [form_item_host_input, form_item_url_input], systemSettings_column1, '', widgetContainer, null, true );
@@ -774,7 +773,7 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input.TTextInput( { field: 'storage_dir', width: 400 } );
 
 				var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-				var label = $( '<span class=\'widget-right-label\'> ('+ $.i18n._( 'for things like attachments, logos, etc...' ) +')</span>' );
+				var label = $( '<span class=\'widget-right-label\'> (' + $.i18n._( 'for things like attachments, logos, etc...' ) + ')</span>' );
 
 				widgetContainer.append( form_item_input );
 				widgetContainer.append( label );
@@ -788,7 +787,7 @@ InstallWizardController = BaseWizardController.extend( {
 
 				// System timezone
 				form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-				form_item_input.TComboBox( {field: 'time_zone'} );
+				form_item_input.TComboBox( { field: 'time_zone' } );
 				form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
 				this.addEditFieldToColumn( $.i18n._( 'Server Time Zone' ), form_item_input, systemSettings_column1 );
 
@@ -799,20 +798,6 @@ InstallWizardController = BaseWizardController.extend( {
 				databaseConfig.find( '.step-tip' ).text( $.i18n._( 'Privileged Database User Name / Password. This is only used to create the database schema if the above user does not have permissions to do so.' ) );
 
 				var step_title_htm = '';
-
-				if ( stepData.database_engine == false ) {
-					step_title_htm = step_title_htm
-							+ '<p style="background-color: #ff0000">'
-							+ $.i18n._( 'Your MySQL database does not support the' ) + ' '
-							+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
-							+ $.i18n._( 'storage engine which is required for' ) + ' '
-							+ $.i18n._( stepData.application_name ) + ' '
-							+ $.i18n._( 'to use transactions and ensure data integrity. Please add' ) + ' '
-							+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
-							+ $.i18n._( 'support to MySQL before continuing.' )
-							+ '</p>';
-				}
-
 				step_title_htm = step_title_htm + $.i18n._( 'Please enter your database configuration information below. If you are unsure, use the default values.' );
 
 				step_title.html( step_title_htm );
@@ -902,44 +887,44 @@ InstallWizardController = BaseWizardController.extend( {
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Upgrade Complete' ) );
 				postUpgrade.html( '<b>' + $.i18n._( 'Congratulations!' ) + '</b>'
-						+ $.i18n._( 'You have successfully upgraded' ) + ' '
-						+ $.i18n._( stepData.application_name ) + ' '
-						+ $.i18n._( 'to' ) + ' '
-						+ '<b>' + stepData.application_version + '</b>'
-						+ '<br>'
-						+ '<br>'
-						+ '<b>' + $.i18n._( 'Note' ) + ':' + '</b>' + ' '
-						+ $.i18n._( 'In order to access new features you may need to re-apply the' ) + ' '
-						+ '<b>' + $.i18n._( 'Administrator' ) + '</b>' + ' '
-						+ $.i18n._( 'permission preset to each administrator employee in' ) + ' '
-						+ $.i18n._( stepData.application_name ) + '.'
+					+ $.i18n._( 'You have successfully upgraded' ) + ' '
+					+ $.i18n._( stepData.application_name ) + ' '
+					+ $.i18n._( 'to' ) + ' '
+					+ '<b>' + stepData.application_version + '</b>'
+					+ '<br>'
+					+ '<br>'
+					+ '<b>' + $.i18n._( 'Note' ) + ':' + '</b>' + ' '
+					+ $.i18n._( 'In order to access new features you may need to re-apply the' ) + ' '
+					+ '<b>' + $.i18n._( 'Administrator' ) + '</b>' + ' '
+					+ $.i18n._( 'permission preset to each administrator employee in' ) + ' '
+					+ $.i18n._( stepData.application_name ) + '.'
 				);
 				postUpgrade.show();
 				break;
 			case 'installDone':
 				var loc = window.location;
 				var currentURL = loc.protocol + '//' + loc.host + loc.pathname;
-				login_url = currentURL + '#!m=Login';
+				var login_url = currentURL + '#!m=Login';
 
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Done!' ) );
 				if ( stepData.upgrade == 1 ) {
 					installDone.html( '<b>' + $.i18n._( 'Congratulations!' ) + '</b>' + ' '
-							+ $.i18n._( 'You have successfully upgraded' ) + ' ' + $.i18n._( stepData.application_name )
-							+ '<br>'
-							+ '<br>'
-							+ $.i18n._( 'You may now' ) + ' '
-							+ '<a href="' + login_url + '">' + $.i18n._( 'login' ) + '</a>' + ' '
-							+ $.i18n._( 'with the user name/password that you created earlier.' )
+						+ $.i18n._( 'You have successfully upgraded' ) + ' ' + $.i18n._( stepData.application_name )
+						+ '<br>'
+						+ '<br>'
+						+ $.i18n._( 'You may now' ) + ' '
+						+ '<a href="' + login_url + '">' + $.i18n._( 'login' ) + '</a>' + ' '
+						+ $.i18n._( 'with the user name/password that you created earlier.' )
 					);
 				} else {
 					installDone.html( '<b>' + $.i18n._( 'Congratulations!' ) + ' ' + '</b>' + ' '
-							+ $.i18n._( 'You have successfully installed' ) + ' ' + $.i18n._( stepData.application_name )
-							+ '<br>'
-							+ '<br>'
-							+ $.i18n._( 'You may now' ) + ' '
-							+ '<a href="' + login_url + '">' + $.i18n._( 'login' ) + '</a>' + ' '
-							+ $.i18n._( 'with the user name/password that you created earlier.' )
+						+ $.i18n._( 'You have successfully installed' ) + ' ' + $.i18n._( stepData.application_name )
+						+ '<br>'
+						+ '<br>'
+						+ $.i18n._( 'You may now' ) + ' '
+						+ '<a href="' + login_url + '">' + $.i18n._( 'login' ) + '</a>' + ' '
+						+ $.i18n._( 'with the user name/password that you created earlier.' )
 					);
 				}
 				installDone.show();
@@ -948,20 +933,20 @@ InstallWizardController = BaseWizardController.extend( {
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Maintenance Jobs' ) );
 				var maintenanceJob_html = $.i18n._( stepData.application_name ) + ' '
-						+ '<b>' + $.i18n._( 'requires' ) + '</b>' + ' '
-						+ $.i18n._( 'that maintenance jobs be run regularly throughout the day.' )
-						+ '<br>'
-						+ '<p style="color: #ff0000">'
-						+ '<b>'
-						+ $.i18n._( 'This is extremely important and without these maintenance jobs running' ) + ' '
-						+ $.i18n._( stepData.application_name ) + ' '
-						+ $.i18n._( 'will fail to operate correctly.' )
-						+ '</b>'
-						+ '</p>'
-						+ '<br>'
-						+ '<br>'
-						+ '<div style="background-color: #eee; width: 100%;">'
-						+ '<br>';
+					+ '<b>' + $.i18n._( 'requires' ) + '</b>' + ' '
+					+ $.i18n._( 'that maintenance jobs be run regularly throughout the day.' )
+					+ '<br>'
+					+ '<p style="color: #ff0000">'
+					+ '<b>'
+					+ $.i18n._( 'This is extremely important and without these maintenance jobs running' ) + ' '
+					+ $.i18n._( stepData.application_name ) + ' '
+					+ $.i18n._( 'will fail to operate correctly.' )
+					+ '</b>'
+					+ '</p>'
+					+ '<br>'
+					+ '<br>'
+					+ '<div style="background-color: #eee; width: 100%;">'
+					+ '<br>';
 
 				if ( stepData.php_os == 'WINNT' ) {
 					maintenanceJob_html = maintenanceJob_html + $.i18n._( 'In Windows simply run this command as Administrator.' ) + '<br><br>' + stepData.schedule_maintenance_job_command;
@@ -979,14 +964,14 @@ InstallWizardController = BaseWizardController.extend( {
 					maintenanceJob_html = maintenanceJob_html + ' crontab -u ' + stepData.web_server_user + ' -e';
 
 					maintenanceJob_html = maintenanceJob_html + '</b>'
-							+ '<br>'
-							+ '<br>'
-							+ $.i18n._( 'Then add the following line to the bottom of the file' ) + ':'
-							+ '<br>'
-							+ '<b>' + '* * * * * php ' + stepData.cron_file + ' > /dev/null 2>&1' + '</b>'
-							+ '<br>'
-							+ '<br>'
-							+ '</div>';
+						+ '<br>'
+						+ '<br>'
+						+ $.i18n._( 'Then add the following line to the bottom of the file' ) + ':'
+						+ '<br>'
+						+ '<b>' + '* * * * * php ' + stepData.cron_file + ' > /dev/null 2>&1' + '</b>'
+						+ '<br>'
+						+ '<br>'
+						+ '</div>';
 
 				}
 
@@ -1004,50 +989,35 @@ InstallWizardController = BaseWizardController.extend( {
 	 * @param deferred (optional)
 	 */
 	onTestDatabaseConnectionClick: function( $this, showTrue ) {
-		$data = {};
+		var $data = {};
 		for ( var key in $this.stepsWidgetDic[$this.current_step] ) {
 			var widget = $this.stepsWidgetDic[$this.current_step][key];
 			$data[key] = widget.getValue();
 		}
 		ProgressBar.showOverlay();
-		res = $this.api.testConnection( $data, { async: false } );
+		var res = $this.api.testConnection( $data, { async: false } );
 
 		if ( res.isValid() ) {
 			var result = res.getResult();
 			var step_title_htm = '';
-			if ( result.database_engine == false ) {
-				step_title_htm = step_title_htm
-						+ '<p style="background-color: #ff0000">'
-						+ $.i18n._( 'Your MySQL database does not support the' ) + ' '
-						+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
-						+ $.i18n._( 'storage engine which is required for' ) + ' '
-						+ $.i18n._( stepData.application_name ) + ' '
-						+ $.i18n._( 'to use transactions and ensure data integrity. Please add' ) + ' '
-						+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
-						+ $.i18n._( 'support to MySQL before continuing.' )
-						+ '</p>';
-				//set next button enabled.
-				TAlertManager.showAlert( step_title_htm );
-				return false;
-			}
 			if ( result.test_connection !== null ) {
 				if ( result.test_connection === true ) {
 					if ( result.database_version === 1 ) {
 						step_title_htm = step_title_htm
-								+ '<p style="background-color: #ff0000">'
-								+ $.i18n._( 'Database version check' ) + ' '
-								+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
-								+ $.i18n._( 'Please upgrade your database to meet the minimum version requirements and try again.' )
-								+ '</p>';
+							+ '<p style="background-color: #ff0000">'
+							+ $.i18n._( 'Database version check' ) + ' '
+							+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
+							+ $.i18n._( 'Please upgrade your database to meet the minimum version requirements and try again.' )
+							+ '</p>';
 						TAlertManager.showAlert( step_title_htm );
 						return false;
 					} else {
 						step_title_htm = step_title_htm
-								+ '<p>'
-								+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
-								+ '<b>' + $.i18n._( 'SUCCEEDED' ) + '</b>' + '!' + ' '
-								+ $.i18n._( 'You may continue.' )
-								+ '</p>';
+							+ '<p>'
+							+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
+							+ '<b>' + $.i18n._( 'SUCCEEDED' ) + '</b>' + '!' + ' '
+							+ $.i18n._( 'You may continue.' )
+							+ '</p>';
 						if ( showTrue ) {
 							TAlertManager.showAlert( step_title_htm );
 						}
@@ -1055,11 +1025,11 @@ InstallWizardController = BaseWizardController.extend( {
 					}
 				} else if ( result.test_connection === false ) {
 					step_title_htm = step_title_htm
-							+ '<p style="background-color: #ff0000">'
-							+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
-							+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
-							+ $.i18n._( 'Please correct your settings and try again.' )
-							+ '</p>';
+						+ '<p style="background-color: #ff0000">'
+						+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
+						+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
+						+ $.i18n._( 'Please correct your settings and try again.' )
+						+ '</p>';
 
 					TAlertManager.showAlert( step_title_htm );
 					return false;
@@ -1069,17 +1039,16 @@ InstallWizardController = BaseWizardController.extend( {
 			if ( result.test_priv_connection !== null ) {
 				if ( result.test_priv_connection === false ) {
 					step_title_htm = step_title_htm
-							+ '<p style="background-color: #ff0000">'
-							+ $.i18n._( 'Connection test to your database as a privileged user has' ) + ' '
-							+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
-							+ $.i18n._( 'Please correct the user name/password and try again.' )
-							+ '</p>';
+						+ '<p style="background-color: #ff0000">'
+						+ $.i18n._( 'Connection test to your database as a privileged user has' ) + ' '
+						+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
+						+ $.i18n._( 'Please correct the user name/password and try again.' )
+						+ '</p>';
 
 					return false;
 					TAlertManager.showAlert( step_title_htm );
 				}
 			}
-
 
 		}
 
@@ -1102,16 +1071,6 @@ InstallWizardController = BaseWizardController.extend( {
 				} );
 				break;
 			case 'type':
-				if ( c_value == 'mysqli' || c_value == 'mysqlt' ) {
-					var message = $.i18n._( 'WARNING: Using MySQL is NOT recommended if you have more or plan on growing to more than 25 employees, if you have employees in multiple timezones, or if you plan on using this system for mission critical purposes.' );
-					message = message + '<br>';
-					message = message + '<br>';
-					message = message + $.i18n._( 'MySQL lacks proper timezone support, is orders of magnitude slower in processing some of the complex queries that are required and it lacks support for DDL transactions, so if an error occurs during an upgrade your data will become corrupt and you must restore from backup.' );
-					message = message + '<br>';
-					message = message + '<br>';
-					message = message + $.i18n._( 'We recommend using PostgreSQL instead as it does not exhibit any of these shortcomings. You have been warned!' );
-					TAlertManager.showAlert( message );
-				}
 				break;
 		}
 
@@ -1153,6 +1112,8 @@ InstallWizardController = BaseWizardController.extend( {
 	},
 
 	onNextClick: function() {
+		var $data;
+
 		var $this = this;
 		this.saveCurrentStep();
 		switch ( this.current_step ) {
@@ -1333,8 +1294,8 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.addClass( 'dataWarning' );
 							} else if ( stepData[key].check_timetrex_version == 2 ) {
 								widget.html(
-										$.i18n._( 'A Newer Version of TimeTrex is Available.' ) + ' '
-										+ '<a href="https://www.timetrex.com/download.php">' + $.i18n._( 'Download' ) + ' v' + stepData[key].latest_timetrex_version + ' ' + $.i18n._( 'Now' ) + '</a>' );
+									$.i18n._( 'A Newer Version of TimeTrex is Available.' ) + ' '
+									+ '<a href="https://www.timetrex.com/download.php">' + $.i18n._( 'Download' ) + ' v' + stepData[key].latest_timetrex_version + ' ' + $.i18n._( 'Now' ) + '</a>' );
 								widget.addClass( 'dataWarning' );
 							}
 							break;
@@ -1352,11 +1313,8 @@ InstallWizardController = BaseWizardController.extend( {
 						case 'database_engine':
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
-							} else if ( stepData[key] == 1 ) {
+							} else {
 								widget.html( $.i18n._( 'Not Installed. (PGSQL extension must be enabled)' ) );
-								widget.addClass( 'dataError' );
-							} else if ( stepData[key] == 2 ) {
-								widget.html( $.i18n._( 'MySQL is not supported. (Database type must be "postgres" in timetrex.ini.php)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1470,14 +1428,14 @@ InstallWizardController = BaseWizardController.extend( {
 							} else if ( stepData[key] == 1 ) {
 								if ( stepData.php_os == 'WINNT' ) {
 									widget.html( $.i18n._( 'Not Installed.' )
-											+ '(' + $.i18n._( 'try running' ) + ': ' + '"<b>go-pear.bat</b>"' + ')'
+										+ '(' + $.i18n._( 'try running' ) + ': ' + '"<b>go-pear.bat</b>"' + ')'
 									);
 								} else {
 									widget.html( $.i18n._( 'Not Installed.' )
-											+ '('
-											+ $.i18n._( 'install the PEAR RPM or package from' ) + ' '
-											+ '<a href=\"http://pear.php.net\">http://pear.php.net</a>'
-											+ ')'
+										+ '('
+										+ $.i18n._( 'install the PEAR RPM or package from' ) + ' '
+										+ '<a href=\"http://pear.php.net\">http://pear.php.net</a>'
+										+ ')'
 									);
 								}
 								widget.addClass( 'dataError' );
@@ -1578,8 +1536,8 @@ InstallWizardController = BaseWizardController.extend( {
 								edit_view_form_item_dic.hide();
 							} else {
 								widget.html( $.i18n._( 'PHP CLI requirements failed while executing' ) + ':<br>'
-										+ stepData[key].php_cli_requirements_command + '<br>'
-										+ $.i18n._( 'Likely caused by having two PHP.INI files with different settings.' )
+									+ stepData[key].php_cli_requirements_command + '<br>'
+									+ $.i18n._( 'Likely caused by having two PHP.INI files with different settings.' )
 								);
 								widget.addClass( 'dataError' );
 							}

@@ -42,11 +42,11 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_preference';
 		this.context_menu_name = $.i18n._( 'Preference' );
 		this.navigation_label = $.i18n._( 'Employees' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
-		this.api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+		this.api_date = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 
 		this.render();
 
@@ -60,7 +60,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [
 				ContextMenuIconName.add,
@@ -190,7 +190,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -243,7 +243,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -254,7 +254,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -266,7 +266,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -320,14 +320,17 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 		var tab_model = {
 			'tab_preference': { 'label': $.i18n._( 'Preference' ) },
-			'tab_schedule_sync': { 'label': $.i18n._( 'Schedule Synchronization' ), 'init_callback': 'initSubScheduleSyncView' },
+			'tab_schedule_sync': {
+				'label': $.i18n._( 'Schedule Synchronization' ),
+				'init_callback': 'initSubScheduleSyncView'
+			},
 			'tab_audit': true,
 		};
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			id: this.script_name + '_navigation',
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			navigation_mode: true,
@@ -377,7 +380,6 @@ UserPreferenceViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( { field: 'time_unit_format', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_unit_format_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Time Units' ), form_item_input, tab_preference_column1 );
-
 
 		// Distance Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );

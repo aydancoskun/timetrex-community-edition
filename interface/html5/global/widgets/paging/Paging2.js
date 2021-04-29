@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.Paging2 = function( options ) {
 		var opts = $.extend( {}, $.fn.Paging2.defaults, options );
@@ -19,71 +19,71 @@
 			return pager_data;
 		},
 
-		this.setPagerData = function( value ) {
+			this.setPagerData = function( value ) {
 
-			pager_data = value;
+				pager_data = value;
 
-			if ( !pager_data ) {
-				$( this.css( 'display', 'none' ) );
-				return;
-			} else {
-				$( this.css( 'display', 'block' ) );
-			}
-
-			$( paging_selector ).empty();
-
-			var len = pager_data.last_page_number;
-
-			if ( len === -1 ) {
-				$( paging_selector ).append( '<option value="' + 1 + '">' + 1 + '</option>' );
-			} else {
-				for ( var i = 1; i <= len; i++ ) {
-					$( paging_selector ).append( '<option value="' + i + '">' + i + '</option>' );
+				if ( !pager_data ) {
+					$( this.css( 'display', 'none' ) );
+					return;
+				} else {
+					$( this.css( 'display', 'block' ) );
 				}
-			}
 
-			$( $( paging_selector ).find( 'option' ) ).filter( function() {
-				var current_value = parseInt( $( this ).attr( 'value' ) );
+				$( paging_selector ).empty();
 
-				return current_value === pager_data.current_page;
-			} ).prop( 'selected', true ).prop( 'selected', true );
+				var len = pager_data.last_page_number;
 
-			if ( pager_data.is_last_page === true ) {
-				right_buttons_div.addClass( 'disabled' );
-				right_buttons_div.addClass( 'disabled-image' );
-				right_buttons_enable = false;
-			} else {
-				right_buttons_div.removeClass( 'disabled' );
-				right_buttons_div.removeClass( 'disabled-image' );
-				right_buttons_enable = true;
-			}
+				if ( len === -1 ) {
+					$( paging_selector ).append( '<option value="' + 1 + '">' + 1 + '</option>' );
+				} else {
+					for ( var i = 1; i <= len; i++ ) {
+						$( paging_selector ).append( '<option value="' + i + '">' + i + '</option>' );
+					}
+				}
 
-			if ( pager_data.is_first_page ) {
-				left_buttons_div.addClass( 'disabled' );
-				left_buttons_div.addClass( 'disabled-image' );
-				left_buttons_enable = false;
+				$( $( paging_selector ).find( 'option' ) ).filter( function() {
+					var current_value = parseInt( $( this ).attr( 'value' ) );
 
-			} else {
-				left_buttons_div.removeClass( 'disabled' );
-				left_buttons_div.removeClass( 'disabled-image' );
-				left_buttons_enable = true;
-			}
+					return current_value === pager_data.current_page;
+				} ).prop( 'selected', true ).prop( 'selected', true );
 
-			if ( len === -1 || (pager_data.is_first_page && pager_data.is_last_page) ) {
+				if ( pager_data.is_last_page === true ) {
+					right_buttons_div.addClass( 'disabled' );
+					right_buttons_div.addClass( 'disabled-image' );
+					right_buttons_enable = false;
+				} else {
+					right_buttons_div.removeClass( 'disabled' );
+					right_buttons_div.removeClass( 'disabled-image' );
+					right_buttons_enable = true;
+				}
 
-				left_buttons_div.addClass( 'disabled' );
-				left_buttons_div.addClass( 'disabled-image' );
-				left_buttons_enable = false;
-				right_buttons_div.addClass( 'disabled' );
-				right_buttons_div.addClass( 'disabled-image' );
-				right_buttons_enable = false;
+				if ( pager_data.is_first_page ) {
+					left_buttons_div.addClass( 'disabled' );
+					left_buttons_div.addClass( 'disabled-image' );
+					left_buttons_enable = false;
 
-				$this.hide();
-			} else {
-				$this.show();
-			}
+				} else {
+					left_buttons_div.removeClass( 'disabled' );
+					left_buttons_div.removeClass( 'disabled-image' );
+					left_buttons_enable = true;
+				}
 
-		};
+				if ( len === -1 || ( pager_data.is_first_page && pager_data.is_last_page ) ) {
+
+					left_buttons_div.addClass( 'disabled' );
+					left_buttons_div.addClass( 'disabled-image' );
+					left_buttons_enable = false;
+					right_buttons_div.addClass( 'disabled' );
+					right_buttons_div.addClass( 'disabled-image' );
+					right_buttons_enable = false;
+
+					$this.hide();
+				} else {
+					$this.show();
+				}
+
+			};
 
 		this.each( function() {
 
@@ -151,5 +151,5 @@
 
 	$.fn.Paging2.defaults = {};
 
-})
+} )
 ( jQuery );

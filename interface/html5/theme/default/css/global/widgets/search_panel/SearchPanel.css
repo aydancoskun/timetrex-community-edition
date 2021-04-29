@@ -1,235 +1,235 @@
 .search-panel {
-    float: left;
-    width: 100%;
+	float: left;
+	width: 100%;
 }
 
 .search-panel .search-panel-tab-bar {
-    background: none;
-    padding-top: 0;
-    padding-left: 0;
-    padding-right: 1px;
-    border: none;
+	background: none;
+	padding-top: 0;
+	padding-left: 0;
+	padding-right: 1px;
+	border: none;
 }
 
 .search-panel .search-flag {
-    left: 3px;
-    position: absolute;
-    top: 5px;
+	left: 3px;
+	position: absolute;
+	top: 5px;
 }
 
 .search-panel .search-panel-tab {
-    margin: 7px;
-    float: left
+	margin: 7px;
+	float: left
 }
 
 .search-panel .search-panel-tab-collapse {
-    overflow: hidden;
-    height: 0;
+	overflow: hidden;
+	height: 0;
 }
 
 /*Tab's left offset'*/
 .search-panel .search-panel-tab-bar-label {
-    padding-left: 30px;
-    padding-top: 0;
-    background: none repeat scroll 0 0 transparent;
-    border: medium none;
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	padding-left: 30px;
+	padding-top: 0;
+	background: none repeat scroll 0 0 transparent;
+	border: medium none;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }
 
 /*table Default style*/
 .search-panel .search-panel-tab-bar-label .ui-state-default {
-    border: 1px solid #BDBDBD;
-    background: none;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    font-size: 12px;
-    border-bottom: 0;
+	border: 1px solid #bdbdbd;
+	background: none;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	font-size: 12px;
+	border-bottom: 0;
 }
 
 /*No Selected tab font style*/
 .search-panel .ui-state-default a, .search-panel .ui-state-default a:link, .search-panel .ui-state-default a:visited {
-    color: #3b3b3b;
+	color: #3b3b3b;
 }
 
 /*Selected tab style*/
 
 .search-panel .ui-state-active {
-    background: none repeat scroll 0 0 #E9E9E9;
-    color: #204175;
-    font-weight: bold;
+	background: none repeat scroll 0 0 #e9e9e9;
+	color: #204175;
+	font-weight: bold;
 }
 
 /*Selected tab font style*/
 .search-panel .ui-state-active a, .search-panel .ui-state-active a:link, .search-panel .ui-state-active a:visited {
-    /*color: #a40000;*/
+	/*color: #a40000;*/
 
 }
 
 .search-panel .active-label {
-    color: #a40000 !important;
+	color: #a40000 !important;
 }
 
 .search-panel .ui-tabs .ui-tabs-nav li.ui-state-active {
-    cursor: pointer;
-    margin-bottom: 0;
-    padding-bottom: 1px;
-    background: #f9f9f9 !important;
-    border-bottom-color: transparent;
+	cursor: pointer;
+	margin-bottom: 0;
+	padding-bottom: 1px;
+	background: #f9f9f9 !important;
+	border-bottom-color: transparent;
 }
 
 /*Current table div style*/
 .search-panel .search-panel-tab-outside {
-    background: none repeat scroll 0 0 #f9f9f9;
-    border: 1px solid #BDBDBD;
-    border-radius: 4px;
-    float: left;
-    margin-bottom: 2px;
-    width: 100%;
-    border-bottom-left-radius: 0;
+	background: none repeat scroll 0 0 #f9f9f9;
+	border: 1px solid #bdbdbd;
+	border-radius: 4px;
+	float: left;
+	margin-bottom: 2px;
+	width: 100%;
+	border-bottom-left-radius: 0;
 }
 
 .search-panel .search-panel-tab-outside-collapse {
-    height: 0;
+	height: 0;
 }
 
 .search-panel .ui-tabs-panel {
-    padding: 0;
+	padding: 0;
 }
 
 .search-panel .ui-tabs .ui-tabs-nav li a {
-    float: left;
-    padding: 0.5em 1.8em;
-    text-decoration: none;
-    font-weight:bold;
+	float: left;
+	padding: 0.5em 1.8em;
+	text-decoration: none;
+	font-weight: bold;
 }
 
 .search-panel .refresh-btn {
-    width: 18px;
-    height: 18px;
-    background: url("../../../../images/refresh_icon.png");
-    border: none;
-    cursor: pointer;
-    right: 5px;
-    position: absolute;
-    top: 5px;
+	width: 18px;
+	height: 18px;
+	background: url("../../../../images/refresh_icon.png");
+	border: none;
+	cursor: pointer;
+	right: 5px;
+	position: absolute;
+	top: 5px;
 
 }
 
 .search-panel .refresh-btn:focus {
-    outline: 0;
+	outline: 0;
 }
 
 .search-panel .collapse-btn {
-    width: 24px;
-    height: 24px;
-    background: url("images/collapse.png");
-    border: none;
-    cursor: pointer;
-    left: 5px;
-    position: absolute;
-    top: 5px;
+	width: 24px;
+	height: 24px;
+	background: url("images/collapse.png");
+	border: none;
+	cursor: pointer;
+	left: 5px;
+	position: absolute;
+	top: 5px;
 
 }
 
 .search-panel .expend-btn {
-    width: 24px;
-    height: 24px;
-    background: url("images/expand.png");
-    border: none;
-    cursor: pointer;
-    left: 5px;
-    position: absolute;
-    top: 5px;
+	width: 24px;
+	height: 24px;
+	background: url("images/expand.png");
+	border: none;
+	cursor: pointer;
+	left: 5px;
+	position: absolute;
+	top: 5px;
 }
 
 .search-panel .layout-selector-div {
-    left: 550px;
-    position: absolute;
-    top: 5px;
-    display: none;
+	left: 550px;
+	position: absolute;
+	top: 5px;
+	display: none;
 }
 
 .search-panel .current-view-label {
-    font-weight: bold;
-    color: #34628d;
-    line-height: 18px;
+	font-weight: bold;
+	color: #34628d;
+	line-height: 18px;
 }
 
 .search-panel .layout-selector {
-    position: relative;
-    top: -3px;
+	position: relative;
+	top: -3px;
 }
 
 .search-panel .search-panel-tab .first-column {
-    float: left;
+	float: left;
 }
 
 .search-panel .search-panel-tab .second-column {
-    float: left;
+	float: left;
 }
 
 .search-panel .search-panel-tab .third-column {
-    float: left;
+	float: left;
 }
 
 .search-panel .previous-saved-layout-div {
-    display: inline;
+	display: inline;
 }
 
 .search-panel .search-btn-div {
-    position: relative;
-    float: left;
-    border: 1px solid #BDBDBD;
-    border-top: none;
-    border-radius: 4px;
-    border-top-right-radius: 0;
-    border-top-left-radius: 0;
-    padding: 3px;
-    margin-bottom: 5px;
-    margin-top: -3px;
-    background: #f5f5f5;
+	position: relative;
+	float: left;
+	border: 1px solid #bdbdbd;
+	border-top: none;
+	border-radius: 4px;
+	border-top-right-radius: 0;
+	border-top-left-radius: 0;
+	padding: 3px;
+	margin-bottom: 5px;
+	margin-top: -3px;
+	background: #f5f5f5;
 }
 
 .search-panel .search-panel-tab-bar .search-panel-tab-bar-label .ui-state-hover {
-    background: none !important;
-    font-weight: bold;
-    color: #000000;
+	background: none !important;
+	font-weight: bold;
+	color: #000000;
 }
 
 .search-panel .station-location {
-    position: relative;
-    top: 5px;
-    left: 2px;
-    cursor: pointer;
+	position: relative;
+	top: 5px;
+	left: 2px;
+	cursor: pointer;
 }
 
 .search-panel .search-panel-tab-bar-label .ui-state-default {
-    border: 1px solid #BDBDBD;
-    background: none;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    font-size: 12px;
-    margin-bottom: 0;
-    padding-bottom: 1px;
+	border: 1px solid #bdbdbd;
+	background: none;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	font-size: 12px;
+	margin-bottom: 0;
+	padding-bottom: 1px;
 }
 
 .ui-tabs .ui-tabs-nav li {
-    list-style: none;
-    float: left;
-    position: relative;
-    top: 1px;
-    margin: 1px .2em 0 0;
-    border:  1px solid transparent; /* Sets to a colour on active. transparent border needed to maintain spacing and prevent UI jumping on tab change (#2710) */
-    border-bottom: none;
-    padding: 0;
-    white-space: nowrap;
+	list-style: none;
+	float: left;
+	position: relative;
+	top: 1px;
+	margin: 1px .2em 0 0;
+	border: 1px solid transparent; /* Sets to a colour on active. transparent border needed to maintain spacing and prevent UI jumping on tab change (#2710) */
+	border-bottom: none;
+	padding: 0;
+	white-space: nowrap;
 }
 
 .ui-tabs .ui-tabs-nav li.ui-tabs-active .ui-tabs-anchor {
-    cursor: pointer;
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	cursor: pointer;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }

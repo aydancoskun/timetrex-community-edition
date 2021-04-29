@@ -34,19 +34,19 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('../includes/global.inc.php');
+require_once( '../includes/global.inc.php' );
 
 /*
  * Get FORM variables
  */
-extract	(FormVariables::GetVariables(
-										array	(
-												'name',
-												'value',
-												'expires',
-												'redirect',
-												'key'
-												) ) );
+extract( FormVariables::GetVariables(
+		[
+				'name',
+				'value',
+				'expires',
+				'redirect',
+				'key',
+		] ) );
 
 //Used to help set cookies across domains. Currently used by Flex
 $authentication = new Authentication();
@@ -58,17 +58,17 @@ if ( $expires == '' ) {
 	$expires = ( time() + 7776000 );
 }
 
-setcookie( $name, $value, $expires, Environment::getCookieBaseURL(), NULL, Misc::isSSL( TRUE ) );
+setcookie( $name, $value, $expires, Environment::getCookieBaseURL(), null, Misc::isSSL( true ) );
 
 if ( $redirect != '' ) {
 	//This can result in a phishing attack, if the user is redirected to an outside site.
-	Debug::Text('Attempting Redirect: '. $redirect .' Current hostname: '. Misc::getHostName(), __FILE__, __LINE__, __METHOD__, 10);
+	Debug::Text( 'Attempting Redirect: ' . $redirect . ' Current hostname: ' . Misc::getHostName(), __FILE__, __LINE__, __METHOD__, 10 );
 
-	if ( str_replace( array('http://', 'https://'), '', $redirect ) == Misc::getHostName()
-			OR strpos( str_replace( array('http://', 'https://'), '', $redirect ), Misc::getHostName().'/' ) === 0 ) { //Make sure we match exactly or with a '/' at the end to prevent ondemand.mydomain.com.phish.com from being accepted.
+	if ( str_replace( [ 'http://', 'https://' ], '', $redirect ) == Misc::getHostName()
+			|| strpos( str_replace( [ 'http://', 'https://' ], '', $redirect ), Misc::getHostName() . '/' ) === 0 ) { //Make sure we match exactly or with a '/' at the end to prevent ondemand.mydomain.com.phish.com from being accepted.
 		Redirect::Page( $redirect );
 	} else {
-		Debug::Text('ERROR: Unable to redirect to: '. $redirect .' as it does not contain hostname: '. Misc::getHostName(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'ERROR: Unable to redirect to: ' . $redirect . ' as it does not contain hostname: ' . Misc::getHostName(), __FILE__, __LINE__, __METHOD__, 10 );
 		echo "ERROR: Unable to redirect...<br>\n";
 	}
 }

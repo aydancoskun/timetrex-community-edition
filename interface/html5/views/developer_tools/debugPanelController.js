@@ -45,7 +45,6 @@ $( document ).on( 'change', '#tt_debug_exception_verbosity', function( e ) {
 	Debug.setVerbosity( $( this ).val() );
 } );
 
-
 $( document ).on( 'change', '#tt_overlay_disable_checkbox', function( e ) {
 	e.preventDefault();
 	Global.UNIT_TEST_MODE = $( this ).is( ':checked' );
@@ -94,55 +93,55 @@ $( document ).on( 'click', '#WidgetTest_test', function( e ) {
 	Debug.showWidgetTest();
 } );
 
-function breakOn(obj, propertyName, mode, func) {
+function breakOn( obj, propertyName, mode, func ) {
 	// this is directly from https://github.com/paulmillr/es6-shim
-	function getPropertyDescriptor(obj, name) {
-		var property = Object.getOwnPropertyDescriptor(obj, name);
-		var proto = Object.getPrototypeOf(obj);
-		while (property === undefined && proto !== null) {
-			property = Object.getOwnPropertyDescriptor(proto, name);
-			proto = Object.getPrototypeOf(proto);
+	function getPropertyDescriptor( obj, name ) {
+		var property = Object.getOwnPropertyDescriptor( obj, name );
+		var proto = Object.getPrototypeOf( obj );
+		while ( property === undefined && proto !== null ) {
+			property = Object.getOwnPropertyDescriptor( proto, name );
+			proto = Object.getPrototypeOf( proto );
 		}
 		return property;
 	}
 
 	function verifyNotWritable() {
-		if (mode !== 'read')
+		if ( mode !== 'read' )
 			throw "This property is not writable, so only possible mode is 'read'.";
 	}
 
 	var enabled = true;
-	var originalProperty = getPropertyDescriptor(obj, propertyName);
+	var originalProperty = getPropertyDescriptor( obj, propertyName );
 	var newProperty = { enumerable: originalProperty.enumerable };
 
 	// write
-	if (originalProperty.set) {// accessor property
-		newProperty.set = function(val) {
-			if(enabled && (!func || func && func(val)))
+	if ( originalProperty.set ) {// accessor property
+		newProperty.set = function( val ) {
+			if ( enabled && ( !func || func && func( val ) ) )
 				debugger;
 
-			originalProperty.set.call(this, val);
-		}
-	} else if (originalProperty.writable) {// value property
-		newProperty.set = function(val) {
-			if(enabled && (!func || func && func(val)))
+			originalProperty.set.call( this, val );
+		};
+	} else if ( originalProperty.writable ) {// value property
+		newProperty.set = function( val ) {
+			if ( enabled && ( !func || func && func( val ) ) )
 				debugger;
 
 			originalProperty.value = val;
-		}
-	} else  {
+		};
+	} else {
 		verifyNotWritable();
 	}
 
 	// read
-	newProperty.get = function(val) {
-		if(enabled && mode === 'read' && (!func || func && func(val)))
+	newProperty.get = function( val ) {
+		if ( enabled && mode === 'read' && ( !func || func && func( val ) ) )
 			debugger;
 
-		return originalProperty.get ? originalProperty.get.call(this, val) : originalProperty.value;
-	}
+		return originalProperty.get ? originalProperty.get.call( this, val ) : originalProperty.value;
+	};
 
-	Object.defineProperty(obj, propertyName, newProperty);
+	Object.defineProperty( obj, propertyName, newProperty );
 
 	return {
 		disable: function() {
@@ -209,7 +208,6 @@ function runUnitTests() {
 		assert.ok( Global.MoneyRound( 0.001, 2 ) == '0.00', 'Global.MoneyRound(0.001, 2) == 0.00 -- Passed!' );
 	} );
 
-
 	QUnit.test( 'Global.js sort-prefix', function( assert ) {
 		var res = Global.removeSortPrefix( '-1234-11111111-1111-1111-1111-111111111111' );
 		assert.ok( res == '11111111-1111-1111-1111-111111111111', 'stripped from synth uuid a.' );
@@ -228,7 +226,6 @@ function runUnitTests() {
 
 		var res = Global.removeSortPrefix( 'testStringGalrblyBlah' );
 		assert.ok( res == 'testStringGalrblyBlah', 'stripped from string with no sort-prefix.' );
-
 
 		var res = Global.removeSortPrefixFromArray( {
 			'-1112-testStringGalrblyBlah': 'string',
@@ -336,7 +333,6 @@ function runUnitTests() {
 		assert.equal( Global.parseTimeUnit( '0.47', 20 ), ( 28 * 60 ) );
 		assert.equal( Global.parseTimeUnit( '0.48', 20 ), ( 29 * 60 ) );
 		assert.equal( Global.parseTimeUnit( '0.50', 20 ), ( 30 * 60 ) );
-
 
 		assert.equal( Global.parseTimeUnit( '0.52', 20 ), ( 31 * 60 ) );
 		assert.equal( Global.parseTimeUnit( '0.53', 20 ), ( 32 * 60 ) );
@@ -462,23 +458,23 @@ function runUnitTests() {
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'test', 'test1' );
-		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['test'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
 
 		TTPromise.wait( 'test', null, function() {
 			//will be run on resolve()
 			assert.ok( 1 == '1', 'TEST Promise test resolved.' );
-			assert.ok( typeof (TTPromise.promises['test']) == 'undefined', 'promises[test] is null.' );
+			assert.ok( typeof ( TTPromise.promises['test'] ) == 'undefined', 'promises[test] is null.' );
 			assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 0, 'filterPromiseArray(test).length == 0.' );
 			assert.ok( TTPromise.filterPromiseArray( 'test', 'test1' ) == false, 'filterPromiseArray("test","test1") length = 0.' );
 			done();
 		} );
 
-		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 1.' );
+		assert.ok( typeof ( TTPromise.promises['test']['test1'] ) == 'object', 'promises object length = 1.' );
 		TTPromise.resolve( 'test', 'test1' );
 	} );
 
@@ -487,10 +483,10 @@ function runUnitTests() {
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'test', 'test1' );
-		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['test'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
 
@@ -501,13 +497,13 @@ function runUnitTests() {
 		}, function() {
 			//will be run on reject()
 			assert.ok( 1 == '1', 'TEST Promise test rejected.' );
-			assert.ok( typeof (TTPromise.promises['test']) == 'undefined', 'promises[test] is null.' );
+			assert.ok( typeof ( TTPromise.promises['test'] ) == 'undefined', 'promises[test] is null.' );
 			assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 0, 'filterPromiseArray(test).length == 0.' );
 			assert.ok( TTPromise.filterPromiseArray( 'test', 'test1' ) == false, 'filterPromiseArray("test","test1") length = 0.' );
 			done();
 		} );
 
-		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 1.' );
+		assert.ok( typeof ( TTPromise.promises['test']['test1'] ) == 'object', 'promises object length = 1.' );
 		TTPromise.reject( 'test', 'test1' );
 	} );
 
@@ -516,15 +512,15 @@ function runUnitTests() {
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'test', 'test1' );
-		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['test'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
 
 		TTPromise.add( 'test', 'test2' );
-		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['test'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 2, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 2, 'TTPromise.filterPromiseArray(test).length == 1' );
 
@@ -548,8 +544,8 @@ function runUnitTests() {
 			done(); //Only finish once all promises are rejected.
 		} );
 
-		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 2.' );
-		assert.ok( typeof (TTPromise.promises['test']['test2']) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof ( TTPromise.promises['test']['test1'] ) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof ( TTPromise.promises['test']['test2'] ) == 'object', 'promises object length = 2.' );
 		TTPromise.reject( 'test', 'test1' );
 		TTPromise.reject( 'test', 'test2' );
 	} );
@@ -559,15 +555,15 @@ function runUnitTests() {
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'test', 'test1' );
-		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['test'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
 
 		TTPromise.add( 'test', 'test2' );
-		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['test'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 2, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 2, 'TTPromise.filterPromiseArray(test).length == 1' );
 
@@ -591,8 +587,8 @@ function runUnitTests() {
 			done(); //Only finish once all promises are rejected.
 		} );
 
-		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 2.' );
-		assert.ok( typeof (TTPromise.promises['test']['test2']) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof ( TTPromise.promises['test']['test1'] ) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof ( TTPromise.promises['test']['test2'] ) == 'object', 'promises object length = 2.' );
 		TTPromise.reject( 'test', 'test1' );
 		TTPromise.resolve( 'test', 'test2' );
 	} );
@@ -602,15 +598,15 @@ function runUnitTests() {
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'test', 'test1' );
-		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['test'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 1, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
 
 		TTPromise.add( 'test', 'test2' );
-		assert.ok( typeof(TTPromise.promises['test']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['test'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['test'] ).length == 2, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'test' ).length == 2, 'TTPromise.filterPromiseArray(test).length == 1' );
 
@@ -634,8 +630,8 @@ function runUnitTests() {
 			done(); //Only finish once all promises are rejected.
 		} );
 
-		assert.ok( typeof (TTPromise.promises['test']['test1']) == 'object', 'promises object length = 2.' );
-		assert.ok( typeof (TTPromise.promises['test']['test2']) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof ( TTPromise.promises['test']['test1'] ) == 'object', 'promises object length = 2.' );
+		assert.ok( typeof ( TTPromise.promises['test']['test2'] ) == 'object', 'promises object length = 2.' );
 		TTPromise.resolve( 'test', 'test1' );
 		TTPromise.reject( 'test', 'test2' );
 	} );
@@ -645,7 +641,7 @@ function runUnitTests() {
 		TTPromise.clearAllPromises();
 
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj empty.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'testa', 'test1' );
 		assert.ok( TTPromise.filterPromiseArray( 'testa' ).length == 1, 'filterPromiseArray(testa).length == 1.' );
@@ -663,13 +659,12 @@ function runUnitTests() {
 		assert.ok( TTPromise.filterPromiseArray( 'testb' ).length == 2, 'filterPromiseArray(testb).length == 2.' );
 		assert.ok( TTPromise.filterPromiseArray( 'testb', 'test1b' ).length == 1, 'filterPromiseArray("testb","test1b") length = 1.' );
 
-
 		TTPromise.wait( 'testa', null, function() {
 			//Debug.Arr(TTPromise,'Case2 TTPromise',null,null,null,10);
 			assert.ok( 1 == '1', 'TEST Promise testa resolved.' );
 			//will be run on resolve()
-			assert.ok( typeof (TTPromise.promises['testa']) == 'undefined', 'promises[testa] is null.' );
-			assert.ok( typeof (TTPromise.promises['testb']) == 'object', 'promises[testb] is not null.' );
+			assert.ok( typeof ( TTPromise.promises['testa'] ) == 'undefined', 'promises[testa] is null.' );
+			assert.ok( typeof ( TTPromise.promises['testb'] ) == 'object', 'promises[testb] is not null.' );
 
 			assert.ok( TTPromise.filterPromiseArray( 'testb' ).length == 2, 'filterPromiseArray(testb).length == 1' ); //one is resolved. should return only 1
 
@@ -688,7 +683,7 @@ function runUnitTests() {
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj empty.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'testc', 'test1' );
 		assert.ok( TTPromise.filterPromiseArray( 'testc', 'test1' ).length == 1, 'TTPromise.filterPromiseArray(testc,test1).length == 1,.' );
@@ -710,9 +705,9 @@ function runUnitTests() {
 
 		TTPromise.wait( null, null, function() {
 			//will be run on resolve()
-			assert.ok( typeof (TTPromise.promises['testc']) == 'undefined', 'promises[testc] is null.' );
-			assert.ok( typeof (TTPromise.promises['testd']) == 'undefined', 'promises[testd] is  null.' );
-			assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+			assert.ok( typeof ( TTPromise.promises['testc'] ) == 'undefined', 'promises[testc] is null.' );
+			assert.ok( typeof ( TTPromise.promises['testd'] ) == 'undefined', 'promises[testd] is  null.' );
+			assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 			assert.ok( TTPromise.filterPromiseArray( 'testc' ).length == 0, 'TTPromise.filterPromiseArray(testc).length == 0,.' );
 			assert.ok( TTPromise.filterPromiseArray( 'testd' ).length == 0, 'TTPromise.filterPromiseArray(testd).length == 0,.' );
 			done();
@@ -732,23 +727,23 @@ function runUnitTests() {
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'Reports', 'LoadReports' );
-		assert.ok( typeof(TTPromise.promises['Reports']) == 'object', 'TTPromise.promises[\'test\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['Reports'] ) == 'object', 'TTPromise.promises[\'test\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['Reports'] ).length == 1, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'Reports' ).length == 1, 'TTPromise.filterPromiseArray(test).length == 1' );
 
 		TTPromise.wait( 'Reports', 'LoadReports', function() {
 			//will be run on resolve()
 			assert.ok( 1 == '1', 'TEST Promise test resolved.' );
-			assert.ok( typeof (TTPromise.promises['Reports']) == 'undefined', 'promises[Reports] is null.' );
+			assert.ok( typeof ( TTPromise.promises['Reports'] ) == 'undefined', 'promises[Reports] is null.' );
 			assert.ok( TTPromise.filterPromiseArray( 'Reports' ).length == 0, 'filterPromiseArray(Reports).length == 0.' );
 			assert.ok( TTPromise.filterPromiseArray( 'Reports', 'LoadReports' ) == false, 'filterPromiseArray("Reports","LoadReports") length = 0.' );
 			done();
 		} );
 
-		assert.ok( typeof (TTPromise.promises['Reports']['LoadReports']) == 'object', 'promises object length = 1.' );
+		assert.ok( typeof ( TTPromise.promises['Reports']['LoadReports'] ) == 'object', 'promises object length = 1.' );
 		TTPromise.resolve( 'Reports', 'LoadReports' );
 	} );
 
@@ -758,10 +753,10 @@ function runUnitTests() {
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'groupone', 'one' );
-		assert.ok( typeof(TTPromise.promises['groupone']) == 'object', 'TTPromise.promises[\'groupone\'] exists.' );
+		assert.ok( typeof ( TTPromise.promises['groupone'] ) == 'object', 'TTPromise.promises[\'groupone\'] exists.' );
 		assert.ok( Object.keys( TTPromise.promises['groupone'] ).length == 1, 'promises object length = 1.' );
 		assert.ok( TTPromise.filterPromiseArray( 'groupone' ).length == 1, 'TTPromise.filterPromiseArray(groupone).length == 1' );
 
@@ -788,10 +783,8 @@ function runUnitTests() {
 		TTPromise.resolve( 'groupone', 'one' );
 		TTPromise.resolve( 'grouptwo', 'three' );
 
-
 		TTPromise.resolve( 'Reports', 'LoadReports' );
 	} );
-
 
 	QUnit.test( 'TTPromise Case 6: resolve 2, wait on 1, global wait.', function( assert ) {
 		var done = assert.async();
@@ -800,12 +793,11 @@ function runUnitTests() {
 		TTPromise.clearAllPromises();
 
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'a', 'a' );
 		TTPromise.add( 'a', 'b' );
 		TTPromise.add( 'a', 'c' );
-
 
 		TTPromise.resolve( 'a', 'a' );
 		TTPromise.resolve( 'a', 'b' );
@@ -832,7 +824,6 @@ function runUnitTests() {
 		TTPromise.resolve( 'b', 'b' );
 	} );
 
-
 	QUnit.test( 'TTPromise Case 7: resolve already resolved stack when other promises exist.', function( assert ) {
 		var done = assert.async();
 		var group_promise_test = 0;
@@ -840,12 +831,11 @@ function runUnitTests() {
 		TTPromise.clearAllPromises();
 
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'a', 'a' );
 		TTPromise.add( 'a', 'b' );
 		TTPromise.add( 'a', 'c' );
-
 
 		TTPromise.resolve( 'a', 'a' );
 		TTPromise.resolve( 'a', 'b' );
@@ -872,12 +862,11 @@ function runUnitTests() {
 		TTPromise.clearAllPromises();
 
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'a', 'a' );
 		TTPromise.add( 'a', 'b' );
 		TTPromise.add( 'a', 'c' );
-
 
 		TTPromise.resolve( 'a', 'a' );
 		TTPromise.resolve( 'a', 'b' );
@@ -904,7 +893,7 @@ function runUnitTests() {
 		TTPromise.clearAllPromises();
 
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'a', 'a' );
 		TTPromise.add( 'a', 'b' );
@@ -921,7 +910,6 @@ function runUnitTests() {
 		TTPromise.resolve( 'a', 'a' );
 		TTPromise.resolve( 'a', 'b' );
 		TTPromise.resolve( 'a', 'c' );
-
 
 		var callbacks = 1;
 		TTPromise.wait( 'a', null, function() {
@@ -959,10 +947,9 @@ function runUnitTests() {
 		TTPromise.clearAllPromises();
 
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'a', 'a' );
-
 
 		var callbacks = 1;
 		TTPromise.wait( 'a', 'a', function() {
@@ -995,10 +982,9 @@ function runUnitTests() {
 		TTPromise.clearAllPromises();
 
 		assert.ok( Object.keys( TTPromise.promises ).length == 0, 'Callback: promises obj length = 0.' );
-		assert.ok( typeof(TTPromise.promises) == 'object', 'TTPromise.promises exists.' );
+		assert.ok( typeof ( TTPromise.promises ) == 'object', 'TTPromise.promises exists.' );
 
 		TTPromise.add( 'a', 'a' );
-
 
 		var callbacks = 1;
 		TTPromise.wait( 'a', 'a', function() {
@@ -1008,7 +994,6 @@ function runUnitTests() {
 		} );
 
 		TTPromise.resolve( 'a', 'a' );
-
 
 		window.setTimeout( function() {
 			TTPromise.wait( 'a', 'a', function() {

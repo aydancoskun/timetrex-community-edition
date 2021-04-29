@@ -49,6 +49,4 @@ var APIUserLicense = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportUserLicense', arguments );
 	}
 
-
-
 } );

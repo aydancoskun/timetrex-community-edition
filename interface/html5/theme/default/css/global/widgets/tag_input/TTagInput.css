@@ -1,64 +1,64 @@
 .t-tag-input {
-    border: 1px solid #CCC;
-    background: #FFF;
-    width: 200px;
-    min-height: 22px;
-    overflow-y: hidden;
-    overflow-x: auto;
-    float: left;
+	border: 1px solid #cccccc;
+	background: #ffffff;
+	width: 200px;
+	min-height: 22px;
+	overflow-y: hidden;
+	overflow-x: auto;
+	float: left;
 }
 
 .t-tag-input-readonly {
-    background: none;
-    border: none;
+	background: none;
+	border: none;
 }
 
 .t-tag-input .add-tag-input {
-    width: 99%;
-    height: 20px;
-    border: none;
+	width: 99%;
+	height: 20px;
+	border: none;
 }
 
 .t-tag-input .add-tag-input-readonly {
-    background: none;
-    border: none;
+	background: none;
+	border: none;
 
 }
 
 .t-tag-input .tag-span-div {
-    float: left;
-    border: 1px solid #999999;
-    border-radius: 2px;
-    background: #E0EAF1;
-    color: #3E6D8E;
-    margin: 2px;
-    height: 19px;
+	float: left;
+	border: 1px solid #999999;
+	border-radius: 2px;
+	background: #e0eaf1;
+	color: #3e6d8e;
+	margin: 2px;
+	height: 19px;
 }
 
 .t-tag-input .removed {
-    background: #FFDDDD !important;
-    color: #F04040 !important;
-    text-decoration: line-through;
+	background: #ffdddd !important;
+	color: #f04040 !important;
+	text-decoration: line-through;
 }
 
 .t-tag-input .new {
-    background: #cde69c;
-    color: #638421;
+	background: #cde69c;
+	color: #638421;
 }
 
 .t-tag-input .tag-span-div .tag-span {
 
-    font-size: 12px;
-    padding-left: 3px;
+	font-size: 12px;
+	padding-left: 3px;
 
 }
 
 .t-tag-input .tag-span-div .close-btn {
-    color: #000000;
-    cursor: pointer;
-    font-size: 10px;
-    margin-left: 5px;
-    margin-right: 2px;
+	color: #000000;
+	cursor: pointer;
+	font-size: 10px;
+	margin-left: 5px;
+	margin-right: 2px;
 
 }
 

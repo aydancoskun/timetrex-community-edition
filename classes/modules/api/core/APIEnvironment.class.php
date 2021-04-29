@@ -45,7 +45,7 @@ class APIEnvironment {
 	 * APIEnvironment constructor.
 	 */
 	public function __construct() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -59,7 +59,7 @@ class APIEnvironment {
 	 * @param null $api
 	 * @return mixed
 	 */
-	function getAPIBaseURL( $api = NULL ) {
+	function getAPIBaseURL( $api = null ) {
 		return Environment::getAPIBaseURL( $api );
 	}
 
@@ -67,7 +67,7 @@ class APIEnvironment {
 	 * @param null $api
 	 * @return string
 	 */
-	function getAPIURL( $api = NULL ) {
+	function getAPIURL( $api = null ) {
 		return Environment::getAPIURL( $api );
 	}
 
@@ -78,4 +78,5 @@ class APIEnvironment {
 		return Environment::getImagesURL();
 	}
 }
+
 ?>

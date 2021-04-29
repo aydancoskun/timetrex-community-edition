@@ -63,6 +63,4 @@ var APICompanyDeduction = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

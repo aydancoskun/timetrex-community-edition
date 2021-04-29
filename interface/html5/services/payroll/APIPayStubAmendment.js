@@ -51,6 +51,4 @@ var APIPayStubAmendment = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportPayStubAmendment', arguments );
 	},
 
-
-
 } );

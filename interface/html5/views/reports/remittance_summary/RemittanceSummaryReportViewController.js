@@ -8,7 +8,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Remittance Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'RemittanceSummaryReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIRemittanceSummaryReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRemittanceSummaryReport' ) )();
 		this.include_form_setup = true;
 	},
 
@@ -52,7 +52,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -69,7 +69,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -89,7 +89,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -106,7 +106,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -126,7 +126,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -143,7 +143,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -163,7 +163,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -180,7 +180,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,

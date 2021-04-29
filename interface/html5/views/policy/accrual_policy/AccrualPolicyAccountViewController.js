@@ -12,7 +12,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 		this.table_name_key = 'accrual_policy_account';
 		this.context_menu_name = $.i18n._( 'Accrual Account' );
 		this.navigation_label = $.i18n._( 'Accrual Account' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -22,7 +22,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
@@ -44,7 +44,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
@@ -104,7 +104,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -116,7 +116,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -124,6 +124,5 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

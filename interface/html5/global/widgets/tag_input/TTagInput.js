@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TTagInput = function( options ) {
 		var opts = $.extend( {}, $.fn.TTagInput.defaults, options );
@@ -90,7 +90,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper tag-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -362,7 +362,7 @@
 
 			add_tag_input = $( '<input class=\'add-tag-input\' autocomplete=\'On\' />' );
 
-			api_tag = new (APIFactory.getAPIClass( 'APICompanyGenericTag' ))();
+			api_tag = new ( APIFactory.getAPIClass( 'APICompanyGenericTag' ) )();
 
 			add_tag_input.autocomplete( {
 				source: [],
@@ -389,13 +389,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-								LocalCacheData.current_open_sub_controller.edit_view &&
-								LocalCacheData.current_open_sub_controller.is_viewing ) {
+							LocalCacheData.current_open_sub_controller.edit_view &&
+							LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-								LocalCacheData.current_open_primary_controller.edit_view &&
-								LocalCacheData.current_open_primary_controller.is_viewing ) {
+							LocalCacheData.current_open_primary_controller.edit_view &&
+							LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -477,8 +477,8 @@
 					return false;
 				}
 
-				if ( (e.which === 13 || e.which === 44 || e.which === 32 || e.which === 9 || e.which === 188) &&
-						add_tag_input.val().length > 0 ) {
+				if ( ( e.which === 13 || e.which === 44 || e.which === 32 || e.which === 9 || e.which === 188 ) &&
+					add_tag_input.val().length > 0 ) {
 
 					e.preventDefault();
 
@@ -510,4 +510,4 @@
 
 	$.fn.TTagInput.defaults = {};
 
-})( jQuery );
+} )( jQuery );

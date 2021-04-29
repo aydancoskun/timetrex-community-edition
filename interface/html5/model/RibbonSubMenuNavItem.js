@@ -14,4 +14,4 @@ var RibbonSubMenuNavItem = Base.extend( {
 
 	}
 
-} )
+} );

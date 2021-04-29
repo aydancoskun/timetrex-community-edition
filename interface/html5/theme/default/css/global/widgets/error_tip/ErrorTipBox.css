@@ -1,25 +1,25 @@
 .errortip-box {
-    background-color: #cb2e2e;
-    border: 1px solid #cb2e2e;
-    position: absolute;
-    padding-left: 4px;
-    padding-right: 4px;
-    line-height: 22px;
-    z-index: 100;
-    max-width: 500px;
-    border-radius: 4px;
+	background-color: #cb2e2e;
+	border: 1px solid #cb2e2e;
+	position: absolute;
+	padding-left: 4px;
+	padding-right: 4px;
+	line-height: 22px;
+	z-index: 100;
+	max-width: 500px;
+	border-radius: 4px;
 }
 
 .warningtip-box {
-    background-color: #ffff00 !important;
-    border: 1px solid #e7be00 !important;
+	background-color: #ffff00 !important;
+	border: 1px solid #e7be00 !important;
 }
 
 .errortip-box .errortip-label {
-    font-size: 11px;
-    color: #ffffff;
+	font-size: 11px;
+	color: #ffffff;
 }
 
 .warningtip-box .errortip-label {
-    color: #362B36 !important;
+	color: #362b36 !important;
 }

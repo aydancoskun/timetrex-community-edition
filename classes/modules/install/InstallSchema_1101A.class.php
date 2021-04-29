@@ -48,7 +48,7 @@ class InstallSchema_1101A extends InstallSchema_Base {
 
 		//No need to manually generate the UUID SEED as its done and written to the config file automatically as part of InstallSchema_Base->replaceSQLVariables()
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -65,97 +65,101 @@ class InstallSchema_1101A extends InstallSchema_Base {
 		$this->convertUserPhoto();
 		Debug::text( 'Finished convert user photos.', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function convertCompanyLogos() {
-		$root_path = realpath( Environment::getStorageBasePath() .'company_logo'. DIRECTORY_SEPARATOR );
-		if ( $root_path === FALSE ) {
-			Debug::text( 'ERROR: Directory does not exist: '. Environment::getStorageBasePath() .'company_logo'. DIRECTORY_SEPARATOR, __FILE__, __LINE__, __METHOD__, 10 );
-			return FALSE;
+		$root_path = realpath( Environment::getStorageBasePath() . 'company_logo' . DIRECTORY_SEPARATOR );
+		if ( $root_path === false ) {
+			Debug::text( 'ERROR: Directory does not exist: ' . Environment::getStorageBasePath() . 'company_logo' . DIRECTORY_SEPARATOR, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
 		try {
 			$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root_path, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
 			foreach ( $files as $file_obj ) {
-				if ( $file_obj->isDir() == FALSE ) {
+				if ( $file_obj->isDir() == false ) {
 					$file = $file_obj->getRealPath();
 					$file_chunks = explode( DIRECTORY_SEPARATOR, $file );
 					$total_file_chunks = count( $file_chunks );
-					if ($total_file_chunks > 1) {
+					if ( $total_file_chunks > 1 ) {
 						$company_file_chunk = ( $total_file_chunks - 2 );
 
 						//only convert the path if it's still an int
-						if ( TTUUID::isUUID( $file_chunks[ $company_file_chunk ] ) == FALSE ) {
-							$file_chunks[ $company_file_chunk ] = TTUUID::convertIntToUUID( $file_chunks[ $company_file_chunk ] );
+						if ( TTUUID::isUUID( $file_chunks[$company_file_chunk] ) == false ) {
+							$file_chunks[$company_file_chunk] = TTUUID::convertIntToUUID( $file_chunks[$company_file_chunk] );
 							$new_path = implode( $file_chunks, DIRECTORY_SEPARATOR );
 							$this->renameFile( $file, $new_path );
 						}
 					}
 				}
 			}
-		} catch( Exception $e ) {
-			Debug::Text('Failed opening/reading file or directory: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+		} catch ( Exception $e ) {
+			Debug::Text( 'Failed opening/reading file or directory: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
-	function convertUserPhoto(){
-		$root_path = realpath( Environment::getStorageBasePath() .'user_photo'. DIRECTORY_SEPARATOR );
-		if ( $root_path === FALSE ) {
-			Debug::text( 'ERROR: Directory does not exist: '. Environment::getStorageBasePath() .'user_photo'. DIRECTORY_SEPARATOR, __FILE__, __LINE__, __METHOD__, 10 );
-			return FALSE;
+	function convertUserPhoto() {
+		$root_path = realpath( Environment::getStorageBasePath() . 'user_photo' . DIRECTORY_SEPARATOR );
+		if ( $root_path === false ) {
+			Debug::text( 'ERROR: Directory does not exist: ' . Environment::getStorageBasePath() . 'user_photo' . DIRECTORY_SEPARATOR, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
-		$changed = FALSE;
+		$changed = false;
 
 		try {
 			$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root_path, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
 			foreach ( $files as $file_obj ) {
-				if ( $file_obj->isDir() == FALSE ) {
+				if ( $file_obj->isDir() == false ) {
 					$file = $file_obj->getRealPath();
 					$file_chunks = explode( DIRECTORY_SEPARATOR, $file );
 					$total_file_chunks = count( $file_chunks );
 
-					if ($total_file_chunks > 1) {
+					if ( $total_file_chunks > 1 ) {
 						$company_file_chunk = ( $total_file_chunks - 2 );
 						$filename_chunk = count( $file_chunks ) - 1;
-						$filename_chunks = explode( '.', $file_chunks[ $filename_chunk ] );
+						$filename_chunks = explode( '.', $file_chunks[$filename_chunk] );
 						$user_id = $filename_chunks[0];
 						$extension = $filename_chunks[1];
 
 						//only convert the path if it's still an int
-						if ( TTUUID::isUUID( $file_chunks[ $company_file_chunk ] ) == FALSE ) {
-							$file_chunks[ $company_file_chunk ] = TTUUID::convertIntToUUID( $file_chunks[ $company_file_chunk ] );
-							$changed = TRUE;
+						if ( TTUUID::isUUID( $file_chunks[$company_file_chunk] ) == false ) {
+							$file_chunks[$company_file_chunk] = TTUUID::convertIntToUUID( $file_chunks[$company_file_chunk] );
+							$changed = true;
 						}
 
-						if ( TTUUID::isUUID( $user_id ) == FALSE ) {
-							$file_chunks[ $filename_chunk ] = TTUUID::convertIntToUUID( $user_id ) . '.' . $extension;
-							$changed = TRUE;
+						if ( TTUUID::isUUID( $user_id ) == false ) {
+							$file_chunks[$filename_chunk] = TTUUID::convertIntToUUID( $user_id ) . '.' . $extension;
+							$changed = true;
 						}
 
-						if ( $changed == TRUE ) {
+						if ( $changed == true ) {
 							$new_path = implode( $file_chunks, DIRECTORY_SEPARATOR );
 							$this->renameFile( $file, $new_path );
 						}
 					}
 				}
 			}
-		} catch( Exception $e ) {
-			Debug::Text('Failed opening/reading file or directory: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+		} catch ( Exception $e ) {
+			Debug::Text( 'Failed opening/reading file or directory: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -165,8 +169,9 @@ class InstallSchema_1101A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function renameFile( $before, $after, $counter = 0 ) {
-		Debug::text( $counter .'. Renaming file: '.$before .' to: '.$after, __FILE__, __LINE__, __METHOD__, 10 );
-		@mkdir( dirname( $after ), 0755, TRUE );
-		return Misc::rename($before, $after);
+		Debug::text( $counter . '. Renaming file: ' . $before . ' to: ' . $after, __FILE__, __LINE__, __METHOD__, 10 );
+		@mkdir( dirname( $after ), 0755, true );
+
+		return Misc::rename( $before, $after );
 	}
 }

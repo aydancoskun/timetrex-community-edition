@@ -39,12 +39,12 @@
  * @package PayrollDeduction
  */
 class PayrollDeduction_Base {
-	var $data = array();
+	var $data = [];
 
 	function setCompany( $company_id ) {
 		$this->data['company_id'] = $company_id;
 
-		return TRUE;
+		return true;
 	}
 
 	function getCompany() {
@@ -52,13 +52,13 @@ class PayrollDeduction_Base {
 			return $this->data['company_id'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setUser( $user_id ) {
 		$this->data['user_id'] = $user_id;
 
-		return TRUE;
+		return true;
 	}
 
 	function getUser() {
@@ -66,13 +66,13 @@ class PayrollDeduction_Base {
 			return $this->data['user_id'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setCountry( $country ) {
 		$this->data['country'] = strtoupper( trim( $country ) );
 
-		return TRUE;
+		return true;
 	}
 
 	function getCountry() {
@@ -80,13 +80,13 @@ class PayrollDeduction_Base {
 			return $this->data['country'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setProvince( $province ) {
 		$this->data['province'] = strtoupper( trim( $province ) );
 
-		return TRUE;
+		return true;
 	}
 
 	function getProvince() {
@@ -94,13 +94,13 @@ class PayrollDeduction_Base {
 			return $this->data['province'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setDistrict( $district ) {
 		$this->data['district'] = strtoupper( trim( $district ) );
 
-		return TRUE;
+		return true;
 	}
 
 	function getDistrict() {
@@ -108,7 +108,7 @@ class PayrollDeduction_Base {
 			return $this->data['district'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -119,7 +119,7 @@ class PayrollDeduction_Base {
 	function setFormulaType( $type_id ) {
 		$this->data['formula_type_id'] = $type_id;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFormulaType() {
@@ -133,7 +133,7 @@ class PayrollDeduction_Base {
 	function setUserValue1( $value ) {
 		$this->data['user_value1'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getUserValue1() {
@@ -141,13 +141,13 @@ class PayrollDeduction_Base {
 			return $this->data['user_value1'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setUserValue2( $value ) {
 		$this->data['user_value2'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getUserValue2() {
@@ -155,13 +155,13 @@ class PayrollDeduction_Base {
 			return $this->data['user_value2'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setUserValue3( $value ) {
 		$this->data['user_value3'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getUserValue3() {
@@ -169,13 +169,13 @@ class PayrollDeduction_Base {
 			return $this->data['user_value3'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setUserValue4( $value ) {
 		$this->data['user_value4'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getUserValue4() {
@@ -183,7 +183,7 @@ class PayrollDeduction_Base {
 			return $this->data['user_value4'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getDateEpoch() {
@@ -197,7 +197,7 @@ class PayrollDeduction_Base {
 	function setDate( $epoch ) {
 		$this->data['date'] = $this->getISODate( $epoch );
 
-		return TRUE;
+		return true;
 	}
 
 	function getDate() {
@@ -205,13 +205,13 @@ class PayrollDeduction_Base {
 			return $this->data['date'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setAnnualPayPeriods( $value ) {
 		$this->data['annual_pay_periods'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getAnnualPayPeriods() {
@@ -219,7 +219,7 @@ class PayrollDeduction_Base {
 			return $this->data['annual_pay_periods'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setCurrentPayPeriod( $value ) {
@@ -229,7 +229,7 @@ class PayrollDeduction_Base {
 
 		$this->data['current_pay_period'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getCurrentPayPeriod() {
@@ -243,7 +243,7 @@ class PayrollDeduction_Base {
 	function setHireAdjustedAnnualPayPeriods( $value ) {
 		$this->data['hire_adjusted_annual_pay_periods'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getHireAdjustedAnnualPayPeriods() {
@@ -261,7 +261,7 @@ class PayrollDeduction_Base {
 
 		$this->data['hire_adjusted_current_pay_period'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getHireAdjustedCurrentPayPeriod() {
@@ -276,7 +276,7 @@ class PayrollDeduction_Base {
 	function setCurrentPayrollRunID( $value ) {
 		$this->data['current_payroll_run_id'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getCurrentPayrollRunID() {
@@ -295,17 +295,17 @@ class PayrollDeduction_Base {
 	}
 
 	function getCountryPrimaryCurrency() {
-		if ( isset( $this->country_primary_currency ) AND $this->country_primary_currency != '' ) {
+		if ( isset( $this->country_primary_currency ) && $this->country_primary_currency != '' ) {
 			return $this->country_primary_currency;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getCountryPrimaryCurrencyID() {
 		$iso_code = $this->getCountryPrimaryCurrency(); //ISO Code
 
-		if ( $iso_code != '' AND TTUUID::isUUID( $this->getCompany() ) ) {
+		if ( $iso_code != '' && TTUUID::isUUID( $this->getCompany() ) ) {
 			$clf = new CurrencyListFactory();
 			$clf->getByCompanyIdAndISOCode( $this->getCompany(), $iso_code );
 			if ( $clf->getRecordCount() > 0 ) {
@@ -318,7 +318,7 @@ class PayrollDeduction_Base {
 
 		Debug::Text( 'Country Primary Currency does not exist: ' . $iso_code, __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
+		return false;
 	}
 
 	//Set the user currency for calculations
@@ -327,7 +327,7 @@ class PayrollDeduction_Base {
 
 		$this->data['user_currency_id'] = $currency_id;
 
-		return TRUE;
+		return true;
 	}
 
 	//Get the user currency for calculations
@@ -339,7 +339,7 @@ class PayrollDeduction_Base {
 		}
 
 		//If no currency is set, return the country primary currency, so no conversion takes place.
-		return FALSE;
+		return false;
 	}
 
 	function setGrossPayPeriodIncome( $income ) {
@@ -351,7 +351,7 @@ class PayrollDeduction_Base {
 		Debug::text( 'Gross Pay Period Income: I: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->data['gross_pay_period_income'] = $income;
 
-		return TRUE;
+		return true;
 	}
 
 	function getGrossPayPeriodIncome() {
@@ -361,7 +361,7 @@ class PayrollDeduction_Base {
 			return $this->data['gross_pay_period_income'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setYearToDateGrossIncome( $income ) {
@@ -369,7 +369,7 @@ class PayrollDeduction_Base {
 
 		$this->data['gross_ytd_income'] = $income;
 
-		return TRUE;
+		return true;
 	}
 
 	function getYearToDateGrossIncome() {
@@ -379,7 +379,7 @@ class PayrollDeduction_Base {
 			return $this->data['gross_ytd_income'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setYearToDateDeduction( $amount ) {
@@ -387,7 +387,7 @@ class PayrollDeduction_Base {
 
 		$this->data['ytd_deduction'] = $amount;
 
-		return TRUE;
+		return true;
 	}
 
 	function getYearToDateDeduction() {
@@ -397,7 +397,7 @@ class PayrollDeduction_Base {
 			return $this->data['ytd_deduction'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 
@@ -406,7 +406,7 @@ class PayrollDeduction_Base {
 		$user_currency_id = $this->getUserCurrency();
 		$country_currency_id = $this->getCountryPrimaryCurrencyID();
 
-		if ( $user_currency_id !== FALSE AND $country_currency_id !== FALSE ) {
+		if ( $user_currency_id !== false && $country_currency_id !== false ) {
 			$retval = CurrencyFactory::convertCurrency( $this->getUserCurrency(), $this->getCountryPrimaryCurrencyID(), $amount );
 		} else {
 			//Conversion failed, return original amount.
@@ -421,7 +421,7 @@ class PayrollDeduction_Base {
 		$user_currency_id = $this->getUserCurrency();
 		$country_currency_id = $this->getCountryPrimaryCurrencyID();
 
-		if ( $user_currency_id !== FALSE AND $country_currency_id !== FALSE ) {
+		if ( $user_currency_id !== false && $country_currency_id !== false ) {
 			$retval = CurrencyFactory::convertCurrency( $this->getCountryPrimaryCurrencyID(), $this->getUserCurrency(), $amount );
 		} else {
 			$retval = $amount;
@@ -430,9 +430,9 @@ class PayrollDeduction_Base {
 		return $retval;
 	}
 
-	function getAnnualizingFactor( $reverse = FALSE ) {
+	function getAnnualizingFactor( $reverse = false ) {
 		$retval = bcdiv( $this->getHireAdjustedAnnualPayPeriods(), $this->getHireAdjustedCurrentPayPeriod() );
-		if ( $reverse == TRUE ) {
+		if ( $reverse == true ) {
 			$retval = bcdiv( 1, $retval );
 		}
 		Debug::text( 'Annualizing Factor (S1): ' . $retval . ' Hire Adjusted: Annual PP: ' . $this->getHireAdjustedAnnualPayPeriods() . '(' . $this->getAnnualPayPeriods() . ') Current PP: ' . $this->getHireAdjustedCurrentPayPeriod() . '(' . $this->getCurrentPayPeriod() . ') Reverse: ' . (int)$reverse, __FILE__, __LINE__, __METHOD__, 10 );
@@ -451,7 +451,7 @@ class PayrollDeduction_Base {
 	}
 
 	function calcNonPeriodicDeduction( $annual_tax_payable, $ytd_deduction ) {
-		$retval = bcsub( bcmul( $annual_tax_payable, $this->getAnnualizingFactor( TRUE ) ), $ytd_deduction );
+		$retval = bcsub( bcmul( $annual_tax_payable, $this->getAnnualizingFactor( true ) ), $ytd_deduction );
 		if ( $retval < 0 ) {
 			$retval = 0;
 		}
@@ -462,11 +462,11 @@ class PayrollDeduction_Base {
 
 	function getDataFromRateArray( $epoch, $arr ) {
 		if ( !is_array( $arr ) ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $epoch == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		krsort( $arr, SORT_NUMERIC );
@@ -476,7 +476,7 @@ class PayrollDeduction_Base {
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 }

@@ -12,14 +12,14 @@ PayStubTransactionSummaryReportViewController = ReportBaseViewController.extend(
 		this.context_menu_name = $.i18n._( 'Pay Stub Transaction Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'PayStubTransactionSummaryReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIPayStubTransactionSummaryReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayStubTransactionSummaryReport' ) )();
 	},
 
 	onReportMenuClick: function( id ) {
 		this.processTransactions( id );
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				export: {

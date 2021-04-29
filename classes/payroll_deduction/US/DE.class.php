@@ -40,52 +40,52 @@
  */
 class PayrollDeduction_US_DE extends PayrollDeduction_US {
 
-	var $state_income_tax_rate_options = array(
-			20140101 => array(
-					0 => array(
-							array('income' => 2000, 'rate' => 0, 'constant' => 0),
-							array('income' => 5000, 'rate' => 2.20, 'constant' => 0),
-							array('income' => 10000, 'rate' => 3.90, 'constant' => 66),
-							array('income' => 20000, 'rate' => 4.80, 'constant' => 261),
-							array('income' => 25000, 'rate' => 5.20, 'constant' => 741),
-							array('income' => 60000, 'rate' => 5.55, 'constant' => 1001),
-							array('income' => 60000, 'rate' => 6.60, 'constant' => 2943.50),
-					),
-			),
-			20100101 => array(
-					0 => array(
-							array('income' => 2000, 'rate' => 0, 'constant' => 0),
-							array('income' => 5000, 'rate' => 2.20, 'constant' => 0),
-							array('income' => 10000, 'rate' => 3.90, 'constant' => 66),
-							array('income' => 20000, 'rate' => 4.80, 'constant' => 261),
-							array('income' => 25000, 'rate' => 5.20, 'constant' => 741),
-							array('income' => 60000, 'rate' => 5.55, 'constant' => 1001),
-							array('income' => 60000, 'rate' => 6.95, 'constant' => 2943.50),
-					),
-			),
-			20060101 => array(
-					0 => array(
-							array('income' => 2000, 'rate' => 0, 'constant' => 0),
-							array('income' => 5000, 'rate' => 2.20, 'constant' => 0),
-							array('income' => 10000, 'rate' => 3.90, 'constant' => 66),
-							array('income' => 20000, 'rate' => 4.80, 'constant' => 261),
-							array('income' => 25000, 'rate' => 5.20, 'constant' => 741),
-							array('income' => 60000, 'rate' => 5.55, 'constant' => 1001),
-							array('income' => 60000, 'rate' => 5.95, 'constant' => 2943.50),
-					),
-			),
-	);
+	var $state_income_tax_rate_options = [
+			20140101 => [
+					0 => [
+							[ 'income' => 2000, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 5000, 'rate' => 2.20, 'constant' => 0 ],
+							[ 'income' => 10000, 'rate' => 3.90, 'constant' => 66 ],
+							[ 'income' => 20000, 'rate' => 4.80, 'constant' => 261 ],
+							[ 'income' => 25000, 'rate' => 5.20, 'constant' => 741 ],
+							[ 'income' => 60000, 'rate' => 5.55, 'constant' => 1001 ],
+							[ 'income' => 60000, 'rate' => 6.60, 'constant' => 2943.50 ],
+					],
+			],
+			20100101 => [
+					0 => [
+							[ 'income' => 2000, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 5000, 'rate' => 2.20, 'constant' => 0 ],
+							[ 'income' => 10000, 'rate' => 3.90, 'constant' => 66 ],
+							[ 'income' => 20000, 'rate' => 4.80, 'constant' => 261 ],
+							[ 'income' => 25000, 'rate' => 5.20, 'constant' => 741 ],
+							[ 'income' => 60000, 'rate' => 5.55, 'constant' => 1001 ],
+							[ 'income' => 60000, 'rate' => 6.95, 'constant' => 2943.50 ],
+					],
+			],
+			20060101 => [
+					0 => [
+							[ 'income' => 2000, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 5000, 'rate' => 2.20, 'constant' => 0 ],
+							[ 'income' => 10000, 'rate' => 3.90, 'constant' => 66 ],
+							[ 'income' => 20000, 'rate' => 4.80, 'constant' => 261 ],
+							[ 'income' => 25000, 'rate' => 5.20, 'constant' => 741 ],
+							[ 'income' => 60000, 'rate' => 5.55, 'constant' => 1001 ],
+							[ 'income' => 60000, 'rate' => 5.95, 'constant' => 2943.50 ],
+					],
+			],
+	];
 
-	var $state_options = array(
-			20060101 => array(
-					'standard_deduction' => array(
+	var $state_options = [
+			20060101 => [
+					'standard_deduction' => [
 							10 => 3250,
 							20 => 6500,
 							30 => 3250,
-					),
+					],
 					'allowance'          => 110,
-			),
-	);
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -100,13 +100,12 @@ class PayrollDeduction_US_DE extends PayrollDeduction_US {
 
 	function getStateStandardDeduction() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
-		if ( isset( $retarr['standard_deduction'][ $this->getStateFilingStatus() ] ) ) {
-			$deduction = $retarr['standard_deduction'][ $this->getStateFilingStatus() ];
+		if ( isset( $retarr['standard_deduction'][$this->getStateFilingStatus()] ) ) {
+			$deduction = $retarr['standard_deduction'][$this->getStateFilingStatus()];
 		} else {
 			$deduction = $retarr['standard_deduction'][10]; //Single
 		}
@@ -118,9 +117,8 @@ class PayrollDeduction_US_DE extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['allowance'];

@@ -33,42 +33,44 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-define('TIMETREX_JSON_API', TRUE );
-if ( isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 ) {
-	$disable_database_connection = TRUE;
+define( 'TIMETREX_JSON_API', true );
+if ( isset( $_GET['disable_db'] ) && $_GET['disable_db'] == 1 ) {
+	$disable_database_connection = true;
 }
-require_once('../../../includes/global.inc.php');
-require_once('../../../includes/API.inc.php');
+require_once( '../../../includes/global.inc.php' );
+require_once( '../../../includes/API.inc.php' );
 forceNoCacheHeaders(); //Send headers to disable caching.
-header('Content-Type: application/javascript; charset=UTF-8');
+header( 'Content-Type: application/javascript; charset=UTF-8' );
 
 TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in, this is needed for getPreLoginData as well.
-$auth = TTNew('APIAuthentication'); /** @var APIAuthentication $auth */
+$auth = TTNew( 'APIAuthentication' ); /** @var APIAuthentication $auth */
 ?>
-var APIGlobal = function() {};
+var APIGlobal = function() {
+};
 APIGlobal.pre_login_data = <?php echo json_encode( $auth->getPreLoginData() );?>; //Convert getPreLoginData() array to JS.
 
 need_load_pre_login_data = false;
 
-var alternate_session_data = decodeURIComponent(getCookie( 'AlternateSessionData' ));
+var alternate_session_data = decodeURIComponent( getCookie( 'AlternateSessionData' ) );
 
 if ( alternate_session_data ) {
-	alternate_session_data = JSON.parse(alternate_session_data);
+	alternate_session_data = JSON.parse( alternate_session_data );
 	if ( alternate_session_data && alternate_session_data.new_session_id ) {
-		setCookie('SessionID', alternate_session_data.new_session_id, 30, APIGlobal.pre_login_data.cookie_base_url);
+		setCookie( 'SessionID', alternate_session_data.new_session_id, 30, APIGlobal.pre_login_data.cookie_base_url );
 
 		alternate_session_data.new_session_id = null;
 
 		//Allow NewSessionID cookie to be accessible from one level higher subdomain.
 		var host = window.location.hostname;
-		host = host.substring((host.indexOf('.') + 1));
+		host = host.substring( ( host.indexOf( '.' ) + 1 ) );
 
-		setCookie('AlternateSessionData', JSON.stringify(alternate_session_data), 1, APIGlobal.pre_login_data.cookie_base_url, host ); //was NewSessionID
+		setCookie( 'AlternateSessionData', JSON.stringify( alternate_session_data ), 1, APIGlobal.pre_login_data.cookie_base_url, host ); //was NewSessionID
 
 		need_load_pre_login_data = true; // need load it again since APIGlobal.pre_login_data.is_logged_in will be false when first load
 	}
 }
-delete alternate_session_data, host;
+delete alternate_session_data;
+delete host;
 <?php
 Debug::writeToLog();
 ?>

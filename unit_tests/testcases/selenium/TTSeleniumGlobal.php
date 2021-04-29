@@ -54,28 +54,28 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'Etc/GMT+8', TRUE ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'Etc/GMT+8', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$this->setHost( $selenium_config['host'] );
 		$this->setPort( (int)$selenium_config['port'] );
 		$this->setBrowser( $selenium_config['browser'] );
 		$this->setBrowserUrl( $selenium_config['default_url'] );
 
-		$this->setDesiredCapabilities( array( 'chromeOptions' => array('args' => array('--incognito'), ) ) ); //Use incognito mode to help prevent caching between sessions and saving passwords and such.
+		$this->setDesiredCapabilities( [ 'chromeOptions' => [ 'args' => [ '--incognito' ], ] ] ); //Use incognito mode to help prevent caching between sessions and saving passwords and such.
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	function Login( $user, $pass ) {
 		//disable the overlay to speed up testing
 
-		Debug::text( 'Login to: ' . $this->selenium_config['default_url'] .' Username: '. $user, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Login to: ' . $this->selenium_config['default_url'] . ' Username: ' . $user, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->url( $this->selenium_config['default_url'] );
 
 		sleep( 2.5 ); //have to be sure that Global.js is loaded before we start trying to use it.
@@ -94,7 +94,7 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		$this->waitUntilByCssSelector( '#leftLogo:not(.login)' ); //the css not() selector is there to differentiate the various calls in the server log.
 
 		//needed as development mode reloads and clears the variables.
-		$javascript = array('script' => 'Global.setUnitTestMode();', 'args' => array());
+		$javascript = [ 'script' => 'Global.setUnitTestMode();', 'args' => [] ];
 		$this->execute( $javascript );
 
 		Debug::text( 'Login Complete...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -115,48 +115,48 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		Debug::text( 'Logout...', __FILE__, __LINE__, __METHOD__, 10 );
 	}
 
-	function waitUntilById( $id, $timeout = NULL, $sleep_interval = NULL ) {
-		if ( $timeout == NULL ) {
+	function waitUntilById( $id, $timeout = null, $sleep_interval = null ) {
+		if ( $timeout == null ) {
 			$timeout = $this->default_wait_timeout;
 		}
-		if ( $sleep_interval == NULL ) {
+		if ( $sleep_interval == null ) {
 			$sleep_interval = $this->default_wait_interval;
 		}
 
 		$this->waitUntil( function () use ( $id ) {
-			$javascript = array('script' => "$('#overlay.overlay:visible').length", 'args' => array());
-			if ( $this->execute( $javascript ) == 0 AND $this->byId( $id ) ) {
+			$javascript = [ 'script' => "$('#overlay.overlay:visible').length", 'args' => [] ];
+			if ( $this->execute( $javascript ) == 0 && $this->byId( $id ) ) {
 
-				return TRUE;
+				return true;
 			}
 
-			return NULL;
+			return null;
 		}, $timeout, $sleep_interval );
 	}
 
-	function waitUntilByCssSelector( $selector, $timeout = NULL, $sleep_interval = NULL ) {
-		if ( $timeout == NULL ) {
+	function waitUntilByCssSelector( $selector, $timeout = null, $sleep_interval = null ) {
+		if ( $timeout == null ) {
 			$timeout = $this->default_wait_timeout;
 		}
-		if ( $sleep_interval == NULL ) {
+		if ( $sleep_interval == null ) {
 			$sleep_interval = $this->default_wait_interval;
 		}
 
 		$this->waitUntil( function () use ( $selector ) {
-			$javascript = array('script' => "$('#overlay.overlay:visible').length", 'args' => array());
-			if ( $this->execute( $javascript ) == 0 AND $this->byCssSelector( $selector ) ) {
-				return TRUE;
+			$javascript = [ 'script' => "$('#overlay.overlay:visible').length", 'args' => [] ];
+			if ( $this->execute( $javascript ) == 0 && $this->byCssSelector( $selector ) ) {
+				return true;
 			}
 
-			return NULL;
+			return null;
 		}, $timeout, $sleep_interval );
 	}
 
-	function takeScreenshot( $screenshot_file_name, $create_dir = TRUE ) {
-		if ( $create_dir === TRUE ) {
+	function takeScreenshot( $screenshot_file_name, $create_dir = true ) {
+		if ( $create_dir === true ) {
 			$dirname = dirname( $screenshot_file_name );
-			if ( file_exists( $dirname ) == FALSE ) {
-				mkdir( $dirname, 0777, TRUE );
+			if ( file_exists( $dirname ) == false ) {
+				mkdir( $dirname, 0777, true );
 			}
 		}
 
@@ -168,12 +168,13 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		$this->waitUntilByCssSelector( '#powered_by,#copy_right_logo' );
 
 		$retval = file_put_contents( $screenshot_file_name, $this->currentScreenshot() );
-		chmod( $screenshot_file_name, 0777);
+		chmod( $screenshot_file_name, 0777 );
+
 		return $retval;
 	}
 
 	function getOSUser() {
-		if ( function_exists( 'posix_geteuid' ) AND function_exists( 'posix_getpwuid' ) ) {
+		if ( function_exists( 'posix_geteuid' ) && function_exists( 'posix_getpwuid' ) ) {
 			$user = posix_getpwuid( posix_geteuid() );
 			Debug::Text( 'Webserver running as User: ' . $user['name'], __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -193,39 +194,36 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		$this->waitUntil( function ( $_self_ ) {
 			//Global.getUIReadyStatus will be == 2 when the screens are finished loading.
 
-			$javascript = array( 'script' => 'if ( ( typeof Global != "undefined" && Global.getUIReadyStatus() == 2 ) && ( typeof TTPromise != "undefined" && TTPromise.isPendingPromises() == false ) ) { return true; } else { return false; }', 'args' => array() );
+			$javascript = [ 'script' => 'if ( ( typeof Global != "undefined" && Global.getUIReadyStatus() == 2 ) && ( typeof TTPromise != "undefined" && TTPromise.isPendingPromises() == false ) ) { return true; } else { return false; }', 'args' => [] ];
 			$js_retval = $this->execute( $javascript );
-			Debug::Text( 'waitForUI result: ' . var_export( $js_retval, TRUE), __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'waitForUI result: ' . var_export( $js_retval, true ), __FILE__, __LINE__, __METHOD__, 10 );
 
-			if ( isset( $js_retval ) AND $js_retval == TRUE ) {
-				return TRUE;
+			if ( isset( $js_retval ) && $js_retval == true ) {
+				return true;
 			} else {
-				$ui_ready_status = $this->execute( array( 'script' => 'if ( typeof Global != "undefined" ) { return Global.getUIReadyStatus(); } else { return null; }', 'args' => array() ) );
-				$pending_promises = $this->execute( array( 'script' => 'if ( typeof TTPromise != "undefined" ) { return TTPromise.isPendingPromises(); } else { return null; }', 'args' => array() ) );
-				Debug::Text( '  waitForUI UIReadyStatus: ' . var_export( $ui_ready_status, TRUE) .' Pending Promises: '. var_export( $pending_promises, TRUE), __FILE__, __LINE__, __METHOD__, 10 );
+				$ui_ready_status = $this->execute( [ 'script' => 'if ( typeof Global != "undefined" ) { return Global.getUIReadyStatus(); } else { return null; }', 'args' => [] ] );
+				$pending_promises = $this->execute( [ 'script' => 'if ( typeof TTPromise != "undefined" ) { return TTPromise.isPendingPromises(); } else { return null; }', 'args' => [] ] );
+				Debug::Text( '  waitForUI UIReadyStatus: ' . var_export( $ui_ready_status, true ) . ' Pending Promises: ' . var_export( $pending_promises, true ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				if ( $_self_->waitForUIInitCompleteLoops > 10 ) {
 					//trigger checking promises again to workaround selenium bug where they resolve without firing function
-					$this->execute( array( 'script' => 'TTPromise.wait()', 'args' => array() ) );
-					Debug::Text( '  waitForUI Triggering TTPromise.wait()... Loops: '. $this->waitForUIInitCompleteLoops, __FILE__, __LINE__, __METHOD__, 10 );
+					$this->execute( [ 'script' => 'TTPromise.wait()', 'args' => [] ] );
+					Debug::Text( '  waitForUI Triggering TTPromise.wait()... Loops: ' . $this->waitForUIInitCompleteLoops, __FILE__, __LINE__, __METHOD__, 10 );
 				}
 				$_self_->waitForUIInitCompleteLoops++;
 
-				return NULL;
+				return null;
 			}
 		}, 60000, 500 ); //Wait for up to 60 seconds.
 	}
 
 	function setUnitTestMode( $username ) {
-		$sf = TTnew( 'StationFactory' );
-		/** @var StationFactory $sf */
-		$slf = TTnew( 'StationListFactory' );
-		/** @var StationListFactory $slf */
+		$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
+		$slf = TTnew( 'StationListFactory' ); /** @var StationListFactory $slf */
 
 		$slf->getByStationId( 'UNITTEST' );
 		if ( $slf->getRecordCount() == 0 ) {
-			$ulf = TTNew( 'UserListFactory' );
-			/** @var UserListFactory $ulf */
+			$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByUserName( $username );
 			if ( $ulf->getRecordCount() > 0 ) {
 				$sf->setCompany( $ulf->getCurrent()->getCompany() );
@@ -248,37 +246,36 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		}
 
 		//run necessary js for unit tests
-		$javascript = array('script' => 'Global.setUnitTestMode();', 'args' => array());
+		$javascript = [ 'script' => 'Global.setUnitTestMode();', 'args' => [] ];
 		$this->execute( $javascript );
 
 		$path = Environment::getCookieBaseURL();
 		//enable detailed logging
 
 		//set the same sessionid for all tests
-		$javascript = array('script' => "$.cookie( 'StationID', 'UNITTESTS', {expires: 30, path: '$path'} );", 'args' => array());
-		$javascript = array('script' => "Global.setStationID('UNITTEST')", 'args' => array());
+		$javascript = [ 'script' => "$.cookie( 'StationID', 'UNITTESTS', {expires: 30, path: '$path'} );", 'args' => [] ];
+		$javascript = [ 'script' => "Global.setStationID('UNITTEST')", 'args' => [] ];
 		$this->execute( $javascript );
-
 	}
 
 	function isThere( $css_selector ) {
 		$result = $this->elements( $this->using( 'css selector' )->value( $css_selector ) );
 		if ( count( $result ) > 0 ) {
 			foreach ( $result as $el ) {
-				if ( $el->displayed() AND $el->enabled() ) {
-					return TRUE;
+				if ( $el->displayed() && $el->enabled() ) {
+					return true;
 					break;
 				}
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function waitThenClick( $selector ) {
 		Debug::Text( 'Attempting to click Selector: ' . $selector, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$javascript = array('script' => "return $('#overlay.overlay').length", 'args' => array());
+		$javascript = [ 'script' => "return $('#overlay.overlay').length", 'args' => [] ];
 		$overlay_shown = $this->execute( $javascript );
 		if ( $overlay_shown > 0 ) {
 			Debug::Text( '  Overlay status check: ' . $overlay_shown, __FILE__, __LINE__, __METHOD__, 10 );
@@ -289,7 +286,7 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		}
 
 		try {
-			if ( ( substr( $selector, 0, 1 ) == '#' AND strstr( $selector, ' ' ) == FALSE ) OR strstr( $selector, 'menu:' ) == TRUE ) {
+			if ( ( substr( $selector, 0, 1 ) == '#' && strstr( $selector, ' ' ) == false ) || strstr( $selector, 'menu:' ) == true ) {
 				//need to do this because of malformed ids in the top menu causing wating by selector to fail.
 				$id = substr( $selector, 1, strlen( $selector ) );
 				Debug::Text( '  Waiting on ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -305,8 +302,8 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 				$el->click();
 			}
 		} catch ( Exception $e ) {
-			$this->takeScreenshot( $this->screenshot_path . DIRECTORY_SEPARATOR . 'waitThenClickException.png', TRUE );
-			Debug::Text( 'Click failed on: ' . $selector .' Screenshot path: '. $this->screenshot_path, __FILE__, __LINE__, __METHOD__, 10 );
+			$this->takeScreenshot( $this->screenshot_path . DIRECTORY_SEPARATOR . 'waitThenClickException.png', true );
+			Debug::Text( 'Click failed on: ' . $selector . ' Screenshot path: ' . $this->screenshot_path, __FILE__, __LINE__, __METHOD__, 10 );
 			//$javascript = array('script' => "$('" . $selector . "').click()", 'args' => array());
 			//$this->execute( $javascript );
 			throw new Exception( $selector . ' - ' . $e->getMessage() );
@@ -333,16 +330,16 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 			return $retval;
 		}
 
-		return array();
+		return [];
 	}
 
-	function clickCancel( $menu_id = FALSE ) {
-		if ( $menu_id !== FALSE ) {
+	function clickCancel( $menu_id = false ) {
+		if ( $menu_id !== false ) {
 			$selector = '#' . $menu_id . ' #cancelIcon';
 			$this->waitThenClick( $selector );
 			Debug::Text( 'Clicking Cancel [' . $selector . ']', __FILE__, __LINE__, __METHOD__, 10 );
 		} else {
-			$javascript = array('script' => "$('#topContainer .ribbon .ribbon-tab-out-side:visible #cancelIcon').click()", 'args' => array());
+			$javascript = [ 'script' => "$('#topContainer .ribbon .ribbon-tab-out-side:visible #cancelIcon').click()", 'args' => [] ];
 			$this->execute( $javascript );
 			Debug::Arr( $javascript, 'Executing  cancelclick with js', __FILE__, __LINE__, __METHOD__, 10 );
 		}

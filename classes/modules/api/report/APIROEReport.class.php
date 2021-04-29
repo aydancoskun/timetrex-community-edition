@@ -47,7 +47,7 @@ class APIROEReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIROEReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getROEReport( $config = FALSE, $format = 'pdf' ) {
+	function getROEReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

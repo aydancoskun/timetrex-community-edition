@@ -48,40 +48,48 @@ class PayrollDeduction_US_MS extends PayrollDeduction_US {
 										);
 	*/
 
-	var $state_income_tax_rate_options = array(
-			20190101 => array(
-					0 => array(
-							array('income' => 2000, 'rate' => 0.0, 'constant' => 0),
-							array('income' => 5000, 'rate' => 3.0, 'constant' => 0),
-							array('income' => 10000, 'rate' => 4.0, 'constant' => 90),
-							array('income' => 10000, 'rate' => 5.0, 'constant' => 290),
-					),
-			),
-			20060101 => array(
-					0 => array(
-							array('income' => 5000, 'rate' => 3.0, 'constant' => 0),
-							array('income' => 10000, 'rate' => 4.0, 'constant' => 150),
-							array('income' => 10000, 'rate' => 5.0, 'constant' => 350),
-					),
-			),
-	);
+	var $state_income_tax_rate_options = [
+			20200101 => [
+					0 => [
+							[ 'income' => 3000, 'rate' => 0.0, 'constant' => 0 ],
+							[ 'income' => 5000, 'rate' => 3.0, 'constant' => 0 ],
+							[ 'income' => 10000, 'rate' => 4.0, 'constant' => 60 ],
+							[ 'income' => 10000, 'rate' => 5.0, 'constant' => 260 ],
+					],
+			],
+			20190101 => [
+					0 => [
+							[ 'income' => 2000, 'rate' => 0.0, 'constant' => 0 ],
+							[ 'income' => 5000, 'rate' => 3.0, 'constant' => 0 ],
+							[ 'income' => 10000, 'rate' => 4.0, 'constant' => 90 ],
+							[ 'income' => 10000, 'rate' => 5.0, 'constant' => 290 ],
+					],
+			],
+			20060101 => [
+					0 => [
+							[ 'income' => 5000, 'rate' => 3.0, 'constant' => 0 ],
+							[ 'income' => 10000, 'rate' => 4.0, 'constant' => 150 ],
+							[ 'income' => 10000, 'rate' => 5.0, 'constant' => 350 ],
+					],
+			],
+	];
 
-	var $state_options = array(
-			20060101 => array(
-					'standard_deduction' => array(
+	var $state_options = [
+			20060101 => [
+					'standard_deduction' => [
 							'10' => 2300,
 							'20' => 2300,
 							'30' => 4600,
 							'40' => 3400,
-					),
-			),
-	);
+					],
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
 
 		$state_deductions = $this->getStateStandardDeduction();
-		$state_allowance = $this->getStateAllowance();
+		$state_allowance = $this->getStateAllowance(); //This is Excemptions Claimed amount.
 
 		$income = bcsub( bcsub( $annual_income, $state_deductions ), $state_allowance );
 
@@ -92,12 +100,11 @@ class PayrollDeduction_US_MS extends PayrollDeduction_US {
 
 	function getStateStandardDeduction() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
-		$deduction = $retarr['standard_deduction'][ $this->getStateFilingStatus() ];
+		$deduction = $retarr['standard_deduction'][$this->getStateFilingStatus()];
 
 		Debug::text( 'Standard Deduction: ' . $deduction, __FILE__, __LINE__, __METHOD__, 10 );
 

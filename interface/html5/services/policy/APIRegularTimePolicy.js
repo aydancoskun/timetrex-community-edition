@@ -47,5 +47,4 @@ var APIRegularTimePolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportRegularTimePolicy', arguments );
 	}
 
-
 } );

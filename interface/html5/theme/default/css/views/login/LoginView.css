@@ -1,24 +1,24 @@
 /*LoginView*/
 .login-view {
-    position: fixed;
-    width: 652px;
-    top: 50%;
-    left: 50%;
-    margin: -238.5px 0 0 -326px;
-    -webkit-transition: opacity 1s;
-    -moz-transition: opacity 1s;
-    -ms-transition: opacity 1s;
-    -o-transition: opacity 1s;
-    transition: opacity 1s;
-    z-index: 10;
+	position: fixed;
+	width: 652px;
+	top: 50%;
+	left: 50%;
+	margin: -238.5px 0 0 -326px;
+	-webkit-transition: opacity 1s;
+	-moz-transition: opacity 1s;
+	-ms-transition: opacity 1s;
+	-o-transition: opacity 1s;
+	transition: opacity 1s;
+	z-index: 10;
 }
 
 .login-view-main-content {
-    position: relative; /* No effect on page, but allows #versionNumber to correctly position in bottom right corner of content box */
-    margin-bottom: 20px;
-    padding-bottom: 15px; /* Padding to reserve room for the fixed position #versionNumber */
-    background: #fff;
-    box-shadow: 0 4px 8px 0 #000, 0 6px 20px 0 #000;
+	position: relative; /* No effect on page, but allows #versionNumber to correctly position in bottom right corner of content box */
+	margin-bottom: 20px;
+	padding-bottom: 15px; /* Padding to reserve room for the fixed position #versionNumber */
+	background: #ffffff;
+	box-shadow: 0 4px 8px 0 #000000, 0 6px 20px 0 #000000;
 }
 
 /******************************************
@@ -27,88 +27,89 @@ Mobile View
 
 /* Some other overrides done in application.css */
 .mobile-device-mode .content-container {
-    overflow: auto; /* Allows scrolling if the mobile device is so short that not all login content fits. */
+	overflow: auto; /* Allows scrolling if the mobile device is so short that not all login content fits. */
 }
 
 .mobile-device-mode.login-bg, .mobile-device-mode #login-bg_opacity_filter {
-    background: #134769;
+	background: #134769;
 }
 
 .mobile-device-mode #login-bg_animal {
-    background: none;
+	background: none;
 }
 
 .mobile-device-mode .box-edge-spacing {
-    width: 95%;
+	width: 95%;
 }
 
 .mobile-device-mode .login-view {
-    position: absolute;
-    top: 48%; /* centering vertically on mobile views. 50 and -50 did not put direct in middle, so 48% and -50% is slightly above middle. More pleasing visually. */
-    transform: translateY(-50%); /* Used together with the top percentage above for vertical centering */
-    left: 0;
-    right: 0;
-    margin: auto; /* Makes sure its centered when max-width is restricting width */
-    padding: 10px; /* Padding to ensure the shadow effect of the box is still visible */
-    padding-bottom: 0;
-    max-width: 652px; /* Makes sure the login box does not go too wide, even on mobile view. */
-    width: auto;
+	position: absolute;
+	top: 48%; /* centering vertically on mobile views. 50 and -50 did not put direct in middle, so 48% and -50% is slightly above middle. More pleasing visually. */
+	transform: translateY(-50%); /* Used together with the top percentage above for vertical centering */
+	left: 0;
+	right: 0;
+	margin: auto; /* Makes sure its centered when max-width is restricting width */
+	padding: 10px; /* Padding to ensure the shadow effect of the box is still visible */
+	padding-bottom: 0;
+	max-width: 652px; /* Makes sure the login box does not go too wide, even on mobile view. */
+	width: auto;
 }
 
-@media only screen and (max-height: 550px){
-    /* When the vertical viewport height gets to small, turn off vertical centering as it cut's off the top content
-     * Re-calculate the max-height size if the login box ever gets too big with new content. 550 is ideal for box height of
-     * around 393px + powered by logo footer (test with social logos / different copyright too).
-     * Alternatively, use flexbox, together with safe centering. Not widely supported yet though.
-     */
-    .mobile-device-mode .login-view {
-        top: 0;
-        transform: none;
-    }
+@media only screen and (max-height: 550px) {
+	/* When the vertical viewport height gets to small, turn off vertical centering as it cut's off the top content
+	 * Re-calculate the max-height size if the login box ever gets too big with new content. 550 is ideal for box height of
+	 * around 393px + powered by logo footer (test with social logos / different copyright too).
+	 * Alternatively, use flexbox, together with safe centering. Not widely supported yet though.
+	 */
+	.mobile-device-mode .login-view {
+		top: 0;
+		transform: none;
+	}
 }
+
 .mobile-device-mode .logo-container {
-    height: 100px;
+	height: 100px;
 }
 
 /* The percentages below intentionally do not add up to 100, to account for some padding between the logos */
 .mobile-device-mode .login-view .company-logo {
-    max-width: 65%;
+	max-width: 65%;
 }
 
 .mobile-device-mode .login-view .app-type {
-    max-width: 25%;
+	max-width: 25%;
 }
 
 .mobile-device-mode .login-view .form td {
-    padding: 5px 0; /* The 0 is specifically to allow empty td column between the inputs to size correctly (padding forces min space in small viewports */
+	padding: 5px 0; /* The 0 is specifically to allow empty td column between the inputs to size correctly (padding forces min space in small viewports */
 }
 
 .mobile-device-mode .login-view .form-container .button-form button {
-    padding: 5px;
+	padding: 5px;
 }
 
 .mobile-device-mode .wizard.forgot-password {
-    max-width: 500px;
-    width: 90%;
-    height: 140px;
+	max-width: 500px;
+	width: 90%;
+	height: 140px;
 }
 
 .mobile-device-mode .wizard.forgot-password .wizard-form-item-div {
-    text-align: left;
-    padding-left: 10px;
+	text-align: left;
+	padding-left: 10px;
 }
 
 .mobile-device-mode .wizard.forgot-password .form-item-label {
-    min-width: 0;
+	min-width: 0;
 }
 
 .mobile-device-mode .social-div {
-    display:none !important; /* TODO: Important is here to override the .show() in LoginViewController.js Refactor together with all other show/hides on form */
+	display: none !important; /* TODO: Important is here to override the .show() in LoginViewController.js Refactor together with all other show/hides on form */
 }
 
 .mobile-device-mode .foot-left-html,
 .mobile-device-mode .foot-right-html {
-    display: none;
+	display: none;
 }
 
 /******************************************
@@ -118,59 +119,59 @@ End Mobile View
 /* Main Layout */
 
 .login-view .form-container {
-    clear: both; /* Used for the float left and right of company and app_type logo */
-    width: 100%;
-    text-align: left;
-    background: #fff;
+	clear: both; /* Used for the float left and right of company and app_type logo */
+	width: 100%;
+	text-align: left;
+	background: #ffffff;
 }
 
 .box-edge-spacing {
-    margin: 0px auto;
-    width: 80%;
+	margin: 0px auto;
+	width: 80%;
 }
 
 .login-view .form td {
-    padding: 5px 0; /* The 0 is specifically to allow empty td column between the inputs to size correctly (padding forces min space in small viewports */
+	padding: 5px 0; /* The 0 is specifically to allow empty td column between the inputs to size correctly (padding forces min space in small viewports */
 }
 
 .foot-right-html {
-    position: fixed;
-    right: 0;
-    bottom: 0;
+	position: fixed;
+	right: 0;
+	bottom: 0;
 }
 
 .foot-left-html {
-    position: fixed;
-    left: 0;
-    bottom: 0;
+	position: fixed;
+	left: 0;
+	bottom: 0;
 }
 
 .login-view .version-label {
-    position: absolute;
-    right: 5px;
-    bottom: 5px;
-    text-align: right;
-    font-size: 9px;
-    color: #000;
+	position: absolute;
+	right: 5px;
+	bottom: 5px;
+	text-align: right;
+	font-size: 9px;
+	color: #000000;
 }
 
 .login-view .error-info {
-    color: red;
-    font-weight: bold;
+	color: red;
+	font-weight: bold;
 }
 
 .login-view .secure-login {
-    color: rgb(60, 97, 138);
-    font-size: 18px;
-    text-align: left;
-    font-weight: normal;
+	color: rgb(60, 97, 138);
+	font-size: 18px;
+	text-align: left;
+	font-weight: normal;
 }
 
 .login-view .labels {
-    color: #000;
-    font-weight: normal;
-    text-align: right;
-    padding-right: 5px;
+	color: #000000;
+	font-weight: normal;
+	text-align: right;
+	padding-right: 5px;
 }
 
 /* Animal background section */
@@ -178,205 +179,206 @@ End Mobile View
 /* Note CSS for .login-bg (the animals/office background) is loaded directly in /index.php to load it as fast as possible */
 
 #login-bg_animal {
-    /* background-image generated by JS. See LoginView.render */
-    position: fixed;
-    height: 100vh;
-    width: 100vw;
-    background-size: cover;
-    background-position: center;
+	/* background-image generated by JS. See LoginView.render */
+	position: fixed;
+	height: 100vh;
+	width: 100vw;
+	background-size: cover;
+	background-position: center;
 }
 
 #login-bg_opacity_filter {
-    position: fixed;
-    height: 100vh;
-    width: 100vw;
-    background-color: rgba(0, 53, 89, 0.55);
-    /*background-color: rgba(19, 71, 105, 0.55);*/ /* This matches the new mobile background color. See which works better */
+	position: fixed;
+	height: 100vh;
+	width: 100vw;
+	background-color: rgba(0, 53, 89, 0.55);
+	/*background-color: rgba(19, 71, 105, 0.55);*/ /* This matches the new mobile background color. See which works better */
 }
 
 /* Logos */
 .logo-container {
-    position: relative; /* Needed for the vertical align of the logos */
-    margin: 0 auto;
-    height: 120px; /* 80px logo max height + 40px for top/bottom spacing, and to roughly match space below login buttons */
-    width: 80%;
+	position: relative; /* Needed for the vertical align of the logos */
+	margin: 0 auto;
+	height: 120px; /* 80px logo max height + 40px for top/bottom spacing, and to roughly match space below login buttons */
+	width: 80%;
 }
 
 .login-view .company-logo {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    /*margin: 20px; !* Use margin instead of padding so that the max image size is not restricted/reduced by padding *!*/
-    cursor: pointer;
-    max-width: 300px;
-    max-height: 80px;
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	/*margin: 20px; !* Use margin instead of padding so that the max image size is not restricted/reduced by padding *!*/
+	cursor: pointer;
+	max-width: 300px;
+	max-height: 80px;
 }
+
 .login-view .app-type {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    /*margin: 20px;*/
-    cursor: pointer;
+	position: absolute;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	/*margin: 20px;*/
+	cursor: pointer;
 
 }
 
 .hr-form-top {
-    margin-top: 0; /* Spacing will be controlled by logos, to allow proper vertical centering. */
+	margin-top: 0; /* Spacing will be controlled by logos, to allow proper vertical centering. */
 }
 
 /* Login form */
 .login-view .form-input {
-    color: #000;
-    width: 150px;
-    font-weight: normal;
-    background-color: #d0d9e5;
-    border: 1px inset #d0d9e5;
+	color: #000000;
+	width: 150px;
+	font-weight: normal;
+	background-color: #d0d9e5;
+	border: 1px inset #d0d9e5;
 }
 
 .login-view input[type=password],
 .login-view input[type=text],
 .login-view input[type=email],
-.login-view select{
-    line-height:32px;
-    border:1px solid lightsteelblue;
-    color: #000;
-    background-color: #fff;
-    width:100% !important;
-    margin: 0px;
-    padding-left:8px;
-    height:42px;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
+.login-view select {
+	line-height: 32px;
+	border: 1px solid lightsteelblue;
+	color: #000000;
+	background-color: #ffffff;
+	width: 100% !important;
+	margin: 0px;
+	padding-left: 8px;
+	height: 42px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
 }
 
 .login-view .form-selector {
-    width: 150px;
-    color: #000;
-    font-weight: normal;
+	width: 150px;
+	color: #000000;
+	font-weight: normal;
 }
 
 .login-view .forgot-password {
-    /*position: absolute;*/
-    cursor: pointer;
-    color: rgb(60, 97, 138);
+	/*position: absolute;*/
+	cursor: pointer;
+	color: rgb(60, 97, 138);
 }
 
 .login-view .button-form .login-button-container {
-    text-align: left;
-    height: 50px;
+	text-align: left;
+	height: 50px;
 }
 
 .login-view .button-form .quick-punch-button-container {
-    text-align: right;
-    height: 50px;
+	text-align: right;
+	height: 50px;
 }
 
 .login-view .form-container .button-form {
-    margin-bottom: 16px;
+	margin-bottom: 16px;
 }
 
 .login-view .login-button,
-.login-view .quick-punch-button
-{
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    padding: 5px;
-    display: inline-block;
-    height: 50px;
-    cursor: pointer;
-    text-decoration: none;
-    font-weight: normal;
-    font-family: sans-serif
+.login-view .quick-punch-button {
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	padding: 5px;
+	display: inline-block;
+	height: 50px;
+	cursor: pointer;
+	text-decoration: none;
+	font-weight: normal;
+	font-family: sans-serif
 }
 
 .login-view .login-button {
-    background: #426d9d;
-    border: 0px solid #a1a3a6;
-    color: #fff;
-    width: 100%;
-    font-size: 18px;
+	background: #426d9d;
+	border: 0px solid #a1a3a6;
+	color: #ffffff;
+	width: 100%;
+	font-size: 18px;
 }
 
 .login-view .quick-punch-button {
-    background: transparent;
-    border: 1px solid #426d9d;
-    padding: 5px 10px;
-    color: #426d9d;
-    font-size: 16px; /* slightly smaller than login button because visually same font size makes quick punch look bigger (Due to the different letters)*/
+	background: transparent;
+	border: 1px solid #426d9d;
+	padding: 5px 10px;
+	color: #426d9d;
+	font-size: 16px; /* slightly smaller than login button because visually same font size makes quick punch look bigger (Due to the different letters)*/
 }
 
 .login-view .login-button:hover,
 .login-view .login-button:focus {
-    opacity: 0.9;
+	opacity: 0.9;
 }
 
 .login-view .quick-punch-button:hover,
 .login-view .quick-punch-button:focus {
-    background: rgba(66, 109, 157, 0.07);
+	background: rgba(66, 109, 157, 0.07);
 }
 
 /* Footer Logos and Social Links */
 
 .social-div {
-    margin: 0 auto;
-    width: 300px;
-    text-align: center;
-    z-index: 7;
-    cursor: pointer;
-    color: rgb(60, 97, 138);
+	margin: 0 auto;
+	width: 300px;
+	text-align: center;
+	z-index: 7;
+	cursor: pointer;
+	color: rgb(60, 97, 138);
 }
 
 .login-view .social-div a {
-    display: inline-block;
+	display: inline-block;
 }
 
 .login-view .powered-by-img {
-    bottom: 5px;
-    left: 0;
-    margin-left: auto;
-    margin-right: auto;
-    position: fixed;
-    right: 0;
-    cursor: pointer;
+	bottom: 5px;
+	left: 0;
+	margin-left: auto;
+	margin-right: auto;
+	position: fixed;
+	right: 0;
+	cursor: pointer;
 }
+
 .social-div,
 .logo_container_powered_by,
 .logo_container_copyright {
-    padding: 5px;
-    text-align: center;
+	padding: 5px;
+	text-align: center;
 }
 
 .powered-by-img-seo {
-    cursor: pointer;
-    z-index: 9;
-    text-align: center;
+	cursor: pointer;
+	z-index: 9;
+	text-align: center;
 }
 
 /* TODO: Don't like the copyrightinfo1 reference, as the main index.php has a similar element ref, but as ID. Not changing yet incase of regression issues. */
 .copy-right-info-1 {
-    z-index: -1;
-    color: #fff;
-    font-size: 11px;
-    text-decoration: none;
+	z-index: -1;
+	color: #ffffff;
+	font-size: 11px;
+	text-decoration: none;
 }
 
 .login-view .legacy-interface {
-    cursor: pointer;
-    color: rgb(60, 97, 138);
-    position: absolute;
-    bottom: 8px;
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
-    width: 96px;
+	cursor: pointer;
+	color: rgb(60, 97, 138);
+	position: absolute;
+	bottom: 8px;
+	margin-left: auto;
+	margin-right: auto;
+	left: 0;
+	right: 0;
+	width: 96px;
 }
 
 .footerLink {
-    text-decoration: none;
-    color: inherit;
+	text-decoration: none;
+	color: inherit;
 }

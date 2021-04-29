@@ -32,17 +32,17 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		this.table_name_key = 'request';
 		this.context_menu_name = $.i18n._( 'Request (Authorizations)' );
 		this.navigation_label = $.i18n._( 'Requests' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRequest' ))();
-		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
-		this.api_request = new (APIFactory.getAPIClass( 'APIRequest' ))();
-		this.api_absence_policy = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
-		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
+		this.authorization_api = new ( APIFactory.getAPIClass( 'APIAuthorization' ) )();
+		this.api_request = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
+		this.api_absence_policy = new ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) )();
+		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 		}
-		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
+		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
 
 		this.initPermission();
 		this.render();
@@ -93,9 +93,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
-		var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
-			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } ).getResult();
+			var result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } ).getResult();
 		}
 
 		if ( !result ) {
@@ -122,7 +122,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				action: {
@@ -485,16 +485,16 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 
 		//Check if Edit permissions exist, if not, only authorize the request to avoid a API permission error.
 		if ( this.enable_edit_view_ui == true ) {
-			$this.api_request['setRequest'](request_data, {
-				onResult: function (res) {
-					if (res.getResult() != false) {
+			$this.api_request['setRequest']( request_data, {
+				onResult: function( res ) {
+					if ( res.getResult() != false ) {
 						authorizeRequest();
 					} else {
 						$this.setErrorMenu();
-						$this.setErrorTips(res, true);
+						$this.setErrorTips( res, true );
 					}
 				},
-			});
+			} );
 		} else {
 			authorizeRequest();
 		}
@@ -507,16 +507,16 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				filter.object_type_id = $this.current_edit_record.hierarchy_type_id;
 
 				$this.authorization_api['setAuthorization']( [filter], {
-					onResult: function ( result ) {
+					onResult: function( result ) {
 						var retval = result.getResult();
 						if ( retval != false ) {
 							$this.is_changed = false;
 							$this.onRightArrowClick( function() {
 								// Note: if side effects occur here, previously the search(false) function was accidentally called as a evaluated param (run each time, parallel), rather than callback (run at the end, on last record)
 								$this.search();
-								$().TFeedback({
+								$().TFeedback( {
 									source: 'Authorize'
-								});
+								} );
 							} );
 						} else {
 							$this.setErrorMenu();
@@ -534,9 +534,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		function doNext() {
 			$this.onRightArrowClick( function() {
 				$this.search();
-				$().TFeedback({
+				$().TFeedback( {
 					source: 'Pass'
-				});
+				} );
 			} );
 		}
 
@@ -569,9 +569,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				onResult: function( res ) {
 					$this.onRightArrowClick( function() {
 						$this.search();
-						$().TFeedback({
+						$().TFeedback( {
 							source: 'Decline'
-						});
+						} );
 					} );
 				}
 			} );
@@ -732,7 +732,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -785,7 +785,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -797,7 +797,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -874,16 +874,16 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 
 		if ( key === 'date_stamp' ||
-				key === 'start_date_stamps' ||
-				key === 'start_date_stamp' ||
-				key === 'start_time' ||
-				key === 'end_time' ||
-				key === 'schedule_policy_id' ||
-				key === 'absence_policy_id' ) {
+			key === 'start_date_stamps' ||
+			key === 'start_date_stamp' ||
+			key === 'start_time' ||
+			key === 'end_time' ||
+			key === 'schedule_policy_id' ||
+			key === 'absence_policy_id' ) {
 
 			if ( this.current_edit_record['date_stamp'] !== '' &&
-					this.current_edit_record['start_time'] !== '' &&
-					this.current_edit_record['end_time'] !== '' ) {
+				this.current_edit_record['start_time'] !== '' &&
+				this.current_edit_record['end_time'] !== '' ) {
 
 				var startTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['start_time'];
 				var endTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['end_time'];
@@ -1088,7 +1088,6 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			} );
 		}
 	},
-
 
 	openAuthorizationView: function() {
 		if ( !this.edit_view ) {

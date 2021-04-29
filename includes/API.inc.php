@@ -34,65 +34,79 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-define('TIMETREX_API', TRUE );
+define( 'TIMETREX_API', true );
 forceNoCacheHeaders(); //Send headers to disable caching.
 
-//Returns valid classes when unauthenticated.
+/**
+ * Returns valid classes when unauthenticated.
+ * @return array
+ */
 function getUnauthenticatedAPIClasses() {
-	return array('APIAuthentication','APIRecruitmentAuthentication', 'APIJobApplicantPortal','APIJobVacancyPortal', 'APIDocumentPortal', 'APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin', 'APIDocumentPortal', 'APICompanyPortal', 'APIProgressBar', 'APIInstall');
+	return [ 'APIAuthentication', 'APIRecruitmentAuthentication', 'APIJobApplicantPortal', 'APIJobVacancyPortal', 'APIDocumentPortal', 'APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin', 'APIDocumentPortal', 'APICompanyPortal', 'APIProgressBar', 'APIInstall' ];
 }
 
+/**
+ * @return array
+ */
 function getAuthenticatedPortalAPIMethods() {
-	return array('getJobApplicant', 'getJobApplicantEducation', 'setJobApplicantEducation', 'getJobApplicantEmployment', 'setJobApplicantEmployment', 'getJobApplicantLanguage', 'setJobApplicantLanguage', 'getJobApplicantLicense', 'setJobApplicantLicense', 'getJobApplicantLocation', 'setJobApplicantLocation', 'getJobApplicantMembership', 'setJobApplicantMembership',
-	'getJobApplicantReference', 'setJobApplicantReference', 'getJobApplicantSkill', 'setJobApplicantSkill', 'getJobApplication', 'setJobApplication', 'getAttachment', 'addAttachment', 'uploadAttachment');
+	return [
+			'getJobApplicant', 'getJobApplicantEducation', 'setJobApplicantEducation', 'getJobApplicantEmployment', 'setJobApplicantEmployment', 'getJobApplicantLanguage', 'setJobApplicantLanguage', 'getJobApplicantLicense', 'setJobApplicantLicense', 'getJobApplicantLocation', 'setJobApplicantLocation', 'getJobApplicantMembership', 'setJobApplicantMembership',
+			'getJobApplicantReference', 'setJobApplicantReference', 'getJobApplicantSkill', 'setJobApplicantSkill', 'getJobApplication', 'setJobApplication', 'getAttachment', 'addAttachment', 'uploadAttachment',
+	];
 }
 
-//Returns session ID from _COOKIE, _POST, then _GET.
+/**
+ * Returns session ID from _COOKIE, _POST, then _GET.
+ * @param int $authentication_type_id
+ * @return bool|string
+ */
 function getSessionID( $authentication_type_id = 800 ) {
-
 	//FIXME: Work-around for bug in Mobile app v3.0.86 that uses old SessionIDs in the Cookie, but correct ones on the URL.
-	if ( isset($_COOKIE['SessionID']) AND isset($_GET['SessionID']) AND $_COOKIE['SessionID'] != $_GET['SessionID'] ) {
+	if ( isset( $_COOKIE['SessionID'] ) && isset( $_GET['SessionID'] ) && $_COOKIE['SessionID'] != $_GET['SessionID'] ) {
 		//Debug::Arr( array($_COOKIE, $_POST, $_GET), 'Input Data:', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Text( 'WARNING: Two different SessionIDs sent, COOKIE: '. $_COOKIE['SessionID'] .' GET: '. $_GET['SessionID'], __FILE__, __LINE__, __METHOD__, 10);
-		if ( isset($_SERVER['REQUEST_URI']) AND stripos( $_SERVER['REQUEST_URI'], 'APIClientStationUnAuthenticated' ) !== FALSE ) {
-			Debug::Text( 'Using GET Session ID...', __FILE__, __LINE__, __METHOD__, 10);
-			unset($_COOKIE['SessionID']);
+		Debug::Text( 'WARNING: Two different SessionIDs sent, COOKIE: ' . $_COOKIE['SessionID'] . ' GET: ' . $_GET['SessionID'], __FILE__, __LINE__, __METHOD__, 10 );
+		if ( isset( $_SERVER['REQUEST_URI'] ) && stripos( $_SERVER['REQUEST_URI'], 'APIClientStationUnAuthenticated' ) !== false ) {
+			Debug::Text( 'Using GET Session ID...', __FILE__, __LINE__, __METHOD__, 10 );
+			unset( $_COOKIE['SessionID'] );
 		}
 	}
 
 	$authentication = new Authentication();
 	$session_name = $authentication->getName( $authentication_type_id );
 
-	if ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) {
+	if ( isset( $_COOKIE[$session_name] ) && $_COOKIE[$session_name] != '' ) {
 		$session_id = (string)$_COOKIE[$session_name];
-	} elseif ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) {
+	} else if ( isset( $_POST[$session_name] ) && $_POST[$session_name] != '' ) {
 		$session_id = (string)$_POST[$session_name];
-	} elseif ( isset($_GET[$session_name]) AND $_GET[$session_name] != '' ) {
+	} else if ( isset( $_GET[$session_name] ) && $_GET[$session_name] != '' ) {
 		$session_id = (string)$_GET[$session_name];
 	} else {
-		$session_id = FALSE;
+		$session_id = false;
 	}
 
 	return $session_id;
 }
 
-//Returns Station ID from _COOKIE, _POST, then _GET.
+/**
+ * Returns Station ID from _COOKIE, _POST, then _GET.
+ * @return bool|mixed
+ */
 function getStationID() {
-	if ( isset($_COOKIE['StationID']) AND $_COOKIE['StationID'] != '' ) {
+	if ( isset( $_COOKIE['StationID'] ) && $_COOKIE['StationID'] != '' ) {
 		$station_id = $_COOKIE['StationID'];
-	} elseif ( isset($_POST['StationID']) AND $_POST['StationID'] != '' ) {
+	} else if ( isset( $_POST['StationID'] ) && $_POST['StationID'] != '' ) {
 		$station_id = $_POST['StationID'];
-	} elseif ( isset($_GET['StationID']) AND $_GET['StationID'] != '' ) {
+	} else if ( isset( $_GET['StationID'] ) && $_GET['StationID'] != '' ) {
 		$station_id = $_GET['StationID'];
 	} else {
-		$station_id = FALSE;
+		$station_id = false;
 	}
 
 	//Check to see if there is a "sticky" user agent based Station ID defined.
-	if ( isset( $_SERVER['HTTP_USER_AGENT'] ) AND $_SERVER['HTTP_USER_AGENT'] != '' AND stripos( $_SERVER['HTTP_USER_AGENT'], 'StationID:' ) !== FALSE ) {
+	if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && $_SERVER['HTTP_USER_AGENT'] != '' && stripos( $_SERVER['HTTP_USER_AGENT'], 'StationID:' ) !== false ) {
 		if ( preg_match( '/StationID:\s?([a-zA-Z0-9]{30,64})/i', $_SERVER['HTTP_USER_AGENT'], $matches ) > 0 ) {
 			if ( isset( $matches[1] ) ) {
-				Debug::Text( '  Found StationID in user agent, forcing to that instead!', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( '  Found StationID in user agent, forcing to that instead!', __FILE__, __LINE__, __METHOD__, 10 );
 				$station_id = $matches[1];
 			}
 		}
@@ -101,11 +115,14 @@ function getStationID() {
 	return $station_id;
 }
 
+/**
+ * @return bool|string
+ */
 function getJSONError() {
-	$retval = FALSE;
+	$retval = false;
 
-	if ( function_exists('json_last_error') ) { //Handle PHP v5.3 and older.
-		switch( json_last_error() ) {
+	if ( function_exists( 'json_last_error' ) ) { //Handle PHP v5.3 and older.
+		switch ( json_last_error() ) {
 			case JSON_ERROR_NONE:
 				break;
 			case JSON_ERROR_DEPTH:

@@ -3,7 +3,6 @@ var APIPayStubEntry = ServiceCaller.extend( {
 	key_name: 'PayStubEntry',
 	className: 'APIPayStubEntry',
 
-
 	getPayStubEntry: function() {
 
 		return this.argumentsHandler( this.className, 'getPayStubEntry', arguments );

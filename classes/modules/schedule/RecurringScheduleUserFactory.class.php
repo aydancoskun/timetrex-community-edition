@@ -42,7 +42,7 @@ class RecurringScheduleUserFactory extends Factory {
 	protected $table = 'recurring_schedule_user';
 	protected $pk_sequence_name = 'recurring_schedule_user_id_seq'; //PK Sequence name
 
-	var $user_obj = NULL;
+	var $user_obj = null;
 
 	/**
 	 * @return bool|mixed
@@ -56,7 +56,8 @@ class RecurringScheduleUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setRecurringScheduleControl( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'recurring_schedule_control_id', $value );
 	}
 
@@ -64,17 +65,18 @@ class RecurringScheduleUserFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
+		if ( is_object( $this->user_obj ) ) {
 			return $this->user_obj;
 		} else {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
+
 				return $this->user_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -91,8 +93,10 @@ class RecurringScheduleUserFactory extends Factory {
 	 */
 	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -101,28 +105,28 @@ class RecurringScheduleUserFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Recurring Schedule
-		$this->Validator->isUUID(	'recurring_schedule_control_id',
-											$this->getRecurringScheduleControl(),
-											TTi18n::gettext('Recurring Schedule is invalid')
-										/*
-										$this->Validator->isResultSetWithRows(			'recurring_schedule',
-																						$rsclf->getByID($id),
-																						TTi18n::gettext('Recurring Schedule is invalid')
-										*/
-										);
+		$this->Validator->isUUID( 'recurring_schedule_control_id',
+								  $this->getRecurringScheduleControl(),
+								  TTi18n::gettext( 'Recurring Schedule is invalid' )
+		/*
+		$this->Validator->isResultSetWithRows(			'recurring_schedule',
+														$rsclf->getByID($id),
+														TTi18n::gettext('Recurring Schedule is invalid')
+		*/
+		);
 		// Selected Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-			$this->Validator->isResultSetWithRows(	'user',
-														$ulf->getByID($this->getUser()),
-														TTi18n::gettext('Selected Employee is invalid')
-													);
+			$this->Validator->isResultSetWithRows( 'user',
+												   $ulf->getByID( $this->getUser() ),
+												   TTi18n::gettext( 'Selected Employee is invalid' )
+			);
 		}
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -131,75 +135,75 @@ class RecurringScheduleUserFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -207,30 +211,30 @@ class RecurringScheduleUserFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -239,11 +243,12 @@ class RecurringScheduleUserFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
-		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getRecurringScheduleControl(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
+		if ( is_object( $u_obj ) ) {
+			return TTLog::addEntry( $this->getRecurringScheduleControl(), $log_action, TTi18n::getText( 'Employee' ) . ': ' . $u_obj->getFullName( false, true ), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

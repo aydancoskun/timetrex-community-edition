@@ -47,7 +47,7 @@ class APIUserQualificationReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIUserQualificationReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getUserQualificationReport( $config = FALSE, $format = 'pdf' ) {
+	function getUserQualificationReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

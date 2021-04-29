@@ -47,5 +47,4 @@ var APIContributingPayCodePolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportContributingPayCodePolicy', arguments );
 	}
 
-
 } );

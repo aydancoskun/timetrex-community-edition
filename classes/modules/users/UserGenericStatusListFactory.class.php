@@ -41,44 +41,44 @@
 class UserGenericStatusListFactory extends UserGenericStatusFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserGenericStatusListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -91,93 +91,93 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserGenericStatusListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id)
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-						LEFT JOIN  '. $uf->getTable() .' as b on a.user_id = b.id
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN  ' . $uf->getTable() . ' as b on a.user_id = b.id
 					where	b.company_id = ?
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserGenericStatusListFactory
 	 */
-	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByIdAndCompanyId( $id, $company_id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $company_id == '') {
-			return FALSE;
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					'company_id' => TTUUID::castUUID($company_id)
-					);
+		$ph = [
+				'id'         => TTUUID::castUUID( $id ),
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-						LEFT JOIN  '. $uf->getTable() .' as b on a.user_id = b.id
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN  ' . $uf->getTable() . ' as b on a.user_id = b.id
 					where	a.id = ?
 						AND b.company_id = ?
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param string $id   UUID
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserGenericStatusListFactory
 	 */
-	function getByUserId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByUserId( $id, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'user_id' => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	user_id = ?
 							AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -189,38 +189,38 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id  UUID
 	 * @param string $batch_id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit       Limit the number of records returned
+	 * @param int $page        Page number of records to return for pagination
+	 * @param array $where     Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order     Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserGenericStatusListFactory
 	 */
-	function getByUserIdAndBatchId( $user_id, $batch_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
+	function getByUserIdAndBatchId( $user_id, $batch_id, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $batch_id == '') {
-			return FALSE;
+		if ( $batch_id == '' ) {
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'status_id' => 'asc', 'label' => 'asc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'status_id' => 'asc', 'label' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'batch_id' => TTUUID::castUUID($batch_id),
-					);
+		$ph = [
+				'user_id'  => TTUUID::castUUID( $user_id ),
+				'batch_id' => TTUUID::castUUID( $batch_id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	user_id = ?
 						AND batch_id = ?
 						AND deleted = 0';
@@ -233,29 +233,29 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id  UUID
 	 * @param string $batch_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where     Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order     Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return array|bool
 	 */
-	function getStatusCountArrayByUserIdAndBatchId( $user_id, $batch_id, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
+	function getStatusCountArrayByUserIdAndBatchId( $user_id, $batch_id, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $batch_id == '') {
-			return FALSE;
+		if ( $batch_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'batch_id' => TTUUID::castUUID($batch_id),
-					);
+		$ph = [
+				'user_id'  => TTUUID::castUUID( $user_id ),
+				'batch_id' => TTUUID::castUUID( $batch_id ),
+		];
 
 		$query = '
 					select	status_id, count(*) as total
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	user_id = ?
 						AND batch_id = ?
 						AND deleted = 0
@@ -263,31 +263,32 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$result = $this->db->GetArray($query, $ph);
+		$result = $this->db->GetArray( $query, $ph );
 
 		$total = 0;
-		foreach( $result as $row ) {
+		foreach ( $result as $row ) {
 			$total = ( $total + $row['total'] );
 		}
-		$retarr = array();
+		$retarr = [];
 		$retarr['total'] = $total;
 
-		$retarr['status'] = array(
-								10 => array('total' => 0, 'percent' => 0),
-								20 => array('total' => 0, 'percent' => 0),
-								30 => array('total' => 0, 'percent' => 0),
-								);
+		$retarr['status'] = [
+				10 => [ 'total' => 0, 'percent' => 0 ],
+				20 => [ 'total' => 0, 'percent' => 0 ],
+				30 => [ 'total' => 0, 'percent' => 0 ],
+		];
 
-		foreach( $result as $row ) {
-			$retarr['status'][$row['status_id']] = array('total' => $row['total'], 'percent' => round( ( ($row['total'] / $total) * 100 ), 1 ) );
+		foreach ( $result as $row ) {
+			$retarr['status'][$row['status_id']] = [ 'total' => $row['total'], 'percent' => round( ( ( $row['total'] / $total ) * 100 ), 1 ) ];
 		}
 
-		if ( empty($retarr) == FALSE ) {
+		if ( empty( $retarr ) == false ) {
 			return $retarr;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 }
+
 ?>

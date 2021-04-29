@@ -34,42 +34,42 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-define('TIMETREX_SOAP_API', TRUE );
+define( 'TIMETREX_SOAP_API', true );
 
 //Add timetrex.ini.php setting to enable/disable the API. Make an entire [API] section.
-require_once('../../includes/global.inc.php');
-require_once('../../includes/API.inc.php');
-Header('Content-Type: application/xml; charset=utf-8');
+require_once( '../../includes/global.inc.php' );
+require_once( '../../includes/API.inc.php' );
+Header( 'Content-Type: application/xml; charset=utf-8' );
 
 $class_prefix = 'API';
-$class_name = FALSE;
+$class_name = false;
 
 //Class name is case sensitive!
 //Get proper class name early, as we need to allow
-if ( isset($_GET['Class']) AND $_GET['Class'] != '' ) {
+if ( isset( $_GET['Class'] ) && $_GET['Class'] != '' ) {
 	$class_name = $_GET['Class'];
 
 	//If API wasn't already put on the class, add it manually.
 	if ( strtolower( substr( $class_name, 0, 3 ) ) != 'api' ) {
-		$class_name = $class_prefix.$class_name;
+		$class_name = $class_prefix . $class_name;
 	}
 
 	$class_name = TTgetPluginClassName( $class_name );
 } else {
-	$class_name = TTgetPluginClassName( $class_prefix.'Authentication' );
+	$class_name = TTgetPluginClassName( $class_prefix . 'Authentication' );
 }
 
 //$class_factory = ( isset($_GET['Class']) AND $_GET['Class'] != '' ) ? $_GET['Class'] : 'Authentication'; //Default to APIAuthentication class if none is specified.
 //$class_name = TTgetPluginClassName( $class_prefix.$class_factory );
-$soap_server = new SoapServer( NULL, array('uri' => 'urn:api', 'encoding' => 'UTF-8') );
-if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) ) {
+$soap_server = new SoapServer( null, [ 'uri' => 'urn:api', 'encoding' => 'UTF-8' ] );
+if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == false ) && ( !isset( $config_vars['other']['down_for_maintenance'] ) || isset( $config_vars['other']['down_for_maintenance'] ) && $config_vars['other']['down_for_maintenance'] == '' ) ) {
 	$authentication = new Authentication();
 
-	if ( isset( $_GET['SessionID'] ) AND $_GET['SessionID'] != '' ) {
+	if ( isset( $_GET['SessionID'] ) && $_GET['SessionID'] != '' ) {
 		Debug::text( 'SOAP Session ID: ' . $_GET['SessionID'] . ' Source IP: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
-		if ( $authentication->Check( $_GET['SessionID'] ) === TRUE ) {
+		if ( $authentication->Check( $_GET['SessionID'] ) === true ) {
 			Debug::text( 'SOAP Class Factory: ' . $class_name, __FILE__, __LINE__, __METHOD__, 10 );
-			if ( $class_name != '' AND class_exists( $class_name ) ) {
+			if ( $class_name != '' && class_exists( $class_name ) ) {
 				$current_user = $authentication->getObject();
 
 				if ( is_object( $current_user ) ) {
@@ -77,16 +77,16 @@ if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other
 					$current_user_prefs = $current_user->getUserPreferenceObject();
 
 					Debug::text( 'Locale Cookie: ' . TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10 );
-					if ( TTi18n::getLocaleCookie() != '' AND $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
+					if ( TTi18n::getLocaleCookie() != '' && $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
 						Debug::text( 'Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10 );
 						$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
 						if ( $current_user_prefs->isValid() ) {
-							$current_user_prefs->Save( FALSE );
+							$current_user_prefs->Save( false );
 						}
 					} else {
 						Debug::text( 'User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10 );
 					}
-					if ( isset( $_GET['language'] ) AND $_GET['language'] != '' ) {
+					if ( isset( $_GET['language'] ) && $_GET['language'] != '' ) {
 						TTi18n::setLocale( $_GET['language'] ); //Sets master locale
 					} else {
 						TTi18n::setLanguage( $current_user_prefs->getLanguage() );
@@ -126,7 +126,7 @@ if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other
 
 		Debug::text( 'SOAP UnAuthenticated!', __FILE__, __LINE__, __METHOD__, 10 );
 		$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
-		if ( $class_name != '' AND in_array( $class_name, $valid_unauthenticated_classes ) AND class_exists( $class_name ) ) {
+		if ( $class_name != '' && in_array( $class_name, $valid_unauthenticated_classes ) && class_exists( $class_name ) ) {
 			$soap_server->setClass( $class_name );
 			$soap_server->handle(); //PHP appears to exit in this function if there is an error.
 		} else {
@@ -134,11 +134,11 @@ if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other
 		}
 	}
 } else {
-	Debug::text('WARNING: Installer/Down For Maintenance is enabled... Service is disabled!', __FILE__, __LINE__, __METHOD__, 10);
-	$soap_server->fault( 9500, APPLICATION_NAME .' is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later.' );
+	Debug::text( 'WARNING: Installer/Down For Maintenance is enabled... Service is disabled!', __FILE__, __LINE__, __METHOD__, 10 );
+	$soap_server->fault( 9500, APPLICATION_NAME . ' is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later.' );
 }
 
-Debug::text('Server Response Time: '. ((float)microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
+Debug::text( 'Server Response Time: ' . ( (float)microtime( true ) - $_SERVER['REQUEST_TIME_FLOAT'] ), __FILE__, __LINE__, __METHOD__, 10 );
 //Debug::Display();
 Debug::writeToLog();
 ?>

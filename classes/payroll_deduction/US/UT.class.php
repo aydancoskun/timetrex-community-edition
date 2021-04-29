@@ -40,98 +40,98 @@
  */
 class PayrollDeduction_US_UT extends PayrollDeduction_US {
 
-	var $state_income_tax_rate_options = array(
+	var $state_income_tax_rate_options = [
 		//See state_options below, as they switched to a completely new formula after this date.
-		20080101 => array(
-				10 => array(
-						array('income' => 6600, 'rate' => 0, 'constant' => 0),
-						array('income' => 8200, 'rate' => 1.0, 'constant' => 0),
-						array('income' => 11000, 'rate' => 2.0, 'constant' => 0),
-						array('income' => 14700, 'rate' => 3.0, 'constant' => 0),
-						array('income' => 21100, 'rate' => 4.0, 'constant' => 0),
-						array('income' => 39800, 'rate' => 5.0, 'constant' => 0),
-						array('income' => 39800, 'rate' => 5.0, 'constant' => 0),
-				),
-				20 => array(
-						array('income' => 13200, 'rate' => 0, 'constant' => 0),
-						array('income' => 16400, 'rate' => 1.0, 'constant' => 0),
-						array('income' => 22000, 'rate' => 2.0, 'constant' => 0),
-						array('income' => 29400, 'rate' => 3.0, 'constant' => 0),
-						array('income' => 42200, 'rate' => 4.0, 'constant' => 0),
-						array('income' => 79600, 'rate' => 5.0, 'constant' => 0),
-						array('income' => 79600, 'rate' => 5.0, 'constant' => 0),
-				),
-		),
-		20070101 => array(
-				10 => array(
-						array('income' => 2630, 'rate' => 0, 'constant' => 0),
-						array('income' => 3630, 'rate' => 2.3, 'constant' => 0),
-						array('income' => 4630, 'rate' => 3.1, 'constant' => 23),
-						array('income' => 5630, 'rate' => 4.0, 'constant' => 54),
-						array('income' => 6630, 'rate' => 4.9, 'constant' => 94),
-						array('income' => 8130, 'rate' => 5.7, 'constant' => 143),
-						array('income' => 8130, 'rate' => 6.5, 'constant' => 229),
-				),
-				20 => array(
-						array('income' => 2630, 'rate' => 0, 'constant' => 0),
-						array('income' => 4630, 'rate' => 2.3, 'constant' => 0),
-						array('income' => 6630, 'rate' => 3.1, 'constant' => 46),
-						array('income' => 8630, 'rate' => 4.0, 'constant' => 108),
-						array('income' => 10630, 'rate' => 4.9, 'constant' => 188),
-						array('income' => 13630, 'rate' => 5.7, 'constant' => 286),
-						array('income' => 13630, 'rate' => 6.5, 'constant' => 457),
-				),
-		),
-		20060101 => array(
-				10 => array(
-						array('income' => 2300, 'rate' => 0, 'constant' => 0),
-						array('income' => 3163, 'rate' => 2.3, 'constant' => 0),
-						array('income' => 4026, 'rate' => 3.1, 'constant' => 20),
-						array('income' => 4888, 'rate' => 4.0, 'constant' => 47),
-						array('income' => 5750, 'rate' => 4.9, 'constant' => 81),
-						array('income' => 6613, 'rate' => 5.7, 'constant' => 123),
-						array('income' => 6613, 'rate' => 6.5, 'constant' => 172),
-				),
-				20 => array(
-						array('income' => 2300, 'rate' => 0, 'constant' => 0),
-						array('income' => 4026, 'rate' => 2.3, 'constant' => 0),
-						array('income' => 5750, 'rate' => 3.1, 'constant' => 40),
-						array('income' => 7476, 'rate' => 4.0, 'constant' => 93),
-						array('income' => 9200, 'rate' => 4.9, 'constant' => 162),
-						array('income' => 10926, 'rate' => 5.7, 'constant' => 246),
-						array('income' => 10926, 'rate' => 6.5, 'constant' => 344),
-				),
-		),
-	);
+		20080101 => [
+				10 => [
+						[ 'income' => 6600, 'rate' => 0, 'constant' => 0 ],
+						[ 'income' => 8200, 'rate' => 1.0, 'constant' => 0 ],
+						[ 'income' => 11000, 'rate' => 2.0, 'constant' => 0 ],
+						[ 'income' => 14700, 'rate' => 3.0, 'constant' => 0 ],
+						[ 'income' => 21100, 'rate' => 4.0, 'constant' => 0 ],
+						[ 'income' => 39800, 'rate' => 5.0, 'constant' => 0 ],
+						[ 'income' => 39800, 'rate' => 5.0, 'constant' => 0 ],
+				],
+				20 => [
+						[ 'income' => 13200, 'rate' => 0, 'constant' => 0 ],
+						[ 'income' => 16400, 'rate' => 1.0, 'constant' => 0 ],
+						[ 'income' => 22000, 'rate' => 2.0, 'constant' => 0 ],
+						[ 'income' => 29400, 'rate' => 3.0, 'constant' => 0 ],
+						[ 'income' => 42200, 'rate' => 4.0, 'constant' => 0 ],
+						[ 'income' => 79600, 'rate' => 5.0, 'constant' => 0 ],
+						[ 'income' => 79600, 'rate' => 5.0, 'constant' => 0 ],
+				],
+		],
+		20070101 => [
+				10 => [
+						[ 'income' => 2630, 'rate' => 0, 'constant' => 0 ],
+						[ 'income' => 3630, 'rate' => 2.3, 'constant' => 0 ],
+						[ 'income' => 4630, 'rate' => 3.1, 'constant' => 23 ],
+						[ 'income' => 5630, 'rate' => 4.0, 'constant' => 54 ],
+						[ 'income' => 6630, 'rate' => 4.9, 'constant' => 94 ],
+						[ 'income' => 8130, 'rate' => 5.7, 'constant' => 143 ],
+						[ 'income' => 8130, 'rate' => 6.5, 'constant' => 229 ],
+				],
+				20 => [
+						[ 'income' => 2630, 'rate' => 0, 'constant' => 0 ],
+						[ 'income' => 4630, 'rate' => 2.3, 'constant' => 0 ],
+						[ 'income' => 6630, 'rate' => 3.1, 'constant' => 46 ],
+						[ 'income' => 8630, 'rate' => 4.0, 'constant' => 108 ],
+						[ 'income' => 10630, 'rate' => 4.9, 'constant' => 188 ],
+						[ 'income' => 13630, 'rate' => 5.7, 'constant' => 286 ],
+						[ 'income' => 13630, 'rate' => 6.5, 'constant' => 457 ],
+				],
+		],
+		20060101 => [
+				10 => [
+						[ 'income' => 2300, 'rate' => 0, 'constant' => 0 ],
+						[ 'income' => 3163, 'rate' => 2.3, 'constant' => 0 ],
+						[ 'income' => 4026, 'rate' => 3.1, 'constant' => 20 ],
+						[ 'income' => 4888, 'rate' => 4.0, 'constant' => 47 ],
+						[ 'income' => 5750, 'rate' => 4.9, 'constant' => 81 ],
+						[ 'income' => 6613, 'rate' => 5.7, 'constant' => 123 ],
+						[ 'income' => 6613, 'rate' => 6.5, 'constant' => 172 ],
+				],
+				20 => [
+						[ 'income' => 2300, 'rate' => 0, 'constant' => 0 ],
+						[ 'income' => 4026, 'rate' => 2.3, 'constant' => 0 ],
+						[ 'income' => 5750, 'rate' => 3.1, 'constant' => 40 ],
+						[ 'income' => 7476, 'rate' => 4.0, 'constant' => 93 ],
+						[ 'income' => 9200, 'rate' => 4.9, 'constant' => 162 ],
+						[ 'income' => 10926, 'rate' => 5.7, 'constant' => 246 ],
+						[ 'income' => 10926, 'rate' => 6.5, 'constant' => 344 ],
+				],
+		],
+	];
 
-	var $state_options = array(
-			20180101 => array(
+	var $state_options = [
+			20180101 => [
 					'rate'                     => 4.95, //Percent
 					'allowance'                => 0,
-					'base_allowance'           => array(
+					'base_allowance'           => [
 							10 => 360,
 							20 => 720,
-					),
-					'allowance_reduction'      => array(
+					],
+					'allowance_reduction'      => [
 							10 => 7128,
 							20 => 14256,
-					),
+					],
 					'allowance_reduction_rate' => 1.3, //Percent
-			),
-			20080101 => array( //Completely new formula after this date.
-							   'rate'                     => 5.0, //Percent
-							   'allowance'                => 125,
-							   'base_allowance'           => array(
-									   10 => 250,
-									   20 => 375,
-							   ),
-							   'allowance_reduction'      => array(
-									   10 => 12000,
-									   20 => 18000,
-							   ),
-							   'allowance_reduction_rate' => 1.3, //Percent
-			),
-	);
+			],
+			20080101 => [ //Completely new formula after this date.
+						  'rate'                     => 5.0, //Percent
+						  'allowance'                => 125,
+						  'base_allowance'           => [
+								  10 => 250,
+								  20 => 375,
+						  ],
+						  'allowance_reduction'      => [
+								  10 => 12000,
+								  20 => 18000,
+						  ],
+						  'allowance_reduction_rate' => 1.3, //Percent
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$income = $this->getAnnualTaxableIncome();
@@ -143,8 +143,8 @@ class PayrollDeduction_US_UT extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_amount = $retarr['allowance'];
@@ -157,13 +157,13 @@ class PayrollDeduction_US_UT extends PayrollDeduction_US {
 
 	function getStateBaseAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$retval = 0;
-		if ( isset( $retarr['base_allowance'][ $this->getStateFilingStatus() ] ) ) {
-			$retval = $retarr['base_allowance'][ $this->getStateFilingStatus() ];
+		if ( isset( $retarr['base_allowance'][$this->getStateFilingStatus()] ) ) {
+			$retval = $retarr['base_allowance'][$this->getStateFilingStatus()];
 		}
 		Debug::text( 'State Base Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -172,13 +172,13 @@ class PayrollDeduction_US_UT extends PayrollDeduction_US {
 
 	function getStateAllowanceReductionAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_reduction_amount = 0;
-		if ( isset( $retarr['allowance_reduction'][ $this->getStateFilingStatus() ] ) ) {
-			$allowance_reduction_amount = $retarr['allowance_reduction'][ $this->getStateFilingStatus() ];
+		if ( isset( $retarr['allowance_reduction'][$this->getStateFilingStatus()] ) ) {
+			$allowance_reduction_amount = $retarr['allowance_reduction'][$this->getStateFilingStatus()];
 		}
 
 		$adjusted_taxable_income = bcsub( $this->getStateAnnualTaxableIncome(), $allowance_reduction_amount );
@@ -202,8 +202,8 @@ class PayrollDeduction_US_UT extends PayrollDeduction_US {
 
 		if ( $annual_income > 0 ) {
 			$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-			if ( $retarr == FALSE ) {
-				return FALSE;
+			if ( $retarr == false ) {
+				return false;
 			}
 
 			$gross_tax = bcmul( $annual_income, bcdiv( $retarr['rate'], 100 ) );

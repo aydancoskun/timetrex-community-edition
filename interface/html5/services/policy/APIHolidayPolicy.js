@@ -47,5 +47,4 @@ var APIHolidayPolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportHolidayPolicy', arguments );
 	}
 
-
 } );

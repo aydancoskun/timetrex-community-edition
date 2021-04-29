@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUndefinedConstantInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -34,7 +34,7 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once(Environment::getBasePath() .'/classes/tcpdf/tcpdf.php');
+require_once( Environment::getBasePath() . '/classes/tcpdf/tcpdf.php' );
 
 //Automatically create TCPDF cache path if it doesn't exist.
 if ( !file_exists( K_PATH_CACHE ) ) {
@@ -49,19 +49,20 @@ class TTPDF extends tcpdf {
 	 * @param $f
 	 * @return number
 	 */
-	protected function _freadint( $f) {
+	protected function _freadint( $f ) {
 		//Read a 4-byte integer from file
-		$a = unpack('Ni', fread($f, 4));
+		$a = unpack( 'Ni', fread( $f, 4 ) );
 
 		//Fixed bug in PHP v5.2.1 and less where it is returning a huge negative number.
 		//See: http://ca3.php.net/manual/en/function.unpack.php
 		//If you are trying to make unpack 'N' work with unsigned long on 64 bit machines, you should take a look to this bug:
 		//http://bugs.php.net/bug.php?id=40543
-		$b = sprintf("%b", $a['i']); // binary representation
-		if ( strlen($b) == 64 ) {
-			$new = substr($b, 33);
-			$a['i'] = bindec($new);
+		$b = sprintf( "%b", $a['i'] ); // binary representation
+		if ( strlen( $b ) == 64 ) {
+			$new = substr( $b, 33 );
+			$a['i'] = bindec( $new );
 		}
+
 		return $a['i'];
 	}
 
@@ -72,14 +73,15 @@ class TTPDF extends tcpdf {
 	 * @param string $format
 	 * @param string $encoding
 	 * @param bool $diskcache
+	 * @noinspection PhpMethodParametersCountMismatchInspection
 	 */
-	function __construct( $orientation='P', $unit='mm', $format='LETTER', $encoding='UTF-8', $diskcache=FALSE) {
-		if ( TTi18n::getPDFDefaultFont() != 'freeserif' AND $encoding == 'ISO-8859-1' ) {
-			parent::__construct($orientation, $unit, $format, FALSE, 'ISO-8859-1', $diskcache); //Make sure TCPDF constructor is called with all the arguments
+	function __construct( $orientation = 'P', $unit = 'mm', $format = 'LETTER', $encoding = 'UTF-8', $diskcache = false ) {
+		if ( TTi18n::getPDFDefaultFont() != 'freeserif' && $encoding == 'ISO-8859-1' ) {
+			parent::__construct( $orientation, $unit, $format, false, 'ISO-8859-1', $diskcache ); //Make sure TCPDF constructor is called with all the arguments
 		} else {
-			parent::__construct($orientation, $unit, $format, TRUE, $encoding, $diskcache); //Make sure TCPDF constructor is called with all the arguments
+			parent::__construct( $orientation, $unit, $format, true, $encoding, $diskcache ); //Make sure TCPDF constructor is called with all the arguments
 		}
-		Debug::Text('PDF Encoding: '. $encoding, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'PDF Encoding: ' . $encoding, __FILE__, __LINE__, __METHOD__, 10 );
 
 		/*
 		if ( TTi18n::getPDFDefaultFont() == 'freeserif' ) {
@@ -93,11 +95,11 @@ class TTPDF extends tcpdf {
 		*/
 
 		//Using freeserif font enabling font subsetting is slow and produces PDFs at least 1mb. Helvetica is fine though.
-		$this->setFontSubsetting(TRUE); //When enabled, makes PDFs smaller, but severly slows down TCPDF if enabled. (+6 seconds per PDF)
+		$this->setFontSubsetting( true ); //When enabled, makes PDFs smaller, but severly slows down TCPDF if enabled. (+6 seconds per PDF)
 
-		$this->SetCreator( APPLICATION_NAME.' '. getTTProductEditionName() .' v'. APPLICATION_VERSION );
+		$this->SetCreator( APPLICATION_NAME . ' ' . getTTProductEditionName() . ' v' . APPLICATION_VERSION );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -106,14 +108,14 @@ class TTPDF extends tcpdf {
 	 * @return bool
 	 */
 	function header() {
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function footer() {
-		return TRUE;
+		return true;
 	}
 }
 

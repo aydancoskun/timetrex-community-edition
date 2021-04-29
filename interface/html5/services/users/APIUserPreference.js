@@ -1,6 +1,5 @@
 var APIUserPreference = ServiceCaller.extend( {
 
-
 	key_name: 'UserPreference',
 	className: 'APIUserPreference',
 

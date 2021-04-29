@@ -9,8 +9,4 @@ var APIScheduleAdvanced = ServiceCaller.extend( {
 
 	}
 
-
-
-
-
 } );

@@ -43,17 +43,17 @@ class UIMiscTest extends TTSeleniumGlobal {
 	function testUIGetGlobalVariable() {
 		$this->Login( 'demoadmin2', 'demo.de' );
 
-		$javascript = array('script' => 'return Global.getUIReadyStatus();', 'args' => array());
+		$javascript = [ 'script' => 'return Global.getUIReadyStatus();', 'args' => [] ];
 		$var = $this->execute( $javascript );
-		Debug::text( 'Global variable 1 retrieved: ' . print_r( $var, TRUE ), __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Global variable 1 retrieved: ' . print_r( $var, true ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->waitForUIInitComplete();
 		$this->byId( 'timesheetIcon' )->click();
 		$this->waitForUIInitComplete();
 
-		$javascript = array('script' => 'return Global.UIReadyStatus;', 'args' => array());
+		$javascript = [ 'script' => 'return Global.UIReadyStatus;', 'args' => [] ];
 		$var2 = $this->execute( $javascript );
-		Debug::text( 'Global variable 2 retrieved: ' . print_r( $var, TRUE ), __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Global variable 2 retrieved: ' . print_r( $var, true ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertNotEmpty( $var );
 		$this->assertNotEmpty( $var2 );

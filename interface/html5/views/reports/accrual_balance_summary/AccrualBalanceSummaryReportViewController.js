@@ -8,7 +8,7 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Accrual Balance Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'AccrualBalanceSummaryReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIAccrualBalanceSummaryReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIAccrualBalanceSummaryReport' ) )();
 	},
 
 	getCustomContextMenuModel: function() {

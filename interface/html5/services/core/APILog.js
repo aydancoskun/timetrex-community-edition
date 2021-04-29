@@ -14,5 +14,4 @@ var APILog = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'setLog', arguments );
 	}
 
-
-} )
+} );

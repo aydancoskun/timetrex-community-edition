@@ -35,7 +35,7 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 	},
 
 	onNextClick: function( e ) {
-		$this = this;
+		var $this = this;
 
 		//Get selected row data so we can determine the time period.
 		if ( this.getStepObject().grid ) {
@@ -185,14 +185,14 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 				filter.columns = columns;
 			}
 			var $this = this;
-			var api_payroll_remittance_agency_event = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
+			var api_payroll_remittance_agency_event = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
 			api_payroll_remittance_agency_event.getPayrollRemittanceAgencyEvent( filter, {
 				onResult: function( event_result ) {
 					var event_result = event_result.getResult()[0];
 
-					var api_payroll_remittance_agency = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ))();
+					var api_payroll_remittance_agency = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ) )();
 					api_payroll_remittance_agency.getPayrollRemittanceAgency( { filter_data: { id: event_result.payroll_remittance_agency_id } }, {
-							onResult: function ( agency_result ) {
+							onResult: function( agency_result ) {
 								event_result.payroll_remittance_agency_obj = agency_result.getResult()[0]; //Merge Event and Agency data together.
 
 								if ( typeof callback == 'function' ) {
@@ -231,7 +231,7 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 	 */
 	showHTMLReport: function( report_name, new_window ) {
 		ProgressBar.showOverlay();
-		var api = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
+		var api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
 		api['getReportData']( this.selected_remittance_agency_event_id, 'html', {
 			onResult: function( res ) {
 				ProgressBar.closeOverlay();
@@ -255,23 +255,20 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 	/**
 	 * @param e
 	 */
-	onDone: function( e ) {
-		if ( e === true || $( e.target ).hasClass( 'disable-image' ) == false ) {
-			var $this = this;
-			this.getPayrollRemittanceAgencyEventById( this.selected_remittance_agency_event_id, {}, function( result ) {
-				if ( result ) {
-					result.enable_recalculate_dates = 1;
-					result.last_due_date = result.due_date;
+	onDoneComplete: function( e ) {
+		var $this = this;
+		this.getPayrollRemittanceAgencyEventById( this.selected_remittance_agency_event_id, {}, function( result ) {
+			if ( result ) {
+				result.enable_recalculate_dates = 1;
+				result.last_due_date = result.due_date;
 
-					var api_payroll_remittance_agency_event = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
-					api_payroll_remittance_agency_event.setPayrollRemittanceAgencyEvent( result, false, true, {
-						onResult: function( result ) {
-							$this.cleanUp();
-						}
-					} );
-				}
-			} );
-		}
+				var api_payroll_remittance_agency_event = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
+				api_payroll_remittance_agency_event.setPayrollRemittanceAgencyEvent( result, false, true, {
+					onResult: function( result ) {
+						$this.cleanUp();
+					}
+				} );
+			}
+		} );
 	}
-
 } );

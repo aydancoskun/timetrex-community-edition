@@ -22,7 +22,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Payroll Export' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'PayrollExportReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIPayrollExportReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayrollExportReport' ) )();
 		this.include_form_setup = true;
 		this.export_setup_data = {};
 	},
@@ -598,8 +598,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		var tab3 = this.edit_view.find( '#form_setup_content_div' );
 		var first_row = this.edit_view.find( '.first-row' );
-		this.export_grid.grid.setGridWidth( this.edit_view.find('.inside-editor-div ').width() + 14 );
-		$('#gbox_export_grid').css('overflow', 'hidden');
+		this.export_grid.grid.setGridWidth( this.edit_view.find( '.inside-editor-div ' ).width() + 14 );
+		$( '#gbox_export_grid' ).css( 'overflow', 'hidden' );
 		this.export_grid.grid.setGridHeight( tab3.height() - first_row.height() );
 
 	},
@@ -607,7 +607,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 	onTabShow: function( e, ui ) {
 		var key = ui.newTab.index();
 
-		$('.edit-view-form-item-label').css('width','auto');
+		$( '.edit-view-form-item-label' ).css( 'width', 'auto' );
 		this.editFieldResize( key );
 
 		if ( !this.current_edit_record ) {
@@ -616,8 +616,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		var last_index = this.getEditViewTabIndex();
 
-
-		if ( (last_index === 1 || this.need_refresh_display_columns) && $( e.target ).parent().index() === 0 ) {
+		if ( ( last_index === 1 || this.need_refresh_display_columns ) && $( e.target ).parent().index() === 0 ) {
 			this.buildReportUIBaseOnSetupFields();
 			this.buildContextMenu( true );
 			this.setEditMenu();
@@ -1008,7 +1007,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'State' ), form_item_input7, tab3_column1, '', null, true );
 				this.setWidgetVisible( [form_item_input7] );
-				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {
+				new ( APIFactory.getAPIClass( 'APIJobDetailReport' ) )().getOptions( 'static_columns', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
 						form_item_input7.setSourceData( Global.buildRecordArray( result_data ) );
@@ -1238,7 +1237,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'Job' ), form_item_input1, tab3_column1, '', null, true );
 				this.setWidgetVisible( [form_item_input1] );
-				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {
+				new ( APIFactory.getAPIClass( 'APIJobDetailReport' ) )().getOptions( 'static_columns', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
 						form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
@@ -1259,7 +1258,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'State' ), form_item_input2, tab3_column1, '', null, true );
 				this.setWidgetVisible( [form_item_input2] );
-				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {
+				new ( APIFactory.getAPIClass( 'APIJobDetailReport' ) )().getOptions( 'static_columns', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
 						form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
@@ -1457,7 +1456,6 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
 				delete $this.edit_view_form_item_dic[code];
 
-
 				//State
 				var code1 = 'state_code';
 				var form_item_input1 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -1492,7 +1490,6 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				$this.export_setup_ui_dic[code1] = $this.edit_view_form_item_dic[code1];
 				delete $this.edit_view_form_item_dic[code1];
-
 
 				// Pay Type Code
 				var code2 = 'pay_type_code';
@@ -1780,7 +1777,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 	 * @returns {{}|*}
 	 */
 	getFormSetupFieldValues: function( field_list ) {
-		ret_arr = {};
+		var ret_arr = {};
 
 		for ( var i = 0; i < field_list.length; i++ ) {
 			if ( this.edit_view_ui_dic[field_list[i]] && !this.edit_view_ui_dic[field_list[i]].getValue() ) {
@@ -1789,8 +1786,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			} else {
 				if ( !this.edit_view_ui_dic[field_list[i]] ) {
 					ret_arr[field_list[i]] = '';
-				}
-				else {
+				} else {
 					ret_arr[field_list[i]] = this.edit_view_ui_dic[field_list[i]].getValue();
 				}
 			}
@@ -1799,7 +1795,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 	},
 
 	getFormData: function( other, for_display ) {
-		if ( !other || ! other.export_type ) {
+		if ( !other || !other.export_type ) {
 			return false;
 		}
 
@@ -1861,8 +1857,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		this.save_export_setup_data['export_type'] = other.export_type;
 
 		if ( for_display ) {
-			for ( key in this.save_export_setup_data ) {
-				if ( key !== false && typeof(this.save_export_setup_data[key]) !== 'String' ) {
+			for ( var key in this.save_export_setup_data ) {
+				if ( key !== false && typeof ( this.save_export_setup_data[key] ) !== 'String' ) {
 					this.save_export_setup_data[key] = this.convertExportSetupValues( this.save_export_setup_data[key] );
 				}
 			}
@@ -1933,8 +1929,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		}
 
 		if ( !res_Data.export_columns ) {
-			for ( key in res_Data ) {
-				if ( key !== false && typeof(res_Data[key]) !== 'String' ) {
+			for ( var key in res_Data ) {
+				if ( key !== false && typeof ( res_Data[key] ) !== 'String' ) {
 					res_Data[key] = this.convertExportSetupValues( res_Data[key] );
 				}
 			}
@@ -1966,7 +1962,6 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			}
 		}
 
-
 		this.onExportChange( res_Data.export_type );
 	},
 
@@ -1977,10 +1972,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 	 * @param doNotDoValidate
 	 */
 	onFormItemChange: function( target, doNotDoValidate ) {
-		var $this = this;
-
 		//If the edit grid has left any rows in edit mode, we need to finalize them now before the data is swept into memory.
-		selRowId = $( '#export_grid' ).getGridParam( 'selrow' );
+		var selRowId = $( '#export_grid' ).getGridParam( 'selrow' );
 		$( '#export_grid' ).saveRow( selRowId );
 
 		if ( target && target.getField && target.getField() == 'export_type' ) { // cannot read property getField of undefined

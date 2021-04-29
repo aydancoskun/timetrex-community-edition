@@ -39,5 +39,4 @@ var APIAccrualPolicyMilestone = ServiceCaller.extend( {
 
 	}
 
-
 } );

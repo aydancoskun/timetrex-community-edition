@@ -31,9 +31,9 @@ AccrualViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Accruals' );
 		this.navigation_label = $.i18n._( 'Accrual' ) + ':';
 
-		this.api = new (APIFactory.getAPIClass( 'APIAccrual' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIAccrual' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
 
 		this.initPermission();
 		this.render();
@@ -115,7 +115,7 @@ AccrualViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrual' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAccrual' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL,
@@ -148,7 +148,7 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.USER,
 				show_search_inputs: true,
@@ -171,7 +171,7 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
+				api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
 				show_search_inputs: true,
@@ -223,7 +223,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 1,
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -235,7 +235,7 @@ AccrualViewController = BaseViewController.extend( {
 				field: 'accrual_policy_account_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
-				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
+				api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -270,7 +270,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -282,7 +282,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -294,7 +294,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -306,7 +306,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -559,7 +559,7 @@ AccrualViewController = BaseViewController.extend( {
 		return context_menu_model;
 	},
 
-	getGridSetup: function(){
+	getGridSetup: function() {
 		var $this = this;
 
 		var grid_setup = {

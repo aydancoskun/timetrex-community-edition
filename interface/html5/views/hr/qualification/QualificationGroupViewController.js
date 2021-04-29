@@ -22,7 +22,7 @@ QualificationGroupViewController = BaseTreeViewController.extend( {
 		this.primary_tab_label = $.i18n._( 'Qualification Group' );
 		this.primary_tab_key = 'tab_qualification_group';
 
-		this.api = new (APIFactory.getAPIClass( 'APIQualificationGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIQualificationGroup' ) )();
 		this.grid_select_id_array = [];
 
 		this.render();
@@ -31,7 +31,7 @@ QualificationGroupViewController = BaseTreeViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [
 				ContextMenuIconName.copy,

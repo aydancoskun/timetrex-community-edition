@@ -10,11 +10,11 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Form W2/W3' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'FormW2ReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIFormW2Report' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIFormW2Report' ) )();
 		this.include_form_setup = true;
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				form: {
@@ -117,7 +117,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -134,7 +134,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -154,7 +154,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -171,7 +171,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -191,7 +191,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -208,7 +208,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -228,7 +228,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -245,7 +245,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -265,7 +265,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -282,7 +282,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -302,7 +302,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -319,7 +319,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -339,7 +339,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -356,7 +356,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -376,7 +376,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -393,7 +393,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -413,7 +413,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -430,7 +430,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -450,7 +450,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -467,7 +467,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -488,7 +488,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -505,7 +505,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -542,7 +542,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -559,7 +559,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -596,7 +596,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -613,7 +613,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -650,7 +650,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -667,7 +667,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -697,12 +697,11 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
-
 		//Box 13 (Retirement Plan)
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICompanyDeduction' )),
+			api_class: ( APIFactory.getAPIClass( 'APICompanyDeduction' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.COMPANY_DEDUCTION,
 			show_search_inputs: true,
@@ -718,7 +717,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -735,7 +734,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -772,7 +771,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -789,7 +788,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -826,7 +825,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -843,7 +842,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -880,7 +879,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -897,7 +896,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,

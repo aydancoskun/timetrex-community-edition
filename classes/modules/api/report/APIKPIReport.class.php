@@ -47,7 +47,7 @@ class APIKPIReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIKPIReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getKPIReport( $config = FALSE, $format = 'pdf' ) {
+	function getKPIReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

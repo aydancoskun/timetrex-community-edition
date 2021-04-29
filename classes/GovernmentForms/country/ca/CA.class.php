@@ -51,12 +51,12 @@ class GovernmentForms_CA extends GovernmentForms_Base {
 
 	function filterCompanyAddress( $value ) {
 		//Combine company address for multicell display.
-		return Misc::formatAddress( NULL, $this->company_address1, $this->company_address2, $this->company_city, $this->company_province, $this->company_postal_code );
+		return Misc::formatAddress( null, $this->company_address1, $this->company_address2, $this->company_city, $this->company_province, $this->company_postal_code );
 	}
 
 	function filterAddress( $value ) {
 		//Combine company address for multicell display.
-		return Misc::formatAddress( NULL, $this->address1, $this->address2, $this->city, $this->province, $this->postal_code, $this->country ); //Include country in case they are outside of Canada.
+		return Misc::formatAddress( null, $this->address1, $this->address2, $this->city, $this->province, $this->postal_code, $this->country ); //Include country in case they are outside of Canada.
 	}
 
 	function formatPayrollAccountNumber( $value ) {
@@ -77,7 +77,7 @@ class GovernmentForms_CA extends GovernmentForms_Base {
 	}
 
 	function formatAlpha3CountryCode( $country_code ) {
-		$alpha3_codes = array(
+		$alpha3_codes = [
 				'AD' => 'AND',
 				'AE' => 'ARE',
 				'AF' => 'AFG',
@@ -330,13 +330,13 @@ class GovernmentForms_CA extends GovernmentForms_Base {
 				'ZW' => 'ZWE',
 				'CS' => 'SCG',
 				'AN' => 'ANT',
-		);
+		];
 
-		if ( isset( $alpha3_codes[ $country_code ] ) ) {
-			return $alpha3_codes[ $country_code ];
+		if ( isset( $alpha3_codes[$country_code] ) ) {
+			return $alpha3_codes[$country_code];
 		}
 
-		return FALSE;
+		return false;
 	}
 }
 

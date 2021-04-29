@@ -22,7 +22,7 @@ KPIGroupViewController = BaseTreeViewController.extend( {
 		this.primary_tab_label = $.i18n._( 'KPI Group' );
 		this.primary_tab_key = 'tab_kpi_group';
 
-		this.api = new (APIFactory.getAPIClass( 'APIKPIGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIKPIGroup' ) )();
 		this.grid_select_id_array = [];
 
 		this.render();
@@ -31,7 +31,7 @@ KPIGroupViewController = BaseTreeViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [
 				ContextMenuIconName.copy,

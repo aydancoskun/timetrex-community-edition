@@ -43,7 +43,7 @@ include_once( 'CA.class.php' );
 class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 	public $pdf_template = 't4a-sum-11b.pdf';
 
-	public $template_offsets = array(-10, 0);
+	public $template_offsets = [ -10, 0 ];
 
 	//Set the submission status. Original, Amended, Cancel.
 	function getStatus() {
@@ -60,480 +60,480 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 		}
 		$this->status = strtoupper( trim( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 				'year' => 'isNumeric',
 				//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		);
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array(
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [
 
-				'year'                   => array(
+				'year'                   => [
 						'page'          => 1,
 						'template_page' => 1,
-						'on_background' => TRUE,
-						'coordinates'   => array(
+						'on_background' => true,
+						'coordinates'   => [
 								'x'          => 162,
 								'y'          => 51,
 								'h'          => 19,
 								'w'          => 59,
 								'halign'     => 'C',
-								'fill_color' => array(255, 255, 255),
-						),
-						'font'          => array(
+								'fill_color' => [ 255, 255, 255 ],
+						],
+						'font'          => [
 								'size' => 14,
 								'type' => 'B',
-						),
-				),
+						],
+				],
 
 				//Company information
-				'company_name'           => array(
-						'coordinates' => array(
+				'company_name'           => [
+						'coordinates' => [
 								'x'      => 250,
 								'y'      => 125,
 								'h'      => 12,
 								'w'      => 210,
 								'halign' => 'L',
-						),
-						'font'        => array(
+						],
+						'font'        => [
 								'size' => 8,
 								'type' => 'B',
-						),
-				),
-				'company_address'        => array(
-						'function'    => array('filterCompanyAddress', 'drawNormal'),
-						'coordinates' => array(
+						],
+				],
+				'company_address'        => [
+						'function'    => [ 'filterCompanyAddress', 'drawNormal' ],
+						'coordinates' => [
 								'x'      => 250,
 								'y'      => 139,
 								'h'      => 12,
 								'w'      => 210,
 								'halign' => 'L',
-						),
-						'font'        => array(
+						],
+						'font'        => [
 								'size' => 8,
 								'type' => '',
-						),
-						'multicell'   => TRUE,
-				),
-				'payroll_account_number' => array(
-						'coordinates' => array(
+						],
+						'multicell'   => true,
+				],
+				'payroll_account_number' => [
+						'coordinates' => [
 								'x'      => 250,
 								'y'      => 95,
 								'h'      => 17,
 								'w'      => 214,
 								'halign' => 'L',
-						),
-						'font'        => array(
+						],
+						'font'        => [
 								'size' => 8,
 								'type' => '',
-						),
-				),
+						],
+				],
 
-				'l88' => array(
-						'coordinates' => array(
+				'l88' => [
+						'coordinates' => [
 								'x'      => 435,
 								'y'      => 243,
 								'h'      => 16,
 								'w'      => 92,
 								'halign' => 'R',
-						),
-				),
+						],
+				],
 
-				'l16'  => array(
+				'l16'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 260,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 260,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l18'  => array(
+								],
+						],
+				],
+				'l18'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 273,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 273,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l20'  => array(
+								],
+						],
+				],
+				'l20'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 286,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 286,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l24'  => array(
+								],
+						],
+				],
+				'l24'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 299,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 299,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l28'  => array(
+								],
+						],
+				],
+				'l28'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 312,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 312,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l30'  => array(
+								],
+						],
+				],
+				'l30'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 325,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 325,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l32'  => array(
+								],
+						],
+				],
+				'l32'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 338,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 338,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l34'  => array(
+								],
+						],
+				],
+				'l34'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 351,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 351,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l40'  => array(
+								],
+						],
+				],
+				'l40'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 364,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 364,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l42'  => array(
+								],
+						],
+				],
+				'l42'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 377,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 377,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l48'  => array(
+								],
+						],
+				],
+				'l48'  => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 390,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 390,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l101' => array(
+								],
+						],
+				],
+				'l101' => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 435,
 										'y'      => 403,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 507,
 										'y'      => 403,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
+								],
+						],
+				],
 
-				'l22'             => array(
+				'l22'             => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 455,
 										'y'      => 422,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 527,
 										'y'      => 422,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l82'             => array(
+								],
+						],
+				],
+				'l82'             => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 455,
 										'y'      => 442,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 527,
 										'y'      => 442,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l82_diff'        => array(
-						'function'    => array('calcL82Diff', 'drawSplitDecimalFloat'),
-						'coordinates' => array(
-								array(
+								],
+						],
+				],
+				'l82_diff'        => [
+						'function'    => [ 'calcL82Diff', 'drawSplitDecimalFloat' ],
+						'coordinates' => [
+								[
 										'x'      => 455,
 										'y'      => 465,
 										'h'      => 13,
 										'w'      => 72,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 527,
 										'y'      => 465,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-						),
-				),
-				'amount_enclosed' => array(
+								],
+						],
+				],
+				'amount_enclosed' => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 410,
 										'y'      => 508,
 										'h'      => 13,
 										'w'      => 90,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 500,
 										'y'      => 508,
 										'h'      => 13,
 										'w'      => 25,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l84'             => array(
+								],
+						],
+				],
+				'l84'             => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 92,
 										'y'      => 508,
 										'h'      => 13,
 										'w'      => 90,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 182,
 										'y'      => 508,
 										'h'      => 13,
 										'w'      => 25,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l86'             => array(
+								],
+						],
+				],
+				'l86'             => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 260,
 										'y'      => 508,
 										'h'      => 13,
 										'w'      => 90,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 350,
 										'y'      => 508,
 										'h'      => 13,
 										'w'      => 25,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l76'             => array(
-						'coordinates' => array(
+								],
+						],
+				],
+				'l76'             => [
+						'coordinates' => [
 								'x'      => 55,
 								'y'      => 591,
 								'h'      => 13,
 								'w'      => 230,
 								'halign' => 'R',
-						),
-				),
-				'l78'             => array(
-						'function'    => array('filterphone', 'drawSegments'),
-						'coordinates' => array(
-								array(
+						],
+				],
+				'l78'             => [
+						'function'    => [ 'filterphone', 'drawSegments' ],
+						'coordinates' => [
+								[
 										'x'      => 335,
 										'y'      => 591,
 										'h'      => 13,
 										'w'      => 20,
 										'halign' => 'C',
-								),
-								array(
+								],
+								[
 										'x'      => 385,
 										'y'      => 591,
 										'h'      => 13,
 										'w'      => 40,
 										'halign' => 'C',
-								),
-						),
-				),
-				'date'            => array(
+								],
+						],
+				],
+				'date'            => [
 						'value'       => date( 'd-M-Y' ),
-						'coordinates' => array(
+						'coordinates' => [
 								'x'      => 50,
 								'y'      => 642,
 								'h'      => 18,
 								'w'      => 110,
 								'halign' => 'C',
-						),
-				),
-		);
+						],
+				],
+		];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -544,10 +544,10 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 		//Strip non-digits.
 		$value = $this->stripNonNumeric( $value );
 		if ( $value != '' ) {
-			return array(substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ));
+			return [ substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ) ];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function calcL82Diff( $value, $schema ) {
@@ -568,10 +568,10 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 		if ( is_object( $this->getXMLObject() ) ) {
 			$xml = $this->getXMLObject();
 		} else {
-			return FALSE; //No XML object to append too. Needs T619 form first.
+			return false; //No XML object to append too. Needs T619 form first.
 		}
 
-		if ( isset( $xml->Return ) AND isset( $xml->Return->T4A ) AND $this->l88 > 0 ) {
+		if ( isset( $xml->Return ) && isset( $xml->Return->T4A ) && $this->l88 > 0 ) {
 			$xml->Return->T4A->addChild( 'T4ASummary' );
 
 			$xml->Return->T4A->T4ASummary->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) );
@@ -608,29 +608,29 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 			}
 
 			$xml->Return->T4A->T4ASummary->addChild( 'T4A_TAMT' );
-			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_pens_spran_amt', $this->MoneyFormat( $this->l16, FALSE ) );
-			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_lsp_amt', $this->MoneyFormat( $this->l18, FALSE ) );
-			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_self_cmsn_amt', $this->MoneyFormat( $this->l20, FALSE ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_pens_spran_amt', $this->MoneyFormat( $this->l16 ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_lsp_amt', $this->MoneyFormat( $this->l18 ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_self_cmsn_amt', $this->MoneyFormat( $this->l20 ) );
 
-			( isset( $this->l30 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_ptrng_aloc_amt', $this->MoneyFormat( $this->l30, FALSE ) ) : NULL;
-			( isset( $this->l32 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_past_srvc_amt', $this->MoneyFormat( $this->l32, FALSE ) ) : NULL;
-			( isset( $this->l34 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_padj_amt', $this->MoneyFormat( $this->l34, FALSE ) ) : NULL;
-			( isset( $this->l42 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_resp_aip_amt', $this->MoneyFormat( $this->l42, FALSE ) ) : NULL;
+			( isset( $this->l30 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_ptrng_aloc_amt', $this->MoneyFormat( $this->l30 ) ) : null;
+			( isset( $this->l32 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_past_srvc_amt', $this->MoneyFormat( $this->l32 ) ) : null;
+			( isset( $this->l34 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_padj_amt', $this->MoneyFormat( $this->l34 ) ) : null;
+			( isset( $this->l42 ) ) ? $xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_resp_aip_amt', $this->MoneyFormat( $this->l42 ) ) : null;
 
-			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_itx_dedn_amt', $this->MoneyFormat( $this->l22, FALSE ) );
-			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_annty_incamt', $this->MoneyFormat( $this->l24, FALSE ) );
-			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'rpt_tot_fee_srvc_amt', $this->MoneyFormat( $this->l48, FALSE ) );
-			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'rpt_tot_oth_info_amt', $this->MoneyFormat( $this->l101, FALSE ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_itx_dedn_amt', $this->MoneyFormat( $this->l22 ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'tot_annty_incamt', $this->MoneyFormat( $this->l24 ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'rpt_tot_fee_srvc_amt', $this->MoneyFormat( $this->l48 ) );
+			$xml->Return->T4A->T4ASummary->T4A_TAMT->addChild( 'rpt_tot_oth_info_amt', $this->MoneyFormat( $this->l101 ) );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function _outputPDF() {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
-		if ( $this->getShowBackground() == TRUE ) {
+		if ( $this->getShowBackground() == true ) {
 			$pdf->setSourceFile( $this->getTemplateDirectory() . DIRECTORY_SEPARATOR . $this->pdf_template );
 
 			$this->template_index[1] = $pdf->ImportPage( 1 );
@@ -644,7 +644,7 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 		$template_schema = $this->getTemplateSchema();
 		if ( is_array( $template_schema ) ) {
 
-			$template_page = NULL;
+			$template_page = null;
 
 			foreach ( $template_schema as $field => $schema ) {
 				Debug::text( 'Drawing Cell... Field: ' . $field, __FILE__, __LINE__, __METHOD__, 10 );
@@ -652,7 +652,7 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 }
 

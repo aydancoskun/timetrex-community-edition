@@ -48,24 +48,23 @@ class HelpFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'type':
-				$retval = array(
-										10 => TTi18n::gettext('Form'),
-										20 => TTi18n::gettext('Page')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Form' ),
+						20 => TTi18n::gettext( 'Page' ),
+				];
 				break;
 			case 'status':
-				$retval = array(
-										10 => TTi18n::gettext('NEW'),
-										15 => TTi18n::gettext('Pending Approval'),
-										20 => TTi18n::gettext('ACTIVE')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'NEW' ),
+						15 => TTi18n::gettext( 'Pending Approval' ),
+						20 => TTi18n::gettext( 'ACTIVE' ),
+				];
 				break;
-
 		}
 
 		return $retval;
@@ -83,15 +82,16 @@ class HelpFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setType( $value) {
-		$value = trim($value);
+	function setType( $value ) {
+		$value = trim( $value );
 
-		$key = Option::getByValue($value, $this->getOptions('type') );
-		if ($key !== FALSE) {
+		$key = Option::getByValue( $value, $this->getOptions( 'type' ) );
+		if ( $key !== false ) {
 			$value = $key;
 		}
 
-		Debug::Text('bType: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'bType: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $this->setGenericDataValue( 'type_id', $value );
 	}
 
@@ -106,13 +106,14 @@ class HelpFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setStatus( $value) {
-		$value = trim($value);
+	function setStatus( $value ) {
+		$value = trim( $value );
 
-		$key = Option::getByValue($value, $this->getOptions('status') );
-		if ($key !== FALSE) {
+		$key = Option::getByValue( $value, $this->getOptions( 'status' ) );
+		if ( $key !== false ) {
 			$value = $key;
 		}
+
 		return $this->setGenericDataValue( 'status_id', $value );
 	}
 
@@ -127,8 +128,9 @@ class HelpFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setHeading( $value) {
-		$value = trim($value);
+	function setHeading( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'heading', $value );
 	}
 
@@ -143,8 +145,9 @@ class HelpFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setBody( $value) {
-		$value = trim($value);
+	function setBody( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'body', $value );
 	}
 
@@ -159,8 +162,9 @@ class HelpFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setKeywords( $value) {
-		$value = trim($value);
+	function setKeywords( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'keywords', $value );
 	}
 
@@ -175,8 +179,8 @@ class HelpFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setPrivate( $value) {
-		return $this->setGenericDataValue( 'private', $this->toBool($value) );
+	function setPrivate( $value ) {
+		return $this->setGenericDataValue( 'private', $this->toBool( $value ) );
 	}
 
 	/**
@@ -187,47 +191,48 @@ class HelpFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Type
-		$this->Validator->inArrayKey(	'type',
-												$this->getType(),
-												TTi18n::gettext('Incorrect Type'),
-												$this->getOptions('type')
-											);
+		$this->Validator->inArrayKey( 'type',
+									  $this->getType(),
+									  TTi18n::gettext( 'Incorrect Type' ),
+									  $this->getOptions( 'type' )
+		);
 		// Status
-		$this->Validator->inArrayKey(	'status',
-												$this->getStatus(),
-												TTi18n::gettext('Incorrect Status'),
-												$this->getOptions('status')
-											);
+		$this->Validator->inArrayKey( 'status',
+									  $this->getStatus(),
+									  TTi18n::gettext( 'Incorrect Status' ),
+									  $this->getOptions( 'status' )
+		);
 		// Heading length
-		if ( $this->getHeading() != NULL ) {
-			$this->Validator->isLength(	'heading',
-												$this->getHeading(),
-												TTi18n::gettext('Incorrect Heading length'),
-												2, 255
-											);
+		if ( $this->getHeading() != null ) {
+			$this->Validator->isLength( 'heading',
+										$this->getHeading(),
+										TTi18n::gettext( 'Incorrect Heading length' ),
+										2, 255
+			);
 		}
 		// Body
-		if ( $this->getBody() != NULL ) {
-			$this->Validator->isLength(	'body',
-												$this->getBody(),
-												TTi18n::gettext('Incorrect Body length'),
-												2, 2048
-											);
+		if ( $this->getBody() != null ) {
+			$this->Validator->isLength( 'body',
+										$this->getBody(),
+										TTi18n::gettext( 'Incorrect Body length' ),
+										2, 2048
+			);
 		}
 		// Keywords
-		if ( $this->getKeywords() != NULL ) {
-			$this->Validator->isLength(	'keywords',
-												$this->getKeywords(),
-												TTi18n::gettext('Incorrect Keywords length'),
-												2, 1024
-											);
+		if ( $this->getKeywords() != null ) {
+			$this->Validator->isLength( 'keywords',
+										$this->getKeywords(),
+										TTi18n::gettext( 'Incorrect Keywords length' ),
+										2, 1024
+			);
 		}
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 }
+
 ?>

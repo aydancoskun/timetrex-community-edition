@@ -47,10 +47,10 @@ class HierarchyControlFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'object_type':
 				$hotlf = TTnew( 'HierarchyObjectTypeListFactory' ); /** @var HierarchyObjectTypeListFactory $hotlf */
 				$retval = $hotlf->getOptions( 'object_type' ); //Must contain sort prefixes, otherwise Edit Employee -> Hierarchy tab will be in the wrong order.
@@ -60,38 +60,36 @@ class HierarchyControlFactory extends Factory {
 				$retval = $hotlf->getOptions( 'short_object_type' );
 				break;
 			case 'columns':
-				$retval = array(
-										'-1010-name' => TTi18n::gettext('Name'),
-										'-1020-description' => TTi18n::gettext('Description'),
-										'-1030-superiors' => TTi18n::gettext('Superiors'),
-										'-1030-subordinates' => TTi18n::gettext('Subordinates'),
-										'-1050-object_type_display' => TTi18n::gettext('Objects'),
+				$retval = [
+						'-1010-name'                => TTi18n::gettext( 'Name' ),
+						'-1020-description'         => TTi18n::gettext( 'Description' ),
+						'-1030-superiors'           => TTi18n::gettext( 'Superiors' ),
+						'-1030-subordinates'        => TTi18n::gettext( 'Subordinates' ),
+						'-1050-object_type_display' => TTi18n::gettext( 'Objects' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								'description',
-								'superiors',
-								'subordinates',
-								'object_type_display'
-								);
+				$retval = [
+						'name',
+						'description',
+						'superiors',
+						'subordinates',
+						'object_type_display',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								);
+				$retval = [];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array(
-								);
+				$retval = [];
 				break;
 		}
 
@@ -103,18 +101,19 @@ class HierarchyControlFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'name' => 'Name',
-										'description' => 'Description',
-										'superiors' => 'TotalSuperiors',
-										'subordinates' => 'TotalSubordinates',
-										'object_type' => 'ObjectType',
-										'object_type_display' => FALSE,
-										'user' => 'User',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'                  => 'ID',
+				'company_id'          => 'Company',
+				'name'                => 'Name',
+				'description'         => 'Description',
+				'superiors'           => 'TotalSuperiors',
+				'subordinates'        => 'TotalSubordinates',
+				'object_type'         => 'ObjectType',
+				'object_type_display' => false,
+				'user'                => 'User',
+				'deleted'             => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -129,8 +128,9 @@ class HierarchyControlFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setCompany( $value) {
+	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -138,30 +138,30 @@ class HierarchyControlFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		$name = trim($name);
+	function isUniqueName( $name ) {
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'name' => TTi18n::strtolower($name),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'name'       => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted = 0';
-		$hierarchy_control_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($hierarchy_control_id, 'Unique Hierarchy Control ID: '. $hierarchy_control_id, __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'select id from ' . $this->getTable() . ' where company_id = ? AND lower(name) = ? AND deleted = 0';
+		$hierarchy_control_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $hierarchy_control_id, 'Unique Hierarchy Control ID: ' . $hierarchy_control_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $hierarchy_control_id === FALSE ) {
-			return TRUE;
+		if ( $hierarchy_control_id === false ) {
+			return true;
 		} else {
-			if ($hierarchy_control_id == $this->getId() ) {
-				return TRUE;
+			if ( $hierarchy_control_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -175,8 +175,9 @@ class HierarchyControlFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim($value);
+	function setName( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -191,8 +192,9 @@ class HierarchyControlFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setDescription( $value) {
-		$value = trim($value);
+	function setDescription( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'description', $value );
 	}
 
@@ -201,26 +203,26 @@ class HierarchyControlFactory extends Factory {
 	 */
 	function getObjectTypeDisplay() {
 		$object_type_ids = $this->getObjectType();
-		$object_types = Misc::trimSortPrefix( $this->getOptions('short_object_type') );
+		$object_types = Misc::trimSortPrefix( $this->getOptions( 'short_object_type' ) );
 
-		$retval = array();
-		if ( is_array($object_type_ids) ) {
+		$retval = [];
+		if ( is_array( $object_type_ids ) ) {
 			foreach ( $object_type_ids as $object_type_id ) {
 				$retval[] = Option::getByKey( $object_type_id, $object_types );
 			}
 			sort( $retval ); //Maintain consistent order.
 
-			return implode(',', $retval );
+			return implode( ',', $retval );
 		}
 
-		return NULL;
+		return null;
 	}
 
 	/**
 	 * @return array|bool
 	 */
 	function getObjectType() {
-		$valid_object_type_ids = Misc::trimSortPrefix( $this->getOptions('object_type') );
+		$valid_object_type_ids = Misc::trimSortPrefix( $this->getOptions( 'object_type' ) );
 
 		$hotlf = TTnew( 'HierarchyObjectTypeListFactory' ); /** @var HierarchyObjectTypeListFactory $hotlf */
 		$hotlf->getByHierarchyControlId( $this->getId() );
@@ -231,70 +233,70 @@ class HierarchyControlFactory extends Factory {
 				}
 			}
 
-			if ( isset($object_type_list) ) {
+			if ( isset( $object_type_list ) ) {
 				return $object_type_list;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
-	 * @param string $ids UUID
+	 * @param string|string[] $ids UUID
 	 * @return bool
 	 */
-	function setObjectType( $ids) {
-		if ( is_array($ids) AND count($ids) > 0 ) {
-			$tmp_ids = array();
-			Debug::Arr($ids, 'IDs: ', __FILE__, __LINE__, __METHOD__, 10);
+	function setObjectType( $ids ) {
+		if ( is_array( $ids ) && count( $ids ) > 0 ) {
+			$tmp_ids = [];
+			Debug::Arr( $ids, 'IDs: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$lf_a = TTnew( 'HierarchyObjectTypeListFactory' ); /** @var HierarchyObjectTypeListFactory $lf_a */
 				$lf_a->getByHierarchyControlId( $this->getId() );
-				Debug::text('Existing Object Type Rows: '. $lf_a->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text( 'Existing Object Type Rows: ' . $lf_a->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
-				foreach ($lf_a as $obj) {
+				foreach ( $lf_a as $obj ) {
 					//$id = $obj->getId();
 					$id = $obj->getObjectType(); //Need to use object_types rather than row IDs.
-					Debug::text('Hierarchy Object Type ID: '. $obj->getId() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text( 'Hierarchy Object Type ID: ' . $obj->getId() . ' ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 
 					//Delete users that are not selected.
-					if ( !in_array($id, $ids) ) {
-						Debug::text('Deleting: Object Type: '. $id .' ID: '. $obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+					if ( !in_array( $id, $ids ) ) {
+						Debug::text( 'Deleting: Object Type: ' . $id . ' ID: ' . $obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
 						$obj->Delete();
 						$obj->postSave(); //Clear cache.
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting: Object Type: '. $id .' ID: '. $obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'NOT Deleting: Object Type: ' . $id . ' ID: ' . $obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
 						$tmp_ids[] = $id;
 					}
 				}
-				unset($id, $obj);
+				unset( $id, $obj );
 			}
 
-			foreach ($ids as $id) {
-				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
+			foreach ( $ids as $id ) {
+				if ( isset( $ids ) && !in_array( $id, $tmp_ids ) ) {
 					$hotf = TTnew( 'HierarchyObjectTypeFactory' ); /** @var HierarchyObjectTypeFactory $hotf */
 					$hotf->setHierarchyControl( $this->getId() );
 					$hotf->setObjectType( $id );
 
-					if ($this->Validator->isTrue(		'object_type',
-														$hotf->isValid(),
-														TTi18n::gettext('Object type is already assigned to another hierarchy'))) {
+					if ( $this->Validator->isTrue( 'object_type',
+												   $hotf->isValid(),
+												   TTi18n::gettext( 'Object type is already assigned to another hierarchy' ) ) ) {
 						$hotf->save();
 					}
 				}
 			}
 
-			return TRUE;
+			return true;
 		}
 
-		$this->Validator->isTrue(		'object_type',
-										FALSE,
-										TTi18n::gettext('At least one object must be selected'));
+		$this->Validator->isTrue( 'object_type',
+								  false,
+								  TTi18n::gettext( 'At least one object must be selected' ) );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -303,57 +305,57 @@ class HierarchyControlFactory extends Factory {
 	function getUser() {
 		$hulf = TTnew( 'HierarchyUserListFactory' ); /** @var HierarchyUserListFactory $hulf */
 		$hulf->getByHierarchyControlID( $this->getId() );
-		foreach ($hulf as $obj) {
+		foreach ( $hulf as $obj ) {
 			$list[] = $obj->getUser();
 		}
 
-		if ( isset($list) ) {
+		if ( isset( $list ) ) {
 			return $list;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $ids UUID
 	 * @return bool
 	 */
-	function setUser( $ids) {
-		if ( !is_array($ids) ) {
-			$ids = array($ids);
+	function setUser( $ids ) {
+		if ( !is_array( $ids ) ) {
+			$ids = [ $ids ];
 		}
 
-		Debug::text('Setting User IDs : ', __FILE__, __LINE__, __METHOD__, 10);
-		if ( is_array($ids) ) {
-			$tmp_ids = array();
+		Debug::text( 'Setting User IDs : ', __FILE__, __LINE__, __METHOD__, 10 );
+		if ( is_array( $ids ) ) {
+			$tmp_ids = [];
 
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$hulf = TTnew( 'HierarchyUserListFactory' ); /** @var HierarchyUserListFactory $hulf */
 				$hulf->getByHierarchyControlID( $this->getId() );
 
-				foreach ($hulf as $obj) {
+				foreach ( $hulf as $obj ) {
 					$id = $obj->getUser();
-					Debug::text('HierarchyControl ID: '. $obj->getHierarchyControl() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text( 'HierarchyControl ID: ' . $obj->getHierarchyControl() . ' ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 
 					//Delete users that are not selected.
-					if ( !in_array($id, $ids) ) {
-						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					if ( !in_array( $id, $ids ) ) {
+						Debug::text( 'Deleting: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'NOT Deleting : ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 						$tmp_ids[] = $id;
 					}
 				}
-				unset($id, $obj);
+				unset( $id, $obj );
 			}
 
 			//Insert new mappings.
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
-			foreach ($ids as $id) {
-				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
+			foreach ( $ids as $id ) {
+				if ( isset( $ids ) && !in_array( $id, $tmp_ids ) ) {
 					$huf = TTnew( 'HierarchyUserFactory' ); /** @var HierarchyUserFactory $huf */
 					$huf->setHierarchyControl( $this->getId() );
 					$huf->setUser( $id );
@@ -362,21 +364,22 @@ class HierarchyControlFactory extends Factory {
 					if ( $ulf->getRecordCount() > 0 ) {
 						$obj = $ulf->getCurrent();
 
-						if ($this->Validator->isTrue(		'user',
-															$huf->isValid(),
-															TTi18n::gettext('Selected subordinate is invalid or already assigned to another hierarchy with the same objects').' ('. $obj->getFullName() .')' )
-							) {
+						if ( $this->Validator->isTrue( 'user',
+													   $huf->isValid(),
+													   TTi18n::gettext( 'Selected subordinate is invalid or already assigned to another hierarchy with the same objects' ) . ' (' . $obj->getFullName() . ')' )
+						) {
 							$huf->save();
 						}
 					}
 				}
 			}
 
-			return TRUE;
+			return true;
 		}
 
-		Debug::text('No User IDs to set.', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::text( 'No User IDs to set.', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 
 	/**
@@ -385,6 +388,7 @@ class HierarchyControlFactory extends Factory {
 	function getTotalSubordinates() {
 		$hulf = TTnew( 'HierarchyUserListFactory' ); /** @var HierarchyUserListFactory $hulf */
 		$hulf->getByHierarchyControlID( $this->getId() );
+
 		return $hulf->getRecordCount();
 	}
 
@@ -392,8 +396,9 @@ class HierarchyControlFactory extends Factory {
 	 * @return mixed
 	 */
 	function getTotalSuperiors() {
-		$hllf = TTnew('HierarchyLevelListFactory'); /** @var HierarchyLevelListFactory $hllf */
+		$hllf = TTnew( 'HierarchyLevelListFactory' ); /** @var HierarchyLevelListFactory $hllf */
 		$hllf->getByHierarchyControlId( $this->getID() );
+
 		return $hllf->getRecordCount();
 	}
 
@@ -401,81 +406,81 @@ class HierarchyControlFactory extends Factory {
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		//
 		// Company
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-		$this->Validator->isResultSetWithRows(	'company',
-														$clf->getByID($this->getCompany()),
-														TTi18n::gettext('Invalid Company')
-													);
+		$this->Validator->isResultSetWithRows( 'company',
+											   $clf->getByID( $this->getCompany() ),
+											   TTi18n::gettext( 'Invalid Company' )
+		);
 		// Name
-		$this->Validator->isLength(	'name',
-											$this->getName(),
-											TTi18n::gettext('Name is invalid'),
-											2, 250
-										);
-		if ( $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isTrue(	'name',
-												$this->isUniqueName($this->getName()),
-												TTi18n::gettext('Name is already in use')
-											);
+		$this->Validator->isLength( 'name',
+									$this->getName(),
+									TTi18n::gettext( 'Name is invalid' ),
+									2, 250
+		);
+		if ( $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Name is already in use' )
+			);
 		}
 		// Description
 		if ( $this->getDescription() != '' ) {
-			$this->Validator->isLength(	'description',
-												$this->getDescription(),
-												TTi18n::gettext('Description is invalid'),
-												1, 250
-											);
+			$this->Validator->isLength( 'description',
+										$this->getDescription(),
+										TTi18n::gettext( 'Description is invalid' ),
+										1, 250
+			);
 		}
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		if ( $this->getName() == FALSE AND $this->Validator->hasError('name') == FALSE ) {
-			$this->Validator->isTrue(		'name',
-											FALSE,
-											TTi18n::gettext('Name is not specified'));
+		if ( $this->getName() == false && $this->Validator->hasError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  false,
+									  TTi18n::gettext( 'Name is not specified' ) );
 		}
 
 		//When the user changes just the hierarchy objects, we need to loop through ALL users and confirm no conflicting hierarchies exist.
 		//Only do this for existing hierarchies and ones that are already valid up to this point.
-		if ( !$this->isNew() AND $this->Validator->isValid() == TRUE ) {
+		if ( !$this->isNew() && $this->Validator->isValid() == true ) {
 
 			$user_ids = $this->getUser();
 			if ( is_array( $user_ids ) ) {
-				$huf = TTNew('HierarchyUserFactory'); /** @var HierarchyUserFactory $huf */
+				$huf = TTNew( 'HierarchyUserFactory' ); /** @var HierarchyUserFactory $huf */
 				$huf->setHierarchyControl( $this->getID() );
 
-				foreach( $user_ids as $user_id ) {
-					if ( $huf->isUniqueUser( $user_id ) == FALSE ) {
+				foreach ( $user_ids as $user_id ) {
+					if ( $huf->isUniqueUser( $user_id ) == false ) {
 						$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 						$ulf->getById( $user_id );
 						if ( $ulf->getRecordCount() > 0 ) {
 							$obj = $ulf->getCurrent();
-							$this->Validator->isTrue(		'user',
-															$huf->isUniqueUser( $user_id, $this->getID() ),
-															TTi18n::gettext('Selected subordinate is invalid or already assigned to another hierarchy with the same objects').' ('. $obj->getFullName() .')' );
+							$this->Validator->isTrue( 'user',
+													  $huf->isUniqueUser( $user_id, $this->getID() ),
+													  TTi18n::gettext( 'Selected subordinate is invalid or already assigned to another hierarchy with the same objects' ) . ' (' . $obj->getFullName() . ')' );
 						} else {
-							TTi18n::gettext('Selected subordinate is invalid or already assigned to another hierarchy with the same object. User ID: %1', array( $user_id ) );
+							TTi18n::gettext( 'Selected subordinate is invalid or already assigned to another hierarchy with the same object. User ID: %1', [ $user_id ] );
 						}
 					}
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -485,11 +490,11 @@ class HierarchyControlFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -501,24 +506,24 @@ class HierarchyControlFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return mixed
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
+	function getObjectAsArray( $include_columns = null ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						//case 'superiors':
 						//case 'subordinates':
 						//	$data[$variable] = $this->getColumn($variable);
@@ -532,7 +537,6 @@ class HierarchyControlFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -546,7 +550,8 @@ class HierarchyControlFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Hierarchy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Hierarchy' ), null, $this->getTable(), $this );
 	}
 }
+
 ?>

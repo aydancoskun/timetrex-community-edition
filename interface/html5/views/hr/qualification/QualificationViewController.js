@@ -21,8 +21,8 @@ QualificationViewController = BaseViewController.extend( {
 		this.table_name_key = 'qualification';
 		this.context_menu_name = $.i18n._( 'Qualification' );
 		this.navigation_label = $.i18n._( 'Qualification' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIQualification' ))();
-		this.qualification_group_api = new (APIFactory.getAPIClass( 'APIQualificationGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIQualification' ) )();
+		this.qualification_group_api = new ( APIFactory.getAPIClass( 'APIQualificationGroup' ) )();
 		this.document_object_type_id = 120;
 		this.render();
 		this.buildContextMenu();
@@ -67,7 +67,7 @@ QualificationViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIQualification' )),
+			api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.QUALIFICATION,
@@ -200,7 +200,7 @@ QualificationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -212,7 +212,7 @@ QualificationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

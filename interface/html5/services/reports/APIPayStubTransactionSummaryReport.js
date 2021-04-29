@@ -55,6 +55,4 @@ var APIPayStubTransactionSummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

@@ -43,16 +43,16 @@ include_once( 'US.class.php' );
 class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 	public $pdf_template = '1099misc.pdf';
 
-	public $template_offsets = array(0, 0);
+	public $template_offsets = [ 0, 0 ];
 
 	function getOptions( $name ) {
-		$retval = NULL;
+		$retval = null;
 		switch ( $name ) {
 			case 'type':
-				$retval = array(
+				$retval = [
 						'government' => TTi18n::gettext( 'Government (Multiple Employees/Page)' ),
 						'employee'   => TTi18n::gettext( 'Employee (One Employee/Page)' ),
-				);
+				];
 				break;
 		}
 
@@ -66,13 +66,13 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			return $this->_type;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setType( $value ) {
 		$this->_type = trim( $value );
 
-		return TRUE;
+		return true;
 	}
 
 	function getShowInstructionPage() {
@@ -80,30 +80,30 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			return $this->_show_instruction_page;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setShowInstructionPage( $value ) {
 		$this->_show_instruction_page = (bool)trim( $value );
 
-		return TRUE;
+		return true;
 	}
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 				'year' => 'isNumeric',
-				'ein'  => array('stripNonNumeric', 'isNumeric'),
-		);
+				'ein'  => [ 'stripNonNumeric', 'isNumeric' ],
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array(
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [
 			//
 			// ** clearObject() seems to be clearing $this->type variable causing problems with which templates to display.
 			// Magic get/set functions are getting in the way?
@@ -133,342 +133,342 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 			//
 			//
 
-			array(
+			[
 				//'template_page' => 2, //All template pages
 				'value'         => $this->year,
-				'on_background' => TRUE,
-				'coordinates'   => array(
+				'on_background' => true,
+				'coordinates'   => [
 						'x'          => 395,
 						'y'          => 70,
 						'h'          => 20,
 						'w'          => 68,
 						'halign'     => 'C',
-						'fill_color' => array(255, 255, 255),
-				),
-				'font'          => array(
+						'fill_color' => [ 255, 255, 255 ],
+				],
+				'font'          => [
 						'size' => 18,
 						'type' => 'B',
-				),
-			),
-			array(
+				],
+			],
+			[
 				//'template_page' => 2,
-				'function'      => array('filterSmallYear', 'drawNormal'),
+				'function'      => [ 'filterSmallYear', 'drawNormal' ],
 				'value'         => $this->year,
-				'on_background' => TRUE,
-				'coordinates'   => array(
+				'on_background' => true,
+				'coordinates'   => [
 						'x'          => 510,
 						'y'          => 249,
 						'h'          => 8,
 						'w'          => 24,
 						'halign'     => 'C',
-						'fill_color' => array(255, 255, 255),
-				),
-				'font'          => array(
+						'fill_color' => [ 255, 255, 255 ],
+				],
+				'font'          => [
 						'size' => 10,
 						'type' => 'B',
-				),
-			),
+				],
+			],
 
 			//Finish initializing page 1.
-			'payer_id'     => array(
-					'coordinates' => array(
+			'payer_id'     => [
+					'coordinates' => [
 							'x'      => 48,
 							'y'      => 170,
 							'h'      => 15,
 							'w'      => 122,
 							'halign' => 'C',
-					),
-			),
-			'recipient_id' => array(
-					'coordinates' => array(
+					],
+			],
+			'recipient_id' => [
+					'coordinates' => [
 							'x'      => 172,
 							'y'      => 170,
 							'h'      => 15,
 							'w'      => 120,
 							'halign' => 'C',
-					),
-			),
+					],
+			],
 
-			'trade_name'      => array(
-					'coordinates' => array(
+			'trade_name'      => [
+					'coordinates' => [
 							'x'      => 48,
 							'y'      => 60,
 							'h'      => 15,
 							'w'      => 240,
 							'halign' => 'L',
-					),
-			),
-			'company_address' => array(
-					'function'    => array('filterCompanyAddress', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'company_address' => [
+					'function'    => [ 'filterCompanyAddress', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 48,
 							'y'      => 75,
 							'h'      => 48,
 							'w'      => 240,
 							'halign' => 'L',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 8,
 							'type' => '',
-					),
-					'multicell'   => TRUE,
-			),
+					],
+					'multicell'   => true,
+			],
 
-			'name'           => array(
-					'function'    => array('filterName', 'drawNormal'),
-					'coordinates' => array(
+			'name'           => [
+					'function'    => [ 'filterName', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 48,
 							'y'      => 205,
 							'h'      => 15,
 							'w'      => 180,
 							'halign' => 'L',
-					),
-			),
-			'address'        => array(
-					'function'    => array('filterAddress', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'address'        => [
+					'function'    => [ 'filterAddress', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 48,
 							'y'      => 250,
 							'h'      => 25,
 							'w'      => 180,
 							'halign' => 'L',
-					),
-					'font'        => array(
+					],
+					'font'        => [
 							'size' => 8,
 							'type' => '',
-					),
-					'multicell'   => TRUE,
-			),
-			'city'           => array(
-					'function'    => array('filterCity', 'drawNormal'),
-					'coordinates' => array(
+					],
+					'multicell'   => true,
+			],
+			'city'           => [
+					'function'    => [ 'filterCity', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 48,
 							'y'      => 285,
 							'h'      => 15,
 							'w'      => 180,
 							'halign' => 'L',
-					),
-			),
-			'account_number' => array(
-					'coordinates' => array(
+					],
+			],
+			'account_number' => [
+					'coordinates' => [
 							'x'      => 48,
 							'y'      => 320,
 							'h'      => 15,
 							'w'      => 180,
 							'halign' => 'L',
-					),
-			),
+					],
+			],
 
-			'l1' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+			'l1' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 305,
 							'y'      => 72,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
+					],
+			],
 
-			'l2' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+			'l2' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 305,
 							'y'      => 108,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l3' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l3' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 305,
 							'y'      => 138,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l4' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l4' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 405,
 							'y'      => 138,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l5' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l5' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 305,
 							'y'      => 180,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l6' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l6' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 405,
 							'y'      => 180,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l7' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l7' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 305,
 							'y'      => 228,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l8' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l8' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 405,
 							'y'      => 228,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l9' => array(
+					],
+			],
+			'l9' => [
 					'function'    => 'drawCheckBox',
-					'coordinates' => array(
-							array(
+					'coordinates' => [
+							[
 									'x'      => 380,
 									'y'      => 264,
 									'h'      => 8,
 									'w'      => 10,
 									'halign' => 'C',
-							),
-					),
-			),
+							],
+					],
+			],
 
-			'l10' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+			'l10' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 405,
 							'y'      => 263,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
+					],
+			],
 
-			'l13' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+			'l13' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 305,
 							'y'      => 324,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l14' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l14' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 405,
 							'y'      => 324,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
+					],
+			],
 
-			'l15a' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+			'l15a' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 60,
 							'y'      => 360,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l15b' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l15b' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 182,
 							'y'      => 360,
 							'h'      => 12,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
+					],
+			],
 
-			'l16a' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+			'l16a' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 305,
 							'y'      => 350,
 							'h'      => 10,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l16b' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l16b' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 305,
 							'y'      => 362,
 							'h'      => 10,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
+					],
+			],
 
-			'l17a' => array(
-					'coordinates' => array(
+			'l17a' => [
+					'coordinates' => [
 							'x'      => 405,
 							'y'      => 350,
 							'h'      => 10,
 							'w'      => 80,
 							'halign' => 'C',
-					),
-			),
-			'l17b' => array(
-					'coordinates' => array(
+					],
+			],
+			'l17b' => [
+					'coordinates' => [
 							'x'      => 405,
 							'y'      => 362,
 							'h'      => 10,
 							'w'      => 80,
 							'halign' => 'C',
-					),
-			),
+					],
+			],
 
-			'l18a' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+			'l18a' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 505,
 							'y'      => 350,
 							'h'      => 10,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-			'l18b' => array(
-					'function'    => array('MoneyFormat', 'drawNormal'),
-					'coordinates' => array(
+					],
+			],
+			'l18b' => [
+					'function'    => [ 'MoneyFormat', 'drawNormal' ],
+					'coordinates' => [
 							'x'      => 505,
 							'y'      => 362,
 							'h'      => 10,
 							'w'      => 80,
 							'halign' => 'L',
-					),
-			),
-		);
+					],
+			],
+		];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -514,8 +514,8 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 
 	function filterSmallYear( $value ) {
 		//Only show small year on 2nd template page.
-		if ( in_array( (int)$this->current_template_index, array(0, 3, 4, 6) ) ) {
-			return FALSE;
+		if ( in_array( (int)$this->current_template_index, [ 0, 3, 4, 6 ] ) ) {
+			return false;
 		}
 
 		return $value;
@@ -525,11 +525,11 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
-		if ( $this->getShowBackground() == TRUE ) {
+		if ( $this->getShowBackground() == true ) {
 			$pdf->setSourceFile( $this->getTemplateDirectory() . DIRECTORY_SEPARATOR . $this->pdf_template );
 
 			for ( $tp = 1; $tp <= 8; $tp++ ) {
-				$this->template_index[ $tp ] = $pdf->ImportPage( $tp );
+				$this->template_index[$tp] = $pdf->ImportPage( $tp );
 			}
 		}
 		Debug::Arr( $this->template_index, 'Template Index ', __FILE__, __LINE__, __METHOD__, 10 );
@@ -540,17 +540,17 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 
 		if ( $this->getType() == 'government' ) {
 			$employees_per_page = 2;
-			$n = 2; //Don't loop the same employee.
-			$form_template_pages = array(2, 3, 7); //Template pages to use.
+			$n = 2;                             //Don't loop the same employee.
+			$form_template_pages = [ 2, 3, 7 ]; //Template pages to use.
 		} else {
 			$employees_per_page = 1;
-			$n = 1; //Loop the same employee twice.
-			$form_template_pages = array(4, 6); //Template pages to use.
+			$n = 1;                          //Loop the same employee twice.
+			$form_template_pages = [ 4, 6 ]; //Template pages to use.
 		}
 
 		//Get location map, start looping over each variable and drawing
 		$records = $this->getRecords();
-		if ( is_array( $records ) AND count( $records ) > 0 ) {
+		if ( is_array( $records ) && count( $records ) > 0 ) {
 			$template_schema = $this->getTemplateSchema();
 
 			foreach ( $form_template_pages as $form_template_page ) {
@@ -558,11 +558,11 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 				Debug::Text( 'Template Page: ' . $form_template_page, __FILE__, __LINE__, __METHOD__, 10 );
 				$template_schema[0]['template_page'] = $form_template_page;
 
-				if ( $this->getType() == 'government' AND count( $records ) > 1 ) {
-					$template_schema[0]['combine_templates'] = array(
-							array('template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets('x') ), 'y' => ( 0 + $this->getTemplateOffsets('y') ) ),
-							array('template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets('x') ), 'y' => ( 380 + $this->getTemplateOffsets('y') ) ) //Place two templates on the same page.
-					);
+				if ( $this->getType() == 'government' && count( $records ) > 1 ) {
+					$template_schema[0]['combine_templates'] = [
+							[ 'template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets( 'x' ) ), 'y' => ( 0 + $this->getTemplateOffsets( 'y' ) ) ],
+							[ 'template_page' => $form_template_page, 'x' => ( 0 + $this->getTemplateOffsets( 'x' ) ), 'y' => ( 380 + $this->getTemplateOffsets( 'y' ) ) ] //Place two templates on the same page.
+					];
 				} else {
 					Debug::Text( 'zTemplate Page: ' . $form_template_page . ' C: ' . count( $records ) . ' B: ' . $this->getShowBackground() . ' D: ' . $this->getType() . ' X: ' . $this->_type, __FILE__, __LINE__, __METHOD__, 10 );
 				}
@@ -574,12 +574,12 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 					$this->arrayToObject( $employee_data ); //Convert record array to object
 
 					for ( $i = 0; $i < $n; $i++ ) {
-						$this->setTempPageOffsets( $this->getPageOffsets('x'), $this->getPageOffsets('y') );
+						$this->setTempPageOffsets( $this->getPageOffsets( 'x' ), $this->getPageOffsets( 'y' ) );
 
-						if ( ( $employees_per_page == 1 AND $i > 0 )
-								OR ( $employees_per_page == 2 AND $e % 2 != 0 )
+						if ( ( $employees_per_page == 1 && $i > 0 )
+								|| ( $employees_per_page == 2 && $e % 2 != 0 )
 						) {
-							$this->setTempPageOffsets( $this->getPageOffsets('x'), ( $template_schema[0]['combine_templates'][1]['y'] + $this->getPageOffsets('y') ) );
+							$this->setTempPageOffsets( $this->getPageOffsets( 'x' ), ( $template_schema[0]['combine_templates'][1]['y'] + $this->getPageOffsets( 'y' ) ) );
 						}
 
 						foreach ( $template_schema as $field => $schema ) {
@@ -587,7 +587,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 						}
 					}
 
-					if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND $e % $employees_per_page != 0 ) ) {
+					if ( $employees_per_page == 1 || ( $employees_per_page == 2 && $e % $employees_per_page != 0 ) ) {
 						$this->resetTemplatePage();
 						//if ( $this->getShowInstructionPage() == TRUE ) {
 						//	$this->addPage( array('template_page' => 2) );
@@ -601,7 +601,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 
 		$this->clearRecords();
 
-		return TRUE;
+		return true;
 	}
 }
 

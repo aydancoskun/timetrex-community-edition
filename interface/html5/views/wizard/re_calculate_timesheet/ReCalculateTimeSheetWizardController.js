@@ -34,7 +34,7 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more pay periods' ) );
 
-				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayPeriod' )), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriod' ) ), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -49,7 +49,7 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) + ':' );
 
-				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIUser' )), true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIUser' ) ), true, ALayoutIDs.USER, 'user_id', true );
 				div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -74,7 +74,7 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 			var pay_period_ids = this.stepsDataDic[2].pay_period_id;
 			var user_ids = this.stepsDataDic[3].user_id;
 
-			var timesheet_api = new (APIFactory.getAPIClass( 'APITimeSheet' ))();
+			var timesheet_api = new ( APIFactory.getAPIClass( 'APITimeSheet' ) )();
 
 			//this is outside the callback to prevent hammer-clicking which was causing problems.
 			this.onCloseClick();
@@ -152,6 +152,5 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 		}
 
 	}
-
 
 } );

@@ -8,10 +8,10 @@ TimesheetSummaryReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'TimeSheet Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'TimesheetSummaryReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APITimesheetSummaryReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APITimesheetSummaryReport' ) )();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		return { include: ['default'] };
 	}
 } );

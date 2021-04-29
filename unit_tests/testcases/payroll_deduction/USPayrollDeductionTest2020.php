@@ -38,39 +38,40 @@
  * @group USPayrollDeductionTest2020
  */
 class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
-	public $company_id = NULL;
+	public $company_id = null;
 
 	public function setUp() {
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
+		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
 
-		$this->tax_table_file = dirname(__FILE__).'/USPayrollDeductionTest2020.csv';
+		$this->tax_table_file = dirname( __FILE__ ) . '/USPayrollDeductionTest2020.csv';
 
 		$this->company_id = PRIMARY_COMPANY_ID;
 
-		TTDate::setTimeZone('Etc/GMT+8'); //Force to non-DST timezone. 'PST' isnt actually valid.
+		TTDate::setTimeZone( 'Etc/GMT+8' ); //Force to non-DST timezone. 'PST' isnt actually valid.
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
-		return TRUE;
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return true;
 	}
 
-	public function mf($amount) {
-		return Misc::MoneyFormat($amount, FALSE);
+	public function mf( $amount ) {
+		return Misc::MoneyFormat( $amount, false );
 	}
 
-	public function MatchWithinMarginOfError( $source, $destination, $error = 0) {
+	public function MatchWithinMarginOfError( $source, $destination, $error = 0 ) {
 		//Source: 125.01
 		//Destination: 125.00
 		//Source: 124.99
-		$high_water_mark = bcadd($destination, $error);
-		$low_water_mark = bcsub($destination, $error);
+		$high_water_mark = bcadd( $destination, $error );
+		$low_water_mark = bcsub( $destination, $error );
 
-		if (  $source <= $high_water_mark AND $source >= $low_water_mark ) {
+		if ( $source <= $high_water_mark && $source >= $low_water_mark ) {
 			return $destination;
 		}
 
@@ -81,18 +82,18 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	// January 2020
 	//
 	function testCSVFile() {
-		$this->assertEquals( file_exists($this->tax_table_file), TRUE);
+		$this->assertEquals( file_exists( $this->tax_table_file ), true );
 
-		$test_rows = Misc::parseCSV( $this->tax_table_file, TRUE );
+		$test_rows = Misc::parseCSV( $this->tax_table_file, true );
 
-		$total_rows = ( count($test_rows) + 1 );
+		$total_rows = ( count( $test_rows ) + 1 );
 		$i = 2;
-		foreach( $test_rows as $row ) {
+		foreach ( $test_rows as $row ) {
 			//Debug::text('Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10);
-			if ( $row['gross_income'] == '' AND isset($row['low_income']) AND $row['low_income'] != '' AND isset($row['high_income']) AND $row['high_income'] != '' ) {
-				$row['gross_income'] = ( $row['low_income'] + ( ($row['high_income'] - $row['low_income']) / 2 ) );
+			if ( $row['gross_income'] == '' && isset( $row['low_income'] ) && $row['low_income'] != '' && isset( $row['high_income'] ) && $row['high_income'] != '' ) {
+				$row['gross_income'] = ( $row['low_income'] + ( ( $row['high_income'] - $row['low_income'] ) / 2 ) );
 			}
-			if ( $row['country'] != '' AND $row['gross_income'] != '' ) {
+			if ( $row['country'] != '' && $row['gross_income'] != '' ) {
 				//echo $i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'] ."\n";
 
 				$pd_obj = new PayrollDeduction( $row['country'], ( ( $row['province'] == '00' ) ? 'AK' : $row['province'] ) ); //Valid state is needed to calculate something, even for just federal numbers.
@@ -103,7 +104,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 				$pd_obj->setFederalFormW4Version( $row['federal_form_w4_version'] );
 				$pd_obj->setFederalFilingStatus( $row['filing_status'] );
 				$pd_obj->setFederalAllowance( $row['allowance'] );
-				$pd_obj->setFederalMultipleJobs( FALSE ); //2020 or newer W4 settings.
+				$pd_obj->setFederalMultipleJobs( false ); //2020 or newer W4 settings.
 				$pd_obj->setFederalClaimDependents( $row['federal_claim_dependents'] );
 				$pd_obj->setFederalOtherIncome( $row['federal_other_income'] );
 				$pd_obj->setFederalDeductions( $row['federal_other_deductions'] );
@@ -114,21 +115,21 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 				$pd_obj->setStateAllowance( $row['allowance'] );
 
 				//Some states use other values for allowance/deductions.
-				switch ($row['province']) {
+				switch ( $row['province'] ) {
 					case 'GA':
-						Debug::text('Setting UserValue3: '. $row['allowance'], __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'Setting UserValue3: ' . $row['allowance'], __FILE__, __LINE__, __METHOD__, 10 );
 						$pd_obj->setUserValue3( $row['allowance'] );
 						break;
 					case 'IN':
 					case 'IL':
 					case 'VA':
-						Debug::text('Setting UserValue1: '. $row['allowance'], __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'Setting UserValue1: ' . $row['allowance'], __FILE__, __LINE__, __METHOD__, 10 );
 						$pd_obj->setUserValue1( $row['allowance'] );
 						break;
 				}
 
-				$pd_obj->setFederalTaxExempt( FALSE );
-				$pd_obj->setProvincialTaxExempt( FALSE );
+				$pd_obj->setFederalTaxExempt( false );
+				$pd_obj->setProvincialTaxExempt( false );
 
 				$pd_obj->setGrossPayPeriodIncome( $this->mf( $row['gross_income'] ) );
 
@@ -147,33 +148,33 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		}
 
 		//Make sure all rows are tested.
-		$this->assertEquals( $total_rows, ($i - 1 ) );
+		$this->assertEquals( $total_rows, ( $i - 1 ) );
 	}
 
 	function testCompareWithLastYearCSVFile() {
-		$this->assertEquals( file_exists($this->tax_table_file), TRUE);
+		$this->assertEquals( file_exists( $this->tax_table_file ), true );
 
-		$test_rows = Misc::parseCSV( $this->tax_table_file, TRUE );
+		$test_rows = Misc::parseCSV( $this->tax_table_file, true );
 
-		$total_rows = ( count($test_rows) + 1 );
+		$total_rows = ( count( $test_rows ) + 1 );
 		$i = 2;
-		foreach( $test_rows as $row ) {
+		foreach ( $test_rows as $row ) {
 			//Debug::text('Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10);
-			if ( $row['gross_income'] == '' AND isset($row['low_income']) AND $row['low_income'] != '' AND isset($row['high_income']) AND $row['high_income'] != '' ) {
-				$row['gross_income'] = ( $row['low_income'] + ( ($row['high_income'] - $row['low_income']) / 2 ) );
+			if ( $row['gross_income'] == '' && isset( $row['low_income'] ) && $row['low_income'] != '' && isset( $row['high_income'] ) && $row['high_income'] != '' ) {
+				$row['gross_income'] = ( $row['low_income'] + ( ( $row['high_income'] - $row['low_income'] ) / 2 ) );
 			}
-			if ( $row['country'] != '' AND $row['gross_income'] != '' ) {
+			if ( $row['country'] != '' && $row['gross_income'] != '' ) {
 				//echo $i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'] ."\n";
 
 				$pd_obj = new PayrollDeduction( $row['country'], ( ( $row['province'] == '00' ) ? 'AK' : $row['province'] ) ); //Valid state is needed to calculate something, even for just federal numbers.
-				$pd_obj->setDate( strtotime('-1 year', strtotime( $row['date'] ) ) ); //Get the same date only last year.
+				$pd_obj->setDate( strtotime( '-1 year', strtotime( $row['date'] ) ) ); //Get the same date only last year.
 				$pd_obj->setAnnualPayPeriods( $row['pay_periods'] );
 
 				//Federal
 				$pd_obj->setFederalFormW4Version( $row['federal_form_w4_version'] );
 				$pd_obj->setFederalFilingStatus( $row['filing_status'] );
 				$pd_obj->setFederalAllowance( $row['allowance'] );
-				$pd_obj->setFederalMultipleJobs( FALSE ); //2020 or newer W4 settings.
+				$pd_obj->setFederalMultipleJobs( false ); //2020 or newer W4 settings.
 				$pd_obj->setFederalClaimDependents( $row['federal_claim_dependents'] );
 				$pd_obj->setFederalOtherIncome( $row['federal_other_income'] );
 				$pd_obj->setFederalDeductions( $row['federal_other_deductions'] );
@@ -185,21 +186,21 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 
 				//Some states use other values for allowance/deductions.
-				switch ($row['province']) {
+				switch ( $row['province'] ) {
 					case 'GA':
-						Debug::text('Setting UserValue3: '. $row['allowance'], __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'Setting UserValue3: ' . $row['allowance'], __FILE__, __LINE__, __METHOD__, 10 );
 						$pd_obj->setUserValue3( $row['allowance'] );
 						break;
 					case 'IN':
 					case 'IL':
 					case 'VA':
-						Debug::text('Setting UserValue1: '. $row['allowance'], __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'Setting UserValue1: ' . $row['allowance'], __FILE__, __LINE__, __METHOD__, 10 );
 						$pd_obj->setUserValue1( $row['allowance'] );
 						break;
 				}
 
-				$pd_obj->setFederalTaxExempt( FALSE );
-				$pd_obj->setProvincialTaxExempt( FALSE );
+				$pd_obj->setFederalTaxExempt( false );
+				$pd_obj->setProvincialTaxExempt( false );
 
 				$pd_obj->setGrossPayPeriodIncome( $this->mf( $row['gross_income'] ) );
 
@@ -215,7 +216,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 						$amount_diff_percent = ( ( $amount_diff / $row['federal_deduction'] ) * 100 );
 					}
 
-					Debug::text($i.'. Amount: This Year: '. $row['federal_deduction'] .' Last Year: '. $pd_obj->getFederalPayPeriodDeductions() .' Diff Amount: '. $amount_diff .' Percent: '. $amount_diff_percent .'%', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text( $i . '. Amount: This Year: ' . $row['federal_deduction'] . ' Last Year: ' . $pd_obj->getFederalPayPeriodDeductions() . ' Diff Amount: ' . $amount_diff . ' Percent: ' . $amount_diff_percent . '%', __FILE__, __LINE__, __METHOD__, 10 );
 					//2019 to 2020 has significant differences, so this check is useless.
 //					if ( $amount_diff > 5 ) {
 //						$this->assertLessThan( 5, $amount_diff_percent ); //Should be slightly higher than inflation.
@@ -227,13 +228,13 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 					//$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), $this->mf( $row['provincial_deduction'] ) );
 					$amount_diff = 0;
 					$amount_diff_percent = 0;
-					if ( $row['provincial_deduction'] > 0 AND $pd_obj->getStatePayPeriodDeductions() > 0 ) {
+					if ( $row['provincial_deduction'] > 0 && $pd_obj->getStatePayPeriodDeductions() > 0 ) {
 						$amount_diff = abs( ( $pd_obj->getStatePayPeriodDeductions() - $row['provincial_deduction'] ) );
 						$amount_diff_percent = ( ( $amount_diff / $row['provincial_deduction'] ) * 100 );
 					}
 
-					Debug::text($i.'. Amount: This Year: '. $row['provincial_deduction'] .' Last Year: '. $pd_obj->getStatePayPeriodDeductions() .' Diff Amount: '. $amount_diff .' Percent: '. $amount_diff_percent .'%', __FILE__, __LINE__, __METHOD__, 10);
-					if ( !in_array( $row['province'], array( '00', 'IA', 'ND', 'OR', 'MN', 'NM', 'CO' ) ) AND $amount_diff > 5 ) { //Some states had significant changes.
+					Debug::text( $i . '. Amount: This Year: ' . $row['provincial_deduction'] . ' Last Year: ' . $pd_obj->getStatePayPeriodDeductions() . ' Diff Amount: ' . $amount_diff . ' Percent: ' . $amount_diff_percent . '%', __FILE__, __LINE__, __METHOD__, 10 );
+					if ( !in_array( $row['province'], [ '00', 'IA', 'ND', 'OR', 'MN', 'NM', 'CO' ] ) && $amount_diff > 5 ) { //Some states had significant changes.
 						$this->assertLessThan( 15, $amount_diff_percent ); //Reasonable margin of error.
 						$this->assertGreaterThan( 0, $amount_diff_percent );
 					}
@@ -244,14 +245,14 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		}
 
 		//Make sure all rows are tested.
-		$this->assertEquals( $total_rows, ($i - 1 ) );
+		$this->assertEquals( $total_rows, ( $i - 1 ) );
 	}
 
 	function testUS_2020_Test2019W4() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -259,7 +260,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -267,8 +268,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
@@ -278,10 +279,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020_Test2020W4SingleJob1() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -289,7 +290,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -297,8 +298,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
@@ -308,10 +309,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020_Test2020W4TwoJobs1() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -319,7 +320,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( TRUE );
+		$pd_obj->setFederalMultipleJobs( true );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -327,8 +328,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
@@ -338,10 +339,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020_Test2020W4OneJobWithDependents1() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -349,7 +350,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 2500 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -357,8 +358,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
@@ -368,10 +369,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020_Test2020W4OneJobWithOtherIncome1() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -379,7 +380,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 10000 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -387,8 +388,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
@@ -398,10 +399,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020_Test2020W4OneJobWithDeductions1() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -409,7 +410,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 5000 );
@@ -417,8 +418,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
@@ -428,10 +429,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020_Test2020W4OneJobWithAdditionalDeduction1() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -439,7 +440,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -447,8 +448,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 9615 );
 
@@ -459,10 +460,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2020W4WageBracket1a() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 20 ); //Married
@@ -470,7 +471,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -478,8 +479,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -490,10 +491,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2020W4WageBracket1b() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 20 ); //Married
@@ -501,7 +502,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -509,8 +510,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -521,10 +522,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2020W4WageBracket2a() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -532,7 +533,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( TRUE );
+		$pd_obj->setFederalMultipleJobs( true );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -540,8 +541,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -552,10 +553,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2020W4WageBracket2b() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 20 ); //Married Filing Jointly
@@ -563,7 +564,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( TRUE );
+		$pd_obj->setFederalMultipleJobs( true );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -571,8 +572,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -583,10 +584,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2020W4WageBracket2c() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 40 ); //Head of Household
@@ -594,7 +595,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( TRUE );
+		$pd_obj->setFederalMultipleJobs( true );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -602,8 +603,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -614,10 +615,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2020W4WageBracket3a() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 40 ); //Head of Household
@@ -625,7 +626,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2020 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -633,8 +634,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -645,10 +646,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2019W4WageBracket1a() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 20 ); //Married
@@ -656,7 +657,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2019 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -664,8 +665,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -676,10 +677,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2019W4WageBracket1b() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 20 ); //Married
@@ -687,7 +688,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2019 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -695,8 +696,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -707,10 +708,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2019W4WageBracket2a() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -718,7 +719,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2019 );
-		$pd_obj->setFederalMultipleJobs( TRUE );
+		$pd_obj->setFederalMultipleJobs( true );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -726,8 +727,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -738,10 +739,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2019W4WageBracket2b() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 20 ); //Married Filing Jointly
@@ -749,7 +750,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2019 );
-		$pd_obj->setFederalMultipleJobs( TRUE );
+		$pd_obj->setFederalMultipleJobs( true );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -757,8 +758,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -769,10 +770,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2019W4WageBracket2c() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 40 ); //Head of Household
@@ -780,7 +781,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2019 );
-		$pd_obj->setFederalMultipleJobs( TRUE );
+		$pd_obj->setFederalMultipleJobs( true );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -788,8 +789,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -800,10 +801,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	//Examples from 15-T publication.
 	function testUS_2020_Test2019W4WageBracket3a() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'TX');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'TX' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 40 ); //Head of Household
@@ -811,7 +812,7 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		//2020 or newer W4
 		$pd_obj->setFederalFormW4Version( 2019 );
-		$pd_obj->setFederalMultipleJobs( FALSE );
+		$pd_obj->setFederalMultipleJobs( false );
 		$pd_obj->setFederalClaimDependents( 0 );
 		$pd_obj->setFederalOtherIncome( 0 );
 		$pd_obj->setFederalDeductions( 0 );
@@ -819,8 +820,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1925 );
 
@@ -831,10 +832,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	function testUS_ID_2020a_Test1() {
 		//Example from employer guide.
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'ID');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'ID' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -845,8 +846,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1212 );
 
@@ -856,10 +857,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	function testUS_ID_2020a_Test2() {
 		//Example from employer guide.
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'ID');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'ID' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 20 ); //Married
@@ -870,8 +871,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1000 );
 
@@ -881,10 +882,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	function testUS_LA_2020a_Test1() {
 		//Example from employer guide.
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'LA');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'LA' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -892,12 +893,12 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setStateFilingStatus( 10 ); //Single
 		$pd_obj->setStateAllowance( 1 );
-		$pd_obj->setUserValue2( 2 );
+		$pd_obj->setUserValue3( 2 ); //Dependent
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 700 );
 
@@ -907,10 +908,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 	function testUS_LA_2020a_Test2() {
 		//Example from employer guide.
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'LA');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'LA' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
 
 		$pd_obj->setFederalFilingStatus( 20 ); //Married
@@ -918,12 +919,12 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setStateFilingStatus( 20 ); //Married
 		$pd_obj->setStateAllowance( 2 );
-		$pd_obj->setUserValue2( 3 );
+		$pd_obj->setUserValue3( 3 ); //Dependent
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 4600 );
 
@@ -932,10 +933,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020a_Test1() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'OR');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'OR' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 26 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -946,8 +947,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 576.923 );
 
@@ -957,14 +958,114 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeSocialSecurity() ), '35.77' );
 	}
 
+	function testUS_AR_2020a_Test1() {
+		//Example from employer guide.
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		$pd_obj = new PayrollDeduction( 'US', 'AR' );
+		$pd_obj->setDate( strtotime( '01-Mar-2020' ) );
+		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
+
+		$pd_obj->setFederalFilingStatus( 10 ); //Single
+		$pd_obj->setFederalAllowance( 2 );
+
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 2 );
+
+		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
+
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+
+		$pd_obj->setGrossPayPeriodIncome( 2127 );
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2127' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '57.73' );
+	}
+
+	function testUS_AR_2020a_Test2() {
+		//Example from employer guide.
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		$pd_obj = new PayrollDeduction( 'US', 'AR' );
+		$pd_obj->setDate( strtotime( '01-Mar-2020' ) );
+		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
+
+		$pd_obj->setFederalFilingStatus( 10 ); //Single
+		$pd_obj->setFederalAllowance( 2 );
+
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 2 );
+
+		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
+
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+
+		$pd_obj->setGrossPayPeriodIncome( 8333.33 );
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '8333.33' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '466.62' );
+	}
+
+	function testUS_MS_2020a_Test1() {
+		//Example from employer guide.
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		$pd_obj = new PayrollDeduction( 'US', 'MS' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
+		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
+
+		$pd_obj->setFederalFilingStatus( 10 ); //Single
+		$pd_obj->setFederalAllowance( 2 );
+
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 0 ); //Exemption Claimed Amount
+
+		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
+
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+
+		$pd_obj->setGrossPayPeriodIncome( 1890 );
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1890' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '80.85' );
+	}
+
+	function testUS_MS_2020a_Test2() {
+		//Example from employer guide.
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		$pd_obj = new PayrollDeduction( 'US', 'MS' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
+		$pd_obj->setAnnualPayPeriods( 26 ); //BiWeekly
+
+		$pd_obj->setFederalFilingStatus( 10 ); //Single
+		$pd_obj->setFederalAllowance( 2 );
+
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 18000 ); //Exemption Claimed Amount
+
+		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
+
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+
+		$pd_obj->setGrossPayPeriodIncome( 1890 );
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1890' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '46.23' );
+	}
+
 	//
 	// US Social Security
 	//
 	function testUS_2020a_SocialSecurity() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -972,8 +1073,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -983,10 +1084,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020a_SocialSecurity_Max() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -995,8 +1096,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( ( $pd_obj->getSocialSecurityMaximumContribution() - 1 ) ); //7347
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -1006,10 +1107,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020a_Medicare() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1017,8 +1118,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -1026,11 +1127,12 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '14.50' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
 	}
-	function testUS_2020a_Additional_MedicareA() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+	function testUS_2020a_Additional_MedicareA() {
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1038,8 +1140,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 
 		$pd_obj->setYearToDateGrossIncome( 199000.00 );
@@ -1050,11 +1152,12 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
 		$this->assertEquals( $this->mf( $pd_obj->getMedicareAdditionalEmployerThreshold() ), '200000.00' );
 	}
-	function testUS_2020a_Additional_MedicareB() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+	function testUS_2020a_Additional_MedicareB() {
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1062,8 +1165,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 
 		$pd_obj->setYearToDateGrossIncome( 199500.00 );
@@ -1076,10 +1179,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020a_Additional_MedicareC() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1087,8 +1190,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 
 		$pd_obj->setYearToDateGrossIncome( 500000.00 );
@@ -1099,11 +1202,12 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
 		$this->assertEquals( $this->mf( $pd_obj->getMedicareAdditionalEmployerThreshold() ), '200000.00' );
 	}
-	function testUS_2020a_Additional_MedicareD() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+	function testUS_2020a_Additional_MedicareD() {
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1111,8 +1215,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -1125,10 +1229,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020a_FederalUI_NoState() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1137,8 +1241,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateSocialSecurityContribution( 0 );
 		$pd_obj->setYearToDateFederalUIContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -1149,10 +1253,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020a_FederalUI_NoState_Max() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1165,8 +1269,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateFederalUIContribution( 419 ); //420
 		$pd_obj->setYearToDateStateUIContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -1177,10 +1281,10 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2020a_FederalUI_State_Max() {
-		Debug::text('US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2020 01-Jan-2020: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('US', 'MO');
-		$pd_obj->setDate(strtotime('01-Jan-2020'));
+		$pd_obj = new PayrollDeduction( 'US', 'MO' );
+		$pd_obj->setDate( strtotime( '01-Jan-2020' ) );
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1193,8 +1297,8 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateFederalUIContribution( 173.30 ); //174.30
 		$pd_obj->setYearToDateStateUIContribution( 0 );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
@@ -1204,4 +1308,5 @@ class USPayrollDeductionTest2020 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getFederalEmployerUI() ), '1.00' );
 	}
 }
+
 ?>

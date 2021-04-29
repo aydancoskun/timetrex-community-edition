@@ -39,8 +39,8 @@
  * This file should run once a day.
  *
  */
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
 //Debug::setVerbosity(11);
 
@@ -50,18 +50,18 @@ $current_epoch = TTDate::getTime();
 $offset = ( 86400 - ( 3600 * 2 ) ); //22hrs of variance. Must be less than 24hrs which is how often this script runs.
 
 $clf = new CompanyListFactory();
-$clf->getByStatusID( array(10,20,23), NULL, array('a.id' => 'asc') );
+$clf->getByStatusID( [ 10, 20, 23 ], null, [ 'a.id' => 'asc' ] );
 if ( $clf->getRecordCount() > 0 ) {
 	foreach ( $clf as $c_obj ) {
-		if ( in_array( $c_obj->getStatus(), array(10, 20, 23) ) ) { //10=Active, 20=Hold, 23=Expired
+		if ( in_array( $c_obj->getStatus(), [ 10, 20, 23 ] ) ) { //10=Active, 20=Hold, 23=Expired
 			$aplf = new AccrualPolicyListFactory();
-			$aplf->getByCompanyIdAndTypeId( $c_obj->getId(), array(20, 30) ); //Include hour based accruals so rollover adjustments can be calculated.
+			$aplf->getByCompanyIdAndTypeId( $c_obj->getId(), [ 20, 30 ] ); //Include hour based accruals so rollover adjustments can be calculated.
 			if ( $aplf->getRecordCount() > 0 ) {
-				foreach( $aplf as $ap_obj ) {
+				foreach ( $aplf as $ap_obj ) {
 					//Accrue for the previous day rather than the current day. So if an employee is hired on August 1st and entered on August 1st,
 					// the next morning they will see accruals if it happens to be a frequency date.
 					//This will make it seem like accruals are delayed by one day though in all other cases, but see #2334
-					$ap_obj->addAccrualPolicyTime( ( $current_epoch - 86400 ) , $offset );
+					$ap_obj->addAccrualPolicyTime( ( $current_epoch - 86400 ), $offset );
 				}
 			}
 		}

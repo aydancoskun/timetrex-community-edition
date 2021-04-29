@@ -6,4 +6,4 @@ var APIProgressBar = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'get', arguments );
 	}
 
-} )
+} );

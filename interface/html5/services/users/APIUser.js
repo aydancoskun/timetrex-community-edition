@@ -57,7 +57,6 @@ var APIUser = ServiceCaller.extend( {
 
 	},
 
-
 	UnsubscribeEmail: function() {
 
 		return this.argumentsHandler( this.className, 'UnsubscribeEmail', arguments );
@@ -70,13 +69,11 @@ var APIUser = ServiceCaller.extend( {
 
 	},
 
-
 	getUniqueUserProvinces: function() {
 
 		return this.argumentsHandler( this.className, 'getUniqueUserProvinces', arguments );
 
 	},
-
 
 	setUserFeedbackRating: function() {
 		return this.argumentsHandler( this.className, 'setUserFeedbackRating', arguments );
@@ -100,6 +97,5 @@ var APIUser = ServiceCaller.extend( {
 	deleteImage: function() {
 		return this.argumentsHandler( this.className, 'deleteImage', arguments );
 	}
-
 
 } );

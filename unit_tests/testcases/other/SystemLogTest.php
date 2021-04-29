@@ -38,24 +38,24 @@
  * @group SystemLog
  */
 class SystemLogTest extends PHPUnit_Framework_TestCase {
-	protected $company_id = NULL;
-	protected $user_id = NULL;
-	protected $pay_period_schedule_id = NULL;
-	protected $pay_period_objs = NULL;
-	protected $pay_stub_account_link_arr = NULL;
+	protected $company_id = null;
+	protected $user_id = null;
+	protected $pay_period_schedule_id = null;
+	protected $pay_period_objs = null;
+	protected $pay_stub_account_link_arr = null;
 
 	public function setUp() {
 		global $dd;
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -68,15 +68,15 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$this->deleteAllSchedules();
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayPeriodSchedule( $shift_assigned_day = 10 ) {
@@ -97,20 +97,20 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartDayOfWeek( TTDate::getDayOfWeek( $anchor_date ) );
 		$ppsf->setTransactionDate( 7 );
 
-		$ppsf->setTransactionDateBusinessDay( TRUE );
-		$ppsf->setTimeZone('PST8PDT');
+		$ppsf->setTransactionDateBusinessDay( true );
+		$ppsf->setTimeZone( 'PST8PDT' );
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4 * 3600) );
-		$ppsf->setMaximumShiftTime( (16 * 3600) );
+		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
+		$ppsf->setMaximumShiftTime( ( 16 * 3600 ) );
 		$ppsf->setShiftAssignedDay( $shift_assigned_day );
 
-		$ppsf->setEnableInitialPayPeriods( FALSE );
+		$ppsf->setEnableInitialPayPeriods( false );
 		if ( $ppsf->isValid() ) {
-			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			$insert_id = $ppsf->Save( false );
+			Debug::Text( 'Pay Period Schedule ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-			$ppsf->setUser( array($this->user_id) );
+			$ppsf->setUser( [ $this->user_id ] );
 			$ppsf->Save();
 
 			$this->pay_period_schedule_id = $insert_id;
@@ -118,13 +118,12 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
-
+		return false;
 	}
 
-	function createPayPeriods( $initial_date = FALSE ) {
+	function createPayPeriods( $initial_date = false ) {
 		$max_pay_periods = 35;
 
 		$ppslf = new PayPeriodScheduleListFactory();
@@ -134,7 +133,7 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					if ( $initial_date !== FALSE ) {
+					if ( $initial_date !== false ) {
 						$end_date = $initial_date;
 					} else {
 						$end_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) );
@@ -143,14 +142,13 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'I: ' . $i . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, ( 86400 + 3600 ), false ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
-
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function getAllPayPeriods() {
@@ -158,8 +156,8 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 		//$pplf->getByCompanyId( $this->company_id );
 		$pplf->getByPayPeriodScheduleId( $this->pay_period_schedule_id );
 		if ( $pplf->getRecordCount() > 0 ) {
-			foreach( $pplf as $pp_obj ) {
-				Debug::text('Pay Period... Start: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			foreach ( $pplf as $pp_obj ) {
+				Debug::text( 'Pay Period... Start: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getStartDate() ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				$this->pay_period_objs[] = $pp_obj;
 			}
@@ -167,7 +165,7 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 
 		$this->pay_period_objs = array_reverse( $this->pay_period_objs );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -178,23 +176,23 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 		global $config_vars;
 
 		//Populate global variables for current_user.
-		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $this->user_id )->getCurrent();
 		global $current_user, $current_company;
 		$current_user = $user_obj;
 		$current_company = $user_obj->getCompanyObject();
 
 		//Enable system log.
-		$config_vars['other']['disable_audit_log'] = FALSE;
-		$config_vars['other']['disable_audit_log_detail'] = FALSE;
+		$config_vars['other']['disable_audit_log'] = false;
+		$config_vars['other']['disable_audit_log_detail'] = false;
 
 		$user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 
 		$llf = new LogListFactory();
-		$filter_data = array( 'table_name' => 'users', 'object_id' => $user_id  );
+		$filter_data = [ 'table_name' => 'users', 'object_id' => $user_id ];
 		$llf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data );
 		if ( $llf->getRecordCount() == 1 ) {
-			foreach( $llf as $l_obj ) {
+			foreach ( $llf as $l_obj ) {
 				$this->assertEquals( $l_obj->getUser(), $this->user_id );
 				$this->assertEquals( $l_obj->getObject(), $user_id );
 				$this->assertEquals( $l_obj->getAction(), 10 );
@@ -202,16 +200,17 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 				$this->assertNotEmpty( $l_obj->getDescription() );
 			}
 
-			$this->assertEquals( TRUE, TRUE );
+			$this->assertEquals( true, true );
 		} else {
-			$this->assertEquals( TRUE, FALSE );
+			$this->assertEquals( true, false );
 		}
 
 		//Disable system log again.
-		$config_vars['other']['disable_audit_log'] = TRUE;
-		$config_vars['other']['disable_audit_log_detail'] = TRUE;
+		$config_vars['other']['disable_audit_log'] = true;
+		$config_vars['other']['disable_audit_log_detail'] = true;
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUndefinedFunctionInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -39,26 +39,24 @@
  * @package Core
  */
 class Debug {
-	static protected $enable = FALSE;			//Enable/Disable debug printing.
-	static protected $verbosity = 5;			//Display debug info with a verbosity level equal or lesser then this.
-	static protected $buffer_output = TRUE;		//Enable/Disable output buffering.
-	static protected $debug_buffer = NULL;		//Output buffer.
-	static protected $enable_display = FALSE;	//Enable/Disable displaying of debug output
-	static protected $enable_log = FALSE;		//Enable/Disable logging of debug output
-	static protected $max_line_size = 200;		//Max line size in characters. This is used to break up long lines.
-	static protected $max_buffer_size = 1000;	//Max buffer size in lines. **Syslog can't handle much more than 1000.
-	static protected $buffer_id = NULL;			//Unique identifier for the debug buffer.
-	static protected $php_errors = 0;			//Count number of PHP errors so we can automatically email the log.
-	static protected $email_log = FALSE;		//Determine if log needs to be emailed on shutdown.
+	static protected $enable = false;         //Enable/Disable debug printing.
+	static protected $verbosity = 5;          //Display debug info with a verbosity level equal or lesser then this.
+	static protected $buffer_output = true;   //Enable/Disable output buffering.
+	static protected $debug_buffer = null;    //Output buffer.
+	static protected $enable_display = false; //Enable/Disable displaying of debug output
+	static protected $enable_log = false;     //Enable/Disable logging of debug output
+	static protected $max_line_size = 200;    //Max line size in characters. This is used to break up long lines.
+	static protected $max_buffer_size = 1000; //Max buffer size in lines. **Syslog can't handle much more than 1000.
+	static protected $buffer_id = null;       //Unique identifier for the debug buffer.
+	static protected $php_errors = 0;         //Count number of PHP errors so we can automatically email the log.
+	static protected $email_log = false;      //Determine if log needs to be emailed on shutdown.
 
-	static protected $buffer_size = 0;			//Current buffer size in lines.
-
-	static $tidy_obj = NULL;
+	static protected $buffer_size = 0;//Current buffer size in lines.
 
 	/**
 	 * @param $bool
 	 */
-	static function setEnable( $bool) {
+	static function setEnable( $bool ) {
 		self::setBufferID();
 		self::$enable = $bool;
 	}
@@ -73,20 +71,20 @@ class Debug {
 	/**
 	 * @param $bool
 	 */
-	static function setBufferOutput( $bool) {
+	static function setBufferOutput( $bool ) {
 		self::$buffer_output = $bool;
 	}
 
 	/**
 	 * @param $level
 	 */
-	static function setVerbosity( $level) {
+	static function setVerbosity( $level ) {
 		global $db;
 
 		self::$verbosity = (int)$level;
 
-		if (is_object($db) AND $level == 11) {
-			$db->debug = TRUE;
+		if ( is_object( $db ) && $level == 11 ) {
+			$db->debug = true;
 		}
 	}
 
@@ -100,7 +98,7 @@ class Debug {
 	/**
 	 * @param $bool
 	 */
-	static function setEnableDisplay( $bool) {
+	static function setEnableDisplay( $bool ) {
 		self::$enable_display = $bool;
 	}
 
@@ -114,7 +112,7 @@ class Debug {
 	/**
 	 * @param $bool
 	 */
-	static function setEnableLog( $bool) {
+	static function setEnableLog( $bool ) {
 		self::$enable_log = $bool;
 	}
 
@@ -126,7 +124,7 @@ class Debug {
 	}
 
 	static function setBufferID() {
-		if ( self::$buffer_id == NULL ) {
+		if ( self::$buffer_id == null ) {
 			self::$buffer_id = uniqid();
 		}
 	}
@@ -136,25 +134,25 @@ class Debug {
 	 * @param null $company_name
 	 * @return mixed
 	 */
-	static function getSyslogIdent( $extra_ident = NULL, $company_name = NULL ) {
+	static function getSyslogIdent( $extra_ident = null, $company_name = null ) {
 		global $config_vars, $current_company;
 
-		$suffix = NULL;
+		$suffix = null;
 		if ( $company_name != '' ) {
 			$suffix = $company_name;
-		} elseif ( isset($current_company) AND is_object( $current_company ) ) {
+		} else if ( isset( $current_company ) && is_object( $current_company ) ) {
 			$suffix = $current_company->getShortName();
 		} else {
 			$suffix = 'System';
 		}
 
-		if ( isset($config_vars['debug']['syslog_ident']) AND $config_vars['debug']['syslog_ident'] != '' ) {
-			$retval = $config_vars['debug']['syslog_ident'].'-'.$suffix.$extra_ident;
+		if ( isset( $config_vars['debug']['syslog_ident'] ) && $config_vars['debug']['syslog_ident'] != '' ) {
+			$retval = $config_vars['debug']['syslog_ident'] . '-' . $suffix . $extra_ident;
 		} else {
-			$retval = APPLICATION_NAME.'-'.$suffix.$extra_ident;
+			$retval = APPLICATION_NAME . '-' . $suffix . $extra_ident;
 		}
 
-		return strtolower( preg_replace('/[^a-zA-Z0-9-]/', '', escapeshellarg( $retval ) ) ); //This will remove spaces.
+		return strtolower( preg_replace( '/[^a-zA-Z0-9-]/', '', escapeshellarg( $retval ) ) ); //This will remove spaces.
 	}
 
 	/**
@@ -164,10 +162,10 @@ class Debug {
 	 */
 	static function getSyslogFacility( $log_type = 0 ) {
 		global $config_vars;
-		if ( isset($config_vars['debug']['syslog_facility']) AND $config_vars['debug']['syslog_facility'] != '' ) {
+		if ( isset( $config_vars['debug']['syslog_facility'] ) && $config_vars['debug']['syslog_facility'] != '' ) {
 			$facility_arr = explode( ',', $config_vars['debug']['syslog_facility'] );
-			if ( is_array($facility_arr) AND isset( $facility_arr[(int)$log_type] ) ) {
-				return ( is_numeric( $facility_arr[(int)$log_type] ) ) ? $facility_arr[(int)$log_type] : constant( trim($facility_arr[(int)$log_type]) );
+			if ( is_array( $facility_arr ) && isset( $facility_arr[(int)$log_type] ) ) {
+				return ( is_numeric( $facility_arr[(int)$log_type] ) ) ? $facility_arr[(int)$log_type] : constant( trim( $facility_arr[(int)$log_type] ) );
 			}
 		}
 
@@ -181,10 +179,10 @@ class Debug {
 	static function getSyslogPriority( $log_type = 0 ) {
 		global $config_vars;
 
-		if ( isset($config_vars['debug']['syslog_priority']) AND $config_vars['debug']['syslog_priority'] != '' ) {
+		if ( isset( $config_vars['debug']['syslog_priority'] ) && $config_vars['debug']['syslog_priority'] != '' ) {
 			$priority_arr = explode( ',', $config_vars['debug']['syslog_priority'] );
-			if ( is_array($priority_arr) AND isset( $priority_arr[(int)$log_type] ) ) {
-				return ( is_numeric( $priority_arr[(int)$log_type] ) ) ? $priority_arr[(int)$log_type] : constant( trim($priority_arr[(int)$log_type]) );
+			if ( is_array( $priority_arr ) && isset( $priority_arr[(int)$log_type] ) ) {
+				return ( is_numeric( $priority_arr[(int)$log_type] ) ) ? $priority_arr[(int)$log_type] : constant( trim( $priority_arr[(int)$log_type] ) );
 			}
 		}
 
@@ -196,7 +194,7 @@ class Debug {
 	 * @return float
 	 */
 	static function getExecutionTime() {
-		return ceil( ( (microtime( TRUE ) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000 ) );
+		return ceil( ( ( microtime( true ) - $_SERVER['REQUEST_TIME_FLOAT'] ) * 1000 ) );
 	}
 
 	/**
@@ -206,20 +204,20 @@ class Debug {
 	 * @param null $suffix
 	 * @return array
 	 */
-	static function splitInput( $text, $prefix = NULL, $suffix = NULL ) {
+	static function splitInput( $text, $prefix = null, $suffix = null ) {
 		if ( strlen( $text ) > self::$max_line_size ) {
-			$retarr = array();
+			$retarr = [];
 
 			$lines = explode( PHP_EOL, $text ); //Split on newlines first.
-			foreach( $lines as $line ) {
+			foreach ( $lines as $line ) {
 				$split_lines = str_split( $line, self::$max_line_size ); //Split on long lines next.
-				foreach( $split_lines as $split_line ) {
-					$retarr[] = $prefix.$split_line.$suffix;
+				foreach ( $split_lines as $split_line ) {
+					$retarr[] = $prefix . $split_line . $suffix;
 				}
 			}
-			unset($lines, $line, $split_lines, $split_line);
+			unset( $lines, $line, $split_lines, $split_line );
 		} else {
-			$retarr = array( $prefix.$text.$suffix ); //Always returns an array.
+			$retarr = [ $prefix . $text . $suffix ]; //Always returns an array.
 		}
 
 		return $retarr;
@@ -233,39 +231,39 @@ class Debug {
 	 * @param int $verbosity
 	 * @return bool
 	 */
-	static function Text( $text = NULL, $file = __FILE__, $line = __LINE__, $method = __METHOD__, $verbosity = 9) {
-		if ( $verbosity > self::getVerbosity() OR self::$enable == FALSE ) {
-			return FALSE;
+	static function Text( $text = null, $file = __FILE__, $line = __LINE__, $method = __METHOD__, $verbosity = 9 ) {
+		if ( $verbosity > self::getVerbosity() || self::$enable == false ) {
+			return false;
 		}
 
-		if ( empty($method) ) {
+		if ( empty( $method ) ) {
 			$method = 'GLOBAL: '; //Was: [Function]
 		} else {
-			$method = $method .'(): ';
+			$method = $method . '(): ';
 		}
 
 		//If text is too long, split it into an array.
-		$text_arr = self::splitInput( $text, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method, PHP_EOL );
+		$text_arr = self::splitInput( $text, 'DEBUG [L' . str_pad( $line, 4, 0, STR_PAD_LEFT ) . '] [' . str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT ) . 'ms]: ' . $method, PHP_EOL );
 
-		if ( self::$buffer_output == TRUE ) {
-			foreach( $text_arr as $text_line ) {
-				self::$debug_buffer[] = array($verbosity, $text_line);
+		if ( self::$buffer_output == true ) {
+			foreach ( $text_arr as $text_line ) {
+				self::$debug_buffer[] = [ $verbosity, $text_line ];
 				self::$buffer_size++;
 				self::handleBufferSize( $line, $method );
 			}
 		} else {
-			if ( self::$enable_display == TRUE ) {
-				foreach( $text_arr as $text_line ) {
+			if ( self::$enable_display == true ) {
+				foreach ( $text_arr as $text_line ) {
 					echo $text_line;
 				}
-			} elseif ( OPERATING_SYSTEM != 'WIN' AND self::$enable_log == TRUE ) {
-				foreach( $text_arr as $text_line ) {
-					syslog(LOG_DEBUG, $text_line );
+			} else if ( OPERATING_SYSTEM != 'WIN' && self::$enable_log == true ) {
+				foreach ( $text_arr as $text_line ) {
+					syslog( LOG_DEBUG, $text_line );
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -273,8 +271,8 @@ class Debug {
 	 * @return bool|string
 	 */
 	static function profileTimers( $profile_obj ) {
-		if ( !is_object($profile_obj) ) {
-			return FALSE;
+		if ( !is_object( $profile_obj ) ) {
+			return false;
 		}
 
 		ob_start();
@@ -297,51 +295,50 @@ class Debug {
 
 		$retval = '';
 		$trace_arr = debug_backtrace();
-		if ( is_array($trace_arr) ) {
+		if ( is_array( $trace_arr ) ) {
 			$i = 1;
-			foreach( $trace_arr as $trace_line ) {
-				if ( isset($trace_line['class']) AND isset($trace_line['type'])	 ) {
-					$class = $trace_line['class'].$trace_line['type'];
+			foreach ( $trace_arr as $trace_line ) {
+				if ( isset( $trace_line['class'] ) && isset( $trace_line['type'] ) ) {
+					$class = $trace_line['class'] . $trace_line['type'];
 				} else {
-					$class = NULL;
+					$class = null;
 				}
 
-				if ( !isset($trace_line['file']) ) {
+				if ( !isset( $trace_line['file'] ) ) {
 					$trace_line['file'] = 'N/A';
 				}
 
-				if ( !isset($trace_line['line']) ) {
+				if ( !isset( $trace_line['line'] ) ) {
 					$trace_line['line'] = 'N/A';
 				}
 
-				if ( isset($trace_line['args']) AND is_array($trace_line['args']) ) {
-					$args = array();
-					foreach( $trace_line['args'] as $arg ) {
-						if ( is_array($arg) ) {
+				if ( isset( $trace_line['args'] ) && is_array( $trace_line['args'] ) ) {
+					$args = [];
+					foreach ( $trace_line['args'] as $arg ) {
+						if ( is_array( $arg ) ) {
 							if ( self::getVerbosity() == 11 ) {
 								$args[] = self::varDump( $arg ); //NOTE: If this contains an exception object from ADODB and is triggered from a SQL error, it could cause a circular reference and exhaust all memory.
 							} else {
 								//Don't display the entire array is it polutes the log and is too large for syslog anyways.
-								$args[] = 'Array('. count($arg) .')';
+								$args[] = 'Array(' . count( $arg ) . ')';
 							}
-						} elseif ( is_object($arg) ) {
+						} else if ( is_object( $arg ) ) {
 							if ( self::getVerbosity() == 11 ) {
 								$args[] = self::varDump( $arg ); //NOTE: If this contains an exception object from ADODB and is triggered from a SQL error, it could cause a circular reference and exhaust all memory.
 							} else {
 								//Don't display the entire array is it polutes the log and is too large for syslog anyways.
-								$args[] = 'Object('. get_class( $arg ) .')';
+								$args[] = 'Object(' . get_class( $arg ) . ')';
 							}
-
 						} else {
 							$args[] = $arg;
 						}
 					}
 				}
-				$retval .= '#'.$i.'.'. $class.$trace_line['function'].'('. implode(', ', $args) .') '. $trace_line['file'] .':'. $trace_line['line'] . PHP_EOL;
+				$retval .= '#' . $i . '.' . $class . $trace_line['function'] . '(' . implode( ', ', $args ) . ') ' . $trace_line['file'] . ':' . $trace_line['line'] . PHP_EOL;
 				$i++;
 			}
 		}
-		unset($trace_arr, $trace_line, $args);
+		unset( $trace_arr, $trace_line, $args );
 
 		return $retval;
 	}
@@ -352,7 +349,7 @@ class Debug {
 	 */
 	static function varDump( $array ) {
 		ob_start();
-		var_dump($array); //Xdebug may interfere with this and cause it to not display all the data...
+		var_dump( $array ); //Xdebug may interfere with this and cause it to not display all the data...
 		//print_r($array);
 		$ob_contents = ob_get_contents();
 		ob_end_clean();
@@ -369,39 +366,39 @@ class Debug {
 	 * @param int $verbosity
 	 * @return bool
 	 */
-	static function Arr( $array, $text = NULL, $file = __FILE__, $line = __LINE__, $method = __METHOD__, $verbosity = 9) {
-		if ( $verbosity > self::getVerbosity() OR self::$enable == FALSE ) {
-			return FALSE;
+	static function Arr( $array, $text = null, $file = __FILE__, $line = __LINE__, $method = __METHOD__, $verbosity = 9 ) {
+		if ( $verbosity > self::getVerbosity() || self::$enable == false ) {
+			return false;
 		}
 
-		if ( empty($method) ) {
+		if ( empty( $method ) ) {
 			$method = '[Function]';
 		}
 
-		$text_arr = array();
-		$text_arr[] = 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms] Array: '. $method .'(): '. $text . PHP_EOL;
-		$text_arr = array_merge( $text_arr, self::splitInput( self::varDump($array), NULL, PHP_EOL ) );
+		$text_arr = [];
+		$text_arr[] = 'DEBUG [L' . str_pad( $line, 4, 0, STR_PAD_LEFT ) . '] [' . str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT ) . 'ms] Array: ' . $method . '(): ' . $text . PHP_EOL;
+		$text_arr = array_merge( $text_arr, self::splitInput( self::varDump( $array ), null, PHP_EOL ) );
 		$text_arr[] = PHP_EOL;
 
-		if (self::$buffer_output == TRUE) {
-			foreach( $text_arr as $text_line ) {
-				self::$debug_buffer[] = array($verbosity, $text_line);
+		if ( self::$buffer_output == true ) {
+			foreach ( $text_arr as $text_line ) {
+				self::$debug_buffer[] = [ $verbosity, $text_line ];
 				self::$buffer_size++;
 				self::handleBufferSize( $line, $method );
 			}
 		} else {
-			if ( self::$enable_display == TRUE ) {
-				foreach( $text_arr as $text_line ) {
+			if ( self::$enable_display == true ) {
+				foreach ( $text_arr as $text_line ) {
 					echo $text_line;
 				}
-			} elseif ( OPERATING_SYSTEM != 'WIN' AND self::$enable_log == TRUE ) {
-				foreach( $text_arr as $text_line ) {
-					syslog(LOG_DEBUG, $text_line );
+			} else if ( OPERATING_SYSTEM != 'WIN' && self::$enable_log == true ) {
+				foreach ( $text_arr as $text_line ) {
+					syslog( LOG_DEBUG, $text_line );
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -418,11 +415,11 @@ class Debug {
 		$output_query = PHP_EOL; //Start with newline so its easier to copy&paste.
 
 		$split_query = explode( '?', $query );
-		foreach( $split_query as $query_chunk ) {
-			$ph_value = ( !empty($ph) ) ? array_shift( $ph ) : FALSE; //array_shift() returns NULL if no elements are left, but the first value can also be NULL in some cases too.
+		foreach ( $split_query as $query_chunk ) {
+			$ph_value = ( !empty( $ph ) ) ? array_shift( $ph ) : false; //array_shift() returns NULL if no elements are left, but the first value can also be NULL in some cases too.
 			if ( is_string( $ph_value ) ) {
-				$ph_value = '\''. $ph_value .'\'';
-			} elseif ( $ph_value === NULL ) {
+				$ph_value = '\'' . $ph_value . '\'';
+			} else if ( $ph_value === null ) {
 				$ph_value = 'NULL';
 			}
 			$output_query .= $query_chunk . $ph_value;
@@ -430,11 +427,11 @@ class Debug {
 
 		$output_query = str_replace( "\t", ' ', $output_query );
 
-		$output_query .= ';'. PHP_EOL; //End with newline so its easier to copy&paste.
+		$output_query .= ';' . PHP_EOL; //End with newline so its easier to copy&paste.
 
 		self::Arr( $output_query, 'SQL Query: ', $file, $line, $method, $verbosity );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -443,22 +440,22 @@ class Debug {
 	 * Replacement for apache_request_headers() as it wasn't reliably available and would sometimes cause PHP fatal errors due to it being undefined.
 	 */
 	static function RequestHeaders() {
-		$arh = array();
+		$arh = [];
 		$rx_http = '/\AHTTP_/';
 		foreach ( $_SERVER as $key => $val ) {
 			if ( preg_match( $rx_http, $key ) ) {
 				$arh_key = preg_replace( $rx_http, '', $key );
-				$rx_matches = array();
+
 				// do some nasty string manipulations to restore the original letter case
 				// this should work in most cases
 				$rx_matches = explode( '_', strtolower( $arh_key ) );
-				if ( count( $rx_matches ) > 0 and strlen( $arh_key ) > 2 ) {
+				if ( count( $rx_matches ) > 0 && strlen( $arh_key ) > 2 ) {
 					foreach ( $rx_matches as $ak_key => $ak_val ) {
-						$rx_matches[ $ak_key ] = ucfirst( $ak_val );
+						$rx_matches[$ak_key] = ucfirst( $ak_val );
 					}
 					$arh_key = implode( '-', $rx_matches );
 				}
-				$arh[ $arh_key ] = $val;
+				$arh[$arh_key] = $val;
 			}
 		}
 
@@ -505,46 +502,46 @@ class Debug {
 					$error_name = 'UNKNOWN';
 			}
 
-			$error_name .= '('. $error_number .')';
+			$error_name .= '(' . $error_number . ')';
 
-			$text = 'PHP ERROR - '. $error_name .': '. $error_str .' File: '. $error_file .' Line: '. $error_line;
+			$text = 'PHP ERROR - ' . $error_name . ': ' . $error_str . ' File: ' . $error_file . ' Line: ' . $error_line;
 
 			//If this is the first PHP error, make sure debugging is enabled so it and any others can be captured.
 			if ( self::$php_errors == 0 ) {
-				self::setEnable(TRUE);
-				self::setBufferOutput(TRUE);
+				self::setEnable( true );
+				self::setBufferOutput( true );
 			}
 
 			self::$php_errors++;
 
 			//Display these errors in the log, but don't cause them to trigger PHP errors that forces the log to be emailed.
 			if ( $error_number == E_USER_ERROR
-					OR ( DEPLOYMENT_ON_DEMAND == TRUE
-							OR ( DEPLOYMENT_ON_DEMAND == FALSE
-									AND (
-											//Database
-											stristr( $error_str, 'unable to connect' ) === FALSE
-											AND stristr( $error_str, 'statement timeout' ) === FALSE
-											AND stristr( $error_str, 'unique constraint' ) === FALSE
-											AND stristr( $error_str, 'deadlock' ) === FALSE
-											AND stristr( $error_str, 'server has gone away' ) === FALSE
-											AND stristr( $error_str, 'software caused connection abort' ) === FALSE
-											AND stristr( $error_str, 'closed the connection unexpectedly' ) === FALSE
-											AND stristr( $error_str, 'execution was interrupted' ) === FALSE
-											AND stristr( $error_str, 'no space left on device' ) === FALSE
-											AND stristr( $error_str, 'unserialize' ) === FALSE
-											AND stristr( $error_str, 'headers already sent by' ) === FALSE
+					|| ( DEPLOYMENT_ON_DEMAND == true
+							|| ( DEPLOYMENT_ON_DEMAND == false
+									&& (
+										//Database
+											stristr( $error_str, 'unable to connect' ) === false
+											&& stristr( $error_str, 'statement timeout' ) === false
+											&& stristr( $error_str, 'unique constraint' ) === false
+											&& stristr( $error_str, 'deadlock' ) === false
+											&& stristr( $error_str, 'server has gone away' ) === false
+											&& stristr( $error_str, 'software caused connection abort' ) === false
+											&& stristr( $error_str, 'closed the connection unexpectedly' ) === false
+											&& stristr( $error_str, 'execution was interrupted' ) === false
+											&& stristr( $error_str, 'no space left on device' ) === false
+											&& stristr( $error_str, 'unserialize' ) === false
+											&& stristr( $error_str, 'headers already sent by' ) === false
 
 											//SOAP
-											AND stristr( $error_str, 'An existing connection was forcibly closed by the remote host' ) === FALSE
+											&& stristr( $error_str, 'An existing connection was forcibly closed by the remote host' ) === false
 
 											//MISC
-											AND stristr( $error_str, 'Unable to fork' ) === FALSE
+											&& stristr( $error_str, 'Unable to fork' ) === false
 									)
 							)
 					)
 			) {
-				self::$email_log = TRUE;
+				self::$email_log = true;
 			}
 
 			if ( self::$php_errors == 1 ) { //Only trigger this on the first error, so its not repeated over and over again.
@@ -558,11 +555,11 @@ class Debug {
 				}
 			}
 
-			self::Text( '(E'. self::$php_errors .') '. $text, $error_file, $error_line, __METHOD__, 0 );
+			self::Text( '(E' . self::$php_errors . ') ' . $text, $error_file, $error_line, __METHOD__, 0 );
 			self::Text( self::backTrace(), $error_file, $error_line, __METHOD__, 0 );
 		}
 
-		return FALSE; //Let the standard PHP error handler work as well.
+		return false; //Let the standard PHP error handler work as well.
 	}
 
 	/**
@@ -570,34 +567,34 @@ class Debug {
 	 */
 	static function Shutdown() {
 		$error = error_get_last();
-		if ( $error !== NULL AND isset($error['type']) AND $error['type'] == 1 ) { //Only trigger fatal errors on shutdown.
+		if ( $error !== null && isset( $error['type'] ) && $error['type'] == 1 ) { //Only trigger fatal errors on shutdown.
 			self::$php_errors++;
-			self::$email_log = TRUE; //On FATAL error, the error handler is not called, just shutdown is called. So we need to make sure we increment the php_errors and enable emailing the log.
-			self::Text('PHP ERROR - FATAL('. $error['type'] .'): '. $error['message'] .' File: '. $error['file'] .' Line: '. $error['line'], $error['file'], $error['line'], __METHOD__, 0 );
+			self::$email_log = true; //On FATAL error, the error handler is not called, just shutdown is called. So we need to make sure we increment the php_errors and enable emailing the log.
+			self::Text( 'PHP ERROR - FATAL(' . $error['type'] . '): ' . $error['message'] . ' File: ' . $error['file'] . ' Line: ' . $error['line'], $error['file'], $error['line'], __METHOD__, 0 );
 
-			if ( defined('TIMETREX_API') AND TIMETREX_API == TRUE ) { //Only when a fatal error occurs.
+			if ( defined( 'TIMETREX_API' ) && TIMETREX_API == true ) { //Only when a fatal error occurs.
 				global $amf_message_id;
 				if ( $amf_message_id != '' ) {
 					$progress_bar = new ProgressBar();
-					$progress_bar->error( $amf_message_id, TTi18n::getText('ERROR: Operation cannot be completed.') );
-					unset($progress_bar);
+					$progress_bar->error( $amf_message_id, TTi18n::getText( 'ERROR: Operation cannot be completed.' ) );
+					unset( $progress_bar );
 				}
 			}
 		}
 
-		if ( self::$email_log == TRUE ) {
+		if ( self::$email_log == true ) {
 			//If the error log is too long, make sure we add important data to help trace it are included at the end of the log.
 			global $config_vars, $current_user, $current_company;
-			self::Text('URI: '. ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'N/A' ) .' IP Address: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
-			self::Text('USER-AGENT: '. ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
-			self::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' OS: '. OPERATING_SYSTEM .' Database: Type: '. ( isset($config_vars['database']['type']) ? $config_vars['database']['type'] : 'N/A' ) .' Name: '. ( isset($config_vars['database']['database_name']) ? $config_vars['database']['database_name'] : 'N/A' ) .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
-			self::Text('Current User: '. ( ( isset($current_user) AND is_object($current_user) ) ? $current_user->getUserName() : 'N/A' ) .' (User ID: '. ( ( isset($current_user) AND is_object($current_user) ) ? $current_user->getID() : 'N/A' ) .') Company: '. ( ( isset($current_company) AND is_object($current_company) ) ? $current_company->getName() : 'N/A' ) .' (Company ID: '. ( ( isset($current_company) AND is_object($current_company) ) ? $current_company->getId() : 'N/A' ) .')', __FILE__, __LINE__, __METHOD__, 10);
+			self::Text( 'URI: ' . ( isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : 'N/A' ) . ' IP Address: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
+			self::Text( 'USER-AGENT: ' . ( isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10 );
+			self::Text( 'Version: ' . APPLICATION_VERSION . ' (PHP: v' . phpversion() . ') Edition: ' . getTTProductEdition() . ' Production: ' . (int)PRODUCTION . ' Server: ' . ( isset( $_SERVER['SERVER_ADDR'] ) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) . ' OS: ' . OPERATING_SYSTEM . ' Database: Type: ' . ( isset( $config_vars['database']['type'] ) ? $config_vars['database']['type'] : 'N/A' ) . ' Name: ' . ( isset( $config_vars['database']['database_name'] ) ? $config_vars['database']['database_name'] : 'N/A' ) . ' Config: ' . CONFIG_FILE . ' Demo Mode: ' . (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10 );
+			self::Text( 'Current User: ' . ( ( isset( $current_user ) && is_object( $current_user ) ) ? $current_user->getUserName() : 'N/A' ) . ' (User ID: ' . ( ( isset( $current_user ) && is_object( $current_user ) ) ? $current_user->getID() : 'N/A' ) . ') Company: ' . ( ( isset( $current_company ) && is_object( $current_company ) ) ? $current_company->getName() : 'N/A' ) . ' (Company ID: ' . ( ( isset( $current_company ) && is_object( $current_company ) ) ? $current_company->getId() : 'N/A' ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
 
-			self::Text('Detected PHP errors ('. self::$php_errors .'), emailing log...', __FILE__, __LINE__, __METHOD__, 0);
-			self::Text('---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '. getmypid() .') ]---------------', __FILE__, __LINE__, __METHOD__, 0);
+			self::Text( 'Detected PHP errors (' . self::$php_errors . '), emailing log...', __FILE__, __LINE__, __METHOD__, 0 );
+			self::Text( '---------------[ ' . @date( 'd-M-Y G:i:s O' ) . ' [' . microtime( true ) . '] (PID: ' . getmypid() . ') ]---------------', __FILE__, __LINE__, __METHOD__, 0 );
 
 			self::emailLog();
-			if ( $error !== NULL ) { //Fatal error, write to log once more as this won't be called automatically.
+			if ( $error !== null ) { //Fatal error, write to log once more as this won't be called automatically.
 				self::writeToLog();
 			}
 		} else {
@@ -605,17 +602,17 @@ class Debug {
 			// Essentially, a CommitTrasnaction() should be called after every FailTransaction() before the script exits. Otherwise in things like loops the entire outer transaction would be rolled back unintentionally.
 			global $db;
 			if ( is_object( $db ) ) {
-				$transaction_error = FALSE;
+				$transaction_error = false;
 				if ( $db->transOff > 0 ) {
-					self::Text('ERROR: Detected UNCOMMITTED transaction: Count: '. $db->transCnt .' Off: '. $db->transOff .' OK: '. (int)$db->_transOK .', emailing log...', __FILE__, __LINE__, __METHOD__, 0);
-					$transaction_error = TRUE;
-				} elseif( $db->transCnt < 0 ) {
-					self::Text('ERROR: Detected DOUBLE COMMITTED transaction: Count: '. $db->transCnt .' Off: '. $db->transOff .' OK: '. (int)$db->_transOK .', emailing log...', __FILE__, __LINE__, __METHOD__, 0);
-					$transaction_error = TRUE;
+					self::Text( 'ERROR: Detected UNCOMMITTED transaction: Count: ' . $db->transCnt . ' Off: ' . $db->transOff . ' OK: ' . (int)$db->_transOK . ', emailing log...', __FILE__, __LINE__, __METHOD__, 0 );
+					$transaction_error = true;
+				} else if ( $db->transCnt < 0 ) {
+					self::Text( 'ERROR: Detected DOUBLE COMMITTED transaction: Count: ' . $db->transCnt . ' Off: ' . $db->transOff . ' OK: ' . (int)$db->_transOK . ', emailing log...', __FILE__, __LINE__, __METHOD__, 0 );
+					$transaction_error = true;
 				}
 
-				if ( $transaction_error == TRUE ) {
-					self::Text( '---------------[ ' . @date( 'd-M-Y G:i:s O' ) . ' [' . microtime( TRUE ) . '] (PID: ' . getmypid() . ') ]---------------', __FILE__, __LINE__, __METHOD__, 0 );
+				if ( $transaction_error == true ) {
+					self::Text( '---------------[ ' . @date( 'd-M-Y G:i:s O' ) . ' [' . microtime( true ) . '] (PID: ' . getmypid() . ') ]---------------', __FILE__, __LINE__, __METHOD__, 0 );
 					self::emailLog();
 					self::writeToLog(); //write to log once more as this won't be called automatically.
 				}
@@ -623,28 +620,28 @@ class Debug {
 		}
 
 		//Must go after emailLog() and writeToLog() above, otherwise the log will get cleared out everytime this runs.
-		if ( PRODUCTION == FALSE AND function_exists('xdebug_get_gc_run_count') == TRUE AND xdebug_get_gc_run_count() > 0 ) {
-			self::Text( 'Garbage Collector Runs: ' . xdebug_get_gc_run_count() .' Collected Roots: '. xdebug_get_gc_total_collected_roots(), __FILE__, __LINE__, __METHOD__, 10 );
+		if ( PRODUCTION == false && function_exists( 'xdebug_get_gc_run_count' ) == true && xdebug_get_gc_run_count() > 0 ) {
+			self::Text( 'Garbage Collector Runs: ' . xdebug_get_gc_run_count() . ' Collected Roots: ' . xdebug_get_gc_total_collected_roots(), __FILE__, __LINE__, __METHOD__, 10 );
 			if ( file_exists( xdebug_get_gcstats_filename() ) ) {
 				self::Arr( file_get_contents( xdebug_get_gcstats_filename() ), 'Garbage Collection Report: ', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 			self::writeToLog();
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool|null|string
 	 */
 	static function getOutput() {
-		$output = NULL;
-		if ( is_array(self::$debug_buffer) AND count(self::$debug_buffer ) > 0 ) {
-			foreach (self::$debug_buffer as $arr) {
+		$output = null;
+		if ( is_array( self::$debug_buffer ) && count( self::$debug_buffer ) > 0 ) {
+			foreach ( self::$debug_buffer as $arr ) {
 				$verbosity = $arr[0];
 				$text = $arr[1];
 
-				if ($verbosity <= self::getVerbosity() ) {
+				if ( $verbosity <= self::getVerbosity() ) {
 					$output .= $text;
 				}
 			}
@@ -652,106 +649,106 @@ class Debug {
 			return $output;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	static function emailLog() {
-		if ( PRODUCTION === TRUE ) {
+		if ( PRODUCTION === true ) {
 			$output = self::getOutput();
 
-			if ( strlen($output) > 0 ) {
+			if ( strlen( $output ) > 0 ) {
 				global $TT_DISABLE_EMAIL_LOG;
 
-				if ( isset($TT_DISABLE_EMAIL_LOG) == FALSE OR $TT_DISABLE_EMAIL_LOG !== TRUE ) { //Prevent emailLog() from triggering more errors and a emailLog infinite loop.
-					$TT_DISABLE_EMAIL_LOG = TRUE;
+				if ( isset( $TT_DISABLE_EMAIL_LOG ) == false || $TT_DISABLE_EMAIL_LOG !== true ) { //Prevent emailLog() from triggering more errors and a emailLog infinite loop.
+					$TT_DISABLE_EMAIL_LOG = true;
 
 					Misc::sendSystemMail( APPLICATION_NAME . ' - Error!', $output );
 
-					$TT_DISABLE_EMAIL_LOG = FALSE;
+					$TT_DISABLE_EMAIL_LOG = false;
 				} else {
-					self::Text('WARNING: Skipping sendSystemMail() to avoid nested calls...', __FILE__, __LINE__, __METHOD__, 0);
+					self::Text( 'WARNING: Skipping sendSystemMail() to avoid nested calls...', __FILE__, __LINE__, __METHOD__, 0 );
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	static function writeToLog() {
-		if (self::$enable_log == TRUE AND self::$buffer_output == TRUE) {
+		if ( self::$enable_log == true && self::$buffer_output == true ) {
 			global $config_vars;
 
 			$eol = PHP_EOL;
 
 			if ( is_array( self::$debug_buffer ) ) {
-				$output = $eol.'---------------[ '. @date('d-M-Y G:i:s O') .' ['. $_SERVER['REQUEST_TIME_FLOAT'] .'] (PID: '. getmypid() .') ]---------------'.$eol;
+				$output = $eol . '---------------[ ' . @date( 'd-M-Y G:i:s O' ) . ' [' . $_SERVER['REQUEST_TIME_FLOAT'] . '] (PID: ' . getmypid() . ') ]---------------' . $eol;
 
-				foreach (self::$debug_buffer as $arr) {
+				foreach ( self::$debug_buffer as $arr ) {
 					if ( $arr[0] <= self::getVerbosity() ) {
 						$output .= $arr[1];
 					}
 				}
 
-				$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '. getmypid() .') ]---------------'.$eol;
+				$output .= '---------------[ ' . @date( 'd-M-Y G:i:s O' ) . ' [' . microtime( true ) . '] (PID: ' . getmypid() . ') ]---------------' . $eol;
 
-				if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {
+				if ( isset( $config_vars['debug']['enable_syslog'] ) && $config_vars['debug']['enable_syslog'] == true && OPERATING_SYSTEM != 'WIN' ) {
 					//If using rsyslog, need to set:
 					//$MaxMessageSize 256000 #Above ModuleLoad imtcp
 					openlog( self::getSyslogIdent(), 11, self::getSyslogFacility( 0 ) ); //11 = LOG_PID | LOG_NDELAY | LOG_CONS
-					syslog( self::getSyslogPriority( 0 ), $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
+					syslog( self::getSyslogPriority( 0 ), $output );                     //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
 					closelog();
 				} else {
-					if ( isset($config_vars['path']['log']) AND is_writable( $config_vars['path']['log'] ) ) {
-						$file_name = $config_vars['path']['log'] . DIRECTORY_SEPARATOR .'timetrex.log';
+					if ( isset( $config_vars['path']['log'] ) && is_writable( $config_vars['path']['log'] ) ) {
+						$file_name = $config_vars['path']['log'] . DIRECTORY_SEPARATOR . 'timetrex.log';
 						$fp = @fopen( $file_name, 'a' );
-						@fwrite($fp, $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
-						@fclose($fp);
-						unset($output);
+						@fwrite( $fp, $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
+						@fclose( $fp );
+						unset( $output );
 					} else {
-						echo "ERROR: Unable to write to log file in directory: ". ( isset($config_vars['path']['log']) ? $config_vars['path']['log'] .'/' : 'N/A' ) . PHP_EOL;
+						echo "ERROR: Unable to write to log file in directory: " . ( isset( $config_vars['path']['log'] ) ? $config_vars['path']['log'] . '/' : 'N/A' ) . PHP_EOL;
 					}
 				}
 
-				return TRUE;
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	static function Display() {
-		if (self::$enable_display == TRUE AND self::$buffer_output == TRUE) {
+		if ( self::$enable_display == true && self::$buffer_output == true ) {
 
 			$output = self::getOutput();
 
-			if ( function_exists('memory_get_usage') ) {
+			if ( function_exists( 'memory_get_usage' ) ) {
 				$memory_usage = memory_get_usage();
 			} else {
 				$memory_usage = 'N/A';
 			}
 
-			if (strlen($output) > 0) {
+			if ( strlen( $output ) > 0 ) {
 				echo PHP_EOL . 'Debug Buffer' . PHP_EOL;
 				echo '============================================================================' . PHP_EOL;
-				echo 'Memory Usage: '. $memory_usage .' Buffer Size: '. self::$buffer_size . PHP_EOL;
+				echo 'Memory Usage: ' . $memory_usage . ' Buffer Size: ' . self::$buffer_size . PHP_EOL;
 				echo '----------------------------------------------------------------------------' . PHP_EOL;
 				echo $output;
 				echo '============================================================================' . PHP_EOL;
 			}
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -759,29 +756,31 @@ class Debug {
 	 * @param null $method
 	 * @return bool
 	 */
-	static function handleBufferSize( $line = NULL, $method = NULL) {
+	static function handleBufferSize( $line = null, $method = null ) {
 		//When buffer exceeds maximum size, write it to the log and clear it.
 		//This will affect displaying large buffers though, but otherwise we may run out of memory.
 		//If we detect PHP errors, buffer up to 10x the maximum size to try and capture those errors.
-		if ( ( self::$php_errors == 0 AND self::$buffer_size >= self::$max_buffer_size ) OR ( self::$php_errors > 0 AND self::$buffer_size >= ( self::$max_buffer_size * 100 ) ) ) {
-			self::$debug_buffer[] = array(1, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method .'(): Maximum debug buffer size of: '. self::$max_buffer_size .' reached. Writing out buffer before continuing... Buffer ID: '. self::$buffer_id . PHP_EOL );
+		if ( ( self::$php_errors == 0 && self::$buffer_size >= self::$max_buffer_size ) || ( self::$php_errors > 0 && self::$buffer_size >= ( self::$max_buffer_size * 100 ) ) ) {
+			self::$debug_buffer[] = [ 1, 'DEBUG [L' . str_pad( $line, 4, 0, STR_PAD_LEFT ) . '] [' . str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT ) . 'ms]: ' . $method . '(): Maximum debug buffer size of: ' . self::$max_buffer_size . ' reached. Writing out buffer before continuing... Buffer ID: ' . self::$buffer_id . PHP_EOL ];
 			self::writeToLog();
 			self::clearBuffer();
-			self::$debug_buffer[] = array(1, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method .'(): Continuing debug output from Buffer ID: '. self::$buffer_id . PHP_EOL );
+			self::$debug_buffer[] = [ 1, 'DEBUG [L' . str_pad( $line, 4, 0, STR_PAD_LEFT ) . '] [' . str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT ) . 'ms]: ' . $method . '(): Continuing debug output from Buffer ID: ' . self::$buffer_id . PHP_EOL ];
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	static function clearBuffer() {
-		self::$debug_buffer = NULL;
+		self::$debug_buffer = null;
 		self::$buffer_size = 0;
-		return TRUE;
+
+		return true;
 	}
 }
+
 ?>

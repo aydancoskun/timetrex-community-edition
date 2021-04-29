@@ -42,7 +42,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 			case 2:
 				Global.setWidgetEnabled( this.next_btn, false );
-				label = this.getLabel();
+				var label = this.getLabel();
 				label.text( $.i18n._( 'Please choose the preferred settings that you would like to use to display information throughout' ) + ' ' + LocalCacheData.getApplicationName() + '.' );
 
 				this.content_div.append( label );
@@ -102,7 +102,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				break;
 
 			case 3:
-				label = this.getLabel();
+				var label = this.getLabel();
 				label.text( $.i18n._( 'Pay period schedules are critical to the operation of' ) + ' ' + LocalCacheData.getApplicationName() + ' ' + $.i18n._( 'regardless if you use it for processing payroll or not. Please select the pay period frequency and enter the start date, end date and transaction date (date the employees are paid) for your next four pay periods. Based on this information' ) + ' ' + LocalCacheData.getApplicationName() + ' ' + $.i18n._( 'will automatically create subsequent pay periods for you.' ) );
 
 				this.content_div.append( label );
@@ -132,20 +132,20 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				break;
 			case 4:
-				label = this.getLabel();
+				var label = this.getLabel();
 				label.text( $.i18n._( 'To help determine how' ) + ' ' + LocalCacheData.getApplicationName() + ' ' + $.i18n._( 'should be initially setup, please select one or more locations that your employees reside within.' ) );
 				this.content_div.append( label );
 
-				guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click' ) + ' <button style="display: inline" class="plus-icon"></button> ' + $.i18n._( 'icon to add additional locations' ) + '</span></div>' );
+				var guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click' ) + ' <button style="display: inline" class="plus-icon"></button> ' + $.i18n._( 'icon to add additional locations' ) + '</span></div>' );
 				this.content_div.append( guide_label );
 
-				legal_entity_label = $( '<br><div><span class="clear-both-div">' + $.i18n._( 'Legal Entity' ) + '</span></div>' );
+				var legal_entity_label = $( '<br><div><span class="clear-both-div">' + $.i18n._( 'Legal Entity' ) + '</span></div>' );
 				this.content_div.append( legal_entity_label );
 
 				var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 				form_item_input.TText( { field: 'legal_entity_id' } );
 				form_item_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+					api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
 					allow_multiple_selection: true,
 					layout_name: ALayoutIDs.LEGAL_ENTITY,
 					show_search_inputs: false,
@@ -184,15 +184,14 @@ QuickStartWizardController = BaseWizardController.extend( {
 				this.stepsWidgetDic[this.current_step]['country'] = editor;
 				break;
 			case 5:
-				label = this.getLabel();
+				var label = this.getLabel();
 				label.text( LocalCacheData.getApplicationName() + ' ' + $.i18n._( 'is now setup and ready for you to start adding employees and tracking their attendance.' ) );
 				this.content_div.append( label );
 
-				guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click the' ) + ' <button style="display: inline" class="done-btn"></button> ' + $.i18n._( 'icon below to begin doing that now' ) + '</span></div>' );
+				var guide_label = $( '<div><span class="clear-both-div">' + $.i18n._( 'Click the' ) + ' <button style="display: inline" class="done-btn"></button> ' + $.i18n._( 'icon below to begin doing that now' ) + '</span></div>' );
 				this.content_div.append( guide_label );
 
 				break;
-
 		}
 	},
 
@@ -268,7 +267,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 		var country = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		country.TComboBox( { field: 'country', set_empty: true, set_select_item_when_set_source_data: true } );
 
-		var country_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		var country_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 
 		country_api.getOptions( 'country', {
 			onResult: function( result ) {
@@ -333,7 +332,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				if ( typeof index != 'undefined' ) {
 
 					row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
-					$this.rows_widgets_array.splice( (index), 0, widgets );
+					$this.rows_widgets_array.splice( ( index ), 0, widgets );
 
 				} else {
 					$( render ).append( row );
@@ -369,7 +368,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		}
 
-		var country_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		var country_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 
 		country_api.getOptions( 'province', val.country, {
 			onResult: function( res ) {
@@ -452,7 +451,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 					company.id = LocalCacheData.getCurrentCompany().id;
 					company.is_setup_complete = true;
 
-					var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+					var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 					LocalCacheData.getCurrentCompany().is_setup_complete = true;
 
 					company_api.setCompany( company, {
@@ -526,7 +525,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 			var data = grid.getData();
 			var first_date = data[0].start_date;
 
-			var api = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
+			var api = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
 
 			api.detectPayPeriodScheduleDates( type_id, first_date, {
 				onResult: function( result ) {
@@ -607,8 +606,8 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				Global.setWidgetEnabled( this.next_btn, false );
 				Global.setWidgetEnabled( this.back_btn, false );
-				var api_user_preference = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
-				var api_current_user = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+				var api_user_preference = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+				var api_current_user = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
 
 				//Time ZOne
 				api_user_preference.getOptions( 'time_zone', {
@@ -683,7 +682,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				break;
 			case 3:
-				var api_pp_schedule = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
+				var api_pp_schedule = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
 				api_pp_schedule.getOptions( 'type', {
 					onResult: function( result ) {
 						var res_data = Global.buildRecordArray( result.getResult() );
@@ -883,8 +882,8 @@ QuickStartWizardController = BaseWizardController.extend( {
 				current_step_data.start_week_day = current_step_ui.start_week_day.getValue();
 
 				if ( direction === 'forward' ) {
-					var api_current_user = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-					var api_user_preference = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
+					var api_current_user = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
+					var api_user_preference = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
 					api_current_user.getCurrentUserPreference( {
 						onResult: function( result ) {
 							var res_data = result.getResult();
@@ -917,7 +916,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				current_step_data.example_dates = current_step_ui.example_dates.getGridParam( 'data' );
 
 				if ( direction === 'forward' ) {
-					var api_pp_schedule = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
+					var api_pp_schedule = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
 
 					api_pp_schedule.detectPayPeriodScheduleSettings( current_step_data.type_id, current_step_data.example_dates, {
 						onResult: function( result ) {
@@ -948,7 +947,6 @@ QuickStartWizardController = BaseWizardController.extend( {
 					callBack( true );
 				}
 
-
 				break;
 			case 4:
 				Global.setWidgetEnabled( this.next_btn, false );
@@ -966,7 +964,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				}
 
 				if ( direction === 'forward' ) {
-					var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+					var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 					company_api.createPresets( current_step_data.country, current_step_data.legal_entity_id, {
 						onResult: function( result ) {
 

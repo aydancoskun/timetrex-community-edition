@@ -47,19 +47,19 @@ class APIUserReview extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * Get options for dropdown boxes.
 	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
-	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
+	 * @param mixed $parent     Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return bool|array
 	 */
-	function getOptions( $name = FALSE, $parent = NULL ) {
+	function getOptions( $name = false, $parent = null ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('user_review', 'enabled')
-					OR !( $this->getPermissionObject()->Check('user_review', 'view') OR $this->getPermissionObject()->Check('user_review', 'view_own') OR $this->getPermissionObject()->Check('user_review', 'view_child') ) ) ) {
+				&& ( !$this->getPermissionObject()->Check( 'user_review', 'enabled' )
+						|| !( $this->getPermissionObject()->Check( 'user_review', 'view' ) || $this->getPermissionObject()->Check( 'user_review', 'view_own' ) || $this->getPermissionObject()->Check( 'user_review', 'view_child' ) ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -72,11 +72,11 @@ class APIUserReview extends APIFactory {
 	function getUserReviewDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting user review control default data...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Getting user review control default data...', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$data = array(
-						'company_id' => $company_obj->getId(),
-					);
+		$data = [
+				'company_id' => $company_obj->getId(),
+		];
 
 		return $this->returnHandler( $data );
 	}
@@ -86,34 +86,35 @@ class APIUserReview extends APIFactory {
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
-	function getUserReview( $data = NULL, $disable_paging = FALSE ) {
+	function getUserReview( $data = null, $disable_paging = false ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
 			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
-		if ( !$this->getPermissionObject()->Check('user_review', 'enabled')
-				OR !( $this->getPermissionObject()->Check('user_review', 'view') OR $this->getPermissionObject()->Check('user_review', 'view_own') OR $this->getPermissionObject()->Check('user_review', 'view_child')	) ) {
+		if ( !$this->getPermissionObject()->Check( 'user_review', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'user_review', 'view' ) || $this->getPermissionObject()->Check( 'user_review', 'view_own' ) || $this->getPermissionObject()->Check( 'user_review', 'view_child' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_review', 'view' );
 
 		$urlf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $urlf */
-		$urlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $urlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$urlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
+		Debug::Text( 'Record Count: ' . $urlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $urlf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $urlf );
-			Debug::Arr($data, 'Searching Data: ', __FILE__, __LINE__, __METHOD__, 10);
-			$retarr = array();
-			foreach( $urlf as $ur_obj ) {
+			Debug::Arr( $data, 'Searching Data: ', __FILE__, __LINE__, __METHOD__, 10 );
+			$retarr = [];
+			foreach ( $urlf as $ur_obj ) {
 				$retarr[] = $ur_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 			}
-			Debug::Arr($retarr, 'Getting Data: ', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Arr( $retarr, 'Getting Data: ', __FILE__, __LINE__, __METHOD__, 10 );
+
 			return $this->returnHandler( $retarr );
 		}
 
-		return $this->returnHandler( TRUE ); //No records returned.
+		return $this->returnHandler( true ); //No records returned.
 	}
 
 	/**
@@ -122,7 +123,7 @@ class APIUserReview extends APIFactory {
 	 * @return array
 	 */
 	function getCommonUserReviewData( $data ) {
-		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getUserReview( $data, TRUE ) ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getUserReview( $data, true ) ) );
 	}
 
 	/**
@@ -130,7 +131,7 @@ class APIUserReview extends APIFactory {
 	 * @return array
 	 */
 	function validateUserReview( $data ) {
-		return $this->setUserReview( $data, TRUE );
+		return $this->setUserReview( $data, true );
 	}
 
 	/**
@@ -139,102 +140,102 @@ class APIUserReview extends APIFactory {
 	 * @param bool $ignore_warning
 	 * @return array|bool
 	 */
-	function setUserReview( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
+	function setUserReview( $data, $validate_only = false, $ignore_warning = true ) {
 		$validate_only = (bool)$validate_only;
 		$ignore_warning = (bool)$ignore_warning;
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
 			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
-		if ( !$this->getPermissionObject()->Check('user_review', 'enabled')
-				OR !( $this->getPermissionObject()->Check('user_review', 'edit') OR $this->getPermissionObject()->Check('user_review', 'edit_own') OR $this->getPermissionObject()->Check('user_review', 'edit_child') OR $this->getPermissionObject()->Check('user_review', 'add') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check( 'user_review', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'user_review', 'edit' ) || $this->getPermissionObject()->Check( 'user_review', 'edit_own' ) || $this->getPermissionObject()->Check( 'user_review', 'edit_child' ) || $this->getPermissionObject()->Check( 'user_review', 'add' ) ) ) {
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		if ( $validate_only == TRUE ) {
-			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
-			$permission_children_ids = FALSE;
+		if ( $validate_only == true ) {
+			Debug::Text( 'Validating Only!', __FILE__, __LINE__, __METHOD__, 10 );
+			$permission_children_ids = false;
 		} else {
 			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 			$permission_children_ids = $this->getPermissionChildren();
 		}
 
 		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = $key = FALSE;
-		if ( is_array($data) AND $total_records > 0 ) {
-			foreach( $data as $key => $row ) {
+		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
+		$validator = $save_result = $key = false;
+		if ( is_array( $data ) && $total_records > 0 ) {
+			foreach ( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $lf */
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] != '' ) {
+				if ( isset( $row['id'] ) && $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get Kpi object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							$validate_only == TRUE
-							OR
+								$validate_only == true
+								||
 								(
-								$this->getPermissionObject()->Check('user_review', 'edit')
-									OR ( $this->getPermissionObject()->Check('user_review', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('user_review', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getCreatedBy(), $permission_children_ids ) === TRUE )
+										$this->getPermissionObject()->Check( 'user_review', 'edit' )
+										|| ( $this->getPermissionObject()->Check( 'user_review', 'edit_own' ) && $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === true )
+										|| ( $this->getPermissionObject()->Check( 'user_review', 'edit_child' ) && $this->getPermissionObject()->isChild( $lf->getCurrent()->getCreatedBy(), $permission_children_ids ) === true )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text( 'Row Exists, getting current data for ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
-							$primary_validator->isTrue( 'user_review', FALSE, TTi18n::gettext('Edit permission denied') );
+							$primary_validator->isTrue( 'user_review', false, TTi18n::gettext( 'Edit permission denied' ) );
 						}
 					} else {
 						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'user_review', $this->getPermissionObject()->Check('user_review', 'add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'user_review', $this->getPermissionObject()->Check( 'user_review', 'add' ), TTi18n::gettext( 'Add permission denied' ) );
 
 					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
 					//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
 					$row['id'] = $lf->getNextInsertId();
 				}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 				$is_valid = $primary_validator->isValid( $ignore_warning );
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-					Debug::Arr($row, 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
+					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Arr( $row, 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->setObjectFromArray( $row );
 
 					$is_valid = $lf->isValid( $ignore_warning );
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-						if ( $validate_only == TRUE ) {
-							$save_result[$key] = TRUE;
+					if ( $is_valid == true ) {
+						Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
+						if ( $validate_only == true ) {
+							$save_result[$key] = true;
 						} else {
-							$save_result[$key] = $lf->Save( TRUE, TRUE ); //Force lookup on isNew()
+							$save_result[$key] = $lf->Save( true, true ); //Force lookup on isNew()
 						}
 						$validator_stats['valid_records']++;
 					}
 				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $is_valid == false ) {
+					Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
 					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				} elseif ( $validate_only == TRUE ) {
+				} else if ( $validate_only == true ) {
 					$lf->FailTransaction();
 				}
 
@@ -244,7 +245,7 @@ class APIUserReview extends APIFactory {
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 
 	/**
@@ -252,31 +253,31 @@ class APIUserReview extends APIFactory {
 	 * @return array|bool
 	 */
 	function deleteUserReview( $data ) {
-		if ( !is_array($data) ) {
-			$data = array($data);
+		if ( !is_array( $data ) ) {
+			$data = [ $data ];
 		}
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
 			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
-		if ( !$this->getPermissionObject()->Check('user_review', 'enabled')
-				OR !( $this->getPermissionObject()->Check('user_review', 'delete') OR $this->getPermissionObject()->Check('user_review', 'delete_own') OR $this->getPermissionObject()->Check('user_review', 'delete_child') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check( 'user_review', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'user_review', 'delete' ) || $this->getPermissionObject()->Check( 'user_review', 'delete_own' ) || $this->getPermissionObject()->Check( 'user_review', 'delete_child' ) ) ) {
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 
 		$permission_children_ids = $this->getPermissionChildren();
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$total_records = count($data);
-		$validator = $save_result = $key = FALSE;
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) AND $total_records > 0 ) {
-			foreach( $data as $key => $id ) {
+		$total_records = count( $data );
+		$validator = $save_result = $key = false;
+		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
+		if ( is_array( $data ) && $total_records > 0 ) {
+			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $lf */
 				$lf->StartTransaction();
@@ -286,39 +287,39 @@ class APIUserReview extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('user_review', 'delete')
-								OR ( $this->getPermissionObject()->Check('user_review', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('user_review', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getCreatedBy(), $permission_children_ids ) === TRUE )
-								) {
-							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						if ( $this->getPermissionObject()->Check( 'user_review', 'delete' )
+								|| ( $this->getPermissionObject()->Check( 'user_review', 'delete_own' ) && $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === true )
+								|| ( $this->getPermissionObject()->Check( 'user_review', 'delete_child' ) && $this->getPermissionObject()->isChild( $lf->getCurrent()->getCreatedBy(), $permission_children_ids ) === true )
+						) {
+							Debug::Text( 'Record Exists, deleting record ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 							$lf = $lf->getCurrent();
 						} else {
-							$primary_validator->isTrue( 'user_review', FALSE, TTi18n::gettext('Delete permission denied') );
+							$primary_validator->isTrue( 'user_review', false, TTi18n::gettext( 'Delete permission denied' ) );
 						}
 					} else {
 						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 					}
 				} else {
-					$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+					$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 				}
 
 				//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				$is_valid = $primary_validator->isValid();
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setDeleted(TRUE);
+				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
+					Debug::Text( 'Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10 );
+					$lf->setDeleted( true );
 
 					$is_valid = $lf->isValid();
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
+					if ( $is_valid == true ) {
+						Debug::Text( 'Record Deleted...', __FILE__, __LINE__, __METHOD__, 10 );
 						$save_result[$key] = $lf->Save();
 						$validator_stats['valid_records']++;
 					}
 				}
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $is_valid == false ) {
+					Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
@@ -331,7 +332,7 @@ class APIUserReview extends APIFactory {
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 
 	/**
@@ -339,28 +340,29 @@ class APIUserReview extends APIFactory {
 	 * @return array
 	 */
 	function copyUserReview( $data ) {
-		if ( !is_array($data) ) {
-			$data = array($data);
+		if ( !is_array( $data ) ) {
+			$data = [ $data ];
 		}
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$src_rows = $this->stripReturnHandler( $this->getUserReview( array('filter_data' => array('id' => $data) ), TRUE ) );
-		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
-			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id']); //Clear fields that can't be copied
+		$src_rows = $this->stripReturnHandler( $this->getUserReview( [ 'filter_data' => [ 'id' => $data ] ], true ) );
+		if ( is_array( $src_rows ) && count( $src_rows ) > 0 ) {
+			Debug::Arr( $src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10 );
+			foreach ( $src_rows as $key => $row ) {
+				unset( $src_rows[$key]['id'] ); //Clear fields that can't be copied
 			}
-			unset($row); //code standards
+			unset( $row );                            //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->setUserReview( $src_rows ); //Save copied rows
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 }
+
 ?>

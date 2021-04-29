@@ -51,5 +51,4 @@ var APIPayCode = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportPayCode', arguments );
 	}
 
-
 } );

@@ -42,13 +42,13 @@ class UILoginTest extends TTSeleniumGlobal {
 	public function setUp() {
 		parent::setUp();
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
 		parent::tearDown();
 
-		return TRUE;
+		return true;
 	}
 
 	function testUILoginLogout() {

@@ -35,24 +35,24 @@
  ********************************************************************************/
 
 class PermissionTest extends PHPUnit_Framework_TestCase {
-	protected $company_id = NULL;
-	protected $user_id = NULL;
-	protected $pay_period_schedule_id = NULL;
-	protected $pay_period_objs = NULL;
-	protected $pay_stub_account_link_arr = NULL;
+	protected $company_id = null;
+	protected $user_id = null;
+	protected $pay_period_schedule_id = null;
+	protected $pay_period_objs = null;
+	protected $pay_stub_account_link_arr = null;
 
 	public function setUp() {
 		global $dd;
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertGreaterThan( 0, $this->company_id );
 
 		$dd->createPermissionGroups( $this->company_id ); //Create all permissions.
@@ -71,15 +71,15 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$this->deleteAllSchedules();
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayPeriodSchedule( $shift_assigned_day = 10, $maximum_shift_time = 57600, $new_shift_trigger_time = 14400 ) {
@@ -100,20 +100,20 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartDayOfWeek( TTDate::getDayOfWeek( $anchor_date ) );
 		$ppsf->setTransactionDate( 7 );
 
-		$ppsf->setTransactionDateBusinessDay( TRUE );
-		$ppsf->setTimeZone('PST8PDT');
+		$ppsf->setTransactionDateBusinessDay( true );
+		$ppsf->setTimeZone( 'PST8PDT' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( $new_shift_trigger_time );
 		$ppsf->setMaximumShiftTime( $maximum_shift_time );
 		$ppsf->setShiftAssignedDay( $shift_assigned_day );
 
-		$ppsf->setEnableInitialPayPeriods( FALSE );
+		$ppsf->setEnableInitialPayPeriods( false );
 		if ( $ppsf->isValid() ) {
-			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			$insert_id = $ppsf->Save( false );
+			Debug::Text( 'Pay Period Schedule ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-			$ppsf->setUser( array($this->user_id) );
+			$ppsf->setUser( [ $this->user_id ] );
 			$ppsf->Save();
 
 			$this->pay_period_schedule_id = $insert_id;
@@ -121,13 +121,12 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
-
+		return false;
 	}
 
-	function createPayPeriods( $initial_date = FALSE ) {
+	function createPayPeriods( $initial_date = false ) {
 		$max_pay_periods = 35;
 
 		$ppslf = new PayPeriodScheduleListFactory();
@@ -137,7 +136,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					if ( $initial_date !== FALSE ) {
+					if ( $initial_date !== false ) {
 						$end_date = $initial_date;
 					} else {
 						$end_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) );
@@ -146,14 +145,13 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'I: ' . $i . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, ( 86400 + 3600 ), false ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
-
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function getAllPayPeriods() {
@@ -161,8 +159,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//$pplf->getByCompanyId( $this->company_id );
 		$pplf->getByPayPeriodScheduleId( $this->pay_period_schedule_id );
 		if ( $pplf->getRecordCount() > 0 ) {
-			foreach( $pplf as $pp_obj ) {
-				Debug::text('Pay Period... Start: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			foreach ( $pplf as $pp_obj ) {
+				Debug::text( 'Pay Period... Start: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getStartDate() ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				$this->pay_period_objs[] = $pp_obj;
 			}
@@ -170,7 +168,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		$this->pay_period_objs = array_reverse( $this->pay_period_objs );
 
-		return TRUE;
+		return true;
 	}
 
 	function editUserPermission( $user_id, $section, $name, $value ) {
@@ -187,14 +185,15 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 			$pc_obj->setPermission( $permission_arr );
 			if ( $pc_obj->isValid() ) {
 				$pc_obj->Save();
-				Debug::Text('Success updating permissions...', __FILE__, __LINE__, __METHOD__, 10);
-				return TRUE;
+				Debug::Text( 'Success updating permissions...', __FILE__, __LINE__, __METHOD__, 10 );
+
+				return true;
 			}
 		}
 
-		Debug::Text('Failed updating permissions...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Failed updating permissions...', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
+		return false;
 	}
 
 	/*
@@ -202,9 +201,6 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		Test basic permission functions.
 		Test basic hierarchy permission functions.
 		Test full blown reports that contain wages, and test all possible permutations of permissions in regards to wages.
-
-
-		**** When run in parallel these used to cause deadlocks/duplicate IDs on MySQL due to concurrency issues. ****
 	*/
 
 	/**
@@ -213,20 +209,20 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	function testBasicPermissionFunctions() {
 		global $dd;
 
-		$permission = TTnew('Permission'); /** @var Permission $permission */
+		$permission = TTnew( 'Permission' ); /** @var Permission $permission */
 		$permission_arr = $permission->getPermissions( $this->user_id, $this->company_id );
-		$this->assertGreaterThan( 40, count($permission_arr) ); //Needs to be low enough for community edtion.
+		$this->assertGreaterThan( 40, count( $permission_arr ) ); //Needs to be low enough for community edtion.
 
 		//Check bogus permission
 		$retval = $permission->Check( 'foobarinvalid', 'view', $this->user_id, $this->company_id );
-		$this->assertEquals( FALSE, $retval );
+		$this->assertEquals( false, $retval );
 
 		//Check proper permission
 		$retval = $permission->Check( 'user', 'view', $this->user_id, $this->company_id );
-		$this->assertEquals( TRUE, $retval );
+		$this->assertEquals( true, $retval );
 
 		$retval = $permission->Check( 'company', 'login_other_user', $this->user_id, $this->company_id );
-		$this->assertEquals( FALSE, $retval );
+		$this->assertEquals( false, $retval );
 
 
 		//Check permission levels
@@ -237,7 +233,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$retval = $permission->getLevel( $this->user_id, $this->company_id );
 		$this->assertEquals( 100, $retval );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -265,35 +261,35 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Admin user at the top
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
-		$permission = TTnew('Permission'); /** @var Permission $permission */
+		$permission = TTnew( 'Permission' ); /** @var Permission $permission */
 		$permission_arr = $permission->getPermissions( $superior_user_id, $this->company_id );
-		$this->assertGreaterThan( 20, count($permission_arr) ); //Needs to be low enough for community edition.
+		$this->assertGreaterThan( 20, count( $permission_arr ) ); //Needs to be low enough for community edition.
 
 		$permission_children_ids = $permission->getPermissionHierarchyChildren( $this->company_id, $superior_user_id );
 		//Debug::Arr( array($subordinate_user_ids, $permission_children_ids), 'aPermission Child Arrays: ', __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertEquals( $subordinate_user_ids, $permission_children_ids );
 
-		$this->assertSame( FALSE, $permission->isPermissionChild( TRUE, $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( FALSE, $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( NULL, $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( '', $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( 0, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( true, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( false, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( null, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( '', $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( 0, $permission_children_ids ) );
 
-		$this->assertSame( FALSE, $permission->isPermissionChild( TRUE, array() ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( FALSE, array() ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( NULL, array() ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( '', array() ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( 0, array() ) );
+		$this->assertSame( false, $permission->isPermissionChild( true, [] ) );
+		$this->assertSame( false, $permission->isPermissionChild( false, [] ) );
+		$this->assertSame( false, $permission->isPermissionChild( null, [] ) );
+		$this->assertSame( false, $permission->isPermissionChild( '', [] ) );
+		$this->assertSame( false, $permission->isPermissionChild( 0, [] ) );
 
-		$this->assertSame( TRUE, $permission->isPermissionChild( TRUE, NULL ) ); //NULL is used for view_all permissions, so it should be TRUE.
-		$this->assertSame( TRUE, $permission->isPermissionChild( FALSE, NULL ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( NULL, NULL ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( '', NULL ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( 0, NULL ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( 99999, NULL ) );
+		$this->assertSame( true, $permission->isPermissionChild( true, null ) ); //NULL is used for view_all permissions, so it should be TRUE.
+		$this->assertSame( true, $permission->isPermissionChild( false, null ) );
+		$this->assertSame( true, $permission->isPermissionChild( null, null ) );
+		$this->assertSame( true, $permission->isPermissionChild( '', null ) );
+		$this->assertSame( true, $permission->isPermissionChild( 0, null ) );
+		$this->assertSame( true, $permission->isPermissionChild( 99999, null ) );
 
-		$this->assertSame( FALSE, $permission->isPermissionChild( 99999, $permission_children_ids ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( 99999, $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
 
 		//Since view_own is enabled, it should add the superior user_id to the array.
 		$permission_children_ids = $permission->getPermissionChildren( 'user', 'view', $superior_user_id, $this->company_id );
@@ -303,12 +299,12 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Check wage permissions, as no wage permissions should be enabled, no children should be returned.
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'cPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
-		$this->assertSame( array(), $permission_children_ids );
-		$this->assertSame( FALSE, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( 99999, $permission_children_ids ) );
+		$this->assertSame( [], $permission_children_ids );
+		$this->assertSame( false, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( 99999, $permission_children_ids ) );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -340,17 +336,18 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		//Add wage, view_own permissions and re-check
 		//
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', true );
 
-		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
+		$permission = TTnew( 'Permission' );
+		/** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'dPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
-		$this->assertSame(  array( $superior_user_id ), $permission_children_ids );
-		$this->assertSame( FALSE, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( 99999, $permission_children_ids ) );
+		$this->assertSame( [ $superior_user_id ], $permission_children_ids );
+		$this->assertSame( false, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( 99999, $permission_children_ids ) );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -383,18 +380,19 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		//Add wage, view_child permissions and re-check
 		//
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', true );
 
-		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
+		$permission = TTnew( 'Permission' );
+		/** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'ePermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame( $subordinate_user_ids, $permission_children_ids );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( 99999, $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( 99999, $permission_children_ids ) );
 
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -427,18 +425,19 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		//Add wage, view_own AND view_child permissions and re-check
 		//
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', true );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', true );
 
-		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
+		$permission = TTnew( 'Permission' );
+		/** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'fPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertSame( array_merge( $subordinate_user_ids, (array)$superior_user_id ), $permission_children_ids );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
-		$this->assertSame( FALSE, $permission->isPermissionChild( 99999, $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
+		$this->assertSame( false, $permission->isPermissionChild( 99999, $permission_children_ids ) );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -471,17 +470,18 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		//Add wage, view permissions and re-check
 		//
-		$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view', true );
 
-		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
+		$permission = TTnew( 'Permission' );
+		/** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'gPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
-		$this->assertSame( NULL, $permission_children_ids );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( 99999, $permission_children_ids ) );
+		$this->assertSame( null, $permission_children_ids );
+		$this->assertSame( true, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( 99999, $permission_children_ids ) );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -514,19 +514,20 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//
 		//Add wage, view AND view_own AND view_child permissions and re-check
 		//
-		$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view', true );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', true );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', true );
 
-		$permission = TTnew('Permission'); /** @var Permission $permission */ //This clears cache
+		$permission = TTnew( 'Permission' );
+		/** @var Permission $permission */ //This clears cache
 		$permission_children_ids = $permission->getPermissionChildren( 'wage', 'view', $superior_user_id, $this->company_id );
 		//Debug::Arr( array($superior_user_id, $this->company_id, $subordinate_user_ids, $permission_children_ids), 'hPermission Child Arrays: User ID: '. $superior_user_id, __FILE__, __LINE__, __METHOD__, 10);
-		$this->assertSame( NULL, $permission_children_ids );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
-		$this->assertSame( TRUE, $permission->isPermissionChild( 99999, $permission_children_ids ) );
+		$this->assertSame( null, $permission_children_ids );
+		$this->assertSame( true, $permission->isPermissionChild( $subordinate_user_ids[0], $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( $superior_user_id, $permission_children_ids ) );
+		$this->assertSame( true, $permission->isPermissionChild( 99999, $permission_children_ids ) );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -557,13 +558,13 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
 
-		$this->editUserPermission( $superior_user_id, 'user', 'view', TRUE ); //View all employees, but not all wages.
+		$this->editUserPermission( $superior_user_id, 'user', 'view', true ); //View all employees, but not all wages.
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -571,30 +572,30 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$current_user = $user_obj;
 		$current_company = $user_obj->getCompanyObject();
 
-		$config['other']['disable_grand_total'] = TRUE;
+		$config['other']['disable_grand_total'] = true;
 		$config['columns'][] = 'employee_number';
 		$config['columns'][] = 'first_name';
 		$config['columns'][] = 'last_name';
 		$config['columns'][] = 'hourly_rate';
-		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
+		$config['sort'][] = [ 'employee_number' => 'asc' ]; //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
+		$report_obj = TTnew( 'UserSummaryReport' ); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count($output_data) );
-		$this->assertArrayHasKey('employee_number', $output_data[0] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[0] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[1] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[2] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[3] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[4] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[5] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[6] );
+		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[0] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[1] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[2] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[3] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[4] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[5] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[6] );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -624,13 +625,13 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Admin user at the top
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
-		$this->editUserPermission( $superior_user_id, 'user', 'view', TRUE ); //View all employees, but not all wages.
+		$this->editUserPermission( $superior_user_id, 'user', 'view', true ); //View all employees, but not all wages.
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', true );
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -638,33 +639,33 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$current_user = $user_obj;
 		$current_company = $user_obj->getCompanyObject();
 
-		$config['other']['disable_grand_total'] = TRUE;
+		$config['other']['disable_grand_total'] = true;
 		$config['columns'][] = 'employee_number';
 		$config['columns'][] = 'first_name';
 		$config['columns'][] = 'last_name';
 		$config['columns'][] = 'hourly_rate';
-		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
+		$config['sort'][] = [ 'employee_number' => 'asc' ]; //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
+		$report_obj = TTnew( 'UserSummaryReport' ); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count($output_data) );
-		$this->assertArrayHasKey('employee_number', $output_data[0] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[0] );
+		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[0] );
 		//$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
 		$this->assertGreaterThanOrEqual( 21.00, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[1] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[2] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[3] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[4] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[5] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[6] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[1] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[2] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[3] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[4] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[5] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[6] );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -694,13 +695,13 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Admin user at the top
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
-		$this->editUserPermission( $superior_user_id, 'user', 'view', TRUE ); //View all employees, but not all wages.
+		$this->editUserPermission( $superior_user_id, 'user', 'view', true ); //View all employees, but not all wages.
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', true );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -708,42 +709,42 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$current_user = $user_obj;
 		$current_company = $user_obj->getCompanyObject();
 
-		$config['other']['disable_grand_total'] = TRUE;
+		$config['other']['disable_grand_total'] = true;
 		$config['columns'][] = 'employee_number';
 		$config['columns'][] = 'first_name';
 		$config['columns'][] = 'last_name';
 		$config['columns'][] = 'hourly_rate';
-		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
+		$config['sort'][] = [ 'employee_number' => 'asc' ]; //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
+		$report_obj = TTnew( 'UserSummaryReport' ); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count($output_data) );
-		$this->assertArrayHasKey('employee_number', $output_data[0] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[0] );
+		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[0] );
 
-		$this->assertArrayHasKey('hourly_rate', $output_data[1] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[1] );
 		//$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
 		$this->assertGreaterThanOrEqual( 20.00, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 
-		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[2] );
 		//$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
 		$this->assertGreaterThanOrEqual( 20.00, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
 
-		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[3] );
 		//$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
 		$this->assertGreaterThanOrEqual( 20.00, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[4] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[5] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[6] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[4] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[5] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[6] );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -773,13 +774,13 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Admin user at the top
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
-		$this->editUserPermission( $superior_user_id, 'user', 'view', TRUE ); //View all employees, but not all wages.
+		$this->editUserPermission( $superior_user_id, 'user', 'view', true ); //View all employees, but not all wages.
 		//$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', true );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', true );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -787,43 +788,43 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$current_user = $user_obj;
 		$current_company = $user_obj->getCompanyObject();
 
-		$config['other']['disable_grand_total'] = TRUE;
+		$config['other']['disable_grand_total'] = true;
 		$config['columns'][] = 'employee_number';
 		$config['columns'][] = 'first_name';
 		$config['columns'][] = 'last_name';
 		$config['columns'][] = 'hourly_rate';
-		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
+		$config['sort'][] = [ 'employee_number' => 'asc' ]; //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
+		$report_obj = TTnew( 'UserSummaryReport' ); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count($output_data) );
-		$this->assertArrayHasKey('employee_number', $output_data[0] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[0] );
+		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[0] );
 		//$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
 		$this->assertGreaterThanOrEqual( 20.00, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
-		$this->assertArrayHasKey('hourly_rate', $output_data[1] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[1] );
 		//$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
 		$this->assertGreaterThanOrEqual( 20.00, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
-		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[2] );
 		//$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
 		$this->assertGreaterThanOrEqual( 20.00, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
-		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[3] );
 		//$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
 		$this->assertGreaterThanOrEqual( 20.00, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[4] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[5] );
-		$this->assertArrayNotHasKey('hourly_rate', $output_data[6] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[4] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[5] );
+		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[6] );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -853,13 +854,13 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		//Admin user at the top
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
 
-		$this->editUserPermission( $superior_user_id, 'user', 'view', TRUE ); //View all employees, but not all wages.
-		$this->editUserPermission( $superior_user_id, 'wage', 'view', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', TRUE );
-		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', TRUE );
+		$this->editUserPermission( $superior_user_id, 'user', 'view', true ); //View all employees, but not all wages.
+		$this->editUserPermission( $superior_user_id, 'wage', 'view', true );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_own', true );
+		$this->editUserPermission( $superior_user_id, 'wage', 'view_child', true );
 		//$permission = TTnew('Permission'); //This clears cache
 
-		$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$user_obj = $ulf->getById( $superior_user_id )->getCurrent();
 
 		//Global current_user/current_company as this is required to properly check permissions in each report
@@ -867,37 +868,38 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$current_user = $user_obj;
 		$current_company = $user_obj->getCompanyObject();
 
-		$config['other']['disable_grand_total'] = TRUE;
+		$config['other']['disable_grand_total'] = true;
 		$config['columns'][] = 'employee_number';
 		$config['columns'][] = 'first_name';
 		$config['columns'][] = 'last_name';
 		$config['columns'][] = 'hourly_rate';
-		$config['sort'][] = array( 'employee_number' => 'asc' ); //Force sort, so it doesn't change on us.
+		$config['sort'][] = [ 'employee_number' => 'asc' ]; //Force sort, so it doesn't change on us.
 
-		$report_obj = TTnew('UserSummaryReport'); /** @var UserSummaryReport $report_obj */
+		$report_obj = TTnew( 'UserSummaryReport' ); /** @var UserSummaryReport $report_obj */
 		$report_obj->setUserObject( $user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count($output_data) );
-		$this->assertArrayHasKey('employee_number', $output_data[0] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[0] );
+		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[0] );
 		$this->assertGreaterThan( 10.00, $output_data[0]['hourly_rate'] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[1] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[1] );
 		$this->assertGreaterThan( 10.00, $output_data[1]['hourly_rate'] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[2] );
 		$this->assertGreaterThan( 10.00, $output_data[2]['hourly_rate'] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[3] );
 		$this->assertGreaterThan( 10.00, $output_data[3]['hourly_rate'] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[4] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[4] );
 		$this->assertGreaterThan( 10.00, $output_data[4]['hourly_rate'] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[5] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[5] );
 		$this->assertGreaterThan( 10.00, $output_data[5]['hourly_rate'] );
-		$this->assertArrayHasKey('hourly_rate', $output_data[6] );
+		$this->assertArrayHasKey( 'hourly_rate', $output_data[6] );
 		$this->assertGreaterThan( 10.00, $output_data[6]['hourly_rate'] );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

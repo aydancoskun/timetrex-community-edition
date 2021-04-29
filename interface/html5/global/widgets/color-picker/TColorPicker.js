@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TColorPicker = function( options ) {
 		var opts = $.extend( {}, $.fn.TColorPicker.defaults, options );
@@ -50,7 +50,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper checkbox-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 				check_box.change( function() {
 					$this.trigger( 'formItemChange', [$this] );
@@ -141,11 +141,11 @@
 					//	rgb = colors.RND.rgb;
 
 					var colors = this.color.colors.RND,
-							modes = {
-								r: colors.rgb.r, g: colors.rgb.g, b: colors.rgb.b,
-								h: colors.hsv.h, s: colors.hsv.s, v: colors.hsv.v,
-								HEX: this.color.colors.HEX
-							};
+						modes = {
+							r: colors.rgb.r, g: colors.rgb.g, b: colors.rgb.b,
+							h: colors.hsv.h, s: colors.hsv.s, v: colors.hsv.v,
+							HEX: this.color.colors.HEX
+						};
 
 					$elm.each( function() {
 						this.value = '#' + modes[this.className.substr( 3 )];
@@ -174,7 +174,6 @@
 					//
 					//}
 
-
 				}
 			} );
 
@@ -186,4 +185,4 @@
 
 	$.fn.TColorPicker.defaults = {};
 
-})( jQuery );
+} )( jQuery );

@@ -33,14 +33,14 @@ StationViewController = BaseViewController.extend( {
 		this.table_name_key = 'station';
 		this.context_menu_name = $.i18n._( 'Station' );
 		this.navigation_label = $.i18n._( 'Station' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIStation' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIStation' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 
-			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 
 		}
 
@@ -52,7 +52,7 @@ StationViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
@@ -237,15 +237,15 @@ StationViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		if ( parseInt( this.current_edit_record['type_id'] ) == 100 ||
-				parseInt( this.current_edit_record['type_id'] ) == 150 ||
-				parseInt( this.current_edit_record['type_id'] ) == 28 ||
-				parseInt( this.current_edit_record['type_id'] ) == 65 ) {
+			parseInt( this.current_edit_record['type_id'] ) == 150 ||
+			parseInt( this.current_edit_record['type_id'] ) == 28 ||
+			parseInt( this.current_edit_record['type_id'] ) == 65 ) {
 
 			$( this.edit_view_tab.find( 'ul li' )[2] ).show();
 			var tab_2_label = this.edit_view.find( 'a[ref=tab_time_clock]' );
 
 			if ( parseInt( this.current_edit_record['type_id'] ) == 100 ||
-					parseInt( this.current_edit_record['type_id'] ) == 150 ) {
+				parseInt( this.current_edit_record['type_id'] ) == 150 ) {
 				tab_2_label.text( $.i18n._( 'TimeClock' ) );
 
 				if ( parseInt( this.current_edit_record['type_id'] ) != 150 ) {
@@ -269,7 +269,6 @@ StationViewController = BaseViewController.extend( {
 				this.detachElement( 'push_frequency' );
 				this.detachElement( 'partial_push_frequency' );
 			}
-
 
 			this.initModeFlag();
 
@@ -433,7 +432,6 @@ StationViewController = BaseViewController.extend( {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
 
-
 		}
 
 	},
@@ -474,7 +472,7 @@ StationViewController = BaseViewController.extend( {
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIStation' )),
+				api_class: ( APIFactory.getAPIClass( 'APIStation' ) ),
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.STATION,
@@ -533,7 +531,7 @@ StationViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -546,7 +544,7 @@ StationViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -560,17 +558,17 @@ StationViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'job_id'
 			} );
 
@@ -588,17 +586,17 @@ StationViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_item_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'job_item_id'
 			} );
 
@@ -670,7 +668,7 @@ StationViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -699,7 +697,7 @@ StationViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -716,7 +714,7 @@ StationViewController = BaseViewController.extend( {
 		// Include Employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -728,7 +726,7 @@ StationViewController = BaseViewController.extend( {
 		// Exclude Employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -917,7 +915,7 @@ StationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -929,7 +927,7 @@ StationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

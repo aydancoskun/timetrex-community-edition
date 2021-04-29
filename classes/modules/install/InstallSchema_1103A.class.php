@@ -46,18 +46,18 @@ class InstallSchema_1103A extends InstallSchema_Base {
 	function preInstall() {
 		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->StartTransaction();
-		$clf->getAll( NULL, NULL, NULL, array('created_date' => 'asc' ) );
+		$clf->getAll( null, null, null, [ 'created_date' => 'asc' ] );
 		Debug::Text( 'Get all companies. Found: ' . $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach ( $clf as $c_obj ) {
@@ -66,19 +66,19 @@ class InstallSchema_1103A extends InstallSchema_Base {
 				$slf = new StationListFactory();
 				$slf->getByCompanyIdAndTypeId( $c_obj->getId(), 65 ); //65=Mobile App Kiosk Station
 				if ( $slf->getRecordCount() > 0 ) {
-					foreach( $slf as $s_obj ) {
+					foreach ( $slf as $s_obj ) {
 						$mode_flags = $s_obj->getModeFlag();
 
-						if ( is_array($mode_flags) ) {
+						if ( is_array( $mode_flags ) ) {
 							if ( in_array( 16, $mode_flags ) ) { //Punch Mode: Facial Recognition
 								$default_mode_flag = 16;
-							} elseif ( in_array( 4, $mode_flags )  ) { //Punch Mode: QRCode
+							} else if ( in_array( 4, $mode_flags ) ) { //Punch Mode: QRCode
 								$default_mode_flag = 4;
-							} elseif ( in_array( 2, $mode_flags )  ) { //Punch Mode: Quick Punch
+							} else if ( in_array( 2, $mode_flags ) ) { //Punch Mode: Quick Punch
 								$default_mode_flag = 2;
 							}
 
-							if ( isset($default_mode_flag) ) {
+							if ( isset( $default_mode_flag ) ) {
 								Debug::text( 'Default Mode Flag: ' . $default_mode_flag, __FILE__, __LINE__, __METHOD__, 9 );
 								$s_obj->setDefaultModeFlag( $default_mode_flag );
 
@@ -88,7 +88,7 @@ class InstallSchema_1103A extends InstallSchema_Base {
 							}
 						}
 
-						unset($default_mode_flag);
+						unset( $default_mode_flag );
 					}
 				}
 			}
@@ -97,7 +97,8 @@ class InstallSchema_1103A extends InstallSchema_Base {
 		$clf->CommitTransaction();
 
 		//return FALSE; //REMOVE ME ZZZ
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.ASearchInput = function( options ) {
 		var opts = $.extend( {}, $.fn.ADropDown.defaults, options );
@@ -67,7 +67,7 @@
 
 				search_timer = setTimeout( function() {
 
-					var val = ($this.val() === default_tooltip) ? '' : $this.val();
+					var val = ( $this.val() === default_tooltip ) ? '' : $this.val();
 
 					$this.trigger( 'searchEnter', [val, column_model.name] );
 
@@ -83,4 +83,4 @@
 
 	$.fn.ASearchInput.defaults = {};
 
-})( jQuery );
+} )( jQuery );

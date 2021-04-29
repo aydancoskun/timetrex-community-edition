@@ -44,9 +44,9 @@ class InstallSchema_1008A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -54,7 +54,7 @@ class InstallSchema_1008A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->StartTransaction();
@@ -71,11 +71,11 @@ class InstallSchema_1008A extends InstallSchema_Base {
 						$next_available_employee_number = 1;
 					}
 
-					$ulf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array('hire_date' => 'asc') );
+					$ulf->getByCompanyId( $c_obj->getId(), null, null, null, [ 'hire_date' => 'asc' ] );
 					if ( $ulf->getRecordCount() > 0 ) {
-						foreach( $ulf as $u_obj ) {
+						foreach ( $ulf as $u_obj ) {
 							if ( $u_obj->getEmployeeNumber() == '' ) {
-								Debug::text('Setting Employee Number to: '. $next_available_employee_number .' for '. $u_obj->getUserName(), __FILE__, __LINE__, __METHOD__, 9);
+								Debug::text( 'Setting Employee Number to: ' . $next_available_employee_number . ' for ' . $u_obj->getUserName(), __FILE__, __LINE__, __METHOD__, 9 );
 
 								$u_obj->setEmployeeNumber( $next_available_employee_number );
 								if ( $u_obj->isValid() ) {
@@ -83,7 +83,7 @@ class InstallSchema_1008A extends InstallSchema_Base {
 									$next_available_employee_number++;
 								}
 							} else {
-								Debug::text('NOT Setting Employee Number for '. $u_obj->getUserName() .' already set to: '. $u_obj->getEmployeeNumber(), __FILE__, __LINE__, __METHOD__, 9);
+								Debug::text( 'NOT Setting Employee Number for ' . $u_obj->getUserName() . ' already set to: ' . $u_obj->getEmployeeNumber(), __FILE__, __LINE__, __METHOD__, 9 );
 							}
 						}
 					}
@@ -93,8 +93,8 @@ class InstallSchema_1008A extends InstallSchema_Base {
 		//$clf->FailTransaction();
 		$clf->CommitTransaction();
 
-		return TRUE;
-
+		return true;
 	}
 }
+
 ?>

@@ -43,8 +43,8 @@ DashletWizardController = BaseWizardController.extend( {
 		this.title = $.i18n._( 'Dashlet Wizard' );
 		this.steps = 2;
 		this.current_step = 1;
-		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
-		this.api_user_report = new (APIFactory.getAPIClass( 'APIUserReportData' ))();
+		this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
+		this.api_user_report = new ( APIFactory.getAPIClass( 'APIUserReportData' ) )();
 		this.render();
 	},
 
@@ -259,7 +259,7 @@ DashletWizardController = BaseWizardController.extend( {
 		var $this = this;
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
-		var api = new (APIFactory.getAPIClass( 'APIDashboard' ))();
+		var api = new ( APIFactory.getAPIClass( 'APIDashboard' ) )();
 		switch ( this.current_step ) {
 			case 1:
 				api.getOptions( 'dashlets', {
@@ -376,7 +376,7 @@ DashletWizardController = BaseWizardController.extend( {
 		var step_2_widgets = this.stepsWidgetDic[2];
 		var script = step_2_widgets.report.getValue();
 		var template_combobox = step_2_widgets.template;
-		var report_api = new (APIFactory.getAPIClass( this.report_apis[script] ))();
+		var report_api = new ( APIFactory.getAPIClass( this.report_apis[script] ) )();
 		var template_options_result = report_api.getOptions( 'templates', { async: false } );
 		var templates = template_options_result.getResult();
 		templates = Global.buildRecordArray( templates );
@@ -415,8 +415,8 @@ DashletWizardController = BaseWizardController.extend( {
 				var result_data = result.getResult();
 				if ( result_data && result_data.length > 0 ) {
 					result_data.sort( function( a, b ) {
-								return Global.compare( a, b, 'name' );
-							}
+							return Global.compare( a, b, 'name' );
+						}
 					);
 				} else {
 					result_data = [
@@ -454,8 +454,8 @@ DashletWizardController = BaseWizardController.extend( {
 				var result_data = result.getResult();
 				if ( result_data && result_data.length > 0 ) {
 					result_data.sort( function( a, b ) {
-								return Global.compare( a, b, 'name' );
-							}
+							return Global.compare( a, b, 'name' );
+						}
 					);
 				} else {
 					result_data = [{ id: 0, name: '- ' + $.i18n._( 'Default' ) + ' -' }];
@@ -612,7 +612,7 @@ DashletWizardController = BaseWizardController.extend( {
 			}
 		} else if ( dashlet_type == 'custom_report' ) {
 			var report = this.stepsDataDic[2].report;
-			var saved_report_id = (this.stepsDataDic[2].saved_report && this.stepsDataDic[2].saved_report != 0) ? this.stepsDataDic[2].saved_report : false;
+			var saved_report_id = ( this.stepsDataDic[2].saved_report && this.stepsDataDic[2].saved_report != 0 ) ? this.stepsDataDic[2].saved_report : false;
 			var template = this.stepsDataDic[2].template;
 			if ( template === 'saved_report' && !saved_report_id ) {
 				TAlertManager.showAlert( $.i18n._( 'No saved report!' ) );

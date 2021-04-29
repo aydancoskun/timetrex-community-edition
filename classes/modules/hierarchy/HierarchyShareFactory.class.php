@@ -60,8 +60,9 @@ class HierarchyShareFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setHierarchyControl( $value) {
+	function setHierarchyControl( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'hierarchy_control_id', $value );
 	}
 
@@ -76,10 +77,12 @@ class HierarchyShareFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -89,21 +92,21 @@ class HierarchyShareFactory extends Factory {
 		//
 		// Hierarchy control
 		$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
-		$this->Validator->isResultSetWithRows(	'hierarchy_control',
-														$hclf->getByID($this->getHierarchyControl()),
-														TTi18n::gettext('Hierarchy control is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'hierarchy_control',
+											   $hclf->getByID( $this->getHierarchyControl() ),
+											   TTi18n::gettext( 'Hierarchy control is invalid' )
+		);
 		// User
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$this->Validator->isResultSetWithRows(	'user',
-														$ulf->getByID($this->getUser()),
-														TTi18n::gettext('User is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'user',
+											   $ulf->getByID( $this->getUser() ),
+											   TTi18n::gettext( 'User is invalid' )
+		);
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -112,75 +115,75 @@ class HierarchyShareFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -188,30 +191,31 @@ class HierarchyShareFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 }
+
 ?>

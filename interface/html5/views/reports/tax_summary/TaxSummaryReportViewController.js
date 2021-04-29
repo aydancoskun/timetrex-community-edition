@@ -8,11 +8,11 @@ TaxSummaryReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Tax Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'TaxSummaryReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APITaxSummaryReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APITaxSummaryReport' ) )();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		return { include: ['default'] };
 	}
-	
+
 } );

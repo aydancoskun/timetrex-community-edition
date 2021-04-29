@@ -57,6 +57,4 @@ var APIUserReportData = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

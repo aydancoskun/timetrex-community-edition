@@ -48,62 +48,62 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 										);
 	*/
 
-	var $state_options = array(
-			20200101 => array(
+	var $state_options = [
+			20200101 => [
 					'rate'                => 5.00,
-					'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
+					'allowance'           => [ 4400, 1000 ], //1 = Base amount, 2 = Per Allowance multiplier
 					'federal_tax_maximum' => 2000,
 					'minimum_income'      => 8000,
-			),
-			20190101 => array(
-							   'rate'                => 5.05,
-							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
-							   'federal_tax_maximum' => 2000,
-							   'minimum_income'      => 8000,
-			),
-			20160101 => array(
-							   'rate'                => 5.10,
-							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
-							   'federal_tax_maximum' => 2000,
-							   'minimum_income'      => 8000,
-			),
-			20150101 => array(
-							   'rate'                => 5.15,
-							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
-							   'federal_tax_maximum' => 2000,
-							   'minimum_income'      => 8000,
-			),
-			20140101 => array(
-							   'rate'                => 5.20,
-							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
-							   'federal_tax_maximum' => 2000,
-							   'minimum_income'      => 8000,
-			),
-			20120101 => array(
-							   'rate'                => 5.25,
-							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
-							   'federal_tax_maximum' => 2000,
-							   'minimum_income'      => 8000,
-			),
-			20090101 => array(
-							   'rate'                => 5.30,
-							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
-							   'federal_tax_maximum' => 2000,
-							   'minimum_income'      => 8000,
-			),
-			20060101 => array(
-							   'rate'                => 5.30,
-							   'standard_deduction'  => array(
-									   10 => 0,
-									   20 => 2100,
-									   30 => 2200,
-									   40 => 2200,
-							   ),
-							   'allowance'           => array(3850, 2850),
-							   'federal_tax_maximum' => 2000,
-							   'minimum_income'      => 8000,
-			),
-	);
+			],
+			20190101 => [
+					'rate'                => 5.05,
+					'allowance'           => [ 4400, 1000 ], //1 = Base amount, 2 = Per Allowance multiplier
+					'federal_tax_maximum' => 2000,
+					'minimum_income'      => 8000,
+			],
+			20160101 => [
+					'rate'                => 5.10,
+					'allowance'           => [ 4400, 1000 ], //1 = Base amount, 2 = Per Allowance multiplier
+					'federal_tax_maximum' => 2000,
+					'minimum_income'      => 8000,
+			],
+			20150101 => [
+					'rate'                => 5.15,
+					'allowance'           => [ 4400, 1000 ], //1 = Base amount, 2 = Per Allowance multiplier
+					'federal_tax_maximum' => 2000,
+					'minimum_income'      => 8000,
+			],
+			20140101 => [
+					'rate'                => 5.20,
+					'allowance'           => [ 4400, 1000 ], //1 = Base amount, 2 = Per Allowance multiplier
+					'federal_tax_maximum' => 2000,
+					'minimum_income'      => 8000,
+			],
+			20120101 => [
+					'rate'                => 5.25,
+					'allowance'           => [ 4400, 1000 ], //1 = Base amount, 2 = Per Allowance multiplier
+					'federal_tax_maximum' => 2000,
+					'minimum_income'      => 8000,
+			],
+			20090101 => [
+					'rate'                => 5.30,
+					'allowance'           => [ 4400, 1000 ], //1 = Base amount, 2 = Per Allowance multiplier
+					'federal_tax_maximum' => 2000,
+					'minimum_income'      => 8000,
+			],
+			20060101 => [
+					'rate'                => 5.30,
+					'standard_deduction'  => [
+							10 => 0,
+							20 => 2100,
+							30 => 2200,
+							40 => 2200,
+					],
+					'allowance'           => [ 3850, 2850 ],
+					'federal_tax_maximum' => 2000,
+					'minimum_income'      => 8000,
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -129,8 +129,8 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 
 	function getStateFederalTaxMaximum() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$maximum = $retarr['federal_tax_maximum'];
@@ -142,12 +142,11 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 
 	function getStateStandardDeduction() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
-		$deduction = $retarr['standard_deduction'][ $this->getStateFilingStatus() ];
+		$deduction = $retarr['standard_deduction'][$this->getStateFilingStatus()];
 
 		Debug::text( 'Standard Deduction: ' . $deduction, __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -156,9 +155,8 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['allowance'];
@@ -171,7 +169,7 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 		} else {
 			if ( $this->getStateAllowance() == 0 ) {
 				$retval = 0;
-			} elseif ( $this->getStateAllowance() == 1 ) {
+			} else if ( $this->getStateAllowance() == 1 ) {
 				$retval = $allowance_arr[0];
 			} else {
 				$retval = bcadd( $allowance_arr[0], bcmul( bcsub( $this->getStateAllowance(), 1 ), $allowance_arr[1] ) );
@@ -190,8 +188,8 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 
 		if ( $annual_income > 0 ) {
 			$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-			if ( $retarr == FALSE ) {
-				return FALSE;
+			if ( $retarr == false ) {
+				return false;
 			}
 
 			$rate = bcdiv( $retarr['rate'], 100 );

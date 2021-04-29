@@ -46,7 +46,7 @@ As Of Date      Name	                        Path	                              
 16-Nov-2019     jquery.stickytableheaders	    interface/html5/framework/jquery.stickytableheaders.min.js	                0.1.24      0.1.24	        ASIS	https://github.com/jmosbech/StickyTableHeaders [Used in HTML reports]
 16-Nov-2019     jquery-ba-resize	            interface/html5/framework/jquery.ba-resize.js	                            1.1	        1.1	            MIT     https://github.com/cowboy/jquery-resize
 16-Nov-2019     jquery.bridget	                interface/html5/framework/jquery.bridget.js	                                2.0.1	    2.0.1	        MIT	    https://github.com/desandro/jquery-bridget
-16-Nov-2019     jquery.i18n	                    interface/html5/framework/jquery.i18n.js	                                1.1.2       1.1.2	        AS IS	https://github.com/recurser/jquery-i18n
+16-Nov-2019     jquery.i18n	                    interface/html5/framework/jquery.i18n.js	                                1.1.2       1.1.2	        AS IS	https://github.com/recurser/jquery-i18n -- Modified to fix global variables (04-Feb-20)
 16-Nov-2019     jquery.imageareaselect	        interface/html5/framework/jquery.imgareaselect.js	                        0.9.10	    0.9.10	        MIT     http://odyniec.net/projects/imgareaselect/
 16-Nov-2019     jquery.json	                    interface/html5/framework/jquery.json.js	                                2.6.0	    2.6.0	        MIT	    https://github.com/Krinkle/jquery-json
 13-Apr-2018     jquery.tablednd	                interface/html5/framework/jquery.tablednd.js	                            1.0.3       1.0.3	        MIT	    https://github.com/isocra/TableDnD

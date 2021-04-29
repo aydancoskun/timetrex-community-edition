@@ -5,7 +5,7 @@ TTPromise = {
 	promises: {},
 
 	add: function( category, key ) {
-		if ( !this.promises[category] || !this.promises[category][key] || (this.promises[category][key].state() != 'pending') ) {
+		if ( !this.promises[category] || !this.promises[category][key] || ( this.promises[category][key].state() != 'pending' ) ) {
 			Debug.Text( 'Promise: add: ' + category + '|' + key, 'TTPromise.js', 'TTPromise.js', 'add', 11 );
 			if ( typeof this.promises[category] == 'undefined' ) {
 				this.promises[category] = {};
@@ -123,7 +123,7 @@ TTPromise = {
 	},
 
 	filterPromiseArray: function( category, key ) {
-		retval = [];
+		var retval = [];
 		for ( var c in this.promises ) {
 			if ( !category || c == category ) {
 

@@ -47,7 +47,7 @@ class APIForm1099MiscReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIForm1099MiscReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getForm1099MiscReport( $config = FALSE, $format = 'pdf' ) {
+	function getForm1099MiscReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

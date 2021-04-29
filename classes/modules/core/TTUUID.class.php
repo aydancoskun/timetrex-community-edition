@@ -46,7 +46,7 @@ class TTUUID {
 	 */
 	static function getZeroID() {
 		global $PRIMARY_KEY_IS_UUID;
-		if ( $PRIMARY_KEY_IS_UUID == FALSE ) {
+		if ( $PRIMARY_KEY_IS_UUID == false ) {
 			return (int)0;
 		}
 
@@ -57,19 +57,18 @@ class TTUUID {
 	 * @param null $int
 	 * @return int|string
 	 */
-	static function getNotExistID( $int = NULL ) {
+	static function getNotExistID( $int = null ) {
 		global $PRIMARY_KEY_IS_UUID;
-		if ( $PRIMARY_KEY_IS_UUID == FALSE ) {
+		if ( $PRIMARY_KEY_IS_UUID == false ) {
 			return (int)-1;
 		}
 
 		if ( is_numeric( $int ) ) {
 
-			return 'ffffffff-ffff-ffff-ffff-'. str_pad( substr( abs( $int ), 0 , 12 ), 12, 0, STR_PAD_LEFT );
+			return 'ffffffff-ffff-ffff-ffff-' . str_pad( substr( abs( $int ), 0, 12 ), 12, 0, STR_PAD_LEFT );
 		} else {
 			return 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 		}
-
 	}
 
 	/**
@@ -78,14 +77,14 @@ class TTUUID {
 	 * @param null $seed
 	 * @return string
 	 */
-	static function generateUUID( $seed = NULL ) {
-		if ( $seed == NULL OR strlen( $seed ) !== 12 ) {
-			$seed = self::getSeed( TRUE );
+	static function generateUUID( $seed = null ) {
+		if ( $seed == null || strlen( $seed ) !== 12 ) {
+			$seed = self::getSeed( true );
 		}
 
 		// 7 bit micro-time using real microsecond precision, as both microtime(1) and array_sum(explode(' ', microtime())) are limited by php.ini precision
-		$split_time = explode( ' ', microtime( FALSE ) );
-		$time_micro_second = $split_time[1] . substr( $split_time[0], 2, 6 ); //Remove precision on the microsecond portion.
+		$split_time = explode( ' ', microtime( false ) );
+		$time_micro_second = $split_time[1] . substr( $split_time[0], 2, 6 );                                                                    //Remove precision on the microsecond portion.
 
 		//On 32bit PHP installs (especially Windows), the microtime() resolution isn't high enough (only 1/64 of a second) and can cause many UUID duplicates in tight loops. Supplement the timer with a counter instead.
 		if ( PHP_INT_SIZE === 4 ) { //32bit
@@ -110,9 +109,9 @@ class TTUUID {
 	 * @param null $seed
 	 * @return string
 	 */
-	static function generateUUIDOld( $seed = NULL ) {
-		if ( $seed == NULL OR strlen( $seed ) !== 12 ) {
-			$seed = self::getSeed( TRUE );
+	static function generateUUIDOld( $seed = null ) {
+		if ( $seed == null || strlen( $seed ) !== 12 ) {
+			$seed = self::getSeed( true );
 		}
 
 		/**
@@ -124,10 +123,10 @@ class TTUUID {
 
 		//On 32bit PHP installs, the microtime() resolution isn't high enough (only 1/64 of a second) and can cause many UUID duplicates in tight loops. Suppliment the timer with a counter instead.
 		if ( PHP_INT_SIZE === 4 ) { //32bit
-			$time = ( microtime( TRUE ) + ( self::$uuid_counter / 100000 ) ) * 10000000 + 0x01b21dd213814000;
+			$time = ( microtime( true ) + ( self::$uuid_counter / 100000 ) ) * 10000000 + 0x01b21dd213814000;
 			self::$uuid_counter++;
 		} else { //64bit
-			$time = microtime( TRUE ) * 10000000 + 0x01b21dd213814000;
+			$time = microtime( true ) * 10000000 + 0x01b21dd213814000;
 		}
 
 		// Convert time to a string representation without any decimal places, and not scientific notation. Using sprintf is slightly faster than substr( $time, 0, strpos( $time, '.' ) )
@@ -157,18 +156,18 @@ class TTUUID {
 	 * @param bool $allow_null
 	 * @return int|string
 	 */
-	static function castUUID( $uuid, $allow_null = FALSE ) {
+	static function castUUID( $uuid, $allow_null = false ) {
 		//@see comment in isUUID
 
 		//During upgrade from V10.x (pre-UUID) to v11 (post-UUID), we need numeric IDs to be left as integers to avoid SQL errors.
 		global $PRIMARY_KEY_IS_UUID;
-		if ( $PRIMARY_KEY_IS_UUID == FALSE ) {
+		if ( $PRIMARY_KEY_IS_UUID == false ) {
 			return (int)$uuid;
 		}
 
 		//Allow NULLs for cases where the column allows it.
 		$uuid = ( is_string( $uuid ) ) ? trim( $uuid ) : $uuid;
-		if ( ( $uuid === NULL AND $allow_null == TRUE ) OR self::isUUID( $uuid ) == TRUE ) {
+		if ( ( $uuid === null && $allow_null == true ) || self::isUUID( $uuid ) == true ) {
 			return $uuid;
 		}
 
@@ -179,12 +178,12 @@ class TTUUID {
 	 * @param bool $exact_string
 	 * @return string
 	 */
-	static function getRegex( $exact_string = TRUE ) {
+	static function getRegex( $exact_string = true ) {
 		$regex = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
-		if ( $exact_string === TRUE ) {
-			return '/^'.$regex.'$/';
+		if ( $exact_string === true ) {
+			return '/^' . $regex . '$/';
 		} else {
-			return '/'.$regex.'/';
+			return '/' . $regex . '/';
 		}
 	}
 
@@ -194,19 +193,19 @@ class TTUUID {
 	 */
 	static function isUUID( $uuid ) {
 		//Must be strict enough to enfore PostgreSQL UUID storage standard (all lower, no '{}' must have dashes)
-		//if we do not enforce this here, MySQL can insert whatever format they want and break '$a->getID() == $b->getID()' comparisons.
+		//  enforce this here so we can be sure that '$a->getID() == $b->getID()' comparisons always work.
 
 		//During upgrade from V10.x (pre-UUID) to v11 (post-UUID), we need numeric IDs to be left as integers to avoid SQL errors.
 		global $PRIMARY_KEY_IS_UUID;
-		if ( $PRIMARY_KEY_IS_UUID == FALSE AND is_numeric($uuid) ) {
+		if ( $PRIMARY_KEY_IS_UUID == false && is_numeric( $uuid ) ) {
 			return $uuid;
 		}
 
-		if ( is_string( $uuid ) AND $uuid != '' AND preg_match( self::getRegex(), $uuid ) ) {
-			return TRUE;
+		if ( is_string( $uuid ) && $uuid != '' && preg_match( self::getRegex(), $uuid ) ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -214,13 +213,13 @@ class TTUUID {
 	 * @param int $group
 	 * @return bool
 	 */
-	static function getUUIDGroup( $uuid, $group = 4 )  {
-		$bits = explode('-', $uuid);
-		if ( isset($bits[$group]) ) {
+	static function getUUIDGroup( $uuid, $group = 4 ) {
+		$bits = explode( '-', $uuid );
+		if ( isset( $bits[$group] ) ) {
 			return $bits[$group];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -228,8 +227,9 @@ class TTUUID {
 	 * @return int
 	 */
 	static function convertUUIDtoInt( $uuid ) {
-		$bits = explode('-', $uuid);
-		return (int)$bits[( count($bits) - 1 )];
+		$bits = explode( '-', $uuid );
+
+		return (int)$bits[( count( $bits ) - 1 )];
 	}
 
 	/**
@@ -237,14 +237,14 @@ class TTUUID {
 	 * @return int|string
 	 */
 	static function convertIntToUUID( $int ) {
-		if ( is_numeric($int) ) {
+		if ( is_numeric( $int ) ) {
 			if ( $int === 0 ) {
 				return self::getZeroID();
-			} elseif ( $int === -1 ) {
+			} else if ( $int === -1 ) {
 				return self::getNotExistID();
 			}
 
-			return self::getConversionPrefix() .'-'. str_pad( $int, 12, '0', STR_PAD_LEFT );
+			return self::getConversionPrefix() . '-' . str_pad( $int, 12, '0', STR_PAD_LEFT );
 		} else {
 			return $int;
 		}
@@ -255,7 +255,9 @@ class TTUUID {
 	 * @return string
 	 */
 	static function convertStringToUUID( $str ) {
-		$retval = substr($str, 0, 8 ) .'-'. substr($str, 8, 4) .'-'. substr($str, 12, 4) .'-'. substr($str, 16, 4) .'-'. substr($str, 20);
+		$str = str_pad( $str,  32, 'f', STR_PAD_LEFT ); //Make sure there is at least enough data to make a full 32 char UUID.
+
+		$retval = substr( $str, 0, 8 ) . '-' . substr( $str, 8, 4 ) . '-' . substr( $str, 12, 4 ) . '-' . substr( $str, 16, 4 ) . '-' . substr( $str, 20, 12 );
 
 		return $retval;
 	}
@@ -264,25 +266,26 @@ class TTUUID {
 	 * @param bool $fail_to_random
 	 * @return bool|string
 	 */
-	static function getSeed( $fail_to_random = FALSE ) {
+	static function getSeed( $fail_to_random = false ) {
 		global $config_vars;
-		if ( isset( $config_vars['other']['uuid_seed'] ) AND strlen($config_vars['other']['uuid_seed']) == 12 AND preg_match('/^[a-z0-9]{12}$/', $config_vars['other']['uuid_seed']) ) {
+		if ( isset( $config_vars['other']['uuid_seed'] ) && strlen( $config_vars['other']['uuid_seed'] ) == 12 && preg_match( '/^[a-z0-9]{12}$/', $config_vars['other']['uuid_seed'] ) ) {
 			return strtolower( trim( $config_vars['other']['uuid_seed'] ) );
 		}
 
-		if ( $fail_to_random == TRUE ) {
-			Debug::text('  WARNING: Generating random seed!', __FILE__, __LINE__, __METHOD__, 9);
+		if ( $fail_to_random == true ) {
+			Debug::text( '  WARNING: Generating random seed!', __FILE__, __LINE__, __METHOD__, 9 );
+
 			return self::generateRandomSeed();
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return string
 	 */
 	static function generateRandomSeed() {
-		return bin2hex( openssl_random_pseudo_bytes(6) );
+		return bin2hex( openssl_random_pseudo_bytes( 6 ) );
 	}
 
 	/**
@@ -291,49 +294,47 @@ class TTUUID {
 	static function generateSeed() {
 		//Once the seed is generated, it must not be ever generated to something different. Especially if the upgrade failed half way through and is run later on, or even on a different server.
 		global $config_vars;
-		if ( isset( $config_vars['other']['uuid_seed'] ) AND strlen($config_vars['other']['uuid_seed']) == 12 AND preg_match('/^[a-z0-9]{12}$/', $config_vars['other']['uuid_seed']) ) {
+		if ( isset( $config_vars['other']['uuid_seed'] ) && strlen( $config_vars['other']['uuid_seed'] ) == 12 && preg_match( '/^[a-z0-9]{12}$/', $config_vars['other']['uuid_seed'] ) ) {
 			return strtolower( trim( $config_vars['other']['uuid_seed'] ) );
-		} else {
-			global $db;
-
-			//Make sure we check that the database/system_setting table exists before we attempt to use it. Otherwise it may fail on initial installation.
-			$install_obj = new Install();
-			$install_obj->setDatabaseConnection( $db ); //Default connection
-			if ( $install_obj->checkSystemSettingTableExists() == TRUE ) {
-				$registration_key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
-			} else {
-				Debug::text('Database or system_setting table does not exist yet, generating temporary registration key...', __FILE__, __LINE__, __METHOD__, 9);
-				$registration_key = md5( uniqid( NULL, TRUE ) );
-			}
-
-			$license = new TTLicense();
-
-			//Make sure the UUID key used for upgrading is as unique as possible, so we can avoid the chance of conflicts as best as possible.
-			//  Include the database type and database name to further help make this unique in the event that a database was copied on the same server (hardware_id), it should at least have a different name.
-			//  Be sure to use CONFIG_FILE file creation time rather than mtime as the config file gets changed during upgrade/installs and can cause the seed to then change.
-			//  Seed should only be exactly 12 characters
-			$uuid_seed = substr( sha1( $registration_key . $license->getHardwareID() . $db->databaseType . $db->database . filectime( CONFIG_FILE ) ), 0, 12 );
-			$config_vars['other']['uuid_seed'] = $uuid_seed; //Save UUID_SEED to any in memory $config_vars to its able to be used immediately.
-
-			Debug::text( '  Generated Seed: ' . $uuid_seed . ' From Registration Key: ' . $registration_key . ' Hardware ID: ' . $license->getHardwareID() . ' Database Type: ' . $db->databaseType . ' DB Name: ' . $db->database . ' Config File: ' . CONFIG_FILE . ' ctime: ' . filectime( CONFIG_FILE ), __FILE__, __LINE__, __METHOD__, 9 );
-
-			$tmp_config_data = array();
-			$tmp_config_data['other']['uuid_seed'] = $uuid_seed;
-			if ( isset($config_vars['other']['primary_company_id']) AND is_numeric( $config_vars['other']['primary_company_id'] ) ) { //Convert to UUID while we are at it.
-				$uuid_primary_company_id = TTUUID::convertIntToUUID( $config_vars['other']['primary_company_id'] );
-				$config_vars['other']['primary_company_id'] = $uuid_primary_company_id; //Save UUID primary_company_id to any in memory $config_vars to its able to be used immediately.
-
-				$tmp_config_data['other']['primary_company_id'] = $uuid_primary_company_id;
-			}
-
-			if ( $install_obj->writeConfigFile( $tmp_config_data ) !== TRUE ) {
-				return FALSE;
-			}
-
-			return $uuid_seed;
 		}
 
-		return FALSE;
+		global $db;
+
+		//Make sure we check that the database/system_setting table exists before we attempt to use it. Otherwise it may fail on initial installation.
+		$install_obj = new Install();
+		$install_obj->setDatabaseConnection( $db ); //Default connection
+		if ( $install_obj->checkSystemSettingTableExists() == true ) {
+			$registration_key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
+		} else {
+			Debug::text( 'Database or system_setting table does not exist yet, generating temporary registration key...', __FILE__, __LINE__, __METHOD__, 9 );
+			$registration_key = md5( uniqid( null, true ) );
+		}
+
+		$license = new TTLicense();
+
+		//Make sure the UUID key used for upgrading is as unique as possible, so we can avoid the chance of conflicts as best as possible.
+		//  Include the database type and database name to further help make this unique in the event that a database was copied on the same server (hardware_id), it should at least have a different name.
+		//  Be sure to use CONFIG_FILE file creation time rather than mtime as the config file gets changed during upgrade/installs and can cause the seed to then change.
+		//  Seed should only be exactly 12 characters
+		$uuid_seed = substr( sha1( $registration_key . $license->getHardwareID() . $db->databaseType . $db->database . filectime( CONFIG_FILE ) ), 0, 12 );
+		$config_vars['other']['uuid_seed'] = $uuid_seed; //Save UUID_SEED to any in memory $config_vars to its able to be used immediately.
+
+		Debug::text( '  Generated Seed: ' . $uuid_seed . ' From Registration Key: ' . $registration_key . ' Hardware ID: ' . $license->getHardwareID() . ' Database Type: ' . $db->databaseType . ' DB Name: ' . $db->database . ' Config File: ' . CONFIG_FILE . ' ctime: ' . filectime( CONFIG_FILE ), __FILE__, __LINE__, __METHOD__, 9 );
+
+		$tmp_config_data = [];
+		$tmp_config_data['other']['uuid_seed'] = $uuid_seed;
+		if ( isset( $config_vars['other']['primary_company_id'] ) && is_numeric( $config_vars['other']['primary_company_id'] ) ) { //Convert to UUID while we are at it.
+			$uuid_primary_company_id = TTUUID::convertIntToUUID( $config_vars['other']['primary_company_id'] );
+			$config_vars['other']['primary_company_id'] = $uuid_primary_company_id; //Save UUID primary_company_id to any in memory $config_vars to its able to be used immediately.
+
+			$tmp_config_data['other']['primary_company_id'] = $uuid_primary_company_id;
+		}
+
+		if ( $install_obj->writeConfigFile( $tmp_config_data ) !== true ) {
+			return false;
+		}
+
+		return $uuid_seed;
 	}
 
 	/**
@@ -341,16 +342,17 @@ class TTUUID {
 	 */
 	static function getConversionPrefix() {
 		$uuid_seed = self::generateSeed();
-		if ( $uuid_seed !== FALSE ) {
+		if ( $uuid_seed !== false ) {
 			$uuid_key = $uuid_seed . substr( sha1( $uuid_seed ), 12 ); //Make sure we sha1() the seed just to pad out to at least 24 characters. Make the first 12 characters the original seed for consistency though.
 
 			$uuid_prefix = substr( $uuid_key, 0, 8 ) . '-' . substr( $uuid_key, 8, 2 ) . substr( substr( $uuid_key, -10 ), 0, 2 ) . '-' . substr( substr( $uuid_key, -8 ), 0, 4 ) . '-' . substr( $uuid_key, -4 );
+
 			//Debug::text( 'UUID Key: ' . $uuid_key . ' UUID PREFIX: ' . $uuid_prefix, __FILE__, __LINE__, __METHOD__, 9 );
 
 			return $uuid_prefix;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -359,9 +361,9 @@ class TTUUID {
 	 * @param bool $include_dashes
 	 * @return string
 	 */
-	static function truncateUUID( $uuid, $length, $include_dashes = TRUE ) {
+	static function truncateUUID( $uuid, $length, $include_dashes = true ) {
 		//Re-arrange UUID so most unique data is at the beginning.
-		if ( is_numeric( self::getUUIDGroup( $uuid, 4 ) ) AND stripos( self::getSeed( FALSE ), self::getUUIDGroup( $uuid, 0 ) ) !== FALSE ) {
+		if ( is_numeric( self::getUUIDGroup( $uuid, 4 ) ) && stripos( self::getSeed( false ), self::getUUIDGroup( $uuid, 0 ) ) !== false ) {
 			//If its a legacy UUID converted from an INT, the only unique part is group 4, so it needs to be at the begining.
 			//  However in cases where the SEED changes in the .ini file for some reason, this won't work anymore. Alternatively we could maybe just check that the first two digits of group 4 are '00' as well as being numeric. The chances of that happening are quite rare, but still possible.
 			$tmp_uuid = self::getUUIDGroup( $uuid, 4 ) . '-' . self::getUUIDGroup( $uuid, 1 ) . '-' . self::getUUIDGroup( $uuid, 2 ) . '-' . self::getUUIDGroup( $uuid, 3 ) . '-' . self::getUUIDGroup( $uuid, 0 );
@@ -369,11 +371,12 @@ class TTUUID {
 			$tmp_uuid = self::getUUIDGroup( $uuid, 1 ) . '-' . self::getUUIDGroup( $uuid, 2 ) . '-' . self::getUUIDGroup( $uuid, 3 ) . '-' . self::getUUIDGroup( $uuid, 0 ) . '-' . self::getUUIDGroup( $uuid, 4 );
 		}
 
-		if ( $include_dashes == FALSE ) {
-			$tmp_uuid = str_replace('-', '', $tmp_uuid);
+		if ( $include_dashes == false ) {
+			$tmp_uuid = str_replace( '-', '', $tmp_uuid );
 		}
 
 		return trim( substr( $tmp_uuid, 0, $length ), '-' );
 	}
 }
+
 ?>

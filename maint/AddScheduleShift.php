@@ -34,35 +34,35 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-$minimum_add_shift_offset = (3600 * 8.5) ; //Add shifts at least 8.5hrs before they start.
-$lookup_shift_offset = (3600 * 4.5); //Lookup shifts that started X hrs before now. Since this should run every 4hrs, check for shifts that may have been missed on the last run.
+$minimum_add_shift_offset = ( 3600 * 8.5 ); //Add shifts at least 8.5hrs before they start.
+$lookup_shift_offset = ( 3600 * 4.5 ); //Lookup shifts that started X hrs before now. Since this should run every 4hrs, check for shifts that may have been missed on the last run.
 
 $current_epoch = TTDate::getTime();
 //$current_epoch = strtotime('05-Sep-2013 10:00 PM');
-Debug::text('Current Epoch: '. TTDate::getDate('DATE+TIME', $current_epoch ), __FILE__, __LINE__, __METHOD__, 10);
+Debug::text( 'Current Epoch: ' . TTDate::getDate( 'DATE+TIME', $current_epoch ), __FILE__, __LINE__, __METHOD__, 10 );
 
 //Initial Start/End dates need to cover all timezones, we narrow it done further once we change to each users timezone later on.
 $initial_start_date = ( $current_epoch - $lookup_shift_offset );
-$initial_end_date = ($current_epoch + $minimum_add_shift_offset );
-Debug::text('Initial Start Date: '. TTDate::getDate('DATE+TIME', $initial_start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $initial_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+$initial_end_date = ( $current_epoch + $minimum_add_shift_offset );
+Debug::text( 'Initial Start Date: ' . TTDate::getDate( 'DATE+TIME', $initial_start_date ) . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $initial_end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
 $clf = new CompanyListFactory();
-$clf->getByStatusID( array(10,20,23), NULL, array('a.id' => 'asc') );
+$clf->getByStatusID( [ 10, 20, 23 ], null, [ 'a.id' => 'asc' ] );
 if ( $clf->getRecordCount() > 0 ) {
 	foreach ( $clf as $c_obj ) {
 		if ( $c_obj->getStatus() != 30 ) {
-			Debug::text('Company: '. $c_obj->getName() .' ID: '. $c_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Company: ' . $c_obj->getName() . ' ID: ' . $c_obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
 
 			//
 			//Get recurring schedules that are ready to be committed.
 			//
-			$rsf = TTNew('RecurringScheduleFactory'); /** @var RecurringScheduleFactory $rsf */
+			$rsf = TTNew( 'RecurringScheduleFactory' ); /** @var RecurringScheduleFactory $rsf */
 			$rsf->addScheduleFromRecurringSchedule( $c_obj, $initial_start_date, $initial_end_date );
 		} else {
-			Debug::text('Company is not ACTIVE: '. $c_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Company is not ACTIVE: ' . $c_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 		}
 	}
 }

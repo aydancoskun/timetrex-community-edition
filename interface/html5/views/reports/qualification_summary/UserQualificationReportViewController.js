@@ -8,15 +8,14 @@ UserQualificationReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Qualification Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'UserQualificationReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIUserQualificationReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserQualificationReport' ) )();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		return { include: ['default'] };
 	}
 
 
 	/* jshint ignore:end */
-
 
 } );

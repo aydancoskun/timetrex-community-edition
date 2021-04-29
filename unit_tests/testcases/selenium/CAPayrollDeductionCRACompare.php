@@ -45,28 +45,28 @@
  * @group CAPayrollDeductionCRACompareTest
  */
 class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestCase {
-	private  $default_wait_timeout = 4000;//100000;
-	private  $default_wait_interval = 50;
+	private $default_wait_timeout = 4000;//100000;
+	private $default_wait_interval = 50;
 
-	function waitUntilByXPath( $xpath, $timeout = NULL, $sleep_interval = NULL ) {
-		if ( $timeout == NULL ) {
+	function waitUntilByXPath( $xpath, $timeout = null, $sleep_interval = null ) {
+		if ( $timeout == null ) {
 			$timeout = $this->default_wait_timeout;
 		}
-		if ( $sleep_interval == NULL ) {
+		if ( $sleep_interval == null ) {
 			$sleep_interval = $this->default_wait_interval;
 		}
 
-		$this->waitUntil( function () use ($xpath) {
+		$this->waitUntil( function () use ( $xpath ) {
 			try {
 				$element = $this->byXPath( $xpath );
 				if ( $element->displayed() ) {
-					return TRUE;
+					return true;
 				}
-			} catch (PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
+			} catch ( PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e ) {
 
 			}
 
-			return NULL;
+			return null;
 		}, $timeout, $sleep_interval );
 	}
 
@@ -74,43 +74,43 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 		global $selenium_config;
 		$this->selenium_config = $selenium_config;
 
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
+		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
 
 		$this->year = 2020;
 
-		$this->tax_table_file = dirname(__FILE__).'/../payroll_deduction/CAPayrollDeductionTest'. $this->year .'.csv';
-		$this->cra_deduction_test_csv_file = dirname($this->tax_table_file). DIRECTORY_SEPARATOR . 'CAPayrollDeductionCRATest'. $this->year .'.csv';
+		$this->tax_table_file = dirname( __FILE__ ) . '/../payroll_deduction/CAPayrollDeductionTest' . $this->year . '.csv';
+		$this->cra_deduction_test_csv_file = dirname( $this->tax_table_file ) . DIRECTORY_SEPARATOR . 'CAPayrollDeductionCRATest' . $this->year . '.csv';
 
 		$this->company_id = PRIMARY_COMPANY_ID;
 
 		$this->selenium_test_case_runs = 0;
 
-		TTDate::setTimeZone('Etc/GMT+8', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'Etc/GMT+8', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$this->setHost( $selenium_config['host'] );
 		$this->setBrowser( $selenium_config['browser'] );
 		$this->setBrowserUrl( $selenium_config['default_url'] );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
-	function CRAPayrollDeductionOnlineCalculator( $args = array() ) {
-		if ( ENABLE_SELENIUM_REMOTE_TESTS != TRUE ) {
-			return FALSE;
+	function CRAPayrollDeductionOnlineCalculator( $args = [] ) {
+		if ( ENABLE_SELENIUM_REMOTE_TESTS != true ) {
+			return false;
 		}
 
-		Debug::Arr( $args, 'Args: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $args, 'Args: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( count($args) == 0 ) {
-			return FALSE;
+		if ( count( $args ) == 0 ) {
+			return false;
 		}
 
 		try {
@@ -132,14 +132,14 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 				Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 				$ae->click();
 			} else {
-				usleep(500000);
+				usleep( 500000 );
 				$this->waitUntilByXPath( '//*[@id="payrollDeductionsResults_button_modifyCalculationButton"]' );
 				$ae = $this->byXPath( '//*[@id="payrollDeductionsResults_button_modifyCalculationButton"]' ); //Modify the current calculation
 				Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 				$ae->click();
 			}
 
-			$province_options = array(
+			$province_options = [
 					'AB' => 'ALBERTA',
 					'BC' => 'BRITISH_COLUMBIA',
 					'SK' => 'SASKATCHEWAN',
@@ -152,19 +152,19 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 					'PE' => 'PRINCE_EDWARD_ISLAND',
 					'NT' => 'NORTHWEST_TERRITORIES',
 					'YT' => 'YUKON',
-					'NU' => 'NUNAVUT'
-			);
+					'NU' => 'NUNAVUT',
+			];
 			Debug::Arr( Option::getByKey( $args['province'], $province_options ), 'Attempting to Select Province Value: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			$this->waitUntilByXPath( '//*[@id="jurisdiction"]' );
 			$ae = $this->byId( 'jurisdiction' );
 			$this->select( $ae )->selectOptionByValue( Option::getByKey( $args['province'], $province_options ) );
 
-			$pp_options = array(
+			$pp_options = [
 					52 => 'WEEKLY_52PP',
 					26 => 'BI_WEEKLY',
 					24 => 'SEMI_MONTHLY',
-			);
+			];
 			$ae = $this->byId( 'payPeriodFrequency' );
 			//$this->select( $ae )->selectOptionByLabel( 'Biweekly (26 pay periods a year)' );
 			$this->select( $ae )->selectOptionByValue( Option::getByKey( $args['pay_period_schedule'], $pp_options ) );
@@ -183,7 +183,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 			$ae->click();
 
 			$this->waitUntilByXPath( '//*[@id="incomeAmount"]' );
-			usleep(500000);
+			usleep( 500000 );
 			$ae = $this->byId( 'incomeAmount' );
 			$ae->click();
 			$this->keys( $args['gross_income'] ); //Sometimes some keystrokes get missed, try putting a wait above here.
@@ -198,7 +198,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 				$this->select( $ae )->selectOptionByValue( ( $args['federal_claim'] == 0 ? 'CLAIM_CODE_0' : 'CLAIM_CODE_1' ) ); //Only support 0=$1, 1=Basic Claim
 			}
 
-			if ( isset( $args['provincial_claim'] ) AND $args['province'] != 'QC' ) { //QC doesn't have provincial claim code.
+			if ( isset( $args['provincial_claim'] ) && $args['province'] != 'QC' ) { //QC doesn't have provincial claim code.
 				$ae = $this->byId( 'provinceTerritoryClaimCode' );
 				$this->select( $ae )->selectOptionByValue( ( $args['provincial_claim'] == 0 ? 'CLAIM_CODE_0' : 'CLAIM_CODE_1' ) ); //Only support 0=$1, 1=Basic Claim
 			}
@@ -229,7 +229,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 				$this->keys( $args['ytd_ei'] );
 			}
 
-			usleep(500000);
+			usleep( 500000 );
 			$ae = $this->byId( 'payrollDeductionsStep3_button_calculate' );
 			Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 			$ae->click();
@@ -237,14 +237,14 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 			//
 			//Handle results here
 			//
-			$screenshot_file_name = '/tmp/cra_result_screenshot-'.$args['province'].'-'. $args['federal_claim'] .'-'. $args['provincial_claim'] .'-'. $args['gross_income'] .'.png';
+			$screenshot_file_name = '/tmp/cra_result_screenshot-' . $args['province'] . '-' . $args['federal_claim'] . '-' . $args['provincial_claim'] . '-' . $args['gross_income'] . '.png';
 			file_put_contents( $screenshot_file_name, $this->currentScreenshot() );
 
 			//Make sure the gross income matches first.
 			$ae = $this->byXPath( '/html/body/div/div/main/section[2]/table[1]/tbody/tr[1]/td[1]' ); //Was: 1
 			Debug::Text( 'AE Text (Gross Income) [1]: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 			$ae = $this->byXPath( '/html/body/div/div/main/section[2]/table[1]/tbody/tr[1]/td[3]' );
-			Debug::Text( 'AE Text (Gross Income) [1]: ' . $ae->text() .' Expecting: '. $args['gross_income'], __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'AE Text (Gross Income) [1]: ' . $ae->text() . ' Expecting: ' . $args['gross_income'], __FILE__, __LINE__, __METHOD__, 10 );
 			//$retarr['gross_inc'] = TTi18n::parseFloat( $ae->text() );
 			$this->assertEquals( TTi18n::parseFloat( $ae->text() ), $args['gross_income'] );
 
@@ -286,30 +286,32 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 
 			$this->selenium_test_case_runs++;
 		} catch ( Exception $e ) {
-			Debug::Text( 'Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
-			file_put_contents( tempnam ( '/tmp/' , 'cra_result_screenshot' ).'.png', $this->currentScreenshot() );
-			sleep(15);
+			Debug::Text( 'Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+			file_put_contents( tempnam( '/tmp/', 'cra_result_screenshot' ) . '.png', $this->currentScreenshot() );
+			sleep( 15 );
 		}
 
-		if ( isset($retarr) ) {
+		if ( isset( $retarr ) ) {
 			Debug::Arr( $retarr, 'Retarr: ', __FILE__, __LINE__, __METHOD__, 10 );
+
 			return $retarr;
 		}
 
 		Debug::Text( 'ERROR: Returning FALSE!', __FILE__, __LINE__, __METHOD__, 10 );
-		return FALSE;
+
+		return false;
 	}
 
 	//Simple control test to ensure the numbers match for a old year like 2016.
 	function testCRAControl() {
-		$args = array(
-			'date' => strtotime('01-Jan-2016'),
-			'province' => 'BC',
-			'pay_period_schedule' => 26,
-			'federal_claim' => 10000,
-			'provincial_claim' => 10000,
-			'gross_income' => 9933.99
-		);
+		$args = [
+				'date'                => strtotime( '01-Jan-2016' ),
+				'province'            => 'BC',
+				'pay_period_schedule' => 26,
+				'federal_claim'       => 10000,
+				'provincial_claim'    => 10000,
+				'gross_income'        => 9933.99,
+		];
 		$retarr = $this->CRAPayrollDeductionOnlineCalculator( $args );
 
 		$this->assertEquals( 2428.10, $retarr['federal_deduction'] );
@@ -317,60 +319,60 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 		//$this->assertEquals( 485.07, $retarr['cpp_deduction'] );
 		//$this->assertEquals( 186.76, $retarr['ei_deduction']  );
 
-		return TRUE;
+		return true;
 	}
 
-	public function mf($amount) {
-		return Misc::MoneyFormat($amount, FALSE);
+	public function mf( $amount ) {
+		return Misc::MoneyFormat( $amount, false );
 	}
 
 	function testCRAToCSVFile() {
-		$this->assertEquals( file_exists($this->tax_table_file), TRUE);
+		$this->assertEquals( file_exists( $this->tax_table_file ), true );
 
-		if ( file_exists($this->cra_deduction_test_csv_file) ) {
-			$file = new \SplFileObject( $this->cra_deduction_test_csv_file, 'r');
-			$file->seek(PHP_INT_MAX);
+		if ( file_exists( $this->cra_deduction_test_csv_file ) ) {
+			$file = new \SplFileObject( $this->cra_deduction_test_csv_file, 'r' );
+			$file->seek( PHP_INT_MAX );
 
 			$total_compare_lines = $file->key() + 1;
-			unset($file);
-			Debug::text('Found existing CRATest file to resume with lines: '. $total_compare_lines, __FILE__, __LINE__, __METHOD__, 10);
+			unset( $file );
+			Debug::text( 'Found existing CRATest file to resume with lines: ' . $total_compare_lines, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 
-		$test_rows = Misc::parseCSV( $this->tax_table_file, TRUE );
+		$test_rows = Misc::parseCSV( $this->tax_table_file, true );
 
-		$total_rows = ( count($test_rows) + 1 );
+		$total_rows = ( count( $test_rows ) + 1 );
 		$i = 2;
-		foreach( $test_rows as $row ) {
-			if ( isset($total_compare_lines) AND $i < $total_compare_lines ) {
-				Debug::text('  Skipping to line: '. $total_compare_lines .'/'. $i, __FILE__, __LINE__, __METHOD__, 10);
+		foreach ( $test_rows as $row ) {
+			if ( isset( $total_compare_lines ) && $i < $total_compare_lines ) {
+				Debug::text( '  Skipping to line: ' . $total_compare_lines . '/' . $i, __FILE__, __LINE__, __METHOD__, 10 );
 				$i++;
 				continue;
 			}
 
-			Debug::text('Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10);
-			if ( isset($row['gross_income']) AND isset($row['low_income']) AND isset($row['high_income'])
-					AND $row['gross_income'] == '' AND $row['low_income'] != '' AND $row['high_income'] != '' ) {
-				$row['gross_income'] = ( $row['low_income'] + ( ($row['high_income'] - $row['low_income']) / 2 ) );
+			Debug::text( 'Province: ' . $row['province'] . ' Income: ' . $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10 );
+			if ( isset( $row['gross_income'] ) && isset( $row['low_income'] ) && isset( $row['high_income'] )
+					&& $row['gross_income'] == '' && $row['low_income'] != '' && $row['high_income'] != '' ) {
+				$row['gross_income'] = ( $row['low_income'] + ( ( $row['high_income'] - $row['low_income'] ) / 2 ) );
 			}
 
-			if ( $row['country'] != '' AND $row['gross_income'] != '' ) {
+			if ( $row['country'] != '' && $row['gross_income'] != '' ) {
 				//echo $i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'] ."\n";
-				Debug::text($i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text( $i . '/' . $total_rows . '. Testing Province: ' . $row['province'] . ' Income: ' . $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10 );
 
-				$args = array(
-						'date' => strtotime( $row['date'] ),
-						'province' => $row['province'],
+				$args = [
+						'date'                => strtotime( $row['date'] ),
+						'province'            => $row['province'],
 						'pay_period_schedule' => 26,
-						'federal_claim' => $row['federal_claim'],
-						'provincial_claim' => $row['provincial_claim'],
-						'gross_income' => $this->mf( $row['gross_income'] ),
-				);
+						'federal_claim'       => $row['federal_claim'],
+						'provincial_claim'    => $row['provincial_claim'],
+						'gross_income'        => $this->mf( $row['gross_income'] ),
+				];
 
 
 				//Debug::Arr( $row, 'aFinal Row: ', __FILE__, __LINE__, __METHOD__, 10);
 				$tmp_cra_data = $this->CRAPayrollDeductionOnlineCalculator( $args );
-				if ( is_array($tmp_cra_data) ) {
+				if ( is_array( $tmp_cra_data ) ) {
 					$retarr[] = array_merge( $row, $tmp_cra_data );
 
 					//Debug::Arr( $retarr, 'bFinal Row: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -379,64 +381,62 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 //						break;
 //					}
 				} else {
-					Debug::text('ERROR! Data from CRA is invalid!', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text( 'ERROR! Data from CRA is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
 					break;
 				}
-
 			}
 
 			$i++;
 		}
 
-		if ( isset($retarr) ) {
+		if ( isset( $retarr ) ) {
 			//generate column array.
 			$column_keys = array_keys( $retarr[0] );
 			foreach ( $column_keys as $column_key ) {
-				$columns[ $column_key ] = $column_key;
+				$columns[$column_key] = $column_key;
 			}
 
 			//var_dump($test_data);
 			//var_dump($retarr);
 			//echo Misc::Array2CSV( $retarr, $columns, FALSE, TRUE );
-			file_put_contents( $this->cra_deduction_test_csv_file, Misc::Array2CSV( $retarr, $columns, FALSE, TRUE ), FILE_APPEND );
+			file_put_contents( $this->cra_deduction_test_csv_file, Misc::Array2CSV( $retarr, $columns, false, true ), FILE_APPEND );
 
 			//Make sure all rows are tested.
 			$this->assertEquals( $total_rows, ( $i - 1 ) );
 		} else {
-			$this->assertEquals( TRUE, FALSE );
+			$this->assertEquals( true, false );
 		}
-
 	}
 
 	function testCRAFromCSVFile() {
-		$this->assertEquals( file_exists($this->cra_deduction_test_csv_file), TRUE);
+		$this->assertEquals( file_exists( $this->cra_deduction_test_csv_file ), true );
 
-		$test_rows = Misc::parseCSV( $this->cra_deduction_test_csv_file, TRUE );
+		$test_rows = Misc::parseCSV( $this->cra_deduction_test_csv_file, true );
 
-		$total_rows = ( count($test_rows) + 1 );
+		$total_rows = ( count( $test_rows ) + 1 );
 		$i = 2;
-		foreach( $test_rows as $row ) {
+		foreach ( $test_rows as $row ) {
 			//Debug::text('Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10);
-			if ( isset($row['gross_income']) AND isset($row['low_income']) AND isset($row['high_income'])
-					AND $row['gross_income'] == '' AND $row['low_income'] != '' AND $row['high_income'] != '' ) {
-				$row['gross_income'] = ( $row['low_income'] + ( ($row['high_income'] - $row['low_income']) / 2 ) );
+			if ( isset( $row['gross_income'] ) && isset( $row['low_income'] ) && isset( $row['high_income'] )
+					&& $row['gross_income'] == '' && $row['low_income'] != '' && $row['high_income'] != '' ) {
+				$row['gross_income'] = ( $row['low_income'] + ( ( $row['high_income'] - $row['low_income'] ) / 2 ) );
 			}
-			if ( $row['country'] != '' AND $row['gross_income'] != '' ) {
+			if ( $row['country'] != '' && $row['gross_income'] != '' ) {
 				//echo $i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'] ."\n";
 
 				$pd_obj = new PayrollDeduction( $row['country'], $row['province'] );
 				$pd_obj->setDate( strtotime( $row['date'] ) );
-				$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+				$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 				$pd_obj->setAnnualPayPeriods( $row['pay_periods'] );
 
 				$pd_obj->setFederalTotalClaimAmount( $row['federal_claim'] ); //Amount from 2005, Should use amount from 2007 automatically.
 				$pd_obj->setProvincialTotalClaimAmount( $row['provincial_claim'] );
 
-				$pd_obj->setEIExempt( FALSE );
-				$pd_obj->setCPPExempt( FALSE );
+				$pd_obj->setEIExempt( false );
+				$pd_obj->setCPPExempt( false );
 
-				$pd_obj->setFederalTaxExempt( FALSE );
-				$pd_obj->setProvincialTaxExempt( FALSE );
+				$pd_obj->setFederalTaxExempt( false );
+				$pd_obj->setProvincialTaxExempt( false );
 
 				$pd_obj->setYearToDateCPPContribution( 0 );
 				$pd_obj->setYearToDateEIContribution( 0 );
@@ -445,10 +445,10 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 
 				$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), $this->mf( $row['gross_income'] ) );
 				if ( $row['federal_deduction'] != '' ) {
-					$this->assertEquals( (float)$this->mf( $row['federal_deduction'] ), (float)$this->mf( $pd_obj->getFederalPayPeriodDeductions() ), NULL, 0.015 ); //0.015=Allowed Delta
+					$this->assertEquals( (float)$this->mf( $row['federal_deduction'] ), (float)$this->mf( $pd_obj->getFederalPayPeriodDeductions() ), null, 0.015 ); //0.015=Allowed Delta
 				}
 				if ( $row['provincial_deduction'] != '' ) {
-					$this->assertEquals( (float)$this->mf( $row['provincial_deduction'] ), (float)$this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), NULL, 0.015  ); //0.015=Allowed Delta
+					$this->assertEquals( (float)$this->mf( $row['provincial_deduction'] ), (float)$this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), null, 0.015 ); //0.015=Allowed Delta
 				}
 			}
 
@@ -456,7 +456,8 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 		}
 
 		//Make sure all rows are tested.
-		$this->assertEquals( $total_rows, ( $i - 1 ));
+		$this->assertEquals( $total_rows, ( $i - 1 ) );
 	}
 }
+
 ?>

@@ -41,43 +41,43 @@
 class CompanySettingListFactory extends CompanySettingFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanySettingListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -89,23 +89,23 @@ class CompanySettingListFactory extends CompanySettingFactory implements Iterato
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanySettingListFactory
 	 */
-	function getByCompanyId( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByCompanyId( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -121,37 +121,39 @@ class CompanySettingListFactory extends CompanySettingFactory implements Iterato
 	 * @param $name
 	 * @return bool|CompanySettingListFactory
 	 */
-	function getByCompanyIdAndName( $company_id, $name) {
+	function getByCompanyIdAndName( $company_id, $name ) {
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $name == '') {
-			return FALSE;
+		if ( $name == '' ) {
+			return false;
 		}
 
-		$cache_id = $company_id.$name;
+		$cache_id = $company_id . $name;
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'name' => $name,
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'name'       => $name,
+		];
 
-		$this->rs = $this->getCache($cache_id);
-		if ( $this->rs === FALSE ) {
+		$this->rs = $this->getCache( $cache_id );
+		if ( $this->rs === false ) {
 			$query = '
 						select	*
-						from	'. $this->getTable() .'
+						from	' . $this->getTable() . '
 						where	company_id = ?
 							AND	name = ?
 							AND deleted = 0';
 
 			$this->rs = $this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs, $cache_id);
+			$this->saveCache( $this->rs, $cache_id );
 		}
+
 		return $this;
 	}
 
 }
+
 ?>

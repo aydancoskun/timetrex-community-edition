@@ -52,17 +52,17 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 		this.permission_id = 'punch';
 		this.other_fields = [];
 		require( this.filterRequiredFiles(), function() {
-			$this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
-			$this.branch_api = new (APIFactory.getAPIClass( 'APIBranch' ))();
-			$this.department_api = new (APIFactory.getAPIClass( 'APIDepartment' ))();
-			$this.other_field_api = new (APIFactory.getAPIClass( 'APIOtherField' ))();
+			$this.api = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
+			$this.branch_api = new ( APIFactory.getAPIClass( 'APIBranch' ) )();
+			$this.department_api = new ( APIFactory.getAPIClass( 'APIDepartment' ) )();
+			$this.other_field_api = new ( APIFactory.getAPIClass( 'APIOtherField' ) )();
 			if ( ( Global.getProductEdition() >= 20 ) ) {
-				$this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-				$this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+				$this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+				$this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 			}
-			$this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-			$this.api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
-			$this.current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+			$this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+			$this.api_station = new ( APIFactory.getAPIClass( 'APIStation' ) )();
+			$this.current_user_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
 			$this.initPermission();
 			ProgressBar.showOverlay();
 
@@ -160,7 +160,6 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			} );
 		}
 
-
 		// if ( !this.show_job_ui && !this.show_job_item_ui ) {
 		//     this.show_bad_quantity_ui = false;
 		//     this.show_good_quantity_ui = false;
@@ -170,7 +169,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 
 	jobUIValidate: function() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				PermissionManager.validate( 'punch', 'edit_job' ) ) {
+			PermissionManager.validate( 'punch', 'edit_job' ) ) {
 			return true;
 		}
 		return false;
@@ -178,7 +177,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 
 	jobItemUIValidate: function() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				PermissionManager.validate( 'punch', 'edit_job_item' ) ) {
+			PermissionManager.validate( 'punch', 'edit_job_item' ) ) {
 			return true;
 		}
 		return false;
@@ -200,7 +199,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 
 	goodQuantityUIValidate: function() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				PermissionManager.validate( 'punch', 'edit_quantity' ) ) {
+			PermissionManager.validate( 'punch', 'edit_quantity' ) ) {
 			return true;
 		}
 		return false;
@@ -208,7 +207,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 
 	badQuantityUIValidate: function() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				PermissionManager.validate( 'punch', 'edit_bad_quantity' ) ) {
+			PermissionManager.validate( 'punch', 'edit_bad_quantity' ) ) {
 			return true;
 		}
 		return false;
@@ -296,7 +295,6 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 			TTPromise.add( 'QuickPunch_options', 'Job' );
 			TTPromise.add( 'QuickPunch_options', 'JobItem' );
-
 
 			var user = LocalCacheData.getPunchLoginUser();
 			args.filter_data = { status_id: 10, user_id: user.id };
@@ -416,12 +414,11 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				$this.onSaveClick();
 				event.preventDefault();
 				return;
-			} else if ( (event.keyCode === 13 || event.keyCode === 32) && $( event.target ).attr( 'id' ) == 'cancel_btn' ) {
+			} else if ( ( event.keyCode === 13 || event.keyCode === 32 ) && $( event.target ).attr( 'id' ) == 'cancel_btn' ) {
 				$this.onCancelClick();
 				event.preventDefault();
 				return;
 			}
-
 
 			if ( event.keyCode === 9 && event.shiftKey ) {
 				//ensure the first editable item is selected.
@@ -595,12 +592,12 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			var field_obj;
 			var error_string;
 			switch ( key ) {
-					// case 'time_stamp':
-					//     field_obj = this.$('p[name="punch_time"]');
-					//     break;
-					// case 'lic_obj':
-					//     field_obj = this.$('p[name="user_full_name"]');
-					//     break;
+				// case 'time_stamp':
+				//     field_obj = this.$('p[name="punch_time"]');
+				//     break;
+				// case 'lic_obj':
+				//     field_obj = this.$('p[name="user_full_name"]');
+				//     break;
 				default:
 					if ( this.$( 'input[name="' + key + '"]' )[0] ) {
 						field_obj = this.$( 'input[name="' + key + '"]' );
@@ -825,7 +822,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 					break;
 				default:
 					$field.append( $( '<option></option>' ).prop( 'value', '0' ).text( '-- ' + $.i18n._( 'None' ) + ' --' ) ).attr( 'selected', 'selected' );
-					// $($this.$el).find(field_selector).selectpicker();
+				// $($this.$el).find(field_selector).selectpicker();
 			}
 		}
 		if ( _.size( source_data ) > 0 ) {
@@ -895,7 +892,7 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 							user_full_name: $this.current_edit_record['first_name'] + ' ' + $this.current_edit_record['last_name'],
 							label: $this.current_edit_record['status_id'] == 10 ? $.i18n._( 'In' ) : $.i18n._( 'Out' ),
 							return_date: $this.current_edit_record['time_stamp'],
-							is_mobile: (_.isUndefined( window.is_mobile ) == false)
+							is_mobile: ( _.isUndefined( window.is_mobile ) == false )
 						} ),
 						_timedRedirect: 5,
 						is_modal: true,
@@ -917,15 +914,15 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			}
 		} );
 		Global.setAnalyticDimensions();
-		if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
+		if ( typeof ( ga ) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
 			try {
 				ga( 'send', 'pageview', { 'sessionControl': 'end' } );
-			} catch(e) {
+			} catch ( e ) {
 				throw e;
 			}
 		}
 		//A bare "if" wrapped around lh_inst doesn't work here for some reason.
-		if ( typeof(lh_inst) != 'undefined' ) {
+		if ( typeof ( lh_inst ) != 'undefined' ) {
 			//stop the update loop for live chat with support
 			clearTimeout( lh_inst.timeoutStatuscheck );
 		}

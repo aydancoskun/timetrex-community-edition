@@ -1,281 +1,284 @@
 /*wizard base*/
 .wizard {
-    background-color: #f8f8f8;
-    border-bottom: 2px solid #32689b;
-    border-top: 30px solid #32689b;
-    border-left: 2px solid #32689b;
-    border-right: 2px solid #32689b;
-    position: absolute;
-    bottom: 50%; /* #2704 Use right/bottom instead of top/left to fix IE11 scrollbar issues. See Microsoft SO reply here: https://stackoverflow.com/questions/27000492/css3-transform-property-working-differently-in-internet-explorer */
-    right: 50%; /* #2704 Use right/bottom instead of top/left to fix IE11 scrollbar issues. See Microsoft SO reply here: https://stackoverflow.com/questions/27000492/css3-transform-property-working-differently-in-internet-explorer */
-    -webkit-transform: translate(50%, 50%);
-    -ms-transform: translate(50%, 50%);
-    transform: translate(50%, 50%);
-    height: calc(100% - 70px);
-    width: calc(100% - 100px);
-    max-width: 1000px;
-    max-height: 700px;
-    font-size: 12px;
-    text-align: center;
-    z-index: 95; /* #2768 Update .wizard-overlay if changing this z-index. */
-    border-radius: 4px;
-    
-    /* For IE 8 */
-    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
-    /* For IE 5.5 - 7 */
-    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
-    box-shadow: 5px 5px 8px 0px rgba(0, 0, 0, 0.3), 0 0 20px 0px rgba(0, 0, 0, 0.38);
+	background-color: #f8f8f8;
+	border-bottom: 2px solid #32689b;
+	border-top: 30px solid #32689b;
+	border-left: 2px solid #32689b;
+	border-right: 2px solid #32689b;
+	position: absolute;
+	bottom: 50%; /* #2704 Use right/bottom instead of top/left to fix IE11 scrollbar issues. See Microsoft SO reply here: https://stackoverflow.com/questions/27000492/css3-transform-property-working-differently-in-internet-explorer */
+	right: 50%; /* #2704 Use right/bottom instead of top/left to fix IE11 scrollbar issues. See Microsoft SO reply here: https://stackoverflow.com/questions/27000492/css3-transform-property-working-differently-in-internet-explorer */
+	-webkit-transform: translate(50%, 50%);
+	-ms-transform: translate(50%, 50%);
+	transform: translate(50%, 50%);
+	height: calc(100% - 70px);
+	width: calc(100% - 100px);
+	max-width: 1000px;
+	max-height: 700px;
+	font-size: 12px;
+	text-align: center;
+	z-index: 95; /* #2768 Update .wizard-overlay if changing this z-index. */
+	border-radius: 4px;
+
+	/* For IE 8 */
+	-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
+	/* For IE 5.5 - 7 */
+	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
+	box-shadow: 5px 5px 8px 0px rgba(0, 0, 0, 0.3), 0 0 20px 0px rgba(0, 0, 0, 0.38);
 }
 
 .wizard .title {
-    color: #FFFFFF;
-    font-size: 12px;
-    left: 15px;
-    position: absolute;
-    top: -22px;
+	color: #ffffff;
+	font-size: 12px;
+	left: 15px;
+	position: absolute;
+	top: -22px;
 }
 
 .wizard .progress-bar {
-    border-bottom: 1px solid #999999;
-    position: absolute;
-    top: 10px;
-    width: 100%;
+	border-bottom: 1px solid #999999;
+	position: absolute;
+	top: 10px;
+	width: 100%;
 }
 
 .wizard .title-1-div {
-    margin-bottom: 5px;
-    margin-left: 15px;
-    text-align: left;
-    float: left;
+	margin-bottom: 5px;
+	margin-left: 15px;
+	text-align: left;
+	float: left;
 }
 
 .wizard .logo {
-    background: url("../../global/widgets/ribbon/icons/wizard2-35x35.png");
-    width: 35px;
-    height: 35px;
-    float: left;
+	background: url("../../global/widgets/ribbon/icons/wizard2-35x35.png");
+	width: 35px;
+	height: 35px;
+	float: left;
 }
 
 .wizard .title-1 {
-    display: block;
-    float: left;
-    font-size: 22px;
-    font-weight: bold;
-    margin-left: 10px;
-    margin-top: 7px;
-    text-align: left;
+	display: block;
+	float: left;
+	font-size: 22px;
+	font-weight: bold;
+	margin-left: 10px;
+	margin-top: 7px;
+	text-align: left;
 }
 
 .wizard .steps {
-    display: block;
-    position: relative;
-    top: -25px;
+	display: block;
+	position: relative;
+	top: -25px;
 }
 
 .wizard-checkbox-label > .t-checkbox {
-    vertical-align: middle;
-    margin-right: 5px;
+	vertical-align: middle;
+	margin-right: 5px;
 }
 
 .wizard .progress {
-    height: 35px;
-    width: 97%;
-    background-color: #eaeaea;
+	height: 35px;
+	width: 97%;
+	background-color: #eaeaea;
 }
 
 progress::-webkit-progress-bar {
-    background-color: #eaeaea;
+	background-color: #eaeaea;
 }
 
 progress::-webkit-progress-value {
-    background: #eaeaea;
-    background: -moz-linear-gradient(top, #57beff 0%, #12a3ff 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #57beff), color-stop(100%, #12a3ff));
-    background: -webkit-linear-gradient(top, #57beff 0%, #12a3ff 100%);
-    background: -o-linear-gradient(top, #57beff 0%, #12a3ff 100%);
-    background: -ms-linear-gradient(top, #57beff 0%, #12a3ff 100%);
-    background: linear-gradient(to bottom, #57beff 0%, #12a3ff 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#57beff', endColorstr='#12a3ff', GradientType=0);
+	background: #eaeaea;
+	background: -moz-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #57beff), color-stop(100%, #12a3ff));
+	background: -webkit-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -o-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -ms-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: linear-gradient(to bottom, #57beff 0%, #12a3ff 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#57beff', endColorstr='#12a3ff', GradientType=0);
 
 }
 
 progress::-moz-progress-bar {
-    background: #eaeaea;
-    background: -moz-linear-gradient(top, #57beff 0%, #12a3ff 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #57beff), color-stop(100%, #12a3ff));
-    background: -webkit-linear-gradient(top, #57beff 0%, #12a3ff 100%);
-    background: -o-linear-gradient(top, #57beff 0%, #12a3ff 100%);
-    background: -ms-linear-gradient(top, #57beff 0%, #12a3ff 100%);
-    background: linear-gradient(to bottom, #57beff 0%, #12a3ff 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#57beff', endColorstr='#12a3ff', GradientType=0);
+	background: #eaeaea;
+	background: -moz-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #57beff), color-stop(100%, #12a3ff));
+	background: -webkit-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -o-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: -ms-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+	background: linear-gradient(to bottom, #57beff 0%, #12a3ff 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#57beff', endColorstr='#12a3ff', GradientType=0);
 
 }
 
 .wizard .content {
-    position: absolute;
-    top: 101px;
-    width: 100%;
-    height: calc(100% - 160px);
-    overflow-y: auto;
-    overflow-x: hidden;
+	position: absolute;
+	top: 101px;
+	width: 100%;
+	height: calc(100% - 160px);
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .wizard .step-title .wizard-label, .wizard .step-tip {
-    font-weight: normal;
+	font-weight: normal;
 }
 
 .wizard .wizard-label {
-    font-weight: bold;
-    display: block;
-    padding-bottom: 10px;
-    padding-top: 10px;
-    clear: both;
+	font-weight: bold;
+	display: block;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	clear: both;
 }
 
 .wizard .wizard-label p {
-    padding-top: 10px;
-    padding-bottom: 10px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
 .wizard .wizard-form-item-div {
-    clear: both;
-    float: left;
-    position: relative;
-    margin-left: 280px;
-    margin-bottom: 10px;
-    text-align: right;
+	clear: both;
+	float: left;
+	position: relative;
+	margin-left: 280px;
+	margin-bottom: 10px;
+	text-align: right;
 }
 
 .wizard .wizard-form-item-div .form-item-label {
-    float: left;
-    min-width: 180px;
-    margin-right: 10px;
-    padding-top: 4px;
+	float: left;
+	min-width: 180px;
+	margin-right: 10px;
+	padding-top: 4px;
 }
 
 .wizard .wizard-form-item-div .form-item-input-div {
-    float: left;
+	float: left;
 }
 
 .wizard .wizard-grid-div {
-    padding-left: 5px;
+	padding-left: 5px;
 }
 
-.wizard .inside-editor{
-    float: left;
-    width: 100%;
-    margin-top: 10px;
-    margin-bottom: 10px;
+.wizard .inside-editor {
+	float: left;
+	width: 100%;
+	margin-top: 10px;
+	margin-bottom: 10px;
 }
 
 .wizard .inside-editor-render {
-    margin: auto;
+	margin: auto;
 }
 
 .wizard .wizard-inside-editor {
-    /*margin-left: 280px;*/
+	/*margin-left: 280px;*/
 }
 
 .wizard .bottom-actions {
-    border-top: 1px solid #999999;
-    bottom: 40px;
-    padding-top: 5px;
-    position: absolute;
-    width: 100%;
+	border-top: 1px solid #999999;
+	bottom: 40px;
+	padding-top: 5px;
+	position: absolute;
+	width: 100%;
 }
 
 .wizard .move-buttons-div {
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    position: absolute;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	position: absolute;
 }
 
 .wizard .confirm-buttons-div {
-    position: absolute;
-    right: 10px;
+	position: absolute;
+	right: 10px;
 }
 
 .wizard .back-btn {
-    background-image: url("../../global/widgets/ribbon/icons/back-35x35.png");
-    background-color: transparent;
-    background-position: 0px 0px;
-    border: medium none;
-    height: 35px;
-    width: 35px;
-    cursor: pointer;
-    padding: 0;
+	background-image: url("../../global/widgets/ribbon/icons/back-35x35.png");
+	background-color: transparent;
+	background-position: 0px 0px;
+	border: medium none;
+	height: 35px;
+	width: 35px;
+	cursor: pointer;
+	padding: 0;
 }
 
 .wizard .forward-btn {
-    background-image: url("../../global/widgets/ribbon/icons/next-35x35.png");
-    background-color: transparent;
-    background-position: 0 0;
-    border: medium none;
-    height: 35px;
-    width: 35px;
-    cursor: pointer;
-    padding: 0;
+	background-image: url("../../global/widgets/ribbon/icons/next-35x35.png");
+	background-color: transparent;
+	background-position: 0 0;
+	border: medium none;
+	height: 35px;
+	width: 35px;
+	cursor: pointer;
+	padding: 0;
 }
 
 .wizard .done-btn {
-    background-image: url("../../global/widgets/ribbon/icons/done-35x35.png");
-    background-color: transparent;
-    background-position: 0px 0px;
-    border: medium none;
-    height: 35px;
-    width: 35px;
-    cursor: pointer;
-    padding: 0;
+	background-image: url("../../global/widgets/ribbon/icons/done-35x35.png");
+	background-color: transparent;
+	background-position: 0px 0px;
+	border: medium none;
+	height: 35px;
+	width: 35px;
+	cursor: pointer;
+	padding: 0;
 }
 
 .wizard .close-btn {
-    background-image: url("../../global/widgets/ribbon/icons/close_misc-35x35.png");
-    background-color: transparent;
-    background-position: 0px 0px;
-    border: medium none;
-    height: 35px;
-    width: 35px;
-    cursor: pointer;
-    padding: 0;
+	background-image: url("../../global/widgets/ribbon/icons/close_misc-35x35.png");
+	background-color: transparent;
+	background-position: 0px 0px;
+	border: medium none;
+	height: 35px;
+	width: 35px;
+	cursor: pointer;
+	padding: 0;
 }
 
 
 /*install wizard*/
 .install-wizard .progress-bar {
-    border-bottom: 1px solid #999999;
-    position: relative;
-    top: 0;
-    width: 100%;
-    padding-top: 10px;
-    padding-bottom: 10px;
+	border-bottom: 1px solid #999999;
+	position: relative;
+	top: 0;
+	width: 100%;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
+
 .wizard .install-content {
-    top: 70px;
+	top: 70px;
 }
+
 .install-wizard .install-content .dataError {
-    background-color: #FF0000;
-    color: #000;
-    text-align: center;
-    padding: 5px;
+	background-color: #ff0000;
+	color: #000000;
+	text-align: center;
+	padding: 5px;
 }
 
 .install-wizard .install-content .dataWarning {
-    background-color: #FFFF00;
-    color: #000;
-    text-align: center;
-    padding: 5px;
+	background-color: #ffff00;
+	color: #000000;
+	text-align: center;
+	padding: 5px;
 }
+
 .install-wizard .license,
 .install-wizard .databaseConfig,
 .install-wizard .user,
 .install-wizard .company,
 .install-wizard .systemSettings,
 .install-wizard .requirements {
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: calc(100% - 90px)
+	overflow-y: auto;
+	overflow-x: hidden;
+	height: calc(100% - 90px)
 }
 
 .install-wizard .license,
@@ -283,132 +286,133 @@ progress::-moz-progress-bar {
 .install-wizard .user,
 .install-wizard .company,
 .install-wizard .systemSettings {
-    overflow-y: auto;
-    overflow-x: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .install-wizard .license > .t-text-area {
-    margin-bottom: 5px;
+	margin-bottom: 5px;
 }
 
 .install-wizard .license .t-checkbox {
-    vertical-align: middle;
+	vertical-align: middle;
 }
 
 .install-wizard .requirements {
-    height: auto;
+	height: auto;
 }
+
 .install-wizard .requirements,
 .install-wizard .databaseConfig,
 .install-wizard .systemSettings,
 .install-wizard .company,
 .install-wizard .user {
-    width: 96%;
-    margin: 0 auto;
+	width: 96%;
+	margin: 0 auto;
 }
 
 .install-wizard .requirements .s-header,
 .install-wizard .requirements .s-body,
 .install-wizard .requirements .s-label,
 .install-wizard .requirements .s-require {
-    width: 100%;
-    clear: both;
+	width: 100%;
+	clear: both;
 }
 
 .install-wizard .requirements .s-require {
-    overflow-y: auto;
-    overflow-x: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .install-wizard .requirements .s-require .all-ok {
-    background: none repeat scroll 0 0 #ffffff;
-    float: left;
-    height: 60px;
-    line-height: 60px;
-    width: 100%;
-    color: #375a7c;
-    font-weight: bold;
+	background: none repeat scroll 0 0 #ffffff;
+	float: left;
+	height: 60px;
+	line-height: 60px;
+	width: 100%;
+	color: #375a7c;
+	font-weight: bold;
 }
 
 .install-wizard .user {
-    height: calc(100% - 120px)
+	height: calc(100% - 120px)
 }
 
 .install-wizard .first-column,
 .install-wizard .second-column {
-    /*border-top: 1px solid #C7C7C7;*/
+	/*border-top: 1px solid #C7C7C7;*/
 }
 
 .install-wizard .first-column {
-    /*border: 1px solid #C7C7C7;*/
-    border-radius: 5px 5px 5px 5px;
-    /*float: left;*/
-    /*width: 48%;*/
-    /*margin-bottom: 5px;*/
+	/*border: 1px solid #C7C7C7;*/
+	border-radius: 5px 5px 5px 5px;
+	/*float: left;*/
+	/*width: 48%;*/
+	/*margin-bottom: 5px;*/
 }
 
 .install-wizard .edit-view-form-item-div {
-    border-bottom: 1px solid #c7c7c7;
-    float: left;
-    width: 100%;
+	border-bottom: 1px solid #c7c7c7;
+	float: left;
+	width: 100%;
 }
 
 .install-wizard .edit-view-form-item-div .edit-view-form-item-label-div {
-    background: none repeat scroll 0 0 #375a7c;
-    border-right: 2px solid #ae0000;
-    float: left;
-    height: 32px;
-    margin-right: 10px;
+	background: none repeat scroll 0 0 #375a7c;
+	border-right: 2px solid #ae0000;
+	float: left;
+	height: 32px;
+	margin-right: 10px;
 }
 
 .install-wizard .edit-view-form-item-label-div {
-    width: 29%;
+	width: 29%;
 }
 
 .install-wizard .edit-view-form-item-div .edit-view-form-item-label {
-    color: #ffffff;
-    float: right;
-    margin-left: 5px;
-    margin-top: 5px;
-    min-width: 135px;
-    padding-right: 7px;
-    text-align: right;
+	color: #ffffff;
+	float: right;
+	margin-left: 5px;
+	margin-top: 5px;
+	min-width: 135px;
+	padding-right: 7px;
+	text-align: right;
 }
 
 .install-wizard .edit-view-form-item-div .edit-view-form-item-input-div {
-    float: left;
-    margin-right: 5px;
-    margin-top: 4px;
-    width: 69%;
-    height: 100%;
-    text-align: left;
+	float: left;
+	margin-right: 5px;
+	margin-top: 4px;
+	width: 69%;
+	height: 100%;
+	text-align: left;
 }
 
 .install-wizard .edit-view-form-item-div .edit-view-form-item-input-div span.custom-t-text {
-    display: inline-block;
-    float: left;
-    width: 100%;
-    height: 100%;
-    text-align: left;
-    word-break: break-all;
+	display: inline-block;
+	float: left;
+	width: 100%;
+	height: 100%;
+	text-align: left;
+	word-break: break-all;
 }
 
 .install-wizard .requirements .second-column .edit-view-form-item-div {
-    display: none;
+	display: none;
 }
 
 .install-wizard .fifth-column {
-    margin-top: 10px;
+	margin-top: 10px;
 }
 
 .install-wizard .content-handle-btn {
-    height: 40px;
-    padding-top: 10px;
-    position: relative;
+	height: 40px;
+	padding-top: 10px;
+	position: relative;
 }
 
 .install-wizard .ribbon-button-bar ul li .ribbon-sub-menu-icon {
-    margin-left: 15px;
+	margin-left: 15px;
 }
 
 /*.wizard.change-password-wizard {*/
@@ -417,41 +421,41 @@ progress::-moz-progress-bar {
 
 /*forgot-password*/
 .forgot-password {
-    height: 90px;
-    margin: 0;
-    padding: 0;
-    top: 45%;
-    width: 500px;
+	height: 90px;
+	margin: 0;
+	padding: 0;
+	top: 45%;
+	width: 500px;
 }
 
 .forgot-password .wizard-form-item-div {
-    clear: both;
-    float: left;
-    /*margin-left: 280px;*/
-    /*margin-bottom: 10px;*/
-    text-align: right;
-    margin: 0;
-    width: 100%;
+	clear: both;
+	float: left;
+	/*margin-left: 280px;*/
+	/*margin-bottom: 10px;*/
+	text-align: right;
+	margin: 0;
+	width: 100%;
 }
 
 .forgot-password .wizard-form-item-div .form-item-label {
-    float: left;
-    min-width: 180px;
-    margin-right: 10px;
-    line-height: 20px;
+	float: left;
+	min-width: 180px;
+	margin-right: 10px;
+	line-height: 20px;
 }
 
 .forgot-password .wizard-form-item-div .form-item-input-div {
-    float: left;
+	float: left;
 }
 
 
 /*report wizard*/
 .report-view-wizard {
-    max-width: none;
-    max-height: none;
-    width: calc(100% - 25px);
-    z-index: 150;
+	max-width: none;
+	max-height: none;
+	width: calc(100% - 25px);
+	z-index: 150;
 }
 
 /*.report-view-wizard {*/
@@ -465,61 +469,61 @@ progress::-moz-progress-bar {
 /*}*/
 
 .report-view-wizard .close-icon {
-    color: #FFFFFF;
-    right: 5px;
-    position: absolute;
-    top: -22px;
-    cursor: pointer;
-    font-size: 0px;
-    background-image: url("../../global/widgets/ribbon/icons/cancel-35x35.png");
-    background-size: 15px;
-    width: 15px;
-    height: 15px;
-    -webkit-filter: grayscale(100%);
-    -moz-filter: grayscale(100%);
-    -ms-filter: grayscale(100%);
-    -o-filter: grayscale(100%);
+	color: #ffffff;
+	right: 5px;
+	position: absolute;
+	top: -22px;
+	cursor: pointer;
+	font-size: 0px;
+	background-image: url("../../global/widgets/ribbon/icons/cancel-35x35.png");
+	background-size: 15px;
+	width: 15px;
+	height: 15px;
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	-ms-filter: grayscale(100%);
+	-o-filter: grayscale(100%);
 
-    filter: grayscale(100%);
-    /* filter: url(gray.svg#grayscale); */
+	filter: grayscale(100%);
+	/* filter: url(gray.svg#grayscale); */
 
-    filter: gray;
+	filter: gray;
 
 }
 
 .report-view-wizard > .content {
-    position: absolute;
-    height: auto;
-    top: 0;
-    bottom: 5px;
-    overflow: hidden;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box; /* Firefox */
-    -webkit-box-sizing: border-box; /* Safari */
-    width: 100%;
+	position: absolute;
+	height: auto;
+	top: 0;
+	bottom: 5px;
+	overflow: hidden;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box; /* Firefox */
+	-webkit-box-sizing: border-box; /* Safari */
+	width: 100%;
 }
 
 .report-view-wizard > .content > .iframe {
-    width: 100%;
-    height: 99%;
-    border: none;
-    background-color: #FFFFFF;
+	width: 100%;
+	height: 99%;
+	border: none;
+	background-color: #ffffff;
 }
 
 .report-view-wizard > .content {
-    overflow-y:auto;
-    -webkit-overflow-scrolling: touch; /* Allow apple devices to scroll the report iframe */
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch; /* Allow apple devices to scroll the report iframe */
 
 }
 
 
 /*reset forgot password wizard*/
 .reset-forgot-password {
-    height: 180px;
-    margin: 0;
-    padding: 0;
-    top:40%;
-    width: 500px;
+	height: 180px;
+	margin: 0;
+	padding: 0;
+	top: 40%;
+	width: 500px;
 }
 
 /*.reset-forgot-password .content {*/
@@ -531,11 +535,11 @@ progress::-moz-progress-bar {
 /*}*/
 
 .reset-forgot-password .wizard-form-item-div {
-    clear: both;
-    float: left;
-    margin-left: 0;
-    margin-bottom: 10px;
-    text-align: right;
+	clear: both;
+	float: left;
+	margin-left: 0;
+	margin-bottom: 10px;
+	text-align: right;
 }
 
 /*.reset-forgot-password .wizard-form-item-div {*/
@@ -556,64 +560,64 @@ progress::-moz-progress-bar {
 /*}*/
 
 .wizard .ribbon-button-bar {
-    border-top: 1px solid #999999;
-    bottom: 0px;
-    padding-top: 5px;
-    position: absolute;
-    width: 100%;
-    background:#f8f8f8;
-    left:0;
+	border-top: 1px solid #999999;
+	bottom: 0px;
+	padding-top: 5px;
+	position: absolute;
+	width: 100%;
+	background: #f8f8f8;
+	left: 0;
 }
 
 .wizard-content {
-    display: none;
+	display: none;
 }
 
 .content .wizard-content {
-    display: block;
-    margin: 0 auto;
-    width: 50%;
-    height: 100%;
-    padding-top: 10px;
+	display: block;
+	margin: 0 auto;
+	width: 50%;
+	height: 100%;
+	padding-top: 10px;
 }
 
 .wizard-content .wizard-item {
-    width: 100%;
-    height: 30px;
-    line-height: 30px;
+	width: 100%;
+	height: 30px;
+	line-height: 30px;
 }
 
 .wizard-content .wizard-item .wizard-item-label {
-    float: left;
-    width: 40%;
+	float: left;
+	width: 40%;
 }
 
 .wizard-content .wizard-item .wizard-item-label span {
-    float: right;
-    margin-left: 5px;
-    margin-right: 7px;
-    text-align: right;
+	float: right;
+	margin-left: 5px;
+	margin-right: 7px;
+	text-align: right;
 }
 
 .wizard-content .wizard-item .wizard-item-widget {
-    float: left;
-    width: 60%;
-    text-align: left;
-    height: 26px;
-    line-height: 26px;
-    padding-top: 4px;
+	float: left;
+	width: 60%;
+	text-align: left;
+	height: 26px;
+	line-height: 26px;
+	padding-top: 4px;
 
 }
 
 .wizard-overlay {
-    background: rgba(0, 0, 0, 0.6);
-    /*width: 100%;*/
-    /*height: 100%;*/
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 92; /* #2768 Wizards 95, edit-views 90, so 92 is inbetween to allow flexibility either side. Search code for 'z-index:' before adjusting. */
+	background: rgba(0, 0, 0, 0.6);
+	/*width: 100%;*/
+	/*height: 100%;*/
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 92; /* #2768 Wizards 95, edit-views 90, so 92 is inbetween to allow flexibility either side. Search code for 'z-index:' before adjusting. */
 }
 
 /*.wizard .edit-view-form-item-label-div-first-row {*/
@@ -621,14 +625,14 @@ progress::-moz-progress-bar {
 /*}*/
 
 .wizard .wizard-acombobox-div {
-    float: left;
-    position: relative;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    margin-bottom: 15px;
-    /*margin-left: 420px;*/
+	float: left;
+	position: relative;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	margin-bottom: 15px;
+	/*margin-left: 420px;*/
 }
 
 .wizard .menu ul {
@@ -636,164 +640,165 @@ progress::-moz-progress-bar {
 }
 
 .wizard .top-des {
-    display: inline-block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    margin-left: 5px;
-    margin-top: 5px;
-    text-align: left;
-    width: 100%;
+	display: inline-block;
+	font-weight: bold;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: left;
+	width: 100%;
 }
 
 .wizard .bottom-des {
-    display: inline-block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    margin-left: 5px;
-    margin-top: 5px;
-    text-align: left;
-    width: 100%;
+	display: inline-block;
+	font-weight: bold;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	margin-top: 5px;
+	text-align: left;
+	width: 100%;
 }
 
 .wizard-image-preview {
-    width: 400;
-    height: 300;
+	width: 400;
+	height: 300;
 }
 
 .wizard-bg {
-    /*background: rgba(0, 0, 0, 0.6);*/
-    /*position: absolute;*/
-    /*top: 0;*/
-    /*width: 100%;*/
-    /*height: 100%;*/
+	/*background: rgba(0, 0, 0, 0.6);*/
+	/*position: absolute;*/
+	/*top: 0;*/
+	/*width: 100%;*/
+	/*height: 100%;*/
 }
 
 .wizard-edit-view {
-    overflow: auto;
-    bottom: 63px;
-    position: absolute;
-    right: 0;
-    left: 0;
-    top: 35px;
-    overflow-x: hidden;
+	overflow: auto;
+	bottom: 63px;
+	position: absolute;
+	right: 0;
+	left: 0;
+	top: 35px;
+	overflow-x: hidden;
 }
 
 .wizard-edit-view .first-column {
-    border: 1px solid #C7C7C7;
-    border-radius: 5px 5px 5px 5px;
-    float: left;
-    width: 48%;
-    margin-bottom: 5px;
-    margin-left: 5px;
+	border: 1px solid #c7c7c7;
+	border-radius: 5px 5px 5px 5px;
+	float: left;
+	width: 48%;
+	margin-bottom: 5px;
+	margin-left: 5px;
 }
 
 .wizard-edit-view .first-column-full {
-    width: 988px;
-    margin-left: 5px;
+	width: 988px;
+	margin-left: 5px;
 }
 
 .wizard-edit-view .first-column > :nth-child(1) > :nth-child(1),
 .wizard-edit-view .second-column > :nth-child(1) > :nth-child(1) {
-    border-top-left-radius: 5px;
+	border-top-left-radius: 5px;
 }
 
 .wizard-edit-view .first-column > :last-child,
 .wizard-edit-view .second-column > :last-child {
-    border-bottom: none;
+	border-bottom: none;
 }
 
 .wizard-edit-view .first-column > :last-child > :nth-child(1),
 .wizard-edit-view .second-column > :last-child > :nth-child(1) {
-    border-bottom-left-radius: 5px;
+	border-bottom-left-radius: 5px;
 
 }
 
 .wizard-edit-view .second-column {
-    border: 1px solid #C7C7C7;
-    border-radius: 5px 5px 5px 5px;
-    float: left;
-    width: 50%;
-    margin-left: 5px;
-    margin-bottom: 5px;
+	border: 1px solid #c7c7c7;
+	border-radius: 5px 5px 5px 5px;
+	float: left;
+	width: 50%;
+	margin-left: 5px;
+	margin-bottom: 5px;
 }
 
 .wizard .wizard-form-item-div-inside {
-    clear: both;
-    float: left;
-    border-bottom: 1px solid #C7C7C7;
-    text-align: right;
-    width: 100%;
+	clear: both;
+	float: left;
+	border-bottom: 1px solid #c7c7c7;
+	text-align: right;
+	width: 100%;
 }
 
 .wizard .wizard-form-item-div-inside .form-item-label {
-    float: right;
-    margin-right: 10px;
-    margin-top: 5px;
-    margin-left: 5px;
-    color: #fff;
+	float: right;
+	margin-right: 10px;
+	margin-top: 5px;
+	margin-left: 5px;
+	color: #ffffff;
 }
 
 .wizard .wizard-form-item-div-inside .form-item-input-div {
-    float: left;
-    margin-top: 5px;
+	float: left;
+	margin-top: 5px;
 }
 
 .wizard .wizard-form-item-div-inside .edit-view-form-item-label-div {
-    background: #375A7C;
-    border-right: 2px solid #AE0000;
-    float: left;
-    height: 32px;
-    margin-right: 10px;
+	background: #375a7c;
+	border-right: 2px solid #ae0000;
+	float: left;
+	height: 32px;
+	margin-right: 10px;
 }
 
-.wizard .download-label{
-    font-weight: normal;
-    cursor: pointer;
-    color: #25abff;
-    margin-bottom: 0px;
+.wizard .download-label {
+	font-weight: normal;
+	cursor: pointer;
+	color: #25abff;
+	margin-bottom: 0px;
 }
 
-.wizard .download-label:hover{
-    text-decoration: underline;
+.wizard .download-label:hover {
+	text-decoration: underline;
 }
+
 /*forgot-password*/
 .forgot-password {
-    height: 122px;
-    margin: 0;
-    padding: 0;
-    top: 35%;
-    width: 500px;
+	height: 122px;
+	margin: 0;
+	padding: 0;
+	top: 35%;
+	width: 500px;
 }
 
 .forgot-password .wizard-form-item-div {
-    clear: both;
-    float: left;
-    /*margin-left: 280px;*/
-    /*margin-bottom: 10px;*/
-    text-align: right;
-    margin: 0;
-    width: 100%;
+	clear: both;
+	float: left;
+	/*margin-left: 280px;*/
+	/*margin-bottom: 10px;*/
+	text-align: right;
+	margin: 0;
+	width: 100%;
 }
 
 .forgot-password .wizard-form-item-div .form-item-label {
-    float: left;
-    min-width: 180px;
-    margin-right: 10px;
-    line-height: 20px;
+	float: left;
+	min-width: 180px;
+	margin-right: 10px;
+	line-height: 20px;
 }
 
 .forgot-password .wizard-form-item-div .form-item-input-div {
-    float: left;
+	float: left;
 }
 
 
 /*reset forgot password wizard*/
 .reset-forgot-password {
-    height: 180px;
-    margin: 0;
-    padding: 0;
-    top:40%;
-    width: 500px;
+	height: 180px;
+	margin: 0;
+	padding: 0;
+	top: 40%;
+	width: 500px;
 }
 
 /*.reset-forgot-password .content {*/
@@ -805,11 +810,11 @@ progress::-moz-progress-bar {
 /*}*/
 
 .reset-forgot-password .wizard-form-item-div {
-    clear: both;
-    float: left;
-    margin-left: 0;
-    margin-bottom: 10px;
-    text-align: right;
+	clear: both;
+	float: left;
+	margin-left: 0;
+	margin-bottom: 10px;
+	text-align: right;
 }
 
 /*.reset-forgot-password .wizard-form-item-div {*/
@@ -829,9 +834,9 @@ progress::-moz-progress-bar {
 /*line-height: 20px;*/
 /*}*/
 .wizard .progress {
-    height: 35px;
-    width: 97%;
-    background-color: #eaeaea;
-    display: block;
-    margin: 0 auto;
+	height: 35px;
+	width: 97%;
+	background-color: #eaeaea;
+	display: block;
+	margin: 0 auto;
 }

@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TImage = function( options ) {
 
@@ -49,7 +49,7 @@
 
 		if ( !$( '.file_browser_overlay' )[0] && $( e.target ).attr( 'enable-delete' ) == 1 ) {
 			var height = $( e.target ).height();
-			var top = (height - 32) / 2;
+			var top = ( height - 32 ) / 2;
 			var left = top;
 
 			var file_browser_overlay = $( '<div class="file_browser_overlay"><img src="theme/default/images/delete-512.png" style="position:absolute;width:32px;height:32px;top:' + top + 'px;left:' + left + 'px;"></div>' );
@@ -83,5 +83,4 @@
 		}
 	} );
 
-
-})( jQuery );
+} )( jQuery );

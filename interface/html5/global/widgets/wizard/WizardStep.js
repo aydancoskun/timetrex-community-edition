@@ -50,7 +50,6 @@ WizardStep = Backbone.View.extend( {
 		}
 	},
 
-
 	setWizardObject: function( val ) {
 		this.wizard_obj = val;
 		this.el = this.wizard_obj.el;
@@ -143,7 +142,6 @@ WizardStep = Backbone.View.extend( {
 		}
 	},
 
-
 	setGridSize: function( grid ) {
 		grid.grid.setGridWidth( $( this.wizard_obj.el ).find( '.content .grid-div' ).width() - 11 );
 		grid.grid.setGridHeight( $( this.wizard_obj.el ).find( '.content' ).height() - 150 ); //During merge, this wasn't in MASTER branch.
@@ -181,7 +179,6 @@ WizardStep = Backbone.View.extend( {
 		var container = $( '<div class="wizard_icon_card" id="' + id + '"/>' );
 
 		var img = $( '<img src="' + icon + '" />' );
-
 
 		var right_container = $( '<div class="right_container"/>' );
 
@@ -237,6 +234,11 @@ WizardStep = Backbone.View.extend( {
 
 	//Overridden in each Wizard step.
 	_onNavigationClick: function( icon ) {
+	},
+
+	//Overridden in each Wizard step that needs to determine if required buttons are clicked or not.
+	isRequiredButtonsClicked: function() {
+		return true;
 	},
 
 	addButtonClick: function( e, icon ) {

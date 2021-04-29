@@ -45,7 +45,7 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 	function setFederalFilingStatus( $value ) {
 		$this->data['federal_filing_status'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalFilingStatus() {
@@ -59,7 +59,7 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 	function setFederalAllowance( $value ) {
 		$this->data['federal_allowance'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalAllowance() {
@@ -67,7 +67,7 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 			return $this->data['federal_allowance'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -120,7 +120,7 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 		$AD = $annual_allowance + $annual_filing;
 		$tax = 0;
 		if ( $annual_taxable_income > $AD ) {
-			$tmp_prev_income = array();
+			$tmp_prev_income = [];
 			$i = 0;
 
 			foreach ( $taxTable as $taxTier ) {
@@ -129,15 +129,15 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 				$income = $taxTier['income'];
 				$rate = $taxTier['rate'];
 
-				if ( $prev_income != 0 AND $prev_income > 0 ) {
+				if ( $prev_income != 0 && $prev_income > 0 ) {
 
-					if ( $annual_taxable_income > $prev_income AND $annual_taxable_income <= $income ) {
+					if ( $annual_taxable_income > $prev_income && $annual_taxable_income <= $income ) {
 						$tax = bcadd( $tax, ( bcmul( $rate, bcsub( $annual_taxable_income, $prev_income ) ) ) );
 					} else {
-						$tmp_prev_income[ $i ] = $prev_income;
-						if ( $i >= 2 AND $i < 3 ) {
+						$tmp_prev_income[$i] = $prev_income;
+						if ( $i >= 2 && $i < 3 ) {
 							if ( $annual_taxable_income > $income ) {
-								$tax = bcadd( $tax, bcmul( $prev_rate, bcsub( $prev_income, $tmp_prev_income[ $i - 1 ] ) ) );
+								$tax = bcadd( $tax, bcmul( $prev_rate, bcsub( $prev_income, $tmp_prev_income[$i - 1] ) ) );
 								$tax = bcadd( $tax, bcmul( $rate, bcsub( $annual_taxable_income, $income ) ) );
 							}
 						}

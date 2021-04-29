@@ -21,8 +21,8 @@ KPIViewController = BaseViewController.extend( {
 		this.table_name_key = 'kpi';
 		this.context_menu_name = $.i18n._( 'KPI' );
 		this.navigation_label = $.i18n._( 'KPI' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIKPI' ))();
-		this.kpi_group_api = new (APIFactory.getAPIClass( 'APIKPIGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIKPI' ) )();
+		this.kpi_group_api = new ( APIFactory.getAPIClass( 'APIKPIGroup' ) )();
 
 		this.document_object_type_id = 210;
 		this.render();
@@ -80,7 +80,7 @@ KPIViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIKPI' )),
+			api_class: ( APIFactory.getAPIClass( 'APIKPI' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.KPI,
@@ -234,7 +234,7 @@ KPIViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -246,7 +246,7 @@ KPIViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

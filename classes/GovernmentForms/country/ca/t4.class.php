@@ -43,27 +43,27 @@ include_once( 'CA.class.php' );
 class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 	public $pdf_template = 't4flat-10b.pdf';
 
-	public $template_offsets = array(-10, 0);
+	public $template_offsets = [ -10, 0 ];
 
 	/*
 	public $payment_cutoff_amount = 7000; //Line5
 	*/
 
 	function getOptions( $name ) {
-		$retval = NULL;
+		$retval = null;
 		switch ( $name ) {
 			case 'status':
-				$retval = array(
+				$retval = [
 						'-1010-O' => TTi18n::getText( 'Original' ),
 						'-1020-A' => TTi18n::getText( 'Amended' ),
 						'-1030-C' => TTi18n::getText( 'Cancel' ),
-				);
+				];
 				break;
 			case 'type':
-				$retval = array(
+				$retval = [
 						'government' => TTi18n::gettext( 'Government (Multiple Employees/Page)' ),
 						'employee'   => TTi18n::gettext( 'Employee (One Employee/Page)' ),
-				);
+				];
 				break;
 		}
 
@@ -73,7 +73,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 	function getPayrollDeductionObject() {
 		if ( !isset( $this->payroll_deduction_obj ) ) {
 			require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'payroll_deduction' . DIRECTORY_SEPARATOR . 'PayrollDeduction.class.php' );
-			$this->payroll_deduction_obj = new PayrollDeduction( 'CA', NULL );
+			$this->payroll_deduction_obj = new PayrollDeduction( 'CA', null );
 			$this->payroll_deduction_obj->setDate( TTDate::getTimeStamp( $this->year, 12, 31 ) );
 		}
 
@@ -95,13 +95,13 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 			return $this->type;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setType( $value ) {
 		$this->type = trim( $value );
 
-		return TRUE;
+		return true;
 	}
 
 	//Set the submission status. Original, Amended, Cancel.
@@ -116,7 +116,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 	function setStatus( $value ) {
 		$this->status = strtoupper( trim( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	function getShowInstructionPage() {
@@ -124,632 +124,632 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 			return $this->show_instruction_page;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setShowInstructionPage( $value ) {
 		$this->show_instruction_page = (bool)trim( $value );
 
-		return TRUE;
+		return true;
 	}
 
 	public function getPreCalcFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 				'l24'         => 'preCalcL24',
 				'l26'         => 'preCalcL26',
 				'ei_exempt'   => 'preCalcEIExempt',
 				'cpp_exempt'  => 'preCalcCPPExempt',
 				'ppip_exempt' => 'preCalcPPIPExempt',
-		);
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 				'year' => 'isNumeric',
 				//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		);
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array(
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [
 
-				'year'                   => array(
+				'year'                   => [
 						'page'          => 1,
 						'template_page' => 1,
-						'on_background' => TRUE,
-						'coordinates'   => array(
+						'on_background' => true,
+						'coordinates'   => [
 								'x'      => 349,
 								'y'      => 37,
 								'h'      => 17,
 								'w'      => 57,
 								'halign' => 'C',
 								//'fill_color' => array( 255, 255, 255 ),
-						),
-						'font'          => array(
+						],
+						'font'          => [
 								'size' => 14,
 								'type' => 'B',
-						),
-				),
+						],
+				],
 
 				//Company information
-				'company_name'           => array(
-						'coordinates' => array(
+				'company_name'           => [
+						'coordinates' => [
 								'x'      => 35,
 								'y'      => 52,
 								'h'      => 12,
 								'w'      => 210,
 								'halign' => 'L',
-						),
-						'font'        => array(
+						],
+						'font'        => [
 								'size' => 8,
 								'type' => 'B',
-						),
-				),
-				'employment_province'    => array( //Province of employment
-												   'coordinates' => array(
-														   'x'      => 297,
-														   'y'      => 109,
-														   'h'      => 18,
-														   'w'      => 28,
-														   'halign' => 'C',
-												   ),
-				),
-				'payroll_account_number' => array(
-						'function'    => array('filterPayrollAccountNumber', 'drawNormal'),
-						'coordinates' => array(
+						],
+				],
+				'employment_province'    => [ //Province of employment
+											  'coordinates' => [
+													  'x'      => 297,
+													  'y'      => 109,
+													  'h'      => 18,
+													  'w'      => 28,
+													  'halign' => 'C',
+											  ],
+				],
+				'payroll_account_number' => [
+						'function'    => [ 'filterPayrollAccountNumber', 'drawNormal' ],
+						'coordinates' => [
 								'x'      => 52,
 								'y'      => 110,
 								'h'      => 17,
 								'w'      => 214,
 								'halign' => 'L',
-						),
-						'font'        => array(
+						],
+						'font'        => [
 								'size' => 8,
 								'type' => '',
-						),
-				),
+						],
+				],
 
 				//Employee information.
-				'sin'                    => array(
-						'coordinates' => array(
+				'sin'                    => [
+						'coordinates' => [
 								'x'      => 52,
 								'y'      => 145,
 								'h'      => 17,
 								'w'      => 120,
 								'halign' => 'C',
-						),
-				),
-				'cpp_exempt'             => array(
-						'function'    => array('drawCheckBox'),
-						'coordinates' => array(
-								array(
+						],
+				],
+				'cpp_exempt'             => [
+						'function'    => [ 'drawCheckBox' ],
+						'coordinates' => [
+								[
 										'x'      => 202,
 										'y'      => 145,
 										'h'      => 18,
 										'w'      => 15,
 										'halign' => 'C',
-								),
-						),
-				),
-				'ei_exempt'              => array(
-						'function'    => array('drawCheckBox'),
-						'coordinates' => array(
-								array(
+								],
+						],
+				],
+				'ei_exempt'              => [
+						'function'    => [ 'drawCheckBox' ],
+						'coordinates' => [
+								[
 										'x'      => 226,
 										'y'      => 145,
 										'h'      => 18,
 										'w'      => 15,
 										'halign' => 'C',
-								),
-						),
-				),
-				'ppip_exempt'            => array(
-						'function'    => array('drawCheckBox'),
-						'coordinates' => array(
-								array(
+								],
+						],
+				],
+				'ppip_exempt'            => [
+						'function'    => [ 'drawCheckBox' ],
+						'coordinates' => [
+								[
 										'x'      => 252,
 										'y'      => 145,
 										'h'      => 18,
 										'w'      => 15,
 										'halign' => 'C',
-								),
-						),
-				),
-				'employment_code'        => array(
-						'coordinates' => array(
+								],
+						],
+				],
+				'employment_code'        => [
+						'coordinates' => [
 								'x'      => 296,
 								'y'      => 145,
 								'h'      => 18,
 								'w'      => 29,
 								'halign' => 'C',
-						),
-				),
-				'last_name'              => array(
-						'coordinates' => array(
+						],
+				],
+				'last_name'              => [
+						'coordinates' => [
 								'x'      => 49,
 								'y'      => 197,
 								'h'      => 14,
 								'w'      => 170,
 								'halign' => 'L',
-						),
-				),
-				'first_name'             => array(
-						'coordinates' => array(
+						],
+				],
+				'first_name'             => [
+						'coordinates' => [
 								'x'      => 222,
 								'y'      => 197,
 								'h'      => 14,
 								'w'      => 60,
 								'halign' => 'L',
-						),
-				),
-				'middle_name'            => array(
-						'function'    => array('filterMiddleName', 'drawNormal'),
-						'coordinates' => array(
+						],
+				],
+				'middle_name'            => [
+						'function'    => [ 'filterMiddleName', 'drawNormal' ],
+						'coordinates' => [
 								'x'      => 290,
 								'y'      => 197,
 								'h'      => 14,
 								'w'      => 30,
 								'halign' => 'R',
-						),
-				),
+						],
+				],
 
-				'address' => array(
-						'function'    => array('filterAddress', 'drawNormal'),
-						'coordinates' => array(
+				'address' => [
+						'function'    => [ 'filterAddress', 'drawNormal' ],
+						'coordinates' => [
 								'x'      => 49,
 								'y'      => 215,
 								'h'      => 42,
 								'w'      => 270,
 								'halign' => 'L',
-						),
-						'font'        => array(
+						],
+						'font'        => [
 								'size' => 8,
 								'type' => '',
-						),
-						'multicell'   => TRUE,
-				),
-				'l14'     => array(
+						],
+						'multicell'   => true,
+				],
+				'l14'     => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 320,
 										'y'      => 72.5,
 										'h'      => 18,
 										'w'      => 98,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 418,
 										'y'      => 72.5,
 										'h'      => 18,
 										'w'      => 33,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l16'     => array(
+								],
+						],
+				],
+				'l16'     => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 348,
 										'y'      => 109,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 418,
 										'y'      => 109,
 										'h'      => 18,
 										'w'      => 33,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l17'     => array(
+								],
+						],
+				],
+				'l17'     => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 348,
 										'y'      => 145,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 418,
 										'y'      => 145,
 										'h'      => 18,
 										'w'      => 33,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l18'     => array(
+								],
+						],
+				],
+				'l18'     => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 348,
 										'y'      => 180,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 418,
 										'y'      => 180,
 										'h'      => 18,
 										'w'      => 33,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l20'     => array(
+								],
+						],
+				],
+				'l20'     => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 348,
 										'y'      => 217,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 418,
 										'y'      => 217,
 										'h'      => 18,
 										'w'      => 33,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l52'     => array(
+								],
+						],
+				],
+				'l52'     => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 348,
 										'y'      => 253,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 418,
 										'y'      => 253,
 										'h'      => 18,
 										'w'      => 33,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l55'     => array(
+								],
+						],
+				],
+				'l55'     => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 348,
 										'y'      => 290,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 418,
 										'y'      => 290,
 										'h'      => 18,
 										'w'      => 33,
 										'halign' => 'C',
-								),
-						),
-				),
+								],
+						],
+				],
 
-				'l22' => array(
+				'l22' => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 470,
 										'y'      => 72.5,
 										'h'      => 18,
 										'w'      => 83,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 553,
 										'y'      => 72.5,
 										'h'      => 18,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l24' => array(
-						'function'    => array('drawSplitDecimalFloat'),
-						'coordinates' => array(
-								array(
+								],
+						],
+				],
+				'l24' => [
+						'function'    => [ 'drawSplitDecimalFloat' ],
+						'coordinates' => [
+								[
 										'x'      => 483,
 										'y'      => 109,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 553,
 										'y'      => 109,
 										'h'      => 18,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l26' => array(
-						'function'    => array('drawSplitDecimalFloat'),
-						'coordinates' => array(
-								array(
+								],
+						],
+				],
+				'l26' => [
+						'function'    => [ 'drawSplitDecimalFloat' ],
+						'coordinates' => [
+								[
 										'x'      => 483,
 										'y'      => 145,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 553,
 										'y'      => 145,
 										'h'      => 18,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l44' => array(
+								],
+						],
+				],
+				'l44' => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 483,
 										'y'      => 180,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 553,
 										'y'      => 180,
 										'h'      => 18,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l46' => array(
+								],
+						],
+				],
+				'l46' => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 483,
 										'y'      => 217,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 553,
 										'y'      => 217,
 										'h'      => 18,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'l50' => array(
+								],
+						],
+				],
+				'l50' => [
 						'function'    => 'drawNormal',
-						'coordinates' => array(
+						'coordinates' => [
 								'x'      => 483,
 								'y'      => 253,
 								'h'      => 18,
 								'w'      => 103,
 								'halign' => 'R',
-						),
-				),
-				'l56' => array(
+						],
+				],
+				'l56' => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 483,
 										'y'      => 290,
 										'h'      => 18,
 										'w'      => 70,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 553,
 										'y'      => 290,
 										'h'      => 18,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
+								],
+						],
+				],
 
-				'other_box_0_code' => array(
-						'coordinates' => array(
+				'other_box_0_code' => [
+						'coordinates' => [
 								'x'      => 106,
 								'y'      => 325,
 								'h'      => 16,
 								'w'      => 27,
 								'halign' => 'C',
-						),
-				),
-				'other_box_0'      => array(
+						],
+				],
+				'other_box_0'      => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 142,
 										'y'      => 325,
 										'h'      => 16,
 										'w'      => 84,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 226,
 										'y'      => 325,
 										'h'      => 16,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'other_box_1_code' => array(
-						'coordinates' => array(
+								],
+						],
+				],
+				'other_box_1_code' => [
+						'coordinates' => [
 								'x'      => 268,
 								'y'      => 325,
 								'h'      => 16,
 								'w'      => 27,
 								'halign' => 'C',
-						),
-				),
-				'other_box_1'      => array(
+						],
+				],
+				'other_box_1'      => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 304,
 										'y'      => 325,
 										'h'      => 16,
 										'w'      => 84,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 388,
 										'y'      => 325,
 										'h'      => 16,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'other_box_2_code' => array(
-						'coordinates' => array(
+								],
+						],
+				],
+				'other_box_2_code' => [
+						'coordinates' => [
 								'x'      => 430,
 								'y'      => 325,
 								'h'      => 16,
 								'w'      => 27,
 								'halign' => 'C',
-						),
-				),
-				'other_box_2'      => array(
+						],
+				],
+				'other_box_2'      => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 466,
 										'y'      => 325,
 										'h'      => 16,
 										'w'      => 84,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 550,
 										'y'      => 325,
 										'h'      => 16,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'other_box_3_code' => array(
-						'coordinates' => array(
+								],
+						],
+				],
+				'other_box_3_code' => [
+						'coordinates' => [
 								'x'      => 106,
 								'y'      => 357,
 								'h'      => 16,
 								'w'      => 27,
 								'halign' => 'C',
-						),
-				),
-				'other_box_3'      => array(
+						],
+				],
+				'other_box_3'      => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 142,
 										'y'      => 357,
 										'h'      => 16,
 										'w'      => 84,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 226,
 										'y'      => 357,
 										'h'      => 16,
 										'w'      => 30,
 										'halign' => 'C',
-								),
-						),
-				),
-				'other_box_4_code' => array(
-						'coordinates' => array(
+								],
+						],
+				],
+				'other_box_4_code' => [
+						'coordinates' => [
 								'x'      => 268,
 								'y'      => 357,
 								'h'      => 16,
 								'w'      => 27,
 								'halign' => 'C',
-						),
-				),
-				'other_box_4'      => array(
+						],
+				],
+				'other_box_4'      => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 304,
 										'y'      => 357,
 										'h'      => 16,
 										'w'      => 84,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 388,
 										'y'      => 357,
 										'h'      => 16,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-				'other_box_5_code' => array(
-						'coordinates' => array(
+								],
+						],
+				],
+				'other_box_5_code' => [
+						'coordinates' => [
 								'x'      => 430,
 								'y'      => 357,
 								'h'      => 16,
 								'w'      => 27,
 								'halign' => 'C',
-						),
-				),
-				'other_box_5'      => array(
+						],
+				],
+				'other_box_5'      => [
 						'function'    => 'drawSplitDecimalFloat',
-						'coordinates' => array(
-								array(
+						'coordinates' => [
+								[
 										'x'      => 466,
 										'y'      => 357,
 										'h'      => 16,
 										'w'      => 84,
 										'halign' => 'R',
-								),
-								array(
+								],
+								[
 										'x'      => 550,
 										'y'      => 357,
 										'h'      => 16,
 										'w'      => 32,
 										'halign' => 'C',
-								),
-						),
-				),
-		);
+								],
+						],
+				],
+		];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -774,7 +774,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 	}
 
 	function preCalcEIExempt( $value, $key, &$array ) {
-		if ( $value == TRUE ) {
+		if ( $value == true ) {
 			$array['l24'] = 0;
 		}
 
@@ -782,7 +782,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 	}
 
 	function preCalcCPPExempt( $value, $key, &$array ) {
-		if ( $value == TRUE ) {
+		if ( $value == true ) {
 			$array['l26'] = 0;
 		}
 
@@ -790,7 +790,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 	}
 
 	function preCalcPPIPExempt( $value, $key, &$array ) {
-		if ( $value == TRUE ) {
+		if ( $value == true ) {
 			$array['l56'] = 0;
 		}
 
@@ -799,7 +799,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 
 	function _outputXML() {
 		//Maps other income box codes to XML element names.
-		$other_box_code_map = array(
+		$other_box_code_map = [
 				30 => 'hm_brd_lodg_amt',
 				31 => 'spcl_wrk_site_amt',
 				32 => 'prscb_zn_trvl_amt',
@@ -835,18 +835,18 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				84 => 'pub_trnst_pass',
 				85 => 'epaid_hlth_pln_amt',
 				86 => 'stok_opt_csh_out_eamt',
-		);
+		];
 
 		if ( is_object( $this->getXMLObject() ) ) {
 			$xml = $this->getXMLObject();
 		} else {
-			return FALSE; //No XML object to append too. Needs T619 form first.
+			return false; //No XML object to append too. Needs T619 form first.
 		}
 
 		$xml->Return->addChild( 'T4' );
 
 		$records = $this->getRecords();
-		if ( is_array( $records ) AND count( $records ) > 0 ) {
+		if ( is_array( $records ) && count( $records ) > 0 ) {
 
 			$e = 0;
 			foreach ( $records as $employee_data ) {
@@ -855,94 +855,94 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 
 				$xml->Return->T4->addChild( 'T4Slip' );
 
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'EMPE_NM' ); //Employee name
-				$xml->Return->T4->T4Slip[ $e ]->EMPE_NM->addChild( 'snm', substr( $this->last_name, 0, 20 ) ); //Surname
-				$xml->Return->T4->T4Slip[ $e ]->EMPE_NM->addChild( 'gvn_nm', substr( $this->first_name, 0, 12 ) ); //Given name
+				$xml->Return->T4->T4Slip[$e]->addChild( 'EMPE_NM' );                                             //Employee name
+				$xml->Return->T4->T4Slip[$e]->EMPE_NM->addChild( 'snm', substr( $this->last_name, 0, 20 ) );     //Surname
+				$xml->Return->T4->T4Slip[$e]->EMPE_NM->addChild( 'gvn_nm', substr( $this->first_name, 0, 12 ) ); //Given name
 				if ( $this->filterMiddleName( $this->middle_name ) != '' ) {
-					$xml->Return->T4->T4Slip[ $e ]->EMPE_NM->addChild( 'init', $this->filterMiddleName( $this->middle_name ) );
+					$xml->Return->T4->T4Slip[$e]->EMPE_NM->addChild( 'init', $this->filterMiddleName( $this->middle_name ) );
 				}
 
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'EMPE_ADDR' ); //Employee Address
+				$xml->Return->T4->T4Slip[$e]->addChild( 'EMPE_ADDR' ); //Employee Address
 				if ( $this->address1 != '' ) {
-					$xml->Return->T4->T4Slip[ $e ]->EMPE_ADDR->addChild( 'addr_l1_txt', substr( Misc::stripHTMLSpecialChars( $this->address1 ), 0, 30 ) );
+					$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild( 'addr_l1_txt', substr( Misc::stripHTMLSpecialChars( $this->address1 ), 0, 30 ) );
 				}
 				if ( $this->address2 != '' ) {
-					$xml->Return->T4->T4Slip[ $e ]->EMPE_ADDR->addChild( 'addr_l2_txt', substr( Misc::stripHTMLSpecialChars( $this->address2 ), 0, 30 ) );
+					$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild( 'addr_l2_txt', substr( Misc::stripHTMLSpecialChars( $this->address2 ), 0, 30 ) );
 				}
 				if ( $this->city != '' ) {
-					$xml->Return->T4->T4Slip[ $e ]->EMPE_ADDR->addChild( 'cty_nm', $this->city );
+					$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild( 'cty_nm', $this->city );
 				}
 				if ( $this->province != '' ) {
-					$xml->Return->T4->T4Slip[ $e ]->EMPE_ADDR->addChild( 'prov_cd', $this->province );
+					$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild( 'prov_cd', $this->province );
 				}
-				$xml->Return->T4->T4Slip[ $e ]->EMPE_ADDR->addChild( 'cntry_cd', $this->formatAlpha3CountryCode( $this->country_code ) );
+				$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild( 'cntry_cd', $this->formatAlpha3CountryCode( $this->country_code ) );
 				if ( $this->postal_code != '' ) {
-					$xml->Return->T4->T4Slip[ $e ]->EMPE_ADDR->addChild( 'pstl_cd', $this->postal_code );
+					$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild( 'pstl_cd', $this->postal_code );
 				}
 
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'sin', ( $this->sin != '' ) ? $this->sin : '000000000' ); //Required
+				$xml->Return->T4->T4Slip[$e]->addChild( 'sin', ( $this->sin != '' ) ? $this->sin : '000000000' ); //Required
 				if ( $this->employee_number != '' ) {
-					$xml->Return->T4->T4Slip[ $e ]->addChild( 'empe_nbr', substr( $this->employee_number, 0, 20 ) );
+					$xml->Return->T4->T4Slip[$e]->addChild( 'empe_nbr', substr( $this->employee_number, 0, 20 ) );
 				}
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) ); //Payroll Account Number. Remove any spaces from the number.
-				if ( isset( $this->l50 ) AND $this->l50 != '' ) {
-					$xml->Return->T4->T4Slip[ $e ]->addChild( 'rpp_dpsp_rgst_nbr', substr( $this->l50, 0, 7 ) );
+				$xml->Return->T4->T4Slip[$e]->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) ); //Payroll Account Number. Remove any spaces from the number.
+				if ( isset( $this->l50 ) && $this->l50 != '' ) {
+					$xml->Return->T4->T4Slip[$e]->addChild( 'rpp_dpsp_rgst_nbr', substr( $this->l50, 0, 7 ) );
 				}
 
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'cpp_qpp_xmpt_cd', (int)$this->cpp_exempt ); //CPP Exempt
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'ei_xmpt_cd', (int)$this->ei_exempt ); //EI Exempt
+				$xml->Return->T4->T4Slip[$e]->addChild( 'cpp_qpp_xmpt_cd', (int)$this->cpp_exempt ); //CPP Exempt
+				$xml->Return->T4->T4Slip[$e]->addChild( 'ei_xmpt_cd', (int)$this->ei_exempt );       //EI Exempt
 				//$xml->Return->T4->T4Slip[$e]->addChild('rpt_tcd', 'O' ); //Report Type Code: O = Originals, A = Amendment, C = Cancel
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'rpt_tcd', $this->getStatus() ); //Report Type Code: O = Originals, A = Amendment, C = Cancel
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'empt_prov_cd', $this->employment_province );
+				$xml->Return->T4->T4Slip[$e]->addChild( 'rpt_tcd', $this->getStatus() );             //Report Type Code: O = Originals, A = Amendment, C = Cancel
+				$xml->Return->T4->T4Slip[$e]->addChild( 'empt_prov_cd', $this->employment_province );
 				//$xml->Return->T4->T4Slip[$e]->addChild('rpp_dpsp_rgst_nbr', $this->l50 ); //Box 50: RPP Registration number
 				//$xml->Return->T4->T4Slip[$e]->addChild('prov_ppip_xmpt_cd', '' ); //PPIP Exempt
 				//$xml->Return->T4->T4Slip[$e]->addChild('empt_cd', '' ); //Box 29: Employment Code
 
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'T4_AMT' ); //T4 Amounts
+				$xml->Return->T4->T4Slip[$e]->addChild( 'T4_AMT' ); //T4 Amounts
 
-				if ( isset( $this->l14 ) AND is_numeric( $this->l14 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'empt_incamt', $this->MoneyFormat( (float)$this->l14, FALSE ) );
+				if ( isset( $this->l14 ) && is_numeric( $this->l14 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'empt_incamt', $this->MoneyFormat( (float)$this->l14 ) );
 				}
-				if ( isset( $this->l16 ) AND is_numeric( $this->l16 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'cpp_cntrb_amt', $this->MoneyFormat( (float)$this->l16, FALSE ) );
+				if ( isset( $this->l16 ) && is_numeric( $this->l16 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'cpp_cntrb_amt', $this->MoneyFormat( (float)$this->l16 ) );
 				}
 				//$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('qpp_cntrb_amt', $this->MoneyFormat( $this->l17, FALSE ) );
-				if ( isset( $this->l18 ) AND is_numeric( $this->l18 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'empe_eip_amt', $this->MoneyFormat( (float)$this->l18, FALSE ) );
+				if ( isset( $this->l18 ) && is_numeric( $this->l18 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'empe_eip_amt', $this->MoneyFormat( (float)$this->l18 ) );
 				}
-				if ( isset( $this->l20 ) AND is_numeric( $this->l20 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'rpp_cntrb_amt', $this->MoneyFormat( (float)$this->l20, FALSE ) );
+				if ( isset( $this->l20 ) && is_numeric( $this->l20 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'rpp_cntrb_amt', $this->MoneyFormat( (float)$this->l20 ) );
 				}
-				if ( isset( $this->l22 ) AND is_numeric( $this->l22 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'itx_ddct_amt', $this->MoneyFormat( (float)$this->l22, FALSE ) );
-				}
-
-				if ( $this->ei_exempt == FALSE AND isset( $this->l24 ) AND is_numeric( $this->l24 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'ei_insu_ern_amt', $this->MoneyFormat( (float)$this->l24, FALSE ) );
-				}
-				if ( $this->cpp_exempt == FALSE AND isset( $this->l26 ) AND is_numeric( $this->l26 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'cpp_qpp_ern_amt', $this->MoneyFormat( (float)$this->l26, FALSE ) );
-				}
-				if ( isset( $this->l44 ) AND is_numeric( $this->l44 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'unn_dues_amt', $this->MoneyFormat( (float)$this->l44, FALSE ) );
-				}
-				if ( isset( $this->l46 ) AND is_numeric( $this->l46 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'chrty_dons_amt', $this->MoneyFormat( (float)$this->l46, FALSE ) );
-				}
-				if ( isset( $this->l52 ) AND is_numeric( $this->l52 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'padj_amt', $this->MoneyFormat( (float)$this->l52, FALSE ) );
-				}
-				if ( isset( $this->l55 ) AND is_numeric( $this->l55 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'prov_pip_amt', $this->MoneyFormat( (float)$this->l55, FALSE ) );
-				}
-				if ( isset( $this->l56 ) AND is_numeric( $this->l56 ) ) {
-					$xml->Return->T4->T4Slip[ $e ]->T4_AMT->addChild( 'prov_insu_ern_amt', $this->MoneyFormat( (float)$this->l56, FALSE ) );
+				if ( isset( $this->l22 ) && is_numeric( $this->l22 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'itx_ddct_amt', $this->MoneyFormat( (float)$this->l22 ) );
 				}
 
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'OTH_INFO' ); //Other Income Fields
+				if ( $this->ei_exempt == false && isset( $this->l24 ) && is_numeric( $this->l24 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'ei_insu_ern_amt', $this->MoneyFormat( (float)$this->l24 ) );
+				}
+				if ( $this->cpp_exempt == false && isset( $this->l26 ) && is_numeric( $this->l26 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'cpp_qpp_ern_amt', $this->MoneyFormat( (float)$this->l26 ) );
+				}
+				if ( isset( $this->l44 ) && is_numeric( $this->l44 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'unn_dues_amt', $this->MoneyFormat( (float)$this->l44 ) );
+				}
+				if ( isset( $this->l46 ) && is_numeric( $this->l46 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'chrty_dons_amt', $this->MoneyFormat( (float)$this->l46 ) );
+				}
+				if ( isset( $this->l52 ) && is_numeric( $this->l52 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'padj_amt', $this->MoneyFormat( (float)$this->l52 ) );
+				}
+				if ( isset( $this->l55 ) && is_numeric( $this->l55 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'prov_pip_amt', $this->MoneyFormat( (float)$this->l55 ) );
+				}
+				if ( isset( $this->l56 ) && is_numeric( $this->l56 ) ) {
+					$xml->Return->T4->T4Slip[$e]->T4_AMT->addChild( 'prov_insu_ern_amt', $this->MoneyFormat( (float)$this->l56 ) );
+				}
+
+				$xml->Return->T4->T4Slip[$e]->addChild( 'OTH_INFO' ); //Other Income Fields
 				for ( $i = 0; $i <= 6; $i++ ) {
-					if ( isset( $this->{'other_box_' . $i . '_code'} ) AND isset( $other_box_code_map[ $this->{'other_box_' . $i . '_code'} ] ) ) {
-						$xml->Return->T4->T4Slip[ $e ]->OTH_INFO->addChild( $other_box_code_map[ $this->{'other_box_' . $i . '_code'} ], $this->MoneyFormat( (float)$this->{'other_box_' . $i}, FALSE ) );
+					if ( isset( $this->{'other_box_' . $i . '_code'} ) && isset( $other_box_code_map[$this->{'other_box_' . $i . '_code'}] ) ) {
+						$xml->Return->T4->T4Slip[$e]->OTH_INFO->addChild( $other_box_code_map[$this->{'other_box_' . $i . '_code'}], $this->MoneyFormat( (float)$this->{'other_box_' . $i} ) );
 					}
 				}
 
@@ -950,14 +950,14 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function _outputPDF() {
 		//Initialize PDF with template.
 		$pdf = $this->getPDFObject();
 
-		if ( $this->getShowBackground() == TRUE ) {
+		if ( $this->getShowBackground() == true ) {
 			$pdf->setSourceFile( $this->getTemplateDirectory() . DIRECTORY_SEPARATOR . $this->pdf_template );
 
 			$this->template_index[1] = $pdf->ImportPage( 1 );
@@ -979,7 +979,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 
 		//Get location map, start looping over each variable and drawing
 		$records = $this->getRecords();
-		if ( is_array( $records ) AND count( $records ) > 0 ) {
+		if ( is_array( $records ) && count( $records ) > 0 ) {
 
 			$template_schema = $this->getTemplateSchema();
 
@@ -988,15 +988,15 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				//Debug::Arr($employee_data, 'Employee Data: ', __FILE__, __LINE__, __METHOD__,10);
 				$this->arrayToObject( $employee_data ); //Convert record array to object
 
-				$template_page = NULL;
+				$template_page = null;
 
 				for ( $i = 0; $i < $n; $i++ ) {
-					$this->setTempPageOffsets( $this->getPageOffsets('x'), $this->getPageOffsets('y') );
+					$this->setTempPageOffsets( $this->getPageOffsets( 'x' ), $this->getPageOffsets( 'y' ) );
 
-					if ( ( $employees_per_page == 1 AND $i > 0 )
-							OR ( $employees_per_page == 2 AND $e % 2 != 0 )
+					if ( ( $employees_per_page == 1 && $i > 0 )
+							|| ( $employees_per_page == 2 && $e % 2 != 0 )
 					) {
-						$this->setTempPageOffsets( $this->getPageOffsets('x'), ( 394 + $this->getPageOffsets('y') ) );
+						$this->setTempPageOffsets( $this->getPageOffsets( 'x' ), ( 394 + $this->getPageOffsets( 'y' ) ) );
 					}
 
 					foreach ( $template_schema as $field => $schema ) {
@@ -1004,10 +1004,10 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 					}
 				}
 
-				if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND $e % $employees_per_page != 0 ) ) {
+				if ( $employees_per_page == 1 || ( $employees_per_page == 2 && $e % $employees_per_page != 0 ) ) {
 					$this->resetTemplatePage();
-					if ( $this->getShowInstructionPage() == TRUE ) {
-						$this->addPage( array('template_page' => 2) );
+					if ( $this->getShowInstructionPage() == true ) {
+						$this->addPage( [ 'template_page' => 2 ] );
 					}
 				}
 				$e++;
@@ -1016,7 +1016,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 
 		$this->clearRecords();
 
-		return TRUE;
+		return true;
 	}
 }
 

@@ -41,45 +41,45 @@
 class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccountFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RemittanceDestinationAccountListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$this->rs = $this->getCache($id);
-		if ( $this->rs === FALSE ) {
-			$ph = array(
-				'id' => TTUUID::castUUID($id),
-			);
+		$this->rs = $this->getCache( $id );
+		if ( $this->rs === false ) {
+			$ph = [
+					'id' => TTUUID::castUUID( $id ),
+			];
 
 			$query = '
 						select	*
-						from	'. $this->getTable() .'
+						from	' . $this->getTable() . '
 						where	id = ?
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
@@ -87,76 +87,76 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 
 			$this->rs = $this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs, $id);
+			$this->saveCache( $this->rs, $id );
 		}
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param int $limit Limit the number of records returned
+	 * @param string $id   UUID
+	 * @param int $limit   Limit the number of records returned
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RemittanceDestinationAccountListFactory
 	 */
-	function getByRemittanceSourceAccountId( $id, $limit = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByRemittanceSourceAccountId( $id, $limit = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-			'remittance_source_account_id' => TTUUID::castUUID($id),
-		);
+		$ph = [
+				'remittance_source_account_id' => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	remittance_source_account_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, $ph, $limit);
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id              UUID
 	 * @param string $legal_entity_id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit              Limit the number of records returned
+	 * @param array $where            Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order            Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RemittanceDestinationAccountListFactory
 	 */
-	function getByRemittanceSourceAccountIdAndNotUserLegalEntityId( $id, $legal_entity_id, $limit = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByRemittanceSourceAccountIdAndNotUserLegalEntityId( $id, $legal_entity_id, $limit = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $legal_entity_id == '') {
-			return FALSE;
+		if ( $legal_entity_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-				'remittance_source_account_id' => TTUUID::castUUID($id),
-				'legal_entity_id' => TTUUID::castUUID($legal_entity_id),
-		);
+		$ph = [
+				'remittance_source_account_id' => TTUUID::castUUID( $id ),
+				'legal_entity_id'              => TTUUID::castUUID( $legal_entity_id ),
+		];
 
 		$uf = new UserFactory();
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .' as rdaf
-					LEFT JOIN '. $uf->getTable() .' as uf ON ( rdaf.user_id = uf.id ) 
+					from	' . $this->getTable() . ' as rdaf
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON ( rdaf.user_id = uf.id ) 
 					where	rdaf.remittance_source_account_id = ?
 						AND uf.legal_entity_id != ?
 						AND ( rdaf.deleted = 0 AND uf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, $ph, $limit);
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
 
 		return $this;
 	}
@@ -164,35 +164,35 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 	/**
 	 * @param string $user_id UUID
 	 * @param int $status_id
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RemittanceDestinationAccountListFactory
 	 */
-	function getByUserIdAndStatusId( $user_id, $status_id, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
+	function getByUserIdAndStatusId( $user_id, $status_id, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $status_id == '') {
-			return FALSE;
+		if ( $status_id == '' ) {
+			return false;
 		}
 
-		if ( $order == NULL ) {
+		if ( $order == null ) {
 			//Similar sort order at PayStubTransactionListFactory::getByPayStubId()
-			$order = array( 'amount_type_id' => 'desc', 'priority' => 'asc', 'type_id'=>'desc', 'id' => 'asc' ); //Fixed amounts first, then percent, always use ID as tie breaker so its consistent.
-			$strict = FALSE;
+			$order = [ 'amount_type_id' => 'desc', 'priority' => 'asc', 'type_id' => 'desc', 'id' => 'asc' ]; //Fixed amounts first, then percent, always use ID as tie breaker so its consistent.
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
+		$ph = [
 				'status_id' => (int)$status_id,
-				'user_id' => TTUUID::castUUID($user_id),
-		);
+				'user_id'   => TTUUID::castUUID( $user_id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	status_id = ?
 						AND user_id = ?
 						AND deleted = 0';
@@ -205,31 +205,31 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id    UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getByUserIdAndCompany( $user_id, $company_id, $where = NULL, $order = NULL ) {
-		if ( $order == NULL ) {
-			$order = array( 'amount_type_id' => 'desc', 'priority' => 'asc', 'id' => 'asc' ); //Fixed amounts first, then percent, always use ID as tie breaker so its consistent.
-			$strict = FALSE;
+	function getByUserIdAndCompany( $user_id, $company_id, $where = null, $order = null ) {
+		if ( $order == null ) {
+			$order = [ 'amount_type_id' => 'desc', 'priority' => 'asc', 'id' => 'asc' ]; //Fixed amounts first, then percent, always use ID as tie breaker so its consistent.
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-				'company_id' => TTUUID::castUUID($company_id),
-				'user_id' => TTUUID::castUUID($user_id),
-		);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'user_id'    => TTUUID::castUUID( $user_id ),
+		];
 
 		$uf = new UserFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
 					where	uf.company_id = ?
 						AND a.user_id = ?
 						AND a.deleted = 0';
@@ -242,33 +242,33 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RemittanceDestinationAccountListFactory
 	 */
-	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByIdAndCompanyId( $id, $company_id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $company_id == '') {
-			return FALSE;
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-			'id' => TTUUID::castUUID($id),
-			'company_id' => TTUUID::castUUID($company_id),
-		);
+		$ph = [
+				'id'         => TTUUID::castUUID( $id ),
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select a.*,
 						uf.legal_entity_id
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
 					where	a.id = ?
 						AND uf.company_id = ?
 						AND ( a.deleted = 0 )';
@@ -284,45 +284,45 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RemittanceDestinationAccountListFactory
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( !is_array($order) ) {
+		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
+			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
+				$order = [ Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order'] ];
 			}
 		}
 
-		$additional_order_fields = array('status_id', 'user_first_name', 'user_last_name');
+		$additional_order_fields = [ 'status_id', 'user_first_name', 'user_last_name' ];
 
-		$sort_column_aliases = array(
-			'status' => 'status_id',
-			'type' => 'type_id',
-			'remittance_source_account' => 'remittance_source_account_id',
-			'display_amount' => 'amount',
-		);
+		$sort_column_aliases = [
+				'status'                    => 'status_id',
+				'type'                      => 'type_id',
+				'remittance_source_account' => 'remittance_source_account_id',
+				'display_amount'            => 'amount',
+		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
-		if ( $order == NULL ) {
-			$order = array( 'status_id' => 'asc', 'amount_type_id' => 'desc', 'priority' => 'asc');
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'status_id' => 'asc', 'amount_type_id' => 'desc', 'priority' => 'asc' ];
+			$strict = false;
 		} else {
 			//Always try to order by status first so INACTIVE employees go to the bottom.
-			if ( !isset($order['status_id']) ) {
-				$order = Misc::prependArray( array('status_id' => 'asc'), $order );
+			if ( !isset( $order['status_id'] ) ) {
+				$order = Misc::prependArray( [ 'status_id' => 'asc' ], $order );
 			}
 			//Always sort by last name, first name after other columns
 
-			$strict = TRUE;
+			$strict = true;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -332,14 +332,14 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$rsaf = new RemittanceSourceAccountFactory();
 		$pstf = new PayStubTransactionFactory();
 
-		$ph = array(
-			'company_id' => TTUUID::castUUID($company_id),
-		);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*,
 							(
-								CASE WHEN EXISTS ( select 1 from '. $pstf->getTable() .' as w where w.remittance_destination_account_id = a.id and a.deleted = 0 ) THEN 1 ELSE 0 END
+								CASE WHEN EXISTS ( select 1 from ' . $pstf->getTable() . ' as w where w.remittance_destination_account_id = a.id and a.deleted = 0 ) THEN 1 ELSE 0 END
 							) as in_use,					
 							rsaf.name as remittance_source_account,
 							rsaf.legal_entity_id as legal_entity_id,
@@ -352,50 +352,52 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
-						LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
-						LEFT JOIN '. $lef->getTable() .' as lef ON ( rsaf.legal_entity_id = lef.id AND lef.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
+						LEFT JOIN ' . $rsaf->getTable() . ' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
+						LEFT JOIN ' . $lef->getTable() . ' as lef ON ( rsaf.legal_entity_id = lef.id AND lef.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	uf.company_id = ?';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'rsaf.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['remittance_source_account_id']) ) ? $this->getWhereClauseSQL( 'a.remittance_source_account_id', $filter_data['remittance_source_account_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['legal_entity_id'] ) ) ? $this->getWhereClauseSQL( 'rsaf.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['remittance_source_account_id'] ) ) ? $this->getWhereClauseSQL( 'a.remittance_source_account_id', $filter_data['remittance_source_account_id'], 'uuid_list', $ph ) : null;
 
-		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
-			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
+		if ( isset( $filter_data['status'] ) && !is_array( $filter_data['status'] ) && trim( $filter_data['status'] ) != '' && !isset( $filter_data['status_id'] ) ) {
+			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions( 'status' ) );
 		}
-		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['status_id'] ) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : null;
 
-		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['status_id']) ) {
-			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
+		if ( isset( $filter_data['type'] ) && !is_array( $filter_data['type'] ) && trim( $filter_data['type'] ) != '' && !isset( $filter_data['status_id'] ) ) {
+			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions( 'type' ) );
 		}
-		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['currency_id']) ) ? $this->getWhereClauseSQL( 'a.currency_id', $filter_data['currency_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['created_date']) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : NULL;
-		$query .= ( isset($filter_data['updated_date']) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : NULL;
+		$query .= ( isset( $filter_data['type_id'] ) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['currency_id'] ) ) ? $this->getWhereClauseSQL( 'a.currency_id', $filter_data['currency_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['name'] ) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : null;
+		$query .= ( isset( $filter_data['created_date'] ) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_date'] ) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : null;
 
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.created_by', 'y.first_name', 'y.last_name' ], $filter_data['created_by'], 'user_id_or_name', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.updated_by', 'z.first_name', 'z.last_name' ], $filter_data['updated_by'], 'user_id_or_name', $ph ) : null;
 
-		$query .=	' AND a.deleted = 0 ';
+		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+
 		//Debug::Arr($ph, 'Query: '.$query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
 
 }
+
 ?>

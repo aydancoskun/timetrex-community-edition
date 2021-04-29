@@ -19,10 +19,10 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_stub_amendment';
 		this.context_menu_name = $.i18n._( 'Pay Stub Amendment' );
 		this.navigation_label = $.i18n._( 'Pay Stub Amendment' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPayStubAmendment' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayStubAmendment' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -135,7 +135,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [],
 			include: [
@@ -500,9 +500,10 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
 			//widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) ); //This fails on 17.07 * 9.50 as it rounds to 162.16 rather than 162.17
 			//calc_amount = ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ); //This fails on 16.5 * 130.23
-			calc_amount = new Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed(4); //Need to use Decimal() class for proper money math operations
+			var calc_amount = new Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed( 4 ); //Need to use Decimal() class for proper money math operations
 			Debug.Text( 'Calculate Amount before rounding: ' + calc_amount, 'PayStubAmendmentViewController.js', 'PayStubAmendmentViewController', 'onFormItemKeyUp', 10 );
 
+			var round_decimal_places;
 			if ( this.currency_array.round_decimal_places ) {
 				round_decimal_places = this.currency_array.round_decimal_places;
 			} else {
@@ -745,7 +746,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		} );
 	},
 
-	doSaveAPICall: function ( record, ignoreWarning) {
+	doSaveAPICall: function( record, ignoreWarning ) {
 		// #2644: We have to handle the record as though its a mass_add, as the awesomebox will always return an array of user_id's. Cannot force is_mass_adding, as this affects the save&continue button disabling.
 		record = this.buildMassAddRecord( record );
 		this._super( 'doSaveAPICall', record, ignoreWarning );
@@ -797,7 +798,6 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		var records_data = null;
 
-
 		var record = this.buildMassAddRecord( record );
 
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
@@ -824,7 +824,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn, pId );
 
-		if ( this.is_mass_adding || this.is_mass_editing || this.is_viewing || (this.current_edit_record && Global.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 1) ) {
+		if ( this.is_mass_adding || this.is_mass_editing || this.is_viewing || ( this.current_edit_record && Global.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 1 ) ) {
 			context_btn.addClass( 'disable-image' );
 		}
 	},
@@ -842,7 +842,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubAmendment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubAmendment' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_AMENDMENT,
@@ -870,7 +870,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: allow_multiple_selection,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -892,7 +892,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		// Pay Stub Account
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -947,7 +947,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		// Percent of
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -1009,7 +1009,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1021,7 +1021,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1032,7 +1032,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_stub_entry_name_id',
 				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-				api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1043,7 +1043,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1075,7 +1075,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1086,7 +1086,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1098,7 +1098,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1110,7 +1110,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1129,9 +1129,8 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	copyAsNewResetIds: function( data ) {
 		data = this.uniformVariable( data );
 		data.id = null;
-		data.effective_date = (new Date).format( Global.getLoginUserDateFormat() );
+		data.effective_date = ( new Date ).format( Global.getLoginUserDateFormat() );
 		return data;
 	}
-
 
 } );

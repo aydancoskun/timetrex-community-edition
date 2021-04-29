@@ -1,91 +1,91 @@
 .view-min-tab-bar {
-    bottom: 4px;
-    left: 20px;
-    position: fixed;
-    z-index: 1000;
+	bottom: 4px;
+	left: 20px;
+	position: fixed;
+	z-index: 1000;
 }
 
 .view-min-tab {
-    background: #345372;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    padding: 6px;
-    cursor: pointer;
-    display: inline-block;
-    margin-left: 3px;
-    position: relative;
-    bottom: -31px;
+	background: #345372;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	padding: 6px;
+	cursor: pointer;
+	display: inline-block;
+	margin-left: 3px;
+	position: relative;
+	bottom: -31px;
 
 }
 
 .animated {
-    -webkit-animation-duration: 0.5s;
-    animation-duration: 0.5s;
-    -webkit-animation-fill-mode: both;
-    animation-fill-mode: both;
+	-webkit-animation-duration: 0.5s;
+	animation-duration: 0.5s;
+	-webkit-animation-fill-mode: both;
+	animation-fill-mode: both;
 }
 
 @-webkit-keyframes bounceOutDown {
-    0% {
-        -webkit-transform: translate3d(0, 0px, 0);
-        transform: translate3d(0, 0px, 0);
-    }
+	0% {
+		-webkit-transform: translate3d(0, 0px, 0);
+		transform: translate3d(0, 0px, 0);
+	}
 
-    30% {
-        -webkit-transform: translate3d(0, -50px, 0);
-        transform: translate3d(0, -50px, 0);
-    }
+	30% {
+		-webkit-transform: translate3d(0, -50px, 0);
+		transform: translate3d(0, -50px, 0);
+	}
 
-    60% {
-        -webkit-transform: translate3d(0, -10px, 0);
-        transform: translate3d(0, -10px, 0);
-    }
+	60% {
+		-webkit-transform: translate3d(0, -10px, 0);
+		transform: translate3d(0, -10px, 0);
+	}
 
-    80%, 100% {
-        -webkit-transform: translate3d(0, -31px, 0);
-        transform: translate3d(0, -31px, 0);
-    }
+	80%, 100% {
+		-webkit-transform: translate3d(0, -31px, 0);
+		transform: translate3d(0, -31px, 0);
+	}
 }
 
 @keyframes bounceOutDown {
-    0% {
-        -webkit-transform: translate3d(0, 0px, 0);
-        transform: translate3d(0, 0px, 0);
-    }
+	0% {
+		-webkit-transform: translate3d(0, 0px, 0);
+		transform: translate3d(0, 0px, 0);
+	}
 
-    30% {
-        -webkit-transform: translate3d(0, -50px, 0);
-        transform: translate3d(0, -50px, 0);
-    }
+	30% {
+		-webkit-transform: translate3d(0, -50px, 0);
+		transform: translate3d(0, -50px, 0);
+	}
 
-    60% {
-        -webkit-transform: translate3d(0, -10px, 0);
-        transform: translate3d(0, -10px, 0);
-    }
+	60% {
+		-webkit-transform: translate3d(0, -10px, 0);
+		transform: translate3d(0, -10px, 0);
+	}
 
-    80%, 100%  {
-        -webkit-transform: translate3d(0, -31px, 0);
-        transform: translate3d(0, -31px, 0);
-    }
+	80%, 100% {
+		-webkit-transform: translate3d(0, -31px, 0);
+		transform: translate3d(0, -31px, 0);
+	}
 }
 
 .view-min-tab.show {
-    -webkit-animation-name: bounceOutDown;
-    animation-name: bounceOutDown;
-    bottom: -31px;
+	-webkit-animation-name: bounceOutDown;
+	animation-name: bounceOutDown;
+	bottom: -31px;
 }
 
 .view-min-tab .view-name {
-    color: #FFFFFF;
+	color: #ffffff;
 }
 
 .view-min-tab .close-btn {
-    background-image: url("../../../../images/close_1.png");
-    background-color: transparent;
-    background-position: 0 0;
-    border: medium none;
-    height: 14px;
-    width: 14px;
-    cursor: pointer;
-    padding: 0;
+	background-image: url("../../../../images/close_1.png");
+	background-color: transparent;
+	background-position: 0 0;
+	border: medium none;
+	height: 14px;
+	width: 14px;
+	cursor: pointer;
+	padding: 0;
 }

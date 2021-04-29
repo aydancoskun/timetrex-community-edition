@@ -47,5 +47,4 @@ var APIException = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportException', arguments );
 	},
 
-
 } );

@@ -12,7 +12,7 @@ ExceptionViewController = BaseViewController.extend( {
 		this.script_name = 'ExceptionView';
 		this.context_menu_name = $.i18n._( 'Exceptions' );
 		this.navigation_label = $.i18n._( 'Exception' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIException' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIException' ) )();
 
 		this.initPermission();
 		this.render();
@@ -108,7 +108,6 @@ ExceptionViewController = BaseViewController.extend( {
 
 	},
 
-
 	setDefaultMenuEditEmployeeIcon: function( context_btn, grid_selected_length ) {
 		if ( !this.editChildPermissionValidate( 'user' ) ) {
 			context_btn.addClass( 'invisible-image' );
@@ -165,11 +164,11 @@ ExceptionViewController = BaseViewController.extend( {
 
 	initOptions: function() {
 		var $this = this;
-		this.initDropDownOption( 'status', 'user_status_id', new (APIFactory.getAPIClass( 'APIUser' ))() );
-		this.initDropDownOption( 'severity', null, new (APIFactory.getAPIClass( 'APIExceptionPolicy' ))() );
-		this.initDropDownOption( 'type', 'exception_policy_type_id', new (APIFactory.getAPIClass( 'APIExceptionPolicy' ))() );
+		this.initDropDownOption( 'status', 'user_status_id', new ( APIFactory.getAPIClass( 'APIUser' ) )() );
+		this.initDropDownOption( 'severity', null, new ( APIFactory.getAPIClass( 'APIExceptionPolicy' ) )() );
+		this.initDropDownOption( 'type', 'exception_policy_type_id', new ( APIFactory.getAPIClass( 'APIExceptionPolicy' ) )() );
 
-		var user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
+		var user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
 		user_group_api.getUserGroup( '', false, false, {
 			onResult: function( res ) {
 
@@ -352,7 +351,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -363,7 +362,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -405,7 +404,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -416,7 +415,7 @@ ExceptionViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -427,7 +426,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -438,7 +437,7 @@ ExceptionViewController = BaseViewController.extend( {
 				field: 'department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -450,7 +449,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'title_id',
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,

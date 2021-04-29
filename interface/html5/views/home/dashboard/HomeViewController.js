@@ -47,8 +47,8 @@ HomeViewController = Backbone.View.extend( {
 			$this.viewId = 'Home';
 			TopMenuManager.selected_menu_id = 'Home';
 			LocalCacheData.current_open_primary_controller = $this;
-			$this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
-			$this.api_dashboard = new (APIFactory.getAPIClass( 'APIDashboard' ))();
+			$this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
+			$this.api_dashboard = new ( APIFactory.getAPIClass( 'APIDashboard' ) )();
 
 			jQueryBridget( 'masonry', Masonry, $ );
 			$this.dashboard_container = $( '.dashboard-container:visible' );
@@ -523,22 +523,22 @@ HomeViewController = Backbone.View.extend( {
 			Global.loadScript( 'views/home/dashlet/DashletController.js', function() {
 				var id = 'dashlet_' + dashlet_data.id;
 				var dash_let = $( '<div class="dashlet-container" id="' + id + '">' +
-						'<div class="dashlet">' +
-						'<button class="refresh-btn"></button>' +
-						'<span class="title"></span>' +
-						'<div class="button-bar">' +
-						'<button class="view-btn button">View</button>' +
-						'<button class="modify-btn button">Edit</button>' +
-						'<button class="delete-btn button">Delete</button>' +
-						'</div>' +
-						'<div class="content">' +
-						'<table id="grid"></table>' +
-						'<iframe class="report-iframe" id="iframe"></iframe>' +
-						'</div>' +
-						'</div>' +
-						'<div class="dashlet-left-cover" ></div>' +
-						'<div class="dashlet-right-cover" ></div>' +
-						'</div>' );
+					'<div class="dashlet">' +
+					'<button class="refresh-btn"></button>' +
+					'<span class="title"></span>' +
+					'<div class="button-bar">' +
+					'<button class="view-btn button">View</button>' +
+					'<button class="modify-btn button">Edit</button>' +
+					'<button class="delete-btn button">Delete</button>' +
+					'</div>' +
+					'<div class="content">' +
+					'<table id="grid"></table>' +
+					'<iframe class="report-iframe" id="iframe"></iframe>' +
+					'</div>' +
+					'</div>' +
+					'<div class="dashlet-left-cover" ></div>' +
+					'<div class="dashlet-right-cover" ></div>' +
+					'</div>' );
 				if ( !dashlet_data.data.height || auto_arrange ) {
 					dashlet_data.data.height = 200;
 				}
@@ -664,7 +664,6 @@ HomeViewController = Backbone.View.extend( {
 			$( '.dashlet-cover--display-green' ).removeClass( 'dashlet-cover--display-green' );
 		} );
 
-
 		this.dashboard_container.on( 'mousemove', function( e ) {
 			var x = e.pageX;
 			var y = e.pageY;
@@ -687,9 +686,10 @@ HomeViewController = Backbone.View.extend( {
 					for ( var x = 0; x < dashlets_to_loop.length; x++ ) {
 						if ( $( dashlets_to_loop[x] ).attr( 'id' ) != ui.item.attr( 'id' ) ) {
 							//ensure collision and on one side of placeholder or the other
-							if ( ($( dashlets_to_loop[x] ).index() == (placeholder_index + 1) || $( dashlets_to_loop[x] ).index() == (placeholder_index - 1)) && checkCollision( $(dashlets_to_loop[x]), $this.current_mouse_position) ) {
+							if ( ( $( dashlets_to_loop[x] ).index() == ( placeholder_index + 1 ) || $( dashlets_to_loop[x] ).index() == ( placeholder_index - 1 ) ) && checkCollision( $( dashlets_to_loop[x] ), $this.current_mouse_position ) ) {
 								//mouseover the right half.
-								if ( $this.current_mouse_position.x >= ( $(dashlets_to_loop[x]).offset().left + ( $(dashlets_to_loop[x]).width() /2 ) ) && $this.current_mouse_position.x <= ( $(dashlets_to_loop[x]).offset().left + ( $(dashlets_to_loop[x]).width() ) ) ) {
+								var direction;
+								if ( $this.current_mouse_position.x >= ( $( dashlets_to_loop[x] ).offset().left + ( $( dashlets_to_loop[x] ).width() / 2 ) ) && $this.current_mouse_position.x <= ( $( dashlets_to_loop[x] ).offset().left + ( $( dashlets_to_loop[x] ).width() ) ) ) {
 									direction = 'RIGHT';
 									$( dashlets_to_loop[x] ).find( '.dashlet-right-cover' ).addClass( 'dashlet-cover--display-green' );
 								} else {
@@ -718,9 +718,9 @@ HomeViewController = Backbone.View.extend( {
 		} );
 
 		function checkCollision( el, mouse_coords ) {
-			el = $(el);
+			el = $( el );
 
-			if ( el.offset().left <= mouse_coords.x && (el.offset().left + el.width()) >= mouse_coords.x
+			if ( el.offset().left <= mouse_coords.x && ( el.offset().left + el.width() ) >= mouse_coords.x
 				&& el.offset().top <= mouse_coords.y && el.offset().top + el.height() >= mouse_coords.y
 			) {
 

@@ -96,21 +96,24 @@ Global.sendErrorReport = function() {
 		/*
 		 * JavaScript exception ignore list
 		 */
-		if (    error_string.indexOf( 'Script error' ) >= 0 || //Script error. in:  line: 0 -- Likely browser extensions or errors from injected or outside javascript.
-				error_string.indexOf( 'Unspecified error' ) >= 0 || //From IE: Unspecified error. in N/A line 1
-				error_string.indexOf( 'TypeError: \'null\' is not an object' ) >= 0 ||
-				error_string.indexOf( '_avast_submit' ) >= 0 || //Errors from anti-virus extension
-				error_string.indexOf( 'googletag' ) >= 0 || //Errors from google tag extension -- Uncaught TypeError: Cannot redefine property: googletag
-				error_string.indexOf( 'NS_ERROR_' ) >= 0 ||
-				error_string.indexOf( 'NS_ERROR_OUT_OF_MEMORY' ) >= 0 ||
-				error_string.indexOf( 'NPObject' ) >= 0 ) { //Error calling method on NPObject - likely caused by an extension or plugin in the browser
+		if ( error_string.indexOf( 'Script error' ) >= 0 || //Script error. in:  line: 0 -- Likely browser extensions or errors from injected or outside javascript.
+			error_string.indexOf( 'Unspecified error' ) >= 0 || //From IE: Unspecified error. in N/A line 1
+			error_string.indexOf( 'TypeError: \'null\' is not an object' ) >= 0 ||
+			error_string.indexOf( '_avast_submit' ) >= 0 || //Errors from anti-virus extension
+			error_string.indexOf( 'googletag' ) >= 0 || //Errors from google tag extension -- Uncaught TypeError: Cannot redefine property: googletag
+			error_string.indexOf( 'NS_ERROR_' ) >= 0 ||
+			error_string.indexOf( 'NS_ERROR_OUT_OF_MEMORY' ) >= 0 ||
+			error_string.indexOf( 'NPObject' ) >= 0 ) { //Error calling method on NPObject - likely caused by an extension or plugin in the browser
 			console.error( 'Ignoring javascript exception outside of our control...' );
 			return;
 		}
 
 		if ( Global.idle_time > 15 ) {
 			Debug.Text( 'User inactive more than 15 mins, not sending error report.', 'Global.js', '', 'sendErrorReport', 1 );
-			ga( 'send', 'exception', { 'exDescription': 'Session Idle: '+ error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '') : 'N/A' ) + ' Line: ' + line, 'exFatal': false } );
+			ga( 'send', 'exception', {
+				'exDescription': 'Session Idle: ' + error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '' ) : 'N/A' ) + ' Line: ' + line,
+				'exFatal': false
+			} );
 			return;
 		}
 
@@ -122,20 +125,22 @@ Global.sendErrorReport = function() {
 			script_name = LocalCacheData.current_open_primary_controller.script_name;
 		}
 
+		var pre_login_data;
 		if ( APIGlobal.pre_login_data ) {
 			pre_login_data = APIGlobal.pre_login_data;
 		} else {
 			pre_login_data = null;
 		}
 
-		if ( Global.isSet(LocalCacheData) && LocalCacheData['current_company'] ) { //getCurrentCompany() which in turn calls getRequiredLocalCache(), which can call sendErroReport causing a loop. So try to prevent that by checking LocalCacheData['current_company'] first.
+		var current_company_obj;
+		if ( Global.isSet( LocalCacheData ) && LocalCacheData['current_company'] ) { //getCurrentCompany() which in turn calls getRequiredLocalCache(), which can call sendErroReport causing a loop. So try to prevent that by checking LocalCacheData['current_company'] first.
 			current_company_obj = LocalCacheData.getCurrentCompany();
 		} else {
 			current_company_obj = null;
 		}
 
 		if ( login_user && Debug.varDump ) {
-			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: ' + login_user.user_name + '\n\nURL: ' + window.location.href + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + ie + '\n\nCurrent Ping: '+ Global.current_ping + '\n\nIdle Time: '+ Global.idle_time + '\n\nSession ID Key: '+ LocalCacheData.getSessionID() + '\n\nCurrent User Object: \n' + Debug.varDump(login_user) + '\n\nCurrent Company Object: \n' + Debug.varDump(current_company_obj) + '\n\nPreLogin: \n' + Debug.varDump(pre_login_data) + ' ';
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: ' + login_user.user_name + '\n\nURL: ' + window.location.href + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + ie + '\n\nCurrent Ping: ' + Global.current_ping + '\n\nIdle Time: ' + Global.idle_time + '\n\nSession ID Key: ' + LocalCacheData.getSessionID() + '\n\nCurrent User Object: \n' + Debug.varDump( login_user ) + '\n\nCurrent Company Object: \n' + Debug.varDump( current_company_obj ) + '\n\nPreLogin: \n' + Debug.varDump( pre_login_data ) + ' ';
 		} else {
 			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\nUncaught Error From: ' + script_name + '\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line + '\n\nUser: N/A' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE: ' + ie;
 		}
@@ -148,10 +153,13 @@ Global.sendErrorReport = function() {
 			alert( 'JAVASCRIPT EXCEPTION:\n---------------------------------------------\n' + error + '\n---------------------------------------------' );
 		}
 
-		if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
+		if ( typeof ( ga ) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
 			// Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
 			// Strip the domain part off the URL on 'from_file' to better account for similar errors.
-			ga( 'send', 'exception', { 'exDescription': error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '') : 'N/A' ) + ' Line: ' + line, 'exFatal': false } );
+			ga( 'send', 'exception', {
+				'exDescription': error_string + ' File: ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '' ) : 'N/A' ) + ' Line: ' + line,
+				'exFatal': false
+			} );
 		}
 
 		//Don't send error report if exception not happens in our codes.
@@ -258,14 +266,14 @@ Global.initStaticStrings = function() {
 
 Global.getUpgradeMessage = function() {
 	var message = $.i18n._( 'This functionality is only available in' ) +
-			' ' + LocalCacheData.getLoginData().application_name + ' ' + $.i18n._( 'Professional, Corporate, or Enterprise Editions.' ) +
-			' ' + $.i18n._( 'For more information please visit' ) + ' <a href="https://www.timetrex.com/r?id=810" target="_blank">www.timetrex.com</a>';
+		' ' + LocalCacheData.getLoginData().application_name + ' ' + $.i18n._( 'Professional, Corporate, or Enterprise Editions.' ) +
+		' ' + $.i18n._( 'For more information please visit' ) + ' <a href="https://www.timetrex.com/r?id=810" target="_blank">www.timetrex.com</a>';
 
 	Global.trackView( 'CommunityUpgrade' );
 	return message;
 };
 
-Global.doPingIfNecessary = function () {
+Global.doPingIfNecessary = function() {
 	var api = new ( APIFactory.getAPIClass( 'APIMisc' ) )();
 	if ( Global.idle_time < Math.min( 15, APIGlobal.pre_login_data.session_idle_timeout / 60 ) ) { //idle_time is minutes, session_idle_timeout is seconds.
 		Global.idle_time = 0;
@@ -284,12 +292,15 @@ Global.doPingIfNecessary = function () {
 	}
 
 	api.isLoggedIn( false, {
-		onResult: function ( result ) {
+		onResult: function( result ) {
 			var res_data = result.getResult();
 
 			if ( res_data !== true ) {
 				//Don't do Logout here, as we need to display a "Session Expired" message to the user, which is triggered from the ServiceCaller.
-				api.ping( { onResult: function () {} } );
+				api.ping( {
+					onResult: function() {
+					}
+				} );
 			}
 		}
 	} );
@@ -321,10 +332,16 @@ Global.clearCache = function( function_name ) {
 	}
 };
 
-Global.getHost = function() {
-	var host = window.location.hostname;
+Global.getHost = function( host ) {
+	if ( !host ) {
+		var host = window.location.hostname;
+	}
 
-	host = host.substring( (host.indexOf( '.' ) + 1) );
+	//Make sure its not an IPv4 address, and if its a domain has more than 1 dot in it before parsing off the sub-domain part.
+	// So both IPv4 addresses and domains like: mycompany.com should not be modified at all. Only: sub.mycompany.com, sub.sub2.mycompany.com
+	if ( /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test( host ) == false && host.match(/\./g).length > 1 ) {
+		host = host.substring( ( host.indexOf( '.' ) + 1 ) );
+	}
 
 	return host;
 };
@@ -386,41 +403,41 @@ Global.upCaseFirstLetter = function( str ) {
 };
 
 Global.calculateTextWidth = function( text, options ) {
-	if ( typeof options === "undefined"  ) {
+	if ( typeof options === "undefined" ) {
 		options = {};
 	}
 
 	if ( !options.fontSize ) {
-        options.fontSize = '12px';
+		options.fontSize = '12px';
 	}
 
-    var element = document.createElement('div');
-    var textNode = document.createTextNode(text);
+	var element = document.createElement( 'div' );
+	var textNode = document.createTextNode( text );
 
-    element.appendChild(textNode);
+	element.appendChild( textNode );
 
-    if ( options.font ) {
-        element.style.fontFamily = options.font;
-    }
+	if ( options.font ) {
+		element.style.fontFamily = options.font;
+	}
 
-    if ( options.fontWeight) {
-        element.style.fontWeight = options.fontWeight
-    }
+	if ( options.fontWeight ) {
+		element.style.fontWeight = options.fontWeight;
+	}
 
-    if ( options.wordBreak ) {
-        element.style.wordBreak = options.wordBreak;
-    }
+	if ( options.wordBreak ) {
+		element.style.wordBreak = options.wordBreak;
+	}
 
 	element.style.fontSize = options.fontSize;
-    element.style.position = 'absolute';
-    element.style.visibility = 'hidden';
-    element.style.left = '-999px';
-    element.style.top = '-999px';
-    element.style.height = 'auto';
+	element.style.position = 'absolute';
+	element.style.visibility = 'hidden';
+	element.style.left = '-999px';
+	element.style.top = '-999px';
+	element.style.height = 'auto';
 
-    document.body.appendChild(element);
-    var content_width = element.offsetWidth;
-    element.parentNode.removeChild(element);
+	document.body.appendChild( element );
+	var content_width = element.offsetWidth;
+	element.parentNode.removeChild( element );
 
 	if ( options.min_width && options.min_width > 0 && content_width < options.min_width ) {
 		content_width = options.min_width;
@@ -507,8 +524,8 @@ Global.convertTojQueryFormat = function( date_format ) {
 };
 
 Global.updateUserPreference = function( callBack, message ) {
-	var user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
-	var current_user_aou = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+	var user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+	var current_user_aou = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
 
 	if ( message ) {
 		ProgressBar.changeProgressBarMessage( message );
@@ -568,6 +585,7 @@ Global.roundTime = function( epoch, round_value, round_type ) {
 		case 20: //Average
 		case 25: //Average (round split seconds up)
 		case 27: //Average (round split seconds down)
+			var tmp_round_value;
 			if ( round_type == 20 || round_value <= 60 ) {
 				tmp_round_value = ( round_value / 2 );
 			} else if ( round_type == 25 ) { //Average (Partial Min. Down)
@@ -586,185 +604,186 @@ Global.roundTime = function( epoch, round_value, round_type ) {
 
 			break;
 		case 30: //Up
-			epoch = ( ( (epoch + (round_value - 1) ) / round_value ) * round_value );
+			epoch = ( ( ( epoch + ( round_value - 1 ) ) / round_value ) * round_value );
 			break;
 	}
 
 	return epoch;
 },
 
-Global.parseTimeUnit = function( time_unit, format ) {
-	var format, time_unit;
+	Global.parseTimeUnit = function( time_unit, format ) {
+		var format, time_unit, time_units, seconds, negative_number;
 
-	var time_unit = time_unit.toString(); //Needs to be a string so we can use .charAt and .replace below.
+		var time_unit = time_unit.toString(); //Needs to be a string so we can use .charAt and .replace below.
 
-	if ( !format ) {
-		format = LocalCacheData.getLoginUserPreference().time_unit_format;
-	}
-	format = parseInt( format );
-
-	var enable_rounding = true;
-	if ( time_unit.charAt(0) == '"' ) {
-		enable_rounding = false;
-	}
-
-	var thousands_separator = ',';
-	var decimal_separator = '.';
-
-	time_unit = time_unit.replace( thousands_separator, '' ).replace( ' ', '' ).replace( '"', '' );
-
-	switch ( format ) {
-		case 10: //hh:mm
-		case 12: //hh:mm:ss
-			if ( time_unit.indexOf( decimal_separator ) !== -1 && time_unit.indexOf( ':' ) === -1 ) { //Hybrid mode, they passed a decimal format HH:MM, try to handle properly.
-				time_unit = Global.getTimeUnit( Global.parseTimeUnit( time_unit, 20 ), format );
-			}
-
-			time_units = time_unit.split( ':' );
-
-			if ( !time_units[0] ) {
-				time_units[0] = 0;
-			}
-
-			if ( !time_units[1] ) {
-				time_units[1] = 0;
-			}
-
-			if ( !time_units[2] ) {
-				time_units[2] = 0;
-			}
-
-			negative_number = false;
-			if ( time_units[0].toString().charAt( 0 ) == '-' || time_units[0] < 0 || time_units[1] < 0 || time_units[2] < 0 ) {
-				negative_number = true;
-			}
-
-			seconds = ( ( Math.abs( Math.floor( time_units[0] ) ) * 3600 ) + ( Math.abs( Math.floor( time_units[1] ) ) * 60 ) + Math.abs( Math.floor( time_units[2] ) ) );
-
-			if ( negative_number == true ) {
-				seconds = ( seconds * -1 );
-			}
-
-			break;
-		case 20: //hours
-		case 22: //hours [Precise]
-		case 23: //hours [Super Precise]
-			if ( time_unit.indexOf( ':' ) !== -1 ) { //Hybrid mode, they passed a decimal format HH:MM, try to handle properly.
-				time_unit = Global.getTimeUnit( Global.parseTimeUnit( time_unit, 10 ), format );
-			}
-
-			seconds = ( time_unit * 3600 );
-			if ( enable_rounding == true ) {
-				seconds = Global.roundTime( seconds, 60 );
-			}
-
-			break;
-		case 30: //minutes
-			seconds = ( time_unit * 60 );
-			break;
-		case 40: //seconds
-			secounds = Math.round( time_unit );
-			break;
-	}
-
-	//Debug.Text( 'Time Unit: '+ time_unit +' Retval: '+ seconds, 'Global.js', '', 'parseTimeUnit', 10 );
-	return seconds;
-},
-
-Global.convertSecondsToHMS = function( seconds, include_seconds, exclude_hours ) {
-	var negative_number = false;
-
-	if ( seconds < 0 ) {
-		negative_number = true;
-	}
-
-	seconds = Math.round( Math.abs( seconds ) );
-
-	tmp_hours = Math.floor( seconds / 3600 );
-	tmp_minutes = Math.floor( ( seconds / 60 ) % 60 );
-	tmp_seconds = Math.floor( seconds % 60 );
-
-	if ( exclude_hours == true ) { //Convert hours to minutes before we pad it.
-		tmp_minutes = ( ( tmp_hours * 60 ) + tmp_minutes );
-		tmp_hours = 0;
-	}
-
-	if ( tmp_hours < 10 ) {
-		tmp_hours = '0' + tmp_hours;
-	}
-
-	if ( tmp_minutes < 10 ) {
-		tmp_minutes = '0' + tmp_minutes;
-	}
-
-	if ( tmp_seconds < 10 ) {
-		tmp_seconds = '0' + tmp_seconds;
-	}
-
-	if ( exclude_hours == true ) {
-		retval = [ tmp_minutes, tmp_seconds].join(':');
-	} else {
-		if ( include_seconds == true ) {
-			retval = [ tmp_hours, tmp_minutes, tmp_seconds ].join(':');
-		} else {
-			retval = [ tmp_hours, tmp_minutes ].join(':');
+		if ( !format ) {
+			format = LocalCacheData.getLoginUserPreference().time_unit_format;
 		}
-	}
+		format = parseInt( format );
 
-	if ( negative_number == true ) {
-		retval = '-'+ retval;
-	}
+		var enable_rounding = true;
+		if ( time_unit.charAt( 0 ) == '"' ) {
+			enable_rounding = false;
+		}
 
-	return retval;
-},
+		var thousands_separator = ',';
+		var decimal_separator = '.';
+
+		time_unit = time_unit.replace( thousands_separator, '' ).replace( ' ', '' ).replace( '"', '' );
+
+		switch ( format ) {
+			case 10: //hh:mm
+			case 12: //hh:mm:ss
+				if ( time_unit.indexOf( decimal_separator ) !== -1 && time_unit.indexOf( ':' ) === -1 ) { //Hybrid mode, they passed a decimal format HH:MM, try to handle properly.
+					time_unit = Global.getTimeUnit( Global.parseTimeUnit( time_unit, 20 ), format );
+				}
+
+				time_units = time_unit.split( ':' );
+
+				if ( !time_units[0] ) {
+					time_units[0] = 0;
+				}
+
+				if ( !time_units[1] ) {
+					time_units[1] = 0;
+				}
+
+				if ( !time_units[2] ) {
+					time_units[2] = 0;
+				}
+
+				negative_number = false;
+				if ( time_units[0].toString().charAt( 0 ) == '-' || time_units[0] < 0 || time_units[1] < 0 || time_units[2] < 0 ) {
+					negative_number = true;
+				}
+
+				seconds = ( ( Math.abs( Math.floor( time_units[0] ) ) * 3600 ) + ( Math.abs( Math.floor( time_units[1] ) ) * 60 ) + Math.abs( Math.floor( time_units[2] ) ) );
+
+				if ( negative_number == true ) {
+					seconds = ( seconds * -1 );
+				}
+
+				break;
+			case 20: //hours
+			case 22: //hours [Precise]
+			case 23: //hours [Super Precise]
+				if ( time_unit.indexOf( ':' ) !== -1 ) { //Hybrid mode, they passed a decimal format HH:MM, try to handle properly.
+					time_unit = Global.getTimeUnit( Global.parseTimeUnit( time_unit, 10 ), format );
+				}
+
+				seconds = ( time_unit * 3600 );
+				if ( enable_rounding == true ) {
+					seconds = Global.roundTime( seconds, 60 );
+				}
+
+				break;
+			case 30: //minutes
+				seconds = ( time_unit * 60 );
+				break;
+			case 40: //seconds
+				seconds = Math.round( time_unit );
+				break;
+		}
+
+		//Debug.Text( 'Time Unit: '+ time_unit +' Retval: '+ seconds, 'Global.js', '', 'parseTimeUnit', 10 );
+		return seconds;
+	},
+
+	Global.convertSecondsToHMS = function( seconds, include_seconds, exclude_hours ) {
+		var negative_number = false;
+
+		if ( seconds < 0 ) {
+			negative_number = true;
+		}
+
+		seconds = Math.round( Math.abs( seconds ) );
+
+		var tmp_hours = Math.floor( seconds / 3600 );
+		var tmp_minutes = Math.floor( ( seconds / 60 ) % 60 );
+		var tmp_seconds = Math.floor( seconds % 60 );
+
+		if ( exclude_hours == true ) { //Convert hours to minutes before we pad it.
+			tmp_minutes = ( ( tmp_hours * 60 ) + tmp_minutes );
+			tmp_hours = 0;
+		}
+
+		if ( tmp_hours < 10 ) {
+			tmp_hours = '0' + tmp_hours;
+		}
+
+		if ( tmp_minutes < 10 ) {
+			tmp_minutes = '0' + tmp_minutes;
+		}
+
+		if ( tmp_seconds < 10 ) {
+			tmp_seconds = '0' + tmp_seconds;
+		}
+
+		var retval;
+		if ( exclude_hours == true ) {
+			retval = [tmp_minutes, tmp_seconds].join( ':' );
+		} else {
+			if ( include_seconds == true ) {
+				retval = [tmp_hours, tmp_minutes, tmp_seconds].join( ':' );
+			} else {
+				retval = [tmp_hours, tmp_minutes].join( ':' );
+			}
+		}
+
+		if ( negative_number == true ) {
+			retval = '-' + retval;
+		}
+
+		return retval;
+	},
 
 //Was: Global.secondToHHMMSS
-Global.getTimeUnit = function( seconds, format ) {
-	var retval;
+	Global.getTimeUnit = function( seconds, format ) {
+		var retval;
 
-	//always return hh:ss. if we can't parse to float, then work with 0 tmp_seconds
-	var seconds = parseFloat( seconds );
-	if ( isNaN( seconds ) ) {
-		seconds = 0;
-	}
+		//always return hh:ss. if we can't parse to float, then work with 0 tmp_seconds
+		var seconds = parseFloat( seconds );
+		if ( isNaN( seconds ) ) {
+			seconds = 0;
+		}
 
-	//FIXES BUG#2071 - don't check the local cache data for default value, or it will fail and cause errors when unauthenticated. For example in the installer.
-	var format;
-	if ( !format ) {
-		format = LocalCacheData.getLoginUserPreference().time_unit_format;
-	}
-	format = parseInt( format );
+		//FIXES BUG#2071 - don't check the local cache data for default value, or it will fail and cause errors when unauthenticated. For example in the installer.
+		var format;
+		if ( !format ) {
+			format = LocalCacheData.getLoginUserPreference().time_unit_format;
+		}
+		format = parseInt( format );
 
-	switch ( format ) {
-		case 10:
-			retval = Global.convertSecondsToHMS( seconds );
-			break;
-		case 12:
-			retval = Global.convertSecondsToHMS( seconds, true );
-			break;
-		case 99: //For local use only, in progress bar always show tmp_minutes and tmp_seconds
-			retval = Global.convertSecondsToHMS( seconds, true, true );
-			break;
-		case 20:
-			retval = ( seconds / 3600 ).toFixed( 2 );
-			break;
-		case 22:
-			retval = ( seconds / 3600 ).toFixed( 3 );
-			break;
-		case 23:
-			retval = ( seconds / 3600 ).toFixed( 4 );
-			break;
-		case 30:
-			retval = ( seconds / 60 ).toFixed( 0 );
-			break;
-		case 40:
-			retval = seconds;
-			break;
-	}
+		switch ( format ) {
+			case 10:
+				retval = Global.convertSecondsToHMS( seconds );
+				break;
+			case 12:
+				retval = Global.convertSecondsToHMS( seconds, true );
+				break;
+			case 99: //For local use only, in progress bar always show tmp_minutes and tmp_seconds
+				retval = Global.convertSecondsToHMS( seconds, true, true );
+				break;
+			case 20:
+				retval = ( seconds / 3600 ).toFixed( 2 );
+				break;
+			case 22:
+				retval = ( seconds / 3600 ).toFixed( 3 );
+				break;
+			case 23:
+				retval = ( seconds / 3600 ).toFixed( 4 );
+				break;
+			case 30:
+				retval = ( seconds / 60 ).toFixed( 0 );
+				break;
+			case 40:
+				retval = seconds;
+				break;
+		}
 
-	//Debug.Text( 'Seconds: '+ seconds +' Retval: '+ retval, 'Global.js', '', 'getTimeUnit', 10 );
-	return retval;
-};
+		//Debug.Text( 'Seconds: '+ seconds +' Retval: '+ retval, 'Global.js', '', 'getTimeUnit', 10 );
+		return retval;
+	};
 
 Global.removeTrailingZeros = function( value, minimum_decimals ) {
 	if ( !minimum_decimals ) {
@@ -794,7 +813,7 @@ Global.removeTrailingZeros = function( value, minimum_decimals ) {
 
 Global.isCanvasSupported = function() {
 	var elem = document.createElement( 'canvas' );
-	return !!(elem.getContext && elem.getContext( '2d' ));
+	return !!( elem.getContext && elem.getContext( '2d' ) );
 };
 
 Global.getRandomNum = function() {
@@ -1129,7 +1148,7 @@ Global.getScriptNameByAPI = function( api_class ) {
 /* jshint ignore:end */
 
 Global.isObject = function( obj ) {
-	if  ( obj !== null && typeof obj === 'object' ) {
+	if ( obj !== null && typeof obj === 'object' ) {
 		return true;
 	}
 
@@ -1155,12 +1174,12 @@ Global.isString = function( obj ) {
 };
 
 Global.isValidDate = function( obj ) {
-	if ( obj instanceof Date && !isNaN(obj) ) {
+	if ( obj instanceof Date && !isNaN( obj ) ) {
 		return true;
 	}
 
 	return false;
-}
+};
 
 Global.decodeCellValue = function( val ) {
 	if ( !val || _.isObject( val ) ) {
@@ -1292,14 +1311,14 @@ Global.addFirstItemToArray = function( array, firstItemType, customLabel ) {
 Global.addLastItemToArray = function( array, key, label ) {
 	var label;
 	if ( array ) {
-		last_array_element = array[(array.length - 1)];
+		var last_array_element = array[( array.length - 1 )];
 		if ( last_array_element.value != key ) {
 			array.push( {
 				fullValue: key,
 				value: key,
 				label: label,
 				id: 2000
-			});
+			} );
 		}
 	}
 
@@ -1438,7 +1457,7 @@ Global.setSignalStrength = function() {
 	}, 60000 );
 
 	function doPing() {
-		if ( ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) || Global.idle_time >= Math.min( 15, APIGlobal.pre_login_data.session_idle_timeout / 60 ) )  {
+		if ( ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) || Global.idle_time >= Math.min( 15, APIGlobal.pre_login_data.session_idle_timeout / 60 ) ) {
 			return;
 		}
 
@@ -1454,7 +1473,7 @@ Global.setSignalStrength = function() {
 				total_time = checking_array[i] + total_time;
 			}
 			average_time = total_time / checking_array.length;
-			Debug.Text( 'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + (new Date).toISOString().replace( /z|t/gi, ' ' ), 'Global.js', '', 'doPing', 1 );
+			Debug.Text( 'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + ( new Date ).toISOString().replace( /z|t/gi, ' ' ), 'Global.js', '', 'doPing', 1 );
 			Global.current_ping = average_time;
 			status = $.i18n._( 'Good' );
 			//do not allow signal strength variation in unit test mode
@@ -1480,7 +1499,7 @@ Global.setSignalStrength = function() {
 	}
 
 	function setTooltip() {
-		var html = '<div>' + $.i18n._( 'Your Network Connection is' ) + ' ' + status + ' (' + $.i18n._( 'Latency' ) + ': ' + (average_time > 0 ? average_time.toFixed( 0 ) + 'ms' : $.i18n._( 'Calculating...' )) + ')' + '</div>';
+		var html = '<div>' + $.i18n._( 'Your Network Connection is' ) + ' ' + status + ' (' + $.i18n._( 'Latency' ) + ': ' + ( average_time > 0 ? average_time.toFixed( 0 ) + 'ms' : $.i18n._( 'Calculating...' ) ) + ')' + '</div>';
 		$( '.signal-strength' ).qtip( {
 			id: 'single_strength',
 			content: {
@@ -1501,14 +1520,14 @@ Global.setSignalStrength = function() {
 			img.onload = function() {
 				var endTime = new Date().getTime();
 				inUse = false;
-				callback( (endTime - start) );
+				callback( ( endTime - start ) );
 
 			};
 			img.onerror = function( e ) {
 				if ( inUse ) {
 					inUse = false;
 					var endTime = new Date().getTime();
-					callback( (endTime - start) );
+					callback( ( endTime - start ) );
 				}
 
 			};
@@ -1518,7 +1537,7 @@ Global.setSignalStrength = function() {
 				if ( inUse ) {
 					var endTime = new Date().getTime();
 					inUse = false;
-					callback( (endTime - start) );
+					callback( ( endTime - start ) );
 				}
 			}, 5000 );
 		}
@@ -1556,7 +1575,7 @@ Global.loadScript = function( scriptPath, onResult ) {
 	}
 
 	var async = true;
-	if ( typeof (onResult) === 'undefined' ) {
+	if ( typeof ( onResult ) === 'undefined' ) {
 		async = false;
 	}
 
@@ -1604,7 +1623,6 @@ Global.loadScript = function( scriptPath, onResult ) {
 		}
 		Debug.Text( 'SYNC-LOADING: ' + scriptPath + calling_script );
 
-
 		var id = scriptPath.split( '/' );
 		var id = id[id.length - 1];
 		id = id.replace( '.js', '' );
@@ -1639,10 +1657,9 @@ Global.loadScript = function( scriptPath, onResult ) {
 		} );
 	}
 
-
 	if ( !async ) {
 		LocalCacheData.loadedScriptNames[scriptPath] = true;
-		return (successflag);
+		return ( successflag );
 	}
 
 };
@@ -1694,7 +1711,7 @@ Global.loadLanguage = function( name ) {
 			//Because this is a dataType: script, and jquery will blindy try to eval() any result returned by the server, including a HTML 404 error message.
 			// resulting in" Uncaught SyntaxError: Unexpected token < in  line 1" being triggered.
 			// Instead just return the raw result and eval() it in the success function ourselves instead.
-			'text script': function (text) {
+			'text script': function( text ) {
 				return text;
 			}
 		},
@@ -1704,7 +1721,7 @@ Global.loadLanguage = function( name ) {
 		},
 		error: function( jqXHR, textStatus, errorThrown ) {
 			//Unable to load or parse i18n dictionary. Could be due to a 404 error?
-			Debug.Text('Unable to load Locale: ' + errorThrown, 'Global.js', '', 'loadLanguage', 10 );
+			Debug.Text( 'Unable to load Locale: ' + errorThrown, 'Global.js', '', 'loadLanguage', 10 );
 			successflag = false;
 		},
 		dataType: 'script'
@@ -1718,7 +1735,7 @@ Global.loadLanguage = function( name ) {
 		LocalCacheData.setI18nDic( {} );
 	}
 
-	return (successflag);
+	return successflag;
 };
 
 Global.getProductEdition = function() {
@@ -1733,7 +1750,7 @@ Global.getProductEdition = function() {
 
 Global.setURLToBrowser = function( new_url ) {
 	if ( new_url != window.location.href ) {
-		Debug.Text('Changing URL to: '+ new_url, 'Global.js', 'Global','setURLToBrowser', 9);
+		Debug.Text( 'Changing URL to: ' + new_url, 'Global.js', 'Global', 'setURLToBrowser', 9 );
 		window.location = new_url;
 	}
 };
@@ -1760,7 +1777,7 @@ Global.getFuncName = function( _callee ) {
 		if ( _start !== -1 ) {
 			if ( /^function\s*\(.*\).*\r\n/.test( _text ) ) {
 				var _tempArr = _scriptArr[i].text.substr( 0, _start ).split( '\r\n' );
-				return _tempArr[(_tempArr.length - 1)].replace( /(var)|(\s*)/g, '' ).replace( /=/g, '' );
+				return _tempArr[( _tempArr.length - 1 )].replace( /(var)|(\s*)/g, '' ).replace( /=/g, '' );
 			} else {
 				return _text.match( /^function\s*([^\(]+).*\r\n/ )[1];
 			}
@@ -2062,7 +2079,7 @@ Global.loadWidgetByName = function( widgetName, raw_text ) {
 
 Global.loadWidget = function( url ) {
 	if ( LocalCacheData.loadedWidgetCache[url] ) {
-		return (LocalCacheData.loadedWidgetCache[url]);
+		return ( LocalCacheData.loadedWidgetCache[url] );
 	}
 
 	var realPath = url + '?v=' + APIGlobal.pre_login_data.application_build;
@@ -2095,7 +2112,7 @@ Global.loadWidget = function( url ) {
 		return null;
 	} else {
 		LocalCacheData.loadedWidgetCache[url] = responseData.responseText;
-		return (responseData.responseText);
+		return ( responseData.responseText );
 	}
 
 };
@@ -2115,7 +2132,7 @@ Global.removeCss = function( path ) {
 Global.getViewPathByViewId = function( viewId ) {
 	var path;
 	switch ( viewId ) {
-			//Recruitment Portal
+		//Recruitment Portal
 		case 'GridTest':
 		case 'WidgetTest':
 		case 'AwesomeboxTest':
@@ -2683,7 +2700,7 @@ Global.removeViewCss = function( viewId, fileName ) {
 
 Global.sanitizeViewId = function( viewId ) {
 	if ( typeof viewId === 'string' || viewId instanceof String ) {
-		return viewId.replace('/', '').replace('\\', '');
+		return viewId.replace( '/', '' ).replace( '\\', '' );
 	}
 
 	return viewId;
@@ -2702,14 +2719,14 @@ Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
 		}
 
 		if ( path ) {
-			if (sync) {
+			if ( sync ) {
 				return Global.loadScript( path + fileName );
 			} else {
 				Global.loadScript( path + fileName, onResult );
 			}
 		} else {
 			//Invalid viewId, redirect to home page?
-			console.debug( 'View does not exist! ViewId: '+ viewId +' File Name: '+ fileName );
+			console.debug( 'View does not exist! ViewId: ' + viewId + ' File Name: ' + fileName );
 			if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
 				Global.setURLToBrowser( ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url );
 			}
@@ -2719,14 +2736,14 @@ Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
 		Global.addCss( path + fileName );
 	} else {
 		if ( path ) {
-			if (sync) {
-				return Global.loadPageSync(path + fileName);
+			if ( sync ) {
+				return Global.loadPageSync( path + fileName );
 			} else {
-				Global.loadPage(path + fileName, onResult);
+				Global.loadPage( path + fileName, onResult );
 			}
 		} else {
 			//Invalid viewId, redirect to home page?
-			console.debug( 'View does not exist! ViewId: '+ viewId +' File Name: '+ fileName );
+			console.debug( 'View does not exist! ViewId: ' + viewId + ' File Name: ' + fileName );
 			if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
 				Global.setURLToBrowser( ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url );
 			}
@@ -2760,7 +2777,7 @@ Global.loadPageSync = function( url ) {
 
 	ProgressBar.removeProgressBar( message_id );
 
-	return (responseData.responseText);
+	return ( responseData.responseText );
 
 };
 
@@ -2822,10 +2839,10 @@ Global.isValidInputCodes = function( keyCode ) {
 		case 20:
 		case 33:
 		case 34:
-			// case 37:
-			// case 38:
-			// case 39:
-			// case 40:
+		// case 37:
+		// case 38:
+		// case 39:
+		// case 40:
 		case 45:
 		case 91:
 		case 92:
@@ -3158,16 +3175,16 @@ Backbone.View.prototype.__super = function( funcName ) {
 
 var dateFormat = function() {
 	var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|'[^']*"|'[^']*'/g,
-			timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
-			timezoneClip = /[^-+\dA-Z]/g,
-			pad = function( val, len ) {
-				val = String( val );
-				len = len || 2;
-				while ( val.length < len ) {
-					val = '0' + val;
-				}
-				return val;
-			};
+		timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
+		timezoneClip = /[^-+\dA-Z]/g,
+		pad = function( val, len ) {
+			val = String( val );
+			len = len || 2;
+			while ( val.length < len ) {
+				val = '0' + val;
+			}
+			return val;
+		};
 
 	// Regexes and supporting functions are cached through closure
 
@@ -3196,44 +3213,44 @@ var dateFormat = function() {
 		}
 
 		var _ = utc ? 'getUTC' : 'get',
-				d = date[_ + 'Date'](),
-				D = date[_ + 'Day'](),
-				m = date[_ + 'Month'](),
-				y = date[_ + 'FullYear'](),
-				H = date[_ + 'Hours'](),
-				M = date[_ + 'Minutes'](),
-				s = date[_ + 'Seconds'](),
-				L = date[_ + 'Milliseconds'](),
-				o = utc ? 0 : date.getTimezoneOffset(),
-				flags = {
-					d: d,
-					dd: pad( d ),
-					ddd: dF.i18n.dayNames[D],
-					dddd: dF.i18n.dayNames[D + 7],
-					m: m + 1,
-					mm: pad( m + 1 ),
-					mmm: dF.i18n.monthNames[m],
-					mmmm: dF.i18n.monthNames[m + 12],
-					yy: String( y ).slice( 2 ),
-					yyyy: y,
-					h: H % 12 || 12,
-					hh: pad( H % 12 || 12 ),
-					H: H,
-					HH: pad( H ),
-					M: M,
-					MM: pad( M ),
-					s: s,
-					ss: pad( s ),
-					l: pad( L, 3 ),
-					L: pad( L > 99 ? Math.round( L / 10 ) : L ),
-					t: H < 12 ? 'a' : 'p',
-					tt: H < 12 ? 'am' : 'pm',
-					T: H < 12 ? 'A' : 'P',
-					TT: H < 12 ? 'AM' : 'PM',
-					Z: utc ? 'UTC' : (String( date ).match( timezone ) || ['']).pop().replace( timezoneClip, '' ),
-					o: (o > 0 ? '-' : '+') + pad( Math.floor( Math.abs( o ) / 60 ) * 100 + Math.abs( o ) % 60, 4 ),
-					S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10]
-				};
+			d = date[_ + 'Date'](),
+			D = date[_ + 'Day'](),
+			m = date[_ + 'Month'](),
+			y = date[_ + 'FullYear'](),
+			H = date[_ + 'Hours'](),
+			M = date[_ + 'Minutes'](),
+			s = date[_ + 'Seconds'](),
+			L = date[_ + 'Milliseconds'](),
+			o = utc ? 0 : date.getTimezoneOffset(),
+			flags = {
+				d: d,
+				dd: pad( d ),
+				ddd: dF.i18n.dayNames[D],
+				dddd: dF.i18n.dayNames[D + 7],
+				m: m + 1,
+				mm: pad( m + 1 ),
+				mmm: dF.i18n.monthNames[m],
+				mmmm: dF.i18n.monthNames[m + 12],
+				yy: String( y ).slice( 2 ),
+				yyyy: y,
+				h: H % 12 || 12,
+				hh: pad( H % 12 || 12 ),
+				H: H,
+				HH: pad( H ),
+				M: M,
+				MM: pad( M ),
+				s: s,
+				ss: pad( s ),
+				l: pad( L, 3 ),
+				L: pad( L > 99 ? Math.round( L / 10 ) : L ),
+				t: H < 12 ? 'a' : 'p',
+				tt: H < 12 ? 'am' : 'pm',
+				T: H < 12 ? 'A' : 'P',
+				TT: H < 12 ? 'AM' : 'PM',
+				Z: utc ? 'UTC' : ( String( date ).match( timezone ) || [''] ).pop().replace( timezoneClip, '' ),
+				o: ( o > 0 ? '-' : '+' ) + pad( Math.floor( Math.abs( o ) / 60 ) * 100 + Math.abs( o ) % 60, 4 ),
+				S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : ( d % 100 - d % 10 !== 10 ) * d % 10]
+			};
 
 		return mask.replace( token, function( $0 ) {
 			return $0 in flags ? flags[$0] : $0.slice( 1, $0.length - 1 );
@@ -3292,7 +3309,6 @@ RightClickMenuType.NORESULTBOX = '3';
 RightClickMenuType.ABSENCE_GRID = '4';
 RightClickMenuType.VIEW_ICON = '5';
 
-
 /**
  * Decoding encoded html enitities (ie: "&gt;")
  * to avoid XSS vulnerabilities do not eval anything that has gone through this function
@@ -3315,7 +3331,7 @@ Global.htmlEncode = function( str ) {
 		// encodedStr = encodedStr.replace( /&#60;br&#62;/g, '<br>' );
 		// return encodedStr;
 
-		var tmp = document.createElement('div');
+		var tmp = document.createElement( 'div' );
 		tmp.textContent = encodedStr;
 
 		return tmp.innerHTML;
@@ -3326,46 +3342,46 @@ Global.htmlEncode = function( str ) {
 
 //Sort by module
 
-Global.m_sort_by = (function() {
+Global.m_sort_by = ( function() {
 	// utility functions
 
 	var default_cmp = function( a, b ) {
 
-				if ( a === b ) {
-					return 0;
-				}
+			if ( a === b ) {
+				return 0;
+			}
 
-				//Speical handle OPEN option to make it always stay together
-				if ( a === false || a === 'OPEN' ) {
-					return -1;
-				}
+			//Speical handle OPEN option to make it always stay together
+			if ( a === false || a === 'OPEN' ) {
+				return -1;
+			}
 
-				if ( b === false || b === 'OPEN' ) {
-					return 1;
-				}
+			if ( b === false || b === 'OPEN' ) {
+				return 1;
+			}
 
-				return a < b ? -1 : 1;
-			},
-			getCmpFunc = function( primer, reverse ) {
-				var cmp = default_cmp;
-				if ( primer ) {
-					cmp = function( a, b ) {
-						return default_cmp( primer( a ), primer( b ) );
-					};
-				}
-				if ( reverse ) {
-					return function( a, b ) {
-						return -1 * cmp( a, b );
-					};
-				}
-				return cmp;
-			};
+			return a < b ? -1 : 1;
+		},
+		getCmpFunc = function( primer, reverse ) {
+			var cmp = default_cmp;
+			if ( primer ) {
+				cmp = function( a, b ) {
+					return default_cmp( primer( a ), primer( b ) );
+				};
+			}
+			if ( reverse ) {
+				return function( a, b ) {
+					return -1 * cmp( a, b );
+				};
+			}
+			return cmp;
+		};
 
 	// actual implementation
 	var sort_by = function( sort_by_array ) {
 		var fields = [],
-				n_fields = sort_by_array.length,
-				field, name, reverse, cmp;
+			n_fields = sort_by_array.length,
+			field, name, reverse, cmp;
 
 		// preprocess sorting options
 		for ( var i = 0; i < n_fields; i++ ) {
@@ -3373,8 +3389,7 @@ Global.m_sort_by = (function() {
 			if ( typeof field === 'string' ) {
 				name = field;
 				cmp = default_cmp;
-			}
-			else {
+			} else {
 				name = field.name;
 				cmp = getCmpFunc( field.primer, field.reverse );
 			}
@@ -3403,7 +3418,7 @@ Global.m_sort_by = (function() {
 
 	return sort_by;
 
-}());
+}() );
 
 $.fn.invisible = function() {
 	return this.each( function() {
@@ -3440,7 +3455,7 @@ Global.trackView = function( name, action ) {
 
 Global.setAnalyticDimensions = function( user_name, company_name ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
-		if ( typeof(ga) !== 'undefined' ) {
+		if ( typeof ( ga ) !== 'undefined' ) {
 			try {
 				ga( 'set', 'dimension1', APIGlobal.pre_login_data.application_version );
 				ga( 'set', 'dimension2', APIGlobal.pre_login_data.http_host );
@@ -3448,11 +3463,11 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 				ga( 'set', 'dimension4', APIGlobal.pre_login_data.registration_key );
 				ga( 'set', 'dimension5', APIGlobal.pre_login_data.primary_company_name );
 
-				if (user_name !== 'undefined' && user_name !== null) {
-					if (APIGlobal.pre_login_data.production !== true) {
-						Debug.Text('Analytics User: ' + user_name, 'Global.js', '', 'doPing', 1);
+				if ( user_name !== 'undefined' && user_name !== null ) {
+					if ( APIGlobal.pre_login_data.production !== true ) {
+						Debug.Text( 'Analytics User: ' + user_name, 'Global.js', '', 'doPing', 1 );
 					}
-					ga('set', 'dimension6', user_name);
+					ga( 'set', 'dimension6', user_name );
 				}
 
 				if ( company_name !== 'undefined' && company_name !== null ) {
@@ -3461,7 +3476,7 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 					}
 					ga( 'set', 'dimension7', company_name );
 				}
-			} catch(e) {
+			} catch ( e ) {
 				throw e; //Attempt to catch any errors thrown by Google Analytics.
 			}
 		}
@@ -3471,11 +3486,11 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 Global.sendAnalyticsPageview = function( track_address ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
 		// Call this delay so view load goes first
-		if ( typeof(ga) !== 'undefined' ) {
+		if ( typeof ( ga ) !== 'undefined' ) {
 			setTimeout( function() {
 				try {
-					ga('send', 'pageview', track_address);
-				} catch(e) {
+					ga( 'send', 'pageview', track_address );
+				} catch ( e ) {
 					throw e;
 				}
 			}, 500 );
@@ -3497,11 +3512,11 @@ Global.sendAnalyticsEvent = function( event_category, event_action, event_label 
 		eventLabel: event_label
 	};
 
-	if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
+	if ( typeof ( ga ) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
 		//Debug.Arr( fieldsObject, 'Sending analytics event payload. Event: ' + event_category + ', Action: ' + event_action + ', Label: ' + event_label, 'Global.js', 'Global', 'sendAnalyticsEvent', 10 );
 		try {
 			ga( 'send', 'event', fieldsObject );
-		} catch(e) {
+		} catch ( e ) {
 			throw e;
 		}
 	}
@@ -3529,13 +3544,13 @@ Global.triggerAnalyticsContextMenuClick = function( context_btn, menu_name ) {
 	} else {
 		// normal click route for context menu click on nav bar
 		event_category = 'navigation:context_menu';
-		dom_context_menu_group = $( context_btn ).parents('.top-ribbon-menu').find('.menu-bottom span').text();
+		dom_context_menu_group = $( context_btn ).parents( '.top-ribbon-menu' ).find( '.menu-bottom span' ).text();
 		button_id = $( context_btn ).find( '.ribbon-sub-menu-icon' ).attr( 'id' ) || 'error-with-icon'; // if fail, show error string to allow graceful fail. E.g. avoid JS exceptions with the .replace further down
 	}
 
 	// Beautify output
-	dom_context_menu = dom_context_menu.replace('ContextMenu', '');
-	button_id = button_id.replace('Icon', ''); //Remove "icon" from button_id.
+	dom_context_menu = dom_context_menu.replace( 'ContextMenu', '' );
+	button_id = button_id.replace( 'Icon', '' ); //Remove "icon" from button_id.
 
 	event_action = 'click';
 	event_label = dom_context_menu + ':' + dom_context_menu_group + '|' + button_id;
@@ -3565,12 +3580,12 @@ Global.triggerAnalyticsEditViewNavigation = function( context, view_id ) {
  */
 Global.triggerAnalyticsTabs = function( event, ui ) {
 	// activate event triggered, ensure all required values are set
-	if( event && event.type && ui && ui.newTab ) {
-		var tab_target = ui.newTab.find('.ui-tabs-anchor').attr('ref') || 'tab-target-error'; // '||' is for gracful fail
+	if ( event && event.type && ui && ui.newTab ) {
+		var tab_target = ui.newTab.find( '.ui-tabs-anchor' ).attr( 'ref' ) || 'tab-target-error'; // '||' is for gracful fail
 		var viewId = LocalCacheData.current_open_view_id || 'error-viewid'; // '||' is for graceful fail
 
 		// Beautify output
-		tab_target = tab_target.replace('tab_', '');
+		tab_target = tab_target.replace( 'tab_', '' );
 
 		var event_action = 'click';
 		var event_label = viewId + ':tabs:' + tab_target;
@@ -3598,7 +3613,7 @@ Global.triggerAnalyticsNavigationOther = function( context, action, view_id ) {
 
 Global.loadStyleSheet = function( path, fn, scope ) {
 	var head = document.getElementsByTagName( 'head' )[0], // reference to document.head for appending/ removing link nodes
-			link = document.createElement( 'link' );           // create the link node
+		link = document.createElement( 'link' );           // create the link node
 	link.setAttribute( 'href', path );
 	link.setAttribute( 'rel', 'stylesheet' );
 	link.setAttribute( 'type', 'text/css' );
@@ -3607,28 +3622,27 @@ Global.loadStyleSheet = function( path, fn, scope ) {
 	if ( 'sheet' in link ) {
 		sheet = 'sheet';
 		cssRules = 'cssRules';
-	}
-	else {
+	} else {
 		sheet = 'styleSheet';
 		cssRules = 'rules';
 	}
 	var interval_id = setInterval( function() {                     // start checking whether the style sheet has successfully loaded
-				try {
-					if ( link[sheet] && link[sheet][cssRules].length ) { // SUCCESS! our style sheet has loaded
-						clearInterval( interval_id );                      // clear the counters
-						clearTimeout( timeout_id );
-						fn.call( scope || window, true, link );           // fire the callback with success == true
-					}
-				} catch ( e ) {
-				} finally {
+			try {
+				if ( link[sheet] && link[sheet][cssRules].length ) { // SUCCESS! our style sheet has loaded
+					clearInterval( interval_id );                      // clear the counters
+					clearTimeout( timeout_id );
+					fn.call( scope || window, true, link );           // fire the callback with success == true
 				}
-			}, 10 ),                                                   // how often to check if the stylesheet is loaded
-			timeout_id = setTimeout( function() {       // start counting down till fail
-				clearInterval( timeout_id );             // clear the counters
-				clearTimeout( timeout_id );
-				head.removeChild( link );                // since the style sheet didn't load, remove the link node from the DOM
-				fn.call( scope || window, false, link ); // fire the callback with success == false
-			}, 15000 );                                 // how long to wait before failing
+			} catch ( e ) {
+			} finally {
+			}
+		}, 10 ),                                                   // how often to check if the stylesheet is loaded
+		timeout_id = setTimeout( function() {       // start counting down till fail
+			clearInterval( timeout_id );             // clear the counters
+			clearTimeout( timeout_id );
+			head.removeChild( link );                // since the style sheet didn't load, remove the link node from the DOM
+			fn.call( scope || window, false, link ); // fire the callback with success == false
+		}, 15000 );                                 // how long to wait before failing
 	head.appendChild( link );  // insert the link node into the DOM and start loading the style sheet
 	return link; // return the link node;
 };
@@ -3644,7 +3658,7 @@ Global.getSessionIDKey = function() {
 
 Global.loadStyleSheet = function( path, fn, scope ) {
 	var head = document.getElementsByTagName( 'head' )[0], // reference to document.head for appending/ removing link nodes
-			link = document.createElement( 'link' );           // create the link node
+		link = document.createElement( 'link' );           // create the link node
 	link.setAttribute( 'href', path );
 	link.setAttribute( 'rel', 'stylesheet' );
 	link.setAttribute( 'type', 'text/css' );
@@ -3653,32 +3667,31 @@ Global.loadStyleSheet = function( path, fn, scope ) {
 	if ( 'sheet' in link ) {
 		sheet = 'sheet';
 		cssRules = 'cssRules';
-	}
-	else {
+	} else {
 		sheet = 'styleSheet';
 		cssRules = 'rules';
 	}
 	var interval_id = setInterval( function() {                     // start checking whether the style sheet has successfully loaded
-				try {
-					if ( link[sheet] && link[sheet][cssRules].length ) { // SUCCESS! our style sheet has loaded
-						clearInterval( interval_id );                      // clear the counters
-						clearTimeout( timeout_id );
-						if ( typeof fn == 'function' ) {
-							fn.call( scope || window, true, link );           // fire the callback with success == true
-						}
+			try {
+				if ( link[sheet] && link[sheet][cssRules].length ) { // SUCCESS! our style sheet has loaded
+					clearInterval( interval_id );                      // clear the counters
+					clearTimeout( timeout_id );
+					if ( typeof fn == 'function' ) {
+						fn.call( scope || window, true, link );           // fire the callback with success == true
 					}
-				} catch ( e ) {
-				} finally {
 				}
-			}, 10 ),                                                   // how often to check if the stylesheet is loaded
-			timeout_id = setTimeout( function() {       // start counting down till fail
-				clearInterval( timeout_id );             // clear the counters
-				clearTimeout( timeout_id );
-				head.removeChild( link );                // since the style sheet didn't load, remove the link node from the DOM
-				if ( typeof fn == 'function' ) {
-					fn.call( scope || window, false, link ); // fire the callback with success == false
-				}
-			}, 15000 );                                 // how long to wait before failing
+			} catch ( e ) {
+			} finally {
+			}
+		}, 10 ),                                                   // how often to check if the stylesheet is loaded
+		timeout_id = setTimeout( function() {       // start counting down till fail
+			clearInterval( timeout_id );             // clear the counters
+			clearTimeout( timeout_id );
+			head.removeChild( link );                // since the style sheet didn't load, remove the link node from the DOM
+			if ( typeof fn == 'function' ) {
+				fn.call( scope || window, false, link ); // fire the callback with success == false
+			}
+		}, 15000 );                                 // how long to wait before failing
 	head.appendChild( link );  // insert the link node into the DOM and start loading the style sheet
 	return link; // return the link node;
 };
@@ -3746,7 +3759,6 @@ Global.setDeepLink = function() {
 	}
 };
 
-
 /**
  sorts items for the ribbon menu
  **/
@@ -3790,13 +3802,13 @@ Global.getDaysInSpan = function( start_date, end_date, sun, mon, tue, wed, thu, 
 		return 0;
 	}
 
-	var days = Math.round( Math.abs( (start_date_obj.getTime() - end_date_obj.getTime()) / (86400 * 1000) ) ) + 1;
+	var days = Math.round( Math.abs( ( start_date_obj.getTime() - end_date_obj.getTime() ) / ( 86400 * 1000 ) ) ) + 1;
 
 	//Need to loop over the whole range to ensure proper counting of effective days on ranges that span multiple weeks.
 	while ( start_date_obj < end_date_obj ) {
 
 		var newDate = start_date_obj.setDate( start_date_obj.getDate() + 1 );
-		start_Date = new Date( newDate );
+		var start_date = new Date( newDate );
 
 		switch ( start_date_obj.getDay() ) {
 			case 0:
@@ -3862,7 +3874,7 @@ Global.eraseCookieFromAllPaths = function( name ) {
 	// Do a simple pathless delete first
 	document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT;';
 	for ( var i = 0; i < path_bits.length; i++ ) {
-		path_current += ((path_current.substr( -1 ) != '/') ? '/' : '') + path_bits[i];
+		path_current += ( ( path_current.substr( -1 ) != '/' ) ? '/' : '' ) + path_bits[i];
 		Debug.Text( '---' + i + '. Deleting cookie: ' + name + ' with value: ' + value + ' and path: ' + path_current, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10 );
 		document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' + path_current + '/;';
 		document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' + path_current + ';';
@@ -3883,7 +3895,7 @@ Global.moveCookiesToNewPath = function() {
 		var val = Global.eraseCookieFromAllPaths( cookies[i] );
 		if ( val && val.length > 0 ) {
 			Debug.Text( 'Setting cookie:' + cookies[i] + ' with value:' + val + ' and path:' + APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'moveCookiesToNewPath', 10 );
-			document.cookie = cookies[i] + '=' + val + '; expires=Thu, 01-Jan-' + (year + 10) + ' 00:00:01 GMT; path=' + APIGlobal.pre_login_data.cookie_base_url + ';';
+			document.cookie = cookies[i] + '=' + val + '; expires=Thu, 01-Jan-' + ( year + 10 ) + ' 00:00:01 GMT; path=' + APIGlobal.pre_login_data.cookie_base_url + ';';
 		} else {
 			Debug.Text( 'NOT Setting cookie:' + cookies[i] + ' with value:' + val + ' and path:' + APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'moveCookiesToNewPath', 10 );
 		}
@@ -3925,7 +3937,7 @@ Global.MoneyRound = function( number, decimals ) {
 	}
 	number = Math.abs( number );
 
-	retval = +(Math.round( number + 'e+' + decimals ) + 'e-' + decimals);
+	var retval = +( Math.round( number + 'e+' + decimals ) + 'e-' + decimals );
 
 	if ( negative ) {
 		retval = retval * -1;
@@ -3933,7 +3945,6 @@ Global.MoneyRound = function( number, decimals ) {
 
 	return retval.toFixed( decimals );
 };
-
 
 Global.getUIReadyStatus = function() {
 	return Global.UIReadyStatus;
@@ -3983,11 +3994,11 @@ Global.convertValidationErrorToString = function( object ) {
 			if ( typeof object[index] == 'string' ) {
 				error_strings.push( object[index] );
 			} else {
-				for ( var key in  object[index] ) {
-					if ( typeof( object[index][key]) == 'string' ) {
+				for ( var key in object[index] ) {
+					if ( typeof ( object[index][key] ) == 'string' ) {
 						error_strings.push( object[index][key] );
 					} else {
-						for ( var i in  object[index][key] ) {
+						for ( var i in object[index][key] ) {
 							error_strings.push( object[index][key][i] );
 						}
 					}
@@ -4025,7 +4036,7 @@ Global.APIFileDownload = function( class_name, method, post_data, url ) {
 	tempForm.attr( 'target', is_browser_iOS ? '_blank' : 'hideReportIFrame' ); //hideReportIFrame
 
 	tempForm.append( $( '<input type=\'hidden\' name=\'X-Client-ID\' value=\'Browser-TimeTrex\'>' ) );
-	tempForm.append( $( '<input type=\'hidden\' name=\'X-CSRF-Token\' value=\''+ getCookie( 'CSRF-Token' ) +'\'>' ) );
+	tempForm.append( $( '<input type=\'hidden\' name=\'X-CSRF-Token\' value=\'' + getCookie( 'CSRF-Token' ) + '\'>' ) );
 
 	tempForm.css( 'display', 'none' );
 	if ( post_data ) {
@@ -4051,14 +4062,13 @@ Global.getStationID = function() {
 	var retval = getCookie( 'StationID' );
 
 	//Check to see if there is a "sticky" user agent based Station ID defined.
-	if ( navigator.userAgent.indexOf('StationID:') != -1 ) {
+	if ( navigator.userAgent.indexOf( 'StationID:' ) != -1 ) {
 		var regex = /StationID:\s?([a-zA-Z0-9]{30,64})/i;
 		var matches = regex.exec( navigator.userAgent );
 		if ( matches[1] ) {
 			Debug.Text( 'Found StationID in user agent, forcing to that instead!', 'Global.js', '', 'getStationID', 11 );
 			retval = matches[1];
 		}
-		delete regex, matches;
 	}
 
 	return retval;
@@ -4085,8 +4095,8 @@ Global.closeEditViews = function( callback ) {
 			Global.closeEditViews( callback );
 		} );
 	} else if ( LocalCacheData.current_open_primary_controller &&
-			LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' &&
-			LocalCacheData.current_open_primary_controller.getPunchMode() === 'manual' ) {
+		LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' &&
+		LocalCacheData.current_open_primary_controller.getPunchMode() === 'manual' ) {
 		LocalCacheData.current_open_primary_controller.doNextIfNoValueChangeInManualGrid( function() {
 			//#2567 Must conclude here. Recursion would be infinite
 			if ( callback ) {
@@ -4110,7 +4120,7 @@ Global.styleSandbox = function() {
 //#2351 - Used for logging in as employee/client or switching to sandbox mode.
 Global.NewSession = function( user_id, client_id ) {
 
-	var api_auth = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+	var api_auth = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
 	var $this = this;
 
 	api_auth.newSession( user_id, client_id, {
@@ -4161,13 +4171,13 @@ Global.isNumeric = function( value ) {
 
 // Returns a function, that, as long as it continues to be invoked, will not be triggered. The function will be called after it stops being called for N milliseconds.
 // If `immediate` is passed, trigger the function on the leading edge, instead of the trailing.
-Global.debounce = function ( func, wait, immediate ) {
+Global.debounce = function( func, wait, immediate ) {
 	var timeout;
 
-	return function () {
+	return function() {
 		var context = this, args = arguments;
 
-		var later = function () {
+		var later = function() {
 			timeout = null;
 			if ( !immediate ) {
 				Debug.Text( 'Calling after debounce wait: ' + func.name, 'Global.js', 'Global', 'debounce', 10 );
@@ -4197,7 +4207,7 @@ Global.debounce = function ( func, wait, immediate ) {
  * @param {Array} [filters] optional array of filters. If none is supplied, defaults will be used.
  * @returns {string} returns the sanitized string result
  */
-Global.filterOutput = function ( entry, filters ) {
+Global.filterOutput = function( entry, filters ) {
 	// default filters can be overridden by passing in a second param
 
 	if ( !filters ) {
@@ -4220,9 +4230,9 @@ Global.filterOutput = function ( entry, filters ) {
  */
 Global.groupArrayDataByKey = function( data, makeUnique ) {
 
-	return data.reduce( function ( accumulator, currentValue ) {
+	return data.reduce( function( accumulator, currentValue ) {
 		// get a list of all object keys for data object, then iterate through each
-		Object.entries( currentValue ).forEach( function ( key ) {
+		Object.entries( currentValue ).forEach( function( key ) {
 			accumulator[key[0]] = accumulator[key[0]] || [];
 
 			// check if value exists or add anyway if makeUnique is false
@@ -4241,7 +4251,7 @@ Global.groupArrayDataByKey = function( data, makeUnique ) {
  * @returns {string} returns the new content value for the viewport meta tag
  * @example A use case is Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
  */
-Global.setVirtualDeviceViewport = function ( setting ) {
+Global.setVirtualDeviceViewport = function( setting ) {
 	var width;
 	var scale;
 	var meta_tag_viewport = $( 'meta[name=viewport]' );
@@ -4253,12 +4263,10 @@ Global.setVirtualDeviceViewport = function ( setting ) {
 	if ( setting === 'mobile' ) {
 		width = 'device-width';
 		scale = 1;
-	}
-	else if ( setting === 'desktop' ) {
+	} else if ( setting === 'desktop' ) {
 		width = 990; // Minium application width which was previously used elsewhere.
 		scale = 0.5;
-	}
-	else {
+	} else {
 		Debug.Text( 'Error: Invalid setting passed to function', 'Global.js', 'Global', 'setVirtualDeviceViewport', 1 );
 		return undefined;
 	}
@@ -4272,7 +4280,7 @@ Global.setVirtualDeviceViewport = function ( setting ) {
 };
 
 //Clear all session and local cache data for logout.
-Global.Logout = function () {
+Global.Logout = function() {
 	ServiceCaller.abortAll(); //Abort any pending AJAX requests so their callbacks don't get triggered and cause all kind of weirdness.
 	Global.clearSessionCookie();
 	LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.

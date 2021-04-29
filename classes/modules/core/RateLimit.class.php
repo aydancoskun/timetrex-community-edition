@@ -38,9 +38,8 @@
 /**
  * @package Core
  */
-
 class RateLimit {
-	protected $sleep = FALSE; //When rate limit is reached, do we sleep or return FALSE?
+	protected $sleep = false; //When rate limit is reached, do we sleep or return FALSE?
 
 	protected $id = 1;
 	protected $group = 'rate_limit';
@@ -48,7 +47,7 @@ class RateLimit {
 	protected $allowed_calls = 25;
 	protected $time_frame = 60; //1 minute.
 
-	protected $memory = NULL;
+	protected $memory = null;
 
 	/**
 	 * RateLimit constructor.
@@ -56,10 +55,12 @@ class RateLimit {
 	function __construct() {
 		try {
 			$this->memory = new SharedMemory();
-			return TRUE;
+
+			return true;
 		} catch ( Exception $e ) {
-			Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
-			return FALSE;
+			Debug::text( 'ERROR: Caught Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9 );
+
+			return false;
 		}
 	}
 
@@ -74,14 +75,14 @@ class RateLimit {
 	 * @param $value
 	 * @return bool
 	 */
-	function setID( $value) {
+	function setID( $value ) {
 		if ( $value != '' ) {
 			$this->id = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -96,14 +97,14 @@ class RateLimit {
 	 * @param $value
 	 * @return bool
 	 */
-	function setAllowedCalls( $value) {
+	function setAllowedCalls( $value ) {
 		if ( $value != '' ) {
 			$this->allowed_calls = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -117,14 +118,14 @@ class RateLimit {
 	 * @param $value
 	 * @return bool
 	 */
-	function setTimeFrame( $value) {
+	function setTimeFrame( $value ) {
 		if ( $value != '' ) {
 			$this->time_frame = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -132,39 +133,41 @@ class RateLimit {
 	 * @return bool
 	 */
 	function setRateData( $data ) {
-		if ( is_object($this->memory) ) {
+		if ( is_object( $this->memory ) ) {
 			try {
-				return $this->memory->set( $this->group.$this->getID(), $data );
+				return $this->memory->set( $this->group . $this->getID(), $data );
 			} catch ( Exception $e ) {
-				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
-				return FALSE;
+				Debug::text( 'ERROR: Caught Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9 );
+
+				return false;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getRateData() {
-		if ( is_object($this->memory) ) {
+		if ( is_object( $this->memory ) ) {
 			try {
-				$retarr = $this->memory->get( $this->group.$this->getID() );
+				$retarr = $this->memory->get( $this->group . $this->getID() );
 
 				if ( is_object( $retarr ) ) { //Fail OPEN in cases where the user may have deleted the cache directory. This also prevents HTTP 500 errors on windows which are difficult to diagnose.
-					Debug::Text( 'ERROR: Shared Memory Failed: ' . $retarr->message .' Cache directory may not exist or has incorrect read/write permissions.', __FILE__, __LINE__, __METHOD__, 10 );
-					$retarr = FALSE;
+					Debug::Text( 'ERROR: Shared Memory Failed: ' . $retarr->message . ' Cache directory may not exist or has incorrect read/write permissions.', __FILE__, __LINE__, __METHOD__, 10 );
+					$retarr = false;
 				}
 
 				return $retarr;
 			} catch ( Exception $e ) {
-				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
-				return FALSE;
+				Debug::text( 'ERROR: Caught Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9 );
+
+				return false;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -172,11 +175,11 @@ class RateLimit {
 	 */
 	function getAttempts() {
 		$rate_data = $this->getRateData();
-		if ( isset($rate_data['attempts']) ) {
+		if ( isset( $rate_data['attempts'] ) ) {
 			return $rate_data['attempts'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -186,42 +189,45 @@ class RateLimit {
 		if ( $this->getID() != '' ) {
 			$rate_data = $this->getRateData();
 			//Debug::Arr($rate_data, 'Failed Attempt Data: ', __FILE__, __LINE__, __METHOD__, 10);
-			if ( !isset($rate_data['attempts']) ) {
-				$rate_data = array(
-											'attempts' => 0,
-											'first_date' => microtime(TRUE),
-											);
-			} elseif ( isset($rate_data['attempts']) ) {
-				if ( $rate_data['attempts'] > $this->getAllowedCalls() AND $rate_data['first_date'] >= ( microtime(TRUE) - $this->getTimeFrame() ) ) {
-					return FALSE;
-				} elseif ( $rate_data['first_date'] < ( microtime(TRUE) - $this->getTimeFrame() ) ) {
+			if ( !isset( $rate_data['attempts'] ) ) {
+				$rate_data = [
+						'attempts'   => 0,
+						'first_date' => microtime( true ),
+				];
+			} else if ( isset( $rate_data['attempts'] ) ) {
+				if ( $rate_data['attempts'] > $this->getAllowedCalls() && $rate_data['first_date'] >= ( microtime( true ) - $this->getTimeFrame() ) ) {
+					return false;
+				} else if ( $rate_data['first_date'] < ( microtime( true ) - $this->getTimeFrame() ) ) {
 					$rate_data['attempts'] = 0;
-					$rate_data['first_date'] = microtime(TRUE);
+					$rate_data['first_date'] = microtime( true );
 				}
 			}
 
 			$rate_data['attempts']++;
 			$this->setRateData( $rate_data );
-			return TRUE; //Don't return result of setRateData() so if it can't write the data to shared memory it fails "OPEN".
+
+			return true; //Don't return result of setRateData() so if it can't write the data to shared memory it fails "OPEN".
 		}
 
-		return TRUE; //Return TRUE is no ID is specified, so it fails "OPEN".
+		return true; //Return TRUE is no ID is specified, so it fails "OPEN".
 	}
 
 	/**
 	 * @return bool
 	 */
 	function delete() {
-		if ( is_object($this->memory) ) {
+		if ( is_object( $this->memory ) ) {
 			try {
-				return $this->memory->delete( $this->group.$this->getID() );
+				return $this->memory->delete( $this->group . $this->getID() );
 			} catch ( Exception $e ) {
-				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
-				return FALSE;
+				Debug::text( 'ERROR: Caught Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9 );
+
+				return false;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

@@ -47,5 +47,4 @@ var APIPayFormulaPolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportPayFormulaPolicy', arguments );
 	}
 
-
 } );

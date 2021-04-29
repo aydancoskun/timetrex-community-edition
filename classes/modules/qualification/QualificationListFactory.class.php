@@ -41,45 +41,45 @@
 class QualificationListFactory extends QualificationFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|QualificationListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$this->rs = $this->getCache($id);
-		if ( $this->rs === FALSE ) {
-			$ph = array(
-						'id' => TTUUID::castUUID($id),
-						);
+		$this->rs = $this->getCache( $id );
+		if ( $this->rs === false ) {
+			$ph = [
+					'id' => TTUUID::castUUID( $id ),
+			];
 
 			$query = '
 						select	*
-						from	'. $this->getTable() .'
+						from	' . $this->getTable() . '
 						where	id = ?
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
@@ -87,39 +87,39 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 
 			$this->rs = $this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs, $id);
+			$this->saveCache( $this->rs, $id );
 		}
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param string $id   UUID
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|QualificationListFactory
 	 */
-	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByCompanyId( $id, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'id' => 'asc', 'name' => 'asc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'id' => 'asc', 'name' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -135,32 +135,32 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 	 * @param string $company_id UUID
 	 * @param int $type_id
 	 * @param $name
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|QualificationListFactory
 	 */
-	function getByCompanyIdAndTypeIdAndName( $company_id, $type_id, $name, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndTypeIdAndName( $company_id, $type_id, $name, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $type_id == '') {
-			return FALSE;
+		if ( $type_id == '' ) {
+			return false;
 		}
 
-		if ( $name == '') {
-			return FALSE;
+		if ( $name == '' ) {
+			return false;
 		}
 
-		$ph = array(
-			'company_id' => TTUUID::castUUID($company_id),
-			'type_id' => (int)$type_id,
-			'name' => (string)$name,
-		);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'type_id'    => (int)$type_id,
+				'name'       => (string)$name,
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
 						AND type_id = ?
 						AND lower(name) LIKE lower(?)
@@ -177,69 +177,69 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|QualificationListFactory
 	 */
-	function getByIdAndCompanyId( $id, $company_id, $order = NULL) {
+	function getByIdAndCompanyId( $id, $company_id, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'id'         => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
 						AND	id = ?
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param string $id         UUID
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|QualificationListFactory
 	 */
-	function getByCompanyIDAndGroupID( $company_id, $id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIDAndGroupID( $company_id, $id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $id == '') {
-			return FALSE;
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'group_id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'group_id'   => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
 						AND group_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -247,33 +247,33 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 	/**
 	 * @param string $company_id UUID
 	 * @param int $type_id
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|QualificationListFactory
 	 */
-	function getByCompanyIdAndTypeId( $company_id, $type_id, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndTypeId( $company_id, $type_id, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $type_id == '') {
-			return FALSE;
+		if ( $type_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'type_id' => (int)$type_id,
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'type_id'    => (int)$type_id,
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	company_id = ?
 						AND type_id = ?
 						AND deleted = 0';
 
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL($query, $ph);
+		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -282,19 +282,19 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|QualificationListFactory
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		if ( isset( $filter_data['qualification_group_id'] ) ) {
-			$filter_data['group_id'] =	$filter_data['qualification_group_id'];
+			$filter_data['group_id'] = $filter_data['qualification_group_id'];
 		}
 		if ( isset( $filter_data['qualification_type_id'] ) ) {
 			$filter_data['type_id'] = $filter_data['qualification_type_id'];
@@ -303,28 +303,28 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 			$filter_data['id'] = $filter_data['qualification_id'];
 		}
 
-		if ( !is_array($order) ) {
+		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
+			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
+				$order = [ Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order'] ];
 			}
 		}
 
-		$additional_order_fields = array('type_id', 'source_type_id', 'group');
+		$additional_order_fields = [ 'type_id', 'source_type_id', 'group' ];
 
-		$sort_column_aliases = array(
-									'type' => 'type_id',
-									'source_type' => 'source_type_id',
-									'group' => 'd.name',
-									);
+		$sort_column_aliases = [
+				'type'        => 'type_id',
+				'source_type' => 'source_type_id',
+				'group'       => 'd.name',
+		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
-		if ( $order == NULL ) {
-			$order = array( 'type_id' => 'asc', 'name' => 'asc');
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'type_id' => 'asc', 'name' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -333,9 +333,9 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		$uf = new UserFactory();
 		$qgf = new QualificationGroupFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*,
@@ -346,54 +346,54 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $qgf->getTable() .' as d ON ( a.group_id = d.id AND d.deleted = 0)
-						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $qgf->getTable() . ' as d ON ( a.group_id = d.id AND d.deleted = 0)
+						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?';
 
 
-
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
 		//$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['source_type_id']) ) ? $this->getWhereClauseSQL( 'a.source_type_id', $filter_data['source_type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['visibility_type_id']) ) ? $this->getWhereClauseSQL( 'a.visibility_type_id', $filter_data['visibility_type_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['type_id'] ) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['source_type_id'] ) ) ? $this->getWhereClauseSQL( 'a.source_type_id', $filter_data['source_type_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['visibility_type_id'] ) ) ? $this->getWhereClauseSQL( 'a.visibility_type_id', $filter_data['visibility_type_id'], 'numeric_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text_metaphone', $ph ) : NULL;
-		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'a.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['group']) ) ? $this->getWhereClauseSQL( 'd.name', $filter_data['group'], 'text', $ph ) : NULL;
+		$query .= ( isset( $filter_data['name'] ) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text_metaphone', $ph ) : null;
+		$query .= ( isset( $filter_data['description'] ) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : null;
+		$query .= ( isset( $filter_data['group_id'] ) ) ? $this->getWhereClauseSQL( 'a.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['group'] ) ) ? $this->getWhereClauseSQL( 'd.name', $filter_data['group'], 'text', $ph ) : null;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 250, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'a.id', [ 'company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 250, 'tag' => $filter_data['tag'] ], 'tag', $ph ) : null;
 
-		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
+		if ( isset( $filter_data['created_date'] ) && !is_array( $filter_data['created_date'] ) && trim( $filter_data['created_date'] ) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );
-			if ( $date_filter != FALSE ) {
-				$query	.=	' AND '. $date_filter;
+			if ( $date_filter != false ) {
+				$query .= ' AND ' . $date_filter;
 			}
-			unset($date_filter);
+			unset( $date_filter );
 		}
-		if ( isset($filter_data['updated_date']) AND !is_array($filter_data['updated_date']) AND trim($filter_data['updated_date']) != '' ) {
+		if ( isset( $filter_data['updated_date'] ) && !is_array( $filter_data['updated_date'] ) && trim( $filter_data['updated_date'] ) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['updated_date'], 'a.updated_date' );
-			if ( $date_filter != FALSE ) {
-				$query	.=	' AND '. $date_filter;
+			if ( $date_filter != false ) {
+				$query .= ' AND ' . $date_filter;
 			}
-			unset($date_filter);
+			unset( $date_filter );
 		}
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.created_by', 'y.first_name', 'y.last_name' ], $filter_data['created_by'], 'user_id_or_name', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.updated_by', 'z.first_name', 'z.last_name' ], $filter_data['updated_by'], 'user_id_or_name', $ph ) : null;
 
-		$query .=	' AND a.deleted = 0 ';
+		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		$this->rs = $this->ExecuteSQL($query, $ph, $limit, $page);
+		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
 }
+
 ?>

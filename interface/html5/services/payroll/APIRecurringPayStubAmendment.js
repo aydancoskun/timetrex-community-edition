@@ -43,5 +43,4 @@ var APIRecurringPayStubAmendment = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'copyRecurringPayStubAmendment', arguments );
 	}
 
-
 } );

@@ -42,7 +42,7 @@
 class TTSoapClient extends SoapClient {
 	/**
 	 * @param string $function_name
-	 * @param string $arguments
+	 * @param array $arguments
 	 * @return mixed|SoapFault
 	 */
 	public function __call( $function_name, $arguments ) {
@@ -52,18 +52,18 @@ class TTSoapClient extends SoapClient {
 		while ( $retry_count < $max_retries ) {
 			if ( $retry_count == ( $max_retries - 1 ) ) {
 				//On last retry, attempt to fall back to HTTP rather than HTTPS
-				$this->__setLocation( str_replace('https://', 'http://', $this->location ) );
-				Debug::Text('WARNING: Due to failed connection attempts, falling back to non-SSL SOAP communication: '. $this->location, __FILE__, __LINE__, __METHOD__, 10);
+				$this->__setLocation( str_replace( 'https://', 'http://', $this->location ) );
+				Debug::Text( 'WARNING: Due to failed connection attempts, falling back to non-SSL SOAP communication: ' . $this->location, __FILE__, __LINE__, __METHOD__, 10 );
 			}
 
-			if ( Debug::getEnable() == TRUE AND Debug::getVerbosity() >= 11 ) {
+			if ( Debug::getEnable() == true && Debug::getVerbosity() >= 11 ) {
 				$result = parent::__call( $function_name, $arguments );
 			} else {
 				$result = @parent::__call( $function_name, $arguments );
 			}
 
-			if ( is_soap_fault( $result ) AND ( $result->faultstring == 'Could not connect to host' OR $result->faultstring == 'Error Fetching http headers' OR $result->faultstring == 'Failed Sending HTTP SOAP request' ) ) {
-				Debug::Text('SOAP connection failed, retrying...', __FILE__, __LINE__, __METHOD__, 10);
+			if ( is_soap_fault( $result ) && ( $result->faultstring == 'Could not connect to host' || $result->faultstring == 'Error Fetching http headers' || $result->faultstring == 'Failed Sending HTTP SOAP request' ) ) {
+				Debug::Text( 'SOAP connection failed, retrying...', __FILE__, __LINE__, __METHOD__, 10 );
 				sleep( 2 );
 				$retry_count++;
 			} else {
@@ -83,7 +83,7 @@ class TTSoapClient extends SoapClient {
  * @package Modules\SOAP
  */
 class TimeTrexSoapClient {
-	var $soap_client_obj = NULL;
+	var $soap_client_obj = null;
 
 	/**
 	 * TimeTrexSoapClient constructor.
@@ -91,33 +91,33 @@ class TimeTrexSoapClient {
 	function __construct() {
 		$this->getSoapObject();
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return null|TTSoapClient
 	 */
 	function getSoapObject() {
-		if ( $this->soap_client_obj == NULL ) {
-			if ( function_exists('openssl_encrypt') ) {
+		if ( $this->soap_client_obj == null ) {
+			if ( function_exists( 'openssl_encrypt' ) ) {
 				$location = 'https://';
 			} else {
 				$location = 'http://';
 			}
 			$location .= 'www.timetrex.com/ext_soap/server.php';
 
-			$this->soap_client_obj = new TTSoapClient(NULL, array(
-											'location' => $location,
-											'uri' => 'urn:test',
-											'style' => SOAP_RPC,
-											'use' => SOAP_ENCODED,
-											'encoding' => 'UTF-8',
-											'connection_timeout' => 30,
-											'keep_alive' => FALSE, //This should help prevent "Error fetching HTTP headers" or "errno=10054 An existing connection was forcibly closed by the remote host." SOAP errors.
-											'trace' => 1,
-											'exceptions' => 0
-											)
-									);
+			$this->soap_client_obj = new TTSoapClient( null, [
+																   'location'           => $location,
+																   'uri'                => 'urn:test',
+																   'style'              => SOAP_RPC,
+																   'use'                => SOAP_ENCODED,
+																   'encoding'           => 'UTF-8',
+																   'connection_timeout' => 30,
+																   'keep_alive'         => false, //This should help prevent "Error fetching HTTP headers" or "errno=10054 An existing connection was forcibly closed by the remote host." SOAP errors.
+																   'trace'              => 1,
+																   'exceptions'         => 0,
+														   ]
+			);
 		}
 
 		return $this->soap_client_obj;
@@ -134,7 +134,7 @@ class TimeTrexSoapClient {
 			return $this->getSoapObject()->convertDocument( $data, $format, $company_data );
 		}
 
-		return NULL; //Return NULL when no data available, and FALSE to try again later.
+		return null; //Return NULL when no data available, and FALSE to try again later.
 	}
 
 	/**
@@ -148,14 +148,14 @@ class TimeTrexSoapClient {
 			return $this->getSoapObject()->parseResume( $resume_data, $file_name, $company_data );
 		}
 
-		return NULL; //Return NULL when no data available, and FALSE to try again later.
+		return null; //Return NULL when no data available, and FALSE to try again later.
 	}
 
 
 	function printSoapDebug() {
 		echo "<pre>\n";
-		echo "Request :\n".htmlspecialchars($this->getSoapObject()->__getLastRequest()) ."\n";
-		echo "Response :\n".htmlspecialchars($this->getSoapObject()->__getLastResponse()) ."\n";
+		echo "Request :\n" . htmlspecialchars( $this->getSoapObject()->__getLastRequest() ) . "\n";
+		echo "Response :\n" . htmlspecialchars( $this->getSoapObject()->__getLastResponse() ) . "\n";
 		echo "</pre>\n";
 	}
 
@@ -171,18 +171,18 @@ class TimeTrexSoapClient {
 	 */
 	function isUpdateNotifyEnabled() {
 		global $config_vars;
-		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL AND DEPLOYMENT_ON_DEMAND == TRUE AND isset( $config_vars['other']['enable_update_notify'] ) AND $config_vars['other']['enable_update_notify'] == FALSE ) {
-			return FALSE; //Disabled with On-Demand service.
+		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL && DEPLOYMENT_ON_DEMAND == true && isset( $config_vars['other']['enable_update_notify'] ) && $config_vars['other']['enable_update_notify'] == false ) {
+			return false; //Disabled with On-Demand service.
 		}
 
 		if ( getTTProductEdition() == 10 ) {
 			$value = SystemSettingFactory::getSystemSettingValueByKey( 'update_notify' );
 			if ( $value == 0 ) {
-				return FALSE;
+				return false;
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -193,13 +193,13 @@ class TimeTrexSoapClient {
 
 		//Make sure a database connection has been established at least, otherwise this can cause FATAL error
 		//which during installation (before any database exists) is bad.
-		if ( isset($db) AND is_object($db) ) {
+		if ( isset( $db ) && is_object( $db ) ) {
 			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 
-			if ( !isset( $config_vars['other']['primary_company_id'] ) OR ( isset( $config_vars['other']['primary_company_id'] ) AND TTUUID::isUUID( $config_vars['other']['primary_company_id'] ) == FALSE ) ) {
+			if ( !isset( $config_vars['other']['primary_company_id'] ) || ( isset( $config_vars['other']['primary_company_id'] ) && TTUUID::isUUID( $config_vars['other']['primary_company_id'] ) == false ) ) {
 				//Find the first created company that is still active.
-				Debug::Text('WARNING: Primary company is not defined in .ini file, attempting to guess...', __FILE__, __LINE__, __METHOD__, 10);
-				$clf->getAll( 1, NULL, array( 'status_id' => '= 10' ), array( 'created_date' => 'asc' ) ); //Limit 1
+				Debug::Text( 'WARNING: Primary company is not defined in .ini file, attempting to guess...', __FILE__, __LINE__, __METHOD__, 10 );
+				$clf->getAll( 1, null, [ 'status_id' => '= 10' ], [ 'created_date' => 'asc' ] ); //Limit 1
 				if ( $clf->getRecordCount() == 1 ) {
 					$config_vars['other']['primary_company_id'] = $clf->getCurrent()->getId();
 				}
@@ -208,36 +208,36 @@ class TimeTrexSoapClient {
 			try {
 				$clf->getById( $config_vars['other']['primary_company_id'] );
 				if ( $clf->getRecordCount() > 0 ) {
-																																																			$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; @$obj = new $obj_class; $hardware_id = $obj->getHardwareID(); unset($obj, $obj_class);
-					foreach( $clf as $c_obj ) {
-						$company_data = array(
-												'system_version' => APPLICATION_VERSION,
-												'application_version_date' => APPLICATION_VERSION_DATE,
-												'registration_key' => $this->getLocalRegistrationKey(),
-												'hardware_id' => $hardware_id,
-												'product_edition_id' => $c_obj->getProductEdition(),
-												'product_edition_available' => getTTProductEdition(),
-												'name' => $c_obj->getName(),
-												'short_name' => $c_obj->getShortName(),
-												'work_phone' => $c_obj->getWorkPhone(),
-												'city' => $c_obj->getCity(),
-												'country' => $c_obj->getCountry(),
-												'province' => $c_obj->getProvince(),
-												'postal_code' => $c_obj->getPostalCode(),
-											);
+																																																																											/* @formatter:off */ $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; @$obj = new $obj_class; $hardware_id = $obj->getHardwareID(); unset( $obj, $obj_class ); /* @formatter:on*/
+					foreach ( $clf as $c_obj ) {
+						$company_data = [
+								'system_version'            => APPLICATION_VERSION,
+								'application_version_date'  => APPLICATION_VERSION_DATE,
+								'registration_key'          => $this->getLocalRegistrationKey(),
+								'hardware_id'               => $hardware_id,
+								'product_edition_id'        => $c_obj->getProductEdition(),
+								'product_edition_available' => getTTProductEdition(),
+								'name'                      => $c_obj->getName(),
+								'short_name'                => $c_obj->getShortName(),
+								'work_phone'                => $c_obj->getWorkPhone(),
+								'city'                      => $c_obj->getCity(),
+								'country'                   => $c_obj->getCountry(),
+								'province'                  => $c_obj->getProvince(),
+								'postal_code'               => $c_obj->getPostalCode(),
+						];
 					}
 
 					return $company_data;
 				} else {
-					Debug::Text('ERROR: Primary company does not exist: '. $config_vars['other']['primary_company_id'], __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'ERROR: Primary company does not exist: ' . $config_vars['other']['primary_company_id'], __FILE__, __LINE__, __METHOD__, 10 );
 				}
-			} catch( Exception $e ) {
-				unset($e); //code standards
-				Debug::Text('ERROR: Cant get company data for downloading upgrade file, database is likely down...', __FILE__, __LINE__, __METHOD__, 10);
+			} catch ( Exception $e ) {
+				unset( $e ); //code standards
+				Debug::Text( 'ERROR: Cant get company data for downloading upgrade file, database is likely down...', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -246,17 +246,18 @@ class TimeTrexSoapClient {
 	 */
 	function isLatestVersion( $company_id ) {
 		$version = SystemSettingFactory::getSystemSettingValueByKey( 'system_version' );
-		if ( $version !== FALSE ) {
+		if ( $version !== false ) {
 			$retval = $this->getSoapObject()->isLatestVersion( $this->getLocalRegistrationKey(), $company_id, $version, getTTProductEdition() );
-			if ( is_object( $retval ) AND get_class( $retval ) == 'SoapFault' ) {
-				Debug::Arr($retval, 'ERROR: Cant check for latest version, SOAP connection failed!', __FILE__, __LINE__, __METHOD__, 10);
+			if ( is_object( $retval ) && get_class( $retval ) == 'SoapFault' ) {
+				Debug::Arr( $retval, 'ERROR: Cant check for latest version, SOAP connection failed!', __FILE__, __LINE__, __METHOD__, 10 );
 			} else {
 				Debug::Text( ' Current Version: ' . $version . ' Retval: ' . (int)$retval, __FILE__, __LINE__, __METHOD__, 10 );
+
 				return $retval;
 			}
 		}
 
-		return TRUE; //Default to TRUE (already running latest version) in the event that something goes wrong.
+		return true; //Default to TRUE (already running latest version) in the event that something goes wrong.
 	}
 
 	/**
@@ -264,12 +265,12 @@ class TimeTrexSoapClient {
 	 * @return bool
 	 */
 	function isValidRegistrationKey( $key ) {
-		$key = trim($key);
-		if ( strlen( $key ) == 32 OR strlen( $key ) == 40 ) {
-			return TRUE;
+		$key = trim( $key );
+		if ( strlen( $key ) == 32 || strlen( $key ) == 40 ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -279,9 +280,10 @@ class TimeTrexSoapClient {
 		$key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
 
 		//If key is invalid, attempt to obtain a new one.
-		if ( $this->isValidRegistrationKey( $key ) == FALSE ) {
+		if ( $this->isValidRegistrationKey( $key ) == false ) {
 			$this->saveRegistrationKey();
-			return FALSE;
+
+			return false;
 		}
 
 		return $key;
@@ -299,47 +301,47 @@ class TimeTrexSoapClient {
 	 */
 	function saveRegistrationKey() {
 		$sslf = TTnew( 'SystemSettingListFactory' ); /** @var SystemSettingListFactory $sslf */
-		$sslf->getByName('registration_key');
+		$sslf->getByName( 'registration_key' );
 
-		$get_new_key = FALSE;
+		$get_new_key = false;
 		if ( $sslf->getRecordCount() > 1 ) {
-			Debug::Text('Too many registration keys, removing them...', __FILE__, __LINE__, __METHOD__, 10);
-			foreach( $sslf as $ss_obj ) {
+			Debug::Text( 'Too many registration keys, removing them...', __FILE__, __LINE__, __METHOD__, 10 );
+			foreach ( $sslf as $ss_obj ) {
 				$ss_obj->Delete();
 			}
-			$get_new_key = TRUE;
-		} elseif ( $sslf->getRecordCount() == 1 ) {
+			$get_new_key = true;
+		} else if ( $sslf->getRecordCount() == 1 ) {
 			$key = $sslf->getCurrent()->getValue();
-			if ( $this->isValidRegistrationKey( $key ) == FALSE ) {
-				foreach( $sslf as $ss_obj ) {
+			if ( $this->isValidRegistrationKey( $key ) == false ) {
+				foreach ( $sslf as $ss_obj ) {
 					$ss_obj->Delete();
 				}
-				$get_new_key = TRUE;
+				$get_new_key = true;
 			}
 		}
 
-		if ( $get_new_key == TRUE OR $sslf->getRecordCount() == 0 ) {
+		if ( $get_new_key == true || $sslf->getRecordCount() == 0 ) {
 			//Get registration key from TimeTrex server.
 			$key = trim( $this->getRegistrationKey() );
-			Debug::Text('Registration Key from server: '. $key, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'Registration Key from server: ' . $key, __FILE__, __LINE__, __METHOD__, 10 );
 
-			if ( $this->isValidRegistrationKey( $key ) == FALSE ) {
-				$key = md5( uniqid( NULL, TRUE ) );
-				Debug::Text('Failed getting registration key from server...', __FILE__, __LINE__, __METHOD__, 10);
+			if ( $this->isValidRegistrationKey( $key ) == false ) {
+				$key = md5( uniqid( null, true ) );
+				Debug::Text( 'Failed getting registration key from server...', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 
-			$sslf->setName('registration_key');
+			$sslf->setName( 'registration_key' );
 			$sslf->setValue( $key );
-			if ( $sslf->isValid() == TRUE ) {
+			if ( $sslf->isValid() == true ) {
 				$sslf->Save();
 			}
 
-			return TRUE;
+			return true;
 		} else {
-			Debug::Text('Registration key is valid, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'Registration key is valid, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -347,10 +349,10 @@ class TimeTrexSoapClient {
 	 * @return bool
 	 */
 	function sendCompanyVersionData( $company_id ) {
-		Debug::Text('Sending Company Version Data...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Sending Company Version Data...', __FILE__, __LINE__, __METHOD__, 10 );
 		$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 
-		$tt_version_data = array();
+		$tt_version_data = [];
 		$tt_version_data['registration_key'] = $this->getLocalRegistrationKey();
 		$tt_version_data['company_id'] = $company_id;
 
@@ -363,43 +365,44 @@ class TimeTrexSoapClient {
 		$tt_version_data['schema_version']['D'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_D' );
 		$tt_version_data['schema_version']['T'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_T' );
 
-		if ( isset($_SERVER['SERVER_SOFTWARE']) ) {
+		if ( isset( $_SERVER['SERVER_SOFTWARE'] ) ) {
 			$server_software = $_SERVER['SERVER_SOFTWARE'];
 		} else {
 			$server_software = 'N/A';
 		}
-		$server_name = Misc::getHostName( TRUE );
+		$server_name = Misc::getHostName( true );
 
 		$db_server_info = $cf->db->ServerInfo();
-		$sys_version_data = array(
-							'php_version' => phpversion(),
-							'zend_version' => zend_version(),
-							'web_server' => $server_software,
-							'database_type' => $cf->db->databaseType,
-							'database_version' => $db_server_info['version'],
-							'database_description' => $db_server_info['description'],
-							'server_name' => $server_name,
-							'base_url' => Environment::getBaseURL(),
-							'php_os' => PHP_OS,
-							'system_information' => php_uname()
-							);
+		$sys_version_data = [
+				'php_version'          => phpversion(),
+				'zend_version'         => zend_version(),
+				'web_server'           => $server_software,
+				'database_type'        => $cf->db->databaseType,
+				'database_version'     => $db_server_info['version'],
+				'database_description' => $db_server_info['description'],
+				'server_name'          => $server_name,
+				'base_url'             => Environment::getBaseURL(),
+				'php_os'               => PHP_OS,
+				'system_information'   => php_uname(),
+		];
 
-		$version_data = array_merge( $tt_version_data, $sys_version_data);
+		$version_data = array_merge( $tt_version_data, $sys_version_data );
 
-		if ( isset($version_data) AND is_array( $version_data) ) {
-			Debug::Text('Sent Company Version Data!', __FILE__, __LINE__, __METHOD__, 10);
+		if ( isset( $version_data ) && is_array( $version_data ) ) {
+			Debug::Text( 'Sent Company Version Data!', __FILE__, __LINE__, __METHOD__, 10 );
 			$retval = $this->getSoapObject()->saveCompanyVersionData( $version_data );
 
-			if ( $retval == FALSE ) {
-				Debug::Text('Server failed saving data!', __FILE__, __LINE__, __METHOD__, 10);
+			if ( $retval == false ) {
+				Debug::Text( 'Server failed saving data!', __FILE__, __LINE__, __METHOD__, 10 );
 			}
+
 			//$this->printSoapDebug();
 
 			return $retval;
 		}
-		Debug::Text('NOT Sending Company Version Data!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'NOT Sending Company Version Data!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -409,35 +412,35 @@ class TimeTrexSoapClient {
 	function sendCompanyUserCountData( $company_id ) {
 		$cuclf = TTnew( 'CompanyUserCountListFactory' ); /** @var CompanyUserCountListFactory $cuclf */
 		$cuclf->getActiveUsers();
-		$user_counts = array();
+		$user_counts = [];
 		if ( $cuclf->getRecordCount() > 0 ) {
-			foreach( $cuclf as $cuc_obj ) {
-				$user_counts[$cuc_obj->getColumn('company_id')]['active'] = $cuc_obj->getColumn('total');
+			foreach ( $cuclf as $cuc_obj ) {
+				$user_counts[$cuc_obj->getColumn( 'company_id' )]['active'] = $cuc_obj->getColumn( 'total' );
 			}
 		}
 
 		$cuclf->getInActiveUsers();
 		if ( $cuclf->getRecordCount() > 0 ) {
-			foreach( $cuclf as $cuc_obj ) {
-				$user_counts[$cuc_obj->getColumn('company_id')]['inactive'] = $cuc_obj->getColumn('total');
+			foreach ( $cuclf as $cuc_obj ) {
+				$user_counts[$cuc_obj->getColumn( 'company_id' )]['inactive'] = $cuc_obj->getColumn( 'total' );
 			}
 		}
 
 		$cuclf->getDeletedUsers();
 		if ( $cuclf->getRecordCount() > 0 ) {
-			foreach( $cuclf as $cuc_obj ) {
-				$user_counts[$cuc_obj->getColumn('company_id')]['deleted'] = $cuc_obj->getColumn('total');
+			foreach ( $cuclf as $cuc_obj ) {
+				$user_counts[$cuc_obj->getColumn( 'company_id' )]['deleted'] = $cuc_obj->getColumn( 'total' );
 			}
 		}
 
-		if ( isset($user_counts[$company_id]) ) {
+		if ( isset( $user_counts[$company_id] ) ) {
 			$user_counts[$company_id]['registration_key'] = $this->getLocalRegistrationKey();
 			$user_counts[$company_id]['company_id'] = $company_id;
 
 			return $this->getSoapObject()->saveCompanyUserCountData( $user_counts[$company_id] );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -446,39 +449,38 @@ class TimeTrexSoapClient {
 	 */
 	function sendCompanyUserLocationData( $company_id ) {
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getById( $company_id );
 		if ( $clf->getRecordCount() > 0 ) {
 
-			$location_data = array();
+			$location_data = [];
 			$location_data['registration_key'] = $this->getLocalRegistrationKey();
 			$location_data['company_id'] = $company_id;
 
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getByCompanyId( $company_id );
 			if ( $ulf->getRecordCount() > 0 ) {
-				foreach( $ulf as $u_obj ) {
+				foreach ( $ulf as $u_obj ) {
 
-					$key = str_replace(' ', '', strtolower( $u_obj->getCity().$u_obj->getCity().$u_obj->getCountry() ) );
+					$key = str_replace( ' ', '', strtolower( $u_obj->getCity() . $u_obj->getCity() . $u_obj->getCountry() ) );
 
-					$location_data['location_data'][$key] = array(
-														'city' => $u_obj->getCity(),
-														'province' => $u_obj->getProvince(),
-														'country' => $u_obj->getCountry()
-															);
+					$location_data['location_data'][$key] = [
+							'city'     => $u_obj->getCity(),
+							'province' => $u_obj->getProvince(),
+							'country'  => $u_obj->getCountry(),
+					];
 				}
 
-				if ( isset($location_data['location_data']) ) {
+				if ( isset( $location_data['location_data'] ) ) {
 					return $this->getSoapObject()->saveCompanyUserLocationData( $location_data );
 				}
 			}
-
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -486,23 +488,23 @@ class TimeTrexSoapClient {
 	 * @param bool $force
 	 * @return bool
 	 */
-	function sendCompanyData( $company_id, $force = FALSE ) {
-		Debug::Text('Sending Company Data...', __FILE__, __LINE__, __METHOD__, 10);
+	function sendCompanyData( $company_id, $force = false ) {
+		Debug::Text( 'Sending Company Data...', __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		//Check for anonymous update notifications
 		$anonymous_update_notify = 0;
-		if ( $force == FALSE OR getTTProductEdition() == 10 ) {
+		if ( $force == false || getTTProductEdition() == 10 ) {
 			$anonymous_update_notify = (int)SystemSettingFactory::getSystemSettingValueByKey( 'anonymous_update_notify' );
 		}
-																																																			$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; @$obj = new $obj_class; $hardware_id = $obj->getHardwareID(); unset($obj, $obj_class);
+																																																																						/* @formatter:off */ $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; @$obj = new $obj_class; $hardware_id = $obj->getHardwareID(); unset($obj, $obj_class); /* @formatter:on */
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getById( $company_id );
 		$company_data = array();
 		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
+			foreach ( $clf as $c_obj ) {
 				$company_data['id'] = $c_obj->getId();
 				$company_data['production'] = PRODUCTION;
 				$company_data['registration_key'] = $this->getLocalRegistrationKey();
@@ -533,7 +535,7 @@ class TimeTrexSoapClient {
 							} else {
 								$email = $u_obj->getHomeEmail();
 							}
-							$company_data['billing_contact'] = '"'.$u_obj->getFullName().'" <'. $email .'>';
+							$company_data['billing_contact'] = '"' . $u_obj->getFullName() . '" <' . $email . '>';
 						}
 					}
 					if ( $c_obj->getAdminContact() != '' ) {
@@ -545,7 +547,7 @@ class TimeTrexSoapClient {
 							} else {
 								$email = $u_obj->getHomeEmail();
 							}
-							$company_data['admin_contact'] = '"'.$u_obj->getFullName().'" <'. $email .'>';
+							$company_data['admin_contact'] = '"' . $u_obj->getFullName() . '" <' . $email . '>';
 						}
 					}
 					if ( $c_obj->getSupportContact() != '' ) {
@@ -557,13 +559,13 @@ class TimeTrexSoapClient {
 							} else {
 								$email = $u_obj->getHomeEmail();
 							}
-							$company_data['support_contact'] = '"'.$u_obj->getFullName().'" <'. $email .'>';
+							$company_data['support_contact'] = '"' . $u_obj->getFullName() . '" <' . $email . '>';
 						}
 					}
 
-					$logo_file = $c_obj->getLogoFileName( $c_obj->getId(), FALSE ); //Ignore default logo
-					if ( $logo_file != '' AND file_exists( $logo_file ) ) {
-						$company_data['logo'] = array('file_name' => $logo_file, 'data' => base64_encode( file_get_contents($logo_file) ) );
+					$logo_file = $c_obj->getLogoFileName( $c_obj->getId(), false ); //Ignore default logo
+					if ( $logo_file != '' && file_exists( $logo_file ) ) {
+						$company_data['logo'] = array('file_name' => $logo_file, 'data' => base64_encode( file_get_contents( $logo_file ) ));
 					}
 				}
 
@@ -573,59 +575,59 @@ class TimeTrexSoapClient {
 				$company_data['postal_code'] = $c_obj->getPostalCode();
 
 				//Get Last user login date.
-				$ulf = TTnew('UserListFactory'); /** @var UserListFactory $ulf */
-				$ulf->getByCompanyId( $company_id, 1, NULL, array( 'last_login_date' => 'is not null' ), array( 'last_login_date' => 'desc' ) );
+				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+				$ulf->getByCompanyId( $company_id, 1, null, array('last_login_date' => 'is not null'), array('last_login_date' => 'desc') );
 				if ( $ulf->getRecordCount() == 1 ) {
 					$company_data['last_login_date'] = $ulf->getCurrent()->getLastLoginDate();
 				}
 				//Get Last Punch Date (before today). Use PunchControl table only as its much faster.
-				$plf = TTnew('PunchControlListFactory'); /** @var PunchControlListFactory $plf */
-				$plf->getByCompanyId( $company_id, 1, NULL, array( array('date_stamp' => ">= '". $plf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'date_stamp' => "<= '". $plf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'date_stamp' => 'desc' ) );
+				$plf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $plf */
+				$plf->getByCompanyId( $company_id, 1, null, array(array('date_stamp' => ">= '" . $plf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - ( 86400 * 30 ) ) ) . "'"), array('date_stamp' => "<= '" . $plf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) ) . "'")), array('date_stamp' => 'desc') );
 				if ( $plf->getRecordCount() == 1 ) {
 					$company_data['last_punch_date'] = $plf->getCurrent()->getDateStamp();
 				}
 				//Get Last Schedule Date (before today)
-				$slf = TTnew('ScheduleListFactory'); /** @var ScheduleListFactory $slf */
-				$slf->getByCompanyId( $company_id, 1, NULL, array( array('date_stamp' => ">= '". $slf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'date_stamp' => "<= '". $slf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'date_stamp' => 'desc' ) );
+				$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
+				$slf->getByCompanyId( $company_id, 1, null, array(array('date_stamp' => ">= '" . $slf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - ( 86400 * 30 ) ) ) . "'"), array('date_stamp' => "<= '" . $slf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) ) . "'")), array('date_stamp' => 'desc') );
 				if ( $slf->getRecordCount() == 1 ) {
 					$company_data['last_schedule_date'] = $slf->getCurrent()->getStartTime();
 				}
 				//Get Last Pay Stub Date (before today)
-				$pslf = TTnew('PayStubListFactory'); /** @var PayStubListFactory $pslf */
-				$pslf->getByCompanyId( $company_id, 1, NULL, array( array('a.start_date' => ">= '". $pslf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'a.start_date' => "<= '". $pslf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'a.start_date' => 'desc' ) );
+				$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
+				$pslf->getByCompanyId( $company_id, 1, null, array(array('a.start_date' => ">= '" . $pslf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - ( 86400 * 30 ) ) ) . "'"), array('a.start_date' => "<= '" . $pslf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) ) . "'")), array('a.start_date' => 'desc') );
 				if ( $pslf->getRecordCount() == 1 ) {
 					$company_data['last_pay_stub_date'] = $pslf->getCurrent()->getEndDate();
 				}
 				//Get Last Review Date (before today)
-				$rclf = TTnew('UserReviewControlListFactory'); /** @var UserReviewControlListFactory $rclf */
-				$rclf->getByCompanyId( $company_id, 1, NULL, array( array('a.created_date' => ">= ". TTDate::getBeginDayEpoch( time() - (86400 * 30) ) ) , array( 'a.created_date' => "<= ". TTDate::getEndDayEpoch( time() )  ) ), array( 'a.created_date' => 'desc' ) );
+				$rclf = TTnew( 'UserReviewControlListFactory' ); /** @var UserReviewControlListFactory $rclf */
+				$rclf->getByCompanyId( $company_id, 1, null, array(array('a.created_date' => ">= " . TTDate::getBeginDayEpoch( time() - ( 86400 * 30 ) )), array('a.created_date' => "<= " . TTDate::getEndDayEpoch( time() ))), array('a.created_date' => 'desc') );
 				if ( $rclf->getRecordCount() == 1 ) {
 					$company_data['last_user_review_date'] = $rclf->getCurrent()->getCreatedDate();
 				}
 
-				Debug::Text('Sent Company Data...', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'Sent Company Data...', __FILE__, __LINE__, __METHOD__, 10 );
 				$retval = $this->getSoapObject()->saveCompanyData( $company_data );
 				//$this->printSoapDebug();
 
-				if ( is_array($retval) ) {
-					foreach( $retval as $command => $command_data ) { //Must be v7.3.x or higher.
-						Debug::Text('Running Command: '. $command, __FILE__, __LINE__, __METHOD__, 10);
-						switch( strtolower($command) ) {
+				if ( is_array( $retval ) ) {
+					foreach ( $retval as $command => $command_data ) { //Must be v7.3.x or higher.
+						Debug::Text( 'Running Command: ' . $command, __FILE__, __LINE__, __METHOD__, 10 );
+						switch ( strtolower( $command ) ) {
 							case 'system_settings':
-								if ( is_array($command_data) ) {
-									foreach( $command_data as $name => $value ) {
-										Debug::Text('Defining System Setting: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+								if ( is_array( $command_data ) ) {
+									foreach ( $command_data as $name => $value ) {
+										Debug::Text( 'Defining System Setting: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 										SystemSettingFactory::setSystemSetting( $name, $value );
 									}
-									unset($name, $value);
+									unset( $name, $value );
 								}
 								break;
 							case 'config_file':
-								if ( is_array($command_data) ) {
-									Debug::Arr( $command_data, 'Defining Config File Settings: ', __FILE__, __LINE__, __METHOD__, 10);
+								if ( is_array( $command_data ) ) {
+									Debug::Arr( $command_data, 'Defining Config File Settings: ', __FILE__, __LINE__, __METHOD__, 10 );
 									$install_obj = new Install();
 									$install_obj->writeConfigFile( $command_data );
-									unset($install_obj);
+									unset( $install_obj );
 								}
 								break;
 							default:
@@ -633,14 +635,14 @@ class TimeTrexSoapClient {
 						}
 					}
 
-					return TRUE;
+					return true;
 				} else {
 					return $retval;
 				}
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -651,7 +653,7 @@ class TimeTrexSoapClient {
 	 * @param string $company_id UUID
 	 * @param $currency_arr
 	 * @param $base_currency
-	 * @return bool
+	 * @return array|bool
 	 */
 	function getCurrencyExchangeRates( $company_id, $currency_arr, $base_currency ) {
 		/*
@@ -660,24 +662,23 @@ class TimeTrexSoapClient {
 
 		*/
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( !is_array($currency_arr) ) {
-			return FALSE;
+		if ( !is_array( $currency_arr ) ) {
+			return false;
 		}
 
 		if ( $base_currency == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$currency_rates = $this->getSoapObject()->getCurrencyExchangeRates( $this->getLocalRegistrationKey(), $company_id, $currency_arr, $base_currency );
-
-		if ( isset($currency_rates) AND is_array($currency_rates) AND count($currency_rates) > 0 ) {
+		if ( isset( $currency_rates ) && is_array( $currency_rates ) && count( $currency_rates ) > 0 ) {
 			return $currency_rates;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -688,22 +689,22 @@ class TimeTrexSoapClient {
 	 * @param int $end_date EPOCH
 	 * @return bool|array
 	 */
-	function getCurrencyExchangeRatesByDate( $company_id, $currency_arr, $base_currency, $start_date = NULL, $end_date = NULL ) {
+	function getCurrencyExchangeRatesByDate( $company_id, $currency_arr, $base_currency, $start_date = null, $end_date = null ) {
 		/*
 
 			Contact info@timetrex.com to request adding custom currency data feeds.
 
 		*/
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( !is_array($currency_arr) ) {
-			return FALSE;
+		if ( !is_array( $currency_arr ) ) {
+			return false;
 		}
 
 		if ( $base_currency == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
@@ -716,45 +717,46 @@ class TimeTrexSoapClient {
 
 		$currency_rates = $this->getSoapObject()->getCurrencyExchangeRatesByDate( $this->getLocalRegistrationKey(), $company_id, $currency_arr, $base_currency, $start_date, $end_date );
 
-		if ( isset($currency_rates) AND is_array($currency_rates) AND count($currency_rates) > 0 ) {
+		if ( isset( $currency_rates ) && is_array( $currency_rates ) && count( $currency_rates ) > 0 ) {
 			return $currency_rates;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param bool $force
 	 * @return bool
 	 */
-	function isNewVersionReadyForUpgrade( $force = FALSE ) {
+	function isNewVersionReadyForUpgrade( $force = false ) {
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) ) {
 			$company_data['force'] = $force;
 
 			$retval = $this->getSoapObject()->isNewVersionReadyForUpgrade( $company_data );
-			Debug::Arr( array( $company_data, $retval ), 'Checking for new version based on this data: ', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Arr( array($company_data, $retval), 'Checking for new version based on this data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $retval;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param bool $force
 	 * @return bool
 	 */
-	function getUpgradeFileURL( $force = FALSE ) {
+	function getUpgradeFileURL( $force = false ) {
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) ) {
 			$company_data['force'] = $force;
 
 			$retval = $this->getSoapObject()->getUpgradeFileURL( $company_data );
+
 			return $retval;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -767,11 +769,11 @@ class TimeTrexSoapClient {
 	 */
 	function validateEmail( $email ) {
 		$company_data = $this->getPrimaryCompanyData();
-		if ( is_array( $company_data ) AND $email != '' ) {
+		if ( is_array( $company_data ) && $email != '' ) {
 			return $this->getSoapObject()->validateEmail( $email, $company_data );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -782,16 +784,17 @@ class TimeTrexSoapClient {
 	 */
 	function sendEmail( $to, $headers, $body ) {
 		$company_data = $this->getPrimaryCompanyData();
-		if ( is_array( $company_data ) AND $to != '' AND $body != '' ) {
+		if ( is_array( $company_data ) && $to != '' && $body != '' ) {
 			$retval = $this->getSoapObject()->sendEmail( $to, $headers, $body, $company_data );
 			if ( $retval === 'unsubscribe' ) {
 				UserFactory::UnsubscribeEmail( $to );
-				$retval = FALSE;
+				$retval = false;
 			}
+
 			return $retval;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -809,11 +812,11 @@ class TimeTrexSoapClient {
 	 */
 	function getGeoCodeByAddress( $address1, $address2, $city, $province, $country, $postal_code ) {
 		$company_data = $this->getPrimaryCompanyData();
-		if ( is_array( $company_data ) AND $city != '' AND $country != '' ) {
+		if ( is_array( $company_data ) && $city != '' && $country != '' ) {
 			return $this->getSoapObject()->getGeoCodeByAddress( $address1, $address2, $city, $province, $country, $postal_code, $company_data );
 		}
 
-		return NULL; //Return NULL when no data available, and FALSE to try again later.
+		return null; //Return NULL when no data available, and FALSE to try again later.
 	}
 
 	/**
@@ -822,11 +825,11 @@ class TimeTrexSoapClient {
 	 */
 	function getGeoIPData( $ip_address ) {
 		$company_data = $this->getPrimaryCompanyData();
-		if ( is_array( $company_data ) AND $ip_address != '' ) {
+		if ( is_array( $company_data ) && $ip_address != '' ) {
 			return $this->getSoapObject()->getGeoIPData( $ip_address, $company_data );
 		}
 
-		return NULL; //Return NULL when no data available, and FALSE to try again later.
+		return null; //Return NULL when no data available, and FALSE to try again later.
 	}
 
 	/**
@@ -838,11 +841,13 @@ class TimeTrexSoapClient {
 	function sendUserFeedback( $rating, $message, $u_obj ) {
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) ) {
-			$user_data = array( 'company_id' => $u_obj->getCompany(), 'host_name' => Misc::getHostName( FALSE ), 'user_id' => $u_obj->getId(), 'permission_level' => $u_obj->getPermissionLevel(), 'company_name' => $u_obj->getCompanyObject()->getName(), 'full_name' => $u_obj->getFullName(), 'work_phone' => $u_obj->getWorkPhone(), 'work_email' => $u_obj->getWorkEmail(), 'home_email' => $u_obj->getHomeEmail(), 'user_ip_address' => Misc::getRemoteIPAddress(), 'user_agent' => ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : NULL ) );
+			$user_data = array('company_id' => $u_obj->getCompany(), 'host_name' => Misc::getHostName( false ), 'user_id' => $u_obj->getId(), 'permission_level' => $u_obj->getPermissionLevel(), 'company_name' => $u_obj->getCompanyObject()->getName(), 'full_name' => $u_obj->getFullName(), 'work_phone' => $u_obj->getWorkPhone(), 'work_email' => $u_obj->getWorkEmail(), 'home_email' => $u_obj->getHomeEmail(), 'user_ip_address' => Misc::getRemoteIPAddress(), 'user_agent' => ( isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : null ));
+
 			return $this->getSoapObject()->sendUserFeedback( $rating, $message, $user_data, $company_data );
 		}
 
-		return NULL; //Return NULL when no data available, and FALSE to try again later.
+		return null; //Return NULL when no data available, and FALSE to try again later.
 	}
 }
+
 ?>

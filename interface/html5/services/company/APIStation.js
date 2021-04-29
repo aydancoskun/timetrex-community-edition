@@ -59,5 +59,4 @@ var APIStation = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportStation', arguments );
 	},
 
-
 } );

@@ -41,44 +41,44 @@
 class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -90,34 +90,34 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByIDAndCompanyId( $id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByIDAndCompanyId( $id, $company_id, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $company_id == '') {
-			return FALSE;
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'id'         => TTUUID::castUUID( $id ),
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$uf = new UserFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as c
+					from	' . $this->getTable() . ' as a,
+							' . $uf->getTable() . ' as c
 					where	a.user_id = c.id
 						AND a.id = ?
 						AND c.company_id = ?
@@ -132,29 +132,29 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param string $id   UUID
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByCompanyId( $id, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$uf = new UserFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as c
+					from	' . $this->getTable() . ' as a,
+							' . $uf->getTable() . ' as c
 					where	a.user_id = c.id
 						AND c.company_id = ?
 						AND ( a.deleted = 0 AND c.deleted=0 )
@@ -170,30 +170,30 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $user_id UUID
 	 * @param int $date_stamp EPOCH
-	 * @param int $object_type_id
+	 * @param int|int[] $object_type_id
 	 * @param bool $override
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function deleteByUserIdAndDateStampAndObjectTypeAndOverrideAndMisMatchPunchControlDateStamp( $user_id, $date_stamp, $object_type_id, $override = FALSE) {
+	function deleteByUserIdAndDateStampAndObjectTypeAndOverrideAndMisMatchPunchControlDateStamp( $user_id, $date_stamp, $object_type_id, $override = false ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamp == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $object_type_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$pcf = new PunchControlFactory();
 
-		$ph = array(
-				'user_id' => TTUUID::castUUID($user_id),
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
 				'date_stamp' => $this->db->BindDate( $date_stamp ),
-				'override' => $this->toBool( $override ),
-		);
+				'override'   => $this->toBool( $override ),
+		];
 
 		//Don't check for JUST b.deleted = 0 because of the LEFT JOIN, it might be NULL too.
 		//There is a bug where sometimes a user_date_total row is orphaned with no punch_control rows that aren't deleted
@@ -202,27 +202,16 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		// Additionaly we ran into a case where a punch_control record got assigned to a different employee, so we need to be able to clean up that case too by checking a.user_id != b.user_id
 		//Ensures that all worked time entries that are map to a punch_control row that is marked as deleted
 		//will also be returned so they can be deleted.
-		if ( $this->getDatabaseType() === 'mysql' ) {
-			$query = '	DELETE a.*
-						FROM '. $this->getTable() .' as a
-						LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
-						WHERE
-						';
-		} else {
-			$query = '	DELETE 
-						FROM '. $this->getTable() .'
-						USING 	'. $this->getTable() .' as a
-						LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
-						WHERE	user_date_total.id = a.id
-							AND
-						';
-
-		}
-		$query .= '		a.user_id = ?
+		$query = '	DELETE 
+					FROM ' . $this->getTable() . '
+					USING 	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pcf->getTable() . ' as b ON a.punch_control_id = b.id
+					WHERE	user_date_total.id = a.id
+						AND a.user_id = ?
 						AND a.date_stamp = ?
 						AND
 							(
-								( a.override = ? AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .') )
+								( a.override = ? AND a.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ') )
 								OR
 								( b.id IS NOT NULL AND ( a.user_id != b.user_id OR a.date_stamp != b.date_stamp OR b.deleted = 1 ) )
 							)
@@ -237,38 +226,38 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 	/**
 	 * @param string $user_id UUID
-	 * @param int $object_type_id
-	 * @param null $absence_policy_id
-	 * @param null $limit
-	 * @param null $page
-	 * @param null $where
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int|int[] $object_type_id
+	 * @param string|string[] $absence_policy_id
+	 * @param int $limit      Limit the number of records returned
+	 * @param int $page       Page number of records to return for pagination
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 * @throws DBError
 	 */
-	function getLastByUserIdAndObjectTypeOrAbsencePolicy( $user_id, $object_type_id, $absence_policy_id = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	function getLastByUserIdAndObjectTypeOrAbsencePolicy( $user_id, $object_type_id, $absence_policy_id = null, $limit = null, $page = null, $where = null, $order = null ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'a.date_stamp' => 'desc', 'a.start_time_stamp' => 'desc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'a.date_stamp' => 'desc', 'a.start_time_stamp' => 'desc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-				'user_id' => TTUUID::castUUID($user_id),
+		$ph = [
+				'user_id' => TTUUID::castUUID( $user_id ),
 
-		);
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where a.user_id = ?
-						AND ( a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .') 
-							OR ( a.object_type_id in ( 25, 50 ) AND a.src_object_id in ('. $this->getListSQL( $absence_policy_id, $ph, 'uuid' ) .') ) )
+						AND ( a.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ') 
+							OR ( a.object_type_id in ( 25, 50 ) AND a.src_object_id in (' . $this->getListSQL( $absence_policy_id, $ph, 'uuid' ) . ') ) )
 						AND a.total_time != 0						
 						AND ( a.deleted = 0 )
 					';
@@ -276,46 +265,46 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
-		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $this;
 	}
 
 	/**
 	 * @param string $user_id UUID
-	 * @param int $object_type_id
-	 * @param $date_stamp
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int|int[] $object_type_id
+	 * @param int $date_stamp
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 * @throws DBError
 	 */
-	function getNextByUserIdAndObjectTypeAndEpoch( $user_id, $object_type_id, $date_stamp, $order = NULL ) {
+	function getNextByUserIdAndObjectTypeAndEpoch( $user_id, $object_type_id, $date_stamp, $order = null ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamp == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'a.date_stamp' => 'asc', 'a.start_time_stamp' => 'asc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'a.date_stamp' => 'asc', 'a.start_time_stamp' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-				'user_id' => TTUUID::castUUID($user_id),
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
 				'date_stamp' => $this->db->BindDate( $date_stamp ),
-		);
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where a.user_id = ?
 						AND a.date_stamp >= ?
-						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+						AND a.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 						AND a.total_time != 0
 						AND ( a.deleted = 0 )
 					';
@@ -323,7 +312,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
-		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $this;
 	}
@@ -331,47 +320,47 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $user_id UUID
 	 * @param int $date_stamp EPOCH
-	 * @param int $object_type_id
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int|int[] $object_type_id
+	 * @param int $limit      Limit the number of records returned
+	 * @param int $page       Page number of records to return for pagination
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByUserIdAndDateStampAndObjectType( $user_id, $date_stamp, $object_type_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getByUserIdAndDateStampAndObjectType( $user_id, $date_stamp, $object_type_id, $limit = null, $page = null, $where = null, $order = null ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamp == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'a.object_type_id' => 'asc', 'c.time_stamp' => 'asc', 'a.start_time_stamp' => 'asc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'a.object_type_id' => 'asc', 'c.time_stamp' => 'asc', 'a.start_time_stamp' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
 		$pcf = new PunchControlFactory();
 		$pf = new PunchFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'date_stamp' => $this->db->BindDate( $date_stamp ),
+		];
 
 		//Want to be able to see overridden or, just time added on its own?
 		//LEFT JOIN '. $pf->getTable() .' as c ON a.punch_control_id = c.punch_control_id AND c.status_id = 10
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
-					LEFT JOIN '. $pf->getTable() .' as c ON a.punch_control_id = c.punch_control_id AND ( c.status_id = 10 OR c.status_id IS NULL )
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pcf->getTable() . ' as b ON a.punch_control_id = b.id
+					LEFT JOIN ' . $pf->getTable() . ' as c ON a.punch_control_id = c.punch_control_id AND ( c.status_id = 10 OR c.status_id IS NULL )
 					where a.user_id = ?
 						AND a.date_stamp = ?
-						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+						AND a.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 						AND ( a.deleted = 0
 								AND ( b.deleted=0 OR b.deleted IS NULL )
 								AND ( c.deleted=0 OR c.deleted IS NULL ) )
@@ -384,49 +373,49 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $user_id UUID
-	 * @param int $date_stamp EPOCH
+	 * @param string $user_id          UUID
+	 * @param int $date_stamp          EPOCH
 	 * @param $object_type
 	 * @param string $punch_control_id UUID
 	 * @param bool $override
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $order             Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByUserIdAndDateStampAndObjectTypeAndPunchControlIdAndOverride( $user_id, $date_stamp, $object_type, $punch_control_id, $override = FALSE, $order = NULL) {
+	function getByUserIdAndDateStampAndObjectTypeAndPunchControlIdAndOverride( $user_id, $date_stamp, $object_type, $punch_control_id, $override = false, $order = null ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamp == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $object_type == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $punch_control_id == FALSE ) {
+		if ( $punch_control_id == false ) {
 			$punch_control_id = TTUUID::getZeroId();
 		}
 
-		if ( $order == NULL ) {
+		if ( $order == null ) {
 			//$order = array( 'c.time_stamp' => 'asc', 'a.start_time_stamp' => 'asc' );
-			$strict = FALSE;
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					'object_type' => $object_type,
-					'punch_control_id' => TTUUID::castUUID($punch_control_id),
-					'override' => $this->toBool( $override ),
-					);
+		$ph = [
+				'user_id'          => TTUUID::castUUID( $user_id ),
+				'date_stamp'       => $this->db->BindDate( $date_stamp ),
+				'object_type'      => $object_type,
+				'punch_control_id' => TTUUID::castUUID( $punch_control_id ),
+				'override'         => $this->toBool( $override ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp = ?
 						AND a.object_type_id = ?
@@ -442,45 +431,45 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $user_id UUID
-	 * @param int $date_stamp EPOCH
+	 * @param string $user_id     UUID
+	 * @param int $date_stamp     EPOCH
 	 * @param $object_type
 	 * @param string $pay_code_id UUID
 	 * @param bool $override
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $order        Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByUserIdAndDateStampAndObjectTypeAndPayCodeIdAndOverride( $user_id, $date_stamp, $object_type, $pay_code_id, $override = FALSE, $order = NULL) {
+	function getByUserIdAndDateStampAndObjectTypeAndPayCodeIdAndOverride( $user_id, $date_stamp, $object_type, $pay_code_id, $override = false, $order = null ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamp == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $object_type == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $order == NULL ) {
+		if ( $order == null ) {
 			//$order = array( 'c.time_stamp' => 'asc', 'a.start_time_stamp' => 'asc' );
-			$strict = FALSE;
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					'object_type' => (int)$object_type,
-					'pay_code_id' => TTUUID::castUUID($pay_code_id),
-					'override' => $this->toBool( $override ),
-					);
+		$ph = [
+				'user_id'     => TTUUID::castUUID( $user_id ),
+				'date_stamp'  => $this->db->BindDate( $date_stamp ),
+				'object_type' => (int)$object_type,
+				'pay_code_id' => TTUUID::castUUID( $pay_code_id ),
+				'override'    => $this->toBool( $override ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp = ?
 						AND a.object_type_id = ?
@@ -496,39 +485,39 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $user_id UUID
-	 * @param int $date_stamp EPOCH
-	 * @param int $old_date_stamp EPOCH
+	 * @param string $user_id          UUID
+	 * @param int $date_stamp          EPOCH
+	 * @param int $old_date_stamp      EPOCH
 	 * @param string $punch_control_id UUID
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByUserIdAndDateStampAndOldDateStampAndPunchControlId( $user_id, $date_stamp, $old_date_stamp, $punch_control_id) {
+	function getByUserIdAndDateStampAndOldDateStampAndPunchControlId( $user_id, $date_stamp, $old_date_stamp, $punch_control_id ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamp == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $punch_control_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( empty( $old_date_stamp ) ) {
 			$old_date_stamp = $date_stamp;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'date_stamp' => $this->db->BindDate( (int)$date_stamp ),
-					'old_date_stamp' => $this->db->BindDate( (int)$old_date_stamp ),
-					'punch_control_id' => TTUUID::castUUID($punch_control_id),
-					);
+		$ph = [
+				'user_id'          => TTUUID::castUUID( $user_id ),
+				'date_stamp'       => $this->db->BindDate( (int)$date_stamp ),
+				'old_date_stamp'   => $this->db->BindDate( (int)$old_date_stamp ),
+				'punch_control_id' => TTUUID::castUUID( $punch_control_id ),
+		];
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where user_id = ?
 						AND ( date_stamp = ? OR date_stamp = ? )
 						AND punch_control_id = ?
@@ -547,42 +536,42 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 */
 	function getTotalSumByUserIdAndDateStamp( $user_id, $date_stamp ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamp == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$apf = new AbsencePolicyFactory();
 		$pcf = new PunchControlFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'date_stamp' => $this->db->BindDate( $date_stamp ),
+		];
 
 		//Don't include total time row
 		//Include paid absences
 		//AND ( a.status_id in (20, 30) OR ( a.status_id = 10 AND a.type_id in ( 100, 110 ) ) )
 		$query = '
 					select	sum(a.total_time)
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
-					LEFT JOIN '. $apf->getTable() .' as c ON ( a.object_type_id = 50 AND a.pay_code_id = c.id )
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pcf->getTable() . ' as b ON a.punch_control_id = b.id
+					LEFT JOIN ' . $apf->getTable() . ' as c ON ( a.object_type_id = 50 AND a.pay_code_id = c.id )
 					where	a.user_id = ?
 						AND a.date_stamp = ?
 						AND a.object_type_id in (10, 50, 100, 110)
 						AND ( c.type_id IS NULL OR c.type_id in ( 10, 12 ) )
 						AND ( a.deleted = 0 AND (b.deleted=0 OR b.deleted is NULL) )
 				';
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 		//Debug::Arr( $ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ($total == '' ) {
+		if ( $total == '' ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
@@ -595,64 +584,64 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 */
 	function getTotalSumByUserIdAndDateStampAndObjectType( $user_id, $date_stamp, $object_type_id ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamp == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'date_stamp' => $this->db->BindDate( $date_stamp ),
+		];
 
 		//Don't include total time row, OR paid absences
 		$query = '
 					select	sum(total_time)
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	user_id = ?
 						AND date_stamp = ?
-						AND object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+						AND object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 						AND deleted = 0
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ( $total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
 
 	/**
-	 * @param string $user_id UUID
-	 * @param int $epoch EPOCH
+	 * @param string $user_id       UUID
+	 * @param int $epoch            EPOCH
 	 * @param int $week_start_epoch EPOCH
 	 * @return bool|int
 	 */
 	function getWeekRegularTimeSumByUserIDAndEpochAndStartWeekEpoch( $user_id, $epoch, $week_start_epoch ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $epoch == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $week_start_epoch == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$otpf = new OverTimePolicyFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'week_start_epoch' => $this->db->BindDate( $week_start_epoch ),
-					'epoch' => $this->db->BindDate( $epoch ),
-					);
+		$ph = [
+				'user_id'          => TTUUID::castUUID( $user_id ),
+				'week_start_epoch' => $this->db->BindDate( $week_start_epoch ),
+				'epoch'            => $this->db->BindDate( $epoch ),
+		];
 
 		//DO NOT Include paid absences. Only count regular time towards weekly overtime.
 		//And other weekly/bi-weekly overtime polices!
@@ -664,8 +653,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//AND a.absence_policy_id = 0
 		$query = '
 					select	sum(a.total_time)
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $otpf->getTable() .' as c ON ( a.object_type_id = 30 AND a.pay_code_id = c.id )
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $otpf->getTable() . ' as c ON ( a.object_type_id = 30 AND a.pay_code_id = c.id )
 					where
 						a.user_id = ?
 						AND a.date_stamp >= ?
@@ -676,47 +665,47 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							)
 						AND a.deleted = 0
 				';
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total .' Week Start: '. TTDate::getDate('DATE+TIME', $week_start_epoch ) .' End: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total . ' Week Start: ' . TTDate::getDate( 'DATE+TIME', $week_start_epoch ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
 
 	/**
 	 * Make sure we take into account auto-deduct/add meal/break policies.
-	 * @param string $user_id UUID
-	 * @param int $epoch EPOCH
+	 * @param string $user_id       UUID
+	 * @param int $epoch            EPOCH
 	 * @param int $week_start_epoch EPOCH
 	 * @return bool|int
 	 */
 	function getWeekWorkedTimeSumByUserIDAndEpochAndStartWeekEpoch( $user_id, $epoch, $week_start_epoch ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $epoch == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $week_start_epoch == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'week_start_epoch' => $this->db->BindDate( $week_start_epoch ),
-					'epoch' => $this->db->BindDate( $epoch ),
-					);
+		$ph = [
+				'user_id'          => TTUUID::castUUID( $user_id ),
+				'week_start_epoch' => $this->db->BindDate( $week_start_epoch ),
+				'epoch'            => $this->db->BindDate( $epoch ),
+		];
 
 		//a.status_id = 20 OR ( a.status_id = 10 AND a.type_id in ( 100, 110 ) )
 		//AND a.absence_policy_id = 0
 		$query = '
 					select	sum(a.total_time)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where
 						a.user_id = ?
 						AND a.date_stamp >= ?
@@ -724,11 +713,12 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.object_type_id in (10,100,110)
 						AND a.deleted = 0
 				';
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
+
 		//Debug::text('Total: '. $total .' Week Start: '. TTDate::getDate('DATE+TIME', $week_start_epoch ) .' End: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $total;
@@ -736,44 +726,44 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $user_id UUID
-	 * @param int $object_type_id
-	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param string $user_id    UUID
+	 * @param int|int[] $object_type_id
+	 * @param int $start_date    EPOCH
+	 * @param int $end_date      EPOCH
 	 * @param null $limit
 	 * @return bool|UserDateTotalListFactory
 	 * @throws DBError
 	 */
-	function getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $company_id, $user_id, $object_type_id, $start_date, $end_date, $limit = NULL ) {
+	function getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $company_id, $user_id, $object_type_id, $start_date, $end_date, $limit = null ) {
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $object_type_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$uf = new UserFactory();
 		$otpf = new OverTimePolicyFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		//Order by a.over_time_policy last so we never leave the ordering up to the database. This can cause
 		//the unit tests to fail between databases.
@@ -782,21 +772,22 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//Ignore records of 0hrs, as stat holiday time in the future, or some other time that was overridden to 0 may exist.
 		//*However if its a system total row of 0hrs and has a start_time_stamp and end_time_stamp, return that as it could be the result of a negative absence entry that matches the total worked time.
 		$query = '	select	a.*
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $uf->getTable() .' as c ON a.user_id = c.id
-					LEFT JOIN '. $otpf->getTable() .' as d ON ( a.object_type_id = 30 AND a.src_object_id = d.id )
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $uf->getTable() . ' as c ON a.user_id = c.id
+					LEFT JOIN ' . $otpf->getTable() . ' as d ON ( a.object_type_id = 30 AND a.src_object_id = d.id )
 					where
 						c.company_id = ?
 						AND	a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
-						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+						AND a.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 						AND ( a.total_time != 0 OR a.override = 1 OR ( a.object_type_id = 5 AND a.total_time = 0 AND a.start_time_stamp IS NOT NULL AND a.end_time_stamp IS NOT NULL ) )
 						AND ( a.deleted = 0 )
 					ORDER BY a.date_stamp asc, a.object_type_id asc, d.type_id desc, a.src_object_id desc, a.total_time, a.id
 					';
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit );
+
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -805,22 +796,22 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * Used by calcQuickExceptions maintenance job to speed up finding days that need to have exceptions calculated throughout the day.
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
-	 * @param int $pay_period_status_id
+	 * @param int $end_date   EPOCH
+	 * @param int|int[] $pay_period_status_id
 	 * @param bool $user_id
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getMidDayExceptionsByStartDateAndEndDateAndPayPeriodStatus( $start_date, $end_date, $pay_period_status_id, $user_id = FALSE ) {
+	function getMidDayExceptionsByStartDateAndEndDateAndPayPeriodStatus( $start_date, $end_date, $pay_period_status_id, $user_id = false ) {
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $pay_period_status_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$epf = new ExceptionPolicyFactory();
@@ -839,7 +830,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$current_epoch = time();
 
-		$ph = array();
+		$ph = [];
 
 		//Exceptions that need to be calculated in the middle of the day:
 		//Definitely: In Late, Out Late, Missed CheckIn
@@ -865,46 +856,46 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						SELECT
 							CASE WHEN sf.user_id IS NOT NULL THEN sf.user_id ELSE udtf.user_id END as user_id,
 							CASE WHEN sf.date_stamp IS NOT NULL THEN sf.date_stamp ELSE udtf.date_stamp END as date_stamp
-						FROM '. $epf->getTable() .' as epf
-						LEFT JOIN '. $epcf->getTable() .' as epcf ON ( epf.exception_policy_control_id = epcf.id )
-						LEFT JOIN '. $pgf->getTable() .' as pgf ON ( epcf.id = pgf.exception_policy_control_id )
-						LEFT JOIN '. $pguf->getTable() .' as pguf ON ( pgf.id = pguf.policy_group_id )
-						LEFT JOIN '. $uf->getTable() .' as uf ON ( pguf.user_id = uf.id )
-						LEFT JOIN '. $cf->getTable() .' as cf ON ( uf.company_id = cf.id )
-						LEFT JOIN '. $ef->getTable() .' as ef ON ( uf.id = ef.user_id AND ef.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ) .' AND ef.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .' AND ef.exception_policy_id = epf.id AND ef.type_id != 5 AND ef.deleted = 0 )
-						LEFT JOIN '. $sf->getTable() .' as sf ON ( uf.id = sf.user_id AND sf.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ) .' AND sf.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .' AND ( sf.start_time <= '. $this->db->qstr( $this->db->BindTimeStamp( $current_epoch ) ) .' OR sf.end_time <= '. $this->db->qstr( $this->db->BindTimeStamp( $current_epoch ) ) .' ) AND sf.deleted = 0 )
-						LEFT JOIN '. $spf->getTable() .' as spf ON ( sf.schedule_policy_id = spf.id AND spf.deleted = 0 )
-						LEFT JOIN '. $udtf->getTable() .' as udtf ON ( uf.id = udtf.user_id AND udtf.object_type_id = 10 AND udtf.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ) .' AND udtf.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .' AND udtf.deleted = 0 )
-						LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.id = ef.pay_period_id OR ppf.id = sf.pay_period_id OR ppf.id = udtf.pay_period_id )
-						LEFT JOIN '. $pcf->getTable() .' as pcf ON ( uf.id = pcf.user_id AND udtf.date_stamp = pcf.date_stamp AND pcf.deleted = 0 )
-						LEFT JOIN '. $pf->getTable() .' as pf ON	(
+						FROM ' . $epf->getTable() . ' as epf
+						LEFT JOIN ' . $epcf->getTable() . ' as epcf ON ( epf.exception_policy_control_id = epcf.id )
+						LEFT JOIN ' . $pgf->getTable() . ' as pgf ON ( epcf.id = pgf.exception_policy_control_id )
+						LEFT JOIN ' . $pguf->getTable() . ' as pguf ON ( pgf.id = pguf.policy_group_id )
+						LEFT JOIN ' . $uf->getTable() . ' as uf ON ( pguf.user_id = uf.id )
+						LEFT JOIN ' . $cf->getTable() . ' as cf ON ( uf.company_id = cf.id )
+						LEFT JOIN ' . $ef->getTable() . ' as ef ON ( uf.id = ef.user_id AND ef.date_stamp >= ' . $this->db->qstr( $this->db->BindDate( $start_date ) ) . ' AND ef.date_stamp <= ' . $this->db->qstr( $this->db->BindDate( $end_date ) ) . ' AND ef.exception_policy_id = epf.id AND ef.type_id != 5 AND ef.deleted = 0 )
+						LEFT JOIN ' . $sf->getTable() . ' as sf ON ( uf.id = sf.user_id AND sf.date_stamp >= ' . $this->db->qstr( $this->db->BindDate( $start_date ) ) . ' AND sf.date_stamp <= ' . $this->db->qstr( $this->db->BindDate( $end_date ) ) . ' AND ( sf.start_time <= ' . $this->db->qstr( $this->db->BindTimeStamp( $current_epoch ) ) . ' OR sf.end_time <= ' . $this->db->qstr( $this->db->BindTimeStamp( $current_epoch ) ) . ' ) AND sf.deleted = 0 )
+						LEFT JOIN ' . $spf->getTable() . ' as spf ON ( sf.schedule_policy_id = spf.id AND spf.deleted = 0 )
+						LEFT JOIN ' . $udtf->getTable() . ' as udtf ON ( uf.id = udtf.user_id AND udtf.object_type_id = 10 AND udtf.date_stamp >= ' . $this->db->qstr( $this->db->BindDate( $start_date ) ) . ' AND udtf.date_stamp <= ' . $this->db->qstr( $this->db->BindDate( $end_date ) ) . ' AND udtf.deleted = 0 )
+						LEFT JOIN ' . $ppf->getTable() . ' as ppf ON ( ppf.id = ef.pay_period_id OR ppf.id = sf.pay_period_id OR ppf.id = udtf.pay_period_id )
+						LEFT JOIN ' . $pcf->getTable() . ' as pcf ON ( uf.id = pcf.user_id AND udtf.date_stamp = pcf.date_stamp AND pcf.deleted = 0 )
+						LEFT JOIN ' . $pf->getTable() . ' as pf ON	(
 																	pcf.id = pf.punch_control_id AND pf.deleted = 0
 																	AND (
-																			( epf.type_id = \'S4\' AND ( pf.time_stamp >= '. $this->getSQLToTimeStampFunction() .'('. $this->getSQLToEpochFunction( 'sf.start_time' ) .' - CASE WHEN spf.id IS NULL THEN 7200 ELSE spf.start_stop_window END )
-																								   AND ( pf.time_stamp <= '. $this->getSQLToTimeStampFunction() .'('. $this->getSQLToEpochFunction( 'sf.end_time' ) .' + CASE WHEN spf.id IS NULL THEN 7200 ELSE spf.start_stop_window END) ) ) )
+																			( epf.type_id = \'S4\' AND ( pf.time_stamp >= ' . $this->getSQLToTimeStampFunction() . '(' . $this->getSQLToEpochFunction( 'sf.start_time' ) . ' - CASE WHEN spf.id IS NULL THEN 7200 ELSE spf.start_stop_window END )
+																								   AND ( pf.time_stamp <= ' . $this->getSQLToTimeStampFunction() . '(' . $this->getSQLToEpochFunction( 'sf.end_time' ) . ' + CASE WHEN spf.id IS NULL THEN 7200 ELSE spf.start_stop_window END) ) ) )
 																			OR
 																			( epf.type_id = \'S6\' AND ( pf.time_stamp >= sf.end_time ) )
 																			OR
-																			( epf.type_id = \'C1\' AND ( pf.status_id = 10 AND pf.time_stamp <= '. $this->getSQLToTimeStampFunction() .'('. (int)$current_epoch .' - epf.grace) ) )
+																			( epf.type_id = \'C1\' AND ( pf.status_id = 10 AND pf.time_stamp <= ' . $this->getSQLToTimeStampFunction() . '(' . (int)$current_epoch . ' - epf.grace) ) )
 																		)
 																	)
 						WHERE ( epf.type_id in (\'S4\', \'S6\', \'C1\') AND epf.active = 1 AND ( epf.type_id != \'C1\' OR ( epf.type_id = \'C1\' AND epf.grace > 0 ) ) )
 							AND ( uf.status_id = 10 AND cf.status_id in (10, 20, 23) ) ';
 
 		if ( $user_id != '' ) {
-			$query .= ' AND uf.id = \''. TTUUID::castUUID($user_id) .'\'';
+			$query .= ' AND uf.id = \'' . TTUUID::castUUID( $user_id ) . '\'';
 		}
 
-		$query .= '			AND ppf.status_id in ('. $this->getListSQL( $pay_period_status_id, $ph, 'int' ) .')
+		$query .= '			AND ppf.status_id in (' . $this->getListSQL( $pay_period_status_id, $ph, 'int' ) . ')
 							AND (
 									(
 										(
 											epf.type_id in (\'S4\', \'S6\')
 											AND ( sf.id IS NOT NULL AND sf.deleted = 0 )
 											AND (
-													( epf.type_id = \'S4\' AND sf.start_time <= '. $this->getSQLToTimeStampFunction() .'('. (int)$current_epoch .') )
+													( epf.type_id = \'S4\' AND sf.start_time <= ' . $this->getSQLToTimeStampFunction() . '(' . (int)$current_epoch . ') )
 													OR
-													( epf.type_id = \'S6\' AND sf.end_time <= '. $this->getSQLToTimeStampFunction() .'('. (int)$current_epoch .') )
+													( epf.type_id = \'S6\' AND sf.end_time <= ' . $this->getSQLToTimeStampFunction() . '(' . (int)$current_epoch . ') )
 												)
 											AND pf.id IS NULL
 										)
@@ -916,7 +907,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					) as tmp
 					GROUP BY tmp.user_id
 				';
-				//Don't check deleted = 0 on PCF/PF tables, as we need to check IS NULL on them instead.
+		//Don't check deleted = 0 on PCF/PF tables, as we need to check IS NULL on them instead.
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 
@@ -930,32 +921,32 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 * where they work 8.5hrs and only get paid for 8hrs due to auto-deduct lunch or breaks.
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $end_date   EPOCH
 	 * @return bool|int
 	 */
 	function getWorkedTimeSumByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		//AND ( a.status_id = 20 OR ( a.status_id = 10 AND a.type_id in ( 100, 110 ) ) )
 		$query = '
 					select	sum(total_time)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
@@ -963,88 +954,88 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id     UUID
 	 * @param string $pay_code_id UUID
-	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $start_date     EPOCH
+	 * @param int $end_date       EPOCH
 	 * @return bool|int
 	 */
 	function getTotalTimeSumByUserIDAndPayCodeIDAndStartDateAndEndDate( $user_id, $pay_code_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		$query = '
 					select	sum(total_time)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
-						AND a.pay_code_id in ('. $this->getListSQL( $pay_code_id, $ph, 'uuid' ) .')
+						AND a.pay_code_id in (' . $this->getListSQL( $pay_code_id, $ph, 'uuid' ) . ')
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id       UUID
 	 * @param int|int[] $object_type_id
 	 * @param string[] $pay_code_id UUID
-	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $start_date       EPOCH
+	 * @param int $end_date         EPOCH
 	 * @return bool
 	 */
 	function getSumByUserIDAndObjectTypeIDAndPayCodeIDAndStartDateAndEndDate( $user_id, $object_type_id, $pay_code_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 //		$query = '
 //					select	sum(total_time) as total_time, sum(actual_total_time) as actual_total_time, sum(total_time_amount) as total_time_amount
@@ -1058,27 +1049,27 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 //						AND ( a.deleted = 0 )';
 		$query = '
 					select	sum(total_time) as total_time, sum(actual_total_time) as actual_total_time, sum(total_time_amount) as total_time_amount
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
-						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
-						AND a.pay_code_id in ('. $this->getListSQL( $pay_code_id, $ph, 'uuid' ) .')
+						AND a.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
+						AND a.pay_code_id in (' . $this->getListSQL( $pay_code_id, $ph, 'uuid' ) . ')
 						AND ( a.deleted = 0 )';
 
-		$row = $this->db->GetRow($query, $ph);
+		$row = $this->db->GetRow( $query, $ph );
 
-		if ( $row['total_time'] === NULL ) {
+		if ( $row['total_time'] === null ) {
 			$row['total_time'] = 0;
 		}
-		if ( $row['actual_total_time'] === NULL ) {
+		if ( $row['actual_total_time'] === null ) {
 			$row['actual_total_time'] = 0;
 		}
-		if ( $row['total_time_amount'] === NULL ) {
+		if ( $row['total_time_amount'] === null ) {
 			$row['total_time_amount'] = 0;
 		}
 
-		Debug::text('Total Time: '. $row['total_time'] .' Amount: '. $row['total_time_amount'], __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total Time: ' . $row['total_time'] . ' Amount: ' . $row['total_time_amount'], __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $row;
 	}
@@ -1086,31 +1077,31 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $end_date   EPOCH
 	 * @return bool|int
 	 */
 	function getRegularTimeSumByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		$query = '
 					select	sum(total_time)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
@@ -1118,64 +1109,64 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id           UUID
 	 * @param string $absence_policy_id UUID
-	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $start_date           EPOCH
+	 * @param int $end_date             EPOCH
 	 * @return bool|int
 	 */
 	function getAbsenceTimeSumByUserIDAndAbsenceIDAndStartDateAndEndDate( $user_id, $absence_policy_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $absence_policy_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		//Include only paid absences.
 		$query = '
 					select	sum(total_time)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
 						AND a.object_type_id = 25
-						AND a.src_object_id in ('. $this->getListSQL( $absence_policy_id, $ph, 'uuid' ) .')
+						AND a.src_object_id in (' . $this->getListSQL( $absence_policy_id, $ph, 'uuid' ) . ')
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
@@ -1183,35 +1174,35 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $end_date   EPOCH
 	 * @return bool|int
 	 */
 	function getPaidAbsenceTimeSumByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$pcf = new PayCodeFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		//Include only paid absences.
 		$query = '
 					select	sum(total_time)
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
 					where pcf.type_id in (10,12)
 						AND a.user_id = ?
 						AND a.date_stamp >= ?
@@ -1222,12 +1213,12 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
@@ -1235,33 +1226,33 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $end_date   EPOCH
 	 * @return bool
 	 */
 	function getDaysWorkedByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		//This includes days where they only got overtime.
 		//Return a list of dates, so they can be compared/added/subtracted with other lists
 		$query = '
 					select	distinct(a.date_stamp)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
@@ -1276,33 +1267,33 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $end_date   EPOCH
 	 * @return bool
 	 */
 	function getDaysWorkedRegularTimeByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		//This includes days where they only got overtime.
 		//Return a list of dates, so they can be compared/added/subtracted with other lists
 		$query = '
 					select	distinct(a.date_stamp)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
@@ -1318,36 +1309,36 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 * Finds number of days the employee received paid absence time.
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
+	 * @param int $end_date   EPOCH
 	 * @return bool
 	 */
 	function getDaysPaidAbsenceByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$pcf = new PayCodeFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		//Include only paid absences.
 		//Return a list of dates, so they can be compared/added/subtracted with other lists
 		$query = '
 					select	distinct(a.date_stamp)
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
 
 					where	pcf.type_id in (10,12)
 						AND a.user_id = ?
@@ -1363,102 +1354,41 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $user_id UUID
-	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
-	 * @param $day_of_week
-	 * @return bool|int
-	 */
-	function getDaysWorkedByUserIDAndStartDateAndEndDateAndDayOfWeek( $user_id, $start_date, $end_date, $day_of_week ) {
-		if ( $user_id == '' ) {
-			return FALSE;
-		}
-
-		if ( $start_date == '' ) {
-			return FALSE;
-		}
-
-		if ( $end_date == '' ) {
-			return FALSE;
-		}
-
-		if ( $day_of_week == '' ) {
-			return FALSE;
-		}
-
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-			$day_of_week_clause = ' (dayofweek(a.date_stamp)-1) '; //Sunday=1 with MySQL, so we need to minus one so it matches PHP Sunday=0
-		} else {
-			$day_of_week_clause = ' extract(dow from a.date_stamp) ';
-		}
-
-		Debug::text('Day Of Week: '. $day_of_week, __FILE__, __LINE__, __METHOD__, 10);
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					'day_of_week' => $day_of_week,
-					);
-
-		//Include only paid absences.
-		$query = '
-					select	count(distinct(a.date_stamp))
-					from	'. $this->getTable() .' as a
-					where	a.user_id = ?
-						AND a.date_stamp >= ?
-						AND a.date_stamp <= ?
-						AND '. $day_of_week_clause .' = ?
-						AND a.object_type_id = 10
-						AND a.total_time > 0
-						AND ( a.deleted = 0 )
-				';
-
-		$total = $this->db->GetOne($query, $ph);
-
-		if ($total === FALSE ) {
-			$total = 0;
-		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
-
-		return $total;
-	}
-
-	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id  UUID
 	 * @param int $date_stamps EPOCH
 	 * @return bool|int
 	 */
 	function getDaysWorkedByUserIDAndDateStamps( $user_id, $date_stamps ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $date_stamps == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					);
+		$ph = [
+				'user_id' => TTUUID::castUUID( $user_id ),
+		];
 
 		//Include only paid absences.
 		//AND a.status_id = 20
 		$query = '
 					select	count(distinct(a.user_date_id))
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
-						AND a.date_stamp in ('. $this->getListSQL($date_stamps, $ph) .')
+						AND a.date_stamp in (' . $this->getListSQL( $date_stamps, $ph ) . ')
 						AND a.object_type_id = 10
 						AND a.total_time > 0
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
@@ -1474,110 +1404,110 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 */
 	function getWorkedUsersByPayPeriodId( $pay_period_id ) {
 		if ( $pay_period_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'pay_period_id' => TTUUID::castUUID($pay_period_id),
-					);
+		$ph = [
+				'pay_period_id' => TTUUID::castUUID( $pay_period_id ),
+		];
 
 		//Include only paid absences.
 		//AND a.status_id = 20
 		$query = '
 					select	count(distinct(a.user_id))
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.pay_period_id = ?
 						AND a.object_type_id = 10
 						AND a.total_time > 0
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id       UUID
 	 * @param string $pay_period_id UUID
 	 * @return bool|int
 	 */
 	function getTimeSumByUserIDAndPayPeriodId( $user_id, $pay_period_id ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $pay_period_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'pay_period_id' => TTUUID::castUUID($pay_period_id),
-					);
+		$ph = [
+				'user_id'       => TTUUID::castUUID( $user_id ),
+				'pay_period_id' => TTUUID::castUUID( $pay_period_id ),
+		];
 
 		//Include only paid absences.
 		//AND ( a.status_id in (20, 30) OR ( a.status_id = 10 AND a.type_id in ( 100, 110 ) ) )
 		$query = '
 					select	sum(total_time)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.pay_period_id = ?
 						AND a.object_type_id in ( 10, 50, 100, 110 )
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total .' Pay Period: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total . ' Pay Period: ' . $pay_period_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id       UUID
 	 * @param string $pay_period_id UUID
 	 * @return bool|int
 	 */
 	function getWorkedTimeSumByUserIDAndPayPeriodId( $user_id, $pay_period_id ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $pay_period_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'pay_period_id' => TTUUID::castUUID($pay_period_id),
-					);
+		$ph = [
+				'user_id'       => TTUUID::castUUID( $user_id ),
+				'pay_period_id' => TTUUID::castUUID( $pay_period_id ),
+		];
 
 		//Include only paid absences.
 		//AND ( a.status_id = 20 OR ( a.status_id = 10 AND a.type_id in ( 100, 110 ) ) )
 		$query = '
 					select	sum(total_time)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.user_id = ?
 						AND a.pay_period_id = ?
 						AND a.object_type_id in ( 10, 50, 100, 110 )
 						AND ( a.deleted = 0 )
 				';
 
-		$total = $this->db->GetOne($query, $ph);
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total .' Pay Period: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total . ' Pay Period: ' . $pay_period_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
@@ -1590,63 +1520,63 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 */
 	function getTotalByPayPeriodIdAndObjectTypeAndOverride( $pay_period_id, $object_type_id, $override ) {
 		if ( $pay_period_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $object_type_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-				'pay_period_id' => TTUUID::castUUID($pay_period_id),
-				'override' => (int)$override,
-		);
+		$ph = [
+				'pay_period_id' => TTUUID::castUUID( $pay_period_id ),
+				'override'      => (int)$override,
+		];
 
 		$query = '
 					select	count(*)
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	a.pay_period_id = ?
 						AND a.override = ?
-						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int') .')
+						AND a.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 						AND ( a.deleted = 0 )
 				';
 
-		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
-		$total = $this->db->GetOne($query, $ph);
+		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10 );
+		$total = $this->db->GetOne( $query, $ph );
 
-		if ($total === FALSE ) {
+		if ( $total === false ) {
 			$total = 0;
 		}
-		Debug::text('Total: '. $total .' Pay Period: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Total: ' . $total . ' Pay Period: ' . $pay_period_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $total;
 	}
 
 	/**
 	 * @param string $pay_code_id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit          Limit the number of records returned
+	 * @param array $where        Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order        Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByPayCodeId( $pay_code_id, $limit = NULL, $where = NULL, $order = NULL) {
+	function getByPayCodeId( $pay_code_id, $limit = null, $where = null, $order = null ) {
 		if ( $pay_code_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$strict = FALSE;
+		if ( $order == null ) {
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-					'pay_code_id' => TTUUID::castUUID($pay_code_id),
-					);
+		$ph = [
+				'pay_code_id' => TTUUID::castUUID( $pay_code_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where  a.pay_code_id = ?
 						AND a.deleted = 0
 					';
@@ -1658,21 +1588,21 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id       UUID
 	 * @param string $pay_period_id UUID
-	 * @param int $end_date EPOCH
+	 * @param int $end_date         EPOCH
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByUserIdAndPayPeriodIdAndEndDate( $user_id, $pay_period_id, $end_date = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
+	function getByUserIdAndPayPeriodIdAndEndDate( $user_id, $pay_period_id, $end_date = null ) {
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $pay_period_id == '') {
-			return FALSE;
+		if ( $pay_period_id == '' ) {
+			return false;
 		}
 
-		if ( $end_date == NULL ) {
+		if ( $end_date == null ) {
 			//Get pay period end date.
 			$pplf = new PayPeriodListFactory();
 			$pplf->getById( $pay_period_id );
@@ -1685,11 +1615,11 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$pcf = new PayCodeFactory();
 		$uwf = new UserWageFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'pay_period_id' => TTUUID::castUUID($pay_period_id),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'user_id'       => TTUUID::castUUID( $user_id ),
+				'pay_period_id' => TTUUID::castUUID( $pay_period_id ),
+				'end_date'      => $this->db->BindDate( $end_date ),
+		];
 
 		//Order dock hours first, so it can be deducted from regular time.
 		//Order newest wage changes first too. This is VERY important for calculating pro-rate amounts.
@@ -1712,12 +1642,12 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 							sum(a.total_time) as total_time,
 							sum(a.total_time_amount) as total_time_amount
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
-					LEFT JOIN '. $uwf->getTable() .' as uwf ON uwf.id = (select uwf.id
-													from '. $uwf->getTable() .' as uwf
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
+					LEFT JOIN ' . $uwf->getTable() . ' as uwf ON uwf.id = (select uwf.id
+													from ' . $uwf->getTable() . ' as uwf
 													where uwf.user_id = a.user_id
-														and uwf.wage_group_id = \''. TTUUID::getZeroID() .'\'
+														and uwf.wage_group_id = \'' . TTUUID::getZeroID() . '\'
 														and uwf.effective_date <= a.date_stamp
 														and uwf.deleted = 0
 														order by uwf.effective_date desc limit 1)
@@ -1740,41 +1670,41 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param string $user_id UUID
-	 * @param string $pay_code_id UUID
+	 * @param string $user_id                   UUID
+	 * @param string $pay_code_id               UUID
 	 * @param string $accrual_policy_account_id UUID
-	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $start_date                   EPOCH
+	 * @param int $end_date                     EPOCH
+	 * @param array $where                      Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order                      Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getAccrualOrphansByUserIdAndPayCodeIdAndAccrualPolicyAccountIdAndStartDateAndEndDate( $user_id, $pay_code_id, $accrual_policy_account_id, $start_date, $end_date, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
+	function getAccrualOrphansByUserIdAndPayCodeIdAndAccrualPolicyAccountIdAndStartDateAndEndDate( $user_id, $pay_code_id, $accrual_policy_account_id, $start_date, $end_date, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $pay_code_id == '') {
-			return FALSE;
+		if ( $pay_code_id == '' ) {
+			return false;
 		}
 
-		if ( $accrual_policy_account_id == '') {
-			return FALSE;
+		if ( $accrual_policy_account_id == '' ) {
+			return false;
 		}
 
 		if ( $start_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $end_date == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'a.date_stamp' => 'asc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'a.date_stamp' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
 		$af = new AccrualFactory();
@@ -1784,14 +1714,14 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		// Also check UserDateTotalListFactory->getAccrualOrphansByPayCodeIdAndStartDateAndEndDate()
 		//
 
-		$ph = array(
-					'accrual_policy_account_id' => $accrual_policy_account_id,
-					'user_id_a' => $user_id,
-					'user_id_b' => $user_id,
-					'pay_code_id' => $pay_code_id,
-					'start_date' => $this->db->BindDate( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $start_date ) ) ) ),
-					'end_date' => $this->db->BindDate( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $end_date ) ) ) ),
-					);
+		$ph = [
+				'accrual_policy_account_id' => $accrual_policy_account_id,
+				'user_id_a'                 => $user_id,
+				'user_id_b'                 => $user_id,
+				'pay_code_id'               => $pay_code_id,
+				'start_date'                => $this->db->BindDate( TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $start_date ) ) ) ),
+				'end_date'                  => $this->db->BindDate( TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $end_date ) ) ) ),
+		];
 
 		//If we include object_type_id=25 here, it will include cases where Hour Based accrual policies accrue time every day.
 		//I think we just want to focus on absence (taken) records instead, object_type_id=50
@@ -1800,8 +1730,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query = '
 					SELECT * FROM (
 						SELECT	a.*, b.id as joined_id
-						FROM	'. $this->getTable() .' as a
-						LEFT JOIN '. $af->getTable() .' as b ON (
+						FROM	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $af->getTable() . ' as b ON (
 																	a.user_id = b.user_id
 																	AND a.date_stamp = b.time_stamp::date
 																	AND b.accrual_policy_account_id = ?
@@ -1812,8 +1742,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						UNION ALL
 
 						SELECT	a.*, c.id as joined_id
-						FROM	'. $this->getTable() .' as a
-						LEFT JOIN '. $this->getTable() .' as c ON (
+						FROM	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $this->getTable() . ' as c ON (
 																	a.user_id = c.user_id
 																	AND a.date_stamp = c.date_stamp
 																	AND a.src_object_id = c.src_object_id
@@ -1828,7 +1758,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						UNION ALL
 
 						SELECT a.*, NULL as joined_id
-						FROM '. $this->getTable() .' as a
+						FROM ' . $this->getTable() . ' as a
 						WHERE a.id in (
 							SELECT a.user_date_total_id from accrual as a
 							LEFT JOIN (
@@ -1862,23 +1792,24 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 	/**
 	 * @param int $start_date EPOCH
-	 * @param int $end_date EPOCH
-	 * @param string $job_ids UUID
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $end_date   EPOCH
+	 * @param string|string[] $job_ids UUID
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getReportByStartDateAndEndDateAndJobList( $start_date, $end_date, $job_ids, $order = NULL) {
-		if ( $job_ids == '') {
-			Debug::Text('No Job Ids: ', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+	function getReportByStartDateAndEndDateAndJobList( $start_date, $end_date, $job_ids, $order = null ) {
+		if ( $job_ids == '' ) {
+			Debug::Text( 'No Job Ids: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
-		if ( $start_date == '') {
+		if ( $start_date == '' ) {
 			//Debug::Text('No Start Date: ', __FILE__, __LINE__, __METHOD__, 10);
 			$start_date = 0;
 		}
 
-		if ( $end_date == '') {
+		if ( $end_date == '' ) {
 			//Debug::Text('No End Date: ', __FILE__, __LINE__, __METHOD__, 10);
 			$end_date = time();
 		}
@@ -1896,10 +1827,10 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$pcf = new PayCodeFactory();
 
-		$ph = array(
-					'start_date' => $this->db->BindDate( $start_date ),
-					'end_date' => $this->db->BindDate( $end_date ),
-					);
+		$ph = [
+				'start_date' => $this->db->BindDate( $start_date ),
+				'end_date'   => $this->db->BindDate( $end_date ),
+		];
 
 		$query = 'select	a.user_id as user_id,
 							a.object_type_id as object_type_id,
@@ -1926,19 +1857,19 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
 							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
 
 					where	a.date_stamp >= ?
 						AND a.date_stamp <= ?
-						AND a.job_id in ('. $this->getListSQL( $job_ids, $ph, 'uuid') .')
+						AND a.job_id in (' . $this->getListSQL( $job_ids, $ph, 'uuid' ) . ')
 						AND ( a.deleted = 0 )
 					group by a.user_id, a.object_type_id, a.src_object_id, a.pay_code_id, pcf.type_id, a.branch_id, a.department_id, a.job_id, a.job_item_id, a.currency_id, a.currency_rate, a.hourly_rate, a.hourly_rate_with_burden
 					order by a.job_id asc
 				';
 		//This isn't needed as it lists every status:	AND a.status_id in (10, 20, 30)
 
-		$query .= $this->getSortSQL( $order, FALSE );
+		$query .= $this->getSortSQL( $order, false );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		$this->rs = $this->ExecuteSQL( $query, $ph );
@@ -1950,13 +1881,13 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 * @param string $company_id UUID
 	 * @param $filter_data
 	 * @param $type
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAffordableCareReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $type, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAffordableCareReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $type, $limit = null, $page = null, $where = null, $order = null ) {
 		//$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
 		//$order = array( 'b.pay_period_id' => 'asc', 'uf.last_name' => 'asc', 'b.date_stamp' => 'asc' );
 		/*
@@ -1968,17 +1899,17 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		}
 		*/
 
-		if ( isset($filter_data['punch_branch_ids']) ) {
+		if ( isset( $filter_data['punch_branch_ids'] ) ) {
 			$filter_data['punch_branch_id'] = $filter_data['punch_branch_ids'];
 		}
-		if ( isset($filter_data['punch_department_ids']) ) {
+		if ( isset( $filter_data['punch_department_ids'] ) ) {
 			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
 		}
 
-		if ( isset($filter_data['branch_ids']) ) {
+		if ( isset( $filter_data['branch_ids'] ) ) {
 			$filter_data['branch_id'] = $filter_data['branch_ids'];
 		}
-		if ( isset($filter_data['department_ids']) ) {
+		if ( isset( $filter_data['department_ids'] ) ) {
 			$filter_data['department_id'] = $filter_data['department_ids'];
 		}
 
@@ -1988,22 +1919,14 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$ppf_b = new PayPeriodFactory();
 		$pcf = new PayCodeFactory();
 
-		$ph = array(
-						'company_id' => TTUUID::castUUID($company_id)
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		if ( $type == 'week' ) {
-			if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-				$date_sql = 'week(	a.date_stamp )';
-			} else {
-				$date_sql = 'date_trunc(\'week\',	a.date_stamp )';
-			}
-		} elseif ( $type == 'month' ) {
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-			$date_sql = 'month(	a.date_stamp )';
-		} else {
-			$date_sql = 'date_trunc(\'month\',	a.date_stamp )';
-		}
+			$date_sql = 'date_trunc(\'week\', a.date_stamp )';
+		} else if ( $type == 'month' ) {
+			$date_sql = 'date_trunc(\'month\', a.date_stamp )';
 		} else {
 			$date_sql = 'a.date_stamp';
 		}
@@ -2014,53 +1937,53 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query = '
 					select
 							a.user_id as user_id,
-							'. $date_sql .' as date_stamp,
+							' . $date_sql . ' as date_stamp,
 							a.object_type_id as object_type_id,
 							a.pay_code_id,
 							pcf.type_id as pay_code_type_id,
 
 							sum(a.total_time) as total_time,
 							sum(a.actual_total_time) as actual_total_time
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON a.user_id = uf.id
 
-					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
-					LEFT JOIN '. $df->getTable() .' as df ON a.department_id = df.id
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
+					LEFT JOIN ' . $bf->getTable() . ' as bf ON a.branch_id = bf.id
+					LEFT JOIN ' . $df->getTable() . ' as df ON a.department_id = df.id
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
 
-					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON a.pay_period_id = ppf.id
+					LEFT JOIN ' . $ppf_b->getTable() . ' as ppf ON a.pay_period_id = ppf.id
 
 					where	uf.company_id = ? ';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_status_id'] ) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : null;
 
-		if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
+		if ( isset( $filter_data['include_user_subgroups'] ) && (bool)$filter_data['include_user_subgroups'] == true ) {
 			$uglf = new UserGroupListFactory();
-			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
+			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], true );
 		}
-		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_group_id'] ) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['default_branch_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_department_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_title_id'] ) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_branch_id'] ) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_department_id'] ) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_time_sheet_verify_status_id']) ) ? $this->getWhereClauseSQL( 'pptsvlf.status_id', $filter_data['pay_period_time_sheet_verify_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['pay_period_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['pay_period_time_sheet_verify_status_id'] ) ) ? $this->getWhereClauseSQL( 'pptsvlf.status_id', $filter_data['pay_period_time_sheet_verify_status_id'], 'numeric_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'uf.id', [ 'company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ], 'tag', $ph ) : null;
 
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query	.=	' AND a.date_stamp >= ?';
+		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['start_date'] );
+			$query .= ' AND a.date_stamp >= ?';
 		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query	.=	' AND a.date_stamp <= ?';
+		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['end_date'] );
+			$query .= ' AND a.date_stamp <= ?';
 		}
 
 		//This isn't needed as it lists every status:	AND a.status_id in (10, 20, 30)
@@ -2069,7 +1992,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					group by a.user_id, a.date_stamp, a.object_type_id, a.pay_code_id, pcf.type_id
 					';
 
-		$query .= $this->getSortSQL( $order, FALSE );
+		$query .= $this->getSortSQL( $order, false );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 
@@ -2081,13 +2004,13 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getTimesheetSummaryReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getTimesheetSummaryReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
 
 		//$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
 		//$order = array( 'b.pay_period_id' => 'asc', 'uf.last_name' => 'asc', 'b.date_stamp' => 'asc' );
@@ -2100,21 +2023,21 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		}
 		*/
 
-		if ( isset($filter_data['punch_branch_ids']) ) {
+		if ( isset( $filter_data['punch_branch_ids'] ) ) {
 			$filter_data['punch_branch_id'] = $filter_data['punch_branch_ids'];
 		}
-		if ( isset($filter_data['punch_department_ids']) ) {
+		if ( isset( $filter_data['punch_department_ids'] ) ) {
 			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
 		}
 
-		if ( isset($filter_data['branch_ids']) ) {
+		if ( isset( $filter_data['branch_ids'] ) ) {
 			$filter_data['branch_id'] = $filter_data['branch_ids'];
 		}
-		if ( isset($filter_data['department_ids']) ) {
+		if ( isset( $filter_data['department_ids'] ) ) {
 			$filter_data['department_id'] = $filter_data['department_ids'];
 		}
 
-		if ( isset($filter_data['user_tag']) ) {
+		if ( isset( $filter_data['user_tag'] ) ) {
 			$filter_data['tag'] = $filter_data['user_tag'];
 		}
 
@@ -2125,7 +2048,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$ppf_b = new PayPeriodFactory();
 		$pptsvlf = new PayPeriodTimeSheetVerifyListFactory();
 
-		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
+		$ph = [ 'company_id' => TTUUID::castUUID( $company_id ), ];
 
 		//Make it so employees with 0 hours still show up!! Very important!
 		//Order dock hours first, so it can be deducted from regular time.
@@ -2157,50 +2080,50 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
 							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
-					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
-					LEFT JOIN '. $df->getTable() .' as df ON a.department_id = df.id
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
-					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON a.pay_period_id = ppf.id
-					LEFT JOIN '. $pptsvlf->getTable() .' as pptsvlf ON ( ppf.id = pptsvlf.pay_period_id AND a.user_id = pptsvlf.user_id AND pptsvlf.deleted = 0 )
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON a.user_id = uf.id
+					LEFT JOIN ' . $bf->getTable() . ' as bf ON a.branch_id = bf.id
+					LEFT JOIN ' . $df->getTable() . ' as df ON a.department_id = df.id
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
+					LEFT JOIN ' . $ppf_b->getTable() . ' as ppf ON a.pay_period_id = ppf.id
+					LEFT JOIN ' . $pptsvlf->getTable() . ' as pptsvlf ON ( ppf.id = pptsvlf.pay_period_id AND a.user_id = pptsvlf.user_id AND pptsvlf.deleted = 0 )
 					where	uf.company_id = ? ';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_status_id'] ) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : null;
 
-		if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
+		if ( isset( $filter_data['include_user_subgroups'] ) && (bool)$filter_data['include_user_subgroups'] == true ) {
 			$uglf = new UserGroupListFactory();
-			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
+			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], true );
 		}
-		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_group_id'] ) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['default_branch_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_department_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_title_id'] ) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_branch_id'] ) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_department_id'] ) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['pay_period_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : null;
 
-		$subquery = NULL;
-		if ( isset( $filter_data['pay_period_time_sheet_verify_status_id'] ) AND in_array( 0, $filter_data['pay_period_time_sheet_verify_status_id'] ) ) {
+		$subquery = null;
+		if ( isset( $filter_data['pay_period_time_sheet_verify_status_id'] ) && in_array( 0, $filter_data['pay_period_time_sheet_verify_status_id'] ) ) {
 			$subquery .= 'OR pptsvlf.status_id IS NULL';
 		}
-		$query .= ( isset($filter_data['pay_period_time_sheet_verify_status_id']) ) ? ' AND (' . $this->getWhereClauseSQL( 'pptsvlf.status_id', $filter_data['pay_period_time_sheet_verify_status_id'], 'numeric_list', $ph, NULL, FALSE ) . ' ' . $subquery . ' )' : NULL;
+		$query .= ( isset( $filter_data['pay_period_time_sheet_verify_status_id'] ) ) ? ' AND (' . $this->getWhereClauseSQL( 'pptsvlf.status_id', $filter_data['pay_period_time_sheet_verify_status_id'], 'numeric_list', $ph, null, false ) . ' ' . $subquery . ' )' : null;
 
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'uf.id', [ 'company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ], 'tag', $ph ) : null;
 
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query	.=	' AND a.date_stamp >= ?';
+		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['start_date'] );
+			$query .= ' AND a.date_stamp >= ?';
 		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query	.=	' AND a.date_stamp <= ?';
+		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['end_date'] );
+			$query .= ' AND a.date_stamp <= ?';
 		}
 
 		//This isn't needed as it lists every status:	AND a.status_id in (10, 20, 30)
@@ -2209,7 +2132,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						GROUP BY a.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, a.date_stamp, a.branch_id, a.department_id, a.object_type_id, a.src_object_id, a.pay_code_id, pcf.type_id, a.currency_id, a.currency_rate, a.hourly_rate, a.hourly_rate_with_burden
 					';
 
-		$query .= $this->getSortSQL( $order, FALSE );
+		$query .= $this->getSortSQL( $order, false );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 
@@ -2221,13 +2144,13 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getTimesheetDetailReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getTimesheetDetailReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
 
 		//$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
 		//$order = array( 'b.pay_period_id' => 'asc', 'uf.last_name' => 'asc', 'b.date_stamp' => 'asc' );
@@ -2240,17 +2163,17 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		}
 		*/
 
-		if ( isset($filter_data['punch_branch_ids']) ) {
+		if ( isset( $filter_data['punch_branch_ids'] ) ) {
 			$filter_data['punch_branch_id'] = $filter_data['punch_branch_ids'];
 		}
-		if ( isset($filter_data['punch_department_ids']) ) {
+		if ( isset( $filter_data['punch_department_ids'] ) ) {
 			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
 		}
 
-		if ( isset($filter_data['branch_ids']) ) {
+		if ( isset( $filter_data['branch_ids'] ) ) {
 			$filter_data['branch_id'] = $filter_data['branch_ids'];
 		}
-		if ( isset($filter_data['department_ids']) ) {
+		if ( isset( $filter_data['department_ids'] ) ) {
 			$filter_data['department_id'] = $filter_data['department_ids'];
 		}
 
@@ -2265,7 +2188,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$jif = new JobItemFactory();
 		}
 
-		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
+		$ph = [ 'company_id' => TTUUID::castUUID( $company_id ), ];
 
 		//Make it so employees with 0 hours still show up!! Very important!
 		//Order dock hours first, so it can be deducted from regular time.
@@ -2293,61 +2216,61 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							a.hourly_rate as hourly_rate,
 							a.hourly_rate_with_burden as hourly_rate_with_burden,
 
-							'. $this->getSQLStringAggregate( 'a.note', ' -- ') .' as udt_note,
+							' . $this->getSQLStringAggregate( 'a.note', ' -- ' ) . ' as udt_note,
 							min(a.start_time_stamp) as start_time_stamp,
 							max(a.end_time_stamp) as end_time_stamp,
 							sum(a.total_time) as total_time,
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
 							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden
-					FROM	'. $this->getTable() .' as a
-					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
-					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
-					LEFT JOIN '. $df->getTable() .' as df ON a.department_id = df.id
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
-					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON a.pay_period_id = ppf.id ';
+					FROM	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON a.user_id = uf.id
+					LEFT JOIN ' . $bf->getTable() . ' as bf ON a.branch_id = bf.id
+					LEFT JOIN ' . $df->getTable() . ' as df ON a.department_id = df.id
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
+					LEFT JOIN ' . $ppf_b->getTable() . ' as ppf ON a.pay_period_id = ppf.id ';
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '
-					LEFT JOIN '. $jf->getTable() .' as jf ON a.job_id = jf.id
-					LEFT JOIN '. $jif->getTable() .' as jif ON a.job_item_id = jif.id ';
+					LEFT JOIN ' . $jf->getTable() . ' as jf ON a.job_id = jf.id
+					LEFT JOIN ' . $jif->getTable() . ' as jif ON a.job_item_id = jif.id ';
 		}
 
 		$query .= ' WHERE	uf.company_id = ? ';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_status_id'] ) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : null;
 
-		if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
+		if ( isset( $filter_data['include_user_subgroups'] ) && (bool)$filter_data['include_user_subgroups'] == true ) {
 			$uglf = new UserGroupListFactory();
-			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
+			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], true );
 		}
-		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_group_id'] ) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_title_id'] ) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_job_id']) ) ? $this->getWhereClauseSQL( 'uf.default_job_id', $filter_data['default_job_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_job_item_id']) ) ? $this->getWhereClauseSQL( 'uf.default_job_item_id', $filter_data['default_job_item_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['default_branch_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_department_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_job_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_job_id', $filter_data['default_job_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_job_item_id', $filter_data['default_job_item_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['punch_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['punch_job_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['punch_job_item_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['punch_branch_id'] ) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_department_id'] ) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_job_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['punch_job_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['punch_job_item_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['pay_period_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'uf.id', [ 'company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ], 'tag', $ph ) : null;
 
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query	.=	' AND a.date_stamp >= ?';
+		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['start_date'] );
+			$query .= ' AND a.date_stamp >= ?';
 		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query	.=	' AND a.date_stamp <= ?';
+		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['end_date'] );
+			$query .= ' AND a.date_stamp <= ?';
 		}
 
 		//This isn't needed as it lists every status: AND a.status_id in (10, 20, 30)
@@ -2356,7 +2279,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					GROUP BY a.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, a.date_stamp, a.branch_id, a.department_id, a.object_type_id, a.src_object_id, a.pay_code_id, pcf.type_id, a.currency_id, a.currency_rate, a.hourly_rate, a.hourly_rate_with_burden
 					';
 
-		$query .= $this->getSortSQL( $order, FALSE );
+		$query .= $this->getSortSQL( $order, false );
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
@@ -2368,13 +2291,13 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getJobDetailReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getJobDetailReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
 
 		//$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
 		//$order = array( 'b.pay_period_id' => 'asc', 'uf.last_name' => 'asc', 'b.date_stamp' => 'asc' );
@@ -2387,17 +2310,17 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		}
 		*/
 
-		if ( isset($filter_data['punch_branch_ids']) ) {
+		if ( isset( $filter_data['punch_branch_ids'] ) ) {
 			$filter_data['punch_branch_id'] = $filter_data['punch_branch_ids'];
 		}
-		if ( isset($filter_data['punch_department_ids']) ) {
+		if ( isset( $filter_data['punch_department_ids'] ) ) {
 			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
 		}
 
-		if ( isset($filter_data['branch_ids']) ) {
+		if ( isset( $filter_data['branch_ids'] ) ) {
 			$filter_data['branch_id'] = $filter_data['branch_ids'];
 		}
-		if ( isset($filter_data['department_ids']) ) {
+		if ( isset( $filter_data['department_ids'] ) ) {
 			$filter_data['department_id'] = $filter_data['department_ids'];
 		}
 
@@ -2412,7 +2335,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$jif = new JobItemFactory();
 		}
 
-		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
+		$ph = [ 'company_id' => TTUUID::castUUID( $company_id ), ];
 
 		//Make it so employees with 0 hours still show up!! Very important!
 		//Order dock hours first, so it can be deducted from regular time.
@@ -2440,7 +2363,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							a.hourly_rate as hourly_rate,
 							a.hourly_rate_with_burden as hourly_rate_with_burden,
 
-							'. $this->getSQLStringAggregate( 'a.note', ' -- ') .' as udt_note,
+							' . $this->getSQLStringAggregate( 'a.note', ' -- ' ) . ' as udt_note,
 							min(a.start_time_stamp) as start_time_stamp,
 							max(a.end_time_stamp) as end_time_stamp,
 							sum(a.quantity) as quantity,
@@ -2449,65 +2372,65 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
 							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
-					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
-					LEFT JOIN '. $df->getTable() .' as df ON a.department_id = df.id
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
-					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON a.pay_period_id = ppf.id ';
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON a.user_id = uf.id
+					LEFT JOIN ' . $bf->getTable() . ' as bf ON a.branch_id = bf.id
+					LEFT JOIN ' . $df->getTable() . ' as df ON a.department_id = df.id
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
+					LEFT JOIN ' . $ppf_b->getTable() . ' as ppf ON a.pay_period_id = ppf.id ';
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '
-					LEFT JOIN '. $jf->getTable() .' as jf ON a.job_id = jf.id
-					LEFT JOIN '. $jif->getTable() .' as jif ON a.job_item_id = jif.id ';
+					LEFT JOIN ' . $jf->getTable() . ' as jf ON a.job_id = jf.id
+					LEFT JOIN ' . $jif->getTable() . ' as jif ON a.job_item_id = jif.id ';
 		}
 
 		$query .= ' where	uf.company_id = ? ';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : null;
 
-		if ( isset($filter_data['user_status']) AND !is_array($filter_data['user_status']) AND trim($filter_data['user_status']) != '' AND !isset($filter_data['user_status_id']) ) {
-			$filter_data['user_status_id'] = Option::getByFuzzyValue( $filter_data['user_status'], $uf->getOptions('status') );
+		if ( isset( $filter_data['user_status'] ) && !is_array( $filter_data['user_status'] ) && trim( $filter_data['user_status'] ) != '' && !isset( $filter_data['user_status_id'] ) ) {
+			$filter_data['user_status_id'] = Option::getByFuzzyValue( $filter_data['user_status'], $uf->getOptions( 'status' ) );
 		}
-		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_status_id'] ) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : null;
 
-		if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
+		if ( isset( $filter_data['include_user_subgroups'] ) && (bool)$filter_data['include_user_subgroups'] == true ) {
 			$uglf = new UserGroupListFactory();
-			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
+			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], true );
 		}
-		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_group_id'] ) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_branch_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_department_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_title_id'] ) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_branch_id'] ) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_department_id'] ) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['pay_period_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : null;
 
-		if ( isset($filter_data['job_status']) AND !is_array($filter_data['job_status']) AND trim($filter_data['job_status']) != '' AND !isset($filter_data['job_status_id']) ) {
-			$filter_data['job_status_id'] = Option::getByFuzzyValue( $filter_data['job_status'], $jf->getOptions('status') );
+		if ( isset( $filter_data['job_status'] ) && !is_array( $filter_data['job_status'] ) && trim( $filter_data['job_status'] ) != '' && !isset( $filter_data['job_status_id'] ) ) {
+			$filter_data['job_status_id'] = Option::getByFuzzyValue( $filter_data['job_status'], $jf->getOptions( 'status' ) );
 		}
-		$query .= ( isset($filter_data['job_status_id']) ) ? $this->getWhereClauseSQL( 'jf.status_id', $filter_data['job_status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['job_tag']) ) ? $this->getWhereClauseSQL( 'jf.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 600, 'tag' => $filter_data['job_tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['job_status_id'] ) ) ? $this->getWhereClauseSQL( 'jf.status_id', $filter_data['job_status_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['job_group_id'] ) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_job_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_job_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['job_tag'] ) ) ? $this->getWhereClauseSQL( 'jf.id', [ 'company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 600, 'tag' => $filter_data['job_tag'] ], 'tag', $ph ) : null;
 
-		$query .= ( isset($filter_data['job_item_group_id']) ) ? $this->getWhereClauseSQL( 'jif.group_id', $filter_data['job_item_group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['include_job_item_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['exclude_job_item_id'], 'not_uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['job_item_tag']) ) ? $this->getWhereClauseSQL( 'jif.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 610, 'tag' => $filter_data['job_item_tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['job_item_group_id'] ) ) ? $this->getWhereClauseSQL( 'jif.group_id', $filter_data['job_item_group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['include_job_item_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['exclude_job_item_id'], 'not_uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['job_item_tag'] ) ) ? $this->getWhereClauseSQL( 'jif.id', [ 'company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 610, 'tag' => $filter_data['job_item_tag'] ], 'tag', $ph ) : null;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'uf.id', [ 'company_id' => TTUUID::castUUID( $company_id ), 'object_type_id' => 200, 'tag' => $filter_data['tag'] ], 'tag', $ph ) : null;
 
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query	.=	' AND a.date_stamp >= ?';
+		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['start_date'] );
+			$query .= ' AND a.date_stamp >= ?';
 		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query	.=	' AND a.date_stamp <= ?';
+		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['end_date'] );
+			$query .= ' AND a.date_stamp <= ?';
 		}
 
 		//This isn't needed as it lists every status: AND a.status_id in (10, 20, 30)
@@ -2516,7 +2439,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					GROUP BY a.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, a.date_stamp, a.branch_id, a.department_id, a.job_id, a.job_item_id, a.object_type_id, a.src_object_id, a.pay_code_id, pcf.type_id, a.currency_id, a.currency_rate, a.hourly_rate, a.hourly_rate_with_burden
 					';
 
-		$query .= $this->getSortSQL( $order, FALSE );
+		$query .= $this->getSortSQL( $order, false );
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -2525,25 +2448,25 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getGeneralLedgerReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getGeneralLedgerReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
 
-		if ( isset($filter_data['punch_branch_ids']) ) {
+		if ( isset( $filter_data['punch_branch_ids'] ) ) {
 			$filter_data['punch_branch_id'] = $filter_data['punch_branch_ids'];
 		}
-		if ( isset($filter_data['punch_department_ids']) ) {
+		if ( isset( $filter_data['punch_department_ids'] ) ) {
 			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
 		}
 
-		if ( isset($filter_data['branch_ids']) ) {
+		if ( isset( $filter_data['branch_ids'] ) ) {
 			$filter_data['branch_id'] = $filter_data['branch_ids'];
 		}
-		if ( isset($filter_data['department_ids']) ) {
+		if ( isset( $filter_data['department_ids'] ) ) {
 			$filter_data['department_id'] = $filter_data['department_ids'];
 		}
 
@@ -2558,7 +2481,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$jif = new JobItemFactory();
 		}
 
-		$ph = array( 'company_id' => TTUUID::castUUID($company_id), );
+		$ph = [ 'company_id' => TTUUID::castUUID( $company_id ), ];
 
 		//Make it so employees with 0 hours still show up!! Very important!
 		//Order dock hours first, so it can be deducted from regular time.
@@ -2592,61 +2515,61 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
 							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
-					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
-					LEFT JOIN '. $df->getTable() .' as df ON a.department_id = df.id
-					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
-					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON a.pay_period_id = ppf.id ';
+					from	' . $this->getTable() . ' as a
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON a.user_id = uf.id
+					LEFT JOIN ' . $bf->getTable() . ' as bf ON a.branch_id = bf.id
+					LEFT JOIN ' . $df->getTable() . ' as df ON a.department_id = df.id
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON a.pay_code_id = pcf.id
+					LEFT JOIN ' . $ppf_b->getTable() . ' as ppf ON a.pay_period_id = ppf.id ';
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '
-					LEFT JOIN '. $jf->getTable() .' as jf ON a.job_id = jf.id
-					LEFT JOIN '. $jif->getTable() .' as jif ON a.job_item_id = jif.id ';
+					LEFT JOIN ' . $jf->getTable() . ' as jf ON a.job_id = jf.id
+					LEFT JOIN ' . $jif->getTable() . ' as jif ON a.job_item_id = jif.id ';
 		}
 
 		$query .= '	where	uf.company_id = ? ';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_user_id'] ) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_uuid_list', $ph ) : null;
 
-		if ( isset($filter_data['user_status']) AND !is_array($filter_data['user_status']) AND trim($filter_data['user_status']) != '' AND !isset($filter_data['user_status_id']) ) {
-			$filter_data['user_status_id'] = Option::getByFuzzyValue( $filter_data['user_status'], $uf->getOptions('status') );
+		if ( isset( $filter_data['user_status'] ) && !is_array( $filter_data['user_status'] ) && trim( $filter_data['user_status'] ) != '' && !isset( $filter_data['user_status_id'] ) ) {
+			$filter_data['user_status_id'] = Option::getByFuzzyValue( $filter_data['user_status'], $uf->getOptions( 'status' ) );
 		}
-		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_status_id'] ) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : null;
 
-		if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
+		if ( isset( $filter_data['include_user_subgroups'] ) && (bool)$filter_data['include_user_subgroups'] == true ) {
 			$uglf = new UserGroupListFactory();
-			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
+			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], true );
 		}
-		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['punch_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_group_id'] ) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_branch_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_department_id'] ) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_title_id'] ) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_branch_id'] ) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['punch_department_id'] ) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['pay_period_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : null;
 
-		if ( isset($filter_data['job_status']) AND !is_array($filter_data['job_status']) AND trim($filter_data['job_status']) != '' AND !isset($filter_data['job_status_id']) ) {
-			$filter_data['job_status_id'] = Option::getByFuzzyValue( $filter_data['job_status'], $jf->getOptions('status') );
+		if ( isset( $filter_data['job_status'] ) && !is_array( $filter_data['job_status'] ) && trim( $filter_data['job_status'] ) != '' && !isset( $filter_data['job_status_id'] ) ) {
+			$filter_data['job_status_id'] = Option::getByFuzzyValue( $filter_data['job_status'], $jf->getOptions( 'status' ) );
 		}
-		$query .= ( isset($filter_data['job_status_id']) ) ? $this->getWhereClauseSQL( 'jf.status_id', $filter_data['job_status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['job_status_id'] ) ) ? $this->getWhereClauseSQL( 'jf.status_id', $filter_data['job_status_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['job_group_id'] ) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_job_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_job_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['job_item_group_id']) ) ? $this->getWhereClauseSQL( 'jif.group_id', $filter_data['job_item_group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['include_job_item_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['exclude_job_item_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['job_item_group_id'] ) ) ? $this->getWhereClauseSQL( 'jif.group_id', $filter_data['job_item_group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['include_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['include_job_item_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['exclude_job_item_id'], 'not_uuid_list', $ph ) : null;
 
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query	.=	' AND a.date_stamp >= ?';
+		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['start_date'] );
+			$query .= ' AND a.date_stamp >= ?';
 		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query	.=	' AND a.date_stamp <= ?';
+		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( $filter_data['end_date'] );
+			$query .= ' AND a.date_stamp <= ?';
 		}
 
 		//This isn't needed as it lists every status: AND a.status_id in (10, 20, 30)
@@ -2655,7 +2578,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					GROUP BY a.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, a.date_stamp, a.branch_id, a.department_id, a.job_id, a.job_item_id, a.object_type_id, a.src_object_id, a.pay_code_id, pcf.type_id, a.currency_id, a.currency_rate, a.hourly_rate, a.hourly_rate_with_burden
 					';
 
-		$query .= $this->getSortSQL( $order, FALSE );
+		$query .= $this->getSortSQL( $order, false );
 		$this->rs = $this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -2664,89 +2587,89 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( !is_array($order) ) {
+		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
+			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
+				$order = [ Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order'] ];
 			}
 		}
-		if ( isset($filter_data['user_date_total_type_id']) ) {
+		if ( isset( $filter_data['user_date_total_type_id'] ) ) {
 			$filter_data['type_id'] = $filter_data['user_date_total_type_id'];
 		}
-		$additional_order_fields = array('first_name', 'last_name', 'date_stamp', 'time_stamp', 'object_type_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title');
-		if ( $order == NULL ) {
-			$order = array( 'a.date_stamp' => 'asc', 'a.object_type_id' => 'asc', 'a.total_time' => 'asc' );
-			$strict = FALSE;
+		$additional_order_fields = [ 'first_name', 'last_name', 'date_stamp', 'time_stamp', 'object_type_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title' ];
+		if ( $order == null ) {
+			$order = [ 'a.date_stamp' => 'asc', 'a.object_type_id' => 'asc', 'a.total_time' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( isset($filter_data['date_stamp']) ) {
+		if ( isset( $filter_data['date_stamp'] ) ) {
 			$filter_data['date'] = $filter_data['date_stamp'];
 		}
 
-		if ( isset($filter_data['exclude_user_ids']) ) {
+		if ( isset( $filter_data['exclude_user_ids'] ) ) {
 			$filter_data['exclude_id'] = $filter_data['exclude_user_ids'];
 		}
-		if ( isset($filter_data['include_user_ids']) ) {
+		if ( isset( $filter_data['include_user_ids'] ) ) {
 			$filter_data['user_id'] = $filter_data['include_user_ids'];
 		}
-		if ( isset($filter_data['user_title_ids']) ) {
+		if ( isset( $filter_data['user_title_ids'] ) ) {
 			$filter_data['title_id'] = $filter_data['user_title_ids'];
 		}
-		if ( isset($filter_data['group_ids']) ) {
+		if ( isset( $filter_data['group_ids'] ) ) {
 			$filter_data['group_id'] = $filter_data['group_ids'];
 		}
-		if ( isset($filter_data['branch_ids']) ) {
+		if ( isset( $filter_data['branch_ids'] ) ) {
 			$filter_data['default_branch_id'] = $filter_data['branch_ids'];
 		}
-		if ( isset($filter_data['department_ids']) ) {
+		if ( isset( $filter_data['department_ids'] ) ) {
 			$filter_data['default_department_id'] = $filter_data['department_ids'];
 		}
 
-		if ( isset($filter_data['pay_period_ids']) ) {
+		if ( isset( $filter_data['pay_period_ids'] ) ) {
 			$filter_data['pay_period_id'] = $filter_data['pay_period_ids'];
 		}
 
-		if ( isset($filter_data['exclude_job_ids']) ) {
+		if ( isset( $filter_data['exclude_job_ids'] ) ) {
 			$filter_data['exclude_id'] = $filter_data['exclude_job_ids'];
 		}
-		if ( isset($filter_data['include_job_ids']) ) {
+		if ( isset( $filter_data['include_job_ids'] ) ) {
 			$filter_data['include_job_id'] = $filter_data['include_job_ids'];
 		}
-		if ( isset($filter_data['job_group_ids']) ) {
+		if ( isset( $filter_data['job_group_ids'] ) ) {
 			$filter_data['job_group_id'] = $filter_data['job_group_ids'];
 		}
-		if ( isset($filter_data['job_item_ids']) ) {
+		if ( isset( $filter_data['job_item_ids'] ) ) {
 			$filter_data['job_item_id'] = $filter_data['job_item_ids'];
 		}
 
 		//If the user filters timesheet data based on branch/department/job/task, that will exclude object_id=5 (system total time) records
 		//As those are never assigned to any branch/department/job/task and their timesheet will always look funny ( Total Time = 0, even if Regular Time is 8hrs ),
 		//So always include *_id=0.
-		if ( isset($filter_data['branch_id']) AND is_array($filter_data['branch_id']) ) {
+		if ( isset( $filter_data['branch_id'] ) && is_array( $filter_data['branch_id'] ) ) {
 			$filter_data['branch_id'][] = TTUUID::getZeroID();
 		}
-		if ( isset($filter_data['department_id']) AND is_array($filter_data['department_id']) ) {
+		if ( isset( $filter_data['department_id'] ) && is_array( $filter_data['department_id'] ) ) {
 			$filter_data['department_id'][] = TTUUID::getZeroID();
 		}
-		if ( isset($filter_data['job_id']) AND is_array($filter_data['job_id']) ) {
+		if ( isset( $filter_data['job_id'] ) && is_array( $filter_data['job_id'] ) ) {
 			$filter_data['job_id'][] = TTUUID::getZeroID();
 		}
-		if ( isset($filter_data['job_item_id']) AND is_array($filter_data['job_item_id']) ) {
+		if ( isset( $filter_data['job_item_id'] ) && is_array( $filter_data['job_item_id'] ) ) {
 			$filter_data['job_item_id'][] = TTUUID::getZeroID();
 		}
 
@@ -2768,9 +2691,9 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$jif = new JobItemFactory();
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select
@@ -2782,11 +2705,11 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							a.pay_code_id as pay_code_id,
 
 							CASE
-							WHEN a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 30 THEN otpf.name
-							WHEN a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 40 THEN ppf.name
-							WHEN a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 50 THEN apf.name
-							WHEN a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 100 THEN mpf.name
-							WHEN a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 110 THEN bpf.name
+							WHEN a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 30 THEN otpf.name
+							WHEN a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 40 THEN ppf.name
+							WHEN a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 50 THEN apf.name
+							WHEN a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 100 THEN mpf.name
+							WHEN a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 110 THEN bpf.name
 							END as policy_name,
 
 							a.start_type_id as start_type_id,
@@ -2861,94 +2784,94 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		}
 
 		$query .= '
-					from	'. $this->getTable() .' as a
-							LEFT JOIN '. $uf->getTable() .' as d ON a.user_id = d.id
+					from	' . $this->getTable() . ' as a
+							LEFT JOIN ' . $uf->getTable() . ' as d ON a.user_id = d.id
 
-							LEFT JOIN '. $bf->getTable() .' as e ON ( d.default_branch_id = e.id AND e.deleted = 0)
-							LEFT JOIN '. $df->getTable() .' as f ON ( d.default_department_id = f.id AND f.deleted = 0)
-							LEFT JOIN '. $ugf->getTable() .' as g ON ( d.group_id = g.id AND g.deleted = 0 )
-							LEFT JOIN '. $utf->getTable() .' as h ON ( d.title_id = h.id AND h.deleted = 0 )
+							LEFT JOIN ' . $bf->getTable() . ' as e ON ( d.default_branch_id = e.id AND e.deleted = 0)
+							LEFT JOIN ' . $df->getTable() . ' as f ON ( d.default_department_id = f.id AND f.deleted = 0)
+							LEFT JOIN ' . $ugf->getTable() . ' as g ON ( d.group_id = g.id AND g.deleted = 0 )
+							LEFT JOIN ' . $utf->getTable() . ' as h ON ( d.title_id = h.id AND h.deleted = 0 )
 
-							LEFT JOIN '. $bf->getTable() .' as j ON ( a.branch_id = j.id AND j.deleted = 0)
-							LEFT JOIN '. $df->getTable() .' as k ON ( a.department_id = k.id AND k.deleted = 0)
+							LEFT JOIN ' . $bf->getTable() . ' as j ON ( a.branch_id = j.id AND j.deleted = 0)
+							LEFT JOIN ' . $df->getTable() . ' as k ON ( a.department_id = k.id AND k.deleted = 0)
 
-							LEFT JOIN '. $otpf->getTable() .' as otpf ON ( a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 30 AND a.pay_code_id = otpf.id AND otpf.deleted = 0 )
-							LEFT JOIN '. $ppf->getTable() .' as ppf ON   ( a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 40 AND a.pay_code_id = ppf.id AND ppf.deleted = 0 )
-							LEFT JOIN '. $apf->getTable() .' as apf ON   ( a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 50 AND a.pay_code_id = apf.id AND apf.deleted = 0 )
-							LEFT JOIN '. $mpf->getTable() .' as mpf ON   ( a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 100 AND a.pay_code_id = mpf.id AND mpf.deleted = 0 )
-							LEFT JOIN '. $bpf->getTable() .' as bpf ON   ( a.pay_code_id != \''. TTUUID::getZeroID() .'\' AND a.object_type_id = 110 AND a.pay_code_id = bpf.id AND bpf.deleted = 0 )
+							LEFT JOIN ' . $otpf->getTable() . ' as otpf ON ( a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 30 AND a.pay_code_id = otpf.id AND otpf.deleted = 0 )
+							LEFT JOIN ' . $ppf->getTable() . ' as ppf ON   ( a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 40 AND a.pay_code_id = ppf.id AND ppf.deleted = 0 )
+							LEFT JOIN ' . $apf->getTable() . ' as apf ON   ( a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 50 AND a.pay_code_id = apf.id AND apf.deleted = 0 )
+							LEFT JOIN ' . $mpf->getTable() . ' as mpf ON   ( a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 100 AND a.pay_code_id = mpf.id AND mpf.deleted = 0 )
+							LEFT JOIN ' . $bpf->getTable() . ' as bpf ON   ( a.pay_code_id != \'' . TTUUID::getZeroID() . '\' AND a.object_type_id = 110 AND a.pay_code_id = bpf.id AND bpf.deleted = 0 )
 
-							LEFT JOIN '. $uwf->getTable() .' as uwf ON uwf.id = (select uwf.id
-																		from '. $uwf->getTable() .' as uwf
+							LEFT JOIN ' . $uwf->getTable() . ' as uwf ON uwf.id = (select uwf.id
+																		from ' . $uwf->getTable() . ' as uwf
 																		where uwf.user_id = a.user_id
 																			and uwf.effective_date <= a.date_stamp
-																			and uwf.wage_group_id = \''. TTUUID::getZeroID() .'\'
+																			and uwf.wage_group_id = \'' . TTUUID::getZeroID() . '\'
 																			and uwf.deleted = 0
 																			order by uwf.effective_date desc LiMiT 1)
 					';
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= '	LEFT JOIN '. $jf->getTable() .' as jf ON a.job_id = jf.id';
-			$query .= '	LEFT JOIN '. $jif->getTable() .' as jif ON a.job_item_id = jif.id';
+			$query .= '	LEFT JOIN ' . $jf->getTable() . ' as jf ON a.job_id = jf.id';
+			$query .= '	LEFT JOIN ' . $jif->getTable() . ' as jif ON a.job_item_id = jif.id';
 		}
 
 		$query .= '
-						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					WHERE d.company_id = ?';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'd.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'd.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'd.id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'd.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_id'] ) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'uuid_list', $ph ) : null;
 
 		//$query .= ( isset($filter_data['user_date_id']) ) ? $this->getWhereClauseSQL( 'a.user_date_id', $filter_data['user_date_id'], 'uuid_list', $ph ) : NULL;
 		//if ( isset($filter_data['date']) AND !is_array($filter_data['date']) AND trim($filter_data['date']) != '' ) {
 		//	$ph[] = $this->db->BindDate( (int)$filter_data['date'] );
 		//	$query	.=	' AND a.date_stamp = ?';
 		//}
-		$query .= ( isset($filter_data['date']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['date'], 'date_stamp', $ph ) : NULL;
+		$query .= ( isset( $filter_data['date'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['date'], 'date_stamp', $ph ) : null;
 
-		$query .= ( isset($filter_data['object_type_id']) ) ? $this->getWhereClauseSQL( 'a.object_type_id', $filter_data['object_type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['src_object_id']) ) ? $this->getWhereClauseSQL( 'a.src_object_id', $filter_data['src_object_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_code_id']) ) ? $this->getWhereClauseSQL( 'a.pay_code_id', $filter_data['pay_code_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['override']) ) ? $this->getWhereClauseSQL( 'a.override', $filter_data['override'], 'boolean', $ph ) : NULL;
+		$query .= ( isset( $filter_data['object_type_id'] ) ) ? $this->getWhereClauseSQL( 'a.object_type_id', $filter_data['object_type_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['src_object_id'] ) ) ? $this->getWhereClauseSQL( 'a.src_object_id', $filter_data['src_object_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['pay_code_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_code_id', $filter_data['pay_code_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['override'] ) ) ? $this->getWhereClauseSQL( 'a.override', $filter_data['override'], 'boolean', $ph ) : null;
 
-		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'd.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'd.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_status_id'] ) ) ? $this->getWhereClauseSQL( 'd.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : null;
+		$query .= ( isset( $filter_data['legal_entity_id'] ) ) ? $this->getWhereClauseSQL( 'd.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : null;
 
-		if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
+		if ( isset( $filter_data['include_subgroups'] ) && (bool)$filter_data['include_subgroups'] == true ) {
 			$uglf = new UserGroupListFactory();
-			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
+			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], true );
 		}
-		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'd.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_group']) ) ? $this->getWhereClauseSQL( 'g.name', $filter_data['user_group'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'd.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['user_group_id'] ) ) ? $this->getWhereClauseSQL( 'd.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['user_group'] ) ) ? $this->getWhereClauseSQL( 'g.name', $filter_data['user_group'], 'text', $ph ) : null;
+		$query .= ( isset( $filter_data['group_id'] ) ) ? $this->getWhereClauseSQL( 'd.group_id', $filter_data['group_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'd.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'd.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'd.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['default_branch_id'] ) ) ? $this->getWhereClauseSQL( 'd.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['default_department_id'] ) ) ? $this->getWhereClauseSQL( 'd.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['title_id'] ) ) ? $this->getWhereClauseSQL( 'd.title_id', $filter_data['title_id'], 'uuid_list', $ph ) : null;
 
 		//$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 		//$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['pay_period_id'] ) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['branch_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['department_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['branch_id'] ) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['branch_id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['department_id'] ) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['department_id'], 'uuid_list', $ph ) : null;
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'uuid_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : NULL;
+			$query .= ( isset( $filter_data['job_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'uuid_list', $ph ) : null;
+			$query .= ( isset( $filter_data['include_job_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'uuid_list', $ph ) : null;
+			$query .= ( isset( $filter_data['exclude_job_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_uuid_list', $ph ) : null;
+			$query .= ( isset( $filter_data['job_group_id'] ) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'uuid_list', $ph ) : null;
 
-			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'uuid_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['include_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['include_job_item_id'], 'uuid_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['exclude_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['exclude_job_item_id'], 'not_uuid_list', $ph ) : NULL;
+			$query .= ( isset( $filter_data['job_item_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'uuid_list', $ph ) : null;
+			$query .= ( isset( $filter_data['include_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['include_job_item_id'], 'uuid_list', $ph ) : null;
+			$query .= ( isset( $filter_data['exclude_job_item_id'] ) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['exclude_job_item_id'], 'not_uuid_list', $ph ) : null;
 		}
 
-		$query .= ( isset($filter_data['date_stamp']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : NULL;
-		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['start_date'], 'start_datestamp', $ph ) : NULL;
-		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['end_date'], 'end_datestamp', $ph ) : NULL;
+		$query .= ( isset( $filter_data['date_stamp'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : null;
+		$query .= ( isset( $filter_data['start_date'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['start_date'], 'start_datestamp', $ph ) : null;
+		$query .= ( isset( $filter_data['end_date'] ) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['end_date'], 'end_datestamp', $ph ) : null;
 
 		$query .= ' AND (a.deleted = 0 AND d.deleted = 0) ';
 		$query .= $this->getWhereSQL( $where );
@@ -2961,4 +2884,5 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		return $this;
 	}
 }
+
 ?>

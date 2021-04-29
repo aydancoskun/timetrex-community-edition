@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.ErrorTipBox = function( options ) {
 		var opts = $.extend( {}, $.fn.ErrorTipBox.defaults, options );
@@ -64,4 +64,4 @@
 
 	$.fn.ErrorTipBox.defaults = {};
 
-})( jQuery );
+} )( jQuery );

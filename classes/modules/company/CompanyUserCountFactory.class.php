@@ -53,8 +53,9 @@ class CompanyUserCountFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setCompany( $value) {
+	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -62,17 +63,17 @@ class CompanyUserCountFactory extends Factory {
 	 * @param bool $raw
 	 * @return bool|int|mixed
 	 */
-	function getDateStamp( $raw = FALSE ) {
+	function getDateStamp( $raw = false ) {
 		$value = $this->getGenericDataValue( 'date_stamp' );
-		if ( $value !== FALSE ) {
-			if ( $raw === TRUE ) {
+		if ( $value !== false ) {
+			if ( $raw === true ) {
 				return $value;
 			} else {
 				return TTDate::strtotime( $value );
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -80,7 +81,8 @@ class CompanyUserCountFactory extends Factory {
 	 * @return bool
 	 */
 	function setDateStamp( $value ) {
-		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+		$value = ( !is_int( $value ) ) ? trim( $value ) : $value; //Dont trim integer values, as it changes them to strings.
+
 		return $this->setGenericDataValue( 'date_stamp', $value );
 	}
 
@@ -95,8 +97,9 @@ class CompanyUserCountFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setActiveUsers( $value) {
-		$value = (int)trim($value);
+	function setActiveUsers( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'active_users', $value );
 	}
 
@@ -111,8 +114,9 @@ class CompanyUserCountFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setInActiveUsers( $value) {
-		$value = (int)trim($value);
+	function setInActiveUsers( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'inactive_users', $value );
 	}
 
@@ -127,8 +131,9 @@ class CompanyUserCountFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setDeletedUsers( $value) {
-		$value = (int)trim($value);
+	function setDeletedUsers( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'deleted_users', $value );
 	}
 
@@ -142,43 +147,43 @@ class CompanyUserCountFactory extends Factory {
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
 			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-			$this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($this->getCompany()),
-															TTi18n::gettext('Company is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'company',
+												   $clf->getByID( $this->getCompany() ),
+												   TTi18n::gettext( 'Company is invalid' )
+			);
 		}
 		// Date
-		$this->Validator->isDate(		'date_stamp',
-												$this->getDateStamp(),
-												TTi18n::gettext('Incorrect date')
-											);
-		if ( $this->Validator->isError('date_stamp') == FALSE ) {
+		$this->Validator->isDate( 'date_stamp',
+								  $this->getDateStamp(),
+								  TTi18n::gettext( 'Incorrect date' )
+		);
+		if ( $this->Validator->isError( 'date_stamp' ) == false ) {
 			if ( $this->getDateStamp() <= 0 ) {
-				$this->Validator->isTRUE(		'date_stamp',
-												FALSE,
-												TTi18n::gettext('Incorrect date')
-											);
+				$this->Validator->isTRUE( 'date_stamp',
+										  false,
+										  TTi18n::gettext( 'Incorrect date' )
+				);
 			}
 		}
 		// Active users
-		$this->Validator->isNumeric(	'active_users',
-												$this->getActiveUsers(),
-												TTi18n::gettext('Incorrect value')
-											);
+		$this->Validator->isNumeric( 'active_users',
+									 $this->getActiveUsers(),
+									 TTi18n::gettext( 'Incorrect value' )
+		);
 		// Inactive users
-		$this->Validator->isNumeric(	'inactive_users',
-												$this->getInActiveUsers(),
-												TTi18n::gettext('Incorrect value')
-											);
+		$this->Validator->isNumeric( 'inactive_users',
+									 $this->getInActiveUsers(),
+									 TTi18n::gettext( 'Incorrect value' )
+		);
 		// Deleted Users
-		$this->Validator->isNumeric(	'deleted_users',
-												$this->getDeletedUsers(),
-												TTi18n::gettext('Incorrect value')
-											);
+		$this->Validator->isNumeric( 'deleted_users',
+									 $this->getDeletedUsers(),
+									 TTi18n::gettext( 'Incorrect value' )
+		);
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -187,7 +192,7 @@ class CompanyUserCountFactory extends Factory {
 	function postSave() {
 		//$this->removeCache( $this->getId() );
 
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -196,60 +201,60 @@ class CompanyUserCountFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -257,31 +262,32 @@ class CompanyUserCountFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 }
+
 ?>

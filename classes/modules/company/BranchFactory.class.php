@@ -50,62 +50,62 @@ class BranchFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'status':
-				$retval = array(
-										10 => TTi18n::gettext('ENABLED'),
-										20 => TTi18n::gettext('DISABLED')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'ENABLED' ),
+						20 => TTi18n::gettext( 'DISABLED' ),
+				];
 				break;
 			case 'columns':
-				$retval = array(
-										'-1010-status' => TTi18n::gettext('Status'),
-										'-1020-manual_id' => TTi18n::gettext('Code'),
-										'-1030-name' => TTi18n::gettext('Name'),
+				$retval = [
+						'-1010-status'    => TTi18n::gettext( 'Status' ),
+						'-1020-manual_id' => TTi18n::gettext( 'Code' ),
+						'-1030-name'      => TTi18n::gettext( 'Name' ),
 
-										'-1140-address1' => TTi18n::gettext('Address 1'),
-										'-1150-address2' => TTi18n::gettext('Address 2'),
-										'-1160-city' => TTi18n::gettext('City'),
-										'-1170-province' => TTi18n::gettext('Province/State'),
-										'-1180-country' => TTi18n::gettext('Country'),
-										'-1190-postal_code' => TTi18n::gettext('Postal Code'),
-										'-1200-work_phone' => TTi18n::gettext('Work Phone'),
-										'-1210-fax_phone' => TTi18n::gettext('Fax Phone'),
+						'-1140-address1'    => TTi18n::gettext( 'Address 1' ),
+						'-1150-address2'    => TTi18n::gettext( 'Address 2' ),
+						'-1160-city'        => TTi18n::gettext( 'City' ),
+						'-1170-province'    => TTi18n::gettext( 'Province/State' ),
+						'-1180-country'     => TTi18n::gettext( 'Country' ),
+						'-1190-postal_code' => TTi18n::gettext( 'Postal Code' ),
+						'-1200-work_phone'  => TTi18n::gettext( 'Work Phone' ),
+						'-1210-fax_phone'   => TTi18n::gettext( 'Fax Phone' ),
 
-										'-1300-tag' => TTi18n::gettext('Tags'),
+						'-1300-tag' => TTi18n::gettext( 'Tags' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'manual_id',
-								'name',
-								'city',
-								'province',
-								);
+				$retval = [
+						'manual_id',
+						'name',
+						'city',
+						'province',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								'name',
-								'manual_id'
-								);
+				$retval = [
+						'name',
+						'manual_id',
+				];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array(
-								'country',
-								'province',
-								'postal_code'
-								);
+				$retval = [
+						'country',
+						'province',
+						'postal_code',
+				];
 				break;
 		}
 
@@ -117,33 +117,34 @@ class BranchFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'status_id' => 'Status',
-										'status' => FALSE,
-										'manual_id' => 'ManualID',
-										'name' => 'Name',
-										'name_metaphone' => 'NameMetaphone',
-										'address1' => 'Address1',
-										'address2' => 'Address2',
-										'city' => 'City',
-										'country' => 'Country',
-										'province' => 'Province',
-										'postal_code' => 'PostalCode',
-										'work_phone' => 'WorkPhone',
-										'fax_phone' => 'FaxPhone',
-										'other_id1' => 'OtherID1',
-										'other_id2' => 'OtherID2',
-										'other_id3' => 'OtherID3',
-										'other_id4' => 'OtherID4',
-										'other_id5' => 'OtherID5',
-										'longitude' => 'Longitude',
-										'latitude' => 'Latitude',
-										'geo_fence_ids' => 'GEOFenceIds',
-										'tag' => 'Tag',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'             => 'ID',
+				'company_id'     => 'Company',
+				'status_id'      => 'Status',
+				'status'         => false,
+				'manual_id'      => 'ManualID',
+				'name'           => 'Name',
+				'name_metaphone' => 'NameMetaphone',
+				'address1'       => 'Address1',
+				'address2'       => 'Address2',
+				'city'           => 'City',
+				'country'        => 'Country',
+				'province'       => 'Province',
+				'postal_code'    => 'PostalCode',
+				'work_phone'     => 'WorkPhone',
+				'fax_phone'      => 'FaxPhone',
+				'other_id1'      => 'OtherID1',
+				'other_id2'      => 'OtherID2',
+				'other_id3'      => 'OtherID3',
+				'other_id4'      => 'OtherID4',
+				'other_id5'      => 'OtherID5',
+				'longitude'      => 'Longitude',
+				'latitude'       => 'Latitude',
+				'geo_fence_ids'  => 'GEOFenceIds',
+				'tag'            => 'Tag',
+				'deleted'        => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -158,8 +159,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setCompany( $value) {
+	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -174,8 +176,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setStatus( $value) {
-		$value = (int)trim( $value);
+	function setStatus( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'status_id', $value );
 	}
 
@@ -183,48 +186,48 @@ class BranchFactory extends Factory {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function isUniqueManualID( $id) {
-		if ( $this->getCompany() == FALSE ) {
-			return FALSE;
+	function isUniqueManualID( $id ) {
+		if ( $this->getCompany() == false ) {
+			return false;
 		}
 
-		$ph = array(
-					'manual_id' => (int)$id,
-					'company_id' =>	TTUUID::castUUID( $this->getCompany() ),
-					);
+		$ph = [
+				'manual_id'  => (int)$id,
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+		];
 
-		$query = 'select id from '. $this->getTable() .' where manual_id = ? AND company_id = ? AND deleted=0';
-		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id, 'Unique Code: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'select id from ' . $this->getTable() . ' where manual_id = ? AND company_id = ? AND deleted=0';
+		$id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $id, 'Unique Code: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $id === FALSE ) {
-			return TRUE;
+		if ( $id === false ) {
+			return true;
 		} else {
-			if ($id == $this->getId() ) {
-				return TRUE;
+			if ( $id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $company_id UUID
 	 * @return int
 	 */
-	function getNextAvailableManualId( $company_id = NULL ) {
+	function getNextAvailableManualId( $company_id = null ) {
 		global $current_company;
 
-		if ( $company_id == '' AND is_object($current_company) ) {
+		if ( $company_id == '' && is_object( $current_company ) ) {
 			$company_id = $current_company->getId();
-		} elseif ( $company_id == '' AND isset($this) AND is_object($this) ) {
+		} else if ( $company_id == '' && isset( $this ) && is_object( $this ) ) {
 			$company_id = $this->getCompany();
 		}
 
 		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getHighestManualIDByCompanyId( $company_id );
 		if ( $blf->getRecordCount() > 0 ) {
-			$next_available_manual_id = ($blf->getCurrent()->getManualId() + 1);
+			$next_available_manual_id = ( $blf->getCurrent()->getManualId() + 1 );
 		} else {
 			$next_available_manual_id = 1;
 		}
@@ -243,8 +246,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setManualID( $value) {
-		$value = $this->Validator->stripNonNumeric( trim($value) );
+	function setManualID( $value ) {
+		$value = $this->Validator->stripNonNumeric( trim( $value ) );
+
 		return $this->setGenericDataValue( 'manual_id', $value );
 	}
 
@@ -252,38 +256,38 @@ class BranchFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		Debug::Arr($this->getCompany(), 'Company: ', __FILE__, __LINE__, __METHOD__, 10);
-		if ( $this->getCompany() == FALSE ) {
-			return FALSE;
+	function isUniqueName( $name ) {
+		Debug::Arr( $this->getCompany(), 'Company: ', __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $this->getCompany() == false ) {
+			return false;
 		}
 
-		$name = trim($name);
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'name' => TTi18n::strtolower($name),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'name'       => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->getTable() .'
+		$query = 'select id from ' . $this->getTable() . '
 					where company_id = ?
 						AND lower(name) = ?
 						AND deleted = 0';
-		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$name_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -297,9 +301,10 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim( $value);
+	function setName( $value ) {
+		$value = trim( $value );
 		$this->setNameMetaphone( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -314,8 +319,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setNameMetaphone( $value) {
-		$value = metaphone( trim($value) );
+	function setNameMetaphone( $value ) {
+		$value = metaphone( trim( $value ) );
+
 		return $this->setGenericDataValue( 'name_metaphone', $value );
 	}
 
@@ -330,8 +336,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setAddress1( $value) {
-		$value = trim($value);
+	function setAddress1( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'address1', $value );
 	}
 
@@ -346,8 +353,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setAddress2( $value) {
-		$value = trim($value);
+	function setAddress2( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'address2', $value );
 	}
 
@@ -362,8 +370,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setCity( $value) {
-		$value = trim($value);
+	function setCity( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'city', $value );
 	}
 
@@ -378,8 +387,8 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setProvince( $value) {
-		return $this->setGenericDataValue( 'province', strtoupper( trim($value) ) );
+	function setProvince( $value ) {
+		return $this->setGenericDataValue( 'province', strtoupper( trim( $value ) ) );
 	}
 
 	/**
@@ -393,8 +402,8 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setCountry( $value) {
-		return $this->setGenericDataValue( 'country', strtoupper( trim($value) ) );
+	function setCountry( $value ) {
+		return $this->setGenericDataValue( 'country', strtoupper( trim( $value ) ) );
 	}
 
 	/**
@@ -408,8 +417,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setPostalCode( $value) {
+	function setPostalCode( $value ) {
 		$value = strtoupper( $this->Validator->stripSpaces( $value ) );
+
 		return $this->setGenericDataValue( 'postal_code', $value );
 	}
 
@@ -425,10 +435,10 @@ class BranchFactory extends Factory {
 	 * @return bool
 	 */
 	function setLongitude( $value ) {
-		if ( is_numeric($value) ) {
+		if ( is_numeric( $value ) ) {
 			$value = Misc::removeTrailingZeros( round( (float)$value, 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000 -- Don't use parseFloat() here as it should never be a user input value with commas as decimal symbols.
 		} else {
-			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
+			$value = null; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
 
 		return $this->setGenericDataValue( 'longitude', $value );
@@ -446,10 +456,10 @@ class BranchFactory extends Factory {
 	 * @return bool
 	 */
 	function setLatitude( $value ) {
-		if ( is_numeric($value) ) {
+		if ( is_numeric( $value ) ) {
 			$value = Misc::removeTrailingZeros( round( (float)$value, 6 ) ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000 -- Don't use parseFloat() here as it should never be a user input value with commas as decimal symbols.
 		} else {
-			$value = NULL; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
+			$value = null; //Allow $value=NULL so the coordinates can be cleared. Also make sure if FALSE is passed in here we assume NULL so it doesn't get cast to integer and saved in DB.
 		}
 
 		return $this->setGenericDataValue( 'latitude', $value );
@@ -466,8 +476,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setWorkPhone( $value) {
-		$value = trim($value);
+	function setWorkPhone( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'work_phone', $value );
 	}
 
@@ -482,8 +493,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setFaxPhone( $value) {
-		$value = trim($value);
+	function setFaxPhone( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'fax_phone', $value );
 	}
 
@@ -498,8 +510,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setOtherID1( $value) {
-		$value = trim($value);
+	function setOtherID1( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'other_id1', $value );
 	}
 
@@ -514,8 +527,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setOtherID2( $value) {
-		$value = trim($value);
+	function setOtherID2( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'other_id2', $value );
 	}
 
@@ -530,8 +544,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setOtherID3( $value) {
-		$value = trim($value);
+	function setOtherID3( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'other_id3', $value );
 	}
 
@@ -546,8 +561,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setOtherID4( $value) {
-		$value = trim($value);
+	function setOtherID4( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'other_id4', $value );
 	}
 
@@ -562,8 +578,9 @@ class BranchFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setOtherID5( $value) {
-		$value = trim($value);
+	function setOtherID5( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'other_id5', $value );
 	}
 
@@ -578,8 +595,9 @@ class BranchFactory extends Factory {
 	 * @param string $ids UUID
 	 * @return bool
 	 */
-	function setGEOFenceIds( $ids) {
-		Debug::text('Setting GEO Fence IDs...', __FILE__, __LINE__, __METHOD__, 10);
+	function setGEOFenceIds( $ids ) {
+		Debug::text( 'Setting GEO Fence IDs...', __FILE__, __LINE__, __METHOD__, 10 );
+
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 4000, $this->getID(), (array)$ids );
 	}
 
@@ -590,14 +608,14 @@ class BranchFactory extends Factory {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
 		$value = $this->getGenericTempDataValue( 'tags' );
-		if ( $value !== FALSE ) {
+		if ( $value !== false ) {
 			return $value;
-		} elseif ( TTUUID::isUUID( $this->getCompany() ) AND $this->getCompany() != TTUUID::getZeroID() AND $this->getCompany() != TTUUID::getNotExistID()
-				AND TTUUID::isUUID($this->getID()) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID() ) {
+		} else if ( TTUUID::isUUID( $this->getCompany() ) && $this->getCompany() != TTUUID::getZeroID() && $this->getCompany() != TTUUID::getNotExistID()
+				&& TTUUID::isUUID( $this->getID() ) && $this->getID() != TTUUID::getZeroID() && $this->getID() != TTUUID::getNotExistID() ) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 110, $this->getID() );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -605,7 +623,8 @@ class BranchFactory extends Factory {
 	 * @return bool
 	 */
 	function setTag( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		//Save the tags in temporary memory to be committed in postSave()
 		return $this->setGenericTempDataValue( 'tags', $value );
 	}
@@ -614,56 +633,56 @@ class BranchFactory extends Factory {
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 
 		//Status
-		if ( $this->getStatus() !== FALSE ) {
+		if ( $this->getStatus() !== false ) {
 			$this->Validator->inArrayKey( 'status',
-													$this->getStatus(),
-													TTi18n::gettext( 'Incorrect Status' ),
-													$this->getOptions( 'status' )
-												);
+										  $this->getStatus(),
+										  TTi18n::gettext( 'Incorrect Status' ),
+										  $this->getOptions( 'status' )
+			);
 		}
 
 		//Manual ID
-		if ( $this->getManualID() !== FALSE ) {
+		if ( $this->getManualID() !== false ) {
 			$this->Validator->isNumeric( 'manual_id',
-												$this->getManualID(),
-												TTi18n::gettext( 'Code is invalid' )
-											);
-			if ( $this->Validator->isError('manual_id') == FALSE ) {
+										 $this->getManualID(),
+										 TTi18n::gettext( 'Code is invalid' )
+			);
+			if ( $this->Validator->isError( 'manual_id' ) == false ) {
 				$this->Validator->isLength( 'manual_id',
-													$this->getManualID(),
-													TTi18n::gettext( 'Code has too many digits' ),
-													0,
-													10 );
+											$this->getManualID(),
+											TTi18n::gettext( 'Code has too many digits' ),
+											0,
+											10 );
 			}
-			if ( $this->Validator->isError('manual_id') == FALSE ) {
+			if ( $this->Validator->isError( 'manual_id' ) == false ) {
 				$this->Validator->isTrue( 'manual_id',
-											( $this->Validator->stripNon32bitInteger( $this->getManualID() ) === 0 ) ? FALSE : TRUE,
-											TTi18n::gettext( 'Code is invalid, maximum value exceeded' ) );
+										  ( $this->Validator->stripNon32bitInteger( $this->getManualID() ) === 0 ) ? false : true,
+										  TTi18n::gettext( 'Code is invalid, maximum value exceeded' ) );
 			}
-			if ( $this->Validator->isError('manual_id') == FALSE ) {
+			if ( $this->Validator->isError( 'manual_id' ) == false ) {
 				$this->Validator->isTrue( 'manual_id',
-											$this->isUniqueManualID( $this->getManualID() ),
-											TTi18n::gettext( 'Code is already in use, please enter a different one' ) );
+										  $this->isUniqueManualID( $this->getManualID() ),
+										  TTi18n::gettext( 'Code is already in use, please enter a different one' ) );
 			}
 		}
 
 		//Name
-		if ( $this->getName() !== FALSE ) {
+		if ( $this->getName() !== false ) {
 			$this->Validator->isLength( 'name',
-											$this->getName(),
-											TTi18n::gettext( 'Name is too short or too long' ),
-											2,
-											100 );
-			if ( $this->Validator->isError('name') == FALSE ) {
+										$this->getName(),
+										TTi18n::gettext( 'Name is too short or too long' ),
+										2,
+										100 );
+			if ( $this->Validator->isError( 'name' ) == false ) {
 				$this->Validator->isTrue( 'name',
-												$this->isUniqueName( $this->getName() ),
-												TTi18n::gettext( 'Branch name already exists' ) );
+										  $this->isUniqueName( $this->getName() ),
+										  TTi18n::gettext( 'Branch name already exists' ) );
 			}
 		}
 
@@ -673,7 +692,7 @@ class BranchFactory extends Factory {
 									   $this->getAddress1(),
 									   TTi18n::gettext( 'Address1 contains invalid characters' ),
 									   $this->address_validator_regex );
-			if ( $this->Validator->isError('address1') == FALSE ) {
+			if ( $this->Validator->isError( 'address1' ) == false ) {
 				$this->Validator->isLength( 'address1',
 											$this->getAddress1(),
 											TTi18n::gettext( 'Address1 is too short or too long' ),
@@ -688,7 +707,7 @@ class BranchFactory extends Factory {
 									   $this->getAddress2(),
 									   TTi18n::gettext( 'Address2 contains invalid characters' ),
 									   $this->address_validator_regex );
-			if ( $this->Validator->isError('address2') == FALSE ) {
+			if ( $this->Validator->isError( 'address2' ) == false ) {
 				$this->Validator->isLength( 'address2',
 											$this->getAddress2(),
 											TTi18n::gettext( 'Address2 is too short or too long' ),
@@ -698,42 +717,42 @@ class BranchFactory extends Factory {
 		}
 
 		//City
-		if ( $this->getCity() !== FALSE ) {
+		if ( $this->getCity() !== false ) {
 			$this->Validator->isRegEx( 'city',
-											$this->getCity(),
-											TTi18n::gettext( 'City contains invalid characters' ),
-											$this->city_validator_regex );
-			if ( $this->Validator->isError('city') == FALSE ) {
+									   $this->getCity(),
+									   TTi18n::gettext( 'City contains invalid characters' ),
+									   $this->city_validator_regex );
+			if ( $this->Validator->isError( 'city' ) == false ) {
 				$this->Validator->isLength( 'city',
-												$this->getCity(),
-												TTi18n::gettext( 'City name is too short or too long' ),
-												2,
-												250 );
+											$this->getCity(),
+											TTi18n::gettext( 'City name is too short or too long' ),
+											2,
+											250 );
 			}
 		}
 
 		//Province
-		if ( $this->getProvince() !== FALSE ) {
+		if ( $this->getProvince() !== false ) {
 			$cf = TTnew( 'CompanyFactory' ); /** @var CompanyFactory $cf */
 			$options_arr = $cf->getOptions( 'province' );
 			if ( isset( $options_arr[$this->getCountry()] ) ) {
 				$options = $options_arr[$this->getCountry()];
 			} else {
-				$options = array();
+				$options = [];
 			}
 			$this->Validator->inArrayKey( 'province',
-												$this->getProvince(),
-												TTi18n::gettext( 'Invalid Province/State' ),
-												$options );
+										  $this->getProvince(),
+										  TTi18n::gettext( 'Invalid Province/State' ),
+										  $options );
 			unset( $options, $options_arr );
 		}
 
 		//Country
-		if ( $this->getCountry() !== FALSE ) {
+		if ( $this->getCountry() !== false ) {
 			$this->Validator->inArrayKey( 'country',
-											$this->getCountry(),
-											TTi18n::gettext( 'Invalid Country' ),
-											$cf->getOptions( 'country' ) );
+										  $this->getCountry(),
+										  TTi18n::gettext( 'Invalid Country' ),
+										  $cf->getOptions( 'country' ) );
 		}
 
 		//Postal Code
@@ -742,7 +761,7 @@ class BranchFactory extends Factory {
 											$this->getPostalCode(),
 											TTi18n::gettext( 'Postal/ZIP Code contains invalid characters, invalid format, or does not match Province/State' ),
 											$this->getCountry(), $this->getProvince() );
-			if ( $this->Validator->isError('postal_code') == FALSE ) {
+			if ( $this->Validator->isError( 'postal_code' ) == false ) {
 				$this->Validator->isLength( 'postal_code',
 											$this->getPostalCode(),
 											TTi18n::gettext( 'Postal/ZIP Code is too short or too long' ),
@@ -816,22 +835,22 @@ class BranchFactory extends Factory {
 		//
 
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		if ( $this->getStatus() == FALSE ) {
-			$this->setStatus(10);
+		if ( $this->getStatus() == false ) {
+			$this->setStatus( 10 );
 		}
 
-		if ( $this->getManualID() == FALSE ) {
+		if ( $this->getManualID() == false ) {
 			$this->setManualID( $this->getNextAvailableManualId( $this->getCompany() ) );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -841,55 +860,55 @@ class BranchFactory extends Factory {
 		$data_diff = $this->getDataDifferences();
 		$this->removeCache( $this->getId() );
 
-		if ( $this->getDeleted() == FALSE ) {
+		if ( $this->getDeleted() == false ) {
 			CompanyGenericTagMapFactory::setTags( $this->getCompany(), 110, $this->getID(), $this->getTag() );
 
 			$this->clearGeoCode( $data_diff ); //Clear Lon/Lat coordinates when address has changed.
 		}
 
-		if ( $this->getDeleted() == TRUE ) {
-			Debug::Text('UnAssign Hours from Branch: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->getDeleted() == true ) {
+			Debug::Text( 'UnAssign Hours from Branch: ' . $this->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 			//Unassign hours from this branch.
 			$pcf = TTnew( 'PunchControlFactory' ); /** @var PunchControlFactory $pcf */
-			$query = 'update '. $pcf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $pcf->getTable() . ' set branch_id = \'' . TTUUID::getZeroID() . '\' where branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			$udtf = TTnew( 'UserDateTotalFactory' ); /** @var UserDateTotalFactory $udtf */
-			$query = 'update '. $udtf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $udtf->getTable() . ' set branch_id = \'' . TTUUID::getZeroID() . '\' where branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			$sf_b = TTnew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf_b */
-			$query = 'update '. $sf_b->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $sf_b->getTable() . ' set branch_id = \'' . TTUUID::getZeroID() . '\' where branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
-			$query = 'update '. $uf->getTable() .' set default_branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $uf->getTable() . ' set default_branch_id = \'' . TTUUID::getZeroID() . '\' where company_id = \'' . TTUUID::castUUID( $this->getCompany() ) . '\' AND default_branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			$udf = TTnew( 'UserDefaultFactory' ); /** @var UserDefaultFactory $udf */
-			$query = 'update '. $udf->getTable() .' set default_branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND default_branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $udf->getTable() . ' set default_branch_id = \'' . TTUUID::getZeroID() . '\' where company_id = \'' . TTUUID::castUUID( $this->getCompany() ) . '\' AND default_branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			$sf = TTnew( 'StationFactory' ); /** @var StationFactory $sf */
-			$query = 'update '. $sf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where company_id = \''. TTUUID::castUUID($this->getCompany()) .'\' AND branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $sf->getTable() . ' set branch_id = \'' . TTUUID::getZeroID() . '\' where company_id = \'' . TTUUID::castUUID( $this->getCompany() ) . '\' AND branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			$sbf = TTnew( 'StationBranchFactory' ); /** @var StationBranchFactory $sbf */
-			$query = 'delete from '. $sbf->getTable() .' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'delete from ' . $sbf->getTable() . ' where branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			$rstf = TTnew( 'RecurringScheduleTemplateFactory' ); /** @var RecurringScheduleTemplateFactory $rstf */
-			$query = 'update '. $rstf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $rstf->getTable() . ' set branch_id = \'' . TTUUID::getZeroID() . '\' where branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			$rsf = TTnew( 'RecurringScheduleFactory' ); /** @var RecurringScheduleFactory $rsf */
-			$query = 'update '. $rsf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-			$this->ExecuteSQL($query);
+			$query = 'update ' . $rsf->getTable() . ' set branch_id = \'' . TTUUID::getZeroID() . '\' where branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+			$this->ExecuteSQL( $query );
 
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 				$jf = TTNew( 'JobFactory' ); /** @var JobFactory $jf */
-				$query = 'update '. $jf->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-				$this->ExecuteSQL($query);
+				$query = 'update ' . $jf->getTable() . ' set branch_id = \'' . TTUUID::getZeroID() . '\' where branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+				$this->ExecuteSQL( $query );
 
 				//Job employee criteria
 				$cgmlf = TTnew( 'CompanyGenericMapListFactory' ); /** @var CompanyGenericMapListFactory $cgmlf */
@@ -904,12 +923,12 @@ class BranchFactory extends Factory {
 
 			if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
 				$uef = TTNew( 'UserExpenseFactory' ); /** @var UserExpenseFactory $uef */
-				$query = 'update '. $uef->getTable() .' set branch_id = \''. TTUUID::getZeroID() .'\' where branch_id = \''. TTUUID::castUUID($this->getId()) .'\'';
-				$this->ExecuteSQL($query);
+				$query = 'update ' . $uef->getTable() . ' set branch_id = \'' . TTUUID::getZeroID() . '\' where branch_id = \'' . TTUUID::castUUID( $this->getId() ) . '\'';
+				$this->ExecuteSQL( $query );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -926,11 +945,11 @@ class BranchFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -942,27 +961,27 @@ class BranchFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'status':
-							$function = 'get'.$variable;
+							$function = 'get' . $variable;
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -975,7 +994,6 @@ class BranchFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -989,8 +1007,9 @@ class BranchFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Branch') .': '. $this->getName(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Branch' ) . ': ' . $this->getName(), null, $this->getTable(), $this );
 	}
 
 }
+
 ?>

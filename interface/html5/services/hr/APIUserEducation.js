@@ -47,5 +47,4 @@ var APIUserEducation = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportUserEducation', arguments );
 	}
 
-
 } );

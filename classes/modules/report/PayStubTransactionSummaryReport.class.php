@@ -43,26 +43,26 @@ class PayStubTransactionSummaryReport extends Report {
 	 * PayStubTransactionSummaryReport constructor.
 	 */
 	function __construct() {
-		$this->title = TTi18n::getText('Pay Stub Transaction Summary Report');
+		$this->title = TTi18n::getText( 'Pay Stub Transaction Summary Report' );
 		$this->file_name = 'paystub_transaction_summary_report';
 
 		parent::__construct();
 
-		return TRUE;
+		return true;
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id    UUID
 	 * @param string $company_id UUID
 	 * @return bool
 	 */
 	protected function _checkPermissions( $user_id, $company_id ) {
-		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
-				AND $this->getPermissionObject()->Check('report', 'view_pay_stub_summary', $user_id, $company_id ) ) {
-			return TRUE;
+		if ( $this->getPermissionObject()->Check( 'report', 'enabled', $user_id, $company_id )
+				&& $this->getPermissionObject()->Check( 'report', 'view_pay_stub_summary', $user_id, $company_id ) ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -72,11 +72,11 @@ class PayStubTransactionSummaryReport extends Report {
 		$config = $this->getConfig();
 
 		//Make sure some time period is selected.
-		if ( ( !isset($config['filter']['time_period']) AND !isset($config['filter']['pay_period_id']) ) OR ( isset($config['filter']['time_period']) AND isset($config['filter']['time_period']['time_period']) AND $config['filter']['time_period']['time_period'] == TTUUID::getZeroId() ) ) {
-			$this->validator->isTrue( 'time_period', FALSE, TTi18n::gettext('No time period defined for this report') );
+		if ( ( !isset( $config['filter']['time_period'] ) && !isset( $config['filter']['pay_period_id'] ) ) || ( isset( $config['filter']['time_period'] ) && isset( $config['filter']['time_period']['time_period'] ) && $config['filter']['time_period']['time_period'] == TTUUID::getZeroId() ) ) {
+			$this->validator->isTrue( 'time_period', false, TTi18n::gettext( 'No time period defined for this report' ) );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -84,65 +84,65 @@ class PayStubTransactionSummaryReport extends Report {
 	 * @param null $params
 	 * @return array|null
 	 */
-	protected function _getOptions( $name, $params = NULL ) {
-		$retval = NULL;
-		switch( $name ) {
+	protected function _getOptions( $name, $params = null ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'status':
 			case 'type':
 			case 'transaction_status_id':
 			case 'transaction_type_id':
 			case 'remittance_source_account_type_id':
-				$pstf = TTnew('PayStubTransactionFactory'); /** @var PayStubTransactionFactory $pstf */
-				$retval = $pstf->getOptions($name);
+				$pstf = TTnew( 'PayStubTransactionFactory' ); /** @var PayStubTransactionFactory $pstf */
+				$retval = $pstf->getOptions( $name );
 				break;
 			case 'output_format':
-				$retval = parent::getOptions('default_output_format');
+				$retval = parent::getOptions( 'default_output_format' );
 				break;
 			case 'default_setup_fields':
-				$retval = array(
-										'template',
-										'time_period',
-										'columns',
-								);
+				$retval = [
+						'template',
+						'time_period',
+						'columns',
+				];
 				break;
 			case 'setup_fields':
-				$retval = array(
-							'-1000-template' => TTi18n::gettext('Template'),
-							'-1010-time_period' => TTi18n::gettext('Time Period'),
-							'-1500-legal_entity_id' => TTi18n::gettext('Legal Entity'),
+				$retval = [
+						'-1000-template'        => TTi18n::gettext( 'Template' ),
+						'-1010-time_period'     => TTi18n::gettext( 'Time Period' ),
+						'-1500-legal_entity_id' => TTi18n::gettext( 'Legal Entity' ),
 
-							'-1510-transaction_transaction_date-date_stamp' => TTi18n::gettext('Transaction Date'),
-							//'-1510-transaction_type_id' => TTi18n::gettext('Transaction Type'),
-							'-1520-transaction_status_id' => TTi18n::gettext('Transaction Status'),
-							'-1520-is_reprint' => TTi18n::gettext('Reprint'),
+						'-1510-transaction_transaction_date-date_stamp' => TTi18n::gettext( 'Transaction Date' ),
+						//'-1510-transaction_type_id' => TTi18n::gettext('Transaction Type'),
+						'-1520-transaction_status_id'                   => TTi18n::gettext( 'Transaction Status' ),
+						'-1520-is_reprint'                              => TTi18n::gettext( 'Reprint' ),
 
-							'-1620-remittance_source_account_type_id' => TTi18n::gettext('Source Account Type'),
-							'-1650-confirmation_number' => TTi18n::gettext('Confirmation Number'),
+						'-1620-remittance_source_account_type_id' => TTi18n::gettext( 'Source Account Type' ),
+						'-1650-confirmation_number'               => TTi18n::gettext( 'Confirmation Number' ),
 
-							'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
-							'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
-							'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
-							'-2035-user_tag' => TTi18n::gettext('Employee Tags'),
-							'-2040-include_user_id' => TTi18n::gettext('Employee Include'),
-							'-2050-exclude_user_id' => TTi18n::gettext('Employee Exclude'),
-							'-2060-default_branch_id' => TTi18n::gettext('Default Branch'),
-							'-2070-default_department_id' => TTi18n::gettext('Default Department'),
-							'-2080-transaction_currency_id' => TTi18n::gettext('Currency'),
-							'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
+						'-2010-user_status_id'          => TTi18n::gettext( 'Employee Status' ),
+						'-2020-user_group_id'           => TTi18n::gettext( 'Employee Group' ),
+						'-2030-user_title_id'           => TTi18n::gettext( 'Employee Title' ),
+						'-2035-user_tag'                => TTi18n::gettext( 'Employee Tags' ),
+						'-2040-include_user_id'         => TTi18n::gettext( 'Employee Include' ),
+						'-2050-exclude_user_id'         => TTi18n::gettext( 'Employee Exclude' ),
+						'-2060-default_branch_id'       => TTi18n::gettext( 'Default Branch' ),
+						'-2070-default_department_id'   => TTi18n::gettext( 'Default Department' ),
+						'-2080-transaction_currency_id' => TTi18n::gettext( 'Currency' ),
+						'-2100-custom_filter'           => TTi18n::gettext( 'Custom Filter' ),
 
-							'-2200-pay_stub_status_id' => TTi18n::gettext('Pay Stub Status'),
-							'-2205-pay_stub_type_id' => TTi18n::gettext('Pay Stub Type'),
-							'-2210-pay_stub_run_id' => TTi18n::gettext('Payroll Run'),
+						'-2200-pay_stub_status_id' => TTi18n::gettext( 'Pay Stub Status' ),
+						'-2205-pay_stub_type_id'   => TTi18n::gettext( 'Pay Stub Type' ),
+						'-2210-pay_stub_run_id'    => TTi18n::gettext( 'Payroll Run' ),
 
-							//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+						//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
-							'-4400-amount' => TTi18n::gettext('Amount'),
-							'-5000-columns' => TTi18n::gettext('Display Columns'),
-							'-5010-group' => TTi18n::gettext('Group By'),
-							'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
-							'-5030-sort' => TTi18n::gettext('Sort By'),
-							'-5040-page_break' => TTi18n::gettext('Page Break On'),
-							);
+						'-4400-amount'     => TTi18n::gettext( 'Amount' ),
+						'-5000-columns'    => TTi18n::gettext( 'Display Columns' ),
+						'-5010-group'      => TTi18n::gettext( 'Group By' ),
+						'-5020-sub_total'  => TTi18n::gettext( 'SubTotal By' ),
+						'-5030-sort'       => TTi18n::gettext( 'Sort By' ),
+						'-5040-page_break' => TTi18n::gettext( 'Page Break On' ),
+				];
 				break;
 			case 'time_period':
 				$retval = TTDate::getTimePeriodOptions();
@@ -151,16 +151,16 @@ class PayStubTransactionSummaryReport extends Report {
 				$retval = array_merge(
 //								TTDate::getReportDateOptions( 'hire', TTi18n::getText( 'Hire Date' ), 13, FALSE ),
 //								TTDate::getReportDateOptions( 'termination', TTi18n::getText( 'Termination Date' ), 14, FALSE ),
-								TTDate::getReportDateOptions( 'pay_stub_transaction', TTi18n::getText('Pay Stub Transaction Date'), 26, TRUE ),
-								TTDate::getReportDateOptions( 'transaction', TTi18n::getText('Transaction Date'), 27, TRUE )
-								);
+						TTDate::getReportDateOptions( 'pay_stub_transaction', TTi18n::getText( 'Pay Stub Transaction Date' ), 26, true ),
+						TTDate::getReportDateOptions( 'transaction', TTi18n::getText( 'Transaction Date' ), 27, true )
+				);
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
 				$oflf = TTnew( 'OtherFieldListFactory' ); /** @var OtherFieldListFactory $oflf */
 				//User and Punch fields conflict as they are merged together in a secondary process.
-				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10), array( 10 => '' ) );
-				if ( is_array($other_field_names) ) {
+				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), [ 10 ], [ 10 => '' ] );
+				if ( is_array( $other_field_names ) ) {
 					$retval = Misc::addSortPrefix( $other_field_names, 9000 );
 				}
 				break;
@@ -169,8 +169,8 @@ class PayStubTransactionSummaryReport extends Report {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
-					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'PayStubTransactionSummaryReport', 'custom_column' );
-					if ( is_array($custom_column_labels) ) {
+					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions( 'display_column_type_ids' ), null, 'PayStubTransactionSummaryReport', 'custom_column' );
+					if ( is_array( $custom_column_labels ) ) {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
 				}
@@ -178,14 +178,14 @@ class PayStubTransactionSummaryReport extends Report {
 			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
-					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'PayStubTransactionSummaryReport', 'custom_column' );
+					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions( 'filter_column_type_ids' ), null, 'PayStubTransactionSummaryReport', 'custom_column' );
 				}
 				break;
 			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
-					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'PayStubTransactionSummaryReport', 'custom_column' );
-					if ( is_array($report_dynamic_custom_column_labels) ) {
+					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions( 'display_column_type_ids' ), $rcclf->getOptions( 'dynamic_format_ids' ), 'PayStubTransactionSummaryReport', 'custom_column' );
+					if ( is_array( $report_dynamic_custom_column_labels ) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
 				}
@@ -193,20 +193,20 @@ class PayStubTransactionSummaryReport extends Report {
 			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' ); /** @var ReportCustomColumnListFactory $rcclf */
-					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'PayStubTransactionummaryReport', 'custom_column' );
-					if ( is_array($report_static_custom_column_labels) ) {
+					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions( 'display_column_type_ids' ), $rcclf->getOptions( 'static_format_ids' ), 'PayStubTransactionummaryReport', 'custom_column' );
+					if ( is_array( $report_static_custom_column_labels ) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
 				}
 				break;
 			case 'formula_columns':
-				$retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
+				$retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions( 'static_columns' ), (array)$this->getOptions( 'report_static_custom_column' ) ), $this->getOptions( 'dynamic_columns' ) ) );
 				break;
 			case 'filter_columns':
-				$retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
+				$retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions( 'static_columns' ), $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) ) );
 				break;
 			case 'static_columns':
-				$retval = array(
+				$retval = [
 					//Static Columns - Aggregate functions can't be used on these.
 					'-1000-destination_user_first_name' => TTi18n::gettext( 'First Name' ),
 					'-1002-destination_user_last_name'  => TTi18n::gettext( 'Last Name' ),
@@ -216,53 +216,53 @@ class PayStubTransactionSummaryReport extends Report {
 					'-1010-remittance_source_account'      => TTi18n::gettext( 'Source Account' ),
 					'-1012-remittance_destination_account' => TTi18n::gettext( 'Destination Account' ),
 
-					'-1020-pay_period_start_date'       => TTi18n::gettext( 'Pay Period Start Date' ),
-					'-1022-pay_period_end_date'         => TTi18n::gettext( 'Pay Period End Date' ),
+					'-1020-pay_period_start_date' => TTi18n::gettext( 'Pay Period Start Date' ),
+					'-1022-pay_period_end_date'   => TTi18n::gettext( 'Pay Period End Date' ),
 
-					'-1025-pay_stub_run_id' => TTi18n::gettext( 'Pay Stub Run' ),
+					'-1025-pay_stub_run_id'     => TTi18n::gettext( 'Pay Stub Run' ),
 					'-1025-confirmation_number' => TTi18n::gettext( 'Confirmation Number' ),
 
 					'-1040-pay_stub_status_id'  => TTi18n::gettext( 'Pay Stub Status' ),
 					'-1041-pay_stub_start_date' => TTi18n::gettext( 'Pay Stub Start Date' ),
 					'-1042-pay_stub_end_date'   => TTi18n::gettext( 'Pay Stub End Date' ),
 
-					'-1110-transaction_currency_id' => TTi18n::gettext('Currency'),
-					'-1131-current_currency' => TTi18n::gettext('Current Currency'),
-				);
+					'-1110-transaction_currency_id' => TTi18n::gettext( 'Currency' ),
+					'-1131-current_currency'        => TTi18n::gettext( 'Current Currency' ),
+				];
 
-				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column') );
-				ksort($retval);
+				$retval = array_merge( $retval, (array)$this->getOptions( 'date_columns' ), (array)$this->getOptions( 'custom_columns' ), (array)$this->getOptions( 'report_static_custom_column' ) );
+				ksort( $retval );
 				break;
 			case 'dynamic_columns':
-				$retval = array(
-								//Dynamic - Aggregate functions can be used
-								'-2010-amount' => TTi18n::gettext( 'Amount' ),
-							);
-				ksort($retval);
+				$retval = [
+					//Dynamic - Aggregate functions can be used
+					'-2010-amount' => TTi18n::gettext( 'Amount' ),
+				];
+				ksort( $retval );
 				break;
 
 			case 'columns':
-				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
-				ksort($retval);
+				$retval = array_merge( $this->getOptions( 'static_columns' ), $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_dynamic_custom_column' ) );
+				ksort( $retval );
 				break;
 			case 'column_format':
 				//Define formatting function for each column.
-				$columns = Misc::trimSortPrefix( array_merge($this->getOptions('dynamic_columns'), (array)$this->getOptions('report_custom_column')) );
-				if ( is_array($columns) ) {
-					foreach($columns as $column => $name ) {
-						if ( strpos($column, 'amount') !== FALSE ) {
+				$columns = Misc::trimSortPrefix( array_merge( $this->getOptions( 'dynamic_columns' ), (array)$this->getOptions( 'report_custom_column' ) ) );
+				if ( is_array( $columns ) ) {
+					foreach ( $columns as $column => $name ) {
+						if ( strpos( $column, 'amount' ) !== false ) {
 							$retval[$column] = 'currency';
-						} elseif ( strpos($column, 'total_pay_stub_transaction') !== FALSE ) {
+						} else if ( strpos( $column, 'total_pay_stub_transaction' ) !== false ) {
 							$retval[$column] = 'numeric';
 						}
 					}
 				}
 				break;
 			case 'aggregates':
-				$retval = array();
-				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns') ) ) );
-				if ( is_array($dynamic_columns ) ) {
-					foreach( $dynamic_columns as $column ) {
+				$retval = [];
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions( 'dynamic_columns' ) ) ) );
+				if ( is_array( $dynamic_columns ) ) {
+					foreach ( $dynamic_columns as $column ) {
 						switch ( $column ) {
 							default:
 								$retval[$column] = 'sum';
@@ -271,22 +271,22 @@ class PayStubTransactionSummaryReport extends Report {
 				}
 				break;
 			case 'templates':
-				$retval = array(
+				$retval = [
 						'-4000-pending_transactions'       => TTi18n::gettext( 'Pending Transactions' ),
 						'-5000-pending_check_transactions' => TTi18n::gettext( 'Pending Check Transactions' ),
 						'-6000-pending_eft_transactions'   => TTi18n::gettext( 'Pending EFT/ACH Transactions' ),
-						'-7000-stop_payment_transactions' => TTi18n::gettext( 'Stopped Transactions' ),
-						'-8000-paid_transactions'         => TTi18n::gettext( 'Paid Transactions' ),
-				);
+						'-7000-stop_payment_transactions'  => TTi18n::gettext( 'Stopped Transactions' ),
+						'-8000-paid_transactions'          => TTi18n::gettext( 'Paid Transactions' ),
+				];
 
 				break;
 			case 'template_config':
 				$template = strtolower( Misc::trimSortPrefix( $params['template'] ) );
-				if ( isset($template) AND $template != '' ) {
+				if ( isset( $template ) && $template != '' ) {
 					switch ( $template ) {
 						case 'pending_transactions':
 							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
-							$retval['-1520-transaction_status_id'] = array(10);
+							$retval['-1520-transaction_status_id'] = [ 10 ];
 
 							$retval['columns'][] = 'transaction_type';
 							$retval['columns'][] = 'remittance_source_account';
@@ -300,15 +300,15 @@ class PayStubTransactionSummaryReport extends Report {
 							$retval['sub_total'][] = 'transaction_type';
 							$retval['sub_total'][] = 'remittance_source_account';
 
-							$retval['sort'][] = array('transaction_type' => 'asc');
-							$retval['sort'][] = array('remittance_source_account' => 'asc');
-							$retval['sort'][] = array('destination_user_last_name' => 'asc');
-							$retval['sort'][] = array('destination_user_first_name' => 'asc');
-							$retval['sort'][] = array('remittance_destination_account' => 'asc');
+							$retval['sort'][] = [ 'transaction_type' => 'asc' ];
+							$retval['sort'][] = [ 'remittance_source_account' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_last_name' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_first_name' => 'asc' ];
+							$retval['sort'][] = [ 'remittance_destination_account' => 'asc' ];
 							break;
 						case 'pending_check_transactions':
 							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
-							$retval['-1520-transaction_status_id'] = array(10);
+							$retval['-1520-transaction_status_id'] = [ 10 ];
 							$retval['-1620-remittance_source_account_type_id'] = 2000;
 
 							$retval['columns'][] = 'remittance_source_account';
@@ -321,15 +321,15 @@ class PayStubTransactionSummaryReport extends Report {
 
 							$retval['sub_total'][] = 'remittance_source_account';
 
-							$retval['sort'][] = array('transaction_type' => 'asc');
-							$retval['sort'][] = array('remittance_source_account' => 'asc');
-							$retval['sort'][] = array('destination_user_last_name' => 'asc');
-							$retval['sort'][] = array('destination_user_first_name' => 'asc');
-							$retval['sort'][] = array('remittance_destination_account' => 'asc');
+							$retval['sort'][] = [ 'transaction_type' => 'asc' ];
+							$retval['sort'][] = [ 'remittance_source_account' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_last_name' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_first_name' => 'asc' ];
+							$retval['sort'][] = [ 'remittance_destination_account' => 'asc' ];
 							break;
 						case 'pending_eft_transactions':
 							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
-							$retval['-1520-transaction_status_id'] = array(10);
+							$retval['-1520-transaction_status_id'] = [ 10 ];
 							$retval['-1620-remittance_source_account_type_id'] = 3000;
 
 							$retval['columns'][] = 'remittance_source_account';
@@ -342,14 +342,14 @@ class PayStubTransactionSummaryReport extends Report {
 
 							$retval['sub_total'][] = 'remittance_source_account';
 
-							$retval['sort'][] = array('remittance_source_account' => 'asc');
-							$retval['sort'][] = array('destination_user_last_name' => 'asc');
-							$retval['sort'][] = array('destination_user_first_name' => 'asc');
-							$retval['sort'][] = array('remittance_destination_account' => 'asc');
+							$retval['sort'][] = [ 'remittance_source_account' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_last_name' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_first_name' => 'asc' ];
+							$retval['sort'][] = [ 'remittance_destination_account' => 'asc' ];
 							break;
 						case 'stop_payment_transactions':
 							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
-							$retval['-1520-transaction_status_id'] = array(100,110);
+							$retval['-1520-transaction_status_id'] = [ 100, 110 ];
 
 							$retval['columns'][] = 'transaction_type';
 							$retval['columns'][] = 'remittance_source_account';
@@ -364,14 +364,14 @@ class PayStubTransactionSummaryReport extends Report {
 							$retval['sub_total'][] = 'transaction_type';
 							$retval['sub_total'][] = 'remittance_source_account';
 
-							$retval['sort'][] = array('remittance_source_account' => 'asc');
-							$retval['sort'][] = array('destination_user_last_name' => 'asc');
-							$retval['sort'][] = array('destination_user_first_name' => 'asc');
-							$retval['sort'][] = array('remittance_destination_account' => 'asc');
+							$retval['sort'][] = [ 'remittance_source_account' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_last_name' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_first_name' => 'asc' ];
+							$retval['sort'][] = [ 'remittance_destination_account' => 'asc' ];
 							break;
 						case 'paid_transactions':
 							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
-							$retval['-1520-transaction_status_id'] = array(20);
+							$retval['-1520-transaction_status_id'] = [ 20 ];
 
 							$retval['columns'][] = 'transaction_type';
 							$retval['columns'][] = 'remittance_source_account';
@@ -385,11 +385,11 @@ class PayStubTransactionSummaryReport extends Report {
 
 							$retval['sub_total'][] = 'remittance_source_account';
 
-							$retval['sort'][] = array('transaction_type' => 'asc');
-							$retval['sort'][] = array('remittance_source_account' => 'asc');
-							$retval['sort'][] = array('destination_user_last_name' => 'asc');
-							$retval['sort'][] = array('destination_user_first_name' => 'asc');
-							$retval['sort'][] = array('remittance_destination_account' => 'asc');
+							$retval['sort'][] = [ 'transaction_type' => 'asc' ];
+							$retval['sort'][] = [ 'remittance_source_account' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_last_name' => 'asc' ];
+							$retval['sort'][] = [ 'destination_user_first_name' => 'asc' ];
+							$retval['sort'][] = [ 'remittance_destination_account' => 'asc' ];
 							break;
 					}
 				}
@@ -398,27 +398,27 @@ class PayStubTransactionSummaryReport extends Report {
 				$retval['-1000-template'] = $template;
 
 				//Add sort prefixes so Flex can maintain order.
-				if ( isset($retval['filter']) ) {
+				if ( isset( $retval['filter'] ) ) {
 					$retval['-5000-filter'] = $retval['filter'];
-					unset($retval['filter']);
+					unset( $retval['filter'] );
 				}
-				if ( isset($retval['columns']) ) {
+				if ( isset( $retval['columns'] ) ) {
 					$retval['-5010-columns'] = $retval['columns'];
-					unset($retval['columns']);
+					unset( $retval['columns'] );
 				}
-				if ( isset($retval['group']) ) {
+				if ( isset( $retval['group'] ) ) {
 					$retval['-5020-group'] = $retval['group'];
-					unset($retval['group']);
+					unset( $retval['group'] );
 				}
-				if ( isset($retval['sub_total']) ) {
+				if ( isset( $retval['sub_total'] ) ) {
 					$retval['-5030-sub_total'] = $retval['sub_total'];
-					unset($retval['sub_total']);
+					unset( $retval['sub_total'] );
 				}
-				if ( isset($retval['sort']) ) {
+				if ( isset( $retval['sort'] ) ) {
 					$retval['-5040-sort'] = $retval['sort'];
-					unset($retval['sort']);
+					unset( $retval['sort'] );
 				}
-				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Arr( $retval, ' Template Config for: ' . $template, __FILE__, __LINE__, __METHOD__, 10 );
 
 				break;
 			default:
@@ -435,87 +435,88 @@ class PayStubTransactionSummaryReport extends Report {
 	 * @param null $format
 	 * @return bool
 	 */
-	function _getData( $format = NULL ) {
-		$this->tmp_data = array('pay_stub_transaction' => array(), 'user' => array() );
+	function _getData( $format = null ) {
+		$this->tmp_data = [ 'pay_stub_transaction' => [], 'user' => [] ];
 		$filter_data = $this->getFilterConfig();
 
 		$currency_convert_to_base = $this->getCurrencyConvertToBase();
 		$base_currency_obj = $this->getBaseCurrencyObject();
 		$this->handleReportCurrency( $currency_convert_to_base, $base_currency_obj, $filter_data );
-		$currency_options = $this->getOptions('currency');
+		$currency_options = $this->getOptions( 'currency' );
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
-		$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */ //For getOptions() below.
-		$psf = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $psf */ //For getOptions() below.
+		$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+		/** @var RemittanceSourceAccountFactory $rsaf */ //For getOptions() below.
+		$psf = TTnew( 'PayStubFactory' );
+		/** @var PayStubFactory $psf */ //For getOptions() below.
 
 		$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 		$pstlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pstlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		Debug::Text('PayStubTransaction report records: '.$pstlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pstlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		Debug::Text( 'PayStubTransaction report records: ' . $pstlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $pstlf->getRecordCount() > 0 ) {
-			foreach( $pstlf as $key => $pst_obj ) {
-				$user_id = $pst_obj->getColumn('user_id');
-				$tmp_row = array(
-															'legal_entity_id' => $pst_obj->getColumn('legal_entity_id'),
-															'legal_entity_legal_name' => $pst_obj->getColumn('legal_entity_legal_name'),
-															'legal_entity_trade_name' => $pst_obj->getColumn('legal_entity_trade_name'),
-															'remittance_source_account' => $pst_obj->getColumn('remittance_source_account'),
-															'remittance_source_account_id' => $pst_obj->getRemittanceSourceAccount(),
-															'remittance_destination_account' => $pst_obj->getColumn('remittance_destination_account'),
-															'remittance_destination_account_id' => $pst_obj->getRemittanceDestinationAccount(),
-															'user_id' => $pst_obj->getColumn('user_id'),
-															'destination_user_first_name' => $pst_obj->getColumn('destination_user_first_name'),
-															'destination_user_last_name' => $pst_obj->getColumn('destination_user_last_name'),
-															'remittance_source_account_type_id' => $pst_obj->getColumn('remittance_source_account_type_id'),
-															'transaction_type' => Option::getByKey( $pst_obj->getColumn('remittance_source_account_type_id'), $rsaf->getOptions('type') ),
-															'transaction_type_id' => $pst_obj->getType(),
-															'transaction_status_id' => $pst_obj->getStatus(),
-															'transaction_date' => $pst_obj->getTransactionDate(),
+			foreach ( $pstlf as $key => $pst_obj ) {
+				$user_id = $pst_obj->getColumn( 'user_id' );
+				$tmp_row = [
+						'legal_entity_id'                   => $pst_obj->getColumn( 'legal_entity_id' ),
+						'legal_entity_legal_name'           => $pst_obj->getColumn( 'legal_entity_legal_name' ),
+						'legal_entity_trade_name'           => $pst_obj->getColumn( 'legal_entity_trade_name' ),
+						'remittance_source_account'         => $pst_obj->getColumn( 'remittance_source_account' ),
+						'remittance_source_account_id'      => $pst_obj->getRemittanceSourceAccount(),
+						'remittance_destination_account'    => $pst_obj->getColumn( 'remittance_destination_account' ),
+						'remittance_destination_account_id' => $pst_obj->getRemittanceDestinationAccount(),
+						'user_id'                           => $pst_obj->getColumn( 'user_id' ),
+						'destination_user_first_name'       => $pst_obj->getColumn( 'destination_user_first_name' ),
+						'destination_user_last_name'        => $pst_obj->getColumn( 'destination_user_last_name' ),
+						'remittance_source_account_type_id' => $pst_obj->getColumn( 'remittance_source_account_type_id' ),
+						'transaction_type'                  => Option::getByKey( $pst_obj->getColumn( 'remittance_source_account_type_id' ), $rsaf->getOptions( 'type' ) ),
+						'transaction_type_id'               => $pst_obj->getType(),
+						'transaction_status_id'             => $pst_obj->getStatus(),
+						'transaction_date'                  => $pst_obj->getTransactionDate(),
 
-															'amount' => $pst_obj->getAmount(),
-															'confirmation_number' => $pst_obj->getConfirmationNumber(),
+						'amount'              => $pst_obj->getAmount(),
+						'confirmation_number' => $pst_obj->getConfirmationNumber(),
 
-															'pay_period_id' => $pst_obj->getColumn('pay_period_id'),
-															'pay_period_start_date' => TTDate::strtotime($pst_obj->getColumn('pay_period_start_date')),
-															'pay_period_end_date' => TTDate::strtotime($pst_obj->getColumn('pay_period_end_date')),
-															'pay_period_transaction_date' => TTDate::strtotime($pst_obj->getColumn('pay_period_transaction_date')),
-															'pay_stub_run_id' => $pst_obj->getColumn('pay_stub_run_id'),
+						'pay_period_id'               => $pst_obj->getColumn( 'pay_period_id' ),
+						'pay_period_start_date'       => TTDate::strtotime( $pst_obj->getColumn( 'pay_period_start_date' ) ),
+						'pay_period_end_date'         => TTDate::strtotime( $pst_obj->getColumn( 'pay_period_end_date' ) ),
+						'pay_period_transaction_date' => TTDate::strtotime( $pst_obj->getColumn( 'pay_period_transaction_date' ) ),
+						'pay_stub_run_id'             => $pst_obj->getColumn( 'pay_stub_run_id' ),
 
-															'pay_stub_id' => $pst_obj->getColumn('pay_stub_id'),
-															'pay_stub_status_id' => Option::getByKey( $pst_obj->getColumn('pay_stub_status_id'), $psf->getOptions('status') ),
-															'pay_stub_start_date' => TTDate::strtotime( $pst_obj->getColumn('pay_stub_start_date') ),
-															'pay_stub_end_date' => TTDate::strtotime( $pst_obj->getColumn('pay_stub_end_date') ),
-															'pay_stub_transaction_date' => TTDate::strtotime($pst_obj->getColumn('pay_stub_transaction_date')),
+						'pay_stub_id'               => $pst_obj->getColumn( 'pay_stub_id' ),
+						'pay_stub_status_id'        => Option::getByKey( $pst_obj->getColumn( 'pay_stub_status_id' ), $psf->getOptions( 'status' ) ),
+						'pay_stub_start_date'       => TTDate::strtotime( $pst_obj->getColumn( 'pay_stub_start_date' ) ),
+						'pay_stub_end_date'         => TTDate::strtotime( $pst_obj->getColumn( 'pay_stub_end_date' ) ),
+						'pay_stub_transaction_date' => TTDate::strtotime( $pst_obj->getColumn( 'pay_stub_transaction_date' ) ),
 
-															'currency_rate' => $pst_obj->getColumn('currency_rate'),
-															'transaction_currency_id' => Option::getByKey( $pst_obj->getColumn('transaction_currency_id'), $currency_options ),
-															'current_currency' => Option::getByKey( $pst_obj->getColumn('transaction_currency_id'), $currency_options ),
+						'currency_rate'           => $pst_obj->getColumn( 'currency_rate' ),
+						'transaction_currency_id' => Option::getByKey( $pst_obj->getColumn( 'transaction_currency_id' ), $currency_options ),
+						'current_currency'        => Option::getByKey( $pst_obj->getColumn( 'transaction_currency_id' ), $currency_options ),
 
-														);
+				];
 
-				if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
+				if ( $currency_convert_to_base == true && is_object( $base_currency_obj ) ) {
 					$tmp_row['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
 				}
 				$this->tmp_data['pay_stub_transaction'][$user_id][] = $tmp_row;
-				unset($tmp_row);
+				unset( $tmp_row );
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-
 			}//foreach
 		}
 
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'hire_date' => TRUE, 'termination_date' => TRUE, 'birth_date' => TRUE ) ) );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), [ 'hire_date' => true, 'termination_date' => true, 'birth_date' => true ] ) );
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);foo
 		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -523,30 +524,30 @@ class PayStubTransactionSummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_transaction']), NULL, TTi18n::getText('Pre-Processing Data...') );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['pay_stub_transaction'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		//Merge time data with user data
 		$key = 0;
-		if ( isset($this->tmp_data['pay_stub_transaction']) ) {
-			foreach( $this->tmp_data['pay_stub_transaction'] as $user_id => $rows ) {
-				if ( isset($this->tmp_data['user'][$user_id]) ) {
-					foreach( $rows as $row ) {
-						if ( is_array($row) ) {
-							$date_columns = TTDate::getReportDates( 'pay_stub_transaction', $row['pay_stub_transaction_date'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-							$transaction_date_columns = TTDate::getReportDates( 'transaction', $row['transaction_date'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+		if ( isset( $this->tmp_data['pay_stub_transaction'] ) ) {
+			foreach ( $this->tmp_data['pay_stub_transaction'] as $user_id => $rows ) {
+				if ( isset( $this->tmp_data['user'][$user_id] ) ) {
+					foreach ( $rows as $row ) {
+						if ( is_array( $row ) ) {
+							$date_columns = TTDate::getReportDates( 'pay_stub_transaction', $row['pay_stub_transaction_date'], false, $this->getUserObject(), [ 'pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date'] ] );
+							$transaction_date_columns = TTDate::getReportDates( 'transaction', $row['transaction_date'], false, $this->getUserObject(), [ 'pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date'] ] );
 
-							$processed_data = array(
+							$processed_data = [
 								//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-								'pay_period_start_date'       => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_period_start_date'] )),
-								'pay_period_end_date'         => array('sort' => $row['pay_period_end_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_period_end_date'] )),
-								'pay_period_transaction_date' => array('sort' => $row['pay_period_transaction_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_period_transaction_date'] )),
-								'pay_stub_start_date'         => array('sort' => $row['pay_stub_start_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_stub_start_date'] )),
-								'pay_stub_end_date'           => array('sort' => $row['pay_stub_end_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_stub_end_date'] )),
-							);
+								'pay_period_start_date'       => [ 'sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_period_start_date'] ) ],
+								'pay_period_end_date'         => [ 'sort' => $row['pay_period_end_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_period_end_date'] ) ],
+								'pay_period_transaction_date' => [ 'sort' => $row['pay_period_transaction_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_period_transaction_date'] ) ],
+								'pay_stub_start_date'         => [ 'sort' => $row['pay_stub_start_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_stub_start_date'] ) ],
+								'pay_stub_end_date'           => [ 'sort' => $row['pay_stub_end_date'], 'display' => TTDate::getDate( 'DATE', $row['pay_stub_end_date'] ) ],
+							];
 
 							//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
 							//$hire_date_columns, $termination_date_columns, $birth_date_columns
-							$this->data[] = array_merge( $this->tmp_data['user'][ $user_id ], $row, $date_columns, $transaction_date_columns, $processed_data );
+							$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $transaction_date_columns, $processed_data );
 
 							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 							$key++;
@@ -554,11 +555,13 @@ class PayStubTransactionSummaryReport extends Report {
 					}
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $transaction_date_columns, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data, $level_1 );
+			unset( $this->tmp_data, $row, $date_columns, $transaction_date_columns, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data, $level_1 );
 		}
+
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

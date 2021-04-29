@@ -51,6 +51,4 @@ var APIPunchSummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

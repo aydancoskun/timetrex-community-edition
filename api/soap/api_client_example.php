@@ -10,7 +10,7 @@ $TIMETREX_PASSWORD = 'demo';
 
 $api_session = new TimeTrexClientAPI();
 $api_session->Login( $TIMETREX_USERNAME, $TIMETREX_PASSWORD );
-if ( $TIMETREX_SESSION_ID == FALSE ) {
+if ( $TIMETREX_SESSION_ID == false ) {
 	echo "Login Failed!<br>\n";
 	exit;
 }
@@ -22,12 +22,12 @@ echo "Session ID: $TIMETREX_SESSION_ID<br>\n";
 //
 $user_obj = new TimeTrexClientAPI( 'User' );
 $result = $user_obj->getUser(
-		array(
-				'filter_data' => array(
+		[
+				'filter_data' => [
 					//'id' => array('11e817cb-7dcc-7130-b939-5431e6810149','11e817cb-8385-8e50-97f3-5431e6810149')
-					'user_name' => array('jane.doe1', 'tristen.braun1'),
-				),
-		)
+					'user_name' => [ 'jane.doe1', 'tristen.braun1' ],
+				],
+		]
 );
 
 $user_data = $result->getResult();
@@ -422,7 +422,7 @@ if ( isset( $user_data[1] ) ) {
 	$user_data[1]['termination_date'] = '02-Jan-18';
 
 	$result = $user_obj->setUser( $user_data[1] );
-	if ( $result->isValid() === TRUE ) {
+	if ( $result->isValid() === true ) {
 		echo "Employee data saved successfully.<br>\n";
 	} else {
 		echo "Employee save failed.<br>\n";
@@ -433,13 +433,13 @@ if ( isset( $user_data[1] ) ) {
 //
 //Update employee record in a single operation. Several records can be updated in a single operation as well.
 //
-$user_data = array(
+$user_data = [
 		'id'               => $user_data[1]['id'], //UUID: 11e7fa4c-f8c2-f040-8ad8-21ea65522ba3
 		'termination_date' => '02-Jan-18',
-);
+];
 
 $result = $user_obj->setUser( $user_data );
-if ( $result->isValid() === TRUE ) {
+if ( $result->isValid() === true ) {
 	echo "Employee data saved successfully.<br>\n";
 } else {
 	echo "Employee save failed.<br>\n";
@@ -456,7 +456,7 @@ $new_hire_defaults = $new_hire_defaults_obj->getUserDefault()->getResult()[0];
 //
 //Add new employee, several new employees can be added in a single operation as well.
 //
-$user_data = array(
+$user_data = [
 		'status_id'       => 10, //Active
 		'first_name'      => 'Michael',
 		'last_name'       => 'Jackson',
@@ -465,10 +465,10 @@ $user_data = array(
 		'password'        => 'whiteglove123',
 		'hire_date'       => '01-Oct-09',
 		'currency_id'     => $new_hire_defaults['currency_id'],
-);
+];
 
 $result = $user_obj->setUser( $user_data );
-if ( $result->isValid() === TRUE ) {
+if ( $result->isValid() === true ) {
 	echo "Employee added successfully.<br>\n";
 	$insert_id = $result->getResult(); //Get employees new ID on success.
 } else {
@@ -481,7 +481,7 @@ if ( $result->isValid() === TRUE ) {
 //Add punch for employee
 //
 $punch_obj = new TimeTrexClientAPI( 'Punch' );
-$punch_data = array(
+$punch_data = [
 		'user_id' => $insert_id, //ID from above newly added employee
 
 		'type_id'   => 10, //Normal
@@ -493,10 +493,10 @@ $punch_data = array(
 		'department_id' => $new_hire_defaults['default_department_id'], //Department
 		'job_id'        => $new_hire_defaults['default_job_id'], //Job
 		'job_item_id'   => $new_hire_defaults['default_job_item_id'], //Task
-);
+];
 
 $result = $punch_obj->setPunch( $punch_data );
-if ( $result->isValid() === TRUE ) {
+if ( $result->isValid() === true ) {
 	echo "Punch added successfully.<br>\n";
 	$insert_id = $result->getResult(); //Get employees new ID on success.
 } else {

@@ -1,84 +1,84 @@
 .t-date-picker-div {
-    position: relative;
-    width: 185px;
-    text-align: left;
-    height: 21px;
-    display: inline-block;
-    vertical-align: top;
+	position: relative;
+	width: 185px;
+	text-align: left;
+	height: 21px;
+	display: inline-block;
+	vertical-align: top;
 }
 
 .t-date-picker-div .t-date-picker {
-    outline: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    line-height: 20px;
-    width: 100%;
-    padding: 0;
-    padding-left: 2px;
-    box-sizing: border-box;
-    margin: 0;
-    display: inline;
-    height: 24px;
+	outline: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	line-height: 20px;
+	width: 100%;
+	padding: 0;
+	padding-left: 2px;
+	box-sizing: border-box;
+	margin: 0;
+	display: inline;
+	height: 24px;
 }
 
 .t-date-picker-div .t-date-picker-readonly {
-    background: transparent;
-    border: none;
-    height: 100%;
-    pointer-events: none;
+	background: transparent;
+	border: none;
+	height: 100%;
+	pointer-events: none;
 }
 
 .t-date-picker-div .t-date-picker-icon {
-    position: absolute;
-    top: 3px;
-    cursor: pointer;
-    right: 3px;
-    height: 18px;
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	position: absolute;
+	top: 3px;
+	cursor: pointer;
+	right: 3px;
+	height: 18px;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }
 
 .ui-timepicker-div .ui-widget-header {
-    margin-bottom: 8px;
+	margin-bottom: 8px;
 }
 
 .ui-timepicker-div dl {
-    text-align: left;
-    padding-left: 10px;
+	text-align: left;
+	padding-left: 10px;
 }
 
 .ui-timepicker-div dl dt {
-    height: 25px;
-    margin-bottom: -25px;
+	height: 25px;
+	margin-bottom: -25px;
 }
 
 .ui-timepicker-div dl dd {
-    margin: 0 10px 10px 65px;
+	margin: 0 10px 10px 65px;
 }
 
 .ui-timepicker-div td {
-    font-size: 90%;
+	font-size: 90%;
 }
 
 .ui-tpicker-grid-label {
-    background: none;
-    border: none;
-    margin: 0;
-    padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	padding: 0;
 }
 
 .ui-timepicker-rtl {
-    direction: rtl;
+	direction: rtl;
 }
 
 .ui-timepicker-rtl dl {
-    text-align: right;
+	text-align: right;
 }
 
 .ui-timepicker-rtl dl dd {
-    margin: 0 65px 10px 10px;
+	margin: 0 65px 10px 10px;
 }
 
 .ui-datepicker .ui-datepicker-buttonpane .ui-datepicker-close {
@@ -86,23 +86,23 @@
 }
 
 .ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current {
-    margin-left: 81px;
+	margin-left: 81px;
 }
 
 .t-range-picker-div {
-    background: none !important;
-    width: auto !important;
-    height: auto !important;
+	background: none !important;
+	width: auto !important;
+	height: auto !important;
 }
 
 .t-range-picker-div .t-range-picker-tab-bar {
-    width: 500px !important;
-    height: 300px !important;
-    min-width: 500px !important;
+	width: 500px !important;
+	height: 300px !important;
+	min-width: 500px !important;
 }
 
 .t-range-picker-div .col-section {
-    display: inline-block;
+	display: inline-block;
 }
 
 .t-range-picker-div .col-section .label {
@@ -110,29 +110,29 @@
 }
 
 .ui-datepicker .ui-state-default {
-     border: 1px solid #aed0ea;
-     background: #d7ebf9 url(../../../jquery-ui/images/ui-bg_glass_80_d7ebf9_1x400.png) 50% 50% repeat-x;
-     font-weight: bold;
-     color: #2779aa;
-     user-drag: none;
-     -moz-user-select: none;
-     -webkit-user-drag: none;
- }
+	border: 1px solid #aed0ea;
+	background: #d7ebf9 url(../../../jquery-ui/images/ui-bg_glass_80_d7ebf9_1x400.png) 50% 50% repeat-x;
+	font-weight: bold;
+	color: #2779aa;
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
+}
 
 .ui-datepicker .ui-state-active {
-    border: 1px solid #2694e8;
-    background: #3baae3 50% 50% repeat-x !important;
-    font-weight: bold;
-    /*color: #ffffff;*/
-    user-drag: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
+	border: 1px solid #2694e8;
+	background: #3baae3 50% 50% repeat-x !important;
+	font-weight: bold;
+	/*color: #ffffff;*/
+	user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 }
 
 .ui-datepicker .ui-state-hover {
-    background: #ccf2ff !important;
+	background: #ccf2ff !important;
 }
 
 .ui-datepicker .ui-datepicker-buttonpane button {
-    padding: .6em;
+	padding: .6em;
 }

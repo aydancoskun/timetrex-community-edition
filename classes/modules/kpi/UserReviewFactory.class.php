@@ -41,38 +41,37 @@
 class UserReviewFactory extends Factory {
 	protected $table = 'user_review';
 	protected $pk_sequence_name = 'user_review_id_seq'; //PK Sequence name
-	protected $kpi_obj = NULL;
+	protected $kpi_obj = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$retval = array(
-										'-2050-rating' => TTi18n::gettext('Rating'),
-										'-1200-note' => TTi18n::gettext('Note'),
-										'-1300-tag' => TTi18n::gettext('Tags'),
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+				$retval = [
+						'-2050-rating'       => TTi18n::gettext( 'Rating' ),
+						'-1200-note'         => TTi18n::gettext( 'Note' ),
+						'-1300-tag'          => TTi18n::gettext( 'Tags' ),
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'rating',
-								'note'
-								);
+				$retval = [
+						'rating',
+						'note',
+				];
 				break;
-
 		}
 
 		return $retval;
@@ -83,21 +82,22 @@ class UserReviewFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'user_review_control_id' => 'UserReviewControl',
-										'kpi_id' => 'KPI',
-										'name' => FALSE,
-										'type_id' => FALSE,
-										'status_id' => FALSE,
-										'minimum_rate' => FALSE,
-										'maximum_rate' => FALSE,
-										'description' => FALSE,
-										'rating' => 'Rating',
-										'note' => 'Note',
-										'tag' => 'Tag',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'                     => 'ID',
+				'user_review_control_id' => 'UserReviewControl',
+				'kpi_id'                 => 'KPI',
+				'name'                   => false,
+				'type_id'                => false,
+				'status_id'              => false,
+				'minimum_rate'           => false,
+				'maximum_rate'           => false,
+				'description'            => false,
+				'rating'                 => 'Rating',
+				'note'                   => 'Note',
+				'tag'                    => 'Tag',
+				'deleted'                => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -119,8 +119,9 @@ class UserReviewFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setKPI( $value) {
+	function setKPI( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'kpi_id', $value );
 	}
 
@@ -136,7 +137,8 @@ class UserReviewFactory extends Factory {
 	 * @return bool
 	 */
 	function setUserReviewControl( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'user_review_control_id', $value );
 	}
 
@@ -151,11 +153,12 @@ class UserReviewFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setRating( $value) {
-		$value = trim($value);
+	function setRating( $value ) {
+		$value = trim( $value );
 		if ( $value == '' ) {
-			$value = NULL;
+			$value = null;
 		}
+
 		return $this->setGenericDataValue( 'rating', $value );
 	}
 
@@ -170,8 +173,9 @@ class UserReviewFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setNote( $value) {
-		$value = trim($value);
+	function setNote( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'note', $value );
 	}
 
@@ -182,16 +186,16 @@ class UserReviewFactory extends Factory {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
 		$value = $this->getGenericTempDataValue( 'tags' );
-		if ( $value !== FALSE ) {
+		if ( $value !== false ) {
 			return $value;
-		} elseif ( is_object( $this->getKPIObject() )
-				AND TTUUID::isUUID( $this->getKPIObject()->getCompany() ) AND $this->getKPIObject()->getCompany() != TTUUID::getZeroID() AND $this->getKPIObject()->getCompany() != TTUUID::getNotExistID()
-				AND TTUUID::isUUID( $this->getID() ) AND $this->getID() != TTUUID::getZeroID() AND $this->getID() != TTUUID::getNotExistID()
-			) {
+		} else if ( is_object( $this->getKPIObject() )
+				&& TTUUID::isUUID( $this->getKPIObject()->getCompany() ) && $this->getKPIObject()->getCompany() != TTUUID::getZeroID() && $this->getKPIObject()->getCompany() != TTUUID::getNotExistID()
+				&& TTUUID::isUUID( $this->getID() ) && $this->getID() != TTUUID::getZeroID() && $this->getID() != TTUUID::getNotExistID()
+		) {
 			return CompanyGenericTagMapListFactory::getStringByCompanyIDAndObjectTypeIDAndObjectID( $this->getKPIObject()->getCompany(), 330, $this->getID() );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -199,7 +203,8 @@ class UserReviewFactory extends Factory {
 	 * @return bool
 	 */
 	function setTag( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		//Save the tags in temporary memory to be committed in postSave()
 		return $this->setGenericTempDataValue( 'tags', $value );
 	}
@@ -208,7 +213,7 @@ class UserReviewFactory extends Factory {
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
 		//
 		// BELOW: Validation code moved from set*() functions.
@@ -216,58 +221,58 @@ class UserReviewFactory extends Factory {
 		// KPI
 		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$this->Validator->isResultSetWithRows( 'kpi_id',
-														$klf->getById($this->getKPI()),
-														TTi18n::gettext('Invalid KPI')
-													);
+											   $klf->getById( $this->getKPI() ),
+											   TTi18n::gettext( 'Invalid KPI' )
+		);
 		// review control
-		$urclf = TTnew('UserReviewControlListFactory'); /** @var UserReviewControlListFactory $urclf */
+		$urclf = TTnew( 'UserReviewControlListFactory' ); /** @var UserReviewControlListFactory $urclf */
 		$this->Validator->isResultSetWithRows( 'user_review_control_id',
-														$urclf->getById($this->getUserReviewControl()),
-														TTi18n::gettext('Invalid review control')
-													);
+											   $urclf->getById( $this->getUserReviewControl() ),
+											   TTi18n::gettext( 'Invalid review control' )
+		);
 		// Rating
-		if ( $this->getRating() != NULL ) {
-			$this->Validator->isNumeric(	'rating',
-													$this->getRating(),
-													TTi18n::gettext('Rating must only be digits')
-												);
-			if ( $this->Validator->isError('rating') == FALSE ) {
+		if ( $this->getRating() != null ) {
+			$this->Validator->isNumeric( 'rating',
+										 $this->getRating(),
+										 TTi18n::gettext( 'Rating must only be digits' )
+			);
+			if ( $this->Validator->isError( 'rating' ) == false ) {
 				$this->Validator->isLengthBeforeDecimal( 'rating',
-																	$this->getRating(),
-																	TTi18n::gettext('Invalid Rating'),
-																	0,
-																	7
-																);
+														 $this->getRating(),
+														 TTi18n::gettext( 'Invalid Rating' ),
+														 0,
+														 7
+				);
 			}
-			if ( $this->Validator->isError('rating') == FALSE ) {
+			if ( $this->Validator->isError( 'rating' ) == false ) {
 				$this->Validator->isLengthAfterDecimal( 'rating',
-																$this->getRating(),
-																TTi18n::gettext('Invalid Rating'),
-																0,
-																2
-															);
+														$this->getRating(),
+														TTi18n::gettext( 'Invalid Rating' ),
+														0,
+														2
+				);
 			}
 		}
 		// Note
 		if ( $this->getNote() != '' ) {
 			$this->Validator->isLength( 'note',
-												$this->getNote(),
-												TTi18n::gettext('Note is too long'),
-												0, 4096
-											);
+										$this->getNote(),
+										TTi18n::gettext( 'Note is too long' ),
+										0, 4096
+			);
 		}
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -276,12 +281,12 @@ class UserReviewFactory extends Factory {
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
-		if ( $this->getDeleted() == FALSE ) {
-			Debug::text('Setting Tags...', __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->getDeleted() == false ) {
+			Debug::text( 'Setting Tags...', __FILE__, __LINE__, __METHOD__, 10 );
 			CompanyGenericTagMapFactory::setTags( $this->getKPIObject()->getCompany(), 330, $this->getID(), $this->getTag() );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -292,11 +297,11 @@ class UserReviewFactory extends Factory {
 
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -308,10 +313,10 @@ class UserReviewFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -319,16 +324,16 @@ class UserReviewFactory extends Factory {
 	 * @param bool $permission_children_ids
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null, $permission_children_ids = false ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
+					$function = 'get' . $function_stub;
 
-					switch( $variable ) {
+					switch ( $variable ) {
 						case 'name':
 						case 'type_id':
 						case 'status_id':
@@ -343,10 +348,9 @@ class UserReviewFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
-			$this->getPermissionColumns( $data, $this->getCreatedBy(), FALSE, $permission_children_ids, $include_columns );
+			$this->getPermissionColumns( $data, $this->getCreatedBy(), false, $permission_children_ids, $include_columns );
 
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
@@ -360,11 +364,13 @@ class UserReviewFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$kpi_obj = $this->getKPIObject();
-		if ( is_object($kpi_obj) ) {
-			return TTLog::addEntry( $this->getUserReviewControl(), $log_action, TTi18n::getText('Employee Review KPI') . ' - ' . TTi18n::getText('KPI') . ': ' . $kpi_obj->getName(), NULL, $this->getTable(), $this );
+		if ( is_object( $kpi_obj ) ) {
+			return TTLog::addEntry( $this->getUserReviewControl(), $log_action, TTi18n::getText( 'Employee Review KPI' ) . ' - ' . TTi18n::getText( 'KPI' ) . ': ' . $kpi_obj->getName(), null, $this->getTable(), $this );
 		}
-		return FALSE;
+
+		return false;
 	}
 
 }
+
 ?>

@@ -31,11 +31,11 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'regular_time_policy';
 		this.context_menu_name = $.i18n._( 'Regular Time Policy' );
 		this.navigation_label = $.i18n._( 'Regular Time Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRegularTimePolicy' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRegularTimePolicy' ) )();
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_group_api = new (APIFactory.getAPIClass( 'APIJobGroup' ))();
-			this.job_item_group_api = new (APIFactory.getAPIClass( 'APIJobItemGroup' ))();
+			this.job_group_api = new ( APIFactory.getAPIClass( 'APIJobGroup' ) )();
+			this.job_item_group_api = new ( APIFactory.getAPIClass( 'APIJobItemGroup' ) )();
 		}
 
 		this.render();
@@ -84,13 +84,16 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 		var tab_model = {
 			'tab_regular_time_policy': { 'label': $.i18n._( 'Regular Time Policy' ) },
-			'tab_differential_criteria': { 'label': $.i18n._( 'Differential Criteria' ), 'init_callback': 'initSubDifferentialCriteriaView' },
+			'tab_differential_criteria': {
+				'label': $.i18n._( 'Differential Criteria' ),
+				'init_callback': 'initSubDifferentialCriteriaView'
+			},
 			'tab_audit': true,
 		};
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRegularTimePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRegularTimePolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
@@ -128,7 +131,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -140,7 +143,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -152,7 +155,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -199,7 +202,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -239,7 +242,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -263,7 +266,6 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Departments' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-
 
 			// Job Groups
 			v_box = $( '<div class=\'v-box\'></div>' );
@@ -314,7 +316,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -381,7 +383,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -401,7 +403,6 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Tasks' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 		}
 	},
-
 
 	onFormItemChange: function( target ) {
 		this.is_changed = true;
@@ -546,7 +547,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -558,7 +559,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -570,7 +571,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -582,7 +583,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

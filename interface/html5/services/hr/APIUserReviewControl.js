@@ -55,6 +55,4 @@ var APIUserReviewControl = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

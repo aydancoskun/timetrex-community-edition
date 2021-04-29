@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnusedLocalVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -40,15 +40,15 @@
  */
 class InstallSchema_1018A extends InstallSchema_Base {
 
-	protected $station_users = array();
+	protected $station_users = [];
 
 	/**
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -59,12 +59,13 @@ class InstallSchema_1018A extends InstallSchema_Base {
 		global $cache;
 		//assuming this is needed elsewhere?
 		// @codingStandardsIgnoreEnd
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'l: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

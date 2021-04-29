@@ -1,6 +1,5 @@
 var APICurrentUser = ServiceCaller.extend( {
 
-
 	key_name: '',
 	className: 'APIAuthentication',
 
@@ -21,9 +20,5 @@ var APICurrentUser = ServiceCaller.extend( {
 //		  this.call(this.className,'Logout',onResult,onError,args,delegate);
 
 	}
-
-
-
-
 
 } );

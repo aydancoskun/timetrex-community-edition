@@ -34,7 +34,7 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 				form_item.css( 'margin-top', '15px' );
 				var form_item_label = form_item.find( '.form-item-label' );
 				var form_item_input_div = form_item.find( '.form-item-input-div' );
-				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )), true, ALayoutIDs.PAY_STUB_ACCOUNT, 'src_ids' );
+				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ), true, ALayoutIDs.PAY_STUB_ACCOUNT, 'src_ids' );
 				form_item_label.text( $.i18n._( 'Source Pay Stub Account(s)' ) + ': ' );
 				form_item_input_div.append( a_combobox );
 				this.content_div.append( form_item );
@@ -44,7 +44,7 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 				form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
-				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )), false, ALayoutIDs.PAY_STUB_ACCOUNT, 'dst_id' );
+				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ), false, ALayoutIDs.PAY_STUB_ACCOUNT, 'dst_id' );
 				form_item_label.text( $.i18n._( 'Destination Pay Stub Account' ) + ': ' );
 				form_item_input_div.append( a_combobox );
 				this.content_div.append( form_item );
@@ -86,7 +86,7 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 		var src_ids = this.stepsDataDic[2].src_ids;
 		var dst_id = this.stepsDataDic[2].dst_id;
 		var effective_date = this.stepsDataDic[2].effective_date;
-		var ps_api = new (APIFactory.getAPIClass( 'APIPayStubEntryAccount' ))();
+		var ps_api = new ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) )();
 		ps_api.migratePayStubEntryAccount( src_ids, dst_id, effective_date, {
 			onResult: function( result ) {
 				var result_data = result.getResult();

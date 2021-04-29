@@ -35,7 +35,6 @@
  ********************************************************************************/
 
 
-
 /**
  * @package Modules\Import
  */
@@ -48,21 +47,21 @@ class ImportBranch extends Import {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$bf = TTNew('BranchFactory'); /** @var BranchFactory $bf */
-				$retval = $bf->getOptions('columns');
+				$bf = TTNew( 'BranchFactory' ); /** @var BranchFactory $bf */
+				$retval = $bf->getOptions( 'columns' );
 				break;
 			case 'import_options':
-				$retval = array(
-								'-1010-fuzzy_match' => TTi18n::getText('Enable smart matching.'),
-								);
+				$retval = [
+						'-1010-fuzzy_match' => TTi18n::getText( 'Enable smart matching.' ),
+				];
 				break;
 			case 'parse_hint':
-				$retval = array();
+				$retval = [];
 				break;
 		}
 
@@ -101,12 +100,12 @@ class ImportBranch extends Import {
 	 * @param null $raw_row
 	 * @return int
 	 */
-	function parse_status( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
+	function parse_status( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
 		if ( strtolower( $input ) == 'e'
-				OR strtolower( $input ) == 'enabled' ) {
+				|| strtolower( $input ) == 'enabled' ) {
 			$retval = 10;
-		} elseif ( strtolower( $input ) == 'd'
-				OR strtolower( $input ) == 'disabled' ) {
+		} else if ( strtolower( $input ) == 'd'
+				|| strtolower( $input ) == 'disabled' ) {
 			$retval = 20;
 		} else {
 			$retval = (int)$input;
@@ -116,4 +115,5 @@ class ImportBranch extends Import {
 	}
 
 }
+
 ?>

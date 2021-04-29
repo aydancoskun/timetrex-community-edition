@@ -42,14 +42,14 @@ class HierarchyUserFactory extends Factory {
 	protected $table = 'hierarchy_user';
 	protected $pk_sequence_name = 'hierarchy_user_id_seq'; //PK Sequence name
 
-	var $hierarchy_control_obj = NULL;
-	var $user_obj = NULL;
+	var $hierarchy_control_obj = null;
+	var $user_obj = null;
 
 	/**
 	 * @return null
 	 */
 	function getHierarchyControlObject() {
-		if ( is_object($this->hierarchy_control_obj) ) {
+		if ( is_object( $this->hierarchy_control_obj ) ) {
 			return $this->hierarchy_control_obj;
 		} else {
 			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
@@ -63,17 +63,18 @@ class HierarchyUserFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
+		if ( is_object( $this->user_obj ) ) {
 			return $this->user_obj;
 		} else {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$this->user_obj = $ulf->getCurrent();
+
 				return $this->user_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -88,8 +89,9 @@ class HierarchyUserFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setHierarchyControl( $value) {
+	function setHierarchyControl( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		//This is a sub-class, need to support setting HierachyControlID before its created.
 		return $this->setGenericDataValue( 'hierarchy_control_id', $value );
 	}
@@ -106,18 +108,18 @@ class HierarchyUserFactory extends Factory {
 		$hcf = TTnew( 'HierarchyControlFactory' ); /** @var HierarchyControlFactory $hcf */
 		$hotf = TTnew( 'HierarchyObjectTypeFactory' ); /** @var HierarchyObjectTypeFactory $hotf */
 
-		$ph = array(
-					'hierarchy_control_id' => $this->getHierarchyControl(),
-					'id' => $id,
-					'exclude_id' => TTUUID::castUUID($exclude_id),
-					);
+		$ph = [
+				'hierarchy_control_id' => $this->getHierarchyControl(),
+				'id'                   => $id,
+				'exclude_id'           => TTUUID::castUUID( $exclude_id ),
+		];
 
 		//$query = 'select a.id from '. $this->getTable() .' as a, '. $pglf->getTable() .' as b where a.hierarchy_control_id = b.id AND a.user_id = ? AND b.deleted=0';
 		$query = '
 					select *
-					from '. $hotf->getTable() .' as a
-					LEFT JOIN '. $this->getTable() .' as b ON a.hierarchy_control_id = b.hierarchy_control_id
-					LEFT JOIN '. $hcf->getTable() .' as c ON a.hierarchy_control_id = c.id
+					from ' . $hotf->getTable() . ' as a
+					LEFT JOIN ' . $this->getTable() . ' as b ON a.hierarchy_control_id = b.hierarchy_control_id
+					LEFT JOIN ' . $hcf->getTable() . ' as c ON a.hierarchy_control_id = c.id
 					WHERE a.object_type_id in (
 							select object_type_id
 							from hierarchy_object_type
@@ -127,13 +129,13 @@ class HierarchyUserFactory extends Factory {
 					AND c.deleted = 0
 				';
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$user_id = $this->db->GetOne($query, $ph);
+		$user_id = $this->db->GetOne( $query, $ph );
 
-		if ( $user_id === FALSE ) {
-			return TRUE;
+		if ( $user_id === false ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -147,10 +149,12 @@ class HierarchyUserFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -160,20 +164,20 @@ class HierarchyUserFactory extends Factory {
 		//
 
 		// Hierarchy Control
-		if ( $this->getHierarchyControl() == '' OR $this->getHierarchyControl() == TTUUID::getZeroID() ) {
+		if ( $this->getHierarchyControl() == '' || $this->getHierarchyControl() == TTUUID::getZeroID() ) {
 			$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
-			$this->Validator->isResultSetWithRows(	'hierarchy_control_id',
-															$hclf->getByID($this->getHierarchyControl()),
-															TTi18n::gettext('Invalid Hierarchy Control')
-														);
+			$this->Validator->isResultSetWithRows( 'hierarchy_control_id',
+												   $hclf->getByID( $this->getHierarchyControl() ),
+												   TTi18n::gettext( 'Invalid Hierarchy Control' )
+			);
 		}
 
 		// Selected Employee
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$this->Validator->isResultSetWithRows(	'user',
-													$ulf->getByID($this->getUser()),
-													TTi18n::gettext('Selected Employee is invalid')
-												);
+		$this->Validator->isResultSetWithRows( 'user',
+											   $ulf->getByID( $this->getUser() ),
+											   TTi18n::gettext( 'Selected Employee is invalid' )
+		);
 		/*
 		//Allow superiors to be assigned as subordinates in the same hierarchy to make it easier to administer hierarchies
 		//that have superiors sharing responsibility.
@@ -187,18 +191,18 @@ class HierarchyUserFactory extends Factory {
 													TTi18n::gettext('Selected Employee is assigned as both a superior and subordinate')
 													)
 */
-		if ( $this->Validator->isError('user') == FALSE ) {
-			$this->Validator->isTrue(		'user',
-													$this->isUniqueUser($this->getUser()),
-													TTi18n::gettext('Selected Employee is already assigned to another hierarchy')
-												);
+		if ( $this->Validator->isError( 'user' ) == false ) {
+			$this->Validator->isTrue( 'user',
+									  $this->isUniqueUser( $this->getUser() ),
+									  TTi18n::gettext( 'Selected Employee is already assigned to another hierarchy' )
+			);
 		}
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -207,75 +211,75 @@ class HierarchyUserFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -283,30 +287,30 @@ class HierarchyUserFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -315,11 +319,12 @@ class HierarchyUserFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
-		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText('Subordinate').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
+		if ( is_object( $u_obj ) ) {
+			return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText( 'Subordinate' ) . ': ' . $u_obj->getFullName( false, true ), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

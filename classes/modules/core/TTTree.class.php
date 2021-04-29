@@ -45,19 +45,20 @@ class TTTree {
 	 * @param bool $include_root
 	 * @return array
 	 */
-	static function FormatArray( $nodes, $include_root = TRUE ) {
-		Debug::Text(' Formatting Array...', __FILE__, __LINE__, __METHOD__, 10);
+	static function FormatArray( $nodes, $include_root = true ) {
+		Debug::Text( ' Formatting Array...', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$nodes = self::createNestedArrayWithDepth( $nodes );
 
-		if ( $include_root == TRUE ) {
-			return array( 0 => array(	 'id' => '00000000-0000-0000-0000-000000000000',
-										 'name' => TTi18n::getText('Root'),
-										 'level' => 0,
-										 'children' => $nodes )
-			);
-		} else {
-			return $nodes;
+		if ( $include_root == true ) {
+			return [
+					0 => [
+							'id'       => '00000000-0000-0000-0000-000000000000',
+							'name'     => TTi18n::getText( 'Root' ),
+							'level'    => 0,
+							'children' => $nodes,
+					],
+			];
 		}
 
 		return $nodes;
@@ -69,13 +70,13 @@ class TTTree {
 	 * @return array
 	 */
 	static function flattenArray( $nodes ) {
-		$retarr = array();
-		foreach ($nodes as $key => $node) {
-			if ( isset($node['children']) ) {
-				$retarr = array_merge( $retarr, self::flattenArray($node['children']) );
-            	unset($node['children']);
-            	$retarr[] = $node;
-        	} else {
+		$retarr = [];
+		foreach ( $nodes as $key => $node ) {
+			if ( isset( $node['children'] ) ) {
+				$retarr = array_merge( $retarr, self::flattenArray( $node['children'] ) );
+				unset( $node['children'] );
+				$retarr[] = $node;
+			} else {
 				$retarr[] = $node;
 			}
 		}
@@ -90,11 +91,11 @@ class TTTree {
 	 * @return array
 	 */
 	static function getElementFromNodes( $nodes, $key = 'id' ) {
-		$retarr = array();
-		if ( is_array($nodes ) ) {
-			foreach( $nodes as $node ) {
+		$retarr = [];
+		if ( is_array( $nodes ) ) {
+			foreach ( $nodes as $node ) {
 				$retarr[] = $node[$key];
-				if ( isset($node['children']) ) {
+				if ( isset( $node['children'] ) ) {
 					$retarr[] = self::getElementFromNodes( $node['children'] );
 				}
 			}
@@ -124,6 +125,7 @@ class TTTree {
 		if ( $a['name'] == $b['name'] ) {
 			return 0;
 		}
+
 		return ( $a['name'] < $b['name'] ) ? -1 : 1;
 	}
 
@@ -135,16 +137,16 @@ class TTTree {
 	 * @return array
 	 */
 	static function createNestedArrayWithDepth( $nodes, $parent_id = '00000000-0000-0000-0000-000000000000', $depth = 1 ) {
-		$retarr = array();
+		$retarr = [];
 
-		if ( is_array($nodes ) ) {
-			uasort( $nodes, array( 'self', 'sortByName' ) );
+		if ( is_array( $nodes ) ) {
+			uasort( $nodes, [ 'self', 'sortByName' ] );
 			foreach ( $nodes as $element ) {
 				$element['level'] = $depth;
-				if ( isset($element['parent_id']) AND isset($element['id']) AND $element['parent_id'] == $parent_id ) {
+				if ( isset( $element['parent_id'] ) && isset( $element['id'] ) && $element['parent_id'] == $parent_id ) {
 					$children = self::createNestedArrayWithDepth( $nodes, $element['id'], ( $depth + 1 ) );
 					if ( $children ) {
-						uasort( $children, array( 'self', 'sortByName' ) );
+						uasort( $children, [ 'self', 'sortByName' ] );
 						$element['children'] = $children;
 					}
 
@@ -156,4 +158,5 @@ class TTTree {
 		return $retarr;
 	}
 }
+
 ?>

@@ -22,5 +22,4 @@ var SearchField = Base.extend( {
 		default_args: null
 	}
 
-
-} )
+} );

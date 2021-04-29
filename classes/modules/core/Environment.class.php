@@ -49,7 +49,7 @@ class Environment {
 	 * @return mixed
 	 */
 	static function stripDuplicateSlashes( $path ) {
-		if ( strpos( $path, ':' ) === FALSE ) {
+		if ( strpos( $path, ':' ) === false ) {
 			return preg_replace( '/\/+/', '/', $path ); //Handle file paths, including ones that start with duplicate slashes, ie: //tmp/test.php
 		} else {
 			return preg_replace( '/([^:])(\/{2,})/', '$1/', $path ); //Handle URLs without replacing http:// or https:// at the beginning.
@@ -61,14 +61,14 @@ class Environment {
 	 */
 	static function getBasePath() {
 		//return dirname( __FILE__ ) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR;
-		return str_replace('classes'. DIRECTORY_SEPARATOR . 'modules'. DIRECTORY_SEPARATOR .'core', '', dirname( __FILE__ ) );
+		return str_replace( 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'core', '', dirname( __FILE__ ) );
 	}
 
 	/**
 	 * @return string
 	 */
 	static function getHostName() {
-		return Misc::getHostName( TRUE );
+		return Misc::getHostName( true );
 	}
 
 	/**
@@ -79,9 +79,9 @@ class Environment {
 
 		$retval = '/';
 
-		if ( isset($config_vars['path']['base_url']) ) {
-			if ( substr( $config_vars['path']['base_url'], -1) != '/' ) {
-				$retval = $config_vars['path']['base_url']. '/'; //Don't use directory separator here
+		if ( isset( $config_vars['path']['base_url'] ) ) {
+			if ( substr( $config_vars['path']['base_url'], -1 ) != '/' ) {
+				$retval = $config_vars['path']['base_url'] . '/'; //Don't use directory separator here
 			} else {
 				$retval = $config_vars['path']['base_url'];
 			}
@@ -100,9 +100,10 @@ class Environment {
 	}
 
 	/**
+	 * @param null $api
 	 * @return mixed|string
 	 */
-	static function getCookieBaseURL( $api = NULL ) {
+	static function getCookieBaseURL( $api = null ) {
 		//  "/timetrex/interface"
 		//  "/timetrex/api/json"
 		//  "/timetrex" <- cookie must go here.
@@ -120,23 +121,23 @@ class Environment {
 	 * @param null $api
 	 * @return mixed
 	 */
-	static function getAPIBaseURL( $api = NULL ) {
+	static function getAPIBaseURL( $api = null ) {
 		global $config_vars;
 
 		//If "interface" appears in the base URL, replace it with API directory
-		$base_url = str_replace( array('/interface', '/api'), '', rtrim( $config_vars['path']['base_url'], '/' ) );
+		$base_url = str_replace( [ '/interface', '/api' ], '', rtrim( $config_vars['path']['base_url'], '/' ) );
 
 		if ( $api == '' ) {
-			if ( defined('TIMETREX_LEGACY_SOAP_API') AND TIMETREX_LEGACY_SOAP_API == TRUE ) {
-				return self::stripDuplicateSlashes( $base_url.'/soap/' );
-			} elseif ( defined('TIMETREX_SOAP_API') AND TIMETREX_SOAP_API == TRUE )	 {
+			if ( defined( 'TIMETREX_LEGACY_SOAP_API' ) && TIMETREX_LEGACY_SOAP_API == true ) {
+				return self::stripDuplicateSlashes( $base_url . '/soap/' );
+			} else if ( defined( 'TIMETREX_SOAP_API' ) && TIMETREX_SOAP_API == true ) {
 				$api = 'soap';
-			} elseif ( defined('TIMETREX_JSON_API') AND TIMETREX_JSON_API == TRUE )	 {
+			} else if ( defined( 'TIMETREX_JSON_API' ) && TIMETREX_JSON_API == true ) {
 				$api = 'json';
 			}
 		}
 
-		$base_url = self::stripDuplicateSlashes( $base_url.'/api/'.$api.'/' );
+		$base_url = self::stripDuplicateSlashes( $base_url . '/api/' . $api . '/' );
 
 		return $base_url;
 	}
@@ -146,21 +147,21 @@ class Environment {
 	 * @return string
 	 */
 	static function getAPIURL( $api ) {
-		return self::getAPIBaseURL( $api ).'api.php';
+		return self::getAPIBaseURL( $api ) . 'api.php';
 	}
 
 	/**
 	 * @return string
 	 */
 	static function getImagesPath() {
-		return self::getBasePath() . DIRECTORY_SEPARATOR .'interface'. DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR;
+		return self::getBasePath() . DIRECTORY_SEPARATOR . 'interface' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR;
 	}
 
 	/**
 	 * @return string
 	 */
 	static function getImagesURL() {
-		return self::getBaseURL() .'images/';
+		return self::getBaseURL() . 'images/';
 	}
 
 	/**
@@ -182,4 +183,5 @@ class Environment {
 	}
 
 }
+
 ?>

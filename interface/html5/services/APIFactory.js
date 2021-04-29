@@ -1,4 +1,4 @@
-var APIFactory = (function() {
+var APIFactory = ( function() {
 
 	var api_dic = {};
 
@@ -30,5 +30,5 @@ var APIFactory = (function() {
 
 	};
 
-})();
+} )();
 

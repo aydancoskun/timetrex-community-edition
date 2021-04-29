@@ -24,8 +24,8 @@ PermissionControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'permission_control';
 		this.context_menu_name = $.i18n._( 'Permission Group' );
 		this.navigation_label = $.i18n._( 'Permission Group' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPermissionControl' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPermissionControl' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -40,7 +40,7 @@ PermissionControlViewController = BaseViewController.extend( {
 		var $this = this;
 
 		if ( this.edit_view_tab_selected_index === 0 && !LocalCacheData.openAwesomeBox &&
-				(focus.length < 1 || focus[0].localName !== 'input') ) {
+			( focus.length < 1 || focus[0].localName !== 'input' ) ) {
 			var a_dropdown = this.edit_view_ui_dic.permission;
 
 			if ( e.keyCode === 39 ) { //right
@@ -62,8 +62,8 @@ PermissionControlViewController = BaseViewController.extend( {
 			} else {
 
 				if ( e.keyCode === 16 ||
-						e.keyCode === 17 ||
-						e.keyCode === 91 ) {
+					e.keyCode === 17 ||
+					e.keyCode === 91 ) {
 					return;
 				}
 
@@ -135,72 +135,25 @@ PermissionControlViewController = BaseViewController.extend( {
 
 	},
 
-	initSubLogView: function( tab_id ) {
-		var $this = this;
-
-		if ( !this.current_edit_record.id ) {
-			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
-			return;
+	setSubLogViewFilter: function() {
+		if ( !this.sub_log_view_controller ) {
+			return false;
 		}
 
-		if ( this.sub_log_view_controller ) {
-			this.sub_log_view_controller.buildContextMenu( true );
-			this.sub_log_view_controller.setDefaultMenu();
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
-				filter['table_name_object_id'] = {
-					'permission_user': [this.parent_edit_record.id],
-					'permission': [this.parent_edit_record.id],
-					'permission_control': [this.parent_edit_record.id]
-				};
-
-				return filter;
+		this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+			filter['table_name_object_id'] = {
+				'permission_user': [this.parent_edit_record.id],
+				'permission': [this.parent_edit_record.id],
+				'permission_control': [this.parent_edit_record.id]
 			};
 
-			$this.sub_log_view_controller.initData();
-			return;
-		}
+			return filter;
+		};
 
-		Global.loadScript( 'views/core/log/LogViewController.js', function() {
-			var tab = $this.edit_view_tab.find( '#' + tab_id );
-
-			var firstColumn = tab.find( '.first-column-sub-view' );
-
-			TTPromise.add( 'initSubAudit', 'init' );
-			TTPromise.wait( 'initSubAudit', 'init', function() {
-				firstColumn.css('opacity', '1');
-			} );
-
-			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
-
-			Global.trackView( 'Sub' + 'Log' + 'View', LocalCacheData.current_doing_context_action );
-			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_log_view_controller = subViewController;
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
-				filter['table_name_object_id'] = {
-					'permission_user': [this.parent_edit_record.id],
-					'permission': [this.parent_edit_record.id],
-					'permission_control': [this.parent_edit_record.id]
-				};
-
-				return filter;
-			};
-			$this.sub_log_view_controller.parent_view_controller = $this;
-			$this.sub_log_view_controller.postInit = function() {
-				this.initData();
-			};
-		}
+		return true;
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: [{
@@ -219,7 +172,7 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		var permission_grid = this.edit_view_ui_dic.permission;
 
-		permission_grid.setHeight( (this.edit_view_tab.height() - 325) );
+		permission_grid.setHeight( ( this.edit_view_tab.height() - 325 ) );
 
 	},
 
@@ -357,7 +310,7 @@ PermissionControlViewController = BaseViewController.extend( {
 	convertPermissionData: function( permission ) {
 
 		var result = [];
-		for ( var key  in permission ) {
+		for ( var key in permission ) {
 			var ar = [];
 			for ( var cKey in permission[key] ) {
 				if ( permission[key][cKey] === true ) {
@@ -404,7 +357,7 @@ PermissionControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPermissionControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPermissionControl' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PERMISSION_CONTROL,
@@ -451,7 +404,7 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -476,7 +429,7 @@ PermissionControlViewController = BaseViewController.extend( {
 			display_close_btn: false,
 			auto_sort: true,
 			display_column_settings: false,
-			default_height: (this.edit_view_tab.height() - 325),
+			default_height: ( this.edit_view_tab.height() - 325 ),
 		} );
 		form_item_input.addClass( 'splayed-adropdown' );
 		this.addEditFieldToColumn( $.i18n._( 'Permissions' ), form_item_input, tab_permission_group_column1, '', null, true, true );
@@ -539,7 +492,7 @@ PermissionControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -551,7 +504,7 @@ PermissionControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

@@ -35,7 +35,6 @@
  ********************************************************************************/
 
 
-
 /**
  * @package Modules\Import
  */
@@ -43,40 +42,40 @@ class ImportPayPeriod extends Import {
 
 	public $class_name = 'APIPayPeriod';
 
-	public $pay_period_schedule_options = FALSE;
+	public $pay_period_schedule_options = false;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$ppf = TTNew('PayPeriodFactory'); /** @var PayPeriodFactory $ppf */
-				$retval = Misc::arrayIntersectByKey( array('pay_period_schedule', 'start_date', 'end_date', 'transaction_date'), Misc::trimSortPrefix( $ppf->getOptions('columns') ) );
+				$ppf = TTNew( 'PayPeriodFactory' ); /** @var PayPeriodFactory $ppf */
+				$retval = Misc::arrayIntersectByKey( [ 'pay_period_schedule', 'start_date', 'end_date', 'transaction_date' ], Misc::trimSortPrefix( $ppf->getOptions( 'columns' ) ) );
 				break;
 			case 'column_aliases':
 				//Used for converting column names after they have been parsed.
-				$retval = array(
-								'pay_period_schedule' => 'pay_period_schedule_id',
-								);
+				$retval = [
+						'pay_period_schedule' => 'pay_period_schedule_id',
+				];
 				break;
 			case 'import_options':
-				$retval = array(
-								'-1010-fuzzy_match' => TTi18n::getText('Enable smart matching.'),
-								);
+				$retval = [
+						'-1010-fuzzy_match' => TTi18n::getText( 'Enable smart matching.' ),
+				];
 				break;
 			case 'parse_hint':
-				$upf = TTnew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
+				$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 
-				$retval = array(
-								'start_date' => $upf->getOptions('date_format'),
-								'end_date' => $upf->getOptions('date_format'),
-								'transaction_date' => $upf->getOptions('date_format'),
-								);
+				$retval = [
+						'start_date'       => $upf->getOptions( 'date_format' ),
+						'end_date'         => $upf->getOptions( 'date_format' ),
+						'transaction_date' => $upf->getOptions( 'date_format' ),
+				];
 				break;
 		}
 
@@ -127,12 +126,12 @@ class ImportPayPeriod extends Import {
 	 */
 	function getPayPeriodScheduleOptions() {
 		//Get job titles
-		$ppslf = TTNew('PayPeriodScheduleListFactory'); /** @var PayPeriodScheduleListFactory $ppslf */
+		$ppslf = TTNew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 		$ppslf->getByCompanyId( $this->company_id );
-		$this->pay_period_schedule_options = (array)$ppslf->getArrayByListFactory( $ppslf, FALSE );
-		unset($ppslf);
+		$this->pay_period_schedule_options = (array)$ppslf->getArrayByListFactory( $ppslf, false );
+		unset( $ppslf );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -141,17 +140,17 @@ class ImportPayPeriod extends Import {
 	 * @param null $parse_hint
 	 * @return array|bool|int|mixed
 	 */
-	function parse_pay_period_schedule( $input, $default_value = NULL, $parse_hint = NULL ) {
+	function parse_pay_period_schedule( $input, $default_value = null, $parse_hint = null ) {
 		if ( !is_array( $this->pay_period_schedule_options ) ) {
 			$this->getPayPeriodScheduleOptions();
 		}
 
-		if ( trim($input) == '' AND count($this->pay_period_schedule_options) == 1 ) {
-			return key($this->pay_period_schedule_options); //Use first pay period schedule.
+		if ( trim( $input ) == '' && count( $this->pay_period_schedule_options ) == 1 ) {
+			return key( $this->pay_period_schedule_options ); //Use first pay period schedule.
 		}
 
 		$retval = $this->findClosestMatch( $input, $this->pay_period_schedule_options );
-		if ( $retval === FALSE ) {
+		if ( $retval === false ) {
 			$retval = -1; //Make sure this fails.
 		}
 
@@ -166,9 +165,10 @@ class ImportPayPeriod extends Import {
 	 * @param null $raw_row
 	 * @return bool|false|int
 	 */
-	function parse_start_date( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
-		if ( isset($parse_hint) AND $parse_hint != '' ) {
+	function parse_start_date( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
+		if ( isset( $parse_hint ) && $parse_hint != '' ) {
 			TTDate::setDateFormat( $parse_hint );
+
 			return TTDate::parseDateTime( $input );
 		} else {
 			return TTDate::strtotime( $input );
@@ -182,9 +182,10 @@ class ImportPayPeriod extends Import {
 	 * @param null $raw_row
 	 * @return bool|false|int
 	 */
-	function parse_end_date( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
-		if ( isset($parse_hint) AND $parse_hint != '' ) {
+	function parse_end_date( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
+		if ( isset( $parse_hint ) && $parse_hint != '' ) {
 			TTDate::setDateFormat( $parse_hint );
+
 			return TTDate::parseDateTime( $input );
 		} else {
 			return TTDate::strtotime( $input );
@@ -198,13 +199,15 @@ class ImportPayPeriod extends Import {
 	 * @param null $raw_row
 	 * @return bool|false|int
 	 */
-	function parse_transaction_date( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
-		if ( isset($parse_hint) AND $parse_hint != '' ) {
+	function parse_transaction_date( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
+		if ( isset( $parse_hint ) && $parse_hint != '' ) {
 			TTDate::setDateFormat( $parse_hint );
+
 			return TTDate::parseDateTime( $input );
 		} else {
 			return TTDate::strtotime( $input );
 		}
 	}
 }
+
 ?>

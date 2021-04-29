@@ -16,8 +16,8 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'round_interval_policy';
 		this.context_menu_name = $.i18n._( 'Rounding Policy' );
 		this.navigation_label = $.i18n._( 'Rounding Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRoundIntervalPolicy' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRoundIntervalPolicy' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 		this.render();
 		this.buildContextMenu();
 
@@ -45,7 +45,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRoundIntervalPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRoundIntervalPolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
@@ -71,7 +71,6 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_rounding_policy_column1, '' );
 		form_item_input.parent().width( '45%' );
-
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
@@ -195,7 +194,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -207,7 +206,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

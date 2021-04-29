@@ -55,6 +55,4 @@ var APIUserMembership = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

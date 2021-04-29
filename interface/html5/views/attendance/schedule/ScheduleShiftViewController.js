@@ -30,19 +30,19 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		this.table_name_key = 'schedule';
 		this.context_menu_name = $.i18n._( 'Schedule Shift' );
 		this.navigation_label = $.i18n._( 'Schedule' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APISchedule' ))();
-		this.absence_policy_api = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
+		this.absence_policy_api = new ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 
-			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 
 		}
 
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 
 		this.initPermission();
 		this.render();
@@ -53,7 +53,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
@@ -67,51 +67,51 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		// is to help debug in future by seeing how the current function was updated to match baseview.
 		// initially, the code looped over all the mass edit records, and then for each record, it would loop over the changed fields and set them on that record.
 		// instead, we will now just loop over the changed fields once, and then loop over the mass edit records, cloning this changed set of fields.
-        // The clone itself is probably yet another loop internally, but this at least makes it easier to read and also allows the merge to use the common base view controller function.
+		// The clone itself is probably yet another loop internally, but this at least makes it easier to read and also allows the merge to use the common base view controller function.
 
 		var $this = this;
-        var record;
-        if ( this.is_mass_editing ) {
+		var record;
+		if ( this.is_mass_editing ) {
 			record = [];
 
 			// loop over all fields on the form, and track the ones that have changed
 			var mass_record_shared = {};
-			for (var key in this.edit_view_ui_dic) {
+			for ( var key in this.edit_view_ui_dic ) {
 
-				if (!this.edit_view_ui_dic.hasOwnProperty(key)) {
+				if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
 					continue;
 				}
 				var widget = this.edit_view_ui_dic[key];
-				if (Global.isSet(widget.isChecked)) {
-					if (widget.isChecked() && widget.getEnabled()) {
+				if ( Global.isSet( widget.isChecked ) ) {
+					if ( widget.isChecked() && widget.getEnabled() ) {
 						mass_record_shared[key] = widget.getValue();
 					}
 				}
 			}
 
-        	// loop over all the selected id's for the mass edit, and apply a copy of the changed fields to each
+			// loop over all the selected id's for the mass edit, and apply a copy of the changed fields to each
 
-            for ( var i = 0; i < this.mass_edit_record_ids.length; i++ ) {
-            	//create new copy of the fields that have changed.
-                var mass_record_single = Global.clone( mass_record_shared );
+			for ( var i = 0; i < this.mass_edit_record_ids.length; i++ ) {
+				//create new copy of the fields that have changed.
+				var mass_record_single = Global.clone( mass_record_shared );
 				mass_record_single['id'] = $this.mass_edit_record_ids[i];
 
 				// push the single record into the array of mass edit records to be saved
-                record.push(mass_record_single);
-            }
-        } else {
-            this.collectUIDataToCurrentEditRecord();
-            record = this.uniformVariable( this.current_edit_record );
-        }
+				record.push( mass_record_single );
+			}
+		} else {
+			this.collectUIDataToCurrentEditRecord();
+			record = this.uniformVariable( this.current_edit_record );
+		}
 
-        this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-            onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
+			onResult: function( result ) {
 
-                $this.onSaveResult( result );
+				$this.onSaveResult( result );
 
-            }
-        } );
-    },
+			}
+		} );
+	},
 
 	//Make sure this.current_edit_record is updated before validate
 	validate: function() {
@@ -155,8 +155,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		}
 
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				PermissionManager.validate( p_id, 'edit_job' ) &&
-				( Global.getProductEdition() >= 20 ) ) {
+			PermissionManager.validate( p_id, 'edit_job' ) &&
+			( Global.getProductEdition() >= 20 ) ) {
 			return true;
 		}
 		return false;
@@ -169,7 +169,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		}
 
 		if ( PermissionManager.validate( 'job_item', 'enabled' ) &&
-				PermissionManager.validate( p_id, 'edit_job_item' ) ) {
+			PermissionManager.validate( p_id, 'edit_job_item' ) ) {
 			return true;
 		}
 		return false;
@@ -271,11 +271,9 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		return false;
 	},
 
-
 	getOtherFieldReferenceField: function() {
 		return 'note';
 	},
-
 
 	buildEditViewUI: function() {
 
@@ -293,7 +291,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		var widgetContainer;
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APISchedule' )),
+			api_class: ( APIFactory.getAPIClass( 'APISchedule' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.SCHEDULE,
@@ -318,16 +316,16 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
 			set_empty: !this.checkOpenPermission(),
 			set_special_empty: true,
 			field: 'user_id',
-			addition_source_function: (function( target, source_data ) {
+			addition_source_function: ( function( target, source_data ) {
 				return $this.onEmployeeSourceCreate( target, source_data );
-			})
+			} )
 
 		} );
 		var default_args = {};
@@ -375,7 +373,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APISchedulePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.SCHEDULE_POLICY,
 			show_search_inputs: true,
@@ -388,7 +386,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
@@ -422,7 +420,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -440,7 +438,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -458,17 +456,17 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'job_id'
 			} );
 
@@ -490,17 +488,17 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_item_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'job_item_id'
 			} );
 
@@ -526,9 +524,9 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		form_item_input.parent().width( '45%' );
 
 		if ( this.is_mass_editing ) {
-			this.detachElement('total_time');
+			this.detachElement( 'total_time' );
 		} else {
-			this.attachElement('total_time');
+			this.attachElement( 'total_time' );
 		}
 
 	},
@@ -602,8 +600,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			result_data[$this.parent_key] = $this.parent_value;
 		}
 		// Default to Open
-		result_data === true && (result_data = { user_id: TTUUID.zero_id });
-		!result_data.user_id && (result_data.user_id = TTUUID.zero_id);
+		result_data === true && ( result_data = { user_id: TTUUID.zero_id } );
+		!result_data.user_id && ( result_data.user_id = TTUUID.zero_id );
 		$this.current_edit_record = result_data;
 		$this.initEditView();
 	},
@@ -669,12 +667,12 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
-				addition_source_function: (function( target, source_data ) {
+				addition_source_function: ( function( target, source_data ) {
 					return $this.onEmployeeSourceCreate( target, source_data );
-				}),
+				} ),
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
@@ -684,7 +682,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -707,7 +705,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -720,7 +718,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -745,7 +743,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -757,10 +755,10 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_id',
 				layout_name: ALayoutIDs.JOB,
-				api_class: ( Global.getProductEdition() >= 20 ) ? (APIFactory.getAPIClass( 'APIJob' )) : null,
+				api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
 				multiple: true,
 				basic_search: false,
-				adv_search: (this.show_job_ui && ( Global.getProductEdition() >= 20 )),
+				adv_search: ( this.show_job_ui && ( Global.getProductEdition() >= 20 ) ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -769,10 +767,10 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_item_id',
 				layout_name: ALayoutIDs.JOB_ITEM,
-				api_class: ( Global.getProductEdition() >= 20 ) ? (APIFactory.getAPIClass( 'APIJobItem' )) : null,
+				api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
 				multiple: true,
 				basic_search: false,
-				adv_search: (this.show_job_item_ui && ( Global.getProductEdition() >= 20 )),
+				adv_search: ( this.show_job_item_ui && ( Global.getProductEdition() >= 20 ) ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -781,7 +779,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -794,7 +792,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -807,7 +805,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'schedule_policy_id',
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APISchedulePolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -968,13 +966,13 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				new_records.push( tmp_records );
 			}
 		} else {
-			new_records.push(this.current_edit_record)
+			new_records.push( this.current_edit_record );
 		}
 
-		if (this.current_edit_record.start_date_stamps && new_records.length > 0) {
+		if ( this.current_edit_record.start_date_stamps && new_records.length > 0 ) {
 			//Allowing multiple dates
 			var edit_record = [];
-			for (var ur in new_records) {
+			for ( var ur in new_records ) {
 				var dates = this.uniformDates( new_records[ur].start_date_stamps, new_records[ur] );
 
 				if ( Array.isArray( new_records[ur].start_date_stamps ) ) {
@@ -983,7 +981,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 					dates = this.parserDatesRange( new_records[ur].start_date_stamps );
 				}
 
-				for (var d in dates) {
+				for ( var d in dates ) {
 					var new_record = {};
 					for ( var er in new_records[ur] ) {
 						if ( er == 'start_date_stamps' ) {
@@ -998,7 +996,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			}
 		} else {
 			edit_record = this.current_edit_record;
-			if ($.isArray(edit_record.start_date_stamp) && edit_record.start_date_stamp.length == 1) {
+			if ( $.isArray( edit_record.start_date_stamp ) && edit_record.start_date_stamp.length == 1 ) {
 				edit_record.start_date_stamp = edit_record.start_date_stamp[0];
 			}
 		}
@@ -1022,14 +1020,15 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	},
 
 	uniformDates: function( date_range, record ) {
-		dates = [];
-		if ( !Array.isArray( date_range ) && date_range.indexOf(' - ') == -1 ) {
+		var dates = [];
+		if ( !Array.isArray( date_range ) && date_range.indexOf( ' - ' ) == -1 ) {
 			dates = [date_range];
 		} else if ( Array.isArray( date_range ) ) {
 			dates = date_range;
 		} else {
 			dates = this.parserDatesRange( date_range );
 		}
+
 		return dates;
 	},
 
@@ -1079,7 +1078,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 						break;
 					case 'job_item_id':
 						if ( ( Global.getProductEdition() >= 20 ) ) {
-							args = {};
+							var args = {};
 							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
 							widget.setValue( this.current_edit_record[key] );
@@ -1108,8 +1107,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 	getScheduleTotalTime: function() {
 		if ( this.is_mass_editing ) {
-            return;
-        }
+			return;
+		}
 
 		var startTime, endTime, date_stamp;
 		if ( this.current_edit_record['start_date_stamps'] ) {

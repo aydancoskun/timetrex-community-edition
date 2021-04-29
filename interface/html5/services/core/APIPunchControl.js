@@ -9,6 +9,4 @@ var APIPunchControl = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

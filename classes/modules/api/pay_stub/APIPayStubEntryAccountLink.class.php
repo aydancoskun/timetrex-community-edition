@@ -38,7 +38,6 @@
 /**
  * @package API\PayStubEntryAccountLink
  */
-
 class APIPayStubEntryAccountLink extends APIFactory {
 	protected $main_class = 'PayStubFactoryAccountLink';
 
@@ -48,7 +47,7 @@ class APIPayStubEntryAccountLink extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -56,29 +55,29 @@ class APIPayStubEntryAccountLink extends APIFactory {
 	 * @return array|bool
 	 */
 	public function getPayStubEntryAccountLink() {
-		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_child')	) ) {
+		if ( !$this->getPermissionObject()->Check( 'pay_stub', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) || $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
 		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
-		$pseallf->getByCompanyId($this->getCurrentUserObject()->getCompany());
-		Debug::Text('PayStubEntryAccountLink Record Count: '. $pseallf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$pseallf->getByCompanyId( $this->getCurrentUserObject()->getCompany() );
+		Debug::Text( 'PayStubEntryAccountLink Record Count: ' . $pseallf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( $pseallf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $pseallf );
 
-			$prev_type = NULL;
-			$retarr = array();
+			$prev_type = null;
+			$retarr = [];
 
-			foreach( $pseallf as $pseal_obj ) {
+			foreach ( $pseallf as $pseal_obj ) {
 				$retarr[] = $pseal_obj->data; //FIXME: whip up an objectToArray function
 			}
 
 			return $this->returnHandler( $retarr );
 		}
 
-		return $this->returnHandler( TRUE ); //No records returned.
+		return $this->returnHandler( true ); //No records returned.
 	}
 
 }

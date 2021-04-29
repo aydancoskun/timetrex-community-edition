@@ -34,15 +34,15 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
 //
 //
 // Main
 //
 //
-if ( $argc <= 1 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc <= 1 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: export_pay_stubs.php [OPTIONS] [Output Directory]\n";
 	$help_output .= "  Options:\n";
 	$help_output .= "    -c [Company ID]			Defaults to 1\n";
@@ -51,68 +51,67 @@ if ( $argc <= 1 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) 
 	$help_output .= "    -d [Pay Period Date]		Format: YYYYMMDD\n";
 
 	echo $help_output;
-
 } else {
 	//FIXME: Use Pears Console_GetArgs package to handle these better.
 
 	//Handle command line arguments
-	$last_arg = count($argv)-1;
+	$last_arg = count( $argv ) - 1;
 
-	if ( in_array('-c', $argv) ) {
-		$company_id = strtolower( trim($argv[array_search('-c', $argv)+1]) );
+	if ( in_array( '-c', $argv ) ) {
+		$company_id = strtolower( trim( $argv[ array_search( '-c', $argv ) + 1 ] ) );
 	} else {
 		$company_id = 1;
 	}
 
-	if ( in_array('-t', $argv) ) {
-		$date_type = strtolower( trim($argv[array_search('-t', $argv)+1]) );
+	if ( in_array( '-t', $argv ) ) {
+		$date_type = strtolower( trim( $argv[ array_search( '-t', $argv ) + 1 ] ) );
 	} else {
 		$date_type = 'last';
 		echo "Pay Period Date Type not specified, assuming: Last\n";
 	}
 
-	$pay_period_date = NULL;
-	if ( in_array('-d', $argv) ) {
-		$pay_period_date = TTDate::getBeginDayEpoch( strtotime( trim($argv[array_search('-d', $argv)+1]) ) );
+	$pay_period_date = null;
+	if ( in_array( '-d', $argv ) ) {
+		$pay_period_date = TTDate::getBeginDayEpoch( strtotime( trim( $argv[ array_search( '-d', $argv ) + 1 ] ) ) );
 	} else {
 		echo "Pay Period Date not specified, assuming: Last\n";
 	}
 
-	if ( isset($argv[$last_arg]) AND $argv[$last_arg] != '' ) {
-		if ( !file_exists( $argv[$last_arg] ) OR !is_writable( $argv[$last_arg] ) ) {
-			echo "Output Directory: ". $argv[$last_arg] ." does not exists or is not writable!\n";
+	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
+		if ( !file_exists( $argv[ $last_arg ] ) OR !is_writable( $argv[ $last_arg ] ) ) {
+			echo "Output Directory: " . $argv[ $last_arg ] . " does not exists or is not writable!\n";
 			exit;
 		} else {
-			$output_directory = $argv[$last_arg];
+			$output_directory = $argv[ $last_arg ];
 		}
 	}
 
 	if ( $date_type != 'last' ) {
-		echo "Searching for Pay Period ". ucfirst($date_type) ." Date: ". TTDate::getDate('DATE', $pay_period_date ) ."...\n";
+		echo "Searching for Pay Period " . ucfirst( $date_type ) . " Date: " . TTDate::getDate( 'DATE', $pay_period_date ) . "...\n";
 	} else {
 		echo "Searching for Last Pay Period...\n";
 	}
 
 	$pplf = new PayPeriodListFactory();
-	$pplf->getPayPeriodsWithPayStubsByCompanyId( $company_id, NULL, array('a.start_date' => 'desc') );
+	$pplf->getPayPeriodsWithPayStubsByCompanyId( $company_id, null, array('a.start_date' => 'desc') );
 	if ( $pplf->getRecordCount() > 0 ) {
-		$x=0;
-		$found_pay_period = FALSE;
-		foreach( $pplf as $pp_obj ) {
+		$x = 0;
+		$found_pay_period = false;
+		foreach ( $pplf as $pp_obj ) {
 
-			if ( $date_type == 'start' AND TTDate::getBeginDayEpoch($pp_obj->getStartDate()) == $pay_period_date ) {
-				$found_pay_period = TRUE;
-			} elseif ( $date_type == 'end' AND TTDate::getBeginDayEpoch($pp_obj->getEndDate()) == $pay_period_date ) {
-				$found_pay_period = TRUE;
-			} elseif ( $date_type == 'transaction' AND TTDate::getBeginDayEpoch($pp_obj->getTransactionDate()) == $pay_period_date ) {
-				$found_pay_period = TRUE;
-			} elseif ( $date_type == 'last' ) {
+			if ( $date_type == 'start' AND TTDate::getBeginDayEpoch( $pp_obj->getStartDate() ) == $pay_period_date ) {
+				$found_pay_period = true;
+			} else if ( $date_type == 'end' AND TTDate::getBeginDayEpoch( $pp_obj->getEndDate() ) == $pay_period_date ) {
+				$found_pay_period = true;
+			} else if ( $date_type == 'transaction' AND TTDate::getBeginDayEpoch( $pp_obj->getTransactionDate() ) == $pay_period_date ) {
+				$found_pay_period = true;
+			} else if ( $date_type == 'last' ) {
 				//Last pay period
-				$found_pay_period = TRUE;
+				$found_pay_period = true;
 			}
 
-			if ( $found_pay_period == TRUE ) {
-				echo "Found Pay Period: Start: ". TTDate::getDate('DATE', $pp_obj->getStartDate() ) .' End: '. TTDate::getDate('DATE', $pp_obj->getEndDate() ) .' Transaction: '. TTDate::getDate('DATE', $pp_obj->getTransactionDate() ) ."\n";
+			if ( $found_pay_period == true ) {
+				echo "Found Pay Period: Start: " . TTDate::getDate( 'DATE', $pp_obj->getStartDate() ) . ' End: ' . TTDate::getDate( 'DATE', $pp_obj->getEndDate() ) . ' Transaction: ' . TTDate::getDate( 'DATE', $pp_obj->getTransactionDate() ) . "\n";
 				$pay_period_id = $pp_obj->getId();
 				break;
 			}
@@ -121,27 +120,27 @@ if ( $argc <= 1 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) 
 		}
 	}
 
-	if ( isset($pay_period_id) ) {
+	if ( isset( $pay_period_id ) ) {
 		$pslf = new PayStubListFactory();
 		$pslf->getByCompanyIdAndPayPeriodId( $company_id, $pay_period_id );
 		if ( $pslf->getRecordCount() > 0 ) {
-			echo "Export Directory: ". $output_directory ."\n";
-			$i=1;
-			foreach( $pslf as $tmp_ps_obj ) {
+			echo "Export Directory: " . $output_directory . "\n";
+			$i = 1;
+			foreach ( $pslf as $tmp_ps_obj ) {
 				$pslf_b = new PayStubListFactory();
 				$pslf_b->getById( $tmp_ps_obj->getId() );
 				if ( $pslf_b->getRecordCount() > 0 ) {
 					$ps_obj = $pslf_b->getCurrent();
 
 					if ( is_object( $ps_obj->getUserObject() ) ) {
-						$file_name = $output_directory . DIRECTORY_SEPARATOR . 'pay_stub_'. $ps_obj->getUserObject()->getUserName() .'_'. date('Ymd', $ps_obj->getStartDate() ) .'.pdf';
+						$file_name = $output_directory . DIRECTORY_SEPARATOR . 'pay_stub_' . $ps_obj->getUserObject()->getUserName() . '_' . date( 'Ymd', $ps_obj->getStartDate() ) . '.pdf';
 
-						$output = $pslf->getPayStub( $pslf_b, TRUE );
-						if ( $output !== FALSE ) {
-							echo "  $i. Exporting Pay Stub for: ". $ps_obj->getUserObject()->getFullName(). "\t\tFile: ". $file_name ."\n";
+						$output = $pslf->getPayStub( $pslf_b, true );
+						if ( $output !== false ) {
+							echo "  $i. Exporting Pay Stub for: " . $ps_obj->getUserObject()->getFullName() . "\t\tFile: " . $file_name . "\n";
 
 							file_put_contents( $file_name, $output );
-							unset($output);
+							unset( $output );
 
 							$i++;
 						} else {

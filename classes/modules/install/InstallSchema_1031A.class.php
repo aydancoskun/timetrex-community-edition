@@ -44,13 +44,9 @@ class InstallSchema_1031A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-			$this->db->GenID( 'company_generic_map_id_seq' ); //Make sure the sequence exists so it can be updated.
-		}
-
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -59,15 +55,15 @@ class InstallSchema_1031A extends InstallSchema_Base {
 	function postInstall() {
 		//As of v11 and the switch to UUID, we need to make sure fast_tree_options for the hierarchy_tree is still available for conversion.
 		global $fast_tree_options, $db;
-		$fast_tree_options = array( 'db' => $db, 'table' => 'hierarchy_tree' ); //This is required for upgrading 1031A schema.
+		$fast_tree_options = [ 'db' => $db, 'table' => 'hierarchy_tree' ]; //This is required for upgrading 1031A schema.
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Go through all pay period schedules and update the annual pay period column
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 		$ppslf->getAll();
 		if ( $ppslf->getRecordCount() > 0 ) {
-			foreach( $ppslf as $pps_obj ) {
+			foreach ( $ppslf as $pps_obj ) {
 				$pps_obj->setAnnualPayPeriods( $pps_obj->calcAnnualPayPeriods() );
 				if ( $pps_obj->isValid() ) {
 					$pps_obj->Save();
@@ -94,28 +90,28 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
-			$object_types = array();
+			$object_types = [];
 			foreach ( $clf as $c_obj ) {
 				if ( $c_obj->getStatus() != 30 ) {
 					$company_id = $c_obj->getId();
-					Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( ' Company ID: ' . $company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 					$hclf = TTnew( 'HierarchyControlListFactory' ); /** @var HierarchyControlListFactory $hclf */
 					$hclf->StartTransaction();
 					$hclf->getByCompanyId( $company_id );
 					if ( $hclf->getRecordCount() > 0 ) {
-						foreach( $hclf as $hc_obj ) {
-							$paths_to_root = array();
+						foreach ( $hclf as $hc_obj ) {
+							$paths_to_root = [];
 							$hierarchy_id = $hc_obj->getId();
 
 							$hlf = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf */
 							$hierarchy_users = $hlf->getByCompanyIdAndHierarchyControlId( $company_id, $hierarchy_id );
-							if ( is_array($hierarchy_users) AND count($hierarchy_users) > 0 ) {
+							if ( is_array( $hierarchy_users ) && count( $hierarchy_users ) > 0 ) {
 
 								$hotlf = TTnew( 'HierarchyObjectTypeListFactory' ); /** @var HierarchyObjectTypeListFactory $hotlf */
 								$hotlf->getByHierarchyControlId( $hierarchy_id );
 								if ( $hotlf->getRecordCount() > 0 ) {
-									foreach( $hotlf as $hot_obj ) {
+									foreach ( $hotlf as $hot_obj ) {
 										//When upgrading from pre. v3.1ish to post 3.5 causing hierarchies to not get carried over due to new object types.
 										//Replace object_type_id = 50 with new ones in the 1000 range.
 										if ( $hot_obj->getObjectType() == 50 ) {
@@ -132,62 +128,62 @@ class InstallSchema_1031A extends InstallSchema_Base {
 
 								//Not all hierarchies can be converted, and if one error occurs then all hierarchy conversions are rolled back
 								//to prevent an invalid hierarchy from being created and possibly becoming a security risk.
-								$parent_groups = array();
-								foreach( $hierarchy_users as $hierarchy_user_arr ) {
-									Debug::Text(' Checking User ID: '. $hierarchy_user_arr['id'], __FILE__, __LINE__, __METHOD__, 10);
+								$parent_groups = [];
+								foreach ( $hierarchy_users as $hierarchy_user_arr ) {
+									Debug::Text( ' Checking User ID: ' . $hierarchy_user_arr['id'], __FILE__, __LINE__, __METHOD__, 10 );
 									$id = $hierarchy_user_arr['id'];
 
 									$tmp_id = $id;
 									$i = 0;
 									do {
-										Debug::Text(' Iteration...', __FILE__, __LINE__, __METHOD__, 10);
+										Debug::Text( ' Iteration...', __FILE__, __LINE__, __METHOD__, 10 );
 										$hlf_b = TTnew( 'HierarchyListFactory' ); /** @var HierarchyListFactory $hlf_b */
-										$parents = $hlf_b->getParentLevelIdArrayByHierarchyControlIdAndUserId( $hierarchy_id, $tmp_id);
-										sort($parents);
+										$parents = $hlf_b->getParentLevelIdArrayByHierarchyControlIdAndUserId( $hierarchy_id, $tmp_id );
+										sort( $parents );
 
 										$level = ( $hlf_b->getFastTreeObject()->getLevel( $tmp_id ) - 1 );
 
-										if ( is_array($parents) AND count($parents) > 0 ) {
-											$parent_users = array();
-											foreach($parents as $user_id) {
+										if ( is_array( $parents ) && count( $parents ) > 0 ) {
+											$parent_users = [];
+											foreach ( $parents as $user_id ) {
 												$parent_users[] = $user_id;
 											}
 
 											$parent_groups[$level] = $parent_users;
-											unset($parent_users);
+											unset( $parent_users );
 										}
 
-										if ( isset($parents[0]) ) {
+										if ( isset( $parents[0] ) ) {
 											$tmp_id = $parents[0];
 										}
 
 										$i++;
-									} while ( is_array($parents) AND count($parents) > 0 AND $i < 100 );
+									} while ( is_array( $parents ) && count( $parents ) > 0 && $i < 100 );
 
-									if ( isset($parent_groups) ) {
-										$serialized_path = serialize($parent_groups);
+									if ( isset( $parent_groups ) ) {
+										$serialized_path = serialize( $parent_groups );
 										$paths_to_root[$serialized_path][] = $id;
-										unset($serialized_path);
+										unset( $serialized_path );
 									}
-									unset($parent_groups, $parents);
+									unset( $parent_groups, $parents );
 								}
 							}
-							Debug::Arr($paths_to_root, ' Paths To Root: ', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Arr( $paths_to_root, ' Paths To Root: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 							//Decode path_to_root array
-							if ( isset($paths_to_root) AND count($paths_to_root) > 0 ) {
-								$decoded_paths = array();
-								foreach( $paths_to_root as $serialized_path => $children ) {
-									$path_arr = unserialize( $serialized_path, array( 'allowed_classes' => FALSE ) );
-									$decoded_paths[] = array( 'hierarchy_control_id' => $hierarchy_id, 'path' => $path_arr, 'children' => $children );
+							if ( isset( $paths_to_root ) && count( $paths_to_root ) > 0 ) {
+								$decoded_paths = [];
+								foreach ( $paths_to_root as $serialized_path => $children ) {
+									$path_arr = unserialize( $serialized_path, [ 'allowed_classes' => false ] );
+									$decoded_paths[] = [ 'hierarchy_control_id' => $hierarchy_id, 'path' => $path_arr, 'children' => $children ];
 								}
-								unset($path_arr, $children);
+								unset( $path_arr, $children );
 
-								Debug::Arr($decoded_paths, ' Decoded Paths: ', __FILE__, __LINE__, __METHOD__, 10);
+								Debug::Arr( $decoded_paths, ' Decoded Paths: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-								if ( empty($decoded_paths) == FALSE ) {
-									foreach( $decoded_paths as $decoded_path ) {
-										Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+								if ( empty( $decoded_paths ) == false ) {
+									foreach ( $decoded_paths as $decoded_path ) {
+										Debug::Text( ' Company ID: ' . $company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 										//Create new hierarchy_control
 										$hcf = TTnew( 'HierarchyControlFactory' ); /** @var HierarchyControlFactory $hcf */
@@ -196,39 +192,39 @@ class InstallSchema_1031A extends InstallSchema_Base {
 										$hcf->setObjectType( $object_types[$decoded_path['hierarchy_control_id']] );
 
 										//Generate meaningful name
-										$name = FALSE;
-										if ( isset($decoded_path['path']) AND is_array($decoded_path['path']) ) {
-											ksort($decoded_path['path']); //Sort by level.
+										$name = false;
+										if ( isset( $decoded_path['path'] ) && is_array( $decoded_path['path'] ) ) {
+											ksort( $decoded_path['path'] ); //Sort by level.
 
-											foreach( $decoded_path['path'] as $level => $superior_ids ) {
-												foreach( $superior_ids as $superior_id) {
+											foreach ( $decoded_path['path'] as $level => $superior_ids ) {
+												foreach ( $superior_ids as $superior_id ) {
 													$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 													$ulf->getById( $superior_id );
 
 													if ( $ulf->getRecordCount() > 0 ) {
-														$name[] = $level.'. '.$ulf->getCurrent()->getFullName();
+														$name[] = $level . '. ' . $ulf->getCurrent()->getFullName();
 													}
 												}
 											}
-											unset($level, $superior_ids, $superior_id);
+											unset( $level, $superior_ids, $superior_id );
 										}
 
-										if ( isset($name) AND is_array($name) ) {
-											$name = $hc_obj->getName() .' '. implode(', ', $name ) .' (#'.rand(1000, 9999).')';
+										if ( isset( $name ) && is_array( $name ) ) {
+											$name = $hc_obj->getName() . ' ' . implode( ', ', $name ) . ' (#' . rand( 1000, 9999 ) . ')';
 										} else {
-											$name = $hc_obj->getName() .' (#'.rand(1000, 9999).')';
+											$name = $hc_obj->getName() . ' (#' . rand( 1000, 9999 ) . ')';
 										}
-										Debug::Text('Hierarchy Control ID: '. $hcf->getID() .' Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+										Debug::Text( 'Hierarchy Control ID: ' . $hcf->getID() . ' Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-										$hcf->setName( substr($name, 0, 249) );
-										$hcf->setDescription( TTi18n::getText('Automatically created by TimeTrex') );
+										$hcf->setName( substr( $name, 0, 249 ) );
+										$hcf->setDescription( TTi18n::getText( 'Automatically created by TimeTrex' ) );
 
-										Debug::Text('zHierarchy Control ID: '. $hcf->getID(), __FILE__, __LINE__, __METHOD__, 10);
+										Debug::Text( 'zHierarchy Control ID: ' . $hcf->getID(), __FILE__, __LINE__, __METHOD__, 10 );
 										$hcf->setUser( $decoded_path['children'] );
 
-										if ( isset($decoded_path['path']) AND is_array($decoded_path['path']) ) {
-											foreach( $decoded_path['path'] as $level => $superior_ids ) {
-												foreach( $superior_ids as $superior_id ) {
+										if ( isset( $decoded_path['path'] ) && is_array( $decoded_path['path'] ) ) {
+											foreach ( $decoded_path['path'] as $level => $superior_ids ) {
+												foreach ( $superior_ids as $superior_id ) {
 													$hlf = TTnew( 'HierarchyLevelFactory' ); /** @var HierarchyLevelFactory $hlf */
 													$hlf->setHierarchyControl( $hcf->getID() );
 													$hlf->setLevel( $level );
@@ -236,24 +232,24 @@ class InstallSchema_1031A extends InstallSchema_Base {
 
 													if ( $hlf->isValid() ) {
 														$hlf->Save();
-														Debug::Text('Saving Level Row ID... User ID: '. $superior_id, __FILE__, __LINE__, __METHOD__, 10);
+														Debug::Text( 'Saving Level Row ID... User ID: ' . $superior_id, __FILE__, __LINE__, __METHOD__, 10 );
 													}
 												}
 											}
-											unset($level, $superior_ids, $superior_id);
+											unset( $level, $superior_ids, $superior_id );
 										}
 
 										if ( $hcf->isValid() ) {
-											$hcf->Save( TRUE, TRUE );
+											$hcf->Save( true, true );
 										}
 									}
 								}
-								unset($decoded_paths);
+								unset( $decoded_paths );
 							}
 
 							//Delete existing hierarchy control.
-							$hc_obj->setDeleted(TRUE);
-							if ( $hc_obj->isValid() == TRUE ) {
+							$hc_obj->setDeleted( true );
+							if ( $hc_obj->isValid() == true ) {
 								$hc_obj->Save();
 							}
 						}
@@ -269,31 +265,32 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+			foreach ( $clf as $c_obj ) {
+				Debug::text( 'Company: ' . $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 				if ( $c_obj->getStatus() != 30 ) {
 					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
+					$pclf->getByCompanyId( $c_obj->getId(), null, null, null, [ 'name' => 'asc' ] ); //Force order to prevent references to columns that haven't been created yet.
 					if ( $pclf->getRecordCount() > 0 ) {
-						foreach( $pclf as $pc_obj ) {
-							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+						foreach ( $pclf as $pc_obj ) {
+							Debug::text( 'Permission Group: ' . $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $c_obj->getId(), $pc_obj->getId(), 'meal_policy', 'enabled', 1 );
 							if ( $plf->getRecordCount() > 0 ) {
-								Debug::text('Found permission group with meal policy enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
+								Debug::text( 'Found permission group with meal policy enabled: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 								$pc_obj->setPermission(
-														array(	'break_policy' => array(
-																					'enabled' => TRUE,
-																					'view' => TRUE,
-																					'add' => TRUE,
-																					'edit' => TRUE,
-																					'delete' => TRUE,
-																				)
-															)
+										[
+												'break_policy' => [
+														'enabled' => true,
+														'view'    => true,
+														'add'     => true,
+														'edit'    => true,
+														'delete'  => true,
+												],
+										]
 
-														);
+								);
 							} else {
-								Debug::text('Permission group does NOT have meal policy enabled...', __FILE__, __LINE__, __METHOD__, 9);
+								Debug::text( 'Permission group does NOT have meal policy enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 							}
 						}
 					}
@@ -307,71 +304,71 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
-				if ( $c_obj->getStatus() != 30 AND $c_obj->getCountry() == 'US' ) {
+			foreach ( $clf as $c_obj ) {
+				Debug::text( 'Company: ' . $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
+				if ( $c_obj->getStatus() != 30 && $c_obj->getCountry() == 'US' ) {
 					//Get PayStub Link accounts
 					$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' ); /** @var PayStubEntryAccountLinkListFactory $pseallf */
 					$pseallf->getByCompanyId( $c_obj->getID() );
-					if	( $pseallf->getRecordCount() > 0 ) {
+					if ( $pseallf->getRecordCount() > 0 ) {
 						$psea_obj = $pseallf->getCurrent();
 					} else {
-						Debug::text('Failed getting PayStubEntryLink for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'Failed getting PayStubEntryLink for Company ID: ' . $company_id, __FILE__, __LINE__, __METHOD__, 10 );
 						continue;
 					}
 
-					$include_pay_stub_accounts = FALSE;
-					$exclude_pay_stub_accounts = FALSE;
+					$include_pay_stub_accounts = false;
+					$exclude_pay_stub_accounts = false;
 
 					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
-					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Social Security - Employee' );
+					$cdlf->getByCompanyIdAndName( $c_obj->getID(), 'Social Security - Employee' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
-						Debug::text('Found SS Employee Tax / Deduction, ID: '. $c_obj->getID() .' Percent: '. $cd_obj->getUserValue1() .' Wage Base: '. $cd_obj->getUserValue2(), __FILE__, __LINE__, __METHOD__, 9);
-						if ( $cd_obj->getCalculation() == 15 AND $cd_obj->getUserValue1() == 6.2 AND $cd_obj->getUserValue2() <= 106800 ) {
-							Debug::text('SS Employee Tax / Deduction Matches... Adjusting for 2011...', __FILE__, __LINE__, __METHOD__, 9);
-							$cd_obj->setUserValue1(4.2);
-							$cd_obj->setUserValue2(106800);
+						Debug::text( 'Found SS Employee Tax / Deduction, ID: ' . $c_obj->getID() . ' Percent: ' . $cd_obj->getUserValue1() . ' Wage Base: ' . $cd_obj->getUserValue2(), __FILE__, __LINE__, __METHOD__, 9 );
+						if ( $cd_obj->getCalculation() == 15 && $cd_obj->getUserValue1() == 6.2 && $cd_obj->getUserValue2() <= 106800 ) {
+							Debug::text( 'SS Employee Tax / Deduction Matches... Adjusting for 2011...', __FILE__, __LINE__, __METHOD__, 9 );
+							$cd_obj->setUserValue1( 4.2 );
+							$cd_obj->setUserValue2( 106800 );
 							$include_pay_stub_accounts = $cd_obj->getIncludePayStubEntryAccount();
 							$exclude_pay_stub_accounts = $cd_obj->getExcludePayStubEntryAccount();
 
-							$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
+							$cd_obj->ignore_column_list = true; //Prevents SQL errors due to new columns being added later on.
 							if ( $cd_obj->isValid() ) {
 								$cd_obj->Save();
 							}
 						}
 					} else {
-						Debug::text('Failed to find SS Employee Tax / Deduction for Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+						Debug::text( 'Failed to find SS Employee Tax / Deduction for Company: ' . $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 					}
-					unset($cdlf, $cd_obj);
+					unset( $cdlf, $cd_obj );
 
 					$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
-					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Social Security - Employer' );
+					$cdlf->getByCompanyIdAndName( $c_obj->getID(), 'Social Security - Employer' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
-						Debug::text('Found SS Employer Tax / Deduction, ID: '. $c_obj->getID() .' Percent: '. $cd_obj->getUserValue1(), __FILE__, __LINE__, __METHOD__, 9);
-						if ( $cd_obj->getCalculation() == 10 AND $cd_obj->getUserValue1() == 100 ) {
-							Debug::text('SS Employer Tax / Deduction Matches... Adjusting for 2011...', __FILE__, __LINE__, __METHOD__, 9);
-							$cd_obj->setCalculation(15);
-							$cd_obj->setUserValue1(6.2);
-							$cd_obj->setUserValue2(106800);
-							if ( $include_pay_stub_accounts !== FALSE ) {
-								Debug::text('Matching Include/Exclude accounts with SS Employee Entry...', __FILE__, __LINE__, __METHOD__, 9);
+						Debug::text( 'Found SS Employer Tax / Deduction, ID: ' . $c_obj->getID() . ' Percent: ' . $cd_obj->getUserValue1(), __FILE__, __LINE__, __METHOD__, 9 );
+						if ( $cd_obj->getCalculation() == 10 && $cd_obj->getUserValue1() == 100 ) {
+							Debug::text( 'SS Employer Tax / Deduction Matches... Adjusting for 2011...', __FILE__, __LINE__, __METHOD__, 9 );
+							$cd_obj->setCalculation( 15 );
+							$cd_obj->setUserValue1( 6.2 );
+							$cd_obj->setUserValue2( 106800 );
+							if ( $include_pay_stub_accounts !== false ) {
+								Debug::text( 'Matching Include/Exclude accounts with SS Employee Entry...', __FILE__, __LINE__, __METHOD__, 9 );
 								//Match include accounts with SS employee entry.
 								$cd_obj->setIncludePayStubEntryAccount( $include_pay_stub_accounts );
 								$cd_obj->setExcludePayStubEntryAccount( $exclude_pay_stub_accounts );
 							} else {
-								Debug::text('NOT Matching Include/Exclude accounts with SS Employee Entry...', __FILE__, __LINE__, __METHOD__, 9);
-								$cd_obj->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
+								Debug::text( 'NOT Matching Include/Exclude accounts with SS Employee Entry...', __FILE__, __LINE__, __METHOD__, 9 );
+								$cd_obj->setIncludePayStubEntryAccount( [ $psea_obj->getTotalGross() ] );
 							}
 
-							$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
+							$cd_obj->ignore_column_list = true; //Prevents SQL errors due to new columns being added later on.
 							if ( $cd_obj->isValid() ) {
 								$cd_obj->Save();
 							}
 						}
 					} else {
-						Debug::text('Failed to find SS Employer Tax / Deduction for Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+						Debug::text( 'Failed to find SS Employer Tax / Deduction for Company: ' . $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 					}
 				}
 			}
@@ -379,27 +376,28 @@ class InstallSchema_1031A extends InstallSchema_Base {
 
 		//Add MiscDaily cronjob to database.
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('MiscDaily');
-		$cjf->setMinute(55);
-		$cjf->setHour(1);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand('MiscDaily.php');
+		$cjf->setName( 'MiscDaily' );
+		$cjf->setMinute( 55 );
+		$cjf->setHour( 1 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( 'MiscDaily.php' );
 		$cjf->Save();
 
 		//Add MiscWeekly cronjob to database.
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('MiscWeekly');
-		$cjf->setMinute(55);
-		$cjf->setHour(1);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('0'); //Sunday morning.
-		$cjf->setCommand('MiscWeekly.php');
+		$cjf->setName( 'MiscWeekly' );
+		$cjf->setMinute( 55 );
+		$cjf->setHour( 1 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '0' ); //Sunday morning.
+		$cjf->setCommand( 'MiscWeekly.php' );
 		$cjf->Save();
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

@@ -61,13 +61,13 @@ RateLimit.setTimeFrame = function( value ) {
 };
 
 RateLimit.getRateData = function() {
-	if ( typeof(this.memory[this.id]) == 'undefined' ) {
+	if ( typeof ( this.memory[this.id] ) == 'undefined' ) {
 		return null;
 	}
 	return this.memory[this.id];
 };
 RateLimit.setRateData = function( value ) {
-	if ( typeof(this.memory[this.id]) == 'undefined' ) {
+	if ( typeof ( this.memory[this.id] ) == 'undefined' ) {
 		this.memory[this.id] = {};
 	}
 	if ( value != '' ) {
@@ -92,7 +92,7 @@ RateLimit.getAttempts = function() {
 RateLimit.check = function() {
 	if ( this.getID() != '' ) {
 		var rate_data = this.getRateData();
-		var new_time = (new Date()).getTime();
+		var new_time = ( new Date() ).getTime();
 
 		if ( Global.isSet( rate_data ) == false ) {
 			rate_data = {
@@ -102,8 +102,8 @@ RateLimit.check = function() {
 		} else if ( Global.isSet( rate_data ) ) {
 
 			var time_frame_milliseconds = this.getTimeFrame() * 1000;
-			if ( rate_data.attempts > this.getAllowedCalls() && rate_data.first_date >= (new_time - time_frame_milliseconds) ) {
-				Debug.Text( 'RateLimit limiting [' + rate_data.attempts + '/' + this.getAllowedCalls() + '] in ' + (Math.floor( (new_time - rate_data.first_date) / 1000 )) + '/' + this.getTimeFrame() + 'sec', 'RateLimit.js', 'RateLimit', 'check', 10 );
+			if ( rate_data.attempts > this.getAllowedCalls() && rate_data.first_date >= ( new_time - time_frame_milliseconds ) ) {
+				Debug.Text( 'RateLimit limiting [' + rate_data.attempts + '/' + this.getAllowedCalls() + '] in ' + ( Math.floor( ( new_time - rate_data.first_date ) / 1000 ) ) + '/' + this.getTimeFrame() + 'sec', 'RateLimit.js', 'RateLimit', 'check', 10 );
 				return false;
 			} else if ( rate_data.first_date < new_time - time_frame_milliseconds ) {
 				rate_data = {

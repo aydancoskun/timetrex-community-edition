@@ -55,6 +55,4 @@ var APIQualification = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

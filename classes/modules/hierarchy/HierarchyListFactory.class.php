@@ -40,18 +40,18 @@
  */
 class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate {
 
-	protected $fasttree_obj = NULL;
+	protected $fasttree_obj = null;
 
 	/**
 	 * @return FastTree|null
 	 */
 	function getFastTreeObject() {
 
-		if ( is_object($this->fasttree_obj) ) {
+		if ( is_object( $this->fasttree_obj ) ) {
 			return $this->fasttree_obj;
 		} else {
 			global $fast_tree_options;
-			$this->fasttree_obj = new FastTree($fast_tree_options);
+			$this->fasttree_obj = new FastTree( $fast_tree_options );
 
 			return $this->fasttree_obj;
 		}
@@ -63,35 +63,35 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 	 * @param bool $recurse
 	 * @return array|bool
 	 */
-	function getChildLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id, $recurse = FALSE) {
+	function getChildLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id, $recurse = false ) {
 		//This only gets the immediate children
 		//Used for authorization list when they just want to see immediate children.
 
 		if ( $tree_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->getFastTreeObject()->setTree( $tree_id );
 
 		//Get current level IDs first, then get children of all of them.
-		$ids = $this->getCurrentLevelIdArrayByHierarchyControlIdAndUserId($tree_id, $user_id, FALSE);
+		$ids = $this->getCurrentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id, false );
 		//Debug::Arr($ids, ' zzNodes at the same level: User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( $ids === FALSE ) {
-			return FALSE;
+		if ( $ids === false ) {
+			return false;
 		}
 
-		$retarr = array();
+		$retarr = [];
 		foreach ( $ids as $id ) {
 			//Debug::Text(' Getting Children of ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 			$children = $this->getFastTreeObject()->getAllChildren( $id, $recurse );
 			//Debug::Arr($children, ' ccNodes at the same level', __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( $children === FALSE ) {
+			if ( $children === false ) {
 				continue;
 			}
 
@@ -104,8 +104,8 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 			*/
 			$child_ids = array_keys( $children );
 
-			$retarr = array_merge($retarr, $child_ids);
-			unset($child_ids);
+			$retarr = array_merge( $retarr, $child_ids );
+			unset( $child_ids );
 		}
 
 		return $retarr;
@@ -116,14 +116,14 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 	 * @param string $user_id UUID
 	 * @return array|bool
 	 */
-	function getAllParentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id) {
+	function getAllParentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id ) {
 		//This only gets the immediate parents
 		if ( $tree_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->getFastTreeObject()->setTree( $tree_id );
@@ -134,44 +134,45 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		//Find out if any of the parents are shared.
 		$hslf = new HierarchyShareListFactory();
 
-		$retarr = array();
+		$retarr = [];
 		foreach ( $ids as $id ) {
 
 			$hierarchy_share = $hslf->getByHierarchyControlIdAndUserId( $tree_id, $id )->getCurrent()->isNew();
 
-			if ( $hierarchy_share === FALSE ) {
+			if ( $hierarchy_share === false ) {
 				//Debug::Text(' Node IS shared:	 '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 				//Get current level IDs
 				$current_level_ids = $this->getCurrentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $id );
-				$retarr = array_merge($retarr, $current_level_ids);
-				unset($current_level_ids);
+				$retarr = array_merge( $retarr, $current_level_ids );
+				unset( $current_level_ids );
 			} else {
 				//Debug::Text(' Node isnt shared:  '. $id, __FILE__, __LINE__, __METHOD__, 10);
-				$retarr[] = TTUUID::castUUID($id);
+				$retarr[] = TTUUID::castUUID( $id );
 			}
 		}
 
 		//Debug::Arr($retarr, ' Final Parent Nodes including shared', __FILE__, __LINE__, __METHOD__, 10);
-		return array_unique($retarr);
+		return array_unique( $retarr );
 	}
 
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id      UUID
 	 * @param string $user_id UUID
 	 * @return bool
 	 */
 	function getLevelsByHierarchyControlIdAndUserId( $id, $user_id ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$hllf = new HierarchyLevelListFactory();
+
 		return $hllf->getLevelsByHierarchyControlIdAndUserId( $id, $user_id );
 	}
 
@@ -182,19 +183,19 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 	 */
 	function getByHierarchyControlIdAndUserId( $tree_id, $user_id ) {
 		if ( $tree_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->getFastTreeObject()->setTree( $tree_id );
 
 		$node = $this->getFastTreeObject()->getNode( $user_id );
 
-		if ($node === FALSE ) {
-			return FALSE;
+		if ( $node === false ) {
+			return false;
 		}
 
 		$ulf = new UserListFactory();
@@ -203,19 +204,19 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		$hslf = new HierarchyShareListFactory();
 		$hierarchy_share = $hslf->getByHierarchyControlIdAndUserId( $tree_id, $user_id )->getCurrent()->isNew();
 
-		if ( $hierarchy_share === FALSE ) {
-			$shared = TRUE;
+		if ( $hierarchy_share === false ) {
+			$shared = true;
 		} else {
-			$shared = FALSE;
+			$shared = false;
 		}
 
-		$retarr = array(
-						'id' => $node['object_id'],
-						'parent_id' => $node['parent_id'],
-						'name' => $user_obj->getFullName(),
-						'level' => $node['level'],
-						'shared' => $shared
-					);
+		$retarr = [
+				'id'        => $node['object_id'],
+				'parent_id' => $node['parent_id'],
+				'name'      => $user_obj->getFullName(),
+				'level'     => $node['level'],
+				'shared'    => $shared,
+		];
 
 		return $retarr;
 	}
@@ -227,105 +228,104 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 	 */
 	function getByHierarchyControlId( $tree_id ) {
 		if ( $tree_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->getFastTreeObject()->setTree( $tree_id );
 
-		$children = $this->getFastTreeObject()->getAllChildren(NULL, 'RECURSE');
+		$children = $this->getFastTreeObject()->getAllChildren( null, 'RECURSE' );
 
 		$ulf = new UserListFactory();
 		$hslf = new HierarchyShareListFactory();
 		$hslf->getByHierarchyControlId( $tree_id );
-		$shared_user_ids = array();
-		foreach( $hslf as $hierarchy_share ) {
+		$shared_user_ids = [];
+		foreach ( $hslf as $hierarchy_share ) {
 			$shared_user_ids[] = $hierarchy_share->getUser();
 		}
 
-		if ( $children !== FALSE ) {
+		if ( $children !== false ) {
 
-			$nodes = array();
-			foreach ($children as $object_id => $level ) {
+			$nodes = [];
+			foreach ( $children as $object_id => $level ) {
 
 				if ( $object_id !== TTUUID::getZeroID() ) {
-					$user_obj = $ulf->getById ( $object_id )->getCurrent();
+					$user_obj = $ulf->getById( $object_id )->getCurrent();
 
-					$shared = FALSE;
-					if ( in_array( $object_id, $shared_user_ids) === TRUE ) {
-						$shared = TRUE;
+					$shared = false;
+					if ( in_array( $object_id, $shared_user_ids ) === true ) {
+						$shared = true;
 					}
 
-					$nodes[] = array(
-									'id' => $object_id,
-									'name' => $user_obj->getFullName(),
-									'level' => $level,
-									'shared' => $shared
-									);
+					$nodes[] = [
+							'id'     => $object_id,
+							'name'   => $user_obj->getFullName(),
+							'level'  => $level,
+							'shared' => $shared,
+					];
 				}
-
 			}
 
-			if ( empty($nodes) == FALSE ) {
+			if ( empty( $nodes ) == false ) {
 				return $nodes;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id      UUID
 	 * @param string $user_id UUID
 	 * @param int $level
 	 * @return array|bool
 	 */
 	function getByHierarchyControlIdAndUserIdAndLevel( $id, $user_id, $level = 1 ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( !is_numeric($level) ) {
-			return FALSE;
+		if ( !is_numeric( $level ) ) {
+			return false;
 		}
-		$min_level = ($level - 1);
+		$min_level = ( $level - 1 );
 		if ( $min_level <= 1 ) {
 			$min_level = 1;
 		}
-		$max_level = ($level + 1);
-		Debug::Text(' User ID: '. $user_id .' Level: '. $level, __FILE__, __LINE__, __METHOD__, 10);
+		$max_level = ( $level + 1 );
+		Debug::Text( ' User ID: ' . $user_id . ' Level: ' . $level, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$retarr = array( 'current_level' => array(), 'parent_level' => array(), 'child_level' => array() );
+		$retarr = [ 'current_level' => [], 'parent_level' => [], 'child_level' => [] ];
 
 		$hlf = new HierarchyLevelFactory();
 		$huf = new HierarchyUserFactory();
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					'idb' => $id,
-					'idc' => $id,
-					'min_level' => $min_level,
-					'max_level' => $max_level,
-					'user_id' => TTUUID::castUUID($user_id),
-					);
+		$ph = [
+				'id'        => TTUUID::castUUID( $id ),
+				'idb'       => $id,
+				'idc'       => $id,
+				'min_level' => $min_level,
+				'max_level' => $max_level,
+				'user_id'   => TTUUID::castUUID( $user_id ),
+		];
 
 		$query = '
 				select * from  (
 						select	a.level,
 								a.user_id
-						from	'. $hlf->getTable() .' as a
+						from	' . $hlf->getTable() . ' as a
 						where	a.hierarchy_control_id = ?
 							AND a.deleted = 0
 
 						UNION ALL
 
-						select	(select max(level)+1 from '. $hlf->getTable() .' as z where z.hierarchy_control_id = ? AND z.deleted = 0 ) as level,
+						select	(select max(level)+1 from ' . $hlf->getTable() . ' as z where z.hierarchy_control_id = ? AND z.deleted = 0 ) as level,
 								b.user_id
-						from	'. $huf->getTable() .' as b
+						from	' . $huf->getTable() . ' as b
 						where	b.hierarchy_control_id = ?
 					) as tmp
 					WHERE level >= ?
@@ -336,25 +336,25 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 
 		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-		$rs = $this->ExecuteSQL($query, $ph);
+		$rs = $this->ExecuteSQL( $query, $ph );
 
 		if ( $rs->RecordCount() > 0 ) {
 
 			//The first row should belong to the user_id that was passed.
-			$current_level = FALSE;
+			$current_level = false;
 			$i = 0;
-			foreach( $rs as $row ) {
-				if ( $i == 0 AND $user_id == $row['user_id'] ) {
+			foreach ( $rs as $row ) {
+				if ( $i == 0 && $user_id == $row['user_id'] ) {
 					//First row.
 					$current_level = $row['level'];
 					$retarr['current_level'][] = $row['user_id'];
-				} elseif ( $i > 0 AND $row['level'] < $current_level ) {
+				} else if ( $i > 0 && $row['level'] < $current_level ) {
 					$retarr['parent_level'][] = $row['user_id'];
-				} elseif ( $i > 0 AND $row['level'] > $current_level ) {
+				} else if ( $i > 0 && $row['level'] > $current_level ) {
 					$retarr['child_level'][] = $row['user_id'];
 				} else {
 					//Debug::Text(' User not in hierarchy...', __FILE__, __LINE__, __METHOD__, 10);
-					return FALSE;
+					return false;
 					break;
 				}
 
@@ -368,10 +368,9 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 			//Debug::Arr($retarr, ' aChildren of User: '. $user_id .' At Level: '. $level, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $retarr;
-
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -381,36 +380,36 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 	 * @param bool $recursive
 	 * @return array|bool
 	 */
-	function getByUserIdAndObjectTypeIDAndLevel( $user_id, $object_type_id, $level = 1, $recursive = TRUE ) {
+	function getByUserIdAndObjectTypeIDAndLevel( $user_id, $object_type_id, $level = 1, $recursive = true ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( !is_numeric($level) ) {
-			return FALSE;
+		if ( !is_numeric( $level ) ) {
+			return false;
 		}
 
-		$min_level = ($level - 1);
+		$min_level = ( $level - 1 );
 		if ( $min_level <= 0 ) {
 			$min_level = 0;
 		}
 
 		//This should have two modes, one where it returns just the immediate child level, and one that returns all children "recursively".
-		if ( $recursive == TRUE ) {
+		if ( $recursive == true ) {
 			$max_level = 99;
 		} else {
-			$max_level = ($level + 1);
+			$max_level = ( $level + 1 );
 		}
-		Debug::Text(' User ID: '. $user_id .' Object Type ID: '. $object_type_id .' Level: '. $level .' Min Level: '. $min_level .' Max Level: '. $max_level, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( ' User ID: ' . $user_id . ' Object Type ID: ' . $object_type_id . ' Level: ' . $level . ' Min Level: ' . $min_level . ' Max Level: ' . $max_level, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$retarr = array( 'current_level' => array(), 'parent_level' => array(), 'child_level' => array() );
+		$retarr = [ 'current_level' => [], 'parent_level' => [], 'child_level' => [] ];
 
 		$hcf = new HierarchyControlFactory();
 		$hlf = new HierarchyLevelFactory();
 		$huf = new HierarchyUserFactory();
 		$hotf = new HierarchyObjectTypeFactory();
 
-		$ph = array();
+		$ph = [];
 
 		//UNION two queries together, the first query gets all superiors, one level above, and all levels below.
 		//The 2nd query gets all subordinates.
@@ -420,12 +419,12 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 								x.user_id,
 								x.level,
 								0 as is_subordinate
-						from	'. $hlf->getTable() .' as x
-						LEFT JOIN '. $hcf->getTable() .' as y ON x.hierarchy_control_id = y.id
-						LEFT JOIN '. $hotf->getTable() .' as y2 ON x.hierarchy_control_id = y2.hierarchy_control_id
-						LEFT JOIN '. $hlf->getTable() .' as z ON x.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = \''. TTUUID::castUUID($user_id) .'\'
+						from	' . $hlf->getTable() . ' as x
+						LEFT JOIN ' . $hcf->getTable() . ' as y ON x.hierarchy_control_id = y.id
+						LEFT JOIN ' . $hotf->getTable() . ' as y2 ON x.hierarchy_control_id = y2.hierarchy_control_id
+						LEFT JOIN ' . $hlf->getTable() . ' as z ON x.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = \'' . TTUUID::castUUID( $user_id ) . '\'
 						where
-							y2.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+							y2.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 							AND x.level >= z.level-1
 							AND ( x.deleted = 0 AND y.deleted = 0 AND z.deleted = 0 )
 
@@ -436,37 +435,37 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 								n.user_id,
 								(
 									select max(level)+1
-									from '. $hlf->getTable() .' as z
+									from ' . $hlf->getTable() . ' as z
 									where z.hierarchy_control_id = n.hierarchy_control_id AND z.deleted = 0
 								) as level,
 								1 as is_subordinate
-						from	'. $huf->getTable() .' as n
-						LEFT JOIN '. $hcf->getTable() .' as o ON n.hierarchy_control_id = o.id
-						LEFT JOIN '. $hotf->getTable() .' as p ON n.hierarchy_control_id = p.hierarchy_control_id
-						LEFT JOIN '. $hlf->getTable() .' as z ON n.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = \''. TTUUID::castUUID($user_id) .'\'
+						from	' . $huf->getTable() . ' as n
+						LEFT JOIN ' . $hcf->getTable() . ' as o ON n.hierarchy_control_id = o.id
+						LEFT JOIN ' . $hotf->getTable() . ' as p ON n.hierarchy_control_id = p.hierarchy_control_id
+						LEFT JOIN ' . $hlf->getTable() . ' as z ON n.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = \'' . TTUUID::castUUID( $user_id ) . '\'
 						where
-							p.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+							p.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 							AND ( o.deleted = 0 AND z.deleted = 0 )
 					) as tmp
-					WHERE level >= '. (int)$min_level .'
-						AND level <= '. (int)$max_level.'
+					WHERE level >= ' . (int)$min_level . '
+						AND level <= ' . (int)$max_level . '
 					ORDER BY level ASC, user_id ASC
 				';
 
 		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$rs = $this->ExecuteSQL($query, $ph);
+		$rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
 			$current_level = $level;
 			$i = 0;
-			foreach( $rs as $row ) {
+			foreach ( $rs as $row ) {
 				//Debug::Text(' User ID: '. $row['user_id'] .' Level: '. $row['level'] .' Sub: '. $row['is_subordinate'] .' Current Level: '. $current_level, __FILE__, __LINE__, __METHOD__, 10);
-				if (  $row['level'] == $current_level AND $row['is_subordinate'] == 0 ) {
+				if ( $row['level'] == $current_level && $row['is_subordinate'] == 0 ) {
 					$retarr['current_level'][] = $row['user_id'];
-				} elseif ( $row['level'] < $current_level AND $row['is_subordinate'] == 0 ) {
+				} else if ( $row['level'] < $current_level && $row['is_subordinate'] == 0 ) {
 					$retarr['parent_level'][] = $row['user_id'];
-				} elseif ( $row['level'] > $current_level AND $row['is_subordinate'] == 1 ) {
+				} else if ( $row['level'] > $current_level && $row['is_subordinate'] == 1 ) {
 					//Only ever show subordinates at child levels, this fixes the bug where the currently logged in user would see their own requests
 					//in the authorization list.
 					$retarr['child_level'][] = $row['user_id'];
@@ -482,50 +481,49 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 			//Debug::Arr($retarr, ' aChildren of User: '. $user_id .' At Level: '. $level, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $retarr;
-
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id               UUID
 	 * @param int $object_type_id
 	 * @param int $level
 	 * @param string $hierarchy_control_ids UUID
 	 * @param bool $recursive
 	 * @return array|bool
 	 */
-	function getByUserIdAndObjectTypeIDAndLevelAndHierarchyControlIDs( $user_id, $object_type_id, $level = 1, $hierarchy_control_ids, $recursive = TRUE ) {
+	function getByUserIdAndObjectTypeIDAndLevelAndHierarchyControlIDs( $user_id, $object_type_id, $level = 1, $hierarchy_control_ids, $recursive = true ) {
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( !is_numeric($level) ) {
-			return FALSE;
+		if ( !is_numeric( $level ) ) {
+			return false;
 		}
 
-		$min_level = ($level - 1);
+		$min_level = ( $level - 1 );
 		if ( $min_level <= 0 ) {
 			$min_level = 0;
 		}
 
 		//This should have two modes, one where it returns just the immediate child level, and one that returns all children "recursively".
-		if ( $recursive == TRUE ) {
+		if ( $recursive == true ) {
 			$max_level = 99;
 		} else {
-			$max_level = ($level + 1);
+			$max_level = ( $level + 1 );
 		}
-		Debug::Text(' User ID: '. $user_id .' Object Type ID: '. $object_type_id .' Level: '. $level .' Min Level: '. $min_level .' Max Level: '. $max_level, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( ' User ID: ' . $user_id . ' Object Type ID: ' . $object_type_id . ' Level: ' . $level . ' Min Level: ' . $min_level . ' Max Level: ' . $max_level, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$retarr = array( 'current_level' => array(), 'parent_level' => array(), 'child_level' => array() );
+		$retarr = [ 'current_level' => [], 'parent_level' => [], 'child_level' => [] ];
 
 		$hcf = new HierarchyControlFactory();
 		$hlf = new HierarchyLevelFactory();
 		$huf = new HierarchyUserFactory();
 		$hotf = new HierarchyObjectTypeFactory();
 
-		$ph = array();
+		$ph = [];
 
 		//UNION two queries together, the first query gets all superiors, one level above, and all levels below.
 		//The 2nd query gets all subordinates.
@@ -535,12 +533,12 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 								x.user_id,
 								x.level,
 								0 as is_subordinate
-						from	'. $hlf->getTable() .' as x
-						LEFT JOIN '. $hcf->getTable() .' as y ON x.hierarchy_control_id = y.id
-						LEFT JOIN '. $hotf->getTable() .' as y2 ON x.hierarchy_control_id = y2.hierarchy_control_id
-						LEFT JOIN '. $hlf->getTable() .' as z ON x.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = \''. TTUUID::castUUID($user_id) .'\'
+						from	' . $hlf->getTable() . ' as x
+						LEFT JOIN ' . $hcf->getTable() . ' as y ON x.hierarchy_control_id = y.id
+						LEFT JOIN ' . $hotf->getTable() . ' as y2 ON x.hierarchy_control_id = y2.hierarchy_control_id
+						LEFT JOIN ' . $hlf->getTable() . ' as z ON x.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = \'' . TTUUID::castUUID( $user_id ) . '\'
 						where
-							y2.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+							y2.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 							AND x.level >= z.level-1
 							AND ( x.deleted = 0 AND y.deleted = 0 AND z.deleted = 0 )
 
@@ -551,38 +549,38 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 								n.user_id,
 								(
 									select max(level)+1
-									from '. $hlf->getTable() .' as z
+									from ' . $hlf->getTable() . ' as z
 									where z.hierarchy_control_id = n.hierarchy_control_id AND z.deleted = 0
 								) as level,
 								1 as is_subordinate
-						from	'. $huf->getTable() .' as n
-						LEFT JOIN '. $hcf->getTable() .' as o ON n.hierarchy_control_id = o.id
-						LEFT JOIN '. $hotf->getTable() .' as p ON n.hierarchy_control_id = p.hierarchy_control_id
-						LEFT JOIN '. $hlf->getTable() .' as z ON n.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = \''. TTUUID::castUUID($user_id) .'\'
+						from	' . $huf->getTable() . ' as n
+						LEFT JOIN ' . $hcf->getTable() . ' as o ON n.hierarchy_control_id = o.id
+						LEFT JOIN ' . $hotf->getTable() . ' as p ON n.hierarchy_control_id = p.hierarchy_control_id
+						LEFT JOIN ' . $hlf->getTable() . ' as z ON n.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = \'' . TTUUID::castUUID( $user_id ) . '\'
 						where
-							p.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+							p.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 							AND ( o.deleted = 0 AND z.deleted = 0 )
 					) as tmp
 					WHERE
-						hierarchy_control_id in ('. $this->getListSQL( $hierarchy_control_ids, $ph, 'uuid') .')
-						AND ( level >= '. (int)$min_level .' AND level <= '. (int)$max_level.' )
+						hierarchy_control_id in (' . $this->getListSQL( $hierarchy_control_ids, $ph, 'uuid' ) . ')
+						AND ( level >= ' . (int)$min_level . ' AND level <= ' . (int)$max_level . ' )
 					ORDER BY level ASC, user_id ASC
 				';
 
 		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$rs = $this->ExecuteSQL($query, $ph);
+		$rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
 			$current_level = $level;
 			$i = 0;
-			foreach( $rs as $row ) {
-				Debug::Text(' User ID: '. $row['user_id'] .' Level: '. $row['level'] .' Sub: '. $row['is_subordinate'] .' Current Level: '. $current_level, __FILE__, __LINE__, __METHOD__, 10);
-				if (  $row['level'] == $current_level AND $row['is_subordinate'] == 0 ) {
+			foreach ( $rs as $row ) {
+				Debug::Text( ' User ID: ' . $row['user_id'] . ' Level: ' . $row['level'] . ' Sub: ' . $row['is_subordinate'] . ' Current Level: ' . $current_level, __FILE__, __LINE__, __METHOD__, 10 );
+				if ( $row['level'] == $current_level && $row['is_subordinate'] == 0 ) {
 					$retarr['current_level'][] = $row['user_id'];
-				} elseif ( $row['level'] < $current_level AND $row['is_subordinate'] == 0 ) {
+				} else if ( $row['level'] < $current_level && $row['is_subordinate'] == 0 ) {
 					$retarr['parent_level'][] = $row['user_id'];
-				} elseif ( $row['level'] > $current_level AND $row['is_subordinate'] == 1 ) {
+				} else if ( $row['level'] > $current_level && $row['is_subordinate'] == 1 ) {
 					//Only ever show subordinates at child levels, this fixes the bug where the currently logged in user would see their own requests
 					//in the authorization list.
 					$retarr['child_level'][] = $row['user_id'];
@@ -595,37 +593,36 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 			$retarr['parent_level'] = array_unique( $retarr['parent_level'] );
 			$retarr['child_level'] = array_unique( $retarr['child_level'] );
 
-			Debug::Arr($retarr, ' aChildren of User: '. $user_id .' At Level: '. $level, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Arr( $retarr, ' aChildren of User: ' . $user_id . ' At Level: ' . $level, __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $retarr;
-
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $user_id UUID
+	 * @param string $user_id    UUID
 	 * @param int $object_type_id
 	 * @param bool $immediate_parents_only
 	 * @param bool $include_levels
 	 * @return array|bool
 	 */
-	function getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $user_id, $object_type_id = 100, $immediate_parents_only = TRUE, $include_levels = TRUE ) {
+	function getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $user_id, $object_type_id = 100, $immediate_parents_only = true, $include_levels = true ) {
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $object_type_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$retval = FALSE;
+		$retval = false;
 
 		//Parents are only considered if an employee is explicitly assigned to a hierarchy as a subordinate.
 		//This does not take into account an employee being in the middle of a hierarchy but not assigned to it as a subordinate.
@@ -637,54 +634,54 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		$hotf = new HierarchyObjectTypeFactory();
 		$hcf = new HierarchyControlFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'company_id' => TTUUID::castUUID($company_id),
-					//'object_type_id' => (int)$object_type_id,
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'company_id' => TTUUID::castUUID( $company_id ),
+				//'object_type_id' => (int)$object_type_id,
+		];
 
 		$query = '
 						select w.level, w.user_id
-						from '. $hlf->getTable() .' as w
-						LEFT JOIN '. $huf->getTable() .' as x ON w.hierarchy_control_id = x.hierarchy_control_id
-						LEFT JOIN '. $hotf->getTable() .' as y ON w.hierarchy_control_id = y.hierarchy_control_id
-						LEFT JOIN '. $uf->getTable() .' as z ON x.user_id = z.id
-						LEFT JOIN '. $hcf->getTable() .' as e ON w.hierarchy_control_id = e.id
+						from ' . $hlf->getTable() . ' as w
+						LEFT JOIN ' . $huf->getTable() . ' as x ON w.hierarchy_control_id = x.hierarchy_control_id
+						LEFT JOIN ' . $hotf->getTable() . ' as y ON w.hierarchy_control_id = y.hierarchy_control_id
+						LEFT JOIN ' . $uf->getTable() . ' as z ON x.user_id = z.id
+						LEFT JOIN ' . $hcf->getTable() . ' as e ON w.hierarchy_control_id = e.id
 						WHERE
 							x.user_id = ?
 							AND z.company_id = ?
-							AND y.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+							AND y.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 							AND ( w.deleted = 0 AND e.deleted = 0 )
 						ORDER BY w.level DESC
 					';
 
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
-		$rs = $this->ExecuteSQL($query, $ph);
+		$rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
-			$valid_level = FALSE;
-			foreach( $rs as $row ) {
-				if ( $immediate_parents_only == TRUE ) {
+			$valid_level = false;
+			foreach ( $rs as $row ) {
+				if ( $immediate_parents_only == true ) {
 					//Even if immediate_parents_only is set, we need to return all parents at the same level.
 					//Prior to v3.1 we just returned a single parent.
-					if ( $valid_level === FALSE OR $valid_level == $row['level'] ) {
-						$retval[] = TTUUID::castUUID($row['user_id']);
+					if ( $valid_level === false || $valid_level == $row['level'] ) {
+						$retval[] = TTUUID::castUUID( $row['user_id'] );
 
-						if ( $valid_level === FALSE ) {
+						if ( $valid_level === false ) {
 							$valid_level = $row['level'];
 						}
 					}
 				} else {
-					if ( $include_levels == TRUE ) {
-						$retval[(int)$row['level']][] = TTUUID::castUUID($row['user_id']);
+					if ( $include_levels == true ) {
+						$retval[(int)$row['level']][] = TTUUID::castUUID( $row['user_id'] );
 					} else {
-						$retval[] = TTUUID::castUUID($row['user_id']);
+						$retval[] = TTUUID::castUUID( $row['user_id'] );
 					}
 				}
 			}
-			if ( $immediate_parents_only == FALSE ) {
-				ksort($retval);
+			if ( $immediate_parents_only == false ) {
+				ksort( $retval );
 			}
 		}
 
@@ -693,7 +690,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $user_id UUID
+	 * @param string $user_id    UUID
 	 * @param int $object_type_id
 	 * @return array|bool
 	 */
@@ -702,18 +699,18 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		$profiler->startTimer( "getPermissionHierarchyChildrenByCompanyIdAndUserId" );
 
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $object_type_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$retval = FALSE;
+		$retval = false;
 
 		$uf = new UserFactory();
 		$hlf = new HierarchyLevelFactory();
@@ -723,44 +720,45 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 
 		//When it comes to permissions we only consider subordinates, not other supervisors/managers in the hierarchy.
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'company_id' => TTUUID::castUUID($company_id),
-					//'object_type_id' => (int)$object_type_id,
-					//'user_idb' => $user_id,
-					//'object_type_idb' => $object_type_id,
-					//'company_idb' => $company_id,
-					);
+		$ph = [
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'company_id' => TTUUID::castUUID( $company_id ),
+				//'object_type_id' => (int)$object_type_id,
+				//'user_idb' => $user_id,
+				//'object_type_idb' => $object_type_id,
+				//'company_idb' => $company_id,
+		];
 
 
 		//w.user_id != x.user_id, is there to make sure we exclude the current user from the subordinate list,
 		//as we now allow superiors to also be subordinates in the same hierarchy.
 		$query = '
 						select w.user_id as user_id
-						from '. $huf->getTable() .' as w
-						LEFT JOIN '. $hlf->getTable() .' as x ON w.hierarchy_control_id = x.hierarchy_control_id
-						LEFT JOIN '. $hotf->getTable() .' as y ON w.hierarchy_control_id = y.hierarchy_control_id
-						LEFT JOIN '. $uf->getTable() .' as z ON x.user_id = z.id
-						LEFT JOIN '. $hcf->getTable() .' as z2 ON w.hierarchy_control_id = z2.id
+						from ' . $huf->getTable() . ' as w
+						LEFT JOIN ' . $hlf->getTable() . ' as x ON w.hierarchy_control_id = x.hierarchy_control_id
+						LEFT JOIN ' . $hotf->getTable() . ' as y ON w.hierarchy_control_id = y.hierarchy_control_id
+						LEFT JOIN ' . $uf->getTable() . ' as z ON x.user_id = z.id
+						LEFT JOIN ' . $hcf->getTable() . ' as z2 ON w.hierarchy_control_id = z2.id
 						WHERE
 							x.user_id = ?
 							AND z.company_id = ?
-							AND y.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+							AND y.object_type_id in (' . $this->getListSQL( $object_type_id, $ph, 'int' ) . ')
 							AND w.user_id != x.user_id
 							AND ( x.deleted = 0 AND z2.deleted = 0 AND z.deleted = 0 )
 					';
 
 		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		$rs = $this->ExecuteSQL($query, $ph);
+		$rs = $this->ExecuteSQL( $query, $ph );
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
-			foreach( $rs as $row ) {
-				$retval[] = TTUUID::castUUID($row['user_id']);
+			foreach ( $rs as $row ) {
+				$retval[] = TTUUID::castUUID( $row['user_id'] );
 			}
 		}
 
 		$profiler->stopTimer( "getPermissionHierarchyChildrenByCompanyIdAndUserId" );
+
 		return $retval;
 	}
 
@@ -775,22 +773,22 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $tree_id UUID
+	 * @param string $tree_id    UUID
 	 * @return array|bool
 	 */
 	function getByCompanyIdAndHierarchyControlId( $company_id, $tree_id ) {
 		if ( $company_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $tree_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$hclf = new HierarchyControlListFactory();
-		$hclf->getByIdAndCompanyId($tree_id, $company_id);
+		$hclf->getByIdAndCompanyId( $tree_id, $company_id );
 		if ( $hclf->getRecordCount() == 0 ) {
-			return FALSE;
+			return false;
 		}
 
 		return $this->getByHierarchyControlId( $tree_id );
@@ -803,14 +801,14 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 	 * @param string $user_id UUID
 	 * @return array|bool
 	 */
-	function getParentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id) {
+	function getParentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id ) {
 		//This only gets the immediate parents
 		if ( $tree_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->getFastTreeObject()->setTree( $tree_id );
@@ -818,11 +816,11 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		//Get the parent, then get the current level from that.
 		$parent_id = $this->getFastTreeObject()->getParentId( $user_id );
 
-		$retarr = array();
+		$retarr = [];
 
-		$parent_nodes = $this->getCurrentLevelIdArrayByHierarchyControlIdAndUserId($tree_id, $parent_id);
+		$parent_nodes = $this->getCurrentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $parent_id );
 		//Debug::Arr($parent_nodes, ' Parent Nodes', __FILE__, __LINE__, __METHOD__, 10);
-		if ( is_array($parent_nodes) ) {
+		if ( is_array( $parent_nodes ) ) {
 			$retarr = $parent_nodes;
 		}
 
@@ -837,22 +835,22 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 	 * @param bool $ignore_self
 	 * @return array|bool
 	 */
-	function getCurrentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id, $ignore_self = FALSE ) {
+	function getCurrentLevelIdArrayByHierarchyControlIdAndUserId( $tree_id, $user_id, $ignore_self = false ) {
 		if ( $tree_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $user_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->getFastTreeObject()->setTree( $tree_id );
 
-		$parent_id = $this->getFastTreeObject()->getParentId( $user_id);
+		$parent_id = $this->getFastTreeObject()->getParentId( $user_id );
 
 		$children = $this->getFastTreeObject()->getAllChildren( $parent_id );
-		if ( $children === FALSE ) {
-			return FALSE;
+		if ( $children === false ) {
+			return false;
 		}
 
 		$ids = array_keys( $children );
@@ -863,22 +861,23 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		//Check if current user is shared, because if it isn't shared, then we can ignore
 		//all other shared users in the tree.
 		$root_user_id_shared = $hslf->getByHierarchyControlIdAndUserId( $tree_id, $user_id )->getRecordCount();
-		Debug::Text('Root User ID: '. $user_id .' Shared: '. $root_user_id_shared, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Root User ID: ' . $user_id . ' Shared: ' . $root_user_id_shared, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$retarr = array();
-		$retarr[] = TTUUID::castUUID($user_id);
+		$retarr = [];
+		$retarr[] = TTUUID::castUUID( $user_id );
 		foreach ( $ids as $id ) {
 
 			$hierarchy_share = $hslf->getByHierarchyControlIdAndUserId( $tree_id, $id )->getCurrent()->isNew();
 
-			if ( $root_user_id_shared == TRUE AND $hierarchy_share === FALSE ) {
+			if ( $root_user_id_shared == true && $hierarchy_share === false ) {
 				//Debug::Text(' Node IS shared:	 '. $id, __FILE__, __LINE__, __METHOD__, 10);
 				$retarr[] = $id;
 			} //else { //Debug::Text(' Node isnt shared:  '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		return array_unique($retarr);
+		return array_unique( $retarr );
 	}
 
 }
+
 ?>

@@ -3,33 +3,33 @@
 }
 
 .user-generic-data-status .status-labels {
-    margin-top: 10px;
+	margin-top: 10px;
 }
 
 .user-generic-data-status .failed-label {
-    color: #ae0000;
-    font-weight: bold;
+	color: #ae0000;
+	font-weight: bold;
 }
 
 .user-generic-data-status .warning-label {
-    color: #daaf00;
-    font-weight: bold;
+	color: #daaf00;
+	font-weight: bold;
 }
 
 .user-generic-data-status .success-label {
-    color: #336315;
-    font-weight: bold;
+	color: #336315;
+	font-weight: bold;
 }
 
 .user-generic-data-status .label {
-    margin-right: 15px;
+	margin-right: 15px;
 }
 
 .user-generic-data-status .content {
-    margin-top: 10px;
-    padding: 0;
-    position: relative;
-    top: 0;
-    width: 100%;
-    height: calc(100% - 85px);
+	margin-top: 10px;
+	padding: 0;
+	position: relative;
+	top: 0;
+	width: 100%;
+	height: calc(100% - 85px);
 }

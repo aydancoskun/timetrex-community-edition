@@ -51,6 +51,4 @@ var APIExceptionSummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

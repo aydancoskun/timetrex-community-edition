@@ -47,7 +47,7 @@ class APIScheduleSummaryReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIScheduleSummaryReport extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getScheduleSummaryReport( $config = FALSE, $format = 'pdf' ) {
+	function getScheduleSummaryReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

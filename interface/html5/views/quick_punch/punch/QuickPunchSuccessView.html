@@ -1,26 +1,26 @@
 <div id="punchModal" class="modal <% if ( is_mobile ) { %> punch-modal <% } %> " role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div style="" align="center">
-                    <table style="font-weight:bold;font-size: 30px">
-                        <tr>
-                            <td><%= $.i18n._( user_full_name ) %></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <%= $.i18n._('Punch') %> <%= $.i18n._( label ) %>: <%= return_date %>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center;font-weight:normal;font-size: 8px">
-                                <button data-dismiss="modal" tabindex="1" style="min-width: 200px;" class="btn btn-sm btn-primary" type="button"><%= $.i18n._('Close') %> <span id="timedRedirect"></span></button>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div><!-- /.modal-content -->
-    </div>
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-body">
+				<div style="" align="center">
+					<table style="font-weight:bold;font-size: 30px">
+						<tr>
+							<td><%= $.i18n._( user_full_name ) %></td>
+						</tr>
+						<tr>
+							<td>
+								<%= $.i18n._('Punch') %> <%= $.i18n._( label ) %>: <%= return_date %>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align:center;font-weight:normal;font-size: 8px">
+								<button data-dismiss="modal" tabindex="1" style="min-width: 200px;" class="btn btn-sm btn-primary" type="button"><%= $.i18n._('Close') %> <span id="timedRedirect"></span></button>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div><!-- /.modal-content -->
+	</div>
 </div>
 

@@ -42,8 +42,8 @@ class BreakPolicyFactory extends Factory {
 	protected $table = 'break_policy';
 	protected $pk_sequence_name = 'break_policy_id_seq'; //PK Sequence name
 
-	protected $company_obj = NULL;
-	protected $pay_code_obj = NULL;
+	protected $company_obj = null;
+	protected $pay_code_obj = null;
 
 
 	/**
@@ -51,72 +51,70 @@ class BreakPolicyFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'type':
-				$retval = array(
-										10 => TTi18n::gettext('Auto-Deduct'),
-										15 => TTi18n::gettext('Auto-Add'),
-										20 => TTi18n::gettext('Normal')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Auto-Deduct' ),
+						15 => TTi18n::gettext( 'Auto-Add' ),
+						20 => TTi18n::gettext( 'Normal' ),
+				];
 				break;
 			case 'auto_detect_type':
-				$retval = array(
-										10 => TTi18n::gettext('Time Window'),
-										20 => TTi18n::gettext('Punch Time'),
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Time Window' ),
+						20 => TTi18n::gettext( 'Punch Time' ),
+				];
 				break;
 			case 'columns':
-				$retval = array(
-										'-1010-type' => TTi18n::gettext('Type'),
-										'-1020-name' => TTi18n::gettext('Name'),
-										'-1025-description' => TTi18n::gettext('Description'),
+				$retval = [
+						'-1010-type'        => TTi18n::gettext( 'Type' ),
+						'-1020-name'        => TTi18n::gettext( 'Name' ),
+						'-1025-description' => TTi18n::gettext( 'Description' ),
 
-										'-1030-amount' => TTi18n::gettext('Break Time'),
-										'-1040-trigger_time' => TTi18n::gettext('Active After'),
+						'-1030-amount'       => TTi18n::gettext( 'Break Time' ),
+						'-1040-trigger_time' => TTi18n::gettext( 'Active After' ),
 
-										'-1050-auto_detect_type' => TTi18n::gettext('Auto Detect Breaks By'),
-										//'-1060-start_window' => TTi18n::gettext('Start Window'),
-										//'-1070-window_length' => TTi18n::gettext('Window Length'),
-										//'-1080-minimum_punch_time' => TTi18n::gettext('Minimum Punch Time'),
-										//'-1090-maximum_punch_time' => TTi18n::gettext('Maximum Punch Time'),
+						'-1050-auto_detect_type' => TTi18n::gettext( 'Auto Detect Breaks By' ),
+						//'-1060-start_window' => TTi18n::gettext('Start Window'),
+						//'-1070-window_length' => TTi18n::gettext('Window Length'),
+						//'-1080-minimum_punch_time' => TTi18n::gettext('Minimum Punch Time'),
+						//'-1090-maximum_punch_time' => TTi18n::gettext('Maximum Punch Time'),
 
-										'-1100-include_break_punch_time' => TTi18n::gettext('Include Break Punch'),
-										'-1110-include_multiple_breaks' => TTi18n::gettext('Include Multiple Breaks'),
+						'-1100-include_break_punch_time' => TTi18n::gettext( 'Include Break Punch' ),
+						'-1110-include_multiple_breaks'  => TTi18n::gettext( 'Include Multiple Breaks' ),
 
-										'-1900-in_use' => TTi18n::gettext('In Use'),
+						'-1900-in_use' => TTi18n::gettext( 'In Use' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								'description',
-								'type',
-								'amount',
-								'updated_date',
-								'updated_by',
-								);
+				$retval = [
+						'name',
+						'description',
+						'type',
+						'amount',
+						'updated_date',
+						'updated_by',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								'name',
-								);
+				$retval = [
+						'name',
+				];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array(
-								);
+				$retval = [];
 				break;
-
 		}
 
 		return $retval;
@@ -127,32 +125,33 @@ class BreakPolicyFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'type_id' => 'Type',
-										'type' => FALSE,
-										'name' => 'Name',
-										'description' => 'Description',
-										'trigger_time' => 'TriggerTime',
-										'amount' => 'Amount',
-										'auto_detect_type_id' => 'AutoDetectType',
-										'auto_detect_type' => FALSE,
-										'start_window' => 'StartWindow',
-										'window_length' => 'WindowLength',
-										'minimum_punch_time' => 'MinimumPunchTime',
-										'maximum_punch_time' => 'MaximumPunchTime',
-										'include_break_punch_time' => 'IncludeBreakPunchTime',
-										'include_multiple_breaks' => 'IncludeMultipleBreaks',
+		$variable_function_map = [
+				'id'                       => 'ID',
+				'company_id'               => 'Company',
+				'type_id'                  => 'Type',
+				'type'                     => false,
+				'name'                     => 'Name',
+				'description'              => 'Description',
+				'trigger_time'             => 'TriggerTime',
+				'amount'                   => 'Amount',
+				'auto_detect_type_id'      => 'AutoDetectType',
+				'auto_detect_type'         => false,
+				'start_window'             => 'StartWindow',
+				'window_length'            => 'WindowLength',
+				'minimum_punch_time'       => 'MinimumPunchTime',
+				'maximum_punch_time'       => 'MaximumPunchTime',
+				'include_break_punch_time' => 'IncludeBreakPunchTime',
+				'include_multiple_breaks'  => 'IncludeMultipleBreaks',
 
-										'pay_code_id' => 'PayCode',
-										'pay_code' => FALSE,
-										'pay_formula_policy_id' => 'PayFormulaPolicy',
-										'pay_formula_policy' => FALSE,
+				'pay_code_id'           => 'PayCode',
+				'pay_code'              => false,
+				'pay_formula_policy_id' => 'PayFormulaPolicy',
+				'pay_formula_policy'    => false,
 
-										'in_use' => FALSE,
-										'deleted' => 'Deleted',
-										);
+				'in_use'  => false,
+				'deleted' => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -181,10 +180,11 @@ class BreakPolicyFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setCompany( $value) {
+	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
 
-		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Company ID: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -199,8 +199,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setType( $value) {
-		$value = (int)trim($value);
+	function setType( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'type_id', $value );
 	}
 
@@ -208,30 +209,30 @@ class BreakPolicyFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		$name = trim($name);
+	function isUniqueName( $name ) {
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'name' => TTi18n::strtolower($name),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'name'       => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
-		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'select id from ' . $this->getTable() . ' where company_id = ? AND lower(name) = ? AND deleted=0';
+		$id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $id, 'Unique: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $id === FALSE ) {
-			return TRUE;
+		if ( $id === false ) {
+			return true;
 		} else {
-			if ($id == $this->getId() ) {
-				return TRUE;
+			if ( $id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -245,8 +246,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim($value);
+	function setName( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -261,8 +263,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setDescription( $value) {
-		$value = trim($value);
+	function setDescription( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'description', $value );
 	}
 
@@ -277,8 +280,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setTriggerTime( $value) {
-		$value = (int)trim($value);
+	function setTriggerTime( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'trigger_time', $value );
 	}
 
@@ -293,8 +297,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setAmount( $value) {
-		$value = trim($value);
+	function setAmount( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'amount', $value );
 	}
 
@@ -309,8 +314,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setAutoDetectType( $value) {
-		$value = (int)trim($value);
+	function setAutoDetectType( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'auto_detect_type_id', $value );
 	}
 
@@ -325,8 +331,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setStartWindow( $value) {
-		$value = (int)trim($value);
+	function setStartWindow( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'start_window', $value );
 	}
 
@@ -341,8 +348,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setWindowLength( $value) {
-		$value = (int)trim($value);
+	function setWindowLength( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'window_length', $value );
 	}
 
@@ -357,8 +365,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setMinimumPunchTime( $value) {
-		$value = (int)trim($value);
+	function setMinimumPunchTime( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'minimum_punch_time', $value );
 	}
 
@@ -373,8 +382,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setMaximumPunchTime( $value) {
-		$value = (int)trim($value);
+	function setMaximumPunchTime( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'maximum_punch_time', $value );
 	}
 
@@ -406,8 +416,8 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setIncludeBreakPunchTime( $value) {
-		return $this->setGenericDataValue( 'include_break_punch_time', $this->toBool($value) );
+	function setIncludeBreakPunchTime( $value ) {
+		return $this->setGenericDataValue( 'include_break_punch_time', $this->toBool( $value ) );
 	}
 
 	/**
@@ -421,8 +431,8 @@ class BreakPolicyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setIncludeMultipleBreaks( $value) {
-		return $this->setGenericDataValue( 'include_multiple_breaks', $this->toBool($value) );
+	function setIncludeMultipleBreaks( $value ) {
+		return $this->setGenericDataValue( 'include_multiple_breaks', $this->toBool( $value ) );
 	}
 
 	/**
@@ -436,8 +446,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPayCode( $value) {
+	function setPayCode( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'pay_code_id', $value );
 	}
 
@@ -452,8 +463,9 @@ class BreakPolicyFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPayFormulaPolicy( $value) {
+	function setPayFormulaPolicy( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'pay_formula_policy_id', $value );
 	}
 
@@ -461,173 +473,173 @@ class BreakPolicyFactory extends Factory {
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Company
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-		$this->Validator->isResultSetWithRows(	'company',
-														$clf->getByID($this->getCompany()),
-														TTi18n::gettext('Company is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'company',
+											   $clf->getByID( $this->getCompany() ),
+											   TTi18n::gettext( 'Company is invalid' )
+		);
 		// Type
-		if ( $this->getType() !== FALSE ) {
-			$this->Validator->inArrayKey(	'type',
-													$this->getType(),
-													TTi18n::gettext('Incorrect Type'),
-													$this->getOptions('type')
-												);
+		if ( $this->getType() !== false ) {
+			$this->Validator->inArrayKey( 'type',
+										  $this->getType(),
+										  TTi18n::gettext( 'Incorrect Type' ),
+										  $this->getOptions( 'type' )
+			);
 		}
 		// Name
-		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record..
+		if ( $this->Validator->getValidateOnly() == false ) { //Don't check the below when mass editing, but must check when adding a new record..
 			if ( $this->getName() == '' ) {
 				$this->Validator->isTRUE( 'name',
-											FALSE,
-											TTi18n::gettext( 'Please specify a name' )
+										  false,
+										  TTi18n::gettext( 'Please specify a name' )
 				);
 			}
 		}
-		if ( $this->getName() !== FALSE ) {
-			if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
+		if ( $this->getName() !== false ) {
+			if ( $this->getName() != '' && $this->Validator->isError( 'name' ) == false ) {
 				$this->Validator->isLength( 'name',
-													$this->getName(),
-													TTi18n::gettext( 'Name is too short or too long' ),
-													2, 50
-												);
+											$this->getName(),
+											TTi18n::gettext( 'Name is too short or too long' ),
+											2, 50
+				);
 			}
-			if ( $this->getName() != '' AND $this->Validator->isError('name') == FALSE ) {
-				$this->Validator->isTrue(	'name',
-													$this->isUniqueName($this->getName()),
-													TTi18n::gettext('Name is already in use')
-												);
+			if ( $this->getName() != '' && $this->Validator->isError( 'name' ) == false ) {
+				$this->Validator->isTrue( 'name',
+										  $this->isUniqueName( $this->getName() ),
+										  TTi18n::gettext( 'Name is already in use' )
+				);
 			}
 		}
 		// Description
 		if ( $this->getDescription() != '' ) {
-			$this->Validator->isLength(	'description',
-												$this->getDescription(),
-												TTi18n::gettext('Description is invalid'),
-												1, 250
-											);
+			$this->Validator->isLength( 'description',
+										$this->getDescription(),
+										TTi18n::gettext( 'Description is invalid' ),
+										1, 250
+			);
 		}
 		// Trigger Time
-		if ( $this->getTriggerTime() !== FALSE ) {
-			$this->Validator->isNumeric(		'trigger_time',
-														$this->getTriggerTime(),
-														TTi18n::gettext('Incorrect Trigger Time')
-													);
+		if ( $this->getTriggerTime() !== false ) {
+			$this->Validator->isNumeric( 'trigger_time',
+										 $this->getTriggerTime(),
+										 TTi18n::gettext( 'Incorrect Trigger Time' )
+			);
 		}
 		// Deduction Amount
-		if ( $this->getAmount() !== FALSE ) {
-			$this->Validator->isNumeric(		'amount',
-														$this->getAmount(),
-														TTi18n::gettext('Incorrect Deduction Amount')
-													);
+		if ( $this->getAmount() !== false ) {
+			$this->Validator->isNumeric( 'amount',
+										 $this->getAmount(),
+										 TTi18n::gettext( 'Incorrect Deduction Amount' )
+			);
 		}
 		// Auto-Detect Type
-		if ( $this->getAutoDetectType() !== FALSE ) {
-			$this->Validator->inArrayKey(	'auto_detect_type',
-													$this->getAutoDetectType(),
-													TTi18n::gettext('Incorrect Auto-Detect Type'),
-													$this->getOptions('auto_detect_type')
-												);
+		if ( $this->getAutoDetectType() !== false ) {
+			$this->Validator->inArrayKey( 'auto_detect_type',
+										  $this->getAutoDetectType(),
+										  TTi18n::gettext( 'Incorrect Auto-Detect Type' ),
+										  $this->getOptions( 'auto_detect_type' )
+			);
 		}
 		// Start Window
 		if ( $this->getStartWindow() != '' ) {
-			$this->Validator->isNumeric(		'start_window',
-														$this->getStartWindow(),
-														TTi18n::gettext('Incorrect Start Window')
-													);
+			$this->Validator->isNumeric( 'start_window',
+										 $this->getStartWindow(),
+										 TTi18n::gettext( 'Incorrect Start Window' )
+			);
 		}
 		// Window Length
 		if ( $this->getWindowLength() != '' ) {
-			$this->Validator->isNumeric(		'window_length',
-														$this->getWindowLength(),
-														TTi18n::gettext('Incorrect Window Length')
-													);
+			$this->Validator->isNumeric( 'window_length',
+										 $this->getWindowLength(),
+										 TTi18n::gettext( 'Incorrect Window Length' )
+			);
 		}
 		// Minimum Punch Time
 		if ( $this->getMinimumPunchTime() != '' ) {
-			$this->Validator->isNumeric(		'minimum_punch_time',
-														$this->getMinimumPunchTime(),
-														TTi18n::gettext('Incorrect Minimum Punch Time')
-													);
+			$this->Validator->isNumeric( 'minimum_punch_time',
+										 $this->getMinimumPunchTime(),
+										 TTi18n::gettext( 'Incorrect Minimum Punch Time' )
+			);
 		}
 		// Maximum Punch Time
 		if ( $this->getMaximumPunchTime() != '' ) {
-			$this->Validator->isNumeric(		'maximum_punch_time',
-														$this->getMaximumPunchTime(),
-														TTi18n::gettext('Incorrect Maximum Punch Time')
-													);
+			$this->Validator->isNumeric( 'maximum_punch_time',
+										 $this->getMaximumPunchTime(),
+										 TTi18n::gettext( 'Incorrect Maximum Punch Time' )
+			);
 		}
 		// Pay Code
-		if ( $this->getPayCode() !== FALSE AND $this->getPayCode() != TTUUID::getZeroID() ) {
+		if ( $this->getPayCode() !== false && $this->getPayCode() != TTUUID::getZeroID() ) {
 			$pclf = TTnew( 'PayCodeListFactory' ); /** @var PayCodeListFactory $pclf */
-			$this->Validator->isResultSetWithRows(	'pay_code_id',
-															$pclf->getById($this->getPayCode()),
-															TTi18n::gettext('Invalid Pay Code')
-														);
+			$this->Validator->isResultSetWithRows( 'pay_code_id',
+												   $pclf->getById( $this->getPayCode() ),
+												   TTi18n::gettext( 'Invalid Pay Code' )
+			);
 		}
 		// Pay Formula Policy
-		if ( $this->getPayFormulaPolicy() !== FALSE AND $this->getPayFormulaPolicy() != TTUUID::getZeroID() ) {
+		if ( $this->getPayFormulaPolicy() !== false && $this->getPayFormulaPolicy() != TTUUID::getZeroID() ) {
 			$pfplf = TTnew( 'PayFormulaPolicyListFactory' ); /** @var PayFormulaPolicyListFactory $pfplf */
-			$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
-															$pfplf->getByID($this->getPayFormulaPolicy()),
-															TTi18n::gettext('Pay Formula Policy is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'pay_formula_policy_id',
+												   $pfplf->getByID( $this->getPayFormulaPolicy() ),
+												   TTi18n::gettext( 'Pay Formula Policy is invalid' )
+			);
 		}
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+		if ( $this->getDeleted() != true && $this->Validator->getValidateOnly() == false ) { //Don't check the below when mass editing.
 			if ( $this->getPayCode() == TTUUID::getZeroID() ) {
-				$this->Validator->isTRUE(	'pay_code_id',
-											FALSE,
-											TTi18n::gettext('Please choose a Pay Code') );
+				$this->Validator->isTRUE( 'pay_code_id',
+										  false,
+										  TTi18n::gettext( 'Please choose a Pay Code' ) );
 			}
 
 			//Make sure Pay Formula Policy is defined somewhere.
 			//if ( $this->getPayFormulaPolicy() == 0 AND $this->getPayCode() > 0 AND ( !is_object( $this->getPayCodeObject() ) OR ( is_object( $this->getPayCodeObject() ) AND $this->getPayCodeObject()->getPayFormulaPolicy() == 0 ) ) ) {
-			if ( $this->getPayFormulaPolicy() == TTUUID::getZeroID() AND ( TTUUID::isUUID( $this->getPayCode() ) AND $this->getPayCode() != TTUUID::getZeroID() AND $this->getPayCode() != TTUUID::getNotExistID() ) AND ( !is_object( $this->getPayCodeObject() ) OR ( is_object( $this->getPayCodeObject() ) AND $this->getPayCodeObject()->getPayFormulaPolicy() == TTUUID::getZeroID() ) ) ) {
-					$this->Validator->isTRUE(	'pay_formula_policy_id',
-												FALSE,
-												TTi18n::gettext('Selected Pay Code does not have a Pay Formula Policy defined'));
+			if ( $this->getPayFormulaPolicy() == TTUUID::getZeroID() && ( TTUUID::isUUID( $this->getPayCode() ) && $this->getPayCode() != TTUUID::getZeroID() && $this->getPayCode() != TTUUID::getNotExistID() ) && ( !is_object( $this->getPayCodeObject() ) || ( is_object( $this->getPayCodeObject() ) && $this->getPayCodeObject()->getPayFormulaPolicy() == TTUUID::getZeroID() ) ) ) {
+				$this->Validator->isTRUE( 'pay_formula_policy_id',
+										  false,
+										  TTi18n::gettext( 'Selected Pay Code does not have a Pay Formula Policy defined' ) );
 			}
 		}
 
-		if ( $this->getDeleted() == TRUE ) {
+		if ( $this->getDeleted() == true ) {
 			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
 			$pglf = TTnew( 'PolicyGroupListFactory' ); /** @var PolicyGroupListFactory $pglf */
-			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('break_policy' => $this->getId() ), 1 );
+			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), [ 'break_policy' => $this->getId() ], 1 );
 			if ( $pglf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by policy groups' ) );
 			}
 
 			$splf = TTnew( 'SchedulePolicyListFactory' ); /** @var SchedulePolicyListFactory $splf */
-			$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('break_policy_id' => $this->getId() ), 1 );
+			$splf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), [ 'break_policy_id' => $this->getId() ], 1 );
 			if ( $splf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE( 'in_use',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by schedule policies' ) );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		if ( $this->getAutoDetectType() == FALSE ) {
+		if ( $this->getAutoDetectType() == false ) {
 			$this->setAutoDetectType( 10 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -636,7 +648,7 @@ class BreakPolicyFactory extends Factory {
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -646,11 +658,11 @@ class BreakPolicyFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -662,31 +674,31 @@ class BreakPolicyFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'in_use':
 							$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'type':
 						case 'auto_detect_type':
-							$function = 'get'.str_replace('_', '', $variable);
+							$function = 'get' . str_replace( '_', '', $variable );
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -697,7 +709,6 @@ class BreakPolicyFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -711,7 +722,8 @@ class BreakPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Break Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Break Policy' ), null, $this->getTable(), $this );
 	}
 }
+
 ?>

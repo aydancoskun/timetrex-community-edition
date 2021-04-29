@@ -63,6 +63,4 @@ var APIPayrollExportReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

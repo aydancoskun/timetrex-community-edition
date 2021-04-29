@@ -15,7 +15,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_stub_entry_account';
 		this.context_menu_name = $.i18n._( 'Pay Stub Accounts' );
 		this.navigation_label = $.i18n._( 'Pay Stub Account' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPayStubEntryAccount' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -83,7 +83,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [],
 			include: [{
@@ -125,7 +125,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
@@ -134,7 +134,6 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
 
 		//Tab 0 start
 
@@ -184,7 +183,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -263,7 +262,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -274,7 +273,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -282,6 +281,5 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

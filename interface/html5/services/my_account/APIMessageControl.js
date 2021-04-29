@@ -67,5 +67,4 @@ var APIMessageControl = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'markRecipientMessageAsRead', arguments );
 	}
 
-
 } );

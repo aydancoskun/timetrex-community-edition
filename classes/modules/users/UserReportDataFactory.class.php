@@ -42,52 +42,51 @@ class UserReportDataFactory extends Factory {
 	protected $table = 'user_report_data';
 	protected $pk_sequence_name = 'user_report_data_id_seq'; //PK Sequence name
 
-	protected $user_obj = NULL;
-	protected $obj_handler = NULL;
+	protected $user_obj = null;
+	protected $obj_handler = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$retval = array(
-										'-1010-name' => TTi18n::gettext('Name'),
-										'-1020-description' => TTi18n::gettext('Description'),
-										'-1030-script_name' => TTi18n::gettext('Report'),
-										'-1040-is_default' => TTi18n::gettext('Default'),
-										'-1050-is_scheduled' => TTi18n::gettext('Scheduled'),
+				$retval = [
+						'-1010-name'         => TTi18n::gettext( 'Name' ),
+						'-1020-description'  => TTi18n::gettext( 'Description' ),
+						'-1030-script_name'  => TTi18n::gettext( 'Report' ),
+						'-1040-is_default'   => TTi18n::gettext( 'Default' ),
+						'-1050-is_scheduled' => TTi18n::gettext( 'Scheduled' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								'script_name',
-								'description',
-								'is_default',
-								);
+				$retval = [
+						'name',
+						'script_name',
+						'description',
+						'is_default',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								'name',
-								'description',
-								);
+				$retval = [
+						'name',
+						'description',
+				];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array(
-								);
+				$retval = [];
 				break;
 		}
 
@@ -99,19 +98,20 @@ class UserReportDataFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'user_id' => 'User',
-										'script' => 'Script',
-										'script_name' => FALSE,
-										'name' => 'Name',
-										'is_default' => 'Default',
-										'is_scheduled' => FALSE,
-										'description' => 'Description',
-										'data' => 'Data',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'           => 'ID',
+				'company_id'   => 'Company',
+				'user_id'      => 'User',
+				'script'       => 'Script',
+				'script_name'  => false,
+				'name'         => 'Name',
+				'is_default'   => 'Default',
+				'is_scheduled' => false,
+				'description'  => 'Description',
+				'data'         => 'Data',
+				'deleted'      => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -126,16 +126,17 @@ class UserReportDataFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getObjectHandler() {
-		if ( is_object($this->obj_handler) ) {
+		if ( is_object( $this->obj_handler ) ) {
 			return $this->obj_handler;
 		} else {
 			$class = $this->getScript();
-			if ( class_exists( $class, TRUE ) ) {
+			if ( class_exists( $class, true ) ) {
 				$this->obj_handler = new $class();
+
 				return $this->obj_handler;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -152,6 +153,7 @@ class UserReportDataFactory extends Factory {
 	 */
 	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -168,6 +170,7 @@ class UserReportDataFactory extends Factory {
 	 */
 	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -182,9 +185,10 @@ class UserReportDataFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setScript( $value) {
+	function setScript( $value ) {
 		//Strip out double slashes, as sometimes those occur and they cause the saved settings to not appear.
-		$value = self::handleScriptName( trim($value) );
+		$value = self::handleScriptName( trim( $value ) );
+
 		return $this->setGenericDataValue( 'script', $value );
 	}
 
@@ -192,52 +196,52 @@ class UserReportDataFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		if ( $this->getCompany() == FALSE ) {
-			return FALSE;
+	function isUniqueName( $name ) {
+		if ( $this->getCompany() == false ) {
+			return false;
 		}
 
 		//Allow no user_id to be set yet, as that would be company generic data.
 
-		if ( $this->getScript() == FALSE ) {
-			return FALSE;
+		if ( $this->getScript() == false ) {
+			return false;
 		}
 
-		$name = trim($name);
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'script' => $this->getScript(),
-					'name' => TTi18n::strtolower( $name ),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'script'     => $this->getScript(),
+				'name'       => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->getTable() .'
+		$query = 'select id from ' . $this->getTable() . '
 					where
 						company_id = ?
 						AND script = ?
 						AND lower(name) = ? ';
-		if (  $this->getUser() != '' ) {
-			$query .= ' AND user_id = \''. TTUUID::castUUID($this->getUser()).'\'';
+		if ( $this->getUser() != '' ) {
+			$query .= ' AND user_id = \'' . TTUUID::castUUID( $this->getUser() ) . '\'';
 		} else {
 			$query .= ' AND user_id is NULL ';
 		}
 
 		$query .= ' AND deleted = 0';
-		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$name_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -252,7 +256,8 @@ class UserReportDataFactory extends Factory {
 	 * @return bool
 	 */
 	function setName( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -268,7 +273,7 @@ class UserReportDataFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefault( $value ) {
-		return $this->setGenericDataValue( 'is_default', $this->toBool($value) );
+		return $this->setGenericDataValue( 'is_default', $this->toBool( $value ) );
 	}
 
 	/**
@@ -283,7 +288,8 @@ class UserReportDataFactory extends Factory {
 	 * @return bool
 	 */
 	function setDescription( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'description', $value );
 	}
 
@@ -291,38 +297,38 @@ class UserReportDataFactory extends Factory {
 	 * @return mixed
 	 */
 	function getData() {
-		return json_decode( $this->getGenericDataValue( 'data' ), TRUE );
+		return json_decode( $this->getGenericDataValue( 'data' ), true );
 	}
 
 	/**
 	 * @param $value
 	 * @return bool
 	 */
-	function setData( $value) {
-		$this->setGenericDataValue( 'data', json_encode($value) );
+	function setData( $value ) {
+		$this->setGenericDataValue( 'data', json_encode( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getDeleted() == FALSE ) {
+	function Validate( $ignore_warning = true ) {
+		if ( $this->getDeleted() == false ) {
 			//
 			// BELOW: Validation code moved from set*() functions.
 			//
 
 			// Company
 			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-			$this->Validator->isResultSetWithRows(			'company',
-															  $clf->getByID($this->getCompany()),
-															  TTi18n::gettext('Invalid Company')
+			$this->Validator->isResultSetWithRows( 'company',
+												   $clf->getByID( $this->getCompany() ),
+												   TTi18n::gettext( 'Invalid Company' )
 			);
 
 			// User must always be specified, don't allow a zero UUID either.
-			if ( $this->getUser() !== FALSE ) {
+			if ( $this->getUser() !== false ) {
 				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$this->Validator->isResultSetWithRows( 'user',
 													   $ulf->getByID( $this->getUser() ),
@@ -343,7 +349,7 @@ class UserReportDataFactory extends Factory {
 										TTi18n::gettext( 'Name is too short or too long' ),
 										1, 100
 			);
-			if ( $this->Validator->isError( 'name' ) == FALSE ) {
+			if ( $this->Validator->isError( 'name' ) == false ) {
 				$this->Validator->isTrue( 'name',
 										  $this->isUniqueName( $this->getName() ),
 										  TTi18n::gettext( 'Name already exists' )
@@ -361,33 +367,33 @@ class UserReportDataFactory extends Factory {
 			// ABOVE: Validation code moved from set*() functions.
 			//
 
-			if ( $this->Validator->hasError( 'name' ) == FALSE AND $this->getName() == '' ) {
+			if ( $this->Validator->hasError( 'name' ) == false && $this->getName() == '' ) {
 				$this->Validator->isTRUE( 'name',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'Name must be specified' ) );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		if ( $this->getDefault() == TRUE ) {
+		if ( $this->getDefault() == true ) {
 			//Remove default flag from all other entries.
 			$urdlf = TTnew( 'UserReportDataListFactory' ); /** @var UserReportDataListFactory $urdlf */
-			if ( $this->getUser() == TTUUID::getZeroID() OR $this->getUser() == '' ) {
-				$urdlf->getByCompanyIdAndScriptAndDefault( $this->getCompany(), $this->getScript(), TRUE );
+			if ( $this->getUser() == TTUUID::getZeroID() || $this->getUser() == '' ) {
+				$urdlf->getByCompanyIdAndScriptAndDefault( $this->getCompany(), $this->getScript(), true );
 			} else {
-				$urdlf->getByUserIdAndScriptAndDefault( $this->getUser(), $this->getScript(), TRUE );
+				$urdlf->getByUserIdAndScriptAndDefault( $this->getUser(), $this->getScript(), true );
 			}
 			if ( $urdlf->getRecordCount() > 0 ) {
-				foreach( $urdlf as $urd_obj ) {
+				foreach ( $urdlf as $urd_obj ) {
 					if ( $urd_obj->getId() != $this->getId() ) { //Don't remove default flag from ourselves when editing an existing record.
 						Debug::Text( 'Removing Default Flag From: ' . $urd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-						$urd_obj->setDefault( FALSE );
+						$urd_obj->setDefault( false );
 						if ( $urd_obj->isValid() ) {
 							$urd_obj->Save();
 						}
@@ -396,7 +402,7 @@ class UserReportDataFactory extends Factory {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -404,7 +410,7 @@ class UserReportDataFactory extends Factory {
 	 * @return mixed
 	 */
 	static function handleScriptName( $script_name ) {
-		return str_replace('//', '/', $script_name);
+		return str_replace( '//', '/', $script_name );
 	}
 
 	/**
@@ -415,11 +421,11 @@ class UserReportDataFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -431,31 +437,31 @@ class UserReportDataFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'is_scheduled':
-							$data[$variable] = $this->getColumn('is_scheduled');
+							$data[$variable] = $this->getColumn( 'is_scheduled' );
 							break;
 						case 'script_name':
 							$report_obj = $this->getObjectHandler();
-							if ( is_object($report_obj ) ) {
+							if ( is_object( $report_obj ) ) {
 								$data[$variable] = $report_obj->title;
 							}
 							break;
@@ -465,7 +471,6 @@ class UserReportDataFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -479,12 +484,13 @@ class UserReportDataFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		if ( $this->getUser() == FALSE AND $this->getDefault() == TRUE ) {
+		if ( $this->getUser() == false && $this->getDefault() == true ) {
 			//Bypass logging on Company Default Save.
-			return TRUE;
+			return true;
 		}
 
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Saved Report Data'), NULL, $this->getTable() );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Saved Report Data' ), null, $this->getTable() );
 	}
 }
+
 ?>

@@ -47,5 +47,4 @@ var APIRecurringHoliday = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportRecurringHoliday', arguments );
 	}
 
-
 } );

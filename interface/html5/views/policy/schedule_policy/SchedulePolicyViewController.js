@@ -13,8 +13,8 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'schedule_policy';
 		this.context_menu_name = $.i18n._( 'Schedule Policy' );
 		this.navigation_label = $.i18n._( 'Schedule Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APISchedulePolicy' ))();
-		this.over_time_policy_api = new (APIFactory.getAPIClass( 'APIOvertimePolicy' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APISchedulePolicy' ) )();
+		this.over_time_policy_api = new ( APIFactory.getAPIClass( 'APIOvertimePolicy' ) )();
 		this.render();
 		this.buildContextMenu();
 
@@ -36,7 +36,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APISchedulePolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.SCHEDULE_POLICY,
@@ -74,7 +74,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		//Meal Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIMealPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIMealPolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.MEAL_POLICY,
 			show_search_inputs: true,
@@ -91,7 +91,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		//Break Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBreakPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBreakPolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BREAK_POLICY,
 			show_search_inputs: true,
@@ -110,7 +110,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRegularTimePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRegularTimePolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
 			show_search_inputs: true,
@@ -127,7 +127,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRegularTimePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRegularTimePolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
 			show_search_inputs: true,
@@ -152,7 +152,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIOvertimePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIOvertimePolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.OVER_TIME_POLICY,
 			show_search_inputs: true,
@@ -171,7 +171,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIOvertimePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIOvertimePolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.OVER_TIME_POLICY,
 			show_search_inputs: true,
@@ -193,7 +193,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPremiumPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPremiumPolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PREMIUM_POLICY,
 			show_search_inputs: true,
@@ -210,7 +210,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPremiumPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPremiumPolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PREMIUM_POLICY,
 			show_search_inputs: true,
@@ -227,7 +227,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		//Full Shift Undertime Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
@@ -239,7 +239,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		//Partial Shift Undertime Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
@@ -340,7 +340,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'full_shift_absence_policy_id',
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -351,7 +351,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'partial_shift_absence_policy_id',
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -362,7 +362,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -374,7 +374,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -382,6 +382,5 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

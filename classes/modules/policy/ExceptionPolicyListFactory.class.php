@@ -41,44 +41,44 @@
 class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ExceptionPolicyListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -90,32 +90,32 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id         UUID
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ExceptionPolicyListFactory
 	 */
-	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByIdAndCompanyId( $id, $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $id == '') {
-			return FALSE;
+		if ( $id == '' ) {
+			return false;
 		}
 
 		$epcf = new ExceptionPolicyControlFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'id'         => TTUUID::castUUID( $id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $epcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $epcf->getTable() . ' as b
 					where
 						a.exception_policy_control_id = b.id
 						AND b.company_id = ?
@@ -132,25 +132,25 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ExceptionPolicyListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$epcf = new ExceptionPolicyControlFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $epcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $epcf->getTable() . ' as b
 					where
 						a.exception_policy_control_id = b.id
 						AND b.company_id = ?
@@ -165,31 +165,31 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ExceptionPolicyListFactory
 	 */
-	function getByExceptionPolicyControlId( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByExceptionPolicyControlId( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'type_id' => 'asc' );
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'type_id' => 'asc' ];
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where	exception_policy_control_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -204,47 +204,47 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 	 * @param string $user_id UUID
 	 * @param int $type_id
 	 * @param bool $active
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ExceptionPolicyListFactory
 	 */
-	function getByPolicyGroupUserIdAndTypeAndActive( $user_id, $type_id, $active = TRUE, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
+	function getByPolicyGroupUserIdAndTypeAndActive( $user_id, $type_id, $active = true, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $type_id == '') {
-			return FALSE;
+		if ( $type_id == '' ) {
+			return false;
 		}
 
-		if ( $order == NULL ) {
+		if ( $order == null ) {
 			//$order = array( 'c.type_id' => 'asc', 'c.trigger_time' => 'desc' );
-			$strict = FALSE;
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
 		$pguf = new PolicyGroupUserFactory();
 		$pgf = new PolicyGroupFactory();
 		$epcf = new ExceptionPolicyControlFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'active' => $this->toBool( $active ),
-					);
+		$ph = [
+				'user_id' => TTUUID::castUUID( $user_id ),
+				'active'  => $this->toBool( $active ),
+		];
 
 		$query = '
 					select	d.*
-					from	'. $pguf->getTable() .' as a,
-							'. $pgf->getTable() .' as b,
-							'. $epcf->getTable() .' as c,
-							'. $this->getTable() .' as d
+					from	' . $pguf->getTable() . ' as a,
+							' . $pgf->getTable() . ' as b,
+							' . $epcf->getTable() . ' as c,
+							' . $this->getTable() . ' as d
 					where	a.policy_group_id = b.id
 						AND b.exception_policy_control_id = c.id
 						AND c.id = d.exception_policy_control_id
 						AND a.user_id = ?
 						AND d.active = ?
-						AND d.type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
+						AND d.type_id in (' . $this->getListSQL( $type_id, $ph, 'int' ) . ')
 						AND ( b.deleted = 0 AND c.deleted=0 AND d.deleted=0)
 						';
 		$query .= $this->getWhereSQL( $where );
@@ -258,37 +258,37 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 	/**
 	 * @param string $user_id UUID
 	 * @param bool $active
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where    Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ExceptionPolicyListFactory
 	 */
-	function getByPolicyGroupUserIdAndActive( $user_id, $active = TRUE, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
+	function getByPolicyGroupUserIdAndActive( $user_id, $active = true, $where = null, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $order == NULL ) {
+		if ( $order == null ) {
 			//$order = array( 'c.type_id' => 'asc', 'c.trigger_time' => 'desc' );
-			$strict = FALSE;
+			$strict = false;
 		} else {
-			$strict = TRUE;
+			$strict = true;
 		}
 
 		$pguf = new PolicyGroupUserFactory();
 		$pgf = new PolicyGroupFactory();
 		$epcf = new ExceptionPolicyControlFactory();
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'active' => $this->toBool( $active ),
-					);
+		$ph = [
+				'user_id' => TTUUID::castUUID( $user_id ),
+				'active'  => $this->toBool( $active ),
+		];
 
 		$query = '
 					select	d.*
-					from	'. $pguf->getTable() .' as a,
-							'. $pgf->getTable() .' as b,
-							'. $epcf->getTable() .' as c,
-							'. $this->getTable() .' as d
+					from	' . $pguf->getTable() . ' as a,
+							' . $pgf->getTable() . ' as b,
+							' . $epcf->getTable() . ' as c,
+							' . $this->getTable() . ' as d
 					where	a.policy_group_id = b.id
 						AND b.exception_policy_control_id = c.id
 						AND c.id = d.exception_policy_control_id
@@ -307,45 +307,45 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 	/**
 	 * @param string $company_id UUID
 	 * @param $filter_data
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $limit         Limit the number of records returned
+	 * @param int $page          Page number of records to return for pagination
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ExceptionPolicyListFactory
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( !is_array($order) ) {
+		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
+			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
+				$order = [ Misc::trimSortPrefix( $filter_data['sort_column'] ) => $filter_data['sort_order'] ];
 			}
 		}
 
-		$additional_order_fields = array('type_id');
+		$additional_order_fields = [ 'type_id' ];
 
-		$sort_column_aliases = array(
-									'type' => 'type_id',
-									);
+		$sort_column_aliases = [
+				'type' => 'type_id',
+		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
-		if ( $order == NULL ) {
-			$order = array( 'type_id' => 'asc');
-			$strict = FALSE;
+		if ( $order == null ) {
+			$order = [ 'type_id' => 'asc' ];
+			$strict = false;
 		} else {
 			//Always try to order by status first so INACTIVE employees go to the bottom.
-			if ( !isset($order['type_id']) ) {
-				$order = Misc::prependArray( array('type_id' => 'asc'), $order );
+			if ( !isset( $order['type_id'] ) ) {
+				$order = Misc::prependArray( [ 'type_id' => 'asc' ], $order );
 			}
 			//Always sort by last name, first name after other columns
-			if ( !isset($order['name']) ) {
+			if ( !isset( $order['name'] ) ) {
 				$order['name'] = 'asc';
 			}
-			$strict = TRUE;
+			$strict = true;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -353,9 +353,9 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 		$uf = new UserFactory();
 		$epcf = new ExceptionPolicyControlFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*,
@@ -365,26 +365,26 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
-						LEFT JOIN '. $epcf->getTable() .' as b ON ( a.exception_policy_control_id = b.id AND b.deleted = 0 )
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+						LEFT JOIN ' . $epcf->getTable() . ' as b ON ( a.exception_policy_control_id = b.id AND b.deleted = 0 )
 					where	b.company_id = ?
 					';
 
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'uuid_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exclude_id'] ) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'b.name', $filter_data['name'], 'text', $ph ) : NULL;
+		$query .= ( isset( $filter_data['name'] ) ) ? $this->getWhereClauseSQL( 'b.name', $filter_data['name'], 'text', $ph ) : null;
 
-		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'text_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exception_policy_control_id']) ) ? $this->getWhereClauseSQL( 'a.exception_policy_control_id', $filter_data['exception_policy_control_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset( $filter_data['type_id'] ) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'text_list', $ph ) : null;
+		$query .= ( isset( $filter_data['exception_policy_control_id'] ) ) ? $this->getWhereClauseSQL( 'a.exception_policy_control_id', $filter_data['exception_policy_control_id'], 'uuid_list', $ph ) : null;
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.created_by', 'y.first_name', 'y.last_name' ], $filter_data['created_by'], 'user_id_or_name', $ph ) : null;
+		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.updated_by', 'z.first_name', 'z.last_name' ], $filter_data['updated_by'], 'user_id_or_name', $ph ) : null;
 
-		$query .=	' AND a.deleted = 0 ';
+		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
@@ -394,4 +394,5 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 	}
 
 }
+
 ?>

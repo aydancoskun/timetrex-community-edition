@@ -51,6 +51,4 @@ var APITimesheetDetailReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

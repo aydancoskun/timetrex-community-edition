@@ -14,7 +14,7 @@ SavedReportViewController = BaseViewController.extend( {
 	context_menu_name: $.i18n._( 'Reports' ),
 	navigation_label: $.i18n._( 'Saved Report' ) + ':',
 
-	api: new (APIFactory.getAPIClass( 'APIUserReportData' ))(),
+	api: new ( APIFactory.getAPIClass( 'APIUserReportData' ) )(),
 
 	init: function( options ) {
 
@@ -85,7 +85,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				share: {
@@ -112,12 +112,12 @@ SavedReportViewController = BaseViewController.extend( {
 		};
 
 		if ( !this.sub_view_mode ) {
-			context_menu_model.include.unshift({
+			context_menu_model.include.unshift( {
 				label: $.i18n._( 'Report' ),
 				id: ContextMenuIconName.view,
 				group: 'editor',
 				icon: Icons.hr_reports
-			});
+			} );
 		}
 
 		return context_menu_model;
@@ -177,7 +177,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 	},
 
-	onViewClick: function( editId, noRefreshUI ) {
+	onViewClick: function( edit_record, noRefreshUI ) {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var id = grid_selected_id_array[0];
 
@@ -261,7 +261,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIUserReportData' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserReportData' ) ),
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SAVED_REPORT,
@@ -307,7 +307,6 @@ SavedReportViewController = BaseViewController.extend( {
 
 		form_item_input.parent().width( '45%' );
 
-
 	},
 
 	buildSearchFields: function() {
@@ -336,7 +335,7 @@ SavedReportViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -348,7 +347,7 @@ SavedReportViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -386,10 +385,10 @@ SavedReportViewController = BaseViewController.extend( {
 
 				TTPromise.add( 'initSubReportScheduleView', 'init' );
 				TTPromise.wait( 'initSubReportScheduleView', 'init', function() {
-					firstColumn.css('opacity', '1');
+					firstColumn.css( 'opacity', '1' );
 				} );
 
-				firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
+				firstColumn.css( 'opacity', '0' ); //Hide the grid while its loading/sizing.
 
 				Global.trackView( 'Sub' + 'ReportSchedule' + 'View' );
 				ReportScheduleViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
@@ -471,7 +470,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 		ProgressBar.closeOverlay();
 		var $this = this;
-		this.setCurrentEditViewState('new');
+		this.setCurrentEditViewState( 'new' );
 		$this.openEditView();
 		$this.current_edit_record = reportData;
 		$this.initEditView();
@@ -479,11 +478,11 @@ SavedReportViewController = BaseViewController.extend( {
 	},
 
 	searchDone: function() {
-		$('window').trigger('resize');
+		$( 'window' ).trigger( 'resize' );
 		if ( this.sub_view_mode ) {
 			TTPromise.resolve( 'SubSavedReportView', 'init' );
 		}
-		this._super('searchDone');
+		this._super( 'searchDone' );
 	}
 } );
 

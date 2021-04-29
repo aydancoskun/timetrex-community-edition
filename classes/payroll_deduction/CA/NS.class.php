@@ -39,28 +39,28 @@
  * @package PayrollDeduction\CA
  */
 class PayrollDeduction_CA_NS extends PayrollDeduction_CA {
-	var $provincial_income_tax_rate_options = array(
-			20110101 => array(
-					array('income' => 29590, 'rate' => 8.79, 'constant' => 0),
-					array('income' => 59180, 'rate' => 14.95, 'constant' => 1823),
-					array('income' => 93000, 'rate' => 16.67, 'constant' => 2841),
-					array('income' => 150000, 'rate' => 17.5, 'constant' => 3613),
-					array('income' => 150000, 'rate' => 21.0, 'constant' => 8863),
-			),
-			20100701 => array(
-					array('income' => 29590, 'rate' => 8.79, 'constant' => 0),
-					array('income' => 59180, 'rate' => 14.95, 'constant' => 1823),
-					array('income' => 93000, 'rate' => 16.67, 'constant' => 2841),
-					array('income' => 150000, 'rate' => 17.5, 'constant' => 3613),
-					array('income' => 150000, 'rate' => 24.5, 'constant' => 14113),
-			),
-			20070101 => array(
-					array('income' => 29590, 'rate' => 8.79, 'constant' => 0),
-					array('income' => 59180, 'rate' => 14.95, 'constant' => 1823),
-					array('income' => 93000, 'rate' => 16.67, 'constant' => 2841),
-					array('income' => 93000, 'rate' => 17.5, 'constant' => 3613),
-			),
-	);
+	var $provincial_income_tax_rate_options = [
+			20110101 => [
+					[ 'income' => 29590, 'rate' => 8.79, 'constant' => 0 ],
+					[ 'income' => 59180, 'rate' => 14.95, 'constant' => 1823 ],
+					[ 'income' => 93000, 'rate' => 16.67, 'constant' => 2841 ],
+					[ 'income' => 150000, 'rate' => 17.5, 'constant' => 3613 ],
+					[ 'income' => 150000, 'rate' => 21.0, 'constant' => 8863 ],
+			],
+			20100701 => [
+					[ 'income' => 29590, 'rate' => 8.79, 'constant' => 0 ],
+					[ 'income' => 59180, 'rate' => 14.95, 'constant' => 1823 ],
+					[ 'income' => 93000, 'rate' => 16.67, 'constant' => 2841 ],
+					[ 'income' => 150000, 'rate' => 17.5, 'constant' => 3613 ],
+					[ 'income' => 150000, 'rate' => 24.5, 'constant' => 14113 ],
+			],
+			20070101 => [
+					[ 'income' => 29590, 'rate' => 8.79, 'constant' => 0 ],
+					[ 'income' => 59180, 'rate' => 14.95, 'constant' => 1823 ],
+					[ 'income' => 93000, 'rate' => 16.67, 'constant' => 2841 ],
+					[ 'income' => 93000, 'rate' => 17.5, 'constant' => 3613 ],
+			],
+	];
 
 	function getProvincialTotalClaimAmount() {
 		/*
@@ -74,7 +74,7 @@ class PayrollDeduction_CA_NS extends PayrollDeduction_CA {
 		*/
 
 		$BPA = parent::getProvincialTotalClaimAmount();
-		if ( $this->getDate() >= 20180101 AND $BPA > 0 ) {
+		if ( $this->getDate() >= 20180101 && $BPA > 0 ) {
 			$high_claim_amount = $this->getBasicProvinceClaimCodeAmount();
 			$low_claim_amount = 8481;
 
@@ -82,9 +82,9 @@ class PayrollDeduction_CA_NS extends PayrollDeduction_CA {
 
 			if ( $A <= 25000 ) {
 				$BPA = $high_claim_amount;
-			} elseif ( $A > 25000 AND $A < 75000 ) {
+			} else if ( $A > 25000 && $A < 75000 ) {
 				$BPA = $high_claim_amount - ( ( $A - 25000 ) * 0.06 );
-			} elseif ( $A > 75000 ) {
+			} else if ( $A > 75000 ) {
 				$BPA = $low_claim_amount;
 			}
 

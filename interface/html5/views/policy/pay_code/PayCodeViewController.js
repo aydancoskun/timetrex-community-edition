@@ -15,7 +15,7 @@ PayCodeViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_code';
 		this.context_menu_name = $.i18n._( 'Pay Code' );
 		this.navigation_label = $.i18n._( 'Pay Code' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPayCode' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayCode' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -61,7 +61,7 @@ PayCodeViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
@@ -88,7 +88,6 @@ PayCodeViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_pay_code_column1, '' );
 
 		form_item_input.parent().width( '45%' );
-
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
@@ -172,7 +171,7 @@ PayCodeViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -188,7 +187,7 @@ PayCodeViewController = BaseViewController.extend( {
 		// Pay Stub Account
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -197,7 +196,6 @@ PayCodeViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab_pay_code_column1 );
 	},
-
 
 	buildSearchFields: function() {
 
@@ -230,7 +228,7 @@ PayCodeViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -242,7 +240,7 @@ PayCodeViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'pay_stub_entry_account_id',
 				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-				api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -254,7 +252,7 @@ PayCodeViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -266,7 +264,7 @@ PayCodeViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -274,7 +272,6 @@ PayCodeViewController = BaseViewController.extend( {
 			} )
 		];
 	},
-
 
 	onCustomContextClick: function( id ) {
 		switch ( id ) {
@@ -297,6 +294,5 @@ PayCodeViewController = BaseViewController.extend( {
 //			$this.search();
 		} );
 	}
-
 
 } );

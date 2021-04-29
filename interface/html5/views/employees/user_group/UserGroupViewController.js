@@ -22,7 +22,7 @@ UserGroupViewController = BaseTreeViewController.extend( {
 		this.primary_tab_label = $.i18n._( 'Employee Group' );
 		this.primary_tab_key = 'tab_employee_group';
 
-		this.api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
 		this.grid_select_id_array = [];
 
 		this.render();
@@ -31,7 +31,7 @@ UserGroupViewController = BaseTreeViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [
 				ContextMenuIconName.copy,

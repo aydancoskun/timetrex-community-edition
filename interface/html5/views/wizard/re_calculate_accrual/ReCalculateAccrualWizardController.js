@@ -31,7 +31,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more accrual policies' ) + ':' );
 
-				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIAccrualPolicy' )), true, ALayoutIDs.ACCRUAL_POLICY, 'accrual_policy_id' );
+				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) ), true, ALayoutIDs.ACCRUAL_POLICY, 'accrual_policy_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -83,7 +83,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var pay_period = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayPeriod' )), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var pay_period = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriod' ) ), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 
 				form_item_label.text( $.i18n._( 'Pay Period' ) + ': ' );
 				form_item_input_div.append( pay_period );
@@ -94,7 +94,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var pay_period_schedule = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )), true, ALayoutIDs.PAY_PERIOD_SCHEDULE, 'pay_period_schedule_id' );
+				var pay_period_schedule = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ), true, ALayoutIDs.PAY_PERIOD_SCHEDULE, 'pay_period_schedule_id' );
 
 				form_item_label.text( $.i18n._( 'Pay Period Schedule' ) + ': ' );
 				form_item_input_div.append( pay_period_schedule );
@@ -119,7 +119,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) + ':' );
 
-				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIUser' )), true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIUser' ) ), true, ALayoutIDs.USER, 'user_id', true );
 				div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -183,7 +183,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 		}
 
-		var accrual_policy_api = new (APIFactory.getAPIClass( 'APIAccrualPolicy' ))();
+		var accrual_policy_api = new ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) )();
 
 		accrual_policy_api.recalculateAccrual( accrual_policy_id, time_period, user_ids, {
 			onResult: function( result ) {
@@ -215,7 +215,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 				break;
 			case 2:
-				new (APIFactory.getAPIClass( 'APITimesheetSummaryReport' ))().getOptions( 'time_period', {
+				new ( APIFactory.getAPIClass( 'APITimesheetSummaryReport' ) )().getOptions( 'time_period', {
 					onResult: function( result ) {
 
 						current_step_ui['time_period'].setSourceData( Global.buildRecordArray( result.getResult() ) );
@@ -305,6 +305,5 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 		}
 
 	}
-
 
 } );

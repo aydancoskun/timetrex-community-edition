@@ -44,23 +44,23 @@ class InstallSchema_1070A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Loop through all contributing shift policies switch include_shift_type_id from boolean to integer.
 		$csplf = new ContributingShiftPolicyListFactory();
 		$csplf->getAll();
 		if ( $csplf->getRecordCount() > 0 ) {
-			Debug::text( 'ContributingShiftPolicies: '. $csplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9 );
-			foreach( $csplf as $csp_obj ) {
+			Debug::text( 'ContributingShiftPolicies: ' . $csplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9 );
+			foreach ( $csplf as $csp_obj ) {
 				$previous_shift_type_id = (int)$csp_obj->getIncludeShiftType();
 				if ( $previous_shift_type_id === 0 ) {
 					$csp_obj->setIncludeShiftType( 200 ); //Full Shift (this was the default before)
@@ -68,7 +68,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 					$csp_obj->setIncludeShiftType( 100 ); //Partial Shift
 				}
 
-				Debug::text(' IncludeShiftType ID: Previous: '. $previous_shift_type_id .' New: '. (int)$csp_obj->getIncludeShiftType(), __FILE__, __LINE__, __METHOD__, 9);
+				Debug::text( ' IncludeShiftType ID: Previous: ' . $previous_shift_type_id . ' New: ' . (int)$csp_obj->getIncludeShiftType(), __FILE__, __LINE__, __METHOD__, 9 );
 				if ( $csp_obj->isValid() ) {
 					$csp_obj->Save();
 				}
@@ -76,7 +76,7 @@ class InstallSchema_1070A extends InstallSchema_Base {
 		}
 
 		//Handle new permissions.
-		$clf = TTNew('CompanyListFactory'); /** @var CompanyListFactory $clf */
+		$clf = TTNew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			$x = 0;
@@ -88,9 +88,9 @@ class InstallSchema_1070A extends InstallSchema_Base {
 					Debug::text( '  Add Regular Employee (Manual TimeSheet) permission group: ', __FILE__, __LINE__, __METHOD__, 9 );
 					$pf = new PermissionFactory;
 
-					$preset_flags = array_keys( $pf->getOptions('preset_flags') );
-					$preset_options = $pf->getOptions('preset');
-					$preset_level_options = $pf->getOptions('preset_level');
+					$preset_flags = array_keys( $pf->getOptions( 'preset_flags' ) );
+					$preset_options = $pf->getOptions( 'preset' );
+					$preset_level_options = $pf->getOptions( 'preset_level' );
 
 					$pcf = TTnew( 'PermissionControlFactory' ); /** @var PermissionControlFactory $pcf */
 					$pcf->setCompany( $company_obj->getID() ); //Regular Employee (Manual TimeSheet)
@@ -98,20 +98,20 @@ class InstallSchema_1070A extends InstallSchema_Base {
 					$pcf->setDescription( '' );
 					$pcf->setLevel( $preset_level_options[14] );
 					if ( $pcf->isValid() ) {
-						$pcf_id = $pcf->Save(FALSE);
-						$pf->applyPreset($pcf_id, 14, $preset_flags );
+						$pcf_id = $pcf->Save( false );
+						$pf->applyPreset( $pcf_id, 14, $preset_flags );
 					}
-					unset($preset_flags, $preset_options, $preset_level_options, $pcf, $pf, $pcf_id);
+					unset( $preset_flags, $preset_options, $preset_level_options, $pcf, $pf, $pcf_id );
 				}
 
 				//Go through each permission group, and rename "Regular Employee (Manual Entry)" to "Regular Employee (Manual Punch)" -- that can punch in/out manually.
 				$pclf = new PermissionControlListFactory;
-				$pclf->getByCompanyId( $company_obj->getId(), NULL, NULL, NULL, array('name' => 'asc') ); //Force order to prevent references to columns that haven't been created yet.
+				$pclf->getByCompanyId( $company_obj->getId(), null, null, null, [ 'name' => 'asc' ] ); //Force order to prevent references to columns that haven't been created yet.
 				if ( $pclf->getRecordCount() > 0 ) {
 					foreach ( $pclf as $pc_obj ) {
-						Debug::text( 'Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
+						Debug::text( 'Permission Group: ' . $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 						if ( stripos( $pc_obj->getName(), 'Manual Entry' ) ) {
-							$pc_obj->setName( str_ireplace('Manual Entry', 'Manual Punch', $pc_obj->getName() ) );
+							$pc_obj->setName( str_ireplace( 'Manual Entry', 'Manual Punch', $pc_obj->getName() ) );
 							Debug::text( '  Renaming Permission Group to: ' . $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 						}
 
@@ -121,9 +121,9 @@ class InstallSchema_1070A extends InstallSchema_Base {
 						if ( $plf->getRecordCount() > 0 ) {
 							Debug::text( '  Found permission group with punch,add, add punch_timesheet: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 							$pc_obj->setPermission(
-									array(
-											'punch' => array('punch_timesheet' => TRUE),
-									)
+									[
+											'punch' => [ 'punch_timesheet' => true ],
+									]
 							);
 						} else {
 							Debug::text( '  Permission group does NOT have punch,add enabled...', __FILE__, __LINE__, __METHOD__, 9 );
@@ -136,9 +136,9 @@ class InstallSchema_1070A extends InstallSchema_Base {
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text( '  Found permission group with punch,edit_child, adding manual_timesheet: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 								$pc_obj->setPermission(
-										array(
-												'punch' => array('manual_timesheet' => TRUE),
-										)
+										[
+												'punch' => [ 'manual_timesheet' => true ],
+										]
 								);
 							} else {
 								Debug::text( '  Permission group does NOT have punch,edit_child enabled...', __FILE__, __LINE__, __METHOD__, 9 );
@@ -152,9 +152,9 @@ class InstallSchema_1070A extends InstallSchema_Base {
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text( '  Found permission group with request,add, adding add_advanced: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 								$pc_obj->setPermission(
-										array(
-												'request' => array('add_advanced' => TRUE),
-										)
+										[
+												'request' => [ 'add_advanced' => true ],
+										]
 								);
 							} else {
 								Debug::text( '  Permission group does NOT have request,add enabled...', __FILE__, __LINE__, __METHOD__, 9 );
@@ -168,28 +168,27 @@ class InstallSchema_1070A extends InstallSchema_Base {
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text( '  Found permission group with request,add, adding add_advanced: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 								$pc_obj->setPermission(
-										array(
-												'government_document' => array('enabled' => TRUE, 'view_own' => TRUE),
-										)
+										[
+												'government_document' => [ 'enabled' => true, 'view_own' => true ],
+										]
 								);
 							} else {
 								Debug::text( '  Permission group does NOT have request,add enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 							}
 
 							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
-							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_obj->getId(), $pc_obj->getId(), 'pay_stub', array( 'add', 'edit', 'delete'), 1 ); //Only return records where permission is ALLOWED.
+							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_obj->getId(), $pc_obj->getId(), 'pay_stub', [ 'add', 'edit', 'delete' ], 1 ); //Only return records where permission is ALLOWED.
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text( '  Found permission group with request,add, adding add_advanced: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
 								$pc_obj->setPermission(
-										array(
-												'government_document' => array('enabled' => TRUE, 'view' => TRUE, 'add' => TRUE, 'edit' => TRUE, 'delete' => TRUE),
-										)
+										[
+												'government_document' => [ 'enabled' => true, 'view' => true, 'add' => true, 'edit' => true, 'delete' => true ],
+										]
 								);
 							} else {
 								Debug::text( '  Permission group does NOT have request,add enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 							}
 						}
-
 					}
 				}
 				unset( $pclf, $plf, $pc_obj );
@@ -198,7 +197,8 @@ class InstallSchema_1070A extends InstallSchema_Base {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

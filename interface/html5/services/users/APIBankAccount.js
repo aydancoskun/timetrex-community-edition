@@ -1,6 +1,5 @@
 var APIBankAccount = ServiceCaller.extend( {
 
-
 	key_name: 'BankAccount',
 	className: 'APIBankAccount',
 
@@ -38,9 +37,5 @@ var APIBankAccount = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportBankAccount', arguments );
 
 	}
-
-
-
-
 
 } );

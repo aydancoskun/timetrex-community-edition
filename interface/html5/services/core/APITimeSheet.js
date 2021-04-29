@@ -63,6 +63,4 @@ var APITimeSheet = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

@@ -46,22 +46,22 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 	public $xml_schema = '1040/IndividualIncomeTax/Ind1040/Return1040.xsd';
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 			//'year' => 'isNumeric',
 			//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		);
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array();
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -83,14 +83,14 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 		}
 		$this->status = strtoupper( trim( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	function filterPhone( $value ) {
 		//Strip non-digits.
 		$value = $this->stripNonNumeric( $value );
 
-		return array(substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ));
+		return [ substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ) ];
 	}
 
 	function _outputXML() {
@@ -99,7 +99,7 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 		$this->setXMLObject( $xml );
 
 		$xml->addChild( 'ReturnHeader' );
-		$xml->ReturnHeader->addAttribute( 'binaryAttachmentCount', 0 ); //Base type for a non-negative integer
+		$xml->ReturnHeader->addAttribute( 'binaryAttachmentCount', 0 );               //Base type for a non-negative integer
 
 		if ( $this->software_id == '' ) {
 			$this->software_id = '00000000';
@@ -139,16 +139,16 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 		$xml->ReturnHeader->addChild( 'Timestamp', $this->return_created_timestamp ); // The date and time when the return was created
 		$xml->ReturnHeader->addChild( 'TaxYear', $this->year );
 		$xml->ReturnHeader->addChild( 'TaxPeriodBeginDate', $this->tax_period_begin_date ); //Tax Period Begin Date
-		$xml->ReturnHeader->addChild( 'TaxPeriodEndDate', $this->tax_period_end__date ); //Tax Period End Date
-		$xml->ReturnHeader->addChild( 'SoftwareId', $this->software_id ); // Software Identification
+		$xml->ReturnHeader->addChild( 'TaxPeriodEndDate', $this->tax_period_end__date );    //Tax Period End Date
+		$xml->ReturnHeader->addChild( 'SoftwareId', $this->software_id );                   // Software Identification
 		$xml->ReturnHeader->addChild( 'Originator' );
 		$xml->ReturnHeader->Originator->addChild( 'EFIN', $this->originator_efin );
 		$xml->ReturnHeader->Originator->addChild( 'OriginatorTypeCd', $this->originator_type_code );
-		$xml->ReturnHeader->addChild( 'PINTypeCode', $this->pin_type_code ); // PIN Type Code
+		$xml->ReturnHeader->addChild( 'PINTypeCode', $this->pin_type_code );                 // PIN Type Code
 		$xml->ReturnHeader->addChild( 'JuratDisclosureCode', $this->jurat_disclosure_code ); // Jurat Disclosure Code
-		$xml->ReturnHeader->addChild( 'PrimaryPINEnteredBy', $this->pin_entered_by ); // Primary PIN entered by
-		$xml->ReturnHeader->addChild( 'PrimarySignatureDate', $this->signature_date ); // Primary Signature Date
-		$xml->ReturnHeader->addChild( 'ReturnType', $this->return_type ); // Return Type
+		$xml->ReturnHeader->addChild( 'PrimaryPINEnteredBy', $this->pin_entered_by );        // Primary PIN entered by
+		$xml->ReturnHeader->addChild( 'PrimarySignatureDate', $this->signature_date );       // Primary Signature Date
+		$xml->ReturnHeader->addChild( 'ReturnType', $this->return_type );                    // Return Type
 		$xml->ReturnHeader->addChild( 'Filer' );
 		$xml->ReturnHeader->Filer->addChild( 'PrimarySSN', $this->ssn ); // Primary SSN
 		$xml->ReturnHeader->Filer->addChild( 'Name', $this->name );
@@ -167,11 +167,11 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 		$xml->addChild( 'ReturnData' );
 		$xml->ReturnData->addAttribute( 'documentCount', 0 ); // The number of return documents in the return.
 
-		return TRUE;
+		return true;
 	}
 
 	function _outputPDF() {
-		return FALSE;
+		return false;
 	}
 }
 

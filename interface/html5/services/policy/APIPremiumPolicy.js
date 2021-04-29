@@ -47,5 +47,4 @@ var APIPremiumPolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportPremiumPolicy', arguments );
 	}
 
-
 } );

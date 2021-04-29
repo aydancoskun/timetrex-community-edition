@@ -22,13 +22,13 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 
 		var $this = this;
 		require( this.filterRequiredFiles(), function() {
-			$this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
-			$this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
-			$this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+			$this.api = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
+			$this.authentication_api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
+			$this.currentUser_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
 			// this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
-			$this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
-			$this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
-			$this.permission_api = new (APIFactory.getAPIClass( 'APIPermission' ))();
+			$this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+			$this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+			$this.permission_api = new ( APIFactory.getAPIClass( 'APIPermission' ) )();
 			$this.edit_view_error_ui_dic = {};
 			LocalCacheData.all_url_args = {};
 			$this.render();
@@ -96,7 +96,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 					TTPromise.add( 'QPLogin', 'Permissions' );
 					$this.permission_api.getPermission( {
 						onResult: function( permissionRes ) {
-							permission_result = permissionRes.getResult();
+							var permission_result = permissionRes.getResult();
 
 							if ( permission_result != false ) {
 								LocalCacheData.setPermissionData( permission_result );
@@ -165,12 +165,12 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 	 * Note: type="number" is default in html, otherwise chrome on android does not change the keyboard to numeric keypad if other way around and converting to number from password. Seems to miss/ignore the type change.
 	 */
 	checkForWebkitTextSecuritySupport: function() {
-		if(typeof CSS !== 'function' || !CSS.supports('-webkit-text-security', 'disc')) {
-			var old_elem = $('input#quick_punch_password');
-			var new_elem = old_elem.clone(true); // clone all, including bound events
-			new_elem.attr('type', 'password');
+		if ( typeof CSS !== 'function' || !CSS.supports( '-webkit-text-security', 'disc' ) ) {
+			var old_elem = $( 'input#quick_punch_password' );
+			var new_elem = old_elem.clone( true ); // clone all, including bound events
+			new_elem.attr( 'type', 'password' );
 			// Replace the element rather than simply changing the original, as IE does not support input type change well.
-			old_elem.replaceWith(new_elem);
+			old_elem.replaceWith( new_elem );
 		}
 	},
 
@@ -206,7 +206,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 
 		var station_id = Global.getStationID();
 		require( ['APIStation'], function() {
-			var api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
+			var api_station = new ( APIFactory.getAPIClass( 'APIStation' ) )();
 
 			if ( !station_id ) {
 				station_id = '';
@@ -330,7 +330,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 		}
 		if ( !source_data ) {
 			source_data = LocalCacheData.getLoginData().language_options;
-			source_data = Global.removeSortPrefixFromArray( (LocalCacheData.getLoginData().language_options) );
+			source_data = Global.removeSortPrefixFromArray( ( LocalCacheData.getLoginData().language_options ) );
 		}
 		if ( _.size( source_data ) == 0 ) {
 			set_empty = true;

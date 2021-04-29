@@ -46,7 +46,7 @@ class InstallSchema_1108A extends InstallSchema_Base {
 	function preInstall() {
 		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -57,12 +57,12 @@ class InstallSchema_1108A extends InstallSchema_Base {
 
 		//Convert all serialize'd data to JSON encoded data instead to avoid potential security issues with unserialize().
 
-		$urdlf = TTnew('UserReportDataListFactory');
+		$urdlf = TTnew( 'UserReportDataListFactory' );
 		$urdlf->getAll();
 		if ( $urdlf->getRecordCount() > 0 ) {
 			$urdlf->StartTransaction();
-			foreach( $urdlf as $urd_obj ) {
-				$data = unserialize( $urd_obj->getGenericDataValue( 'data' ), array( 'allowed_classes' => FALSE ) );
+			foreach ( $urdlf as $urd_obj ) {
+				$data = unserialize( $urd_obj->getGenericDataValue( 'data' ), [ 'allowed_classes' => false ] );
 				if ( $data != '' ) {
 					$urd_obj->setData( $data );
 					if ( $urd_obj->isValid() ) {
@@ -73,7 +73,7 @@ class InstallSchema_1108A extends InstallSchema_Base {
 					}
 				} else {
 					Debug::Text( 'ERROR: Unable to unserialize UserReportData, deleting: ' . $urd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-					$urd_obj->setDeleted( TRUE );
+					$urd_obj->setDeleted( true );
 					if ( $urd_obj->isValid() ) {
 						$urd_obj->Save();
 					}
@@ -82,18 +82,19 @@ class InstallSchema_1108A extends InstallSchema_Base {
 			//$urdlf->FailTransaction();
 			$urdlf->CommitTransaction();
 		}
-		unset($urdlf);
+		unset( $urdlf );
 
 
-		$ugdlf = TTnew( 'UserGenericDataListFactory');
+		$ugdlf = TTnew( 'UserGenericDataListFactory' );
 		$ugdlf->getAll();
 		if ( $ugdlf->getRecordCount() > 0 ) {
 			$ugdlf->StartTransaction();
-			foreach( $ugdlf as $ugd_obj ) { /** @var UserGenericDataFactory $ugd_obj */
+			foreach ( $ugdlf as $ugd_obj ) {
+				/** @var UserGenericDataFactory $ugd_obj */
 				//Delete any legacy "-Default-" records that aren't import settings, as they are now "-- Default --" instead.
 				//  Only delete default records for saved searches on regular views though (*View), to ensure we skip deleting default import wizard settings as that can cause major problems for some users.
-				if ( ( $ugd_obj->getName() == '-Default-' AND preg_match( '/View$/i', $ugd_obj->getScript() ) ) ) {
-					$ugd_obj->setDeleted( TRUE );
+				if ( ( $ugd_obj->getName() == '-Default-' && preg_match( '/View$/i', $ugd_obj->getScript() ) ) ) {
+					$ugd_obj->setDeleted( true );
 					if ( $ugd_obj->isValid() ) {
 						Debug::Text( 'NOTICE: Deleting legacy -Default- UserGenericData record: ' . $ugd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 						$ugd_obj->Save();
@@ -105,14 +106,14 @@ class InstallSchema_1108A extends InstallSchema_Base {
 						$ugd_obj->setName( '-- Default --' );
 
 						//Check if there is a duplicate name, if so set it back to the original value.
-						if ( $ugd_obj->isValid() == FALSE ) {
-							Debug::Text( '  Validation error, setting back to original name: ' . $original_name .' Script: '. $ugd_obj->getScript() .' ID: '. $ugd_obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
+						if ( $ugd_obj->isValid() == false ) {
+							Debug::Text( '  Validation error, setting back to original name: ' . $original_name . ' Script: ' . $ugd_obj->getScript() . ' ID: ' . $ugd_obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
 							$ugd_obj->setName( $original_name );
 						}
-						unset($original_name);
+						unset( $original_name );
 					}
 
-					$data = unserialize( $ugd_obj->getGenericDataValue( 'data' ), array('allowed_classes' => FALSE) );
+					$data = unserialize( $ugd_obj->getGenericDataValue( 'data' ), [ 'allowed_classes' => false ] );
 
 					if ( $data != '' ) {
 						$ugd_obj->setData( $data );
@@ -124,7 +125,7 @@ class InstallSchema_1108A extends InstallSchema_Base {
 						}
 					} else {
 						Debug::Text( 'ERROR: Unable to unserialize UserGenericData, deleting: ' . $ugd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-						$ugd_obj->setDeleted( TRUE );
+						$ugd_obj->setDeleted( true );
 						if ( $ugd_obj->isValid() ) {
 							$ugd_obj->Save();
 						}
@@ -135,9 +136,10 @@ class InstallSchema_1108A extends InstallSchema_Base {
 			//$ugdlf->FailTransaction();
 			$ugdlf->CommitTransaction();
 		}
-		unset($ugdlf);
+		unset( $ugdlf );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TTextInput = function( options ) {
 		var opts = $.extend( {}, $.fn.TTextInput.defaults, options );
@@ -144,7 +144,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 				check_box.change( function() {
 					if ( need_parser_date || need_parser_sec ) {
@@ -234,7 +234,7 @@
 		};
 
 		this.setWidth = function( val ) {
-			if ( val && ( val > 0 || val.indexOf( '%' ) > 0) ) {
+			if ( val && ( val > 0 || val.indexOf( '%' ) > 0 ) ) {
 				$this.width( val );
 				static_width = val;
 				is_static_width = true;
@@ -286,14 +286,20 @@
 				} else {
 					example_width = 156;
 				}
-				content_width = Global.calculateTextWidth( $this.getValue(), { min_width: example_width, max_width: 200 } );
+				content_width = Global.calculateTextWidth( $this.getValue(), {
+					min_width: example_width,
+					max_width: 200
+				} );
 
 			} else {
 				if ( static_width.toString().indexOf( '%' ) > 0 ) {
 					return;
 				}
 				example_width = static_width;
-				content_width = Global.calculateTextWidth( $this.getValue(), {min_width: example_width, max_width: static_width > 200 ? static_width : 200 } );
+				content_width = Global.calculateTextWidth( $this.getValue(), {
+					min_width: example_width,
+					max_width: static_width > 200 ? static_width : 200
+				} );
 			}
 			$this.width( content_width + 'px' );
 		};
@@ -320,14 +326,14 @@
 			need_parser_sec = o.need_parser_sec;
 
 			if ( need_parser_date || need_parser_sec ) {
-				api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
+				api_date = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 			}
 
 			if ( o.mode ) {
 				mode = o.mode;
 			}
 
-			if ( o.width && ( o.width > 0 || o.width.indexOf( '%' ) > 0) ) {
+			if ( o.width && ( o.width > 0 || o.width.indexOf( '%' ) > 0 ) ) {
 				$this.width( o.width );
 				static_width = o.width;
 				is_static_width = true;
@@ -449,13 +455,13 @@
 
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-								LocalCacheData.current_open_sub_controller.edit_view &&
-								LocalCacheData.current_open_sub_controller.is_viewing ) {
+							LocalCacheData.current_open_sub_controller.edit_view &&
+							LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-								LocalCacheData.current_open_primary_controller.edit_view &&
-								LocalCacheData.current_open_primary_controller.is_viewing ) {
+							LocalCacheData.current_open_primary_controller.edit_view &&
+							LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -481,4 +487,4 @@
 
 	$.fn.TTextInput.defaults = {};
 
-})( jQuery );
+} )( jQuery );

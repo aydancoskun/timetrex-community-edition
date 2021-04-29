@@ -41,4 +41,5 @@
 class APITTDate extends TTDate {
 	protected $main_class = 'TTDate';
 }
+
 ?>

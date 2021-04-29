@@ -45,6 +45,4 @@ var APIRemittanceDestinationAccount = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

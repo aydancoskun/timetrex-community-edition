@@ -47,7 +47,7 @@ class APIFormW2Report extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIFormW2Report extends APIReport {
 	 * @param string $format
 	 * @return array|bool
 	 */
-	function getFormW2Report( $config = FALSE, $format = 'pdf' ) {
+	function getFormW2Report( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

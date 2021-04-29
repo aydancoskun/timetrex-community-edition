@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TTextArea = function( options ) {
 		var opts = $.extend( {}, $.fn.TTextArea.defaults, options );
@@ -51,7 +51,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper textarea--mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -153,13 +153,13 @@
 
 			field = o.field;
 
-			if ( o.width && ( o.width > 0 || o.width.indexOf( '%' ) > 0) ) {
+			if ( o.width && ( o.width > 0 || o.width.indexOf( '%' ) > 0 ) ) {
 				$this.width( o.width );
 				static_width = o.width;
 				is_static_width = true;
 			}
 
-			if ( o.height && (o.height > 0 || o.height.indexOf( '%' ) > 0) ) {
+			if ( o.height && ( o.height > 0 || o.height.indexOf( '%' ) > 0 ) ) {
 				$this.height( o.height );
 			}
 
@@ -205,13 +205,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-								LocalCacheData.current_open_sub_controller.edit_view &&
-								LocalCacheData.current_open_sub_controller.is_viewing ) {
+							LocalCacheData.current_open_sub_controller.edit_view &&
+							LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-								LocalCacheData.current_open_primary_controller.edit_view &&
-								LocalCacheData.current_open_primary_controller.is_viewing ) {
+							LocalCacheData.current_open_primary_controller.edit_view &&
+							LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -235,4 +235,4 @@
 
 	$.fn.TTextArea.defaults = {};
 
-})( jQuery );
+} )( jQuery );

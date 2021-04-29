@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUndefinedVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -34,35 +34,35 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'pear'. DIRECTORY_SEPARATOR .'Cache'. DIRECTORY_SEPARATOR .'Lite.php');
+require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'pear' . DIRECTORY_SEPARATOR . 'Cache' . DIRECTORY_SEPARATOR . 'Lite.php' );
 
 //If caching is disabled, still do memory caching, otherwise permission checks cause the page to take 2+ seconds to load.
-if ( $config_vars['cache']['enable'] == FALSE ) {
-	$config_vars['cache']['only_memory_cache_enable'] = TRUE;
+if ( $config_vars['cache']['enable'] == false ) {
+	$config_vars['cache']['only_memory_cache_enable'] = true;
 } else {
-	$config_vars['cache']['only_memory_cache_enable'] = FALSE;
+	$config_vars['cache']['only_memory_cache_enable'] = false;
 }
 
-$cache_options = array(
-		'caching' => TRUE,
-		'cacheDir' => $config_vars['cache']['dir'] . DIRECTORY_SEPARATOR,
-		'lifeTime' => 86400, //604800, //One day, cache should be cleared when the data is modified
-		'fileLocking' => TRUE,
-		'writeControl' => TRUE,
-		'readControl' => TRUE,
-		'memoryCaching' => TRUE,
-		'onlyMemoryCaching' => $config_vars['cache']['only_memory_cache_enable'],
-		'automaticSerialization' => TRUE,
-		'hashedDirectoryLevel' => 1,
-		'fileNameProtection' => FALSE,
-		'redisHost' => ( isset($config_vars['cache']['redis_host']) ) ? $config_vars['cache']['redis_host'] : '',
-		'redisDB' => ( isset($config_vars['cache']['redis_db']) ) ? $config_vars['cache']['redis_db'] : '',
-);
+$cache_options = [
+		'caching'                => true,
+		'cacheDir'               => $config_vars['cache']['dir'] . DIRECTORY_SEPARATOR,
+		'lifeTime'               => 86400, //604800, //One day, cache should be cleared when the data is modified
+		'fileLocking'            => true,
+		'writeControl'           => true,
+		'readControl'            => true,
+		'memoryCaching'          => true,
+		'onlyMemoryCaching'      => $config_vars['cache']['only_memory_cache_enable'],
+		'automaticSerialization' => true,
+		'hashedDirectoryLevel'   => 1,
+		'fileNameProtection'     => false,
+		'redisHost'              => ( isset( $config_vars['cache']['redis_host'] ) ) ? $config_vars['cache']['redis_host'] : '',
+		'redisDB'                => ( isset( $config_vars['cache']['redis_db'] ) ) ? $config_vars['cache']['redis_db'] : '',
+];
 
-if ( isset($config_vars['cache']['redis_host']) AND $config_vars['cache']['redis_host'] != '' ) {
-	require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'other'. DIRECTORY_SEPARATOR .'Redis_Cache_Lite.class.php');
-	$cache = $ADODB_CACHE = new Redis_Cache_Lite($cache_options);
+if ( isset( $config_vars['cache']['redis_host'] ) && $config_vars['cache']['redis_host'] != '' ) {
+	require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'Redis_Cache_Lite.class.php' );
+	$cache = $ADODB_CACHE = new Redis_Cache_Lite( $cache_options );
 } else {
-	$cache = new Cache_Lite($cache_options);
+	$cache = new Cache_Lite( $cache_options );
 }
 ?>

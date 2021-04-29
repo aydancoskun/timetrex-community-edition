@@ -44,30 +44,30 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 	public $xml_schema = 'CMS/PBJ/nhpbj_4_00_0.xsd';
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 			//'year' => 'isNumeric',
 			//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		);
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array();
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
 		}
 	}
 
-	public static function getFederalYearQuarterMonth( $epoch = NULL ) {
-		$year_quarter_months = array(
+	public static function getFederalYearQuarterMonth( $epoch = null ) {
+		$year_quarter_months = [
 				1  => 2,
 				2  => 2,
 				3  => 2,
@@ -80,15 +80,15 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 				10 => 1,
 				11 => 1,
 				12 => 1,
-		);
+		];
 
 		$month = TTDate::getMonth( $epoch );
 
-		if ( isset( $year_quarter_months[ $month ] ) ) {
-			return $year_quarter_months[ $month ];
+		if ( isset( $year_quarter_months[$month] ) ) {
+			return $year_quarter_months[$month];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 
@@ -114,11 +114,11 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 		$xml->staffingHours->addAttribute( 'processType', 'replace' );
 
 		$records = $this->getRecords();
-		if ( is_array( $records ) AND count( $records ) > 0 ) {
+		if ( is_array( $records ) && count( $records ) > 0 ) {
 			//Process records into Employee -> Date -> Hour Entries
-			$tmp_rows = array();
+			$tmp_rows = [];
 			foreach ( $records as $record ) {
-				$tmp_rows[ $record['employee_number'] ][ $record['date_stamp'] ][ $record['pbj_job_title_code'] ][] = $record;
+				$tmp_rows[$record['employee_number']][$record['date_stamp']][$record['pbj_job_title_code']][] = $record;
 			}
 			unset( $records );
 
@@ -135,25 +135,25 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 							foreach ( $title_data as $data ) {
 								$this->arrayToObject( $data ); //Convert record array to object
 
-								if ( $d == 0 AND $h == 0 ) {
-									$xml->employees->employee[ $e ]->addChild( 'employeeId', $this->employee_number );
-									$xml->employees->employee[ $e ]->addChild( 'hireDate', date( 'Y-m-d', $this->{'hire-date_stamp'} ) );
+								if ( $d == 0 && $h == 0 ) {
+									$xml->employees->employee[$e]->addChild( 'employeeId', $this->employee_number );
+									$xml->employees->employee[$e]->addChild( 'hireDate', date( 'Y-m-d', $this->{'hire-date_stamp'} ) );
 									if ( $this->{'termination-date_stamp'} != '' ) {
-										$xml->employees->employee[ $e ]->addChild( 'terminationDate', date( 'Y-m-d', $this->{'termination-date_stamp'} ) );
+										$xml->employees->employee[$e]->addChild( 'terminationDate', date( 'Y-m-d', $this->{'termination-date_stamp'} ) );
 									}
 
-									$xml->staffingHours->staffHours[ $e ]->addChild( 'employeeId', $this->employee_number );
-									$xml->staffingHours->staffHours[ $e ]->addChild( 'workDays' );
+									$xml->staffingHours->staffHours[$e]->addChild( 'employeeId', $this->employee_number );
+									$xml->staffingHours->staffHours[$e]->addChild( 'workDays' );
 								}
 
 								if ( $h == 0 ) {
-									$xml->staffingHours->staffHours[ $e ]->workDays->addChild( 'workDay' );
-									$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->addChild( 'date', date( 'Y-m-d', $date_stamp ) );
-									$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->addChild( 'hourEntries' );
+									$xml->staffingHours->staffHours[$e]->workDays->addChild( 'workDay' );
+									$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->addChild( 'date', date( 'Y-m-d', $date_stamp ) );
+									$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->addChild( 'hourEntries' );
 								}
 
-								$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->hourEntries->addChild( 'hourEntry' );
-								$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->hourEntries->hourEntry[ $h ]->addChild( 'hours', round( TTDate::getHours( $this->pbj_hours ), 2 ) );
+								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->addChild( 'hourEntry' );
+								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild( 'hours', round( TTDate::getHours( $this->pbj_hours ), 2 ) );
 								/*
 								1=Administrator
 								2=Medical Director
@@ -196,7 +196,7 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 								39=Housekeeping Service Worker (opt
 								40=Other Service Worker (optional)
 								*/
-								$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->hourEntries->hourEntry[ $h ]->addChild( 'jobTitleCode', (int)$this->pbj_job_title_code );
+								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild( 'jobTitleCode', (int)$this->pbj_job_title_code );
 
 								/*
 								1=Exempt
@@ -204,7 +204,7 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 								3=Contract
 								*/
 								//Default to Non-Exempt as that is most common.
-								$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->hourEntries->hourEntry[ $h ]->addChild( 'payTypeCode', ( (int)$this->pbj_pay_type_code == 0 ) ? 2 : (int)$this->pbj_pay_type_code );
+								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild( 'payTypeCode', ( (int)$this->pbj_pay_type_code == 0 ) ? 2 : (int)$this->pbj_pay_type_code );
 
 								$h++;
 							}
@@ -216,11 +216,11 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function _outputPDF() {
-		return FALSE;
+		return false;
 	}
 }
 

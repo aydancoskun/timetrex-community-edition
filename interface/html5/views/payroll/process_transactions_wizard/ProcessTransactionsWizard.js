@@ -68,7 +68,7 @@ ProcessTransactionsWizard = Wizard.extend( {
 			if ( data.filter_data.remittance_source_account_id.length > 0 ) {
 				$( e.target ).addClass( 'disable-image' );
 				var post_data = { 0: data, 1: true, 2: 'export_transactions' };
-				var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
+				var api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
 				Global.APIFileDownload( api.className, 'getPayStub', post_data );
 			} else {
 				Debug.Text( 'No source accounts selected', 'ProcessTransactionsWizard.js', 'ProcessTransactionsWizard', 'onDone', 10 );

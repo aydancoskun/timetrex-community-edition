@@ -39,18 +39,18 @@
  * @package PayrollDeduction\CA
  */
 class PayrollDeduction_CA_PE extends PayrollDeduction_CA {
-	var $provincial_income_tax_rate_options = array(
-			20070701 => array(
-					array('income' => 31984, 'rate' => 9.8, 'constant' => 0),
-					array('income' => 63969, 'rate' => 13.8, 'constant' => 1279),
-					array('income' => 63969, 'rate' => 16.7, 'constant' => 3134),
-			),
-			20070101 => array(
-					array('income' => 30754, 'rate' => 9.8, 'constant' => 0),
-					array('income' => 61509, 'rate' => 13.8, 'constant' => 1230),
-					array('income' => 61509, 'rate' => 16.7, 'constant' => 3014),
-			),
-	);
+	var $provincial_income_tax_rate_options = [
+			20070701 => [
+					[ 'income' => 31984, 'rate' => 9.8, 'constant' => 0 ],
+					[ 'income' => 63969, 'rate' => 13.8, 'constant' => 1279 ],
+					[ 'income' => 63969, 'rate' => 16.7, 'constant' => 3134 ],
+			],
+			20070101 => [
+					[ 'income' => 30754, 'rate' => 9.8, 'constant' => 0 ],
+					[ 'income' => 61509, 'rate' => 13.8, 'constant' => 1230 ],
+					[ 'income' => 61509, 'rate' => 16.7, 'constant' => 3014 ],
+			],
+	];
 
 	function getProvincialSurtax() {
 		/*
@@ -69,7 +69,7 @@ class PayrollDeduction_CA_PE extends PayrollDeduction_CA {
 		if ( $this->getDate() >= 20080101 ) {
 			if ( $T4 <= 12500 ) {
 				$V1 = 0;
-			} elseif ( $T4 > 12500 ) {
+			} else if ( $T4 > 12500 ) {
 				$V1 = bcmul( 0.10, bcsub( $T4, 12500 ) );
 			}
 		}

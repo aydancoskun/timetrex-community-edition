@@ -63,6 +63,4 @@ var APIT4ASummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

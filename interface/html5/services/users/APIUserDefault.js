@@ -1,6 +1,5 @@
 var APIUserDefault = ServiceCaller.extend( {
 
-
 	key_name: 'UserDefault',
 	className: 'APIUserDefault',
 
@@ -38,6 +37,5 @@ var APIUserDefault = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'copyUserDefault', arguments );
 
 	}
-
 
 } );

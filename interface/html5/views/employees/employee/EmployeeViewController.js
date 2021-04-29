@@ -56,18 +56,18 @@ EmployeeViewController = BaseViewController.extend( {
 		this.document_object_type_id = 100;
 		this.context_menu_name = $.i18n._( 'Employees' );
 		this.navigation_label = $.i18n._( 'Employee' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 		this.select_company_id = LocalCacheData.getCurrentCompany().id;
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 
-			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 
 		}
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-		this.hierarchyControlAPI = new (APIFactory.getAPIClass( 'APIHierarchyControl' ))();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.hierarchyControlAPI = new ( APIFactory.getAPIClass( 'APIHierarchyControl' ) )();
 
 		this.render();
 
@@ -78,9 +78,9 @@ EmployeeViewController = BaseViewController.extend( {
 
 	jobUIValidate: function() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				(PermissionManager.validate( 'job', 'view' ) ||
-						PermissionManager.validate( 'job', 'view_child' ) ||
-						PermissionManager.validate( 'job', 'view_own' )) ) {
+			( PermissionManager.validate( 'job', 'view' ) ||
+				PermissionManager.validate( 'job', 'view_child' ) ||
+				PermissionManager.validate( 'job', 'view_own' ) ) ) {
 			return true;
 		}
 		return false;
@@ -89,9 +89,9 @@ EmployeeViewController = BaseViewController.extend( {
 	jobItemUIValidate: function() {
 
 		if ( PermissionManager.validate( 'job_item', 'enabled' ) &&
-				(PermissionManager.validate( 'job_item', 'view' ) ||
-						PermissionManager.validate( 'job_item', 'view_child' ) ||
-						PermissionManager.validate( 'job_item', 'view_own' )) ) {
+			( PermissionManager.validate( 'job_item', 'view' ) ||
+				PermissionManager.validate( 'job_item', 'view_child' ) ||
+				PermissionManager.validate( 'job_item', 'view_own' ) ) ) {
 			return true;
 		}
 		return false;
@@ -175,7 +175,6 @@ EmployeeViewController = BaseViewController.extend( {
 			);
 		}
 
-
 		return context_menu_model;
 	},
 
@@ -187,7 +186,7 @@ EmployeeViewController = BaseViewController.extend( {
 					$this_obj.initEditViewUI( $this_obj.viewId, $this_obj.edit_view_tpl );
 					var $this = this;
 					doNext();
-				}else {
+				} else {
 					doNext();
 				}
 
@@ -199,7 +198,7 @@ EmployeeViewController = BaseViewController.extend( {
 			}
 		}
 
-		function doNext(){
+		function doNext() {
 			$this_obj.getEmployeeData( id, function( result ) {
 				//Error: Uncaught TypeError: Cannot read property 'user_id' of null in interface/html5/#!m=TimeSheet&date=20150915&user_id=42175&show_wage=0 line 79
 				if ( !result ) {
@@ -212,7 +211,7 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 
 				if ( $this_obj.edit_only_mode ) {
-					$('.edit-view-tab-bar').css('opacity', 1);
+					$( '.edit-view-tab-bar' ).css( 'opacity', 1 );
 				}
 			} );
 		}
@@ -482,7 +481,7 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		$( '#tab_qualifications .first-column-sub-view' ).css('opacity', '0');
+		$( '#tab_qualifications .first-column-sub-view' ).css( 'opacity', '0' );
 		TTPromise.add( 'Employee_Qualifications_Tab', 'initSubQualificationView' );
 
 		TTPromise.add( 'Employee_Qualifications_Tab', 'UserSkillViewController' );
@@ -594,7 +593,7 @@ EmployeeViewController = BaseViewController.extend( {
 			};
 		}
 
-		TTPromise.wait( 'Employee_Qualifications_Tab', null, function () {
+		TTPromise.wait( 'Employee_Qualifications_Tab', null, function() {
 			$( '#contentContainer' ).trigger( 'resize' );
 			$( '#tab_qualifications .first-column-sub-view' ).css( 'opacity', '1' );
 		} );
@@ -647,7 +646,8 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
-	initSubUserReviewControlView: function() {;
+	initSubUserReviewControlView: function() {
+		;
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -693,7 +693,6 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 	},
-
 
 	initSubPaymentMethodsView: function() {
 		var $this = this;
@@ -956,7 +955,7 @@ EmployeeViewController = BaseViewController.extend( {
 			var last_name_widget = this.edit_view_ui_dic['last_name'];
 
 			var user_name_widget = this.edit_view_ui_dic['user_name'];
-			user_name_widget.setValue( first_name_widget.getValue().toLowerCase() +'.'+ last_name_widget.getValue().toLowerCase() );
+			user_name_widget.setValue( first_name_widget.getValue().toLowerCase() + '.' + last_name_widget.getValue().toLowerCase() );
 			this.current_edit_record.user_name = user_name_widget.getValue();
 		}
 	},
@@ -1050,7 +1049,10 @@ EmployeeViewController = BaseViewController.extend( {
 			case 'job_quick_search':
 			case 'job_item_quick_search':
 				if ( ( Global.getProductEdition() >= 20 ) ) {
-					this.onJobQuickSearch( key, target.getValue(), 'default_job_id', 'default_job_item_id',  { status_id: 10, company_id: $this.select_company_id } );
+					this.onJobQuickSearch( key, target.getValue(), 'default_job_id', 'default_job_item_id', {
+						status_id: 10,
+						company_id: $this.select_company_id
+					} );
 
 					//Don't validate immediately as onJobQuickSearch is doing async API calls, and it would cause a guaranteed validation failure.
 					doNotValidate = true;
@@ -1072,7 +1074,7 @@ EmployeeViewController = BaseViewController.extend( {
 	hierarchyPermissionValidate: function( p_id, selected_item ) {
 
 		if ( PermissionManager.validate( 'hierarchy', 'edit' ) ||
-				PermissionManager.validate( 'user', 'edit_hierarchy' ) ) {
+			PermissionManager.validate( 'user', 'edit_hierarchy' ) ) {
 
 			return true;
 		}
@@ -1082,7 +1084,7 @@ EmployeeViewController = BaseViewController.extend( {
 	},
 
 	checkTabPermissions: function( tab ) {
-		retval = false;
+		var retval = false;
 
 		switch ( tab ) {
 			case 'tab_hierarchy':
@@ -1200,19 +1202,23 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		if ( this.current_edit_record.id ) {
-			this.file_browser.show();
-			this.file_browser.setImage( ServiceCaller.userPhoto + '&object_id=' + this.current_edit_record.id );
-			if ( this.is_viewing ) {
-				this.file_browser.setEnable( false );
-			} else {
-				this.file_browser.setEnable( true );
+			if ( this.file_browser ) {
+				this.file_browser.show();
+				this.file_browser.setImage( ServiceCaller.userPhoto + '&object_id=' + this.current_edit_record.id );
+				if ( this.is_viewing ) {
+					this.file_browser.setEnable( false );
+				} else {
+					this.file_browser.setEnable( true );
+				}
+				$( '.upload-image-alert' ).remove();
 			}
-			$( '.upload-image-alert' ).remove();
 		} else {
-			this.file_browser.hide();
-			var span = $( '<span class="upload-image-alert">' );
-			span.text( $.i18n._( 'Please save this record before uploading a photo' ) );
-			this.file_browser.parent().append( span );
+			if ( this.file_browser ) {
+				this.file_browser.hide();
+				var span = $( '<span class="upload-image-alert">' );
+				span.text( $.i18n._( 'Please save this record before uploading a photo' ) );
+				this.file_browser.parent().append( span );
+			}
 		}
 
 		// Error: TypeError: this.edit_view_ui_dic.company_id is undefined in interface/html5/framework/jquery.min.js?v=9.0.5-20151222-162143 line 2 > eval line 1374
@@ -1266,7 +1272,7 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
-	getCopyAsNewFilter: function ( filter ) {
+	getCopyAsNewFilter: function( filter ) {
 		// overriding BaseViewController for _continueDoCopyAsNew()
 		filter.filter_data.company_id = this.select_company_id;
 		return filter;
@@ -1274,7 +1280,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 	onAddClick: function() {
 		var $this = this;
-		this.setCurrentEditViewState('new');
+		this.setCurrentEditViewState( 'new' );
 		$this.openEditView();
 
 		$this.api['get' + $this.api.key_name + 'DefaultData']( this.select_company_id, {
@@ -1340,8 +1346,8 @@ EmployeeViewController = BaseViewController.extend( {
 
 	},
 
-	getAPIFilters: function () {
-		var filter = this._super('getAPIFilters');
+	getAPIFilters: function() {
+		var filter = this._super( 'getAPIFilters' );
 		filter.filter_data.company_id = this.select_company_id;
 
 		return filter;
@@ -1699,7 +1705,6 @@ EmployeeViewController = BaseViewController.extend( {
 
 		this.sub_user_language_view_controller = null;
 
-
 		this.sub_payment_methods_view_controller = null;
 	},
 
@@ -1761,7 +1766,7 @@ EmployeeViewController = BaseViewController.extend( {
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
 				id: this.script_name + '_navigation',
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.USER,
 				navigation_mode: true,
@@ -1783,7 +1788,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Company
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICompany' )),
+			api_class: ( APIFactory.getAPIClass( 'APICompany' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.COMPANY,
 			show_search_inputs: true,
@@ -1796,12 +1801,15 @@ EmployeeViewController = BaseViewController.extend( {
 		//Legal Entity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+			api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			show_search_inputs: true,
+			field: 'legal_entity_id',
+			customSearchFilter: ( function( args ) {
+				return $this.setCompanyIdFilter( args );
+			} ),
 			set_empty: true,
-			field: 'legal_entity_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Legal Entity' ), form_item_input, tab_employee_column1 );
 
@@ -1829,14 +1837,14 @@ EmployeeViewController = BaseViewController.extend( {
 		//Permission Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPermissionControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPermissionControl' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PERMISSION_CONTROL,
 			show_search_inputs: true,
 			field: 'permission_control_id',
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			set_empty: true
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Permission Group' ), form_item_input, tab_employee_column1 );
@@ -1844,13 +1852,13 @@ EmployeeViewController = BaseViewController.extend( {
 		//Pay Period Schedule
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 			show_search_inputs: true,
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			set_empty: true,
 			field: 'pay_period_schedule_id'
 		} );
@@ -1859,12 +1867,12 @@ EmployeeViewController = BaseViewController.extend( {
 		//Policy Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPolicyGroup' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPolicyGroup' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.POLICY_GROUP,
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'policy_group_id'
@@ -1874,12 +1882,12 @@ EmployeeViewController = BaseViewController.extend( {
 		//Title
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.JOB_TITLE,
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'title_id'
@@ -1891,27 +1899,26 @@ EmployeeViewController = BaseViewController.extend( {
 		//Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			show_search_inputs: true,
 			field: 'currency_id',
 			set_empty: true
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab_employee_column2 );
 
-
 		//Default Branch
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: false,
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
 			set_empty: true,
@@ -1922,18 +1929,17 @@ EmployeeViewController = BaseViewController.extend( {
 		//Department
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'default_department_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Default Department' ), form_item_input, tab_employee_column2 );
-
 
 		this.initPermission(); //#2398 - job/task permissions were getting broken on multiple opens of same employee.
 		if ( ( Global.getProductEdition() >= 20 ) ) {
@@ -1941,20 +1947,20 @@ EmployeeViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
-				customSearchFilter: (function( args ) {
+				customSearchFilter: ( function( args ) {
 					return $this.setCompanyIdFilter( args );
-				}),
+				} ),
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'default_job_id'
 			} );
 
@@ -1976,23 +1982,23 @@ EmployeeViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
-				customSearchFilter: (function( args ) {
+				customSearchFilter: ( function( args ) {
 					return $this.setCompanyIdFilter( args );
-				}),
+				} ),
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 					if ( val ) {
 						job_item_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'default_job_item_id'
 			} );
 
-			default_task_description = $( '<div class=\'widget-h-box\'></div>' );
+			var default_task_description = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
@@ -2022,12 +2028,12 @@ EmployeeViewController = BaseViewController.extend( {
 		// Ethnicity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIEthnicGroup' )),
+			api_class: ( APIFactory.getAPIClass( 'APIEthnicGroup' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ETHNIC_GROUP,
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			show_search_inputs: true,
 			field: 'ethnic_group_id',
 			set_empty: true
@@ -2312,7 +2318,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Quick Punch ID
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'phone_id', width: 90 } );
-		quick_punch_id_description = $( '<div class=\'widget-h-box\'></div>' );
+		var quick_punch_id_description = $( '<div class=\'widget-h-box\'></div>' );
 		quick_punch_id_description.append( form_item_input );
 		quick_punch_id_description.append( $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'Optional' ) + ' )</span>' ) );
 		this.addEditFieldToColumn( $.i18n._( 'Quick Punch ID' ), form_item_input, tab_login_column2, '', quick_punch_id_description );
@@ -2325,7 +2331,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Login Expire Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( { field: 'login_expire_date' } );
-		login_expire_date_description = $( '<div class=\'widget-h-box\'></div>' );
+		var login_expire_date_description = $( '<div class=\'widget-h-box\'></div>' );
 		login_expire_date_description.append( form_item_input );
 		login_expire_date_description.append( $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'Leave blank to never expire' ) + ' )</span>' ) );
 		this.addEditFieldToColumn( $.i18n._( 'Login Expire Date' ), form_item_input, tab_login_column2, '', login_expire_date_description );
@@ -2333,14 +2339,14 @@ EmployeeViewController = BaseViewController.extend( {
 		//Terminated Permission Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPermissionControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPermissionControl' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PERMISSION_CONTROL,
 			show_search_inputs: true,
 			field: 'terminated_permission_control_id',
-			customSearchFilter: (function( args ) {
+			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
-			}),
+			} ),
 			set_empty: true
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Terminated Permission Group' ), form_item_input, tab_login_column2 );
@@ -2445,7 +2451,7 @@ EmployeeViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'company_id',
 				layout_name: ALayoutIDs.COMPANY,
-				api_class: (APIFactory.getAPIClass( 'APICompany' )),
+				api_class: ( APIFactory.getAPIClass( 'APICompany' ) ),
 				multiple: false,
 				custom_first_label: Global.default_item,
 				basic_search: PermissionManager.checkTopLevelPermission( 'Companies' ) ? true : false,
@@ -2457,7 +2463,7 @@ EmployeeViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'legal_entity_id',
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
-				api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
 				multiple: true,
 				custom_first_label: Global.any_item,
 				basic_search: PermissionManager.checkTopLevelPermission( 'LegalEntity' ) ? true : false,
@@ -2551,13 +2557,13 @@ EmployeeViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				customSearchFilter: (function( args ) {
+				customSearchFilter: ( function( args ) {
 					return $this.setCompanyIdFilter( args );
-				}),
+				} ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2565,13 +2571,13 @@ EmployeeViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				customSearchFilter: (function( args ) {
+				customSearchFilter: ( function( args ) {
 					return $this.setCompanyIdFilter( args );
-				}),
+				} ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2579,13 +2585,13 @@ EmployeeViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 3,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				customSearchFilter: (function( args ) {
+				customSearchFilter: ( function( args ) {
 					return $this.setCompanyIdFilter( args );
-				}),
+				} ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -2659,7 +2665,7 @@ EmployeeViewController = BaseViewController.extend( {
 		column_filter.company_id = true;
 		column_filter.latitude = true;
 		column_filter.longitude = true;
-		return this._getFilterColumnsFromDisplayColumns( column_filter, enable_system_columns )
+		return this._getFilterColumnsFromDisplayColumns( column_filter, enable_system_columns );
 	},
 
 } );

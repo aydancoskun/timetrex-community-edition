@@ -24,8 +24,8 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_period_schedule';
 		this.context_menu_name = $.i18n._( 'Pay Period Schedule' );
 		this.navigation_label = $.i18n._( 'Pay Period Schedule' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
-		this.user_preference_api = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
+		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -35,7 +35,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy, ContextMenuIconName.mass_edit],
 			include: []
@@ -73,7 +73,6 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			if ( !this.edit_view ) {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
-
 
 		}
 
@@ -185,7 +184,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		if ( key == 'type_id' ) {
 			this.onTypeChange();
-		} else if ( key == 'start_day_of_week' && ( !this.current_edit_record || !this.current_edit_record.id) ) {
+		} else if ( key == 'start_day_of_week' && ( !this.current_edit_record || !this.current_edit_record.id ) ) {
 			this.edit_view_ui_dic.start_week_day_id.setValue( this.edit_view_ui_dic.start_day_of_week.getValue() );
 			this.current_edit_record.start_week_day_id = this.edit_view_ui_dic.start_day_of_week.getValue();
 		} else if ( key == 'timesheet_verify_type_id' ) {
@@ -321,7 +320,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
 				id: this.script_name + '_navigation',
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 				navigation_mode: true,
@@ -462,7 +461,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		// employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -585,7 +584,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -596,7 +595,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',

@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.SwitchButton = function( options ) {
 
@@ -29,15 +29,15 @@
 		//Error: TypeError: btn is null in /interface/html5/global/widgets/switch_button/SwitchButton.js?v=9.0.0-20150822-212724 line 31
 		this.getValue = function( return_number ) {
 			if ( return_number ) {
-				return (btn && btn.hasClass( 'selected' )) ? 1 : 0;
+				return ( btn && btn.hasClass( 'selected' ) ) ? 1 : 0;
 			} else {
-				return (btn && btn.hasClass( 'selected' )) ? true : false;
+				return ( btn && btn.hasClass( 'selected' ) ) ? true : false;
 			}
 		};
 
 		this.setValue = function( val ) {
 
-			//Error: TypeError: btn is null in /interface/html5/global/widgets/switch_button/SwitchButton.js?v=8.0.0-20141230-130626 line 35 
+			//Error: TypeError: btn is null in /interface/html5/global/widgets/switch_button/SwitchButton.js?v=8.0.0-20141230-130626 line 35
 			if ( !btn ) {
 				return;
 			}
@@ -86,7 +86,7 @@
 
 	$.fn.SwitchButton.defaults = {};
 
-})( jQuery );
+} )( jQuery );
 
 var SwitchButtonIcon = function() {
 

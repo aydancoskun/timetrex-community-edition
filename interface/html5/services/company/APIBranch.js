@@ -49,6 +49,4 @@ var APIBranch = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportBranch', arguments );
 	}
 
-
-
 } );

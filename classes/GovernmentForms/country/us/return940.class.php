@@ -46,22 +46,22 @@ class GovernmentForms_US_RETURN940 extends GovernmentForms_US {
 	public $xml_schema = '94x/94x/Return940.xsd';
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 			//'year' => 'isNumeric',
 			//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		);
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array();
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -83,13 +83,13 @@ class GovernmentForms_US_RETURN940 extends GovernmentForms_US {
 		}
 		$this->status = strtoupper( trim( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	function _outputXML() {
 
 		$xml = new SimpleXMLElement( '<ReturnData xsi:schemaLocation="http://www.irs.gov/efile ReturnData940.xsd" xmlns="http://www.irs.gov/efile" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"></ReturnData>' ); //IRS940 must be wrapped in <ReturnData></ReturnData>
-		$xml->addAttribute( 'documentCount', 0 ); // The number of return documents in the return.
+		$xml->addAttribute( 'documentCount', 0 );                                                                                                                                                                          // The number of return documents in the return.
 
 		$this->setXMLObject( $xml );
 
@@ -116,11 +116,11 @@ class GovernmentForms_US_RETURN940 extends GovernmentForms_US {
 		$xml->addChild( 'IRS940' );
 
 
-		return TRUE;
+		return true;
 	}
 
 	function _outputPDF() {
-		return FALSE;
+		return false;
 	}
 }
 

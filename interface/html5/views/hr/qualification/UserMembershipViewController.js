@@ -23,9 +23,9 @@ UserMembershipViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_membership';
 		this.context_menu_name = $.i18n._( 'Memberships' );
 		this.navigation_label = $.i18n._( 'Membership' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUserMembership' ))();
-		this.qualification_api = new (APIFactory.getAPIClass( 'APIQualification' ))();
-		this.qualification_group_api = new (APIFactory.getAPIClass( 'APIQualificationGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserMembership' ) )();
+		this.qualification_api = new ( APIFactory.getAPIClass( 'APIQualification' ) )();
+		this.qualification_group_api = new ( APIFactory.getAPIClass( 'APIQualificationGroup' ) )();
 
 		this.document_object_type_id = 130;
 		this.render();
@@ -99,13 +99,13 @@ UserMembershipViewController = BaseViewController.extend( {
 
 	cancelOtherSubViewSelectedStatus: function() {
 		switch ( true ) {
-			case typeof( this.parent_view_controller.sub_user_skill_view_controller ) !== 'undefined':
+			case typeof ( this.parent_view_controller.sub_user_skill_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_skill_view_controller.unSelectAll();
-			case typeof( this.parent_view_controller.sub_user_license_view_controller ) !== 'undefined':
+			case typeof ( this.parent_view_controller.sub_user_license_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_license_view_controller.unSelectAll();
-			case typeof( this.parent_view_controller.sub_user_education_view_controller ) !== 'undefined':
+			case typeof ( this.parent_view_controller.sub_user_education_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_education_view_controller.unSelectAll();
-			case typeof( this.parent_view_controller.sub_user_language_view_controller ) !== 'undefined':
+			case typeof ( this.parent_view_controller.sub_user_language_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_language_view_controller.unSelectAll();
 				break;
 		}
@@ -178,7 +178,7 @@ UserMembershipViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUserMembership' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUserMembership' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_Membership,
@@ -201,7 +201,7 @@ UserMembershipViewController = BaseViewController.extend( {
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -221,7 +221,7 @@ UserMembershipViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIQualification' )),
+			api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.QUALIFICATION,
 			show_search_inputs: true,
@@ -245,7 +245,7 @@ UserMembershipViewController = BaseViewController.extend( {
 		// Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			field: 'currency_id',
@@ -295,7 +295,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -307,7 +307,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'currency_id',
 				layout_name: ALayoutIDs.CURRENCY,
-				api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+				api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -319,7 +319,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'qualification_id',
 				layout_name: ALayoutIDs.QUALIFICATION,
-				api_class: (APIFactory.getAPIClass( 'APIQualification' )),
+				api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -395,7 +395,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -407,7 +407,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,

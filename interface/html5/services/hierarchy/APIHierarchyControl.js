@@ -11,7 +11,6 @@ var APIHierarchyControl = ServiceCaller.extend( {
 
 	setHierarchyLevel: function() {
 
-
 		return this.argumentsHandler( this.className, 'setHierarchyLevel', arguments );
 
 	},

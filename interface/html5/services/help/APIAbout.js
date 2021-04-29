@@ -15,5 +15,4 @@ var APIAbout = ServiceCaller.extend( {
 
 	}
 
-
 } );

@@ -55,7 +55,8 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	 */
 	function setUserDefault( $value ) {
 		$value = TTUUID::castUUID( $value );
-		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'ID: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $this->setGenericDataValue( 'user_default_id', $value );
 	}
 
@@ -72,9 +73,11 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	 */
 	function setCompanyDeduction( $value ) {
 		$value = TTUUID::castUUID( $value );
-		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'ID: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $this->setGenericDataValue( 'company_deduction_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -84,21 +87,21 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 		//
 		// Employee Default settings
 		$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
-		$this->Validator->isResultSetWithRows(	'user_default',
-														$udlf->getByID($this->getUserDefault()),
-														TTi18n::gettext('Employee Default settings is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'user_default',
+											   $udlf->getByID( $this->getUserDefault() ),
+											   TTi18n::gettext( 'Employee Default settings is invalid' )
+		);
 		// Deduction
 		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
-		$this->Validator->isResultSetWithRows(	'company_deduction',
-														$cdlf->getByID($this->getCompanyDeduction()),
-														TTi18n::gettext('Deduction is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'company_deduction',
+											   $cdlf->getByID( $this->getCompanyDeduction() ),
+											   TTi18n::gettext( 'Deduction is invalid' )
+		);
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -107,75 +110,75 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -183,30 +186,31 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 }
+
 ?>

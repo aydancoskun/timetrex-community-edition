@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.CameraBrowser = function( options ) {
 
@@ -105,7 +105,7 @@
 
 		};
 
-		onImageLoad = function( image ) {
+		this.onImageLoad = function( image ) {
 
 //			var image_height = $( image ).height() > 0 ? $( image ).height() : image.naturalHeight;
 //			var image_width = $( image ).width() > 0 ? $( image ).width() : image.naturalWidth;
@@ -172,4 +172,4 @@
 
 	$.fn.CameraBrowser.defaults = {};
 
-})( jQuery );
+} )( jQuery );

@@ -31,13 +31,13 @@ ReportViewWizardController = BaseWizardController.extend( {
 		LocalCacheData.current_open_wizard_controller = null;
 
 		var source = 'View'; // Backup value in case the url sm does not exist.
-		if( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm ) {
+		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm ) {
 			source = LocalCacheData.all_url_args.sm + '@View';
 		}
-		$().TFeedback({
+		$().TFeedback( {
 			source: source,
 			force_source: true
-		});
+		} );
 	},
 
 	onDoneClick: function() {

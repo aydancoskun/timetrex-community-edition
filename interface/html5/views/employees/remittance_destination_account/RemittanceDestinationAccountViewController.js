@@ -21,9 +21,9 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 	is_subview: false,
 
 	init: function( options ) {
-		this.type_array = [],
-				//this._super('initialize', options );
-				this.edit_view_tpl = 'RemittanceDestinationAccountEditView.html';
+		this.type_array = [];
+		//this._super('initialize', options );
+		this.edit_view_tpl = 'RemittanceDestinationAccountEditView.html';
 		this.permission_id = 'remittance_destination_account';
 		this.viewId = 'RemittanceDestinationAccount';
 		this.script_name = 'RemittanceDestinationAccountView';
@@ -31,11 +31,11 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Pay Methods' );
 		this.navigation_label = $.i18n._( 'Pay Methods' ) + ':';
 		this.document_object_type_id = 320;
-		this.api = new (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.user_default_api = new (APIFactory.getAPIClass( 'APIUserDefault' ))();
-		this.remittance_source_account_api = new (APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.user_default_api = new ( APIFactory.getAPIClass( 'APIUserDefault' ) )();
+		this.remittance_source_account_api = new ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) )();
 
 		this.render();
 		if ( this.sub_view_mode ) {
@@ -94,7 +94,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				$this.default_display_columns = [];
 
 				for ( var n in columns_result_data ) {
-					if ( $this.is_subview == true && (columns_result_data[n] == 'user_first_name' || columns_result_data[n] == 'user_last_name' ) ) {
+					if ( $this.is_subview == true && ( columns_result_data[n] == 'user_first_name' || columns_result_data[n] == 'user_last_name' ) ) {
 						continue;
 					} else {
 						$this.default_display_columns.push( columns_result_data[n] );
@@ -270,7 +270,6 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 	},
 
-
 	getRemittanceSourceAccount: function() {
 
 		var $this = this;
@@ -287,7 +286,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		source_account_args.filter_data.type_id = type_id;
 
 		if ( this.is_mass_editing ) {
-			source_account_args.filter_data.company_id = [ LocalCacheData.getLoginUser().company_id, TTUUID.not_exist_id ];
+			source_account_args.filter_data.company_id = [LocalCacheData.getLoginUser().company_id, TTUUID.not_exist_id];
 		} else {
 			source_account_args.filter_data.legal_entity_id = [legal_entity_id, TTUUID.not_exist_id];
 		}
@@ -335,22 +334,23 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 					}
 				}
 
-		$this.onTypeChange();}} );
+				$this.onTypeChange();
+			}
+		} );
 
 		$this.current_edit_record['remittance_source_account_id'] = $this.edit_view_ui_dic['remittance_source_account_id'].getValue();
 
 	},
-
 
 	uniformVariable: function( record ) {
 		//ensure that the variable variable fields are set to false if they aren't showing.
 		if ( this.edit_view_ui_dic && this.current_edit_record.remittance_source_account_id != TTUUID.zero_id ) { //Keep accountd data if UUID == zero_id
 			for ( var i = 1; i <= 10; i++ ) {
 				if ( i == 1 ) {
-					if ( this.edit_view_ui_dic['value1_1'] && this.edit_view_ui_dic['value1_1'].is(':visible') ) {
-						record['value1'] =record['value1_1'] ?record['value1_1'] : this.edit_view_ui_dic['value1_1'].getValue();
-					} else if ( this.edit_view_ui_dic['value1_2'] && this.edit_view_ui_dic['value1_2'].is(':visible') ) {
-						record['value1'] =record['value1_2'] ? record['value1_2'] : this.edit_view_ui_dic['value1_2'].getValue();
+					if ( this.edit_view_ui_dic['value1_1'] && this.edit_view_ui_dic['value1_1'].is( ':visible' ) ) {
+						record['value1'] = record['value1_1'] ? record['value1_1'] : this.edit_view_ui_dic['value1_1'].getValue();
+					} else if ( this.edit_view_ui_dic['value1_2'] && this.edit_view_ui_dic['value1_2'].is( ':visible' ) ) {
+						record['value1'] = record['value1_2'] ? record['value1_2'] : this.edit_view_ui_dic['value1_2'].getValue();
 					} else {
 						if ( !this.is_mass_editing ) {
 							record['value1'] = false;
@@ -371,7 +371,6 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 		return record;
 	},
-
 
 	onFormItemChange: function( target, doNotValidate ) {
 
@@ -514,7 +513,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT,
@@ -533,7 +532,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		// Legal entity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+			api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			field: 'legal_entity_id',
@@ -586,7 +585,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		// Remittance Source Account
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRemittanceSourceAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
 			field: 'remittance_source_account_id',
@@ -599,7 +598,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		// Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			field: 'currency_id',
@@ -607,7 +606,6 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 			show_search_inputs: true
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
-
 
 		// Priority
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -700,7 +698,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Legal Entity' ),
 				in_column: 1,
 				field: 'legal_entity_id',
-				api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -711,7 +709,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -722,7 +720,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Source Account' ),
 				in_column: 1,
 				field: 'remittance_source_account_id',
-				api_class: (APIFactory.getAPIClass( 'APIRemittanceSourceAccount' )),
+				api_class: ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -753,7 +751,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Currency' ),
 				in_column: 2,
 				field: 'currency_id',
-				api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+				api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -765,7 +763,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -778,7 +776,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -789,8 +787,8 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		];
 	},
 
-	searchDone: function(){
-		this.__super('searchDone');
+	searchDone: function() {
+		this.__super( 'searchDone' );
 		TTPromise.resolve( 'PaymentMethodsView', 'init' );
 	}
 } );

@@ -42,19 +42,19 @@ class CompanyGenericTagMapFactory extends Factory {
 	protected $table = 'company_generic_tag_map';
 	protected $pk_sequence_name = 'company_generic_tag_map_id_seq'; //PK Sequence name
 
-	protected $tag_obj = NULL;
+	protected $tag_obj = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'object_type':
-				$cgtf = TTnew('CompanyGenericTagFactory'); /** @var CompanyGenericTagFactory $cgtf */
+				$cgtf = TTnew( 'CompanyGenericTagFactory' ); /** @var CompanyGenericTagFactory $cgtf */
 				$retval = $cgtf->getOptions( $name );
 				break;
 		}
@@ -66,7 +66,7 @@ class CompanyGenericTagMapFactory extends Factory {
 	 * @return null
 	 */
 	function getTagObject() {
-		if ( is_object($this->tag_obj) ) {
+		if ( is_object( $this->tag_obj ) ) {
 			return $this->tag_obj;
 		} else {
 			$cgtlf = TTnew( 'CompanyGenericTagListFactory' ); /** @var CompanyGenericTagListFactory $cgtlf */
@@ -87,8 +87,9 @@ class CompanyGenericTagMapFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setObjectType( $value) {
-		$value = trim($value);
+	function setObjectType( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'object_type_id', $value );
 	}
 
@@ -103,8 +104,9 @@ class CompanyGenericTagMapFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setObjectID( $value) {
+	function setObjectID( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'object_id', $value );
 	}
 
@@ -119,24 +121,25 @@ class CompanyGenericTagMapFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setTagID( $value) {
+	function setTagID( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'tag_id', $value );
 	}
 
 	/**
 	 * @param string $company_id UUID
 	 * @param int $object_type_id
-	 * @param string $object_id UUID
+	 * @param string $object_id  UUID
 	 * @param $tags
 	 * @return bool
 	 */
 	static function setTags( $company_id, $object_type_id, $object_id, $tags ) {
-		if ( TTUUID::isUUID($object_id) AND $object_id != TTUUID::getZeroID() AND $object_id != TTUUID::getNotExistID() ) {
+		if ( TTUUID::isUUID( $object_id ) && $object_id != TTUUID::getZeroID() && $object_id != TTUUID::getNotExistID() ) {
 			//Parse tags
 			$parsed_tags = CompanyGenericTagFactory::parseTags( $tags );
-			if ( is_array($parsed_tags) ) {
-				Debug::text('Setting Tags: Company: '. $company_id .' Object Type: '. $object_type_id .' Object: '. $object_type_id .' Tags: '. $tags, __FILE__, __LINE__, __METHOD__, 10);
+			if ( is_array( $parsed_tags ) ) {
+				Debug::text( 'Setting Tags: Company: ' . $company_id . ' Object Type: ' . $object_type_id . ' Object: ' . $object_type_id . ' Tags: ' . $tags, __FILE__, __LINE__, __METHOD__, 10 );
 
 				$existing_tags = CompanyGenericTagFactory::getOrCreateTags( $company_id, $object_type_id, $parsed_tags );
 
@@ -145,11 +148,11 @@ class CompanyGenericTagMapFactory extends Factory {
 				//Debug::Arr($existing_tag_ids, 'Existing Tag IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Get list of mapped Tag IDs that need to be deleted.
-				$del_tag_ids = array();
-				if ( isset($parsed_tags['delete']) ) {
-					foreach( $parsed_tags['delete'] as $del_tag ) {
-						$del_tag = TTi18n::strtolower($del_tag);
-						if ( isset($existing_tags[$del_tag]) AND TTUUID::isUUID( $existing_tags[$del_tag] ) AND $existing_tags[$del_tag] != TTUUID::getZeroID() ) {
+				$del_tag_ids = [];
+				if ( isset( $parsed_tags['delete'] ) ) {
+					foreach ( $parsed_tags['delete'] as $del_tag ) {
+						$del_tag = TTi18n::strtolower( $del_tag );
+						if ( isset( $existing_tags[$del_tag] ) && TTUUID::isUUID( $existing_tags[$del_tag] ) && $existing_tags[$del_tag] != TTUUID::getZeroID() ) {
 							$del_tag_ids[] = $existing_tags[$del_tag];
 						}
 					}
@@ -159,34 +162,34 @@ class CompanyGenericTagMapFactory extends Factory {
 				$cgtmlf = TTnew( 'CompanyGenericTagMapListFactory' ); /** @var CompanyGenericTagMapListFactory $cgtmlf */
 				$cgtmlf->getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $object_id );
 
-				$tmp_ids = array();
+				$tmp_ids = [];
 				foreach ( $cgtmlf as $obj ) {
 					$id = $obj->getTagID();
-					Debug::text('Object Type ID: '. $object_type_id .' Object ID: '. $obj->getObjectID() .' Tag ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text( 'Object Type ID: ' . $object_type_id . ' Object ID: ' . $obj->getObjectID() . ' Tag ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 
-					if ( in_array($id, $del_tag_ids) == TRUE ) {
-						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					if ( in_array( $id, $del_tag_ids ) == true ) {
+						Debug::text( 'Deleting: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'NOT Deleting: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 						$tmp_ids[] = $id;
 					}
 				}
-				unset($id, $obj);
+				unset( $id, $obj );
 				//Debug::Arr($tmp_ids, 'TMP Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Add new tags.
-				if ( isset($parsed_tags['add']) ) {
-					foreach( $parsed_tags['add'] as $add_tag ) {
-						$add_tag = TTi18n::strtolower($add_tag);
-						if ( isset($existing_tags[$add_tag])
-								AND TTUUID::isUUID( $existing_tags[$add_tag] ) AND  $existing_tags[$add_tag] != TTUUID::getZeroID() AND $existing_tags[$add_tag] != TTUUID::getNotExistID()
-								AND !in_array($existing_tags[$add_tag], $tmp_ids) ) {
-							$cgtmf = TTnew('CompanyGenericTagMapFactory'); /** @var CompanyGenericTagMapFactory $cgtmf */
+				if ( isset( $parsed_tags['add'] ) ) {
+					foreach ( $parsed_tags['add'] as $add_tag ) {
+						$add_tag = TTi18n::strtolower( $add_tag );
+						if ( isset( $existing_tags[$add_tag] )
+								&& TTUUID::isUUID( $existing_tags[$add_tag] ) && $existing_tags[$add_tag] != TTUUID::getZeroID() && $existing_tags[$add_tag] != TTUUID::getNotExistID()
+								&& !in_array( $existing_tags[$add_tag], $tmp_ids ) ) {
+							$cgtmf = TTnew( 'CompanyGenericTagMapFactory' ); /** @var CompanyGenericTagMapFactory $cgtmf */
 							$cgtmf->setObjectType( $object_type_id );
 							$cgtmf->setObjectID( $object_id );
-							$cgtmf->setTagID( $existing_tags[TTi18n::strtolower($add_tag)] );
+							$cgtmf->setTagID( $existing_tags[TTi18n::strtolower( $add_tag )] );
 							if ( $cgtmf->isValid() ) {
 								$cgtmf->Save();
 							}
@@ -195,10 +198,10 @@ class CompanyGenericTagMapFactory extends Factory {
 				}
 			}
 		} else {
-			Debug::Text('Object ID not set, skipping tags!', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'Object ID not set, skipping tags!', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -209,25 +212,25 @@ class CompanyGenericTagMapFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Object Type
-		$this->Validator->inArrayKey(	'object_type',
-												$this->getObjectType(),
-												TTi18n::gettext('Object Type is invalid'),
-												$this->getOptions('object_type')
-											);
+		$this->Validator->inArrayKey( 'object_type',
+									  $this->getObjectType(),
+									  TTi18n::gettext( 'Object Type is invalid' ),
+									  $this->getOptions( 'object_type' )
+		);
 		// Object ID
-		$this->Validator->isUUID(	'object_id',
-											$this->getObjectID(),
-											TTi18n::gettext('Object ID is invalid')
-										);
+		$this->Validator->isUUID( 'object_id',
+								  $this->getObjectID(),
+								  TTi18n::gettext( 'Object ID is invalid' )
+		);
 		// Tag ID
-		$this->Validator->isUUID(	'tag_id',
-											$this->getTagID(),
-											TTi18n::gettext('Tag ID is invalid')
-										);
+		$this->Validator->isUUID( 'tag_id',
+								  $this->getTagID(),
+								  TTi18n::gettext( 'Tag ID is invalid' )
+		);
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -236,105 +239,105 @@ class CompanyGenericTagMapFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -342,69 +345,69 @@ class CompanyGenericTagMapFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		$retval = FALSE;
+		$retval = false;
 		if ( $this->getObjectType() > 0 ) {
 			//Get Tag name.
-			$description = TTi18n::getText('Tag');
+			$description = TTi18n::getText( 'Tag' );
 			if ( is_object( $this->getTagObject() ) ) {
-				$description .= ': '. $this->getTagObject()->getName();
+				$description .= ': ' . $this->getTagObject()->getName();
 			}
 
-			switch( $this->getObjectType() ) {
-/*
-										100 => 'company',
-										110 => 'branch',
-										120 => 'department',
-										130 => 'stations',
-										140 => 'hierarchy',
-										150 => 'request',
-										160 => 'message',
-										170 => 'policy_group',
+			switch ( $this->getObjectType() ) {
+				/*
+														100 => 'company',
+														110 => 'branch',
+														120 => 'department',
+														130 => 'stations',
+														140 => 'hierarchy',
+														150 => 'request',
+														160 => 'message',
+														170 => 'policy_group',
 
-										200 => 'users',
-										210 => 'user_wage',
-										220 => 'user_title',
+														200 => 'users',
+														210 => 'user_wage',
+														220 => 'user_title',
 
-										300 => 'pay_stub_amendment',
+														300 => 'pay_stub_amendment',
 
-										400 => 'schedule',
-										410 => 'recurring_schedule_template',
+														400 => 'schedule',
+														410 => 'recurring_schedule_template',
 
-										500 => 'report',
-										510 => 'report_schedule',
+														500 => 'report',
+														510 => 'report_schedule',
 
-										600 => 'job',
-										610 => 'job_item',
+														600 => 'job',
+														610 => 'job_item',
 
-										700 => 'document',
+														700 => 'document',
 
-										800 => 'client',
-										810 => 'client_contact',
-										820 => 'client_payment',
+														800 => 'client',
+														810 => 'client_contact',
+														820 => 'client_payment',
 
-										900 => 'product',
-										910 => 'invoice',
+														900 => 'product',
+														910 => 'invoice',
 
-*/
+				*/
 				case 100:
 					$lf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $lf */
 					$lf->getById( $this->getObjectId() );
 					if ( $lf->getRecordCount() > 0 ) {
-						$description = ' - '.TTi18n::getText('Company').': '. $lf->getCurrent()->getName();
+						$description = ' - ' . TTi18n::getText( 'Company' ) . ': ' . $lf->getCurrent()->getName();
 					}
 
-					Debug::text('Action: '. $log_action .' TagID: '. $this->getTagID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
-					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'company' );
+					Debug::text( 'Action: ' . $log_action . ' TagID: ' . $this->getTagID() . ' ObjectID: ' . $this->getObjectID() . ' Description: ' . $description, __FILE__, __LINE__, __METHOD__, 10 );
+					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, null, 'company' );
 					break;
 				case 200:
 					$lf = TTnew( 'UserListFactory' ); /** @var UserListFactory $lf */
 					$lf->getById( $this->getObjectId() );
 					if ( $lf->getRecordCount() > 0 ) {
-						$description .= ' - '.TTi18n::getText('Employee').': '. $lf->getCurrent()->getFullName();
+						$description .= ' - ' . TTi18n::getText( 'Employee' ) . ': ' . $lf->getCurrent()->getFullName();
 					}
 
-					Debug::text('Action: '. $log_action .' TagID: '. $this->getTagID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
-					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'users' );
+					Debug::text( 'Action: ' . $log_action . ' TagID: ' . $this->getTagID() . ' ObjectID: ' . $this->getObjectID() . ' Description: ' . $description, __FILE__, __LINE__, __METHOD__, 10 );
+					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, null, 'users' );
 					break;
 			}
 		}
@@ -413,4 +416,5 @@ class CompanyGenericTagMapFactory extends Factory {
 	}
 
 }
+
 ?>

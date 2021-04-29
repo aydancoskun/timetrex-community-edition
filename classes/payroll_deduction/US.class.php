@@ -44,17 +44,17 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	//
 	function setFederalFilingStatus( $value ) {
 		//Check for invalid value, default to single if found.
-		if ( in_array( $value, array(10, 20, 40) ) == FALSE ) {
+		if ( in_array( $value, [ 10, 20, 40 ] ) == false ) {
 			$value = 10; //Single
 		}
 
 		$this->data['federal_filing_status'] = (int)$value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalFilingStatus() {
-		if ( isset( $this->data['federal_filing_status'] ) AND $this->data['federal_filing_status'] != '' ) {
+		if ( isset( $this->data['federal_filing_status'] ) && $this->data['federal_filing_status'] != '' ) {
 			return $this->data['federal_filing_status'];
 		}
 
@@ -64,7 +64,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function setFederalAllowance( $value ) {
 		$this->data['federal_allowance'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalAllowance() {
@@ -72,18 +72,18 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['federal_allowance'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setFederalFormW4Version( $value ) {
 		//Check for invalid value, default to single if found.
-		if ( in_array( $value, array(2019, 2020) ) == FALSE ) {
+		if ( in_array( $value, [ 2019, 2020 ] ) == false ) {
 			$value = 2019; //Default to 2019 version.
 		}
 
 		$this->data['federal_form_w4_version'] = (string)$value; //2019 or 2010
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalFormW4Version() {
@@ -98,7 +98,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function setFederalMultipleJobs( $value ) {
 		$this->data['federal_multiple_jobs'] = (bool)$value; //Boolean Yes/No
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalMultipleJobs() {
@@ -106,13 +106,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['federal_multiple_jobs'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setFederalClaimDependents( $value ) {
 		$this->data['federal_claim_dependents'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalClaimDependents() {
@@ -120,13 +120,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['federal_claim_dependents'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setFederalOtherIncome( $value ) {
 		$this->data['federal_other_income'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalOtherIncome() {
@@ -134,13 +134,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['federal_other_income'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setFederalDeductions( $value ) {
 		$this->data['federal_deductions'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalDeductions() {
@@ -148,13 +148,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['federal_deductions'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setFederalAdditionalDeduction( $value ) {
 		$this->data['federal_additional_deduction'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalAdditionalDeduction() {
@@ -162,17 +162,17 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['federal_additional_deduction'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setYearToDateSocialSecurityContribution( $value ) {
 		if ( $value > 0 ) {
 			$this->data['social_security_ytd_contribution'] = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getYearToDateSocialSecurityContribution() {
@@ -187,10 +187,10 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		if ( $value > 0 ) {
 			$this->data['federal_ui_ytd_contribution'] = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getYearToDateFederalUIContribution() {
@@ -204,7 +204,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function setFederalTaxExempt( $value ) {
 		$this->data['federal_tax_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalTaxExempt() {
@@ -212,7 +212,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['federal_tax_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -221,11 +221,11 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function setStateFilingStatus( $value ) {
 		$this->data['state_filing_status'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getStateFilingStatus() {
-		if ( isset( $this->data['state_filing_status'] ) AND $this->data['state_filing_status'] != '' ) {
+		if ( isset( $this->data['state_filing_status'] ) && $this->data['state_filing_status'] != '' ) {
 			return $this->data['state_filing_status'];
 		}
 
@@ -235,7 +235,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function setStateAllowance( $value ) {
 		$this->data['state_allowance'] = (int)$value; //Don't allow fractions, like 1.5 allowances, as this can cause problems with rate lookups failing when its expecting 1 or 2, and it gets 1.5
 
-		return TRUE;
+		return true;
 	}
 
 	function getStateAllowance() {
@@ -243,13 +243,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['state_allowance'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setStateAdditionalDeduction( $value ) {
 		$this->data['state_additional_deduction'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getStateAdditionalDeduction() {
@@ -257,12 +257,12 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['state_additional_deduction'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//Default to 0 unless otherwise defined in a State specific class.
 	function getStateTaxPayable() {
-		if ( $this->getProvincialTaxExempt() == TRUE ) {
+		if ( $this->getProvincialTaxExempt() == true ) {
 			Debug::text( 'State Tax Exempt!', __FILE__, __LINE__, __METHOD__, 10 );
 
 			return 0;
@@ -286,7 +286,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
 			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getStateHighestRate(), 1.25 ) );
-			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+			if ( $highest_taxable_amount > 0 && $retval > $highest_taxable_amount ) {
 				$retval = $highest_taxable_amount;
 				Debug::text( 'State tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
 			}
@@ -312,7 +312,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
 			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getDistrictHighestRate(), 1.25 ) );
-			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+			if ( $highest_taxable_amount > 0 && $retval > $highest_taxable_amount ) {
 				$retval = $highest_taxable_amount;
 				Debug::text( 'District tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
 			}
@@ -339,7 +339,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			$retval = bcmul( $annual_income, $rate );
 		}
 
-		if ( !isset( $retval ) OR $retval < 0 ) {
+		if ( !isset( $retval ) || $retval < 0 ) {
 			$retval = 0;
 		}
 
@@ -351,7 +351,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function setDistrictFilingStatus( $value ) {
 		$this->data['district_filing_status'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getDistrictFilingStatus() {
@@ -365,7 +365,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function setDistrictAllowance( $value ) {
 		$this->data['district_allowance'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getDistrictAllowance() {
@@ -373,17 +373,17 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['district_allowance'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setYearToDateStateUIContribution( $value ) {
 		if ( $value > 0 ) {
 			$this->data['state_ui_ytd_contribution'] = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getYearToDateStateUIContribution() {
@@ -398,10 +398,10 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		if ( $value > 0 ) {
 			$this->data['state_ui_rate'] = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getStateUIRate() {
@@ -416,10 +416,10 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		if ( $value > 0 ) {
 			$this->data['state_ui_wage_base'] = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getStateUIWageBase() {
@@ -433,7 +433,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function setProvincialTaxExempt( $value ) {
 		$this->data['provincial_tax_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getProvincialTaxExempt() {
@@ -441,13 +441,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['provincial_tax_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setSocialSecurityExempt( $value ) {
 		$this->data['social_security_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getSocialSecurityExempt() {
@@ -455,13 +455,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['social_security_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setMedicareExempt( $value ) {
 		$this->data['medicare_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getMedicareExempt() {
@@ -469,13 +469,13 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['medicare_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setUIExempt( $value ) {
 		$this->data['ui_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getUIExempt() {
@@ -483,7 +483,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			return $this->data['ui_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//
@@ -515,7 +515,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
 			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getFederalHighestRate(), 1.25 ) );
-			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+			if ( $highest_taxable_amount > 0 && $retval > $highest_taxable_amount ) {
 				$retval = $highest_taxable_amount;
 				Debug::text( 'Federal tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
 			}
@@ -529,19 +529,19 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	}
 
 	function getFederalTaxPayable() {
-		if ( $this->getFederalTaxExempt() == TRUE ) {
+		if ( $this->getFederalTaxExempt() == true ) {
 			Debug::text( 'Federal Tax Exempt!', __FILE__, __LINE__, __METHOD__, 10 );
 
 			return 0;
 		}
 
 		$annual_taxable_income = $this->getAnnualTaxableIncome();
-		if ( $this->getDate() >= 20200101 AND $this->getFederalFormW4Version() == 2020 ) { //See Form W4 Version check below as well.
+		if ( $this->getDate() >= 20200101 && $this->getFederalFormW4Version() == 2020 ) { //See Form W4 Version check below as well.
 			$annual_taxable_income = bcadd( $annual_taxable_income, $this->getFederalOtherIncome() );
 
 			$filing_status_adjustment = 0;
-			if ( $this->getFederalMultipleJobs() == FALSE ) {
-				if ( $this->getFederalFilingStatus() == 20 ) { //Married Filing Jointly
+			if ( $this->getFederalMultipleJobs() == false ) {
+				if ( $this->getFederalFilingStatus() == 20 ) {                                                    //Married Filing Jointly
 					$filing_status_adjustment = bcmul( $this->getFederalAllowanceAmount( $this->getDate() ), 3 ); //$12,600 (4,200 * 3 )
 				} else {
 					$filing_status_adjustment = bcmul( $this->getFederalAllowanceAmount( $this->getDate() ), 2 ); //$8,400 ( 4,200 * 2 )
@@ -571,7 +571,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 			$retval = bcadd( bcmul( bcsub( $annual_taxable_income, $federal_rate_income ), $rate ), $federal_constant );
 
-			if ( $this->getDate() >= 20200101 AND $this->getFederalFormW4Version() == 2020 ) {  //See Form W4 Version check above as well.
+			if ( $this->getDate() >= 20200101 && $this->getFederalFormW4Version() == 2020 ) {  //See Form W4 Version check above as well.
 				$additional_deduction = 0;
 				if ( $this->getFederalAdditionalDeduction() > 0 ) {
 					$additional_deduction = bcmul( $this->getFederalAdditionalDeduction(), $this->getAnnualPayPeriods() ); //Federal Deduction amount from 2020 W4 is *PER PAY PERIOD*
@@ -597,7 +597,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	// Social Security
 	//
 	function getAnnualEmployeeSocialSecurity() {
-		if ( $this->getSocialSecurityExempt() == TRUE ) {
+		if ( $this->getSocialSecurityExempt() == true ) {
 			return 0;
 		}
 
@@ -624,7 +624,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	}
 
 	function getEmployeeSocialSecurity() {
-		if ( $this->getSocialSecurityExempt() == TRUE ) {
+		if ( $this->getSocialSecurityExempt() == true ) {
 			return 0;
 		}
 
@@ -654,7 +654,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	}
 
 	function getEmployerSocialSecurity() {
-		if ( $this->getSocialSecurityExempt() == TRUE ) {
+		if ( $this->getSocialSecurityExempt() == true ) {
 			return 0;
 		}
 
@@ -692,7 +692,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	}
 
 	function getEmployeeMedicare() {
-		if ( $this->getMedicareExempt() == TRUE ) {
+		if ( $this->getMedicareExempt() == true ) {
 			return 0;
 		}
 
@@ -707,7 +707,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 		$threshold_income = $this->getMedicareAdditionalEmployerThreshold();
 		Debug::text( 'Threshold Income: ' . $threshold_income, __FILE__, __LINE__, __METHOD__, 10 );
-		if ( $threshold_income > 0 AND bcadd( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome() ) > $threshold_income ) {
+		if ( $threshold_income > 0 && bcadd( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome() ) > $threshold_income ) {
 			if ( $this->getYearToDateGrossIncome() < $threshold_income ) {
 				$threshold_income = bcsub( bcadd( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome() ), $threshold_income );
 			} else {
@@ -728,7 +728,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 	function getEmployerMedicare() {
 		//return $this->getEmployeeMedicare();
-		if ( $this->getMedicareExempt() == TRUE ) {
+		if ( $this->getMedicareExempt() == true ) {
 			return 0;
 		}
 
@@ -751,7 +751,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	// Federal UI
 	//
 	function getFederalEmployerUI() {
-		if ( $this->getUIExempt() == TRUE ) {
+		if ( $this->getUIExempt() == true ) {
 			return 0;
 		}
 
@@ -799,7 +799,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	*/
 	function getArray() {
 
-		$array = array(
+		$array = [
 				'gross_pay'                => $this->getGrossPayPeriodIncome(),
 				'federal_tax'              => $this->getFederalPayPeriodDeductions(),
 				'state_tax'                => $this->getStatePayPeriodDeductions(),
@@ -813,7 +813,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 				'federal_employer_ui'      => $this->getFederalEmployerUI(),
 				//						'state_employer_ui' => $this->getStateEmployerUI(),
 
-		);
+		];
 
 		Debug::Arr( $array, 'Deductions Array:', __FILE__, __LINE__, __METHOD__, 10 );
 

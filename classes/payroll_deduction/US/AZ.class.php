@@ -52,15 +52,15 @@ class PayrollDeduction_US_AZ extends PayrollDeduction_US {
 		//add some checks so if an employee's amount isn't changed we default to the closest rate.
 		if ( $rate >= 39.5 ) {
 			$rate = 5.1;
-		} elseif ( $rate >= 33.1 ) {
+		} else if ( $rate >= 33.1 ) {
 			$rate = 4.2;
-		} elseif ( $rate >= 26.7 ) {
+		} else if ( $rate >= 26.7 ) {
 			$rate = 3.6;
-		} elseif ( $rate >= 24.5 ) {
+		} else if ( $rate >= 24.5 ) {
 			$rate = 2.7;
-		} elseif ( $rate >= 20.3 ) {
+		} else if ( $rate >= 20.3 ) {
 			$rate = 1.8;
-		} elseif ( $rate >= 10.7 ) {
+		} else if ( $rate >= 10.7 ) {
 			$rate = 1.3;
 		}
 		Debug::text( ' Adjusted Rate: ' . $rate, __FILE__, __LINE__, __METHOD__, 10 );

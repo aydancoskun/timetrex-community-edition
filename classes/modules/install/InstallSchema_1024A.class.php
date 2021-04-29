@@ -44,9 +44,9 @@ class InstallSchema_1024A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -54,36 +54,36 @@ class InstallSchema_1024A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Go through each permission group, and enable payroll export report for anyone who can see pay stub summary report.
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+			foreach ( $clf as $c_obj ) {
+				Debug::text( 'Company: ' . $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 				if ( $c_obj->getStatus() != 30 ) {
 					$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to avoid referencing column that was added in a later version (level)
+					$pclf->getByCompanyId( $c_obj->getId(), null, null, null, [ 'name' => 'asc' ] ); //Force order to avoid referencing column that was added in a later version (level)
 					if ( $pclf->getRecordCount() > 0 ) {
-						foreach( $pclf as $pc_obj ) {
-							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+						foreach ( $pclf as $pc_obj ) {
+							Debug::text( 'Permission Group: ' . $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 							$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $c_obj->getId(), $pc_obj->getId(), 'report', 'view_pay_stub_summary', 1 );
 							if ( $plf->getRecordCount() > 0 ) {
-								Debug::text('Found permission group with pay stub report enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
-								$pc_obj->setPermission( array('report' => array('view_payroll_export' => TRUE) ) );
+								Debug::text( 'Found permission group with pay stub report enabled: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
+								$pc_obj->setPermission( [ 'report' => [ 'view_payroll_export' => true ] ] );
 							} else {
-								Debug::text('Permission group does NOT have pay stub report enabled...', __FILE__, __LINE__, __METHOD__, 9);
+								Debug::text( 'Permission group does NOT have pay stub report enabled...', __FILE__, __LINE__, __METHOD__, 9 );
 							}
 						}
 					}
-
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

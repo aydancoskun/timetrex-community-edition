@@ -47,15 +47,15 @@ class UserSettingFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'type':
-				$retval = array(
-								10 => TTi18n::gettext('Public'),
-								20 => TTi18n::gettext('Private'),
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Public' ),
+						20 => TTi18n::gettext( 'Private' ),
+				];
 				break;
 		}
 
@@ -67,17 +67,18 @@ class UserSettingFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'user_id' => 'User',
-										'first_name' => FALSE,
-										'last_name' => FALSE,
-										'type_id' => 'Type',
-										'type' => FALSE,
-										'name' => 'Name',
-										'value' => 'Value',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'         => 'ID',
+				'user_id'    => 'User',
+				'first_name' => false,
+				'last_name'  => false,
+				'type_id'    => 'Type',
+				'type'       => false,
+				'name'       => 'Name',
+				'value'      => 'Value',
+				'deleted'    => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -85,37 +86,37 @@ class UserSettingFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		if ( $this->getUser() == FALSE ) {
-			return FALSE;
+	function isUniqueName( $name ) {
+		if ( $this->getUser() == false ) {
+			return false;
 		}
 
-		$name = trim($name);
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => TTUUID::castUUID($this->getUser()),
-					'name' => TTi18n::strtolower($name),
-					);
+		$ph = [
+				'user_id' => TTUUID::castUUID( $this->getUser() ),
+				'name'    => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->getTable() .'
+		$query = 'select id from ' . $this->getTable() . '
 					where user_id = ?
 						AND lower(name) = ?
 						AND deleted = 0';
-		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$name_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -131,6 +132,7 @@ class UserSettingFactory extends Factory {
 	 */
 	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -146,7 +148,8 @@ class UserSettingFactory extends Factory {
 	 * @return bool
 	 */
 	function setType( $value ) {
-		$value = (int)trim($value);
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'type_id', $value );
 	}
 
@@ -161,8 +164,9 @@ class UserSettingFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim($value);
+	function setName( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -177,8 +181,9 @@ class UserSettingFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setValue( $value) {
-		$value = trim($value);
+	function setValue( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'value', $value );
 	}
 
@@ -191,52 +196,54 @@ class UserSettingFactory extends Factory {
 		//
 		// User
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$this->Validator->isResultSetWithRows(	'user_id',
-														$ulf->getByID($this->getUser()),
-														TTi18n::gettext('Invalid Employee')
-													);
+		$this->Validator->isResultSetWithRows( 'user_id',
+											   $ulf->getByID( $this->getUser() ),
+											   TTi18n::gettext( 'Invalid Employee' )
+		);
 		// Type
-		$this->Validator->inArrayKey(	'type',
-												$this->getType(),
-												TTi18n::gettext('Incorrect Type'),
-												$this->getOptions('type')
-											);
+		$this->Validator->inArrayKey( 'type',
+									  $this->getType(),
+									  TTi18n::gettext( 'Incorrect Type' ),
+									  $this->getOptions( 'type' )
+		);
 		// Name
-		$this->Validator->isLength(	'name',
-											$this->getName(),
-											TTi18n::gettext('Name is too short or too long'),
-											1, 250
-										);
-		if ( $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isTrue(	'name',
-												$this->isUniqueName($this->getName()),
-												TTi18n::gettext('Name already exists')
-											);
+		$this->Validator->isLength( 'name',
+									$this->getName(),
+									TTi18n::gettext( 'Name is too short or too long' ),
+									1, 250
+		);
+		if ( $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Name already exists' )
+			);
 		}
 		// Value
-		$this->Validator->isLength(	'value',
-											$this->getValue(),
-											TTi18n::gettext('Value is too short or too long'),
-											1, 4096
-										);
+		$this->Validator->isLength( 'value',
+									$this->getValue(),
+									TTi18n::gettext( 'Value is too short or too long' ),
+									1, 4096
+		);
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
+
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postSave() {
-		$this->removeCache( $this->getUser().$this->getName() );
-		return TRUE;
+		$this->removeCache( $this->getUser() . $this->getName() );
+
+		return true;
 	}
 
 	/**
@@ -246,11 +253,11 @@ class UserSettingFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -262,31 +269,31 @@ class UserSettingFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'first_name':
 						case 'last_name':
 							$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'type':
-							$function = 'get'.$variable;
+							$function = 'get' . $variable;
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -297,7 +304,6 @@ class UserSettingFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -311,7 +317,7 @@ class UserSettingFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('User Setting - Name').': '. $this->getName() .' '. TTi18n::getText('Value').': '. $this->getValue(), NULL, $this->getTable() );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'User Setting - Name' ) . ': ' . $this->getName() . ' ' . TTi18n::getText( 'Value' ) . ': ' . $this->getValue(), null, $this->getTable() );
 	}
 
 	/**
@@ -325,10 +331,11 @@ class UserSettingFactory extends Factory {
 		if ( $uslf->getRecordCount() == 1 ) {
 			$us_obj = $uslf->getCurrent();
 			$retarr = $us_obj->getObjectAsArray();
+
 			return $retarr;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -339,12 +346,12 @@ class UserSettingFactory extends Factory {
 	 * @return bool
 	 */
 	static function setUserSetting( $user_id, $name, $value, $type_id = 10 ) {
-		$row = array(
-			'user_id' => $user_id,
-			'name' => $name,
-			'value' => $value,
-			'type_id' => $type_id
-		);
+		$row = [
+				'user_id' => $user_id,
+				'name'    => $name,
+				'value'   => $value,
+				'type_id' => $type_id,
+		];
 		$uslf = new UserSettingListFactory();
 		$uslf->getByUserIdAndName( $user_id, $name );
 		if ( $uslf->getRecordCount() == 1 ) {
@@ -354,15 +361,15 @@ class UserSettingFactory extends Factory {
 			$usf = new UserSettingFactory();
 		}
 
-		Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 		$usf->setObjectFromArray( $row );
 		if ( $usf->isValid() ) {
 			return $usf->Save();
 		}
 
-		return FALSE;
-
+		return false;
 	}
+
 	/**
 	 * @param string $user_id UUID
 	 * @param $name
@@ -373,13 +380,14 @@ class UserSettingFactory extends Factory {
 		$uslf->getByUserIdAndName( $user_id, $name );
 		if ( $uslf->getRecordCount() == 1 ) {
 			$usf = $uslf->getCurrent();
-			$usf->setDeleted(TRUE);
+			$usf->setDeleted( true );
 			if ( $usf->isValid() ) {
 				$usf->Save();
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

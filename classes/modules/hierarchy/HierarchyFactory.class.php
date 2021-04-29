@@ -42,7 +42,7 @@ class HierarchyFactory extends Factory {
 
 	protected $table = 'hierarchy'; //Used for caching purposes only.
 
-	protected $fasttree_obj = NULL;
+	protected $fasttree_obj = null;
 	//protected $tmp_data = array(); //Tmp data.
 
 	/**
@@ -50,11 +50,11 @@ class HierarchyFactory extends Factory {
 	 */
 	function getFastTreeObject() {
 
-		if ( is_object($this->fasttree_obj) ) {
+		if ( is_object( $this->fasttree_obj ) ) {
 			return $this->fasttree_obj;
 		} else {
 			global $fast_tree_options;
-			$this->fasttree_obj = new FastTree($fast_tree_options);
+			$this->fasttree_obj = new FastTree( $fast_tree_options );
 
 			return $this->fasttree_obj;
 		}
@@ -71,10 +71,10 @@ class HierarchyFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setId( $value) {
+	function setId( $value ) {
 		$this->setGenericDataValue( 'id', TTUUID::castUUID( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -88,9 +88,10 @@ class HierarchyFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setHierarchyControl( $value) {
+	function setHierarchyControl( $value ) {
 		$this->setGenericDataValue( 'hierarchy_control_id', TTUUID::castUUID( $value ) );
-		return TRUE;
+
+		return true;
 	}
 
 	/**
@@ -106,9 +107,10 @@ class HierarchyFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPreviousUser( $value) {
+	function setPreviousUser( $value ) {
 		$this->setGenericDataValue( 'previous_user_id', TTUUID::castUUID( $value ) );
-		return TRUE;
+
+		return true;
 	}
 
 	/**
@@ -122,9 +124,10 @@ class HierarchyFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setParent( $value) {
+	function setParent( $value ) {
 		$this->setGenericDataValue( 'parent_user_id', TTUUID::castUUID( $value ) );
-		return TRUE;
+
+		return true;
 	}
 
 	/**
@@ -138,9 +141,10 @@ class HierarchyFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$this->setGenericDataValue( 'user_id', TTUUID::castUUID( $value ) );
-		return TRUE;
+
+		return true;
 	}
 
 	/**
@@ -154,8 +158,8 @@ class HierarchyFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setShared( $value) {
-		return $this->setGenericDataValue( 'shared', $this->toBool($value) );
+	function setShared( $value ) {
+		return $this->setGenericDataValue( 'shared', $this->toBool( $value ) );
 	}
 
 
@@ -163,34 +167,34 @@ class HierarchyFactory extends Factory {
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 
 		if ( $this->getUser() == $this->getParent() ) {
-				$this->Validator->isTrue(	'parent',
-											FALSE,
-											TTi18n::gettext('User is the same as parent')
-											);
+			$this->Validator->isTrue( 'parent',
+									  false,
+									  TTi18n::gettext( 'User is the same as parent' )
+			);
 		}
 
 		//Make sure both user and parent belong to the same company
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->getUser() );
 		$user = $ulf->getIterator()->current();
-		unset($ulf);
+		unset( $ulf );
 
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getById( $this->getParent() );
 		$parent = $ulf->getIterator()->current();
-		unset($ulf);
+		unset( $ulf );
 
 
-		if ( $this->getUser() == TTUUID::getZeroID() AND $this->getParent() == TTUUID::getZeroID() ) {
+		if ( $this->getUser() == TTUUID::getZeroID() && $this->getParent() == TTUUID::getZeroID() ) {
 			$parent_company_id = TTUUID::getZeroID();
 			$user_company_id = TTUUID::getZeroID();
-		} elseif ( $this->getUser() == TTUUID::getZeroID() ) {
+		} else if ( $this->getUser() == TTUUID::getZeroID() ) {
 			$parent_company_id = $parent->getCompany();
 			$user_company_id = $parent->getCompany();
-		} elseif ( $this->getParent() == TTUUID::getZeroID() ) {
+		} else if ( $this->getParent() == TTUUID::getZeroID() ) {
 			$parent_company_id = $user->getCompany();
 			$user_company_id = $user->getCompany();
 		} else {
@@ -198,32 +202,32 @@ class HierarchyFactory extends Factory {
 			$user_company_id = $user->getCompany();
 		}
 
-		if ( TTUUID::isUUID($user_company_id) AND $user_company_id != TTUUID::getZeroID() AND $user_company_id != TTUUID::getNotExistID() AND TTUUID::isUUID($parent_company_id) AND $parent_company_id != TTUUID::getZeroID() AND $parent_company_id != TTUUID::getNotExistID() ) {
+		if ( TTUUID::isUUID( $user_company_id ) && $user_company_id != TTUUID::getZeroID() && $user_company_id != TTUUID::getNotExistID() && TTUUID::isUUID( $parent_company_id ) && $parent_company_id != TTUUID::getZeroID() && $parent_company_id != TTUUID::getNotExistID() ) {
 
-			Debug::Text(' User Company: '. $user_company_id .' Parent Company: '. $parent_company_id, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( ' User Company: ' . $user_company_id . ' Parent Company: ' . $parent_company_id, __FILE__, __LINE__, __METHOD__, 10 );
 			if ( $user_company_id != $parent_company_id ) {
-					$this->Validator->isTrue(	'parent',
-												FALSE,
-												TTi18n::gettext('User or parent has incorrect company')
-												);
+				$this->Validator->isTrue( 'parent',
+										  false,
+										  TTi18n::gettext( 'User or parent has incorrect company' )
+				);
 			}
 
 			$this->getFastTreeObject()->setTree( $this->getHierarchyControl() );
 			$children_arr = $this->getFastTreeObject()->getAllChildren( $this->getUser(), 'RECURSE' );
-			if ( is_array($children_arr) ) {
+			if ( is_array( $children_arr ) ) {
 				$children_ids = array_keys( $children_arr );
 
-				if ( isset($children_ids) AND is_array($children_ids) AND in_array( $this->getParent(), $children_ids) == TRUE ) {
-					Debug::Text(' Objects cant be re-parented to their own children...', __FILE__, __LINE__, __METHOD__, 10);
-					$this->Validator->isTrue(	'parent',
-												FALSE,
-												TTi18n::gettext('Unable to change parent to a child of itself')
-												);
+				if ( isset( $children_ids ) && is_array( $children_ids ) && in_array( $this->getParent(), $children_ids ) == true ) {
+					Debug::Text( ' Objects cant be re-parented to their own children...', __FILE__, __LINE__, __METHOD__, 10 );
+					$this->Validator->isTrue( 'parent',
+											  false,
+											  TTi18n::gettext( 'Unable to change parent to a child of itself' )
+					);
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -231,61 +235,62 @@ class HierarchyFactory extends Factory {
 	 * @param bool $force_lookup
 	 * @return bool
 	 */
-	function Save( $reset_data = TRUE, $force_lookup = FALSE ) {
+	function Save( $reset_data = true, $force_lookup = false ) {
 		$this->StartTransaction();
 
 		$this->getFastTreeObject()->setTree( $this->getHierarchyControl() );
 
-		$retval = TRUE;
-		if ( $this->getId() === FALSE ) {
-			Debug::Text(' Adding Node ', __FILE__, __LINE__, __METHOD__, 10);
+		$retval = true;
+		if ( $this->getId() === false ) {
+			Debug::Text( ' Adding Node ', __FILE__, __LINE__, __METHOD__, 10 );
 			$log_action = 10;
 
 			//Add node to tree
-			if ( $this->getFastTreeObject()->add( $this->getUser(), $this->getParent() ) === FALSE ) {
-				Debug::Text(' Failed adding Node ', __FILE__, __LINE__, __METHOD__, 10);
+			if ( $this->getFastTreeObject()->add( $this->getUser(), $this->getParent() ) === false ) {
+				Debug::Text( ' Failed adding Node ', __FILE__, __LINE__, __METHOD__, 10 );
 
-				$this->Validator->isTrue(	'user',
-											FALSE,
-											TTi18n::gettext('Employee is already assigned to this hierarchy')
-											);
-				$retval = FALSE;
+				$this->Validator->isTrue( 'user',
+										  false,
+										  TTi18n::gettext( 'Employee is already assigned to this hierarchy' )
+				);
+				$retval = false;
 			}
 		} else {
-			Debug::Text(' Editing Node ', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( ' Editing Node ', __FILE__, __LINE__, __METHOD__, 10 );
 			$log_action = 20;
 
 			//Edit node.
-			if ( $this->getFastTreeObject()->edit( $this->getPreviousUser(), $this->getUser() ) === TRUE ) {
+			if ( $this->getFastTreeObject()->edit( $this->getPreviousUser(), $this->getUser() ) === true ) {
 				$retval = $this->getFastTreeObject()->move( $this->getUser(), $this->getParent() );
 			} else {
-				Debug::Text(' Failed editing Node ', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( ' Failed editing Node ', __FILE__, __LINE__, __METHOD__, 10 );
 
 				//$retval = FALSE;
-				$retval = TRUE;
+				$retval = true;
 			}
 		}
 
-		TTLog::addEntry( $this->getUser(), $log_action, TTi18n::getText('Hierarchy Tree - Control ID').': '.$this->getHierarchyControl(), NULL, $this->getTable() );
+		TTLog::addEntry( $this->getUser(), $log_action, TTi18n::getText( 'Hierarchy Tree - Control ID' ) . ': ' . $this->getHierarchyControl(), null, $this->getTable() );
 
 		$this->CommitTransaction();
 		//$this->FailTransaction();
 
-		$cache_id = $this->getHierarchyControl().$this->getParent();
+		$cache_id = $this->getHierarchyControl() . $this->getParent();
 		$this->removeCache( $cache_id );
 
 		return $retval;
 	}
 
 	/**
+	 * @param bool $disable_audit_log
 	 * @return bool
 	 */
-	function Delete( $disable_audit_log = FALSE ) {
-		if ( $this->getUser() !== FALSE ) {
-			return TRUE;
+	function Delete( $disable_audit_log = false ) {
+		if ( $this->getUser() !== false ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -294,75 +299,75 @@ class HierarchyFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -370,31 +375,32 @@ class HierarchyFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 }
+
 ?>

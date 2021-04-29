@@ -40,30 +40,30 @@
  */
 class PayrollDeduction_US_WV extends PayrollDeduction_US {
 
-	var $state_income_tax_rate_options = array(
-			20060101 => array(
-					10 => array(
-							array('income' => 10000, 'rate' => 3.0, 'constant' => 0),
-							array('income' => 25000, 'rate' => 4.0, 'constant' => 300),
-							array('income' => 40000, 'rate' => 4.5, 'constant' => 900),
-							array('income' => 60000, 'rate' => 6.0, 'constant' => 1575),
-							array('income' => 60000, 'rate' => 6.5, 'constant' => 2775),
-					),
-					20 => array(
-							array('income' => 6000, 'rate' => 3.0, 'constant' => 0),
-							array('income' => 15000, 'rate' => 4.0, 'constant' => 180),
-							array('income' => 24000, 'rate' => 4.5, 'constant' => 540),
-							array('income' => 36000, 'rate' => 6.0, 'constant' => 945),
-							array('income' => 36000, 'rate' => 6.5, 'constant' => 1665),
-					),
-			),
-	);
+	var $state_income_tax_rate_options = [
+			20060101 => [
+					10 => [
+							[ 'income' => 10000, 'rate' => 3.0, 'constant' => 0 ],
+							[ 'income' => 25000, 'rate' => 4.0, 'constant' => 300 ],
+							[ 'income' => 40000, 'rate' => 4.5, 'constant' => 900 ],
+							[ 'income' => 60000, 'rate' => 6.0, 'constant' => 1575 ],
+							[ 'income' => 60000, 'rate' => 6.5, 'constant' => 2775 ],
+					],
+					20 => [
+							[ 'income' => 6000, 'rate' => 3.0, 'constant' => 0 ],
+							[ 'income' => 15000, 'rate' => 4.0, 'constant' => 180 ],
+							[ 'income' => 24000, 'rate' => 4.5, 'constant' => 540 ],
+							[ 'income' => 36000, 'rate' => 6.0, 'constant' => 945 ],
+							[ 'income' => 36000, 'rate' => 6.5, 'constant' => 1665 ],
+					],
+			],
+	];
 
-	var $state_options = array(
-			20060101 => array(
+	var $state_options = [
+			20060101 => [
 					'allowance' => 2000,
-			),
-	);
+			],
+	];
 
 	function getStatePayPeriodDeductionRoundedValue( $amount ) {
 		return $this->RoundNearestDollar( $amount );
@@ -82,9 +82,8 @@ class PayrollDeduction_US_WV extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['allowance'];

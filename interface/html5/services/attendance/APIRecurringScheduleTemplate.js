@@ -43,5 +43,4 @@ var APIRecurringScheduleTemplate = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'copyRecurringScheduleTemplate', arguments );
 	}
 
-
 } );

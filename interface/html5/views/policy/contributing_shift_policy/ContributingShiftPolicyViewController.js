@@ -35,13 +35,13 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'contributing_shift_policy';
 		this.context_menu_name = $.i18n._( 'Contributing Shift Policy' );
 		this.navigation_label = $.i18n._( 'Contributing Shift Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIContributingShiftPolicy' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) )();
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_group_api = new (APIFactory.getAPIClass( 'APIJobGroup' ))();
-			this.job_item_group_api = new (APIFactory.getAPIClass( 'APIJobItemGroup' ))();
+			this.job_group_api = new ( APIFactory.getAPIClass( 'APIJobGroup' ) )();
+			this.job_item_group_api = new ( APIFactory.getAPIClass( 'APIJobItemGroup' ) )();
 		}
 
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 		this.render();
 		this.buildContextMenu();
 
@@ -91,17 +91,22 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-
 		var tab_model = {
 			'tab_contributing_shift_policy': { 'label': $.i18n._( 'Contributing Shift Policy' ) },
-			'tab_date_criteria': { 'label': $.i18n._( 'Date/Time Criteria' ), 'init_callback': 'initSubDateCriteriaView' },
-			'tab_differential_criteria': { 'label': $.i18n._( 'Differential Criteria' ), 'init_callback': 'initSubDifferentialCriteriaView' },
+			'tab_date_criteria': {
+				'label': $.i18n._( 'Date/Time Criteria' ),
+				'init_callback': 'initSubDateCriteriaView'
+			},
+			'tab_differential_criteria': {
+				'label': $.i18n._( 'Differential Criteria' ),
+				'init_callback': 'initSubDifferentialCriteriaView'
+			},
 			'tab_audit': true,
 		};
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.OVER_TIME_POLICY,
@@ -138,7 +143,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		// Wage Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingPayCodePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingPayCodePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
 			show_search_inputs: true,
@@ -258,7 +263,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		// Holiday Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIHolidayPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIHolidayPolicy' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.HOLIDAY_POLICY,
 			show_search_inputs: true,
@@ -306,7 +311,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -346,7 +351,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -419,7 +424,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -486,7 +491,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -696,7 +701,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'contributing_pay_code_policy_id',
 				layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIContributingPayCodePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIContributingPayCodePolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -708,7 +713,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -720,7 +725,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -728,6 +733,5 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

@@ -38,19 +38,19 @@
  * Checks for any version updates...
  *
  */
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
 $ttsc = new TimeTrexSoapClient();
-if ( $ttsc->isUpdateNotifyEnabled() == TRUE ) {
-	sleep( rand(0, 60) ); //Further randomize when calls are made.
+if ( $ttsc->isUpdateNotifyEnabled() == true ) {
+	sleep( rand( 0, 60 ) ); //Further randomize when calls are made.
 	$clf = new CompanyListFactory();
 	$clf->getAll();
 	if ( $clf->getRecordCount() > 0 ) {
 		$i = 0;
 		foreach ( $clf as $c_obj ) {
-			if ( $ttsc->getLocalRegistrationKey() == FALSE
-					OR $ttsc->getLocalRegistrationKey() == '' ) {
+			if ( $ttsc->getLocalRegistrationKey() == false
+					|| $ttsc->getLocalRegistrationKey() == '' ) {
 				$ttsc->saveRegistrationKey();
 			}
 
@@ -63,9 +63,9 @@ if ( $ttsc->isUpdateNotifyEnabled() == TRUE ) {
 
 			//Check for new license once it starts expiring.
 			//Help -> About, checking for new versions also gets the updated license file.
-			if ( $i == 0 AND getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
-				if ( !isset($system_settings['license']) ) {
-					$system_settings['license'] = NULL;
+			if ( $i == 0 && getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+				if ( !isset( $system_settings['license'] ) ) {
+					$system_settings['license'] = null;
 				}
 
 				$license = new TTLicense();
@@ -77,7 +77,7 @@ if ( $ttsc->isUpdateNotifyEnabled() == TRUE ) {
 				$latest_version = $ttsc->isLatestVersion( $c_obj->getId() );
 
 				$sslf = new SystemSettingListFactory();
-				$sslf->getByName('new_version');
+				$sslf->getByName( 'new_version' );
 				if ( $sslf->getRecordCount() == 1 ) {
 					$obj = $sslf->getCurrent();
 				} else {
@@ -85,7 +85,7 @@ if ( $ttsc->isUpdateNotifyEnabled() == TRUE ) {
 				}
 				$obj->setName( 'new_version' );
 
-				if( $latest_version == FALSE ) {
+				if ( $latest_version == false ) {
 					$obj->setValue( 1 );
 				} else {
 					$obj->setValue( 0 );
@@ -100,7 +100,7 @@ if ( $ttsc->isUpdateNotifyEnabled() == TRUE ) {
 		}
 	}
 } else {
-	Debug::Text('Auto Update Notifications are disabled!', __FILE__, __LINE__, __METHOD__, 10);
+	Debug::Text( 'Auto Update Notifications are disabled!', __FILE__, __LINE__, __METHOD__, 10 );
 }
 Debug::writeToLog();
 Debug::Display();

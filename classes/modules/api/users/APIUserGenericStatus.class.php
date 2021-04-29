@@ -47,7 +47,7 @@ class APIUserGenericStatus extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -57,7 +57,7 @@ class APIUserGenericStatus extends APIFactory {
 	 * @param bool $disable_paging
 	 * @return array
 	 */
-	function getUserGenericStatus( $data = NULL, $disable_paging = FALSE ) {
+	function getUserGenericStatus( $data = null, $disable_paging = false ) {
 
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
@@ -67,9 +67,9 @@ class APIUserGenericStatus extends APIFactory {
 			$batch_id = $data['filter_data']['batch_id'];
 
 			$ugslf = TTnew( 'UserGenericStatusListFactory' ); /** @var UserGenericStatusListFactory $ugslf */
-			$ugslf->getByUserIdAndBatchId( $user_id, $batch_id, $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+			$ugslf->getByUserIdAndBatchId( $user_id, $batch_id, $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 
-			Debug::Text('Record Count: '. $ugslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'Record Count: ' . $ugslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
 			if ( $ugslf->getRecordCount() > 0 ) {
 				//$status_count_arr = $ugslf->getStatusCountArrayByUserIdAndBatchId( $user_id, $batch_id );
@@ -77,33 +77,31 @@ class APIUserGenericStatus extends APIFactory {
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ugslf->getRecordCount() );
 				$this->setPagerObject( $ugslf );
 
-				$rows = array();
-				foreach ($ugslf as $ugs_obj) {
-					$rows[] = array(
-										'id' => $ugs_obj->getId(),
-										'user_id' => $ugs_obj->getUser(),
-										'batch_id' => $ugs_obj->getBatchId(),
-										'status_id' => $ugs_obj->getStatus(),
-										'status' => Option::getByKey( $ugs_obj->getStatus(), $ugs_obj->getOptions('status') ),
-										'label' => $ugs_obj->getLabel(),
-										'description' => $ugs_obj->getDescription(),
-										'link' => $ugs_obj->getLink(),
-										'deleted' => $ugs_obj->getDeleted()
-									);
+				$rows = [];
+				foreach ( $ugslf as $ugs_obj ) {
+					$rows[] = [
+							'id'          => $ugs_obj->getId(),
+							'user_id'     => $ugs_obj->getUser(),
+							'batch_id'    => $ugs_obj->getBatchId(),
+							'status_id'   => $ugs_obj->getStatus(),
+							'status'      => Option::getByKey( $ugs_obj->getStatus(), $ugs_obj->getOptions( 'status' ) ),
+							'label'       => $ugs_obj->getLabel(),
+							'description' => $ugs_obj->getDescription(),
+							'link'        => $ugs_obj->getLink(),
+							'deleted'     => $ugs_obj->getDeleted(),
+					];
 					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $ugslf->getCurrentRow() );
 				}
 
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 				return $this->returnHandler( $rows );
-
 			} else {
-				return $this->returnHandler( TRUE ); //No records returned.
+				return $this->returnHandler( true ); //No records returned.
 			}
 		} else {
-			return $this->returnHandler( TRUE ); //No records returned.
+			return $this->returnHandler( true ); //No records returned.
 		}
-
 	}
 
 	/**
@@ -112,24 +110,24 @@ class APIUserGenericStatus extends APIFactory {
 	 * @return array
 	 */
 	function deleteUserGenericStatus( $data ) {
-		if ( !is_array($data) ) {
-			$data = array($data);
+		if ( !is_array( $data ) ) {
+			$data = [ $data ];
 		}
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		Debug::Text('Received data for: '. count($data) .' User Generic Status', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Received data for: ' . count( $data ) . ' User Generic Status', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$total_records = count($data);
-		$validator = $save_result = $key = FALSE;
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) AND $total_records > 0 ) {
+		$total_records = count( $data );
+		$validator = $save_result = $key = false;
+		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
+		if ( is_array( $data ) && $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
-			foreach( $data as $key => $id ) {
+			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserGenericStatusListFactory' ); /** @var UserGenericStatusListFactory $lf */
 				$lf->StartTransaction();
@@ -139,38 +137,38 @@ class APIUserGenericStatus extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('user', 'delete')
-								OR ( $this->getPermissionObject()->Check('user', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						if ( $this->getPermissionObject()->Check( 'user', 'delete' )
+								|| ( $this->getPermissionObject()->Check( 'user', 'delete_own' ) && $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === true ) ) {
+							Debug::Text( 'Record Exists, deleting record ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 							$lf = $lf->getCurrent();
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
+							$primary_validator->isTrue( 'permission', false, TTi18n::gettext( 'Delete permission denied' ) );
 						}
 					} else {
 						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 					}
 				} else {
-					$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+					$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 				}
 
 				//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				$is_valid = $primary_validator->isValid();
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setDeleted(TRUE);
+				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
+					Debug::Text( 'Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10 );
+					$lf->setDeleted( true );
 
 					$is_valid = $lf->isValid();
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
+					if ( $is_valid == true ) {
+						Debug::Text( 'Record Deleted...', __FILE__, __LINE__, __METHOD__, 10 );
 						$save_result[$key] = $lf->Save();
 						$validator_stats['valid_records']++;
 					}
 				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $is_valid == false ) {
+					Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
@@ -187,15 +185,15 @@ class APIUserGenericStatus extends APIFactory {
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id  UUID
 	 * @param string $batch_id UUID
 	 * @return array|bool
 	 */
-	function getUserGenericStatusCountArray( $user_id, $batch_id) {
+	function getUserGenericStatusCountArray( $user_id, $batch_id ) {
 		$user_id = $this->getCurrentUserObject()->getId();
 		if ( $batch_id != '' ) {
 			$ugslf = TTnew( 'UserGenericStatusListFactory' ); /** @var UserGenericStatusListFactory $ugslf */
@@ -204,7 +202,8 @@ class APIUserGenericStatus extends APIFactory {
 			return $this->returnHandler( $status_count_arr );
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 }
+
 ?>

@@ -47,7 +47,7 @@ class APIAuthorization extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,9 +55,9 @@ class APIAuthorization extends APIFactory {
 	 * @return array
 	 */
 	function getAuthorizationDefaultData() {
-		Debug::Text('Getting authorization default data...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Getting authorization default data...', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$data = array();
+		$data = [];
 
 		return $this->returnHandler( $data );
 	}
@@ -68,51 +68,51 @@ class APIAuthorization extends APIFactory {
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
-	function getAuthorization( $data = NULL, $disable_paging = FALSE ) {
-		Debug::Arr($data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
+	function getAuthorization( $data = null, $disable_paging = false ) {
+		Debug::Arr( $data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//Keep in mind administrators doing authorization often have access to ALL requests, or ALL users, so permission_children won't come into play.
 		//Users should be able to see authorizations for their own requests.
-		if ( isset($data['filter_data']['object_type_id']) AND in_array( $data['filter_data']['object_type_id'], array(1010, 1020, 1030, 1040, 1100) ) ) { //Requests
-			Debug::Text('Request object_type_id: '. $data['filter_data']['object_type_id'], __FILE__, __LINE__, __METHOD__, 10);
+		if ( isset( $data['filter_data']['object_type_id'] ) && in_array( $data['filter_data']['object_type_id'], [ 1010, 1020, 1030, 1040, 1100 ] ) ) { //Requests
+			Debug::Text( 'Request object_type_id: ' . $data['filter_data']['object_type_id'], __FILE__, __LINE__, __METHOD__, 10 );
 
-			if ( !$this->getPermissionObject()->Check('request', 'enabled')
-					OR !( $this->getPermissionObject()->Check('request', 'view') OR $this->getPermissionObject()->Check('request', 'view_own') OR $this->getPermissionObject()->Check('request', 'view_child')	) ) {
-				return	$this->getPermissionObject()->PermissionDenied();
+			if ( !$this->getPermissionObject()->Check( 'request', 'enabled' )
+					|| !( $this->getPermissionObject()->Check( 'request', 'view' ) || $this->getPermissionObject()->Check( 'request', 'view_own' ) || $this->getPermissionObject()->Check( 'request', 'view_child' ) ) ) {
+				return $this->getPermissionObject()->PermissionDenied();
 			}
 
 			$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'request', 'view' );
-		} elseif ( isset($data['filter_data']['object_type_id']) AND in_array( $data['filter_data']['object_type_id'], array(90) ) ) { //Timesheets
-			Debug::Text('TimeSheet object_type_id: '. $data['filter_data']['object_type_id'], __FILE__, __LINE__, __METHOD__, 10);
+		} else if ( isset( $data['filter_data']['object_type_id'] ) && in_array( $data['filter_data']['object_type_id'], [ 90 ] ) ) { //Timesheets
+			Debug::Text( 'TimeSheet object_type_id: ' . $data['filter_data']['object_type_id'], __FILE__, __LINE__, __METHOD__, 10 );
 
-			if ( !$this->getPermissionObject()->Check('punch', 'enabled')
-					OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child')  ) ) {
-				return	$this->getPermissionObject()->PermissionDenied();
+			if ( !$this->getPermissionObject()->Check( 'punch', 'enabled' )
+					|| !( $this->getPermissionObject()->Check( 'punch', 'view' ) || $this->getPermissionObject()->Check( 'punch', 'view_own' ) || $this->getPermissionObject()->Check( 'punch', 'view_child' ) ) ) {
+				return $this->getPermissionObject()->PermissionDenied();
 			}
 
 			$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
-		} elseif ( isset($data['filter_data']['object_type_id']) AND in_array( $data['filter_data']['object_type_id'], array(200) ) ) { // Expense
-			Debug::Text('Expense object_type_id: '. $data['filter_data']['object_type_id'], __FILE__, __LINE__, __METHOD__, 10);
+		} else if ( isset( $data['filter_data']['object_type_id'] ) && in_array( $data['filter_data']['object_type_id'], [ 200 ] ) ) { // Expense
+			Debug::Text( 'Expense object_type_id: ' . $data['filter_data']['object_type_id'], __FILE__, __LINE__, __METHOD__, 10 );
 
-			if ( !$this->getPermissionObject()->Check('user_expense', 'enabled')
-					OR !( $this->getPermissionObject()->Check('user_expense', 'view') OR $this->getPermissionObject()->Check('user_expense', 'view_own') OR $this->getPermissionObject()->Check('user_expense', 'view_child')  ) ) {
-				return	$this->getPermissionObject()->PermissionDenied();
+			if ( !$this->getPermissionObject()->Check( 'user_expense', 'enabled' )
+					|| !( $this->getPermissionObject()->Check( 'user_expense', 'view' ) || $this->getPermissionObject()->Check( 'user_expense', 'view_own' ) || $this->getPermissionObject()->Check( 'user_expense', 'view_child' ) ) ) {
+				return $this->getPermissionObject()->PermissionDenied();
 			}
 
 			$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_expense', 'view' );
-
 		} else {
 			//Invalid or not specified object_type_id
-			Debug::Text('No valid object_type_id specified...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'No valid object_type_id specified...', __FILE__, __LINE__, __METHOD__, 10 );
+
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
 		//Make sure there is always a object_type_id/object_id to prevent the SQL call from skipping these filters and returning more data than it should.
-		if ( !isset($data['filter_data']['object_type_id']) ) {
+		if ( !isset( $data['filter_data']['object_type_id'] ) ) {
 			$data['filter_data']['object_type_id'] = TTUUID::notExistID();
 		}
 
-		if ( !isset($data['filter_data']['object_id']) ) {
+		if ( !isset( $data['filter_data']['object_id'] ) ) {
 			$data['filter_data']['object_id'] = TTUUID::notExistID();
 		}
 
@@ -121,16 +121,16 @@ class APIAuthorization extends APIFactory {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$blf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $blf */
-		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
+		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
 
 			$this->setPagerObject( $blf );
 
-			$retarr = array();
-			foreach( $blf as $b_obj ) {
-				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']	);
+			$retarr = [];
+			foreach ( $blf as $b_obj ) {
+				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
 			}
@@ -140,7 +140,7 @@ class APIAuthorization extends APIFactory {
 			return $this->returnHandler( $retarr );
 		}
 
-		return $this->returnHandler( TRUE ); //No records returned.
+		return $this->returnHandler( true ); //No records returned.
 	}
 
 	/**
@@ -149,7 +149,7 @@ class APIAuthorization extends APIFactory {
 	 * @return array
 	 */
 	function getCommonAuthorizationData( $data ) {
-		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getAuthorization( $data, TRUE ) ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getAuthorization( $data, true ) ) );
 	}
 
 	/**
@@ -158,7 +158,7 @@ class APIAuthorization extends APIFactory {
 	 * @return array
 	 */
 	function validateAuthorization( $data ) {
-		return $this->setAuthorization( $data, TRUE );
+		return $this->setAuthorization( $data, true );
 	}
 
 	/**
@@ -168,63 +168,63 @@ class APIAuthorization extends APIFactory {
 	 * @param bool $ignore_warning
 	 * @return array|bool
 	 */
-	function setAuthorization( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
+	function setAuthorization( $data, $validate_only = false, $ignore_warning = true ) {
 		$validate_only = (bool)$validate_only;
 		$ignore_warning = (bool)$ignore_warning;
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
 			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
 		if ( $this->getCurrentUserObject()->getStatus() != 10 ) { //10=Active -- Make sure user record is active as well.
-			return $this->getPermissionObject()->PermissionDenied( FALSE, TTi18n::getText( 'Employee status must be Active to Authorize/Decline Requests' ) );
+			return $this->getPermissionObject()->PermissionDenied( false, TTi18n::getText( 'Employee status must be Active to Authorize/Decline Requests' ) );
 		}
 
-		if ( !( $this->getPermissionObject()->Check('request', 'authorize') OR $this->getPermissionObject()->Check('punch', 'authorize') OR $this->getPermissionObject()->Check('user_expense', 'authorize') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
+		if ( !( $this->getPermissionObject()->Check( 'request', 'authorize' ) || $this->getPermissionObject()->Check( 'punch', 'authorize' ) || $this->getPermissionObject()->Check( 'user_expense', 'authorize' ) ) ) {
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		if ( $validate_only == TRUE ) {
-			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
+		if ( $validate_only == true ) {
+			Debug::Text( 'Validating Only!', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
-		Debug::Text('Received data for: '. $total_records .' Authorizations', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Received data for: ' . $total_records . ' Authorizations', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = $key = FALSE;
-		if ( is_array($data) AND $total_records > 0 ) {
+		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
+		$validator = $save_result = $key = false;
+		if ( is_array( $data ) && $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
-			foreach( $data as $key => $row ) {
-				$transaction_function = function() use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key ) {
+			foreach ( $data as $key => $row ) {
+				$transaction_function = function () use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key ) {
 					$primary_validator = $tertiary_validator = new Validator();
 
 					$lf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $lf */
-					if ( $validate_only	== FALSE ) { //Only switch into serializable mode when actually saving the record.
+					if ( $validate_only == false ) {                  //Only switch into serializable mode when actually saving the record.
 						$lf->setTransactionMode( 'REPEATABLE READ' ); //Required to help prevent duplicate simulataneous HTTP requests from causing duplicate user records or duplicate employee number/user_names.
 					}
 					$lf->StartTransaction();
 
-					if ( isset( $row['id'] ) AND $row['id'] != '' ) {
+					if ( isset( $row['id'] ) && $row['id'] != '' ) {
 						//Modifying existing object.
 						//Get authorization object, so we can only modify just changed data for specific records if needed.
 						$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
 						if ( $lf->getRecordCount() == 1 ) {
 							//Object exists, check edit permissions
 							if (
-									$validate_only == TRUE
-									OR
+									$validate_only == true
+									||
 									(
 											$this->getPermissionObject()->Check( 'request', 'authorize' )
-											OR
+											||
 											$this->getPermissionObject()->Check( 'punch', 'authorize' )
-											OR
+											||
 											$this->getPermissionObject()->Check( 'user_expense', 'authorize' )
 									)
 							) {
@@ -233,34 +233,34 @@ class APIAuthorization extends APIFactory {
 								$lf = $lf->getCurrent();
 								$row = array_merge( $lf->getObjectAsArray(), $row );
 							} else {
-								$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Edit permission denied' ) );
+								$primary_validator->isTrue( 'permission', false, TTi18n::gettext( 'Edit permission denied' ) );
 							}
 						} else {
 							//Object doesn't exist.
-							$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
+							$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
 						}
 					} //else {
-						//Adding new object, check ADD permissions.
-						//$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('authorization', 'add'), TTi18n::gettext('Add permission denied') );
+					//Adding new object, check ADD permissions.
+					//$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('authorization', 'add'), TTi18n::gettext('Add permission denied') );
 					//}
 					Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$is_valid = $primary_validator->isValid( $ignore_warning );
-					if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+					if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
 						//Handle authorizing timesheets that have no PPTSVF records yet.
-						if ( isset( $row['object_type_id'] ) AND $row['object_type_id'] == 90
-								AND isset( $row['object_id'] ) AND $row['object_id'] == TTUUID::getNotExistID()
-								AND isset( $row['user_id'] ) AND isset( $row['pay_period_id'] ) ) {
+						if ( isset( $row['object_type_id'] ) && $row['object_type_id'] == 90
+								&& isset( $row['object_id'] ) && $row['object_id'] == TTUUID::getNotExistID()
+								&& isset( $row['user_id'] ) && isset( $row['pay_period_id'] ) ) {
 
 							//Since we are most likely inside a RetryTransaction block already, and verifyTimeSheet() itself is inside one too,
 							// we need rethrow any exceptions to cause the outer nested transaction block to fail and retry as a whole. Since we can't retry just part of the transaction.
 							try {
 								$api_ts = new APITimeSheet();
-								$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'], FALSE ); //Don't enable setEnableAuthorize() as that duplicates the authorize records and causes validation errors.
+								$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'], false ); //Don't enable setEnableAuthorize() as that duplicates the authorize records and causes validation errors.
 								Debug::Arr( $api_raw_retval, 'API Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 								$api_retval = $this->stripReturnHandler( $api_raw_retval );
-								if ( TTUUID::isUUID( $api_retval ) AND $api_retval != TTUUID::getZeroID() AND $api_retval != TTUUID::getNotExistID() ) {
+								if ( TTUUID::isUUID( $api_retval ) && $api_retval != TTUUID::getZeroID() && $api_retval != TTUUID::getNotExistID() ) {
 									$row['object_id'] = $api_retval;
 								} else {
 									$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $api_raw_retval, $tertiary_validator );
@@ -271,7 +271,7 @@ class APIAuthorization extends APIFactory {
 							}
 						}
 
-						if ( $is_valid == TRUE ) {
+						if ( $is_valid == true ) {
 							Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 							$lf->setObjectFromArray( $row );
 
@@ -279,18 +279,18 @@ class APIAuthorization extends APIFactory {
 							$lf->setCurrentUser( $this->getCurrentUserObject()->getId() );
 
 							$is_valid = $lf->isValid( $ignore_warning );
-							if ( $is_valid == TRUE ) {
+							if ( $is_valid == true ) {
 								Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
-								if ( $validate_only == TRUE ) {
-									$save_result[ $key ] = TRUE;
+								if ( $validate_only == true ) {
+									$save_result[$key] = true;
 									$validator_stats['valid_records']++;
 								} else {
-									$save_result[ $key ] = $lf->Save( FALSE );
+									$save_result[$key] = $lf->Save( false );
 
 									//Make sure we test for validation failures after Save() is called, especially in cases of advanced requests, as the addRelatedSchedules() could fail.
-									if ( $lf->isValid( $ignore_warning ) == FALSE ) {
+									if ( $lf->isValid( $ignore_warning ) == false ) {
 										Debug::Arr( $lf->Validator->getErrors(), 'PostSave() returned a validation error!', __FILE__, __LINE__, __METHOD__, 10 );
-										$is_valid = FALSE;
+										$is_valid = false;
 									} else {
 										$validator_stats['valid_records']++;
 									}
@@ -299,20 +299,20 @@ class APIAuthorization extends APIFactory {
 						}
 					}
 
-					if ( $is_valid == FALSE ) {
+					if ( $is_valid == false ) {
 						Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
 						$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-						$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
-					} elseif ( $validate_only == TRUE ) {
+						$validator[$key] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
+					} else if ( $validate_only == true ) {
 						$lf->FailTransaction();
 					}
 
 					$lf->CommitTransaction();
 					$lf->setTransactionMode(); //Back to default isolation level.
 
-					return array( $validator, $validator_stats, $key, $save_result );
+					return [ $validator, $validator_stats, $key, $save_result ];
 				};
 
 				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
@@ -325,7 +325,7 @@ class APIAuthorization extends APIFactory {
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 
 	/**
@@ -334,32 +334,32 @@ class APIAuthorization extends APIFactory {
 	 * @return array|bool
 	 */
 	function deleteAuthorization( $data ) {
-		if ( !is_array($data) ) {
-			$data = array($data);
+		if ( !is_array( $data ) ) {
+			$data = [ $data ];
 		}
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == FALSE ) { //700=HTTP Auth with username/password
+		if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
 			return $this->getPermissionObject()->AuthenticationTypeDenied();
 		}
 
-		if ( !( $this->getPermissionObject()->Check('request', 'authorize') OR $this->getPermissionObject()->Check('punch', 'authorize') OR $this->getPermissionObject()->Check('user_expense', 'authorize') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
+		if ( !( $this->getPermissionObject()->Check( 'request', 'authorize' ) || $this->getPermissionObject()->Check( 'punch', 'authorize' ) || $this->getPermissionObject()->Check( 'user_expense', 'authorize' ) ) ) {
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		Debug::Text('Received data for: '. count($data) .' Authorizations', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Received data for: ' . count( $data ) . ' Authorizations', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$total_records = count($data);
-		$validator = $save_result = $key = FALSE;
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) AND $total_records > 0 ) {
+		$total_records = count( $data );
+		$validator = $save_result = $key = false;
+		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
+		if ( is_array( $data ) && $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
-			foreach( $data as $key => $id ) {
+			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'AuthorizationListFactory' ); /** @var AuthorizationListFactory $lf */
 				$lf->StartTransaction();
@@ -370,42 +370,42 @@ class APIAuthorization extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							$this->getPermissionObject()->Check('request', 'authorize')
-							OR
-							$this->getPermissionObject()->Check('punch', 'authorize')
-							OR
-							$this->getPermissionObject()->Check('user_expense', 'authorize')
-							) {
-							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+								$this->getPermissionObject()->Check( 'request', 'authorize' )
+								||
+								$this->getPermissionObject()->Check( 'punch', 'authorize' )
+								||
+								$this->getPermissionObject()->Check( 'user_expense', 'authorize' )
+						) {
+							Debug::Text( 'Record Exists, deleting record ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 							$lf = $lf->getCurrent();
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
+							$primary_validator->isTrue( 'permission', false, TTi18n::gettext( 'Delete permission denied' ) );
 						}
 					} else {
 						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 					}
 				} else {
-					$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+					$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 				}
 
 				//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				$is_valid = $primary_validator->isValid();
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setDeleted(TRUE);
+				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
+					Debug::Text( 'Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10 );
+					$lf->setDeleted( true );
 
 					$is_valid = $lf->isValid();
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
+					if ( $is_valid == true ) {
+						Debug::Text( 'Record Deleted...', __FILE__, __LINE__, __METHOD__, 10 );
 						$save_result[$key] = $lf->Save();
 						$validator_stats['valid_records']++;
 					}
 				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $is_valid == false ) {
+					Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
@@ -422,7 +422,8 @@ class APIAuthorization extends APIFactory {
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 }
+
 ?>

@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TopNotification = function( options ) {
 		var opts = $.extend( {}, $.fn.TopNotification.defaults, options );
@@ -44,7 +44,7 @@
 			setTimeout( function() {
 				removeRow( row_tpl );
 				setExpendButton();
-			}, (delay * 1000) );
+			}, ( delay * 1000 ) );
 		};
 
 		var setCloseButton = function( row_tpl ) {
@@ -81,7 +81,7 @@
 
 				if ( item.destination ) {
 
-					if ( (typeof item.destination['indexOf']) !== 'undefined' && ( item.destination.indexOf( 'http://' ) > -1 || item.destination.indexOf( 'https://' ) > -1 ) ) {
+					if ( ( typeof item.destination['indexOf'] ) !== 'undefined' && ( item.destination.indexOf( 'http://' ) > -1 || item.destination.indexOf( 'https://' ) > -1 ) ) {
 						window.open( item.destination, '_blank' );
 
 					} else if ( item.destination.hasOwnProperty( 'menu_name' ) ) {
@@ -206,4 +206,4 @@
 
 	$.fn.TopNotification.defaults = {};
 
-})( jQuery );
+} )( jQuery );

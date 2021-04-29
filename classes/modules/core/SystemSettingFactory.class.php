@@ -46,24 +46,24 @@ class SystemSettingFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		$ph = array(
-					'name' => $name,
-					);
+	function isUniqueName( $name ) {
+		$ph = [
+				'name' => $name,
+		];
 
-		$query = 'select id from '. $this->getTable() .' where name = ?';
-		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'select id from ' . $this->getTable() . ' where name = ?';
+		$name_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -77,8 +77,9 @@ class SystemSettingFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim($value);
+	function setName( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -93,8 +94,9 @@ class SystemSettingFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setValue( $value) {
-		$value = trim($value);
+	function setValue( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'value', $value );
 	}
 
@@ -106,28 +108,28 @@ class SystemSettingFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Name
-		$this->Validator->isLength(	'name',
-											$this->getName(),
-											TTi18n::gettext('Name is too short or too long'),
-											1, 250
-										);
-		if ( $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isTrue(		'name',
-													$this->isUniqueName($this->getName()),
-													TTi18n::gettext('Name already exists')
-												);
+		$this->Validator->isLength( 'name',
+									$this->getName(),
+									TTi18n::gettext( 'Name is too short or too long' ),
+									1, 250
+		);
+		if ( $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Name already exists' )
+			);
 		}
 		// Value
-		$this->Validator->isLength(	'value',
-											$this->getValue(),
-											TTi18n::gettext('Value is too short or too long'),
-											1, 4096
-										);
+		$this->Validator->isLength( 'value',
+									$this->getValue(),
+									TTi18n::gettext( 'Value is too short or too long' ),
+									1, 4096
+		);
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -136,75 +138,75 @@ class SystemSettingFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -212,37 +214,37 @@ class SystemSettingFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -251,7 +253,8 @@ class SystemSettingFactory extends Factory {
 	function postSave() {
 		$this->removeCache( 'all' );
 		$this->removeCache( $this->getName() );
-		return TRUE;
+
+		return true;
 	}
 
 	/**
@@ -270,11 +273,12 @@ class SystemSettingFactory extends Factory {
 		$obj->setName( $key );
 		$obj->setValue( $value );
 		if ( $obj->isValid() ) {
-			Debug::Text('Key: '. $key .' Value: '. $value .' isNew: '. (int)$obj->isNew(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'Key: ' . $key . ' Value: ' . $value . ' isNew: ' . (int)$obj->isNew(), __FILE__, __LINE__, __METHOD__, 10 );
+
 			return $obj->Save();
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -286,12 +290,13 @@ class SystemSettingFactory extends Factory {
 		$sslf->getByName( $key );
 		if ( $sslf->getRecordCount() == 1 ) {
 			$obj = $sslf->getCurrent();
+
 			return $obj->getValue();
-		} elseif ( $sslf->getRecordCount() > 1 ) {
-			Debug::Text('ERROR: '. $sslf->getRecordCount() .' SystemSetting record(s) exists with key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
+		} else if ( $sslf->getRecordCount() > 1 ) {
+			Debug::Text( 'ERROR: ' . $sslf->getRecordCount() . ' SystemSetting record(s) exists with key: ' . $key, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -305,7 +310,7 @@ class SystemSettingFactory extends Factory {
 			return $sslf->getCurrent();
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -313,7 +318,8 @@ class SystemSettingFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('System Setting - Name').': '. $this->getName() .' '. TTi18n::getText('Value').': '. $this->getValue(), NULL, $this->getTable() );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'System Setting - Name' ) . ': ' . $this->getName() . ' ' . TTi18n::getText( 'Value' ) . ': ' . $this->getValue(), null, $this->getTable() );
 	}
 }
+
 ?>

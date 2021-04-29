@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.RibbonSubMenuNavWidget = function( options ) {
 		var opts = $.extend( {}, $.fn.RibbonSubMenuNavWidget.defaults, options );
@@ -36,4 +36,4 @@
 
 	$.fn.RibbonSubMenuNavWidget.defaults = {};
 
-})( jQuery );
+} )( jQuery );

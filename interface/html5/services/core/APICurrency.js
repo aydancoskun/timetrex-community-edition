@@ -1,6 +1,5 @@
 var APICurrency = ServiceCaller.extend( {
 
-
 	key_name: 'Currency',
 	className: 'APICurrency',
 
@@ -47,7 +46,5 @@ var APICurrency = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'getISOCodesArray', arguments );
 
 	}
-
-
 
 } );

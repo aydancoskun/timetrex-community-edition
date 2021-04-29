@@ -11,10 +11,10 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Schedule Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'ScheduleSummaryReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIScheduleSummaryReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIScheduleSummaryReport' ) )();
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				schedule: {

@@ -47,7 +47,7 @@ class APIActiveShiftReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIActiveShiftReport extends APIReport {
 	 * @param string $format
 	 * @return array
 	 */
-	function getActiveShiftReport( $config = FALSE, $format = 'pdf' ) {
+	function getActiveShiftReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

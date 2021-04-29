@@ -51,5 +51,4 @@ var APIPayPeriodTimeSheetVerify = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportPayPeriodTimeSheetVerify', arguments );
 	}
 
-
 } );

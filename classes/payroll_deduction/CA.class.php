@@ -43,7 +43,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		//TC
 		$this->data['federal_total_claim_amount'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalTotalClaimAmount() {
@@ -59,11 +59,11 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		if ( $this->data['federal_total_claim_amount'] > 0 ) {
 			if ( $this->getBasicFederalClaimCodeAmount() > 0
-					AND (
+					&& (
 							$this->data['federal_total_claim_amount'] < $this->getBasicFederalClaimCodeAmount()
-							OR
+							||
 							$this->data['federal_total_claim_amount'] == $this->getBasicFederalClaimCodeAmount( $previous_year )
-							OR
+							||
 							$this->data['federal_total_claim_amount'] == $this->getBasicFederalClaimCodeAmount( $next_year )
 					)
 			) {
@@ -83,7 +83,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		//TCP
 		$this->data['provincial_total_claim_amount'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getProvincialTotalClaimAmount() {
@@ -99,11 +99,11 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		if ( $this->data['provincial_total_claim_amount'] > 0 ) {
 			if ( $this->getBasicProvinceClaimCodeAmount() > 0
-					AND (
+					&& (
 							$this->data['provincial_total_claim_amount'] < $this->getBasicProvinceClaimCodeAmount()
-							OR
+							||
 							$this->data['provincial_total_claim_amount'] == $this->getBasicProvinceClaimCodeAmount( $previous_year )
-							OR
+							||
 							$this->data['provincial_total_claim_amount'] == $this->getBasicProvinceClaimCodeAmount( $next_year )
 					)
 			) {
@@ -120,10 +120,10 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		if ( $value >= 0 ) {
 			$this->data['additional_deduction'] = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getFederalAdditionalDeduction() {
@@ -131,13 +131,13 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			return $this->data['additional_deduction'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setUnionDuesAmount( $value ) {
 		$this->data['union_dues_amount'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getUnionDuesAmount() {
@@ -151,7 +151,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	function setCPPExempt( $value ) {
 		$this->data['cpp_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getCPPExempt() {
@@ -159,17 +159,17 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			return $this->data['cpp_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setYearToDateCPPContribution( $value ) {
 		if ( $value >= 0 ) {
 			$this->data['cpp_year_to_date_contribution'] = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getYearToDateCPPContribution() {
@@ -183,7 +183,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	function setEIExempt( $value ) {
 		$this->data['ei_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getEIExempt() {
@@ -192,17 +192,17 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			return $this->data['ei_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setYearToDateEIContribution( $value ) {
 		if ( $value >= 0 ) {
 			$this->data['ei_year_to_date_contribution'] = $value;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getYearToDateEIContribution() {
@@ -216,7 +216,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	function setFederalTaxExempt( $value ) {
 		$this->data['federal_tax_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getFederalTaxExempt() {
@@ -225,13 +225,13 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			return $this->data['federal_tax_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setProvincialTaxExempt( $value ) {
 		$this->data['provincial_tax_exempt'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getProvincialTaxExempt() {
@@ -240,13 +240,13 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			return $this->data['provincial_tax_exempt'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function setEnableCPPAndEIDeduction( $value ) {
 		$this->data['enable_cpp_and_ei_deduction'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getEnableCPPAndEIDeduction() {
@@ -255,7 +255,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			return $this->data['enable_cpp_and_ei_deduction'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 
@@ -284,7 +284,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
 			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getFederalHighestRate(), 1.25 ) );
-			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+			if ( $highest_taxable_amount > 0 && $retval > $highest_taxable_amount ) {
 				$retval = $highest_taxable_amount;
 				Debug::text( 'Federal tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
 			}
@@ -302,7 +302,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 			//Ensure that the tax amount doesn't exceed the highest possible tax rate plus 25% for "catch-up" purposes.
 			$highest_taxable_amount = bcmul( $this->getGrossPayPeriodIncome(), bcmul( $this->getProvincialHighestRate(), 1.25 ) );
-			if ( $highest_taxable_amount > 0 AND $retval > $highest_taxable_amount ) {
+			if ( $highest_taxable_amount > 0 && $retval > $highest_taxable_amount ) {
 				$retval = $highest_taxable_amount;
 				Debug::text( 'Provincial tax amount exceeds highest tax bracket rate, capping amount at: ' . $highest_taxable_amount, __FILE__, __LINE__, __METHOD__, 10 );
 			}
@@ -371,29 +371,30 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			if ( $this->getDate() >= 20200101 ) {
 				$NI = $this->getAnnualTaxableIncome(); //Net income for the year or ( A + HD )
 
-				if ( is_array($basic_personal_amount_data) ) {
+				if ( is_array( $basic_personal_amount_data ) ) {
 					if ( $NI <= $basic_personal_amount_data['phase_out_start'] ) {
 						$BPAF = $basic_personal_amount_data['max'];
-					} elseif ( $NI >= $basic_personal_amount_data['phase_out_end'] )  {
+					} else if ( $NI >= $basic_personal_amount_data['phase_out_end'] ) {
 						$BPAF = $basic_personal_amount_data['min'];
 					} else {
-						$tmp_NI_threshold = bcdiv( bcsub( $NI, $basic_personal_amount_data['phase_out_start'] ), bcsub( $basic_personal_amount_data['phase_out_end'], $basic_personal_amount_data['phase_out_start']) );
+						$tmp_NI_threshold = bcdiv( bcsub( $NI, $basic_personal_amount_data['phase_out_start'] ), bcsub( $basic_personal_amount_data['phase_out_end'], $basic_personal_amount_data['phase_out_start'] ) );
 						if ( $tmp_NI_threshold > 1 ) {
 							$tmp_NI_threshold = 1;
 						}
 
 						$BPAF = round( bcadd( $basic_personal_amount_data['min'], ( bcsub( bcsub( $basic_personal_amount_data['max'], $basic_personal_amount_data['min'] ), bcmul( bcsub( $basic_personal_amount_data['max'], $basic_personal_amount_data['min'] ), $tmp_NI_threshold ) ) ) ), 2 );
-						Debug::text( ' BPAF: '. $BPAF .' Min: '. $basic_personal_amount_data['min'] .' Max: '. $basic_personal_amount_data['max'] .' Phase Out: Start: '. $basic_personal_amount_data['phase_out_start'] .' End: '. $basic_personal_amount_data['phase_out_end'], __FILE__, __LINE__, __METHOD__, 10 );
+						Debug::text( ' BPAF: ' . $BPAF . ' Min: ' . $basic_personal_amount_data['min'] . ' Max: ' . $basic_personal_amount_data['max'] . ' Phase Out: Start: ' . $basic_personal_amount_data['phase_out_start'] . ' End: ' . $basic_personal_amount_data['phase_out_end'], __FILE__, __LINE__, __METHOD__, 10 );
 					}
 				}
 
-				unset($basic_claim_code_data);
-			} elseif ( is_numeric( $basic_personal_amount_data ) ) {
+				unset( $basic_claim_code_data );
+			} else if ( is_numeric( $basic_personal_amount_data ) ) {
 				$BPAF = $basic_personal_amount_data; //Federal Basic Personal Amount
 			}
 		}
 
-		Debug::text( ' BPAF: '. $BPAF, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( ' BPAF: ' . $BPAF, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $BPAF;
 	}
 
@@ -411,7 +412,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		$K = $this->getData()->getFederalConstant( $A );
 		$TC = $this->getFederalTotalClaimAmount();
 		$K1 = bcmul( $this->getData()->getFederalLowestRate(), $TC );
-		if ( $this->getEnableCPPAndEIDeduction() == TRUE ) {
+		if ( $this->getEnableCPPAndEIDeduction() == true ) {
 			$K2 = $this->getFederalCPPAndEITaxCredit();
 		} else {
 			$K2 = 0; //Do the deduction at the Company Tax Deduction level instead.
@@ -449,7 +450,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 	function getFederalTaxPayable() {
 		//If employee is federal tax exempt, return 0 dollars.
-		if ( $this->getFederalTaxExempt() == TRUE ) {
+		if ( $this->getFederalTaxExempt() == true ) {
 			Debug::text( 'Federal Tax Exempt!', __FILE__, __LINE__, __METHOD__, 10 );
 
 			return 0;
@@ -477,7 +478,6 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		Debug::text( 'T1: ' . $T1, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $T1;
-
 	}
 
 	function getFederalEmploymentCredit() {
@@ -609,7 +609,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 	function getProvincialTaxPayable() {
 		//If employee is provincial tax exempt, return 0 dollars.
-		if ( $this->getProvincialTaxExempt() == TRUE ) {
+		if ( $this->getProvincialTaxExempt() == true ) {
 			Debug::text( 'Provincial Tax Exempt!', __FILE__, __LINE__, __METHOD__, 10 );
 
 			return 0;
@@ -653,7 +653,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		$KP = $this->getData()->getProvincialConstant( $A );
 		$TCP = $this->getProvincialTotalClaimAmount();
 		$K1P = bcmul( $this->getData()->getProvincialLowestRate(), $TCP );
-		if ( $this->getEnableCPPAndEIDeduction() == TRUE ) {
+		if ( $this->getEnableCPPAndEIDeduction() == true ) {
 			$K2P = $this->getProvincialCPPAndEITaxCredit();
 		} else {
 			$K2P = 0; //Use the Company Deduction Exclude funtionality instead.
@@ -710,7 +710,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	function setEmployeeCPPForPayPeriod( $value ) {
 		$this->data['employee_cpp_for_pp'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getEmployeeCPPForPayPeriod() {
@@ -719,11 +719,11 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 					if the result is negative, C = 0
 		*/
 		//If employee is CPP exempt, return 0 dollars.
-		if ( $this->getCPPExempt() == TRUE ) {
+		if ( $this->getCPPExempt() == true ) {
 			return 0;
 		}
 
-		if ( isset( $this->data['employee_cpp_for_pp'] ) AND $this->data['employee_cpp_for_pp'] != NULL ) {
+		if ( isset( $this->data['employee_cpp_for_pp'] ) && $this->data['employee_cpp_for_pp'] != null ) {
 			Debug::text( 'Using manually passed in Employee CPP for PP: ' . $this->data['employee_cpp_for_pp'], __FILE__, __LINE__, __METHOD__, 10 );
 			$CII = $this->data['employee_cpp_for_pp'];
 		} else {
@@ -763,7 +763,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		*/
 
 		//If employee is CPP exempt, return 0 dollars.
-		if ( $this->getCPPExempt() == TRUE ) {
+		if ( $this->getCPPExempt() == true ) {
 			return 0;
 		}
 
@@ -797,7 +797,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	function setEmployeeEIForPayPeriod( $value ) {
 		$this->data['employee_ei_for_pp'] = $value;
 
-		return TRUE;
+		return true;
 	}
 
 	function getEmployeeEIForPayPeriod() {
@@ -806,7 +806,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 					round the resulting amount in ii) to the nearest $0.01
 		*/
 		//If employee is EI exempt, return 0 dollars.
-		if ( $this->getEIExempt() == TRUE ) {
+		if ( $this->getEIExempt() == true ) {
 			return 0;
 		}
 
@@ -814,7 +814,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		Debug::text( 'Employee EI Rate: ' . $this->getEIEmployeeRate() . ' I: ' . $I, __FILE__, __LINE__, __METHOD__, 10 );
 		$tmp2_EI = bcmul( $this->getEIEmployeeRate(), $I );
-		if ( isset( $this->data['employee_ei_for_pp'] ) AND $this->data['employee_ei_for_pp'] != NULL ) {
+		if ( isset( $this->data['employee_ei_for_pp'] ) && $this->data['employee_ei_for_pp'] != null ) {
 			Debug::text( 'Using manually passed in Employee EI for PP: ' . $this->data['employee_ei_for_pp'], __FILE__, __LINE__, __METHOD__, 10 );
 			$tmp2_EI = $this->data['employee_ei_for_pp'];
 		}
@@ -835,7 +835,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		*/
 
 		//If employee is EI exempt, return 0 dollars.
-		if ( $this->getEIExempt() == TRUE ) {
+		if ( $this->getEIExempt() == true ) {
 			return 0;
 		}
 
@@ -879,7 +879,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		Use this to get all useful values.
 	*/
 	function getArray() {
-		$array = array(
+		$array = [
 				'gross_pay'                    => $this->getGrossPayPeriodIncome(),
 				'federal_tax'                  => $this->getFederalPayPeriodDeductions(),
 				'provincial_tax'               => $this->getProvincialPayPeriodDeductions(),
@@ -890,7 +890,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 				'employer_ei'                  => $this->getEmployerEI(),
 				'federal_additional_deduction' => $this->getFederalAdditionalDeduction(),
 				//'net_pay' => $this->getPayPeriodNetPay()
-		);
+		];
 
 		Debug::Arr( $array, 'Deductions Array:', __FILE__, __LINE__, __METHOD__, 10 );
 

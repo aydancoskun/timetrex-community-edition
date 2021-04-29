@@ -122,7 +122,7 @@ LogViewController = BaseViewController.extend( {
 		this.viewId = 'Log';
 		this.script_name = 'LogView';
 		this.log_detail_script_name = 'LogDetailView';
-		this.api = new (APIFactory.getAPIClass( 'APILog' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APILog' ) )();
 		this.noticeDiv = $( '.audit-info' );
 
 		this.render();
@@ -144,7 +144,7 @@ LogViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APILog' )),
+			api_class: ( APIFactory.getAPIClass( 'APILog' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LOG,
@@ -318,10 +318,10 @@ LogViewController = BaseViewController.extend( {
 							grid_source_data.push( new_record );
 							$this.grid.setData( grid_source_data );
 
-							if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
-								len = Global.isSet( len ) ? len : 0;
-								$this.resizeSubGrid( len + 1 );
-							}
+							// if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
+							// 	len = Global.isSet( len ) ? len : 0;
+							// 	$this.resizeSubGrid( len + 1 );
+							// }
 						}
 					}
 
@@ -386,7 +386,7 @@ LogViewController = BaseViewController.extend( {
 
 	},
 
-	getGridSetup: function(){
+	getGridSetup: function() {
 		var $this = this;
 		return {
 			container_selector: this.sub_view_mode ? '.edit-view-tab-bar' : 'body',
@@ -423,18 +423,18 @@ LogViewController = BaseViewController.extend( {
 		// if ( !this.sub_view_mode ) {
 		// 	this.grid.setGridHeight( ($( this.el ).height() - (this.search_panel && this.search_panel.is( ':visible' ) ? this.search_panel.height() : 0) - 68 - header_size) );
 		// } else if ( !Global.isSet( this.resizeSubGrid ) ) {
-			if ( this.pager_data && this.pager_data.last_page_number > 1 ) {
-				this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 101 - header_size );
-			} else {
-				this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 78 - header_size );
-			}
+		if ( this.pager_data && this.pager_data.last_page_number > 1 ) {
+			this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 101 - header_size );
+		} else {
+			this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 78 - header_size );
+		}
 
 		// }
 	},
 
 	setAuditInfo: function() {
-		var updated_info = (this.parent_edit_record['updated_date'] || $.i18n._( 'N/A' )) + ' ' + $.i18n._( 'by' ) + ' ' + (this.parent_edit_record['updated_by'] || $.i18n._( 'N/A' )) + ' ';
-		var created_info = (this.parent_edit_record['created_date'] || $.i18n._( 'N/A' )) + ' ' + $.i18n._( 'by' ) + ' ' + (this.parent_edit_record['created_by'] || $.i18n._( 'N/A' )) + ' ';
+		var updated_info = ( this.parent_edit_record['updated_date'] || $.i18n._( 'N/A' ) ) + ' ' + $.i18n._( 'by' ) + ' ' + ( this.parent_edit_record['updated_by'] || $.i18n._( 'N/A' ) ) + ' ';
+		var created_info = ( this.parent_edit_record['created_date'] || $.i18n._( 'N/A' ) ) + ' ' + $.i18n._( 'by' ) + ' ' + ( this.parent_edit_record['created_by'] || $.i18n._( 'N/A' ) ) + ' ';
 		this.noticeDiv.find( '.left > .info' ).text( updated_info );
 		this.noticeDiv.find( '.right > .info' ).text( created_info );
 	},
@@ -494,7 +494,7 @@ LogViewController = BaseViewController.extend( {
 			column_info_array.push( column_info );
 		}
 
-		grid_setup = {
+		var grid_setup = {
 			container_selector: this.sub_view_mode ? '.edit-view-tab-bar' : 'body',
 			sub_grid_mode: this.sub_view_mode,
 			onResizeGrid: true,
@@ -760,7 +760,7 @@ LogViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -785,10 +785,10 @@ LogViewController = BaseViewController.extend( {
 		return filter;
 	},
 
-	searchDone: function(){
-		$('window').trigger('resize');
+	searchDone: function() {
+		$( 'window' ).trigger( 'resize' );
 		TTPromise.resolve( 'initSubAudit', 'init' );
-		this._super('searchDone');
+		this._super( 'searchDone' );
 
 	}
 

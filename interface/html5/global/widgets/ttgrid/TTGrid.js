@@ -7,24 +7,37 @@
  * @constructor
  */
 TTGrid = function( table_id, setup, column_info_array ) {
+	this.getGridId = function() {
+		return this.ui_id;
+	};
+
+	this.setTableIDElement = function() {
+		this.table_id_element = $( '#' + this.ui_id );
+		return true;
+	};
+
+	this.getTableIDElement = function() {
+		return this.table_id_element;
+	};
 
 	if ( !table_id || !setup || !column_info_array ) {
 		Debug.Text( 'ERROR: constructor requires all 3 arguments', 'TTGrid.js', 'TTGrid', 'constructor', 10 );
 		return;
 	}
 
-	table_div = $( '#' + table_id );
+	this.ui_id = table_id;
+
+	var max_height = null;
+
+	this.setTableIDElement();
+	var table_div = this.getTableIDElement();
+
+	this.grid = null;
 
 	if ( table_div[0] == false ) {
 		Debug.Text( 'ERROR: table_id not found in DOM', 'TTGrid.js', 'TTGrid', 'constructor', 10 );
 		return;
 	}
-
-	var $this = this;
-	var max_height = null;
-	this.ui_id = table_id;
-
-	this.grid = null;
 
 	//Default grid settings.
 	var default_setup = {
@@ -54,7 +67,6 @@ TTGrid = function( table_id, setup, column_info_array ) {
 		// }
 	};
 
-
 	if ( setup.max_height === true ) {
 		setup.max_height = max_height;
 	}
@@ -70,18 +82,14 @@ TTGrid = function( table_id, setup, column_info_array ) {
 	table_div.empty(); //should unbind all events bound to the grid.
 	this.grid = table_div.jqGrid( setup );
 
-	LocalCacheData.resizeable_grids.push(this);
+	LocalCacheData.resizeable_grids.push( this );
 
 	if ( setup.winMultiSelect === true ) {
 		this.grid.winMultiSelect();
 	}
 
-	this.getGridId = function() {
-		return this.ui_id;
-	};
-
 	//turn off grid resize event (for schedule grids that need to be rebuilt on every resize)
-	this.noResize = function(){
+	this.noResize = function() {
 		this.setup.onResizeGrid = false;
 	};
 
@@ -100,7 +108,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 			this.grid.setGridParam( { 'data': data } ).trigger( 'reloadGrid' );
 			//this.setGridColumnsWidth();
 		} else {
-			throw('ERROR: Grid is not ready yet.');
+			throw( 'ERROR: Grid is not ready yet.' );
 		}
 	};
 	this.getData = function() {
@@ -110,7 +118,6 @@ TTGrid = function( table_id, setup, column_info_array ) {
 	this.getSetup = function() {
 		return this.getGridParam( 'data' );
 	};
-
 
 	this.getHeight = function() {
 		return $( this.grid ).height();
@@ -149,7 +156,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 			this.grid = null;
 		}
 		return true;
-	},
+	};
 
 	this.clearGridData = function() {
 		this.grid.jqGrid( 'clearGridData', true );
@@ -279,56 +286,61 @@ TTGrid = function( table_id, setup, column_info_array ) {
 	};
 
 	this.getSelection = function() {
-		var tds = this.grid.find('td.ui-state-highlight');
+		var tds = this.grid.find( 'td.ui-state-highlight' );
 
-		var selection = []
-		for ( var x = 0; x < tds.length; x++ ){
+		var selection = [];
+		for ( var x = 0; x < tds.length; x++ ) {
 			selection.push( {
-				tr: $(tds[x]).parent('tr').index(),
-				td: $(tds[x]).index()
+				tr: $( tds[x] ).parent( 'tr' ).index(),
+				td: $( tds[x] ).index()
 			} );
 		}
 		return selection;
 	},
 
-	this.setTimesheetSelection = function( selection_obj ) {
-		//This is currently broken, it highlights the cells, but they aren't actually considered "selected".
-		// So if you go to Attendance -> TimeSheet, select two cells, Mass Edit them, click Save, the "Mass Edit" is no longer available to be clicked again.
-		// As well if you hold in SHIFT to try and expand the selection (select more cells), that doesn't work either.
-		var trs = this.grid.find('tr');
-		for ( var i = 0; i < selection_obj.length; i++ ) {
-			for ( var x = 0; x < trs.length; x++ ){
-				if ( $(trs[x]).index() == selection_obj[i].tr ) {
-					var tds = $(trs[x]).find('td');
-					for ( var w = 0; w < tds.length; w++ ){
-						if ( $(tds[w]).index() == selection_obj[i].td ) {
-							$(tds[w]).addClass('ui-state-highlight');
-							break;
+		this.setTimesheetSelection = function( selection_obj ) {
+			//This is currently broken, it highlights the cells, but they aren't actually considered "selected".
+			// So if you go to Attendance -> TimeSheet, select two cells, Mass Edit them, click Save, the "Mass Edit" is no longer available to be clicked again.
+			// As well if you hold in SHIFT to try and expand the selection (select more cells), that doesn't work either.
+			var trs = this.grid.find( 'tr' );
+			for ( var i = 0; i < selection_obj.length; i++ ) {
+				for ( var x = 0; x < trs.length; x++ ) {
+					if ( $( trs[x] ).index() == selection_obj[i].tr ) {
+						var tds = $( trs[x] ).find( 'td' );
+						for ( var w = 0; w < tds.length; w++ ) {
+							if ( $( tds[w] ).index() == selection_obj[i].td ) {
+								$( tds[w] ).addClass( 'ui-state-highlight' );
+								break;
+							}
 						}
+						break;
 					}
-					break;
 				}
 			}
-		}
-	},
+		};
 
 	this.setGridColumnsWidth = function( column_model, options ) {
 		// this.grid.autoResizeAllColumns();
 		// return;
 		if ( this.setup.treeGrid || this.setup.tree_mode ) {
-			this.setGridWidth( $(this.setup.container_selector).width() - 12 );
+			this.setGridWidth( $( this.setup.container_selector ).width() - 12 );
 			return;
 		}
-
 
 		if ( typeof options === 'undefined' ) {
 			options = {};
 		}
 
-		if ( this.setup.container_selector && (!options.min_grid_width || options.min_grid_width == 0 ) ) {
-			if ( this.grid.parents( this.setup.container_selector ).find('.edit-view-tab').length > 0 ) {
-				//Sub-View grid.
-				options.min_grid_width = this.grid.parents( this.setup.container_selector ).find('.edit-view-tab').innerWidth();
+		if ( this.setup.container_selector && ( !options.min_grid_width || options.min_grid_width == 0 ) ) {
+			var parent_container = this.grid.parents( this.setup.container_selector ).find( '.edit-view-tab' );
+			if ( parent_container.length > 0 ) {
+				//Sub-View grid, check if parent div is visible, and if not don't bother resizing grid.
+				if ( parent_container.is( ':visible' ) === true ) {
+					options.min_grid_width = parent_container.innerWidth();
+				} else {
+					Debug.Text( '  Parent container of grid is not visible, skip setting column widths...', 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+					return;
+				}
 			} else {
 				//Main grid
 				options.min_grid_width = this.grid.parents( this.setup.container_selector ).innerWidth();
@@ -340,7 +352,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 		}
 
 		//Adjust for the vertical scrollbar offset that can occur when the items per page always exceeds the screen height.
-		var grid_width_scrollbar_offset = ( this.grid.parents('.ui-jqgrid-bdiv').length > 0 && Math.ceil( this.grid.parents('.ui-jqgrid-bdiv').height() ) < Math.ceil( this.grid.parents('.ui-jqgrid-bdiv')[0].scrollHeight ) ) ? 15 : 0;
+		var grid_width_scrollbar_offset = ( this.grid.parents( '.ui-jqgrid-bdiv' ).length > 0 && Math.ceil( this.grid.parents( '.ui-jqgrid-bdiv' ).height() ) < Math.ceil( this.grid.parents( '.ui-jqgrid-bdiv' )[0].scrollHeight ) ) ? 15 : 0;
 		options.min_grid_width = options.min_grid_width - grid_width_scrollbar_offset;
 
 		if ( !options.max_grid_width ) {
@@ -351,11 +363,11 @@ TTGrid = function( table_id, setup, column_info_array ) {
 			options.min_grid_width = options.max_grid_width;
 		}
 
-		Debug.Text( 'Target Grid: '+ this.setup.container_selector +' Target Div: '+ this.grid.parents( this.setup.container_selector ).id +' Width: Min: '+ options.min_grid_width +' Max: '+ options.max_grid_width +' Scrollbar Offset: '+ grid_width_scrollbar_offset +' Parent Width: '+ $(this.grid.parents('.edit-view-tab, body')[0]).width(), 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+		Debug.Text( 'Target Grid: ' + this.setup.container_selector + ' Target Div: ' + this.grid.parents( this.setup.container_selector ).id + ' Width: Min: ' + options.min_grid_width + ' Max: ' + options.max_grid_width + ' Scrollbar Offset: ' + grid_width_scrollbar_offset + ' Parent Width: ' + $( this.grid.parents( '.edit-view-tab, body' )[0] ).width(), 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 
 		if ( column_model ) {
 			var total_column_width = 0;
-			for( var i = 0; i < column_model.length; i++ ) {
+			for ( var i = 0; i < column_model.length; i++ ) {
 				var field = column_model[i].name;
 				var width = column_model[i].width ? column_model[i].width : column_model.widthOrg;
 				total_column_width += width;
@@ -379,7 +391,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 		}
 
 		function longer( champ, contender ) {
-			return (contender.length > champ.length) ? contender : champ;
+			return ( contender.length > champ.length ) ? contender : champ;
 		}
 
 		function longestWord( str ) {
@@ -417,33 +429,33 @@ TTGrid = function( table_id, setup, column_info_array ) {
 					width = options.column_width_override[field];
 				} else {
 
-					for (var j = 0; j < grid_data.length; j++) {
+					for ( var j = 0; j < grid_data.length; j++ ) {
 						var row_data = grid_data[j];
-						if (!row_data.hasOwnProperty(field)) {
+						if ( !row_data.hasOwnProperty( field ) ) {
 							break;
 						}
 
 						var current_cell_content = row_data[field];
-						if (!current_cell_content) {
+						if ( !current_cell_content ) {
 							current_cell_content = '';
 						}
 
-						if (!longest_cell_content) {
+						if ( !longest_cell_content ) {
 							longest_cell_content = current_cell_content.toString();
 							header_is_longest = false;
 						} else {
-							if (current_cell_content && current_cell_content.toString().length > longest_cell_content.length) {
+							if ( current_cell_content && current_cell_content.toString().length > longest_cell_content.length ) {
 								longest_cell_content = current_cell_content.toString();
 								header_is_longest = false;
 							}
 						}
 					}
 
-
+					var calculate_text_width_options;
 					if ( longest_cell_content == field ) {
-						calculate_text_width_options = {fontSize: '11px', fontWeight: 'bolder'};
+						calculate_text_width_options = { fontSize: '11px', fontWeight: 'bolder' };
 					} else {
-						calculate_text_width_options = {fontSize: '11px', fontWeight: 'normal'};
+						calculate_text_width_options = { fontSize: '11px', fontWeight: 'normal' };
 					}
 
 					var width = Global.calculateTextWidth( longest_cell_content, calculate_text_width_options ); // + 40; // 8 is drag handle width +2 for borders +20 for sort order ui hint (17 for actual hint,13 for header padding on Firefox under windows
@@ -470,7 +482,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 		if ( ( longest_field_width * column_model.length ) <= options.min_grid_width ) {
 			var equal_column_width = Math.floor( ( options.min_grid_width - cb_column_width ) / ( column_model.length - cb_column_count_adjustment ) );
 			var equal_column_width_remainder = ( ( options.min_grid_width - cb_column_width ) % ( column_model.length - cb_column_count_adjustment ) ); //Eliminate partial pixel adjustments.
-			Debug.Text( ' Grid columns CAN fit with equal sizes... Grid Width: '+ options.min_grid_width +' Optimal Grid Width: '+ this.grid_total_width +' Equal Size Width: '+ equal_column_width +' Remainder: '+ equal_column_width_remainder, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+			Debug.Text( ' Grid columns CAN fit with equal sizes... Grid Width: ' + options.min_grid_width + ' Optimal Grid Width: ' + this.grid_total_width + ' Equal Size Width: ' + equal_column_width + ' Remainder: ' + equal_column_width_remainder, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 
 			var adjusted_grid_width = 0;
 
@@ -480,7 +492,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 					this.grid.setColWidth( 'cb', cb_column_width );
 					adjusted_grid_width += cb_column_width;
 				} else {
-					tmp_column_width = equal_column_width;
+					var tmp_column_width = equal_column_width;
 
 					if ( x == 1 ) {
 						tmp_column_width += equal_column_width_remainder;
@@ -497,11 +509,11 @@ TTGrid = function( table_id, setup, column_info_array ) {
 
 				x++;
 			}
-			Debug.Text( ' Adjusted Grid Width: '+ adjusted_grid_width +' Adjusted Column Remainder: '+ equal_column_width_remainder, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+			Debug.Text( ' Adjusted Grid Width: ' + adjusted_grid_width + ' Adjusted Column Remainder: ' + equal_column_width_remainder, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 
 			this.grid_total_width = options.min_grid_width;
 		} else {
-			Debug.Text( ' Optimal Grid Width: '+ this.grid_total_width +' Equal Size Width: '+ ( longest_field_width * column_model.length ), 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+			Debug.Text( ' Optimal Grid Width: ' + this.grid_total_width + ' Equal Size Width: ' + ( longest_field_width * column_model.length ), 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 
 			var body_width_difference = 0;
 			var column_width_adjustment = 0;
@@ -538,6 +550,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 					this.grid.setColWidth( 'cb', cb_column_width );
 					adjusted_grid_width += cb_column_width;
 				} else {
+					var tmp_column_width;
 					if ( options.column_width_override && options.column_width_override[n] ) {
 						tmp_column_width = column_widths[tmp_column_name];
 					} else {
@@ -548,7 +561,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 						tmp_column_width += column_width_adjustment_remainder;
 					}
 
-					Debug.Text( '    Adjusted Column: '+ tmp_column_name +' Width: Old: '+ column_widths[tmp_column_name] +' New: '+ tmp_column_width +' Adjustment: '+ column_width_adjustment +' Body Difference: '+ body_width_difference +' Columns Adjusted: '+ columns_to_adjust_width, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+					Debug.Text( '    Adjusted Column: ' + tmp_column_name + ' Width: Old: ' + column_widths[tmp_column_name] + ' New: ' + tmp_column_width + ' Adjustment: ' + column_width_adjustment + ' Body Difference: ' + body_width_difference + ' Columns Adjusted: ' + columns_to_adjust_width, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 					if ( this.grid.getColProp( tmp_column_name ).width != tmp_column_width ) {
 						this.grid.setColWidth( tmp_column_name, tmp_column_width );
 					}
@@ -562,51 +575,61 @@ TTGrid = function( table_id, setup, column_info_array ) {
 		}
 
 		//this.setGridWidth( this.grid_total_width, this.grid_total_width ); //Causes columns with to flucuate, specifically in schedule day mode.
-		Debug.Text( ' FINAL Grid width: '+ this.grid_total_width +' Body Width: '+ Global.bodyWidth() +' Total Rows: '+ grid_data.length, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+		Debug.Text( ' FINAL Grid width: ' + this.grid_total_width + ' Body Width: ' + Global.bodyWidth() + ' Total Rows: ' + grid_data.length, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 		return this.grid_total_width;
 	};
 
 	//resize event.
-	$( '#contentContainer' ).off( 'resize' ).on( 'resize', Global.debounce( function(e) {
+	$( '#contentContainer' ).off( 'resize' ).on( 'resize', Global.debounce( function( e ) {
 		e.stopPropagation();
-		Debug.Text( ' Window resize event hit by TTGrid. Target: '+ e.target, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+		Debug.Text( ' Window resize event hit by TTGrid. Target: ' + e.target, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 
 		if ( LocalCacheData.resizeable_grids.length > 0 ) {
 
 			//remove the nulls
-			var grids = LocalCacheData.resizeable_grids.filter( function(t) {
+			var grids = LocalCacheData.resizeable_grids.filter( function( t ) {
 				return t != null;
-			});
+			} );
 			LocalCacheData.resizeable_grids = grids;
 
 			for ( var i in LocalCacheData.resizeable_grids ) {
 				var ttgrid = LocalCacheData.resizeable_grids[i];
 
-				if ( !ttgrid || $('#'+ttgrid.ui_id).length === 0 || !ttgrid.grid || ttgrid.setup.onResizeGrid === false ) {
+				if ( !ttgrid || ttgrid.getTableIDElement().length === 0 || !ttgrid.grid || ttgrid.setup.onResizeGrid === false ) {
 					Debug.Arr( LocalCacheData.resizeable_grids, ' Grid ignored ' + i, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 					LocalCacheData.resizeable_grids[i] = null;
 					continue;
 				}
 
-				Debug.Text( ' Processing: ' + ttgrid.ui_id, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
-				if ( ttgrid.setup.onResizeGrid && typeof ttgrid.setup.onResizeGrid == 'function' ) {
-					Debug.Text( ' TTGrid invoked setup defined onResizeGrid() for ' + ttgrid.ui_id, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
-					ttgrid.setup.onResizeGrid();
-				} else {
-					if ( ttgrid.grid.length == 1 ) {
-						Debug.Text( ' TTGrid invoked TTgrid::setGridColumnsWidth() for ' + ttgrid.ui_id, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
-						ttgrid.setGridColumnsWidth();
-
+				//Try to only resize visible grids. ie: Switch from Audit tab to primary tab, wait until resize event is triggered, then switch back, triggering "flashing" of scroll bars appearing/disappearing
+				// Only happens on edit views with double row fields (ie: Note fields), like Edit Punch or Edit Schedule.
+				if ( ttgrid.getTableIDElement().is( ':visible' ) ) {
+					Debug.Text( ' Processing: ' + ttgrid.ui_id, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+					if ( ttgrid.setup.onResizeGrid && typeof ttgrid.setup.onResizeGrid == 'function' ) {
+						Debug.Text( ' TTGrid invoked setup defined onResizeGrid() for ' + ttgrid.ui_id, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+						ttgrid.setup.onResizeGrid();
+					} else {
+						if ( ttgrid.grid.length == 1 ) {
+							Debug.Text( ' TTGrid invoked TTgrid::setGridColumnsWidth() for ' + ttgrid.ui_id, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
+							ttgrid.setGridColumnsWidth();
+						}
 					}
+				} else {
+					Debug.Text( ' Skipping grid that is not visible: ' + ttgrid.ui_id, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 				}
 			}
 
-			//usually we will want to make doublesure that visible search grids resize.
-			//have to check for grid though because dashboard has no "search grid"
-			if ( LocalCacheData.current_open_primary_controller.grid ) {
-				//LocalCacheData.current_open_primary_controller.grid.setGridColumnsWidth();
+			//Usually we will want to make double sure that visible search grids resize.
+			//Have to check for grid though because dashboard has no "search grid"
+			if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.grid ) {
 				LocalCacheData.current_open_primary_controller.setGridColumnsWidth(); //Be sure to call the setGridColumnsWidth() from current_open_primary_controller in case its overridden.
 				LocalCacheData.current_open_primary_controller.setGridSize();
+			}
+
+			//Also resize grids inside Edit Views.
+			if ( LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.grid ) {
+				LocalCacheData.current_open_sub_controller.setGridColumnsWidth(); //Be sure to call the setGridColumnsWidth() from current_open_sub_controller in case its overridden.
+				LocalCacheData.current_open_sub_controller.setGridSize();
 			}
 		}
 	}, 500 ) );

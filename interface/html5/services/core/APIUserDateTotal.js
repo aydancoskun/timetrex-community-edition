@@ -51,6 +51,4 @@ var APIUserDateTotal = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

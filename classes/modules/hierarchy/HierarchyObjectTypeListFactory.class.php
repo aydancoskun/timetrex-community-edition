@@ -41,44 +41,44 @@
 class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 				';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HierarchyObjectTypeListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
+	function getById( $id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 				';
 		$query .= $this->getWhereSQL( $where );
@@ -90,24 +90,24 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HierarchyObjectTypeListFactory
 	 */
-	function getByHierarchyControlId( $id, $where = NULL, $order = NULL) {
+	function getByHierarchyControlId( $id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	hierarchy_control_id = ?
 				';
 		$query .= $this->getWhereSQL( $where );
@@ -119,43 +119,43 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param int $object_type_id
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HierarchyObjectTypeListFactory
 	 */
-	function getByCompanyIdAndObjectTypeId( $id, $object_type_id, $where = NULL, $order = NULL) {
+	function getByCompanyIdAndObjectTypeId( $id, $object_type_id, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $object_type_id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$cache_id = $id.$object_type_id;
-		$this->rs = $this->getCache($cache_id);
-		if ( $this->rs === FALSE ) {
+		$cache_id = $id . $object_type_id;
+		$this->rs = $this->getCache( $cache_id );
+		if ( $this->rs === false ) {
 			$hcf = new HierarchyControlFactory();
 			$hotf = new HierarchyObjectTypeFactory();
 
-			$strict_order = TRUE;
-			if ( $order == NULL ) {
+			$strict_order = true;
+			if ( $order == null ) {
 				//$order = array('b.last_name' => 'asc');
-				$strict_order = FALSE;
+				$strict_order = false;
 			}
 
-			$ph = array(
-						'id' => TTUUID::castUUID($id),
-						'object_type_id' => (int)$object_type_id,
-						);
+			$ph = [
+					'id'             => TTUUID::castUUID( $id ),
+					'object_type_id' => (int)$object_type_id,
+			];
 
 			$query = '
 						select	*
-						from	'. $this->getTable() .' as a,
-								'. $hcf->getTable() .' as b,
-								'. $hotf->getTable() .' as c
+						from	' . $this->getTable() . ' as a,
+								' . $hcf->getTable() . ' as b,
+								' . $hotf->getTable() . ' as c
 
 						where	a.hierarchy_control_id = b.id
 							AND a.hierarchy_control_id = c.hierarchy_control_id
@@ -168,42 +168,42 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 
 			$this->rs = $this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs, $cache_id);
+			$this->saveCache( $this->rs, $cache_id );
 		}
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param string $id   UUID
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|HierarchyObjectTypeListFactory
 	 */
-	function getByCompanyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getByCompanyId( $id, $limit = null, $page = null, $where = null, $order = null ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$strict_order = TRUE;
-		if ( $order == NULL ) {
+		$strict_order = true;
+		if ( $order == null ) {
 			//$order = array('b.last_name' => 'asc');
-			$strict_order = FALSE;
+			$strict_order = false;
 		}
 
 		$hcf = new HierarchyControlFactory();
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .' as a,
-							'. $hcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $hcf->getTable() . ' as b
 
 					where	a.hierarchy_control_id = b.id
 						AND b.company_id = ?
@@ -222,17 +222,18 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 	 * @param string $id UUID
 	 * @return array
 	 */
-	function getByCompanyIdArray( $id) {
+	function getByCompanyIdArray( $id ) {
 
 		$hotlf = new HierarchyObjectTypeListFactory();
-		$hotlf->getByCompanyId( $id ) ;
+		$hotlf->getByCompanyId( $id );
 
-		$object_types = array();
-		foreach ($hotlf as $object_type) {
+		$object_types = [];
+		foreach ( $hotlf as $object_type ) {
 			$object_types[] = $object_type->getObjectType();
 		}
 
 		return $object_types;
 	}
 }
+
 ?>

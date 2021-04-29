@@ -24,9 +24,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 		this.current_step = 1;
 		this.script_name = 'wizard_process_payroll';
 		this.wizard_id = 'ProcessPayrollWizard';
-		this.api_pay_period = new (APIFactory.getAPIClass( 'APIPayPeriod' ))();
-		this.api_pay_stub = new (APIFactory.getAPIClass( 'APIPayStub' ))();
-		this.api_pay_stub_transaction = new (APIFactory.getAPIClass( 'APIPayStubTransaction' ))();
+		this.api_pay_period = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
+		this.api_pay_stub = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+		this.api_pay_stub_transaction = new ( APIFactory.getAPIClass( 'APIPayStubTransaction' ) )();
 
 		this.render();
 	},
@@ -53,7 +53,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 			Global.setWidgetEnabled( this.done_btn, false );
 			Global.setWidgetEnabled( this.next_btn, true );
 			//Error: TypeError: this.stepsWidgetDic[1] is undefined in interface/html5/framework/jquery.min.js?v=9.0.0-20150918-155419 line 2 > eval line 45
-			if ( this.stepsWidgetDic[1] && (!this.stepsWidgetDic[1].pay_period_id.getValue() || this.stepsWidgetDic[1].pay_period_id.getValue().length < 1) ) {
+			if ( this.stepsWidgetDic[1] && ( !this.stepsWidgetDic[1].pay_period_id.getValue() || this.stepsWidgetDic[1].pay_period_id.getValue().length < 1 ) ) {
 				Global.setWidgetEnabled( this.next_btn, false );
 			}
 		} else {
@@ -70,10 +70,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 		switch ( this.current_step ) {
 			case 1:
 
-
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more pay periods to process payroll for' ) + ':' );
-				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayPeriod' )), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriod' ) ), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -265,11 +264,11 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				this.content_div.append( label );
 				this.stepsWidgetDic[this.current_step] = {};
 
-				$('.wizard .content').css( 'opacity', 0 );
-				TTPromise.add('wizard', 'step8');
-				TTPromise.wait('wizard', 'step8', function(){
-					$('.wizard .content').css( 'opacity', 1 );
-				});
+				$( '.wizard .content' ).css( 'opacity', 0 );
+				TTPromise.add( 'wizard', 'step8' );
+				TTPromise.wait( 'wizard', 'step8', function() {
+					$( '.wizard .content' ).css( 'opacity', 1 );
+				} );
 
 				grid_id = 'pay_stub_transfer';
 				grid_div = $( '<div class=\'grid-div wizard-grid-div\'> <table id=\'' + grid_id + '\'></table></div> <hr>' );
@@ -277,13 +276,12 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 				grid_id = 'pay_stub_transaction';
 				grid_div = $( '<div class=\'grid-div wizard-grid-div\'> <table id=\'' + grid_id + '\'></table></div>' );
-				this.setGrid( grid_id, grid_div, false ).setGridHeight( Math.floor( (this.content_div.height() - 150) / 2 ) );
+				this.setGrid( grid_id, grid_div, false ).setGridHeight( Math.floor( ( this.content_div.height() - 150 ) / 2 ) );
 
 				ribbon_button_box = this.getRibbonButtonBox();
 				var ribbon_btn1 = this.getRibbonButton( ContextMenuIconName.direct_deposit, Global.getRibbonIconRealPath( 'direct_deposit-35x35.png' ), $.i18n._( 'Process<br>Transactions' ) );
 				ribbon_btn2 = this.getRibbonButton( ContextMenuIconName.pay_stub_transaction_summary, Global.getRibbonIconRealPath( Icons.payroll_export_report ), $.i18n._( 'Pay Stub<br>Transaction Summary' ) );
 				ribbon_btn3 = this.getRibbonButton( ContextMenuIconName.payroll_export_report, Global.getRibbonIconRealPath( Icons.payroll_export_report ), $.i18n._( 'Payroll Export' ) );
-
 
 				ribbon_btn1.unbind( 'click' ).bind( 'click', function() {
 					$this.onNavigationClick( ContextMenuIconName.direct_deposit );
@@ -348,9 +346,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 		$( this.el ).remove();
 
-		$().TFeedback({
+		$().TFeedback( {
 			source: this.wizard_id
-		});
+		} );
 	},
 
 	getGridColumns: function( gridId, callBack ) {
@@ -369,10 +367,10 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				var column_data = $this.pay_stub_transaction_columns[x];
 
 				if ( column_data.value == 'remittance_source_account' ||
-						column_data.value == 'remittance_source_account_type' ||
-						column_data.value == 'currency' ||
-						column_data.value == 'total_transactions' ||
-						column_data.value == 'total_amount' ) {
+					column_data.value == 'remittance_source_account_type' ||
+					column_data.value == 'currency' ||
+					column_data.value == 'total_transactions' ||
+					column_data.value == 'total_amount' ) {
 					var column_info = {
 						resizable: false,
 						name: column_data.value,
@@ -410,9 +408,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 						var column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
-								column_data.value == 'end_date' ||
-								column_data.value == 'transaction_date' ||
-								column_data.value == 'pending_requests' ) {
+							column_data.value == 'end_date' ||
+							column_data.value == 'transaction_date' ||
+							column_data.value == 'pending_requests' ) {
 							var column_info = {
 								resizable: false,
 								name: column_data.value,
@@ -435,18 +433,18 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
-								column_data.value == 'end_date' ||
-								column_data.value == 'transaction_date' ||
-								column_data.value == 'exceptions_high' ||
-								column_data.value == 'exceptions_medium' ||
-								column_data.value == 'exceptions_low' ||
-								column_data.value == 'exceptions_critical'
+							column_data.value == 'end_date' ||
+							column_data.value == 'transaction_date' ||
+							column_data.value == 'exceptions_high' ||
+							column_data.value == 'exceptions_medium' ||
+							column_data.value == 'exceptions_low' ||
+							column_data.value == 'exceptions_critical'
 						) {
 
 							if ( column_data.value == 'exceptions_high' ||
-									column_data.value == 'exceptions_medium' ||
-									column_data.value == 'exceptions_low' ||
-									column_data.value == 'exceptions_critical' ) {
+								column_data.value == 'exceptions_medium' ||
+								column_data.value == 'exceptions_low' ||
+								column_data.value == 'exceptions_critical' ) {
 
 								column_info = {
 									resizable: false,
@@ -484,16 +482,16 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
-								column_data.value == 'end_date' ||
-								column_data.value == 'transaction_date' ||
-								column_data.value == 'verified_timesheets' ||
-								column_data.value == 'pending_timesheets' ||
-								column_data.value == 'total_timesheets'
+							column_data.value == 'end_date' ||
+							column_data.value == 'transaction_date' ||
+							column_data.value == 'verified_timesheets' ||
+							column_data.value == 'pending_timesheets' ||
+							column_data.value == 'total_timesheets'
 						) {
 
 							if ( column_data.value == 'verified_timesheets' ||
-									column_data.value == 'pending_timesheets' ||
-									column_data.value == 'total_timesheets' ) {
+								column_data.value == 'pending_timesheets' ||
+								column_data.value == 'total_timesheets' ) {
 
 								column_info = {
 									resizable: false,
@@ -529,9 +527,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
-								column_data.value == 'end_date' ||
-								column_data.value == 'transaction_date' ||
-								column_data.value == 'status'
+							column_data.value == 'end_date' ||
+							column_data.value == 'transaction_date' ||
+							column_data.value == 'status'
 						) {
 
 							column_info = {
@@ -555,9 +553,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
-								column_data.value == 'end_date' ||
-								column_data.value == 'transaction_date' ||
-								column_data.value == 'ps_amendments'
+							column_data.value == 'end_date' ||
+							column_data.value == 'transaction_date' ||
+							column_data.value == 'ps_amendments'
 						) {
 
 							column_info = {
@@ -582,9 +580,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
-								column_data.value == 'end_date' ||
-								column_data.value == 'transaction_date' ||
-								column_data.value == 'pay_stubs_open'
+							column_data.value == 'end_date' ||
+							column_data.value == 'transaction_date' ||
+							column_data.value == 'pay_stubs_open'
 						) {
 
 							column_info = {
@@ -606,10 +604,10 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'status' ||
-								column_data.value == 'start_date' ||
-								column_data.value == 'end_date' ||
-								column_data.value == 'transaction_date' ||
-								column_data.value == 'pay_stubs_open'
+							column_data.value == 'start_date' ||
+							column_data.value == 'end_date' ||
+							column_data.value == 'transaction_date' ||
+							column_data.value == 'pay_stubs_open'
 						) {
 
 							column_info = {
@@ -649,8 +647,8 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 		var new_tr = $( '<tr class="group-column-tr" >' + '</tr>' );
 
 		var new_th = $( '<th class="group-column-th"  >' +
-				'<span class="group-column-label"></span>' +
-				'</th>' );
+			'<span class="group-column-label"></span>' +
+			'</th>' );
 
 		switch ( gridId ) {
 			case 'exceptions':
@@ -793,7 +791,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				grid = current_step_ui.pay_stub_generate;
 				ids = grid.grid.jqGrid( 'getGridParam', 'selarrrow' );
 				ProgressBar.showOverlay();
-				new (APIFactory.getAPIClass( 'APIPayStub' ))().generatePayStubs( ids, {
+				new ( APIFactory.getAPIClass( 'APIPayStub' ) )().generatePayStubs( ids, {
 					onResult: function( result ) {
 						if ( result.isValid() ) {
 							var user_generic_status_batch_id = result.getAttributeInAPIDetails( 'user_generic_status_batch_id' );
@@ -869,7 +867,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				this.onCloseClick();
 				break;
 
-				//Process Payments Button Click
+			//Process Payments Button Click
 			case ContextMenuIconName.direct_deposit:
 				Global.addViewTab( this.wizard_id, $.i18n._( 'Process Payroll' ), window.location.href );
 
@@ -924,7 +922,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				grid.grid.trigger( 'reloadGrid' );
 				this.setGridAutoHeight( grid, this.transaction_source_data.length );
 				this.showNoResultCover( grid.grid.parents( '.grid-div' ) );
-				pay_stub_transaction_grid.show();
+				pay_stub_transaction_grid.grid.show();
 
 			} else {
 				this.content_div.find( '#directDepositIcon' ).removeClass( 'disable-image' );
@@ -944,7 +942,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 							$this.showNoResultCover( grid );
 						}
 
-						pay_stub_transaction_grid.show();
+						pay_stub_transaction_grid.grid.show();
 					}
 				} );
 			}
@@ -1166,7 +1164,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 									$this.setGridAutoHeight( grid, $this.transaction_source_data.length );
 									grid.grid.find( '.cbox' ).prop( 'checked', true );
 
-									TTPromise.resolve('wizard', 'step8');
+									TTPromise.resolve( 'wizard', 'step8' );
 								}
 							} );
 

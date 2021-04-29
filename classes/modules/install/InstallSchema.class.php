@@ -40,8 +40,8 @@
  */
 class InstallSchema extends Install {
 
-	protected $schema_version = NULL;
-	protected $obj = NULL;
+	protected $schema_version = null;
+	protected $obj = null;
 
 	/**
 	 * InstallSchema constructor.
@@ -50,30 +50,30 @@ class InstallSchema extends Install {
 	 * @param $db_conn
 	 * @param bool $is_upgrade
 	 */
-	function __construct( $database_type, $version, $db_conn, $is_upgrade = FALSE ) {
+	function __construct( $database_type, $version, $db_conn, $is_upgrade = false ) {
 		global $config_vars;
 		$this->config_vars = $config_vars; //Variable is in the install_obj too, but we need to propegate it here so cleanCacheDirectory() can be called.
 
-		Debug::text('Database Type: '. $database_type .' Version: '. $version, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Database Type: ' . $database_type . ' Version: ' . $version, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->database_type = $database_type;
 		$this->schema_version = $version;
 
 		if ( $database_type == '' ) {
-			return FALSE;
+			return false;
 		}
 
 		if ( $version == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$schema_class_file_name = Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'install'. DIRECTORY_SEPARATOR .'InstallSchema_'. $version .'.class.php';
+		$schema_class_file_name = Environment::getBasePath() . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'install' . DIRECTORY_SEPARATOR . 'InstallSchema_' . $version . '.class.php';
 		$schema_sql_file_name = $this->getSchemaSQLFilename();
-		if ( file_exists($schema_class_file_name)
-				AND file_exists($schema_sql_file_name ) ) {
+		if ( file_exists( $schema_class_file_name )
+				&& file_exists( $schema_sql_file_name ) ) {
 
 			include_once( $schema_class_file_name );
 
-			$class_name = 'InstallSchema_'. $version;
+			$class_name = 'InstallSchema_' . $version;
 
 			$this->obj = new $class_name( $this ); //Pass current Install class object to the schema class, so we can call common functions.
 			$this->obj->setDatabaseConnection( $db_conn );
@@ -81,26 +81,26 @@ class InstallSchema extends Install {
 			$this->obj->setVersion( $version );
 			$this->obj->setSchemaSQLFilename( $this->getSchemaSQLFilename() );
 
-			return TRUE;
+			return true;
 		} else {
-			Debug::text('Schema Install Class File DOES NOT Exists - File Name: '. $schema_class_file_name .' Schema SQL File: '. $schema_sql_file_name, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Schema Install Class File DOES NOT Exists - File Name: ' . $schema_class_file_name . ' Schema SQL File: ' . $schema_sql_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return string
 	 */
 	function getSQLFileDirectory() {
-		return Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'install'. DIRECTORY_SEPARATOR .'sql'. DIRECTORY_SEPARATOR . $this->database_type . DIRECTORY_SEPARATOR;
+		return Environment::getBasePath() . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'install' . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . $this->database_type . DIRECTORY_SEPARATOR;
 	}
 
 	/**
 	 * @return string
 	 */
 	function getSchemaSQLFilename() {
-		return $this->getSQLFileDirectory() . $this->schema_version .'.sql';
+		return $this->getSQLFileDirectory() . $this->schema_version . '.sql';
 	}
 
 	//load Schema file data
@@ -112,11 +112,11 @@ class InstallSchema extends Install {
 	 * @return bool|null
 	 */
 	private function getObject() {
-		if ( is_object($this->obj) ) {
+		if ( is_object( $this->obj ) ) {
 			return $this->obj;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -124,20 +124,21 @@ class InstallSchema extends Install {
 	 * @param array $args
 	 * @return bool|mixed
 	 */
-	function __call( $function_name, $args = array() ) {
-		if ( $this->getObject() !== FALSE ) {
+	function __call( $function_name, $args = [] ) {
+		if ( $this->getObject() !== false ) {
 			//Debug::text('Calling Sub-Class Function: '. $function_name, __FILE__, __LINE__, __METHOD__, 10);
-			if ( is_callable( array($this->getObject(), $function_name) ) ) {
-				$return = call_user_func_array(array($this->getObject(), $function_name), $args);
+			if ( is_callable( [ $this->getObject(), $function_name ] ) ) {
+				$return = call_user_func_array( [ $this->getObject(), $function_name ], $args );
 
 				return $return;
 			}
 		}
 
-		Debug::text('Sub-Class Function Call FAILED!:'. $function_name, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Sub-Class Function Call FAILED!:' . $function_name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
+		return false;
 	}
 
 }
+
 ?>

@@ -39,34 +39,34 @@
  * This file should/can be run as often as it needs to (once an hour)
  *
  */
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
 $current_epoch = TTDate::getTime();
 
 //If offset is only 24hrs then adding user_date rows can happen before the pay period
 //was added. Add pay periods 48hrs in advance now?
-$offset = 86400*2; //48hrs
+$offset = 86400 * 2; //48hrs
 
 $ppslf = new PayPeriodScheduleListFactory();
 
 $clf = new CompanyListFactory();
-$clf->getByStatusID( array(10, 20, 23), NULL, array('a.id' => 'asc') ); //10=Active, 20=Hold, 23=Expired
+$clf->getByStatusID( [ 10, 20, 23 ], null, [ 'a.id' => 'asc' ] ); //10=Active, 20=Hold, 23=Expired
 if ( $clf->getRecordCount() > 0 ) {
 	foreach ( $clf as $c_obj ) {
-		if ( in_array( $c_obj->getStatus(), array(10, 20, 23) ) ) { //10=Active, 20=Hold, 23=Expired
+		if ( in_array( $c_obj->getStatus(), [ 10, 20, 23 ] ) ) { //10=Active, 20=Hold, 23=Expired
 			//Get all pay period schedules.
 			$ppslf->getByCompanyId( $c_obj->getId() );
-			foreach ($ppslf as $pay_period_schedule) {
-				$end_date = NULL;
+			foreach ( $ppslf as $pay_period_schedule ) {
+				$end_date = null;
 
-				$pay_period_schedule->createNextPayPeriod($end_date, $offset);
-				if ( PRODUCTION == TRUE AND DEMO_MODE == FALSE ) {
+				$pay_period_schedule->createNextPayPeriod( $end_date, $offset );
+				if ( PRODUCTION == true && DEMO_MODE == false ) {
 					$pay_period_schedule->forceClosePreviousPayPeriods( $current_epoch );
 				}
 
-				unset($ppf);
-				unset($pay_period_schedule);
+				unset( $ppf );
+				unset( $pay_period_schedule );
 			}
 		}
 	}

@@ -63,6 +63,4 @@ var APIUserQualificationReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

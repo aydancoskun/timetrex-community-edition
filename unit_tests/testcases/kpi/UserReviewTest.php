@@ -38,27 +38,28 @@
  * @group UserReview
  */
 class UserReviewTest extends PHPUnit_Framework_TestCase {
-	protected $company_id = NULL;
-	protected $user_id = NULL;
-	protected $currency_id = NULL;
-	protected $pay_period_schedule_id = NULL;
-	protected $pay_period_objs = NULL;
-	protected $pay_stub_account_link_arr = NULL;
-	protected $branch_ids = NULL;
-	protected $department_ids = NULL;
-	protected $expense_policy_ids = NULL;
+	protected $company_id = null;
+	protected $user_id = null;
+	protected $currency_id = null;
+	protected $pay_period_schedule_id = null;
+	protected $pay_period_objs = null;
+	protected $pay_stub_account_link_arr = null;
+	protected $branch_ids = null;
+	protected $department_ids = null;
+	protected $expense_policy_ids = null;
+
 	//protected $user_expense_id = NULL;
 
 	public function setUp() {
 		global $dd;
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -77,20 +78,20 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 
-	function createKPIGroup( $company_id , $type, $parent_id = 0 ) {
+	function createKPIGroup( $company_id, $type, $parent_id = 0 ) {
 		$kgf = TTnew( 'KPIGroupFactory' ); /** @var KPIGroupFactory $kgf */
 		$kgf->setCompany( $company_id );
-		switch( $type ) {
+		switch ( $type ) {
 			case 10:
 				$kgf->setParent( $parent_id );
 				$kgf->setName( 'Carpenter' );
@@ -101,7 +102,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 				break;
 			case 30:
 				$kgf->setParent( $parent_id );
-				$kgf->setName(  'General Laborer' );
+				$kgf->setName( 'General Laborer' );
 				break;
 			case 40:
 				$kgf->setParent( $parent_id );
@@ -111,112 +112,113 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 				$kgf->setParent( $parent_id );
 				$kgf->setName( 'Electrician' );
 				break;
-
 		}
 		if ( $kgf->isValid() ) {
 			$insert_id = $kgf->Save();
+
 			return $insert_id;
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	function createKPI( $company_id , $type, $rate_type, $kpi_group_id = NULL, $minimum_rate = NULL, $maximum_rate = NULL ) {
+	function createKPI( $company_id, $type, $rate_type, $kpi_group_id = null, $minimum_rate = null, $maximum_rate = null ) {
 		$kf = TTnew( 'KPIFactory' ); /** @var KPIFactory $kf */
 		$kf->setCompany( $company_id );
-		switch($type) {
+		switch ( $type ) {
 			case 10:
-				$kf->setName('Works well with others?');
-				$kf->setStatus(10);
-				$kf->setType(10); //Scale
-				$kf->setDescription('');
+				$kf->setName( 'Works well with others?' );
+				$kf->setStatus( 10 );
+				$kf->setType( 10 ); //Scale
+				$kf->setDescription( '' );
 				break;
 			case 20:
-				$kf->setName('Ability to manage time efficiently?');
-				$kf->setStatus(10);
-				$kf->setType(10); //Scale
-				$kf->setDescription('');
+				$kf->setName( 'Ability to manage time efficiently?' );
+				$kf->setStatus( 10 );
+				$kf->setType( 10 ); //Scale
+				$kf->setDescription( '' );
 				break;
 			case 30:
-				$kf->setName('Finishes projects on time?');
-				$kf->setStatus(10);
-				$kf->setType(10); //Scale
-				$kf->setDescription('');
+				$kf->setName( 'Finishes projects on time?' );
+				$kf->setStatus( 10 );
+				$kf->setType( 10 ); //Scale
+				$kf->setDescription( '' );
 				break;
 			case 40:
-				$kf->setName('How satisified are you with your current position?');
-				$kf->setStatus(15);
-				$kf->setType(10); //Scale
-				$kf->setDescription('');
+				$kf->setName( 'How satisified are you with your current position?' );
+				$kf->setStatus( 15 );
+				$kf->setType( 10 ); //Scale
+				$kf->setDescription( '' );
 				break;
 			case 50:
-				$kf->setName('Positive Attitude?');
-				$kf->setStatus(15);
-				$kf->setType(10); //Scale
-				$kf->setDescription('');
+				$kf->setName( 'Positive Attitude?' );
+				$kf->setStatus( 15 );
+				$kf->setType( 10 ); //Scale
+				$kf->setDescription( '' );
 				break;
 			case 60:
-				$kf->setName('What can I do to make you more successful?');
-				$kf->setStatus(10);
-				$kf->setType(20); // Yes/No
-				$kf->setDescription('');
+				$kf->setName( 'What can I do to make you more successful?' );
+				$kf->setStatus( 10 );
+				$kf->setType( 20 ); // Yes/No
+				$kf->setDescription( '' );
 				break;
 			case 70:
-				$kf->setName('How can you work better with your supervisor?');
-				$kf->setStatus(10);
-				$kf->setType(30); //Text
-				$kf->setDescription('In the past 12 months tell me what you have learnt about the role you play in a group and how your supervisor can best work with you in that role.');
+				$kf->setName( 'How can you work better with your supervisor?' );
+				$kf->setStatus( 10 );
+				$kf->setType( 30 ); //Text
+				$kf->setDescription( 'In the past 12 months tell me what you have learnt about the role you play in a group and how your supervisor can best work with you in that role.' );
 				break;
 		}
 
-		if( $rate_type != 60 AND $rate_type != 70 ) {
+		if ( $rate_type != 60 && $rate_type != 70 ) {
 			$kf->setMinimumRate( $minimum_rate );
 			$kf->setMaximumRate( $maximum_rate );
 		}
 
 		if ( $kf->isValid() ) {
-			$insert_id = $kf->Save(FALSE);
+			$insert_id = $kf->Save( false );
 
 			if ( isset( $kpi_group_id ) ) {
 				$kf->setGroup( $kpi_group_id );
 			} else {
-				$kf->setGroup( array() );
+				$kf->setGroup( [] );
 			}
 
 			if ( $kf->isValid() ) {
 				$kf->Save();
 
-				Debug::Text('Creating KPI ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'Creating KPI ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 				return $insert_id;
 			}
 		}
 
-		Debug::Text('Failed Creating KPI!', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::Text( 'Failed Creating KPI!', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 
-	function createUserReviewControl( $user_id , $reviewer_user_id) {
-		$urcf = TTnew('UserReviewControlFactory'); /** @var UserReviewControlFactory $urcf */
+	function createUserReviewControl( $user_id, $reviewer_user_id ) {
+		$urcf = TTnew( 'UserReviewControlFactory' ); /** @var UserReviewControlFactory $urcf */
 		$urcf->setUser( $user_id );
 		$urcf->setReviewerUser( $reviewer_user_id );
-		$urcf->setStartDate( time() - (86400 * rand(21, 30)) );
-		$urcf->setEndDate( time() - (86400 * rand(11, 20))  );
-		$urcf->setDueDate( time() - (86400 * rand(1, 10)) );
-		$urcf->setType( rand(2, 9) * 5 );
-		$urcf->setSeverity( rand(1, 5) * 10 );
-		$urcf->setTerm( rand(1, 3) * 10 );
-		$urcf->setStatus( rand(1, 3) * 10 );
+		$urcf->setStartDate( time() - ( 86400 * rand( 21, 30 ) ) );
+		$urcf->setEndDate( time() - ( 86400 * rand( 11, 20 ) ) );
+		$urcf->setDueDate( time() - ( 86400 * rand( 1, 10 ) ) );
+		$urcf->setType( rand( 2, 9 ) * 5 );
+		$urcf->setSeverity( rand( 1, 5 ) * 10 );
+		$urcf->setTerm( rand( 1, 3 ) * 10 );
+		$urcf->setStatus( rand( 1, 3 ) * 10 );
 		if ( $urcf->isValid() ) {
 			$insert_id = $urcf->Save();
-			Debug::Text('User Review Control ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'User Review Control ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating User Review Control!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Failed Creating User Review Control!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
+		return false;
 	}
 
 	function getKPIArrayByGroupId( $id ) {
@@ -224,13 +226,13 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$klf->getByCompanyIDAndGroupID( $this->company_id, $id );
 		if ( $klf->getRecordCount() > 0 ) {
-			foreach( $klf as $kpi_obj ) {
-				$kpi_arr[] = array(
-					'group_id' => $kpi_obj->getGroup(),
-					'type_id' => $kpi_obj->getType(),
-					'minimum_rate' => $kpi_obj->getMinimumRate(),
-					'maximum_rate' => $kpi_obj->getMaximumRate(),
-				);
+			foreach ( $klf as $kpi_obj ) {
+				$kpi_arr[] = [
+						'group_id'     => $kpi_obj->getGroup(),
+						'type_id'      => $kpi_obj->getType(),
+						'minimum_rate' => $kpi_obj->getMinimumRate(),
+						'maximum_rate' => $kpi_obj->getMaximumRate(),
+				];
 			}
 		}
 
@@ -238,31 +240,30 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			return $kpi_arr;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getKPIArrayByControlId( $id ) {
 		$urlf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $urlf */
 		$urlf->getByUserReviewControlId( $id );
 		if ( $urlf->getRecordCount() > 0 ) {
-			foreach( $urlf as $ur_obj ) {
-				$kpi_arr[] = array(
-					'group_id' => $ur_obj->getKPIObject()->getGroup(),
-					'type_id' => $ur_obj->getKPIObject()->getType(),
-					'minimum_rate' => $ur_obj->getKPIObject()->getMinimumRate(),
-					'maximum_rate' => $ur_obj->getKPIObject()->getMaximumRate(),
-					'rating' => $ur_obj->getRating(),
-					'note' => $ur_obj->getNote(),
-				);
+			foreach ( $urlf as $ur_obj ) {
+				$kpi_arr[] = [
+						'group_id'     => $ur_obj->getKPIObject()->getGroup(),
+						'type_id'      => $ur_obj->getKPIObject()->getType(),
+						'minimum_rate' => $ur_obj->getKPIObject()->getMinimumRate(),
+						'maximum_rate' => $ur_obj->getKPIObject()->getMaximumRate(),
+						'rating'       => $ur_obj->getRating(),
+						'note'         => $ur_obj->getNote(),
+				];
 			}
 		}
 		if ( isset( $kpi_arr ) ) {
 			return $kpi_arr;
 		}
 
-		return FALSE;
+		return false;
 	}
-
 
 
 	function testKPIA() {
@@ -285,8 +286,8 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
-			$urf->setNote('');
-			$urf->setRating(3);
+			$urf->setNote( '' );
+			$urf->setRating( 3 );
 			if ( $urf->isValid() ) {
 				$urf->Save();
 			}
@@ -299,10 +300,10 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
 		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 1 );
 		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 10 );
-		if ( $kpi_arr[0]['rating'] < 10 AND $kpi_arr[0]['rating'] > 1 ) {
-			$this->assertTrue( TRUE );
+		if ( $kpi_arr[0]['rating'] < 10 && $kpi_arr[0]['rating'] > 1 ) {
+			$this->assertTrue( true );
 		} else {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( false );
 		}
 
 		unset( $kpi_id, $kpi_arr, $kpi_group_id, $user_ids, $user_review_control_id );
@@ -326,8 +327,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		unset( $kpi_id, $kpi_arr, $kpi_group_ids );
 
-		return TRUE;
-
+		return true;
 	}
 
 	function testKPIB() {
@@ -345,30 +345,29 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
-			$urf->setNote('');
-			$urf->setRating(TRUE); // TRUE
+			$urf->setNote( '' );
+			$urf->setRating( true ); // TRUE
 			if ( $urf->isValid() ) {
-				 $user_review_id = $urf->Save();
+				$user_review_id = $urf->Save();
 			}
-
 		}
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
 		$this->assertEquals( $kpi_arr[0]['type_id'], 20 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], FALSE );
-		if ( (int)$kpi_arr[0]['rating'] == 0 OR (int)$kpi_arr[0]['rating'] == 1 ) {
-			$this->assertTrue( TRUE );
+		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		if ( (int)$kpi_arr[0]['rating'] == 0 || (int)$kpi_arr[0]['rating'] == 1 ) {
+			$this->assertTrue( true );
 		} else {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( false );
 		}
 
-		if ( isset( $user_review_id ) AND $user_review_id != '' ) {
+		if ( isset( $user_review_id ) && $user_review_id != '' ) {
 			$urf->setId( $user_review_id );
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
-			$urf->setRating(FALSE); // FALSE
+			$urf->setRating( false ); // FALSE
 			if ( $urf->isValid() ) {
 				$urf->Save();
 			}
@@ -378,19 +377,17 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
 		$this->assertEquals( $kpi_arr[0]['type_id'], 20 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], FALSE );
-		if ( (int)$kpi_arr[0]['rating'] == 0 OR (int)$kpi_arr[0]['rating'] == 1 ) {
-			$this->assertTrue( TRUE );
+		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		if ( (int)$kpi_arr[0]['rating'] == 0 || (int)$kpi_arr[0]['rating'] == 1 ) {
+			$this->assertTrue( true );
 		} else {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( false );
 		}
 
 		unset( $kpi_id, $kpi_arr, $kpi_group_id, $user_ids, $user_review_control_id );
 
-		return TRUE;
-
-
+		return true;
 	}
 
 	function testKPIC() {
@@ -402,8 +399,8 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_id );
 
 		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], FALSE );
+		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
 
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 17 );
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 19 );
@@ -414,21 +411,18 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			if ( $urf->isValid() ) {
-				 $user_review_id = $urf->Save();
+				$user_review_id = $urf->Save();
 			}
-
 		}
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
 		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['rating'], FALSE );
+		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['rating'], false );
 
-		return TRUE;
-
-
+		return true;
 	}
 
 	function testEditKPI() {
@@ -439,8 +433,8 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_id );
 
 		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], FALSE );
+		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
 
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 12 );
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 13 );
@@ -452,24 +446,23 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			if ( $urf->isValid() ) {
-				 $user_review_id = $urf->Save();
+				$user_review_id = $urf->Save();
 			}
-
 		}
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
 		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['rating'], FALSE );
+		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['rating'], false );
 
 		unset( $kpi_arr, $user_ids, $user_review_control_id, $urf );
 
 		// Edit
 		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$kf = $klf->getById( $kpi_id )->getCurrent();
-		$kf->setType(10);
+		$kf->setType( 10 );
 		$kf->setMinimumRate( 10 );
 		$kf->setMaximumRate( 100 );
 		if ( $kf->isValid() ) {
@@ -489,8 +482,8 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
-			$urf->setNote('');
-			$urf->setRating(50);
+			$urf->setNote( '' );
+			$urf->setRating( 50 );
 			if ( $urf->isValid() ) {
 				$urf->Save();
 			}
@@ -503,13 +496,13 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
 		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 10 );
 		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 100 );
-		if ( $kpi_arr[0]['rating'] < 100 AND $kpi_arr[0]['rating'] > 10 ) {
-			$this->assertTrue( TRUE );
+		if ( $kpi_arr[0]['rating'] < 100 && $kpi_arr[0]['rating'] > 10 ) {
+			$this->assertTrue( true );
 		} else {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( false );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -529,40 +522,38 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 15 );
 
 
-		foreach( $kpi_ids as $type => $kpi_id ) {
-			$user_key = rand(0, 2);
-			$reviewer_user_key = ($user_key + 1);
+		foreach ( $kpi_ids as $type => $kpi_id ) {
+			$user_key = rand( 0, 2 );
+			$reviewer_user_key = ( $user_key + 1 );
 			$user_review_control_ids[] = $user_review_control_id = $this->createUserReviewControl( $user_ids[$user_key], $user_ids[$reviewer_user_key] );
 			if ( $user_review_control_id != '' ) {
 				$urf = TTnew( 'UserReviewFactory' ); /** @var UserReviewFactory $urf */
 				$urf->setUserReviewControl( $user_review_control_id );
 				$urf->setKPI( $kpi_id );
-				switch( $type ) {
+				switch ( $type ) {
 					case 10:
-						$urf->setRating(7);
+						$urf->setRating( 7 );
 						break;
 					case 30:
-						$urf->setNote('');
+						$urf->setNote( '' );
 						break;
 				}
 
 				if ( $urf->isValid() ) {
-					 $user_review_ids[] = $urf->Save();
+					$user_review_ids[] = $urf->Save();
 				}
-
 			}
-
 		}
 
 		// Delete the KPI which is in use, it will fail to delete
-		foreach( $kpi_ids as $kpi_id ) {
+		foreach ( $kpi_ids as $kpi_id ) {
 			$lf = new KPIListFactory();
 			$lf->getById( $kpi_id );
 			if ( $lf->getRecordCount() == 1 ) {
 				$lf = $lf->getCurrent();
-				$lf->setDeleted(TRUE);
+				$lf->setDeleted( true );
 				$is_valid = $lf->isValid();
-				if ( $is_valid == TRUE ) {
+				if ( $is_valid == true ) {
 					$lf->Save();
 				}
 			}
@@ -576,46 +567,46 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_ids[1] );
 		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], FALSE );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], FALSE );
+		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
+		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
 		$this->assertEquals( $kpi_arr[0]['group_id'][0], $kpi_group_ids[1] );
-		$this->assertEquals( $kpi_arr[0]['rating'], FALSE );
+		$this->assertEquals( $kpi_arr[0]['rating'], false );
 
 
 		// Delete reviews first and then delete KPIs
-		foreach( $user_review_ids as $user_review_id ) {
+		foreach ( $user_review_ids as $user_review_id ) {
 			$lf = new UserReviewListFactory();
 			$lf->getById( $user_review_id );
 			if ( $lf->getRecordCount() == 1 ) {
 				$lf = $lf->getCurrent();
-				$lf->setDeleted(TRUE);
+				$lf->setDeleted( true );
 				$is_valid = $lf->isValid();
-				if ( $is_valid == TRUE ) {
+				if ( $is_valid == true ) {
 					$lf->Save();
 				}
 			}
 		}
-		foreach( $kpi_ids as $kpi_id ) {
+		foreach ( $kpi_ids as $kpi_id ) {
 			$lf = new KPIListFactory();
 			$lf->getById( $kpi_id );
 			if ( $lf->getRecordCount() == 1 ) {
 				$lf = $lf->getCurrent();
-				$lf->setDeleted(TRUE);
+				$lf->setDeleted( true );
 				$is_valid = $lf->isValid();
-				if ( $is_valid == TRUE ) {
+				if ( $is_valid == true ) {
 					$lf->Save();
 				}
 			}
 		}
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_ids[0] );
-		$this->assertEquals( $kpi_arr, FALSE );
+		$this->assertEquals( $kpi_arr, false );
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_ids[1] );
-		$this->assertEquals( $kpi_arr, FALSE );
+		$this->assertEquals( $kpi_arr, false );
 
-		return TRUE;
-
+		return true;
 	}
 
 }
+
 ?>

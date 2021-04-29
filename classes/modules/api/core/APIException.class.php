@@ -47,19 +47,19 @@ class APIException extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * Get options for dropdown boxes.
 	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
-	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
+	 * @param mixed $parent     Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return bool|array
 	 */
-	function getOptions( $name = FALSE, $parent = NULL ) {
+	function getOptions( $name = false, $parent = null ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('punch', 'enabled')
-					OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) ) {
+				&& ( !$this->getPermissionObject()->Check( 'punch', 'enabled' )
+						|| !( $this->getPermissionObject()->Check( 'punch', 'view' ) || $this->getPermissionObject()->Check( 'punch', 'view_child' ) ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -73,11 +73,11 @@ class APIException extends APIFactory {
 	function getExceptionDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting exception default data...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Getting exception default data...', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$data = array(
-						'company_id' => $company_obj->getId(),
-					);
+		$data = [
+				'company_id' => $company_obj->getId(),
+		];
 
 		return $this->returnHandler( $data );
 	}
@@ -86,13 +86,13 @@ class APIException extends APIFactory {
 	 * Get exception data for one or more exceptiones.
 	 * @param array $data filter data
 	 * @param bool $disable_paging
-	 * @return array
+	 * @return array|bool
 	 */
-	function getException( $data = NULL, $disable_paging = FALSE ) {
+	function getException( $data = null, $disable_paging = false ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
-				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) {
+		if ( !$this->getPermissionObject()->Check( 'punch', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'punch', 'view' ) || $this->getPermissionObject()->Check( 'punch', 'view_own' ) || $this->getPermissionObject()->Check( 'punch', 'view_child' ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied(); //If they don't have permissions to view punches/timesheets, what good is it to show them exceptions?
 			//$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
@@ -100,29 +100,31 @@ class APIException extends APIFactory {
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
 
 		//If no pay period is specified, force to showing exceptions only in non-closed pay periods. This is a performance optimization too.
-		if ( !isset($data['filter_data']['pay_period_status_id']) AND !isset($data['filter_data']['pay_period_id']) ) {
-			$data['filter_data']['pay_period_status_id'] = array(10, 12, 30); //All but closed
+		if ( !isset( $data['filter_data']['pay_period_status_id'] ) && !isset( $data['filter_data']['pay_period_id'] ) ) {
+			$data['filter_data']['pay_period_status_id'] = [ 10, 12, 30 ]; //All but closed
 		}
 
 		$blf = TTnew( 'ExceptionListFactory' ); /** @var ExceptionListFactory $blf */
 
-		$type_ids = Misc::trimSortPrefix( $blf->getOptions('type') );
-		if ( !isset($data['filter_data']['show_pre_mature']) OR ( isset($data['filter_data']['show_pre_mature']) AND $data['filter_data']['show_pre_mature'] == FALSE ) ) {
-			unset( $type_ids[5]);
+		$type_ids = Misc::trimSortPrefix( $blf->getOptions( 'type' ) );
+		if ( !isset( $data['filter_data']['show_pre_mature'] ) || ( isset( $data['filter_data']['show_pre_mature'] ) && $data['filter_data']['show_pre_mature'] == false ) ) {
+			unset( $type_ids[5] );
 		}
 		$data['filter_data']['type_id'] = array_keys( $type_ids );
 
 
-		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $blf->setQueryStatementTimeout( 60000 ); }
-		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( DEPLOYMENT_ON_DEMAND == true ) {
+			$blf->setQueryStatementTimeout( 60000 );
+		}
+		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
+		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
 
 			$this->setPagerObject( $blf );
 
-			$retarr = array();
-			foreach( $blf as $b_obj ) {
+			$retarr = [];
+			foreach ( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
@@ -133,7 +135,7 @@ class APIException extends APIFactory {
 			return $this->returnHandler( $retarr );
 		}
 
-		return $this->returnHandler( TRUE ); //No records returned.
+		return $this->returnHandler( true ); //No records returned.
 	}
 
 	/**
@@ -142,9 +144,11 @@ class APIException extends APIFactory {
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
-	function exportException( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+	function exportException( $format = 'csv', $data = null, $disable_paging = true ) {
 		$result = $this->stripReturnHandler( $this->getException( $data, $disable_paging ) );
-		return $this->exportRecords( $format, 'export_exceptions', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+
+		return $this->exportRecords( $format, 'export_exceptions', $result, ( ( isset( $data['filter_columns'] ) ) ? $data['filter_columns'] : null ) );
 	}
 }
+
 ?>

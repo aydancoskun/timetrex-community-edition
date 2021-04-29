@@ -47,7 +47,7 @@ class APIPermission extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,31 +55,32 @@ class APIPermission extends APIFactory {
 	 */
 	function getUniqueCountry() {
 		global $current_company;
-		$company_id = TTUUID::castUUID($current_company->getId());
+		$company_id = TTUUID::castUUID( $current_company->getId() );
 
-		$ulf = TTNew('UserListFactory'); /** @var UserListFactory $ulf */
+		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		return $ulf->getUniqueCountryByCompanyId( $company_id );
 	}
 
 	/**
-	 * @param string $user_id UUID
+	 * @param string $user_id    UUID
 	 * @param string $company_id UUID
 	 * @return array|bool
 	 */
-	function getPermissions( $user_id = NULL, $company_id = NULL ) {
-		if ( $user_id == NULL OR $user_id == '' ) {
+	function getPermissions( $user_id = null, $company_id = null ) {
+		if ( $user_id == null || $user_id == '' ) {
 			global $current_user;
 
 			$user_id = $current_user->getId();
 		}
 
-		if ( $company_id == NULL OR $company_id == '' ) {
+		if ( $company_id == null || $company_id == '' ) {
 			global $current_company;
 
 			$company_id = $current_company->getId();
 		}
 
 		$permission = new Permission();
+
 		return $this->returnHandler( $permission->getPermissions( $user_id, $company_id ) );
 	}
 
@@ -88,38 +89,38 @@ class APIPermission extends APIFactory {
 	 * @return array|bool
 	 */
 	function getSectionBySectionGroup( $section_groups ) {
-		if ( !is_array($section_groups) ) {
-			$section_groups = array( $section_groups );
+		if ( !is_array( $section_groups ) ) {
+			$section_groups = [ $section_groups ];
 		}
-		$section_groups = Misc::trimSortPrefix( $section_groups, TRUE );
+		$section_groups = Misc::trimSortPrefix( $section_groups, true );
 		//Debug::Arr($section_groups, 'aSection Groups: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$section_options = Misc::trimSortPrefix( $this->getOptions('section') );
-		$section_group_map = Misc::trimSortPrefix( $this->getOptions('section_group_map') );
+		$section_options = Misc::trimSortPrefix( $this->getOptions( 'section' ) );
+		$section_group_map = Misc::trimSortPrefix( $this->getOptions( 'section_group_map' ) );
 
 		if ( in_array( 'all', $section_groups ) ) {
 			//Debug::Text('Returning ALL section Groups: ', __FILE__, __LINE__, __METHOD__, 10);
-			$section_groups = array_keys( (array)$this->getOptions('section_group') );
-			unset($section_groups[0]);
+			$section_groups = array_keys( (array)$this->getOptions( 'section_group' ) );
+			unset( $section_groups[0] );
 		}
 
 		//Debug::Arr($section_groups, 'bSection Groups: ', __FILE__, __LINE__, __METHOD__, 10);
-		$retarr = array();
-		foreach( $section_groups as $section_group ) {
+		$retarr = [];
+		foreach ( $section_groups as $section_group ) {
 			$section_group = Misc::trimSortPrefix( $section_group );
-			if ( isset($section_group_map[$section_group]) ) {
-				foreach( $section_group_map[$section_group] as $tmp_section ) {
+			if ( isset( $section_group_map[$section_group] ) ) {
+				foreach ( $section_group_map[$section_group] as $tmp_section ) {
 					$retarr[$tmp_section] = $section_options[$tmp_section];
 				}
 			}
 		}
 
-		if ( count($retarr) > 0 ) {
+		if ( count( $retarr ) > 0 ) {
 			//Debug::Arr($retarr, 'Sections: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->returnHandler( Misc::trimSortPrefix( $retarr, 1000 ) );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -128,9 +129,10 @@ class APIPermission extends APIFactory {
 	 * @param bool $filter_permissions
 	 * @return array|bool
 	 */
-	function filterPresetPermissions( $preset, $filter_sections = FALSE, $filter_permissions = FALSE ) {
-		$pf = TTNew('PermissionFactory'); /** @var PermissionFactory $pf */
+	function filterPresetPermissions( $preset, $filter_sections = false, $filter_permissions = false ) {
+		$pf = TTNew( 'PermissionFactory' ); /** @var PermissionFactory $pf */
 		return $this->returnHandler( $pf->filterPresetPermissions( $preset, $filter_sections, $filter_permissions ) );
 	}
 }
+
 ?>

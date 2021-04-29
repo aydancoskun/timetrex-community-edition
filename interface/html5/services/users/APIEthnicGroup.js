@@ -42,6 +42,4 @@ var APIEthnicGroup = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

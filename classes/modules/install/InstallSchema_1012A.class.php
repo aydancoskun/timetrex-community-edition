@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnusedLocalVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -44,9 +44,9 @@ class InstallSchema_1012A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -58,21 +58,21 @@ class InstallSchema_1012A extends InstallSchema_Base {
 		global $cache;
 		// @codingStandardsIgnoreEnd
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Get all pay period schedules.
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 		$ppslf->getAll();
 		if ( $ppslf->getRecordCount() > 0 ) {
-			foreach( $ppslf as $pps_obj ) {
+			foreach ( $ppslf as $pps_obj ) {
 				$user_ids = $pps_obj->getUser();
-				if ( is_array($user_ids) ) {
-					$time_zone_arr = array();
-					foreach( $user_ids as $user_id ) {
+				if ( is_array( $user_ids ) ) {
+					$time_zone_arr = [];
+					foreach ( $user_ids as $user_id ) {
 						$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 						$uplf->getByUserId( $user_id );
 						if ( $uplf->getRecordCount() > 0 ) {
-							if ( isset($time_zone_arr[$uplf->getCurrent()->getTimeZone()]) ) {
+							if ( isset( $time_zone_arr[$uplf->getCurrent()->getTimeZone()] ) ) {
 								$time_zone_arr[$uplf->getCurrent()->getTimeZone()]++;
 							} else {
 								$time_zone_arr[$uplf->getCurrent()->getTimeZone()] = 1;
@@ -80,13 +80,13 @@ class InstallSchema_1012A extends InstallSchema_Base {
 						}
 					}
 
-					arsort($time_zone_arr);
+					arsort( $time_zone_arr );
 
 					//Grab the first time zone, as it is most common
-					foreach( $time_zone_arr as $time_zone => $count ) {
+					foreach ( $time_zone_arr as $time_zone => $count ) {
 						break;
 					}
-					unset($count); //code standards
+					unset( $count ); //code standards
 
 					if ( $time_zone != '' ) {
 						//Set pay period timezone to the timezone of the majority of the users are in.
@@ -99,9 +99,10 @@ class InstallSchema_1012A extends InstallSchema_Base {
 			}
 		}
 
-		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'l: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

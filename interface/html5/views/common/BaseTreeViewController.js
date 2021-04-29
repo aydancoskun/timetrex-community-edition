@@ -52,7 +52,6 @@ BaseTreeViewController = BaseViewController.extend( {
 			this.grid = null;
 		}
 
-
 		this.grid = new TTGrid( this.ui_id + '_grid', {
 			multiselect: false,
 			winMultiSelect: false,
@@ -295,14 +294,14 @@ BaseTreeViewController = BaseViewController.extend( {
 		return array;
 	},
 
-	doViewAPICall: function ( filter ) {
+	doViewAPICall: function( filter ) {
 		return this._super( 'doViewAPICall', filter, [filter, false, false] );
 	},
-	handleViewAPICallbackResult: function ( result ) {
+	handleViewAPICallbackResult: function( result ) {
 		return this.handleAPICallbackResult( result );
 	},
 
-	handleAPICallbackResult: function ( result ) {
+	handleAPICallbackResult: function( result ) {
 		var result_data = result.getResult();
 		var record_id = this.getCurrentSelectedRecord();
 		result_data = Global.getParentIdByTreeRecord( Global.buildTreeRecord( result_data ), record_id );
@@ -312,7 +311,7 @@ BaseTreeViewController = BaseViewController.extend( {
 		this._super( 'handleViewAPICallbackResult', result_data );
 	},
 
-	handleEditAPICallbackResult: function ( result ) {
+	handleEditAPICallbackResult: function( result ) {
 		return this.handleAPICallbackResult( result );
 	},
 
@@ -326,7 +325,7 @@ BaseTreeViewController = BaseViewController.extend( {
 		this.grid_select_id_array = [];
 	},
 
-	doEditAPICall: function ( filter ) {
+	doEditAPICall: function( filter ) {
 		return this._super( 'doEditAPICall', filter, [filter, false, false] );
 	},
 
@@ -412,12 +411,12 @@ BaseTreeViewController = BaseViewController.extend( {
 		} );
 
 		var tab_model = Array();
-		tab_model[this.primary_tab_key] = { 'label': this.primary_tab_label },
+		tab_model[this.primary_tab_key] = { 'label': this.primary_tab_label };
 		tab_model['tab_audit'] = {
-				'label': $.i18n._( 'Audit' ),
-				'init_callback': 'initSubLogView',
-				'display_on_mass_edit': false,
-				'display_on_add': false
+			'label': $.i18n._( 'Audit' ),
+			'init_callback': 'initSubLogView',
+			'display_on_mass_edit': false,
+			'display_on_add': false
 		};
 		this.setTabModel( tab_model );
 
@@ -441,7 +440,7 @@ BaseTreeViewController = BaseViewController.extend( {
 		this.setNavigation();
 
 		//Tab 0 start
-		var tab_group = this.edit_view_tab.find( '#'+ this.primary_tab_key );
+		var tab_group = this.edit_view_tab.find( '#' + this.primary_tab_key );
 
 		var tab_group_column1 = tab_group.find( '.first-column' );
 

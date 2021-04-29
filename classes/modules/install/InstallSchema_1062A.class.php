@@ -44,29 +44,30 @@ class InstallSchema_1062A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Enable AutoUpgrade maintenance job to occur after MiscDaily (backup) has completed.
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('AutoUpgrade');
-		$cjf->setMinute( rand(0, 59) ); //Random time once a day for load balancing
-		$cjf->setHour( rand(2, 4) ); //Random time once a day for load balancing
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand('AutoUpgrade.php');
+		$cjf->setName( 'AutoUpgrade' );
+		$cjf->setMinute( rand( 0, 59 ) ); //Random time once a day for load balancing
+		$cjf->setHour( rand( 2, 4 ) );    //Random time once a day for load balancing
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( 'AutoUpgrade.php' );
 		$cjf->Save();
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

@@ -22,10 +22,10 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_period_time_sheet_verify';
 		this.context_menu_name = $.i18n._( 'TimeSheet (Authorizations)' );
 		this.navigation_label = $.i18n._( 'TimeSheet' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' ))();
-		this.request_api = new (APIFactory.getAPIClass( 'APIRequest' ))();
-		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
-		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' ) )();
+		this.request_api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
+		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
+		this.authorization_api = new ( APIFactory.getAPIClass( 'APIAuthorization' ) )();
 
 		this.render();
 		this.buildContextMenu( true );
@@ -79,7 +79,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				action: {
@@ -403,8 +403,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.authorization_timesheet:
-				break;
 			case ContextMenuIconName.send:
 				this.onSaveClick();
 				break;
@@ -421,8 +419,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				this.onAuthorizationRequestClick();
 				break;
 			case ContextMenuIconName.authorization_timesheet:
-				this.onAuthorizationTimesheetClick();
-				break;
+				break; //Already here, don't do anything.
 			case ContextMenuIconName.authorization_expense:
 				this.onAuthorizationExpenseClick();
 				break;
@@ -533,7 +530,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 			current_edit_record_id = $this.current_edit_record.id;
 
-
 			$this.onViewClick( current_edit_record_id, true );
 
 		} else {
@@ -577,9 +573,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				if ( res.isValid() ) {
 					$this.onRightArrowClick( function() {
 						$this.search();
-						$().TFeedback({
+						$().TFeedback( {
 							source: 'Authorize'
-						});
+						} );
 					} );
 				} else {
 					TAlertManager.showErrorAlert( res );
@@ -593,9 +589,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		var $this = this;
 		this.onRightArrowClick( function() {
 			$this.search();
-			$().TFeedback({
+			$().TFeedback( {
 				source: 'Pass'
-			});
+			} );
 		} );
 	},
 
@@ -636,9 +632,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				if ( res.isValid() ) {
 					$this.onRightArrowClick( function() {
 						$this.search();
-						$().TFeedback({
+						$().TFeedback( {
 							source: 'Decline'
-						});
+						} );
 					} );
 				} else {
 					TAlertManager.showErrorAlert( res );
@@ -672,7 +668,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		return records;
 	},
 
-	getAPIFilters: function () {
+	getAPIFilters: function() {
 		// override this function if view requires more filters
 		var record_id = this.getCurrentSelectedRecord();
 		var filter = {};
@@ -688,7 +684,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		return filter;
 	},
 
-	handleViewAPICallbackResult: function ( result ) {
+	handleViewAPICallbackResult: function( result ) {
 		var result_data = result.getResult();
 		var record_id = this.getCurrentSelectedRecord();
 
@@ -698,11 +694,11 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		result_data = result_data[0];
-		return this._super('handleViewAPICallbackResult', result_data );
+		return this._super( 'handleViewAPICallbackResult', result_data );
 	},
 
-	doViewClickResult: function ( result_data ) {
-		this._super('doViewClickResult', result_data );
+	doViewClickResult: function( result_data ) {
+		this._super( 'doViewClickResult', result_data );
 		AuthorizationHistory.init( this );
 	},
 
@@ -792,7 +788,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -804,7 +800,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -828,7 +824,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -840,7 +836,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -932,7 +928,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_PERIOD,
@@ -1125,7 +1121,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 		var $this = this;
 		if ( !this.api_exception ) {
-			this.api_exception = new (APIFactory.getAPIClass( 'APIException' ))();
+			this.api_exception = new ( APIFactory.getAPIClass( 'APIException' ) )();
 		}
 
 		$this.buildExceptionGrid();
@@ -1189,7 +1185,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 						$this.setExceptionGridSize();
 
 						$( '.exception-title' ).text( $.i18n._( 'Exceptions' ) );
-						$( '.exception-title' ).css( 'width' ,($this.exception_grid.grid.width() - 1)+'px !important' );
+						$( '.exception-title' ).css( 'width', ( $this.exception_grid.grid.width() - 1 ) + 'px !important' );
 						$this.setGridCellBackGround();
 					}
 				} );
@@ -1203,7 +1199,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		if ( typeof column_info_array == 'undefined' ) {
 			column_info_array = [];
 		}
-
 
 		if ( this.exception_grid ) {
 			this.exception_grid.grid.jqGrid( 'GridUnload' );
@@ -1282,7 +1277,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 	},
 
-
 	initTimeSheetSummary: function() {
 		var $this = this;
 
@@ -1292,7 +1286,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 		this.accumulated_total_grid_source_map = {};
 		if ( !this.api_timesheet ) {
-			this.api_timesheet = new (APIFactory.getAPIClass( 'APITimeSheet' ))();
+			this.api_timesheet = new ( APIFactory.getAPIClass( 'APITimeSheet' ) )();
 		}
 
 		$this.buildAccumulatedTotalGrid();
@@ -1364,7 +1358,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	buildSubGridsData: function( array, date_string, map, result_array, parent_key ) {
 		var row;
 		var marked_regular_row = false; //Only mark the first regular time row, as thats where the bold top-line is going to go.
-		for ( var key  in array ) {
+		for ( var key in array ) {
 			if ( !map[key] ) {
 				row = {};
 				row.parent_key = parent_key;
@@ -1487,7 +1481,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.sortAccumulatedTotalData();
 		this.timesheet_authorization_summary_grid.setData( this.accumulated_total_grid_source );
 
-		$( '.timesheet-authorization-summary-title' ).text( $.i18n._( 'TimeSheet Summary' ) )
+		$( '.timesheet-authorization-summary-title' ).text( $.i18n._( 'TimeSheet Summary' ) );
 	},
 
 	sortAccumulatedTotalData: function() {
@@ -1669,7 +1663,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 			var data_array = this.exception_grid.getData();
 			if ( Global.isArray( data_array ) ) {
-				size += ( 22 * data_array.length )
+				size += ( 22 * data_array.length );
 			}
 
 			this.exception_grid.setGridHeight( size );
@@ -1684,7 +1678,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 			var data_array = this.timesheet_authorization_summary_grid.getData();
 			if ( Global.isArray( data_array ) ) {
-				size += ( 22 * data_array.length )
+				size += ( 22 * data_array.length );
 			}
 
 			this.timesheet_authorization_summary_grid.setGridHeight( size );

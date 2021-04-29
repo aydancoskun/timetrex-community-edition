@@ -46,71 +46,71 @@ class FormVariables {
 	 * @param array $filter_ignore_name_arr
 	 * @return array
 	 */
-	static function getVariables( $form_variables, $form_type = 'BOTH', $filter_input = TRUE, $filter_ignore_name_arr = array('next_page', 'batch_next_page') ) {
-		$form_type = trim(strtoupper($form_type));
+	static function getVariables( $form_variables, $form_type = 'BOTH', $filter_input = true, $filter_ignore_name_arr = [ 'next_page', 'batch_next_page' ] ) {
+		$form_type = trim( strtoupper( $form_type ) );
 
-		$retarr = array();
-		if ( is_array($form_variables) ) {
-			foreach($form_variables as $variable_name) {
-				$retarr[$variable_name] = NULL; //Need to set variables to NULL, otherwise we get a lot of variable not set errors.
-				switch ($form_type) {
+		$retarr = [];
+		if ( is_array( $form_variables ) ) {
+			foreach ( $form_variables as $variable_name ) {
+				$retarr[$variable_name] = null; //Need to set variables to NULL, otherwise we get a lot of variable not set errors.
+				switch ( $form_type ) {
 					case 'GET':
-						if ( isset($_GET[$variable_name]) ) {
+						if ( isset( $_GET[$variable_name] ) ) {
 							$retarr[$variable_name] = $_GET[$variable_name];
 						}
 						break;
 					case 'POST':
-						if ( isset($_POST[$variable_name]) ) {
+						if ( isset( $_POST[$variable_name] ) ) {
 							$retarr[$variable_name] = $_POST[$variable_name];
 						}
 						break;
 					default:
-						if ( isset($_GET[$variable_name]) ) {
+						if ( isset( $_GET[$variable_name] ) ) {
 							$retarr[$variable_name] = $_GET[$variable_name];
-						} elseif ( isset($_POST[$variable_name]) ) {
+						} else if ( isset( $_POST[$variable_name] ) ) {
 							$retarr[$variable_name] = $_POST[$variable_name];
 						}
 				}
 
 				//Ignore next_page, batch_next_page variables as those are encoded URLs passed in, and htmlspecialchars
 				//will break them.
-				if ( $filter_input == TRUE AND isset($retarr[$variable_name]) AND is_string($retarr[$variable_name]) AND $retarr[$variable_name] != ''
-						AND ( !is_array($filter_ignore_name_arr) OR ( is_array($filter_ignore_name_arr) AND !in_array( $variable_name, $filter_ignore_name_arr) ) ) ) {
+				if ( $filter_input == true && isset( $retarr[$variable_name] ) && is_string( $retarr[$variable_name] ) && $retarr[$variable_name] != ''
+						&& ( !is_array( $filter_ignore_name_arr ) || ( is_array( $filter_ignore_name_arr ) && !in_array( $variable_name, $filter_ignore_name_arr ) ) ) ) {
 					//Remove "javascript:" from all inputs, and run htmlspecialchars over them to help prevent XSS attacks.
 					$retarr[$variable_name] = self::sanitize( $retarr[$variable_name] );
-				} elseif ( strtolower($filter_input) == 'recurse' AND is_array($retarr[$variable_name])
-								AND ( !is_array($filter_ignore_name_arr) OR ( is_array($filter_ignore_name_arr) AND !in_array( $variable_name, $filter_ignore_name_arr) ) ) ) {
-					self::RecurseFilterArray($retarr[$variable_name]);
+				} else if ( strtolower( $filter_input ) == 'recurse' && is_array( $retarr[$variable_name] )
+						&& ( !is_array( $filter_ignore_name_arr ) || ( is_array( $filter_ignore_name_arr ) && !in_array( $variable_name, $filter_ignore_name_arr ) ) ) ) {
+					self::RecurseFilterArray( $retarr[$variable_name] );
 				}
 			}
 
-			if ( empty($retarr) == FALSE ) {
+			if ( empty( $retarr ) == false ) {
 				return $retarr;
 			}
 		}
 
 		//Return empty array so extract() doesn't complain.
-		return array();
+		return [];
 	}
 
 	/**
 	 * @param $arr
 	 * @return bool
 	 */
-	static function RecurseFilterArray( &$arr) {
-		if ( !is_array($arr) ) {
-			return FALSE;
+	static function RecurseFilterArray( &$arr ) {
+		if ( !is_array( $arr ) ) {
+			return false;
 		}
 
-		foreach ($arr as $key => $val) {
-			if ( is_array($val) ) {
-				self::RecurseFilterArray($arr[$key]);
+		foreach ( $arr as $key => $val ) {
+			if ( is_array( $val ) ) {
+				self::RecurseFilterArray( $arr[$key] );
 			} else {
 				$arr[$key] = self::sanitize( $val );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -118,7 +118,7 @@ class FormVariables {
 	 * @return string
 	 */
 	static function sanitize( $val ) {
-		return @htmlspecialchars( str_ireplace( array('javascript:', 'src=', 'www.example.com'), '', $val ), ENT_QUOTES, 'UTF-8' ); //Supress warnings due to invalid multibyte sequences
+		return @htmlspecialchars( str_ireplace( [ 'javascript:', 'src=', 'www.example.com' ], '', $val ), ENT_QUOTES, 'UTF-8' ); //Supress warnings due to invalid multibyte sequences
 	}
 
 	/**
@@ -131,4 +131,5 @@ class FormVariables {
 	}
 
 }
+
 ?>

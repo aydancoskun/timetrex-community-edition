@@ -39,19 +39,19 @@
  */
 class BrowserTest extends PHPUnit_Framework_TestCase {
 	public function setUp() {
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( !class_exists('Browser', FALSE ) ) {
-			require_once( Environment::getBasePath().'/classes/other/Browser.php');
+		if ( !class_exists( 'Browser', false ) ) {
+			require_once( Environment::getBasePath() . '/classes/other/Browser.php' );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	function testBrowserIE() {
@@ -111,7 +111,8 @@ class BrowserTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $browser->getBrowser(), Browser::BROWSER_IE );
 		$this->assertEquals( $browser->getVersion(), '8.0' ); //Take MSIE over Trident here. -- Internet Explorer 8 on Windows 7, Internet Explorer 10 Compatibility View
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

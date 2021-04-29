@@ -56,6 +56,4 @@ var APIPayPeriodSchedule = ServiceCaller.extend( {
 
 	},
 
-
-
 } );

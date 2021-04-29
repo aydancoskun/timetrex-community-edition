@@ -47,7 +47,7 @@ class APIExceptionReport extends APIReport {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,8 +55,9 @@ class APIExceptionReport extends APIReport {
 	 * @param string $format
 	 * @return array
 	 */
-	function getExceptionReport( $config = FALSE, $format = 'pdf' ) {
+	function getExceptionReport( $config = false, $format = 'pdf' ) {
 		return $this->getReport( $config, $format );
 	}
 }
+
 ?>

@@ -13,7 +13,7 @@ CurrencyRateViewController = BaseViewController.extend( {
 		this.table_name_key = 'currency_rate';
 		this.context_menu_name = $.i18n._( 'Rates' );
 		this.navigation_label = $.i18n._( 'Rate' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APICurrencyRate' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APICurrencyRate' ) )();
 
 		this.render();
 
@@ -32,7 +32,7 @@ CurrencyRateViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
@@ -55,7 +55,7 @@ CurrencyRateViewController = BaseViewController.extend( {
 		var form_item_input;
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrencyRate' )),
+			api_class: ( APIFactory.getAPIClass( 'APICurrencyRate' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY_RATE,
@@ -78,7 +78,7 @@ CurrencyRateViewController = BaseViewController.extend( {
 		// Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			field: 'currency_id',
@@ -102,7 +102,6 @@ CurrencyRateViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( conversion_rate_clarification_box );
 		this.addEditFieldToColumn( $.i18n._( 'Conversion Rate' ), [form_item_input], tab_currency_rate_column1, '', widgetContainer, false, true );
-
 
 	},
 
@@ -161,12 +160,10 @@ CurrencyRateViewController = BaseViewController.extend( {
 		this._super( 'onFormItemChange', target, doNotValidate );
 	},
 
-
 	initEditView: function( editId, noRefreshUI ) {
 		this._super( 'initEditView' );
 		this.setConversionRateExampleText( this.edit_view_ui_dic.conversion_rate.getValue(), null, this.edit_view_ui_dic.currency_id.getValue() );
 	}
-
 
 } );
 

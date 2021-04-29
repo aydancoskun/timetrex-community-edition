@@ -51,6 +51,4 @@ var APIGeneralLedgerSummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

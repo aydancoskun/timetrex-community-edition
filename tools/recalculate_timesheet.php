@@ -34,10 +34,10 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
+if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
 	$help_output = "Usage: recalculate_timesheet.php [options] [company_id]\n";
 	$help_output .= "    -start_date			Start Date to recalculate\n";
 	$help_output .= "    -end_date				End Date to recalculate\n";
@@ -46,41 +46,41 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 	echo $help_output;
 } else {
 	//Handle command line arguments
-	$last_arg = count($argv)-1;
+	$last_arg = count( $argv ) - 1;
 
-	if ( in_array('-start_date', $argv) ) {
-		$start_date = trim($argv[array_search('-start_date', $argv)+1]);
+	if ( in_array( '-start_date', $argv ) ) {
+		$start_date = trim( $argv[ array_search( '-start_date', $argv ) + 1 ] );
 	} else {
 		$start_date = time();
 	}
-	if ( in_array('-end_date', $argv) ) {
-		$end_date = trim($argv[array_search('-end_date', $argv)+1]);
+	if ( in_array( '-end_date', $argv ) ) {
+		$end_date = trim( $argv[ array_search( '-end_date', $argv ) + 1 ] );
 	} else {
 		$end_date = $start_date;
 	}
 
-	if ( in_array('-user_id', $argv) ) {
-		$filter_user_id = trim($argv[array_search('-user_id', $argv)+1]);
+	if ( in_array( '-user_id', $argv ) ) {
+		$filter_user_id = trim( $argv[ array_search( '-user_id', $argv ) + 1 ] );
 	} else {
-		$filter_user_id = NULL;
+		$filter_user_id = null;
 	}
 
-	if ( in_array('-n', $argv) ) {
-		$dry_run = TRUE;
+	if ( in_array( '-n', $argv ) ) {
+		$dry_run = true;
 		echo "Using DryRun!\n";
 	} else {
-		$dry_run = FALSE;
+		$dry_run = false;
 	}
 
-	if ( isset($argv[$last_arg]) AND $argv[$last_arg] != '' AND TTUUID::isUUID( $argv[$last_arg] ) ) {
-		$company_id = $argv[$last_arg];
+	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' AND TTUUID::isUUID( $argv[ $last_arg ] ) ) {
+		$company_id = $argv[ $last_arg ];
 	}
 
 
 	$date_stamps = TTDate::getDateArray( strtotime( $start_date ), strtotime( $end_date ) );
 
 	//Force flush after each output line.
-	ob_implicit_flush( TRUE );
+	ob_implicit_flush( true );
 	ob_end_flush();
 
 	//TTDate::setTimeZone( 'UTC' ); //Always force the timezone to be set.
@@ -89,7 +89,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 	$clf->getAll();
 	if ( $clf->getRecordCount() > 0 ) {
 		foreach ( $clf as $c_obj ) {
-			if ( isset($company_id) AND $company_id != '' AND $company_id != $c_obj->getId() ) {
+			if ( isset( $company_id ) AND $company_id != '' AND $company_id != $c_obj->getId() ) {
 				continue;
 			}
 
@@ -98,37 +98,37 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 			//}
 
 			if ( $c_obj->getStatus() != 30 ) {
-				Debug::text('Company: '. $c_obj->getName() .' ID: '. $c_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-				echo 'Company: '. $c_obj->getName() .' ID: '. $c_obj->getID() ."\n";
+				Debug::text( 'Company: ' . $c_obj->getName() . ' ID: ' . $c_obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
+				echo 'Company: ' . $c_obj->getName() . ' ID: ' . $c_obj->getID() . "\n";
 				//Check to see if there any absence entries that are linked to an accrual, but the accrual record does not exist.
 
-				echo ' Recalculating TimeSheets from '. date('r', strtotime( $start_date ) ) .' to '. date('r', strtotime( $end_date ) ) ."\n";
+				echo ' Recalculating TimeSheets from ' . date( 'r', strtotime( $start_date ) ) . ' to ' . date( 'r', strtotime( $end_date ) ) . "\n";
 
 				$flags = array(
-					'meal' => TRUE,
-					'undertime_absence' => TRUE, //Needs to calculate undertime absences, otherwise it won't update accruals.
-					'break' => TRUE,
-					'holiday' => TRUE,
-					'schedule_absence' => TRUE, //Required to calculate absences created from the schedule that may be causing duplicate entries in the accrual.
-					'absence' => TRUE,
-					'regular' => TRUE,
-					'overtime' => TRUE,
-					'premium' => TRUE,
-					'accrual' => TRUE,
+						'meal'              => true,
+						'undertime_absence' => true, //Needs to calculate undertime absences, otherwise it won't update accruals.
+						'break'             => true,
+						'holiday'           => true,
+						'schedule_absence'  => true, //Required to calculate absences created from the schedule that may be causing duplicate entries in the accrual.
+						'absence'           => true,
+						'regular'           => true,
+						'overtime'          => true,
+						'premium'           => true,
+						'accrual'           => true,
 
-					'exception' => TRUE,
-					//Exception options
-					'exception_premature' => FALSE, //Calculates premature exceptions
-					'exception_future' => FALSE, //Calculates exceptions in the future.
+						'exception'           => true,
+						//Exception options
+						'exception_premature' => false, //Calculates premature exceptions
+						'exception_future'    => false, //Calculates exceptions in the future.
 
-					//Calculate policies for future dates.
-					'future_dates' => FALSE, //Calculates dates in the future.
+						//Calculate policies for future dates.
+						'future_dates'        => false, //Calculates dates in the future.
 				);
 
 				$ulf = new UserListFactory();
 				$ulf->getByCompanyId( $c_obj->getID() );
 				if ( $ulf->getRecordCount() > 0 ) {
-					foreach( $ulf as $user_obj ) {
+					foreach ( $ulf as $user_obj ) {
 						if ( $filter_user_id == '' OR $filter_user_id == $user_obj->getId() ) {
 							$c_obj->StartTransaction(); //Try to keep transactions are short lived as possible.
 
@@ -159,7 +159,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 							$cp->calculate(); //This sets timezone itself.
 							$cp->Save();
 
-							if ( $dry_run == TRUE ) {
+							if ( $dry_run == true ) {
 								$c_obj->FailTransaction();
 							}
 							$c_obj->CommitTransaction();
@@ -168,8 +168,6 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 						}
 					}
 				}
-
-
 			}
 		}
 	}

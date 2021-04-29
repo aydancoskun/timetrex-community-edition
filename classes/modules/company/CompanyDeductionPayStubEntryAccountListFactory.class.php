@@ -41,43 +41,43 @@
 class CompanyDeductionPayStubEntryAccountListFactory extends CompanyDeductionPayStubEntryAccountFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable();
+					from	' . $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanyDeductionPayStubEntryAccountListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -90,25 +90,25 @@ class CompanyDeductionPayStubEntryAccountListFactory extends CompanyDeductionPay
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanyDeductionPayStubEntryAccountListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$cdf = new CompanyDeductionFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $cdf->getTable() .' as cdf ON a.company_deduction_id = cdf.id
+					from	' . $this->getTable() . ' as a
+						LEFT JOIN ' . $cdf->getTable() . ' as cdf ON a.company_deduction_id = cdf.id
 					where
 						cdf.company_id = ?
 						AND ( cdf.deleted = 0 )
@@ -122,24 +122,24 @@ class CompanyDeductionPayStubEntryAccountListFactory extends CompanyDeductionPay
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanyDeductionPayStubEntryAccountListFactory
 	 */
-	function getByCompanyDeductionId( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByCompanyDeductionId( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where
 						a.company_deduction_id = ?
 					';
@@ -152,25 +152,25 @@ class CompanyDeductionPayStubEntryAccountListFactory extends CompanyDeductionPay
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param int $type_id
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanyDeductionPayStubEntryAccountListFactory
 	 */
-	function getByCompanyDeductionIdAndTypeId( $id, $type_id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getByCompanyDeductionIdAndTypeId( $id, $type_id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					'type_id' => (int)$type_id,
-					);
+		$ph = [
+				'id'      => TTUUID::castUUID( $id ),
+				'type_id' => (int)$type_id,
+		];
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
+					from	' . $this->getTable() . ' as a
 					where
 						a.company_deduction_id = ?
 						AND a.type_id = ?
@@ -184,22 +184,23 @@ class CompanyDeductionPayStubEntryAccountListFactory extends CompanyDeductionPay
 	}
 
 
-/*
-	function getByPolicyGroupIdArray($id) {
-		$pgotplf = new PolicyGroupOverTimePolicyListFactory();
+	/*
+		function getByPolicyGroupIdArray($id) {
+			$pgotplf = new PolicyGroupOverTimePolicyListFactory();
 
-		$pgotplf->getByPolicyGroupId($id);
+			$pgotplf->getByPolicyGroupId($id);
 
-		foreach ($pgotplf as $obj) {
-			$list[$obj->getOverTimePolicy()] = NULL;
+			foreach ($pgotplf as $obj) {
+				$list[$obj->getOverTimePolicy()] = NULL;
+			}
+
+			if ( isset($user) ) {
+				return $user;
+			}
+
+			return array();
 		}
-
-		if ( isset($user) ) {
-			return $user;
-		}
-
-		return array();
-	}
-*/
+	*/
 }
+
 ?>

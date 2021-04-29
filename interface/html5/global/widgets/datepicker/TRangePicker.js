@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TRangePicker = function( options ) {
 		var opts = $.extend( {}, $.fn.TRangePicker.defaults, options );
@@ -95,7 +95,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -200,7 +200,11 @@
 		this.autoResize = function() {
 			var content_width, example_width;
 			example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().date_format_display );
-			content_width = Global.calculateTextWidth( date_picker_input.val(), { min_width: example_width, max_width: ((example_width * 2) + 100), padding: 28 } );
+			content_width = Global.calculateTextWidth( date_picker_input.val(), {
+				min_width: example_width,
+				max_width: ( ( example_width * 2 ) + 100 ),
+				padding: 28
+			} );
 			date_picker.width( content_width + 'px' );
 		};
 
@@ -393,8 +397,7 @@
 					inst.selectedDay = inst.currentDay;
 					inst.drawMonth = inst.selectedMonth = inst.currentMonth;
 					inst.drawYear = inst.selectedYear = inst.currentYear;
-				}
-				else {
+				} else {
 					var date = new Date();
 					inst.selectedDay = date.getDate();
 					inst.drawMonth = inst.selectedMonth = date.getMonth();
@@ -540,7 +543,7 @@
 
 			LocalCacheData.openRangerPicker = $this;
 
-			if ( result && (typeof result == 'string') ) {
+			if ( result && ( typeof result == 'string' ) ) {
 				var result_array = result.split( ' - ' );
 				range_start_picker.datepicker( 'setDate', result_array[0] );
 				range_end_picker.datepicker( 'setDate', result_array[1] );
@@ -623,4 +626,4 @@
 
 	$.fn.TRangePicker.defaults = {};
 
-})( jQuery );
+} )( jQuery );

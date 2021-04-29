@@ -23,8 +23,8 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		this.viewId = 'AccrualPolicyUserModifier';
 		this.table_name_key = 'accrual_policy_user_modifier';
 
-		this.api = new (APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 
 		this.render();
 		if ( this.sub_view_mode ) {
@@ -42,7 +42,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.add, ContextMenuIconName.copy],
 			include: ['default']
@@ -51,70 +51,25 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		return context_menu_model;
 	},
 
-	initSubLogView: function( tab_id ) {
-		var $this = this;
-
-		if ( !this.current_edit_record.id ) {
-			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
-			return;
+	setSubLogViewFilter: function() {
+		if ( !this.sub_log_view_controller ) {
+			return false;
 		}
 
-		if ( this.sub_log_view_controller ) {
-			this.sub_log_view_controller.buildContextMenu( true );
-			this.sub_log_view_controller.setDefaultMenu();
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
-				filter['table_name_object_id'] = {
-					'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id]
-				};
-
-				return filter;
+		this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+			filter['table_name_object_id'] = {
+				'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id]
 			};
 
-			$this.sub_log_view_controller.initData();
-			return;
-		}
+			return filter;
+		};
 
-		Global.loadScript( 'views/core/log/LogViewController.js', function() {
-			var tab = $this.edit_view_tab.find( '#' + tab_id );
-
-			var firstColumn = tab.find( '.first-column-sub-view' );
-
-			TTPromise.add( 'initSubAudit', 'init' );
-			TTPromise.wait( 'initSubAudit', 'init', function() {
-				firstColumn.css('opacity', '1');
-			} );
-
-			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
-
-			Global.trackView( 'Sub' + 'Log' + 'View' );
-			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_log_view_controller = subViewController;
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
-				filter['table_name_object_id'] = {
-					'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id]
-				};
-
-				return filter;
-			};
-			$this.sub_log_view_controller.parent_view_controller = $this;
-			$this.sub_log_view_controller.postInit = function() {
-				this.initData();
-			};
-		}
+		return true;
 	},
 
 	onAddClick: function() {
 		var $this = this;
-		this.setCurrentEditViewState('new');
+		this.setCurrentEditViewState( 'new' );
 		$this.openEditView();
 
 		var user_id;
@@ -195,12 +150,12 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		}
 
 		if ( !this.grid ) {
-	//		for ( i = start_from; i < len; i++ ) {
-	//			var view_column_data = display_columns[i];
-	//
-	//			var column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
-	//			column_info_array.push( column_info );
-	//		}
+			//		for ( i = start_from; i < len; i++ ) {
+			//			var view_column_data = display_columns[i];
+			//
+			//			var column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
+			//			column_info_array.push( column_info );
+			//		}
 
 			if ( this.parent_view === 'accrual_policy' ) {
 				column_info = {
@@ -275,8 +230,8 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			};
 			column_info_array.push( column_info );
 
-	//		column_info = {name: 'minimum_time_modifier', index: 'minimum_time_modifier', label: 'Accrual Total Minimum Modifier', width:110, sortable: false, title: false};
-	//		column_info_array.push( column_info );
+			//		column_info = {name: 'minimum_time_modifier', index: 'minimum_time_modifier', label: 'Accrual Total Minimum Modifier', width:110, sortable: false, title: false};
+			//		column_info_array.push( column_info );
 
 			column_info = {
 				name: 'rollover_time_modifier',
@@ -291,7 +246,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			var container = 'body';
 
 			if ( $this.sub_view_mode ) {
-				if ($('#tab_accruals:visible').length > 0 ) {
+				if ( $( '#tab_accruals:visible' ).length > 0 ) {
 					container = '#tab_accruals';
 				} else {
 					container = '#tab_employee_settings';
@@ -299,7 +254,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			}
 
 			var grid_setup = this.getGridSetup();
-			this.grid = new TTGrid( this.ui_id + '_grid', grid_setup, column_info_array);
+			this.grid = new TTGrid( this.ui_id + '_grid', grid_setup, column_info_array );
 		}
 		// else {
 		// 	grid = $( this.el ).find( '#' + this.ui_id + '_grid' );
@@ -349,7 +304,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	},
 
-	setGridSetup: function(){
+	setGridSetup: function() {
 		var $this = this;
 		return {
 			height: 200,
@@ -409,8 +364,8 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		return column_filter;
 	},
-	
-	doEditAPICall: function ( filter, api_args, _callback ) {
+
+	doEditAPICall: function( filter, api_args, _callback ) {
 		var record_id = this.getCurrentSelectedRecord();
 		if ( TTUUID.isUUID( record_id ) && record_id != TTUUID.not_exist_id && record_id != TTUUID.zero_id ) {
 			return this._super( 'doEditAPICall', filter, api_args, _callback );
@@ -683,7 +638,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.WAGE,
@@ -709,7 +664,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -728,7 +683,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY,
 			show_search_inputs: true,
@@ -953,7 +908,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	},
 
-	getAPIFilters: function () {
+	getAPIFilters: function() {
 		var filter = this._super( 'getAPIFilters' );
 
 		if ( this.sub_view_mode && this.parent_key ) {
@@ -1156,7 +1111,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenuDeleteIcon: function( context_btn, grid_selected_length, pId ) {
-		if ( (!this.addPermissionValidate( pId ) && !this.editPermissionValidate( pId )) || this.edit_only_mode ) {
+		if ( ( !this.addPermissionValidate( pId ) && !this.editPermissionValidate( pId ) ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 
@@ -1174,8 +1129,8 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		}
 	},
 
-	searchDone: function(){
-		this.__super('searchDone');
+	searchDone: function() {
+		this.__super( 'searchDone' );
 		TTPromise.resolve( 'AccrualView', 'init' );
 	}
 

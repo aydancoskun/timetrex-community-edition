@@ -19,6 +19,4 @@ var APIUserGenericData = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

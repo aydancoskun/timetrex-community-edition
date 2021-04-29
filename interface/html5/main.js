@@ -515,7 +515,6 @@ require.config( {
 			deps: ['ServiceCaller', 'APIFactory']
 		},
 
-
 		'WizardStep': {
 			deps: ['Wizard', 'backbone']
 		},
@@ -589,7 +588,7 @@ require( [
 	}
 
 	is_browser_iOS = ( navigator.userAgent.match( /(iPad|iPhone|iPod)/g ) ? true : false );
-	ie = ( function () {
+	ie = ( function() {
 		var ua = window.navigator.userAgent;
 
 		var trident = ua.indexOf( 'Trident/' );
@@ -608,7 +607,7 @@ require( [
 		$.support.cors = true; // For IE
 		cleanProgress();
 
-		var api_authentication = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+		var api_authentication = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
 
 		if ( Error ) {
 			Error.stackTraceLimit = 50; //Increase JS exception stack trace limit.
@@ -624,51 +623,18 @@ require( [
 
 		};
 
-		//When the user switched away from, then back again to our tab, make sure the session is still the same so they don't get two different login sessions confused.
-		function handleVisibilityChange() {
-			var is_hidden = document.hidden;
-			var cookie_session_id = getCookie( Global.getSessionIDKey() );
-
-			Debug.Text( 'Tab Visibility Change: ' + is_hidden +' Session ID: '+ LocalCacheData.getSessionID(), 'main.js', '', 'handleVisibilityChange', 10 );
-
-			if ( is_hidden == false ) {
-				//Check to make sure our session_id matches what the server returns.
-				if ( cookie_session_id != LocalCacheData.getSessionID() ) {
-					Debug.Text( 'Session ID has changed out from out underneath us! Session ID: Memory: '+ LocalCacheData.getSessionID() +' Cookie: '+ cookie_session_id, 'main.js', '', 'handleVisibilityChange', 1 );
-
-					var api = new ( APIFactory.getAPIClass( 'APIMisc' ) )();
-					api.isLoggedIn( false, {
-						onResult: function ( result ) {
-							var result_data = result.getResult();
-
-							if ( result_data === true ) {
-								TAlertManager.showAlert( $.i18n._( 'It appears that you have logged in from another web browser window or tab.<br><br>Please be patient while the session is resumed here...' ), 'Session Changed', function () {
-									Global.sendAnalyticsEvent( 'session', 'session:changed', 'session:changed' );
-									window.location.reload( true );
-								});
-							} else {
-								//Don't do Logout here, as we need to display a "Session Expired" message to the user, which is triggered from the ServiceCaller.
-								api.ping( { onResult: function () {} } );
-							}
-						}
-					} );
-				}
-			}
-		}
-		window.addEventListener('visibilitychange', handleVisibilityChange );
-
-		window.addEventListener('beforeunload', function (e) {
+		window.addEventListener( 'beforeunload', function( e ) {
 			// Note that Google recommends against the following, as it affects page caching, but we dont want caching anyway: https://developers.google.com/web/updates/2018/07/page-lifecycle-api#the-beforeunload-event
 			Global.sendAnalyticsEvent( 'browser', 'browser:beforeunload', 'browser:beforeunload' );
 			if ( ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.edit_view && LocalCacheData.current_open_primary_controller.is_changed == true )
-					|| ( LocalCacheData.current_open_report_controller && LocalCacheData.current_open_report_controller.is_changed == true )
-					|| ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.is_changed == true )
-					|| ( LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.edit_view && LocalCacheData.current_open_sub_controller.is_changed == true )
-				 ) {
+				|| ( LocalCacheData.current_open_report_controller && LocalCacheData.current_open_report_controller.is_changed == true )
+				|| ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.is_changed == true )
+				|| ( LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.edit_view && LocalCacheData.current_open_sub_controller.is_changed == true )
+			) {
 				e.preventDefault(); // Cancel the unload event
 				e.returnValue = ''; // Chrome requires returnValue to be set
 			}
-		});
+		} );
 
 		$( 'body' ).addClass( 'login-bg' );
 
@@ -699,9 +665,9 @@ require( [
 					LocalCacheData.openAwesomeBox.selectNextItem( e );
 				}
 			} else if ( LocalCacheData.current_open_primary_controller &&
-					LocalCacheData.current_open_primary_controller.column_selector &&
-					LocalCacheData.current_open_primary_controller.column_selector.is( ':visible' ) &&
-					LocalCacheData.current_open_primary_controller.column_selector.has( $( ':focus' ) ).length > 0 ) {
+				LocalCacheData.current_open_primary_controller.column_selector &&
+				LocalCacheData.current_open_primary_controller.column_selector.is( ':visible' ) &&
+				LocalCacheData.current_open_primary_controller.column_selector.has( $( ':focus' ) ).length > 0 ) {
 				if ( Global.isValidInputCodes( e.keyCode ) ) {
 					LocalCacheData.current_open_primary_controller.column_selector.selectNextItem( e );
 				}
@@ -715,7 +681,7 @@ require( [
 				}
 			}
 
-			if ( (e.keyCode === 65 && e.metaKey === true) || (e.keyCode === 65 && e.ctrlKey === true ) ) {
+			if ( ( e.keyCode === 65 && e.metaKey === true ) || ( e.keyCode === 65 && e.ctrlKey === true ) ) {
 				e.preventDefault();
 				selectAll();
 			}
@@ -730,16 +696,15 @@ require( [
 
 			// keyboard event to quick search permission adropdown
 			if ( LocalCacheData.current_open_primary_controller &&
-					LocalCacheData.current_open_primary_controller.viewId === 'PermissionControl' &&
-					LocalCacheData.current_open_primary_controller.edit_view ) {
+				LocalCacheData.current_open_primary_controller.viewId === 'PermissionControl' &&
+				LocalCacheData.current_open_primary_controller.edit_view ) {
 				LocalCacheData.current_open_primary_controller.onKeyDown( e );
-
 			}
 
 		} );
 
-		if( window._addToDebugClickStack === undefined ) {
-			window._addToDebugClickStack = function ( e ) {
+		if ( window._addToDebugClickStack === undefined ) {
+			window._addToDebugClickStack = function( e ) {
 				// Must collect click data on 'event capture phase' vs bubbling phase, so the click is recorded as soon as possible, before any potential errors prevent the recording of last click.
 				// Function added to window, to prevent duplicate click listeners (JS wont add duplicate listeners referencing the same function). More context at https://stackoverflow.com/questions/38939937/when-are-duplicate-event-listeners-discarded-and-when-are-they-not
 				var ui_clicked_date = new Date();
@@ -756,7 +721,7 @@ require( [
 				LocalCacheData.ui_click_stack.unshift( ui_stack );
 
 			};
-			window.addEventListener('click', window._addToDebugClickStack, true); // true is to set listener on 'event capture phase', so the click is recorded as soon as possible, before any potential errors prevent the recording of last click.
+			window.addEventListener( 'click', window._addToDebugClickStack, true ); // true is to set listener on 'event capture phase', so the click is recorded as soon as possible, before any potential errors prevent the recording of last click.
 		}
 
 		$( 'body' ).unbind( 'mousedown' ).bind( 'mousedown', function( e ) {
@@ -839,30 +804,30 @@ require( [
 				&& ServiceCaller && ServiceCaller.rootURL
 				&& loginData && loginData.base_url ) {
 				try {
-					(function (i, s, o, g, r, a, m) {
+					( function( i, s, o, g, r, a, m ) {
 						i['GoogleAnalyticsObject'] = r;
-						i[r] = i[r] || function () {
-							(i[r].q = i[r].q || []).push(arguments);
+						i[r] = i[r] || function() {
+							( i[r].q = i[r].q || [] ).push( arguments );
 						}, i[r].l = 1 * new Date();
-						a = s.createElement(o),
-							m = s.getElementsByTagName(o)[0];
+						a = s.createElement( o ),
+							m = s.getElementsByTagName( o )[0];
 						a.async = 1;
 						a.src = g;
-						m.parentNode.insertBefore(a, m);
-					})(window, document, 'script', ServiceCaller.rootURL + loginData.base_url + 'html5/framework/google/analytics/analytics.js', 'ga');
+						m.parentNode.insertBefore( a, m );
+					} )( window, document, 'script', ServiceCaller.rootURL + loginData.base_url + 'html5/framework/google/analytics/analytics.js', 'ga' );
 					//ga('set', 'sendHitTask', null); //disables sending hit data to Google. uncoment when debugging GA.
 
-					ga('create', APIGlobal.pre_login_data.analytics_tracking_code, 'auto');
+					ga( 'create', APIGlobal.pre_login_data.analytics_tracking_code, 'auto' );
 
 					//Do not check exitstance of LocalCacheData with if(LocalCacheData) or JS will execute the unnamed function it uses as a constructor
-					if (LocalCacheData.loginUser) {
+					if ( LocalCacheData.loginUser ) {
 						var current_company = LocalCacheData.getCurrentCompany();
-						Global.setAnalyticDimensions(LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name);
+						Global.setAnalyticDimensions( LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name );
 					} else {
 						Global.setAnalyticDimensions();
 					}
-					ga('send', 'pageview', {'sessionControl': 'start'});
-				} catch(e) {
+					ga( 'send', 'pageview', { 'sessionControl': 'start' } );
+				} catch ( e ) {
 					throw e; //Attempt to catch any errors thrown by Google Analytics.
 				}
 			}
@@ -885,13 +850,12 @@ require( [
 			$.i18n.load( LocalCacheData.getI18nDic() );
 			Global.initStaticStrings();
 
-
 			ServiceCaller.import_csv_emample = ServiceCaller.rootURL + loginData.base_url + 'html5/views/wizard/import_csv/';
-			ServiceCaller.fileDownloadURL = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&X-CSRF-Token='+ getCookie( 'CSRF-Token' );
+			ServiceCaller.fileDownloadURL = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&X-CSRF-Token=' + getCookie( 'CSRF-Token' );
 			ServiceCaller.uploadURL = ServiceCaller.rootURL + loginData.base_url + 'upload_file.php';
-			ServiceCaller.companyLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=company_logo&X-CSRF-Token='+ getCookie( 'CSRF-Token' );
-			ServiceCaller.invoiceLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=invoice_config&X-CSRF-Token='+ getCookie( 'CSRF-Token' );
-			ServiceCaller.userPhoto = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=user_photo&X-CSRF-Token='+ getCookie( 'CSRF-Token' );
+			ServiceCaller.companyLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=company_logo&X-CSRF-Token=' + getCookie( 'CSRF-Token' );
+			ServiceCaller.invoiceLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=invoice_config&X-CSRF-Token=' + getCookie( 'CSRF-Token' );
+			ServiceCaller.userPhoto = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=user_photo&X-CSRF-Token=' + getCookie( 'CSRF-Token' );
 			ServiceCaller.mainCompanyLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=primary_company_logo';
 			ServiceCaller.poweredByLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=smcopyright';
 			ServiceCaller.login_page_powered_by_logo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=copyright';
@@ -910,25 +874,64 @@ require( [
 					Debug.Text( e.message, 'main.js', 'require', 'initApps', 10 );
 				}
 			}
+
+			//When the user switched away from, then back again to our tab, make sure the session is still the same so they don't get two different login sessions confused.
+			function handleVisibilityChange() {
+				var is_hidden = document.hidden;
+				var cookie_session_id = getCookie( Global.getSessionIDKey() );
+
+				Debug.Text( 'Tab Visibility Change: ' + is_hidden + ' Session ID: ' + LocalCacheData.getSessionID(), 'main.js', '', 'handleVisibilityChange', 10 );
+
+				if ( is_hidden == false ) {
+					//Check to make sure our session_id matches what the server returns.
+					if ( cookie_session_id != LocalCacheData.getSessionID() ) {
+						Debug.Text( 'Session ID has changed out from out underneath us! Session ID: Memory: ' + LocalCacheData.getSessionID() + ' Cookie: ' + cookie_session_id, 'main.js', '', 'handleVisibilityChange', 1 );
+
+						var api = new ( APIFactory.getAPIClass( 'APIMisc' ) )();
+						if ( typeof api.isLoggedIn === "function" ) {
+							api.isLoggedIn( false, {
+								onResult: function( result ) {
+									var result_data = result.getResult();
+
+									if ( result_data === true ) {
+										TAlertManager.showAlert( $.i18n._( 'It appears that you have logged in from another web browser window or tab.<br><br>Please be patient while the session is resumed here...' ), 'Session Changed', function() {
+											Global.sendAnalyticsEvent( 'session', 'session:changed', 'session:changed' );
+											window.location.reload( true );
+										} );
+									} else {
+										//Don't do Logout here, as we need to display a "Session Expired" message to the user, which is triggered from the ServiceCaller.
+										api.ping( {
+											onResult: function() {
+											}
+										} );
+									}
+								}
+							} );
+						}
+					}
+				}
+			}
+
+			window.addEventListener( 'visibilitychange', handleVisibilityChange );
 		}
 
 		function gridScrollDown() {
 			if ( LocalCacheData.openAwesomeBox &&
-					_.isFunction( LocalCacheData.openAwesomeBox.gridScrollDown ) ) {
+				_.isFunction( LocalCacheData.openAwesomeBox.gridScrollDown ) ) {
 				LocalCacheData.openAwesomeBox.gridScrollDown();
 				return;
 			}
 
 			if ( LocalCacheData.current_open_sub_controller ) {
 				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
-						_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollDown ) ) {
+					_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollDown ) ) {
 					LocalCacheData.current_open_sub_controller.gridScrollDown();
 				}
 				return;
 			}
 			if ( LocalCacheData.current_open_primary_controller ) {
 				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
-						_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollDown ) ) {
+					_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollDown ) ) {
 					LocalCacheData.current_open_primary_controller.gridScrollDown();
 				}
 				return;
@@ -937,13 +940,13 @@ require( [
 
 		function gridScrollTop() {
 			if ( LocalCacheData.openAwesomeBox &&
-					_.isFunction( LocalCacheData.openAwesomeBox.gridScrollTop ) ) {
+				_.isFunction( LocalCacheData.openAwesomeBox.gridScrollTop ) ) {
 				LocalCacheData.openAwesomeBox.gridScrollTop();
 				return;
 			}
 			if ( LocalCacheData.current_open_sub_controller ) {
 				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
-						_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollTop ) ) {
+					_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollTop ) ) {
 					LocalCacheData.current_open_sub_controller.gridScrollTop();
 				}
 				return;
@@ -951,7 +954,7 @@ require( [
 			//Error: Uncaught TypeError: LocalCacheData.current_open_primary_controller.gridScrollTop is not a function in interface/html5/main.js?v=9.0.2-20151106-092147 line 434
 			if ( LocalCacheData.current_open_primary_controller ) {
 				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
-						_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollTop ) ) {
+					_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollTop ) ) {
 					LocalCacheData.current_open_primary_controller.gridScrollTop();
 				}
 				return;
@@ -959,10 +962,9 @@ require( [
 		}
 
 		function selectAll() {
-
 			//Error: Uncaught TypeError: LocalCacheData.current_open_primary_controller.selectAll is not a function in interface/html5/main.js?v=9.0.4-20151123-121757 line 457
 			if ( LocalCacheData.openAwesomeBox &&
-					_.isFunction( LocalCacheData.openAwesomeBox.selectAll ) ) {
+				_.isFunction( LocalCacheData.openAwesomeBox.selectAll ) ) {
 				LocalCacheData.openAwesomeBox.selectAll();
 				return;
 			}
@@ -970,7 +972,7 @@ require( [
 			if ( LocalCacheData.current_open_sub_controller ) {
 
 				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
-						_.isFunction( LocalCacheData.current_open_sub_controller.selectAll ) ) {
+					_.isFunction( LocalCacheData.current_open_sub_controller.selectAll ) ) {
 					LocalCacheData.current_open_sub_controller.selectAll();
 				}
 
@@ -979,7 +981,7 @@ require( [
 
 			if ( LocalCacheData.current_open_primary_controller ) {
 				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
-						_.isFunction( LocalCacheData.current_open_primary_controller.selectAll ) ) {
+					_.isFunction( LocalCacheData.current_open_primary_controller.selectAll ) ) {
 					LocalCacheData.current_open_primary_controller.selectAll();
 				}
 				return;
@@ -987,7 +989,6 @@ require( [
 		};
 
 	} );
-
 
 	function loadViewRequiredJS() {
 		LocalCacheData.loadViewRequiredJSReady = false;
@@ -1067,7 +1068,7 @@ require( [
 		//do not load interact on mobile.
 		if ( Global.detectMobileBrowser() == true ) {
 			require_array.splice( require_array.indexOf( 'interact' ), 1 );
-			require( require_array, function( Backbone, Global, Nanobar, Decimal) {
+			require( require_array, function( Backbone, Global, Nanobar, Decimal ) {
 				window.Nanobar = Nanobar;
 				window.Decimal = Decimal;
 				LocalCacheData.loadViewRequiredJSReady = true;
@@ -1090,7 +1091,7 @@ require( [
 		url = stripDuplicateSlashes( url );
 		var a = url.split( '/' ); //Strip duplicate slashes
 
-		var targetIndex = (a.length - 3);
+		var targetIndex = ( a.length - 3 );
 		var newUrl = '';
 		for ( var i = 0; i < targetIndex; i++ ) {
 			if ( i !== 1 ) {

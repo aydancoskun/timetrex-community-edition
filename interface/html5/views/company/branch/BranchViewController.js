@@ -23,8 +23,8 @@ BranchViewController = BaseViewController.extend( {
 		this.table_name_key = 'branch';
 		this.context_menu_name = $.i18n._( 'Branch' );
 		this.navigation_label = $.i18n._( 'Branch' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIBranch' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIBranch' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -156,7 +156,7 @@ BranchViewController = BaseViewController.extend( {
 		var form_item_input;
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
@@ -262,7 +262,7 @@ BranchViewController = BaseViewController.extend( {
 		if ( Global.getProductEdition() >= 20 ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIGEOFence' )),
+				api_class: ( APIFactory.getAPIClass( 'APIGEOFence' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.GEO_FENCE,
 				show_search_inputs: true,
@@ -445,7 +445,7 @@ BranchViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -458,7 +458,7 @@ BranchViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,

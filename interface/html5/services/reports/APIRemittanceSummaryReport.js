@@ -63,6 +63,4 @@ var APIRemittanceSummaryReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

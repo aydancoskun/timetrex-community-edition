@@ -35,7 +35,7 @@
  ********************************************************************************/
 
 
-include_once( dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'GovernmentForms_Base.class.php' );
+include_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'GovernmentForms_Base.class.php' );
 
 /**
  * @package GovernmentForms
@@ -48,23 +48,27 @@ class GovernmentForms_grid extends GovernmentForms_Base {
 	public $grid_height = 10;
 
 	public function getFilterFunction( $name ) {
-		return FALSE;
+		return false;
 	}
 
 	function getTemplate() {
 		return $this->pdf_template;
 	}
+
 	function setTemplate( $value ) {
 		$this->pdf_template = $value;
-		return TRUE;
+
+		return true;
 	}
 
 	function getTemplatePages() {
 		return $this->pdf_template_pages;
 	}
+
 	function setTemplatePages( $value ) {
 		$this->pdf_template_pages = $value;
-		return TRUE;
+
+		return true;
 	}
 
 	function _outputPDF() {
@@ -72,18 +76,18 @@ class GovernmentForms_grid extends GovernmentForms_Base {
 		$pdf = $this->getPDFObject();
 
 
-		if ( $this->getShowBackground() == TRUE AND $this->getTemplate() != '' ) {
+		if ( $this->getShowBackground() == true && $this->getTemplate() != '' ) {
 			$pdf->setSourceFile( $this->getTemplate() );
 
-			for( $i=1; $i <= $this->getTemplatePages(); $i++ ) {
-				$this->template_index[$i] = $pdf->ImportPage($i);
+			for ( $i = 1; $i <= $this->getTemplatePages(); $i++ ) {
+				$this->template_index[$i] = $pdf->ImportPage( $i );
 			}
 		}
 
 		$pdf->AddPage();
 
-		if ( isset($this->template_index[1]) ) {
-			$pdf->useTemplate( $this->template_index[1], $this->getTemplateOffsets('x'), $this->getTemplateOffsets('y') );
+		if ( isset( $this->template_index[1] ) ) {
+			$pdf->useTemplate( $this->template_index[1], $this->getTemplateOffsets( 'x' ), $this->getTemplateOffsets( 'y' ) );
 		}
 
 
@@ -98,15 +102,15 @@ class GovernmentForms_grid extends GovernmentForms_Base {
 		$pdf->setDrawColor( 0, 0, 255 );
 
 		//Draw grid.
-		$continue = TRUE;
-		$i=0;
+		$continue = true;
+		$i = 0;
 
-		$x=0;
-		$y=0;
+		$x = 0;
+		$y = 0;
 		$page = 1;
-		while( $continue AND $i < 1000000 ) {
+		while ( $continue && $i < 1000000 ) {
 			$pdf->setXY( $x, $y );
-			$pdf->Cell( $this->grid_width, $this->grid_height, $x . 'x' . $y , 1, 0, 'L', 0 );
+			$pdf->Cell( $this->grid_width, $this->grid_height, $x . 'x' . $y, 1, 0, 'L', 0 );
 
 			$x = $x + $this->grid_width;
 			if ( $x > $pdf->getPageWidth() ) {
@@ -114,23 +118,24 @@ class GovernmentForms_grid extends GovernmentForms_Base {
 				$y = $y + $this->grid_height;
 			}
 
-			if ( $y > $pdf->getPageHeight() AND $page < $this->getTemplatePages() ) {
+			if ( $y > $pdf->getPageHeight() && $page < $this->getTemplatePages() ) {
 				$page++;
 
 				$pdf->AddPage();
-				$pdf->useTemplate( $this->template_index[$page], $this->getTemplateOffsets('x'), $this->getTemplateOffsets('y') );
+				$pdf->useTemplate( $this->template_index[$page], $this->getTemplateOffsets( 'x' ), $this->getTemplateOffsets( 'y' ) );
 
 				$x = 0;
 				$y = 0;
-			} elseif ( $y > $pdf->getPageHeight() AND $page == $this->getTemplatePages() ) {
-				$continue = FALSE;
+			} else if ( $y > $pdf->getPageHeight() && $page == $this->getTemplatePages() ) {
+				$continue = false;
 				break;
 			}
 
 			$i++;
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

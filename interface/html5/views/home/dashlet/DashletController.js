@@ -16,8 +16,8 @@ DashletController = Backbone.View.extend( {
 	accmulated_order_map: null,
 
 	initialize: function( options ) {
-		this.api_dashboard = new (APIFactory.getAPIClass( 'APIDashboard' ))();
-		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+		this.api_dashboard = new ( APIFactory.getAPIClass( 'APIDashboard' ) )();
+		this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
 	},
 
 	refreshIfNecessary: function() {
@@ -42,16 +42,17 @@ DashletController = Backbone.View.extend( {
 		if ( Global.detectMobileBrowser() == false ) {
 			$( '#' + $( this.el ).attr( 'id' ) ).resizable( {
 				handles: 'all',
-				start: function(e, ui) {},
-				resize: function(e, ui) {
+				start: function( e, ui ) {
+				},
+				resize: function( e, ui ) {
 					$this.setGridSize();
 				},
-				stop: function(e, ui) {
+				stop: function( e, ui ) {
 					$this.addIframeBack();
-					var height = Math.floor(ui.size.height);
-					var width = Math.floor(ui.size.width);
+					var height = Math.floor( ui.size.height );
+					var width = Math.floor( ui.size.width );
 
-					$this.saveSize(height, width);
+					$this.saveSize( height, width );
 
 					$this.homeViewController.updateLayout();
 					$this.homeViewController.dashboard_container.masonry( 'reloadItems' );
@@ -469,7 +470,7 @@ DashletController = Backbone.View.extend( {
 	buildSubGridsData: function( array, date_string, map, result_array, parent_key ) {
 		var row;
 		var marked_regular_row = false; //Only mark the first regular time row, as thats where the bold top-line is going to go.
-		for ( var key  in array ) {
+		for ( var key in array ) {
 			if ( !map[key] ) {
 				row = {};
 				row.parent_key = parent_key;
@@ -603,7 +604,7 @@ DashletController = Backbone.View.extend( {
 		};
 		columns.push( column_1 );
 		columns.push( column_2 );
-		grid_data = {};
+		var grid_data = {};
 		if ( !this.grid ) { //#2571 - this.grid.jqGrid is not a function
 			grid_data = {
 
@@ -707,20 +708,21 @@ DashletController = Backbone.View.extend( {
 	},
 
 	saveSize: function( h, w ) {
-		this.data.data.width = Math.floor(w/$('.dashboard-container').width() * 100 ); //needs a percentage
+		this.data.data.width = Math.floor( w / $( '.dashboard-container' ).width() * 100 ); //needs a percentage
 		this.data.data.height = h;
-		console.log(this.data.data);
+		console.log( this.data.data );
 		this.user_generic_data_api.setUserGenericData( this.data, {
-			onResult: function( result ) { }
+			onResult: function( result ) {
+			}
 		} );
 	},
 
 	setGridSize: function() {
-		if ( (!this.grid || !this.grid.grid || !this.grid.grid.is( ':visible' )) ) {
+		if ( ( !this.grid || !this.grid.grid || !this.grid.grid.is( ':visible' ) ) ) {
 			return;
 		}
-		this.grid.grid.setGridWidth( $(this.el).find('.content').width() );
-		this.grid.grid.setGridHeight( $(this.el).find('.content').height() - 28 );
+		this.grid.grid.setGridWidth( $( this.el ).find( '.content' ).width() );
+		this.grid.grid.setGridHeight( $( this.el ).find( '.content' ).height() - 28 );
 	},
 
 	initReportContent: function() {
@@ -731,7 +733,7 @@ DashletController = Backbone.View.extend( {
 			$( e.target ).addClass( 'button-rotate' );
 			$this.initReportData();
 		} );
-		this.api_user_report = new (APIFactory.getAPIClass( 'APIUserReportData' ))();
+		this.api_user_report = new ( APIFactory.getAPIClass( 'APIUserReportData' ) )();
 		this.api = this.getAPIByViewName( this.data.data.report );
 		this.initReportData();
 		this.startRefresh();
@@ -816,16 +818,16 @@ DashletController = Backbone.View.extend( {
 				} else if ( $this.data.data.dashlet_type == 'custom_report' ) {
 					$this.initReportData();
 				} else if ( $this.data.data.dashlet_type == 'exception_summary' ||
-						$this.data.data.dashlet_type == 'request_summary' ||
-						$this.data.data.dashlet_type == 'message_summary' ||
-						$this.data.data.dashlet_type == 'exception_summary_child' ||
-						$this.data.data.dashlet_type == 'request_authorize_summary' ||
-						$this.data.data.dashlet_type == 'accrual_balance_summary' ||
-						$this.data.data.dashlet_type == 'user_active_shift_summary' ||
-						$this.data.data.dashlet_type == 'timesheet_verification_summary' ||
-						$this.data.data.dashlet_type == 'timesheet_verification_summary_child' ||
-						$this.data.data.dashlet_type == 'schedule_summary' ||
-						$this.data.data.dashlet_type == 'schedule_summary_child' ) {
+					$this.data.data.dashlet_type == 'request_summary' ||
+					$this.data.data.dashlet_type == 'message_summary' ||
+					$this.data.data.dashlet_type == 'exception_summary_child' ||
+					$this.data.data.dashlet_type == 'request_authorize_summary' ||
+					$this.data.data.dashlet_type == 'accrual_balance_summary' ||
+					$this.data.data.dashlet_type == 'user_active_shift_summary' ||
+					$this.data.data.dashlet_type == 'timesheet_verification_summary' ||
+					$this.data.data.dashlet_type == 'timesheet_verification_summary_child' ||
+					$this.data.data.dashlet_type == 'schedule_summary' ||
+					$this.data.data.dashlet_type == 'schedule_summary_child' ) {
 					$this.initDefaultDashletData();
 				} else if ( $this.data.data.dashlet_type == 'timesheet_summary' ) {
 					$this.initDefaultTimesheetData();
@@ -833,7 +835,7 @@ DashletController = Backbone.View.extend( {
 					$this.initNewsData();
 				}
 
-			}, (auto_refresh * 1000) );
+			}, ( auto_refresh * 1000 ) );
 		}
 	},
 
@@ -874,7 +876,7 @@ DashletController = Backbone.View.extend( {
 		var i;
 		var item;
 		if ( this.data.data.dashlet_type === 'exception_summary' ||
-				this.data.data.dashlet_type === 'exception_summary_child' ) {
+			this.data.data.dashlet_type === 'exception_summary_child' ) {
 			//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 			if ( !data ) {
 				return;
@@ -932,7 +934,7 @@ DashletController = Backbone.View.extend( {
 				}
 			}
 		} else if ( this.data.data.dashlet_type === 'schedule_summary' ||
-				this.data.data.dashlet_type === 'schedule_summary_child' ) {
+			this.data.data.dashlet_type === 'schedule_summary_child' ) {
 			//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 			if ( !data ) {
 				return;
@@ -957,7 +959,7 @@ DashletController = Backbone.View.extend( {
 					clearInterval( $this.refresh_timer );
 				}
 				$this.initCustomViewData();
-			}, (auto_refresh * 1000) );
+			}, ( auto_refresh * 1000 ) );
 		}
 	},
 
@@ -1188,163 +1190,163 @@ DashletController = Backbone.View.extend( {
 		var api = null;
 		switch ( view_name ) {
 			case 'message_summary':
-				api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
+				api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
 				break;
 			case 'schedule_summary':
 			case 'schedule_summary_child':
 			case 'Schedule':
-				api = new (APIFactory.getAPIClass( 'APISchedule' ))();
+				api = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
 				break;
 			case 'Exception':
 			case 'exception_summary':
 			case 'exception_summary_child':
-				api = new (APIFactory.getAPIClass( 'APIException' ))();
+				api = new ( APIFactory.getAPIClass( 'APIException' ) )();
 				break;
 			case 'Invoice':
-				api = new (APIFactory.getAPIClass( 'APIInvoice' ))();
+				api = new ( APIFactory.getAPIClass( 'APIInvoice' ) )();
 				break;
 			case 'User':
-				api = new (APIFactory.getAPIClass( 'APIUser' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 				break;
 			case 'request_summary':
 			case 'Request':
 			case 'Request-Authorization':
 			case 'request_authorize_summary':
-				api = new (APIFactory.getAPIClass( 'APIRequest' ))();
+				api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
 				break;
 			case 'accrual_balance_summary':
-				api = new (APIFactory.getAPIClass( 'APIAccrualBalance' ))();
+				api = new ( APIFactory.getAPIClass( 'APIAccrualBalance' ) )();
 				break;
 			case 'timesheet_verification_summary':
 			case 'timesheet_verification_summary_child':
-				api = new (APIFactory.getAPIClass( 'APITimesheetSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APITimesheetSummaryReport' ) )();
 				break;
 			case 'timesheet_summary':
-				api = new (APIFactory.getAPIClass( 'APITimeSheet' ))();
+				api = new ( APIFactory.getAPIClass( 'APITimeSheet' ) )();
 				break;
 			case 'user_active_shift_summary':
-				api = new (APIFactory.getAPIClass( 'APIActiveShiftReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIActiveShiftReport' ) )();
 				break;
 			case 'PayPeriodTimeSheetVerify':
-				api = new (APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' ))();
+				api = new ( APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' ) )();
 				break;
 			case 'UserExpense':
 			case 'UserExpense-Authorization':
-				api = new (APIFactory.getAPIClass( 'APIUserExpense' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserExpense' ) )();
 				break;
 			case 'TimeSheetSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APITimesheetSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APITimesheetSummaryReport' ) )();
 				break;
 			case 'TimeSheetDetailReport':
-				api = new (APIFactory.getAPIClass( 'APITimesheetDetailReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APITimesheetDetailReport' ) )();
 				break;
 			case 'AccrualBalance':
-				api = new (APIFactory.getAPIClass( 'APIAccrualBalance' ))();
+				api = new ( APIFactory.getAPIClass( 'APIAccrualBalance' ) )();
 				break;
 			case 'Accrual':
-				api = new (APIFactory.getAPIClass( 'APIAccrual' ))();
+				api = new ( APIFactory.getAPIClass( 'APIAccrual' ) )();
 				break;
 			case 'RecurringScheduleControl':
-				api = new (APIFactory.getAPIClass( 'APIRecurringScheduleControl' ))();
+				api = new ( APIFactory.getAPIClass( 'APIRecurringScheduleControl' ) )();
 				break;
 			case 'RecurringScheduleTemplateControl':
-				api = new (APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ))();
+				api = new ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ) )();
 				break;
 			case 'Job':
-				api = new (APIFactory.getAPIClass( 'APIJob' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
 				break;
 			case 'JobItem':
-				api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 				break;
 			case 'UserContact':
-				api = new (APIFactory.getAPIClass( 'APIUserContact' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserContact' ) )();
 				break;
 			case 'UserWage':
-				api = new (APIFactory.getAPIClass( 'APIUserWage' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserWage' ) )();
 				break;
 			case 'PayStub':
-				api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
+				api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
 				break;
 			case 'PayPeriod':
-				api = new (APIFactory.getAPIClass( 'APIPayPeriod' ))();
+				api = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
 				break;
 			case 'PayStubAmendment':
-				api = new (APIFactory.getAPIClass( 'APIPayStubAmendment' ))();
+				api = new ( APIFactory.getAPIClass( 'APIPayStubAmendment' ) )();
 				break;
 			case 'Client':
-				api = new (APIFactory.getAPIClass( 'APIClient' ))();
+				api = new ( APIFactory.getAPIClass( 'APIClient' ) )();
 				break;
 			case 'ClientContact':
-				api = new (APIFactory.getAPIClass( 'APIClientContact' ))();
+				api = new ( APIFactory.getAPIClass( 'APIClientContact' ) )();
 				break;
 			case 'Transaction':
-				api = new (APIFactory.getAPIClass( 'APITransaction' ))();
+				api = new ( APIFactory.getAPIClass( 'APITransaction' ) )();
 				break;
 			case 'UserReviewControl':
-				api = new (APIFactory.getAPIClass( 'APIUserReviewControl' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserReviewControl' ) )();
 				break;
 			case 'JobVacancy':
-				api = new (APIFactory.getAPIClass( 'APIJobVacancy' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJobVacancy' ) )();
 				break;
 			case 'JobApplicant':
-				api = new (APIFactory.getAPIClass( 'APIJobApplicant' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJobApplicant' ) )();
 				break;
 			case 'JobApplication':
-				api = new (APIFactory.getAPIClass( 'APIJobApplication' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJobApplication' ) )();
 				break;
 			case 'AccrualBalanceSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APIAccrualBalanceSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIAccrualBalanceSummaryReport' ) )();
 				break;
 			case 'UserSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APIUserSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserSummaryReport' ) )();
 				break;
 			case 'ActiveShiftReport':
-				api = new (APIFactory.getAPIClass( 'APIActiveShiftReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIActiveShiftReport' ) )();
 				break;
 			case 'AuditTrailReport':
-				api = new (APIFactory.getAPIClass( 'APIAuditTrailReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIAuditTrailReport' ) )();
 				break;
 			case 'ScheduleSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APIScheduleSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIScheduleSummaryReport' ) )();
 				break;
 			case 'PunchSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APIPunchSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIPunchSummaryReport' ) )();
 				break;
 			case 'ExceptionReport':
-				api = new (APIFactory.getAPIClass( 'APIExceptionSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIExceptionSummaryReport' ) )();
 				break;
 			case 'PayStubSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APIPayStubSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIPayStubSummaryReport' ) )();
 				break;
 			case 'UserExpenseReport':
-				api = new (APIFactory.getAPIClass( 'APIUserExpenseReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserExpenseReport' ) )();
 				break;
 			case 'JobSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APIJobSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJobSummaryReport' ) )();
 				break;
 			case 'JobDetailReport':
-				api = new (APIFactory.getAPIClass( 'APIJobDetailReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJobDetailReport' ) )();
 				break;
 			case 'JobInformationReport':
-				api = new (APIFactory.getAPIClass( 'APIJobInformationReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJobInformationReport' ) )();
 				break;
 			case 'JobItemInformationReport':
-				api = new (APIFactory.getAPIClass( 'APIJobItemInformationReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIJobItemInformationReport' ) )();
 				break;
 			case 'InvoiceTransactionSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APIInvoiceTransactionSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIInvoiceTransactionSummaryReport' ) )();
 				break;
 			case 'UserQualificationReport':
-				api = new (APIFactory.getAPIClass( 'APIUserQualificationReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserQualificationReport' ) )();
 				break;
 			case 'KPIReport':
-				api = new (APIFactory.getAPIClass( 'APIKPIReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIKPIReport' ) )();
 				break;
 			case 'UserRecruitmentSummaryReport':
-				api = new (APIFactory.getAPIClass( 'APIUserRecruitmentSummaryReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserRecruitmentSummaryReport' ) )();
 				break;
 			case 'UserRecruitmentDetailReport':
-				api = new (APIFactory.getAPIClass( 'APIUserRecruitmentDetailReport' ))();
+				api = new ( APIFactory.getAPIClass( 'APIUserRecruitmentDetailReport' ) )();
 				break;
 		}
 

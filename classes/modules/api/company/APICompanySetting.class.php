@@ -47,7 +47,7 @@ class APICompanySetting extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -56,6 +56,7 @@ class APICompanySetting extends APIFactory {
 	 */
 	function getCompanySetting( $name ) {
 		$retarr = CompanySettingFactory::getCompanySettingArrayByName( $this->getCurrentCompanyObject()->getId(), $name );
+
 		return $this->returnHandler( $retarr );
 	}
 
@@ -67,7 +68,8 @@ class APICompanySetting extends APIFactory {
 	 */
 	function setCompanySetting( $name, $value, $type_id = 10 ) {
 		$retval = CompanySettingFactory::setCompanySetting( $this->getCurrentCompanyObject()->getId(), $name, $value, $type_id );
-		return $this->returnHandler($retval);
+
+		return $this->returnHandler( $retval );
 	}
 
 	/**
@@ -76,8 +78,10 @@ class APICompanySetting extends APIFactory {
 	 */
 	function deleteCompanySetting( $name ) {
 		$retval = CompanySettingFactory::deleteCompanySetting( $this->getCurrentCompanyObject()->getId(), $name );
-		return $this->returnHandler($retval);
+
+		return $this->returnHandler( $retval );
 	}
 
 }
+
 ?>

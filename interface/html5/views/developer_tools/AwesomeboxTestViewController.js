@@ -24,10 +24,10 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		this.table_name_key = 'awesomebox_test';
 		this.context_menu_name = $.i18n._( 'AwesomeBox Test' );
 		this.navigation_label = $.i18n._( 'AwesomBox Test' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 		this.select_company_id = LocalCacheData.getCurrentCompany().id;
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 		this.user_id_array = [];
 
 		this.render();
@@ -89,7 +89,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		//Company
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -102,7 +102,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		//Company
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICompany' )),
+			api_class: ( APIFactory.getAPIClass( 'APICompany' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.COMPANY,
 			show_search_inputs: true,
@@ -115,7 +115,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		//Legal Entity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+			api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			show_search_inputs: true,
@@ -170,7 +170,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'company_id',
 				layout_name: ALayoutIDs.COMPANY,
-				api_class: (APIFactory.getAPIClass( 'APICompany' )),
+				api_class: ( APIFactory.getAPIClass( 'APICompany' ) ),
 				multiple: false,
 				custom_first_label: Global.default_item,
 				basic_search: PermissionManager.checkTopLevelPermission( 'Companies' ) ? true : false,
@@ -182,7 +182,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'legal_entity_id',
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
-				api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
+				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
 				multiple: true,
 				custom_first_label: Global.any_item,
 				basic_search: PermissionManager.checkTopLevelPermission( 'LegalEntity' ) ? true : false,
@@ -224,7 +224,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -260,7 +260,6 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		var complete_count = 0;
 		var option_result = [];
 
-
 		var res = '[{"id":"00000000-0000-0000-0000-000000000000","name":"Root","level":0,"children":[{"id":"11e85213-a778-6410-bee1-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"00000000-0000-0000-0000-000000000000","name":"Corporate","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":1,"children":[{"id":"11e85213-a779-fa20-835f-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a778-6410-bee1-123456abcdef","name":"Executives","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a778-6410-bee1-123456abcdef","isLeaf":true},{"id":"11e85213-a77a-39c0-9bc2-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a778-6410-bee1-123456abcdef","name":"Human Resources","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a778-6410-bee1-123456abcdef","isLeaf":true}],"expanded":true,"loaded":true,"parent":"00000000-0000-0000-0000-000000000000"},{"id":"11e85213-a77a-7810-a67f-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"00000000-0000-0000-0000-000000000000","name":"Hourly (Non-Exempt)","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":1,"children":[{"id":"11e85213-a77a-bb40-b83e-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a77a-7810-a67f-123456abcdef","name":"Salary (Exempt)","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a77a-7810-a67f-123456abcdef","isLeaf":true}],"expanded":true,"loaded":true,"parent":"00000000-0000-0000-0000-000000000000"}],"expanded":true,"loaded":true},{"id":"11e85213-a778-6410-bee1-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"00000000-0000-0000-0000-000000000000","name":"Corporate","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":1,"children":[{"id":"11e85213-a779-fa20-835f-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a778-6410-bee1-123456abcdef","name":"Executives","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a778-6410-bee1-123456abcdef","isLeaf":true},{"id":"11e85213-a77a-39c0-9bc2-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a778-6410-bee1-123456abcdef","name":"Human Resources","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a778-6410-bee1-123456abcdef","isLeaf":true}],"expanded":true,"loaded":true,"parent":"00000000-0000-0000-0000-000000000000"},{"id":"11e85213-a779-fa20-835f-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a778-6410-bee1-123456abcdef","name":"Executives","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a778-6410-bee1-123456abcdef","isLeaf":true},{"id":"11e85213-a77a-39c0-9bc2-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a778-6410-bee1-123456abcdef","name":"Human Resources","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a778-6410-bee1-123456abcdef","isLeaf":true},{"id":"11e85213-a77a-7810-a67f-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"00000000-0000-0000-0000-000000000000","name":"Hourly (Non-Exempt)","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":1,"children":[{"id":"11e85213-a77a-bb40-b83e-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a77a-7810-a67f-123456abcdef","name":"Salary (Exempt)","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a77a-7810-a67f-123456abcdef","isLeaf":true}],"expanded":true,"loaded":true,"parent":"00000000-0000-0000-0000-000000000000"},{"id":"11e85213-a77a-bb40-b83e-123456abcdef","company_id":"11e85213-a6b2-93b0-a2cd-123456abcdef","parent_id":"11e85213-a77a-7810-a67f-123456abcdef","name":"Salary (Exempt)","deleted":false,"created_by_id":false,"created_by":false,"created_date":"07-May-18 9:28 AM","updated_by_id":false,"updated_by":false,"updated_date":"07-May-18 9:28 AM","level":2,"expanded":true,"loaded":true,"parent":"11e85213-a77a-7810-a67f-123456abcdef","isLeaf":true}]';
 		res = JSON.parse( res );
 		if ( !$this.edit_only_mode ) {
@@ -280,13 +279,11 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			callBack( option_result );
 		}
 
-
 		for ( var i = 0; i < len - 2; i++ ) {
 			var option_info = options[i];
 			this.initDropDownOption( option_info.option_name, option_info.field_name, option_info.api, onGetOptionResult );
 
 		}
-
 
 		function onGetOptionResult( result ) {
 
@@ -305,21 +302,21 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 	//override that forces same data to grid at all times.
 	search: function() {
 		var result_data = JSON.parse( '[{"id":"11e85213-a799-d200-b041-123456abcdef","status":"Active","employee_number":100,"first_name":"Mr.","last_name":"FAKE","full_name":"Administrator, Mr.","home_phone":"471-438-3900","is_owner":true,"is_child":false},' +
-				'{"id":"11e85213-ad34-e0e0-8541-123456abcdef","status":"Active","employee_number":13,"first_name":"Tristen","last_name":"Braun","full_name":"FAKE Braun, Tristen","home_phone":"527-500-4852","is_owner":false,"is_child":true},' +
-				'{"id":"11e85213-af64-d0e0-9b00-123456abcdef","status":"Active","employee_number":20,"first_name":"Jane","last_name":"Doe","full_name":"FAKE Doe, Jane","home_phone":"477-443-9650","is_owner":false,"is_child":true},' +
-				'{"id":"11e85213-ac44-1830-9908-123456abcdef","status":"Active","employee_number":10,"first_name":"John","last_name":"Doe","full_name":"FAKE Doe, John","home_phone":"464-547-9452","is_owner":false,"is_child":true}]' );
+			'{"id":"11e85213-ad34-e0e0-8541-123456abcdef","status":"Active","employee_number":13,"first_name":"Tristen","last_name":"Braun","full_name":"FAKE Braun, Tristen","home_phone":"527-500-4852","is_owner":false,"is_child":true},' +
+			'{"id":"11e85213-af64-d0e0-9b00-123456abcdef","status":"Active","employee_number":20,"first_name":"Jane","last_name":"Doe","full_name":"FAKE Doe, Jane","home_phone":"477-443-9650","is_owner":false,"is_child":true},' +
+			'{"id":"11e85213-ac44-1830-9908-123456abcdef","status":"Active","employee_number":10,"first_name":"John","last_name":"Doe","full_name":"FAKE Doe, John","home_phone":"464-547-9452","is_owner":false,"is_child":true}]' );
 		this.user_id_array = result_data;
 		result_data = this.processResultData( result_data );
 		this.grid.setData( result_data );
 		this.grid.setGridColumnsWidth();
-		this.current_edit_record  = result_data[0];
+		this.current_edit_record = result_data[0];
 		this.setCurrentEditViewState( 'edit' );
 
 		TTPromise.add( 'Awesomeboxtest', 'init' );
 		var $this = this;
 		TTPromise.wait( 'Awesomeboxtest', 'init', function() {
 			$this.initEditView();
-		});
+		} );
 
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 	},
@@ -333,7 +330,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				}
 			} );
 			$this.setTabOVisibility( true );
-			$('.edit-view-tab-bar').css('opacity', 1);
+			$( '.edit-view-tab-bar' ).css( 'opacity', 1 );
 		}, 2500 );
 	},
 
@@ -385,13 +382,13 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 							Debug.Text( 'E: Test tree_mode MultiSelect AwesomeBox', 'AwesomeboxTestViewController.js', 'AwesomeboxTestViewController', 'runTests', 11 );
 							$this.checkMultiTreeAwesomeBox( assert, function() {
 								Debug.Text( 'F: Test searching in AwesomeBox', 'AwesomeboxTestViewController.js', 'AwesomeboxTestViewController', 'runTests', 11 );
-								$this.checkClearSearch( $this.edit_view_ui_dic['user_id2'], assert, function(){
+								$this.checkClearSearch( $this.edit_view_ui_dic['user_id2'], assert, function() {
 									Debug.Text( 'G: Wonky move all scenario', 'AwesomeboxTestViewController.js', 'AwesomeboxTestViewController', 'runTests', 11 );
 									$this.checkMoveAllScenario( $this.edit_view_ui_dic['user_id2'], assert, function() {
-									setTimeout( function() {
-										Debug.Text( 'Z: Testing Complete', 'AwesomeboxTestViewController.js', 'AwesomeboxTestViewController', 'runTests', 11 );
-										done_awesomebox_tests();
-									}, 1000 );
+										setTimeout( function() {
+											Debug.Text( 'Z: Testing Complete', 'AwesomeboxTestViewController.js', 'AwesomeboxTestViewController', 'runTests', 11 );
+											done_awesomebox_tests();
+										}, 1000 );
 
 									} );
 
@@ -403,7 +400,6 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			} );
 
 		} );
-
 
 	},
 
@@ -576,7 +572,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		}
 	},
 
-	checkClearSearch: function ( box, assert, callback ) {
+	checkClearSearch: function( box, assert, callback ) {
 		// open
 		var $this = this;
 		box.trigger( 'click' );
@@ -592,10 +588,10 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			$( checkboxes[7] ).trigger( 'click' );
 
 			//note selected ids
-			expected_ids.push( getRowId( $(checkboxes[1]) ) );
-			expected_ids.push( getRowId( $(checkboxes[3]) ) );
-			expected_ids.push( getRowId( $(checkboxes[6]) ) );
-			expected_ids.push( getRowId( $(checkboxes[7]) ) );
+			expected_ids.push( getRowId( $( checkboxes[1] ) ) );
+			expected_ids.push( getRowId( $( checkboxes[3] ) ) );
+			expected_ids.push( getRowId( $( checkboxes[6] ) ) );
+			expected_ids.push( getRowId( $( checkboxes[7] ) ) );
 
 			// click move button
 			dropdown.find( '.a-grid-right-arrow' ).trigger( 'click' );
@@ -619,21 +615,20 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 
 			TTPromise.wait( null, null, function() {
 				// check that VISIBLE values contain expected ids
-				assert.ok( (dropdown.find( '.select-grid tr' ).length == 2), 'only .sizetr and mr admin shows after filter (only works with demo data)' );
+				assert.ok( ( dropdown.find( '.select-grid tr' ).length == 2 ), 'only .sizetr and mr admin shows after filter (only works with demo data)' );
 
 				// move first record back ( note id )
 				var first_row = $( dropdown.find( '.select-grid tr' )[dropdown.find( '.select-grid tr' ).length - 1] );
-				first_row.find('input[type="checkbox"]').click()
-				var ondblClickRowHandler = dropdown.find('.select-grid').jqGrid('getGridParam', 'ondblClickRow');
-				ondblClickRowHandler.call( dropdown.find('.select-grid')[0], first_row.prop('id'));
+				first_row.find( 'input[type="checkbox"]' ).click();
+				var ondblClickRowHandler = dropdown.find( '.select-grid' ).jqGrid( 'getGridParam', 'ondblClickRow' );
+				ondblClickRowHandler.call( dropdown.find( '.select-grid' )[0], first_row.prop( 'id' ) );
 
 				// check that selected values contain expected ids
 				assert.ok( $( dropdown.find( '.select-grid tr' ).length == 1 ), 'removed record is in not in selectgrid' ); //1 because of sizetr
 				assert.ok( expectedInGrid( 'unselect_grid', dropdown, [getRowId( first_row )] ), 'removed record is in unselectgrid' );
 
 				// clear search
-				dropdown.find('.select-grid-search-div .close-btn').trigger('click');
-
+				dropdown.find( '.select-grid-search-div .close-btn' ).trigger( 'click' );
 
 				TTPromise.wait( null, null, function() {
 					expected_ids.splice( 0, 1 ); // remove moved record from expected_ids
@@ -643,18 +638,16 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 					assert.ok( ( dropdown.find( '.select-grid tr' ).length == 4 ), 'correct number of selected rows' );
 					assert.ok( expectedInGrid( 'select_grid', dropdown, expected_ids ), 'all expected records are in selected grid' );
 
-					dropdown.find('#select_grid_close_btn').click();
-					box.setValue([]);
-
+					dropdown.find( '#select_grid_close_btn' ).click();
+					box.setValue( [] );
 
 					if ( callback ) {
 						callback();
 					}
 
-				});
+				} );
 			} );
 		} );
-
 
 		//strip out jqgrid stuff and get row id
 		function getRowId( row ) {
@@ -672,7 +665,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 
 		function expectedInGrid( target_grid_name, dropdown, expected_ids ) {
 			var selected_rows = null;
-			if ( target_grid_name == 'select_grid') {
+			if ( target_grid_name == 'select_grid' ) {
 				selected_rows = dropdown.find( '.select-grid tr' );
 			} else {
 				selected_rows = dropdown.find( '.unselect-grid tr' );
@@ -696,7 +689,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		}
 	},
 
-	checkMoveAllScenario: function( box, assert, callback ){
+	checkMoveAllScenario: function( box, assert, callback ) {
 		// open
 		var $this = this;
 		box.trigger( 'click' );
@@ -720,10 +713,10 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			$( checkboxes[7] ).trigger( 'click' );
 
 			//note selected ids
-			expected_ids.push( getRowId( $(checkboxes[1]) ) );
-			expected_ids.push( getRowId( $(checkboxes[3]) ) );
-			expected_ids.push( getRowId( $(checkboxes[6]) ) );
-			expected_ids.push( getRowId( $(checkboxes[7]) ) );
+			expected_ids.push( getRowId( $( checkboxes[1] ) ) );
+			expected_ids.push( getRowId( $( checkboxes[3] ) ) );
+			expected_ids.push( getRowId( $( checkboxes[6] ) ) );
+			expected_ids.push( getRowId( $( checkboxes[7] ) ) );
 
 			// click move button
 			dropdown.find( '.a-grid-right-arrow' ).trigger( 'click' );
@@ -732,7 +725,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			assert.ok( expectedInGrid( 'select_grid', dropdown, expected_ids ), 'all expected records are in selected grid' );
 
 			//click "move all" button to remove all selected records
-			dropdown.find('.select-grid-title-bar #clear_btn').trigger('click');
+			dropdown.find( '.select-grid-title-bar #clear_btn' ).trigger( 'click' );
 
 			TTPromise.wait( null, null, function() {
 				expected_ids = [];
@@ -742,15 +735,16 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				assert.ok( ( dropdown.find( '.select-grid tr' ).length == 1 ), 'correct number of selected rows ( zero )' ); // the 1 is sizetr
 				assert.ok( expectedInGrid( 'select_grid', dropdown, expected_ids ), 'zero records are in selected grid' );
 
-				dropdown.find('#select_grid_close_btn').click();
-				box.setValue([]);
+				dropdown.find( '#select_grid_close_btn' ).click();
+				box.setValue( [] );
 
 				if ( callback ) {
 					callback();
 				}
 
-			});
-		});
+			} );
+		} );
+
 		function getRowId( row ) {
 			if ( !row || !row.prop ) {
 				return false;
@@ -766,7 +760,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 
 		function expectedInGrid( target_grid_name, dropdown, expected_ids ) {
 			var selected_rows = null;
-			if ( target_grid_name == 'select_grid') {
+			if ( target_grid_name == 'select_grid' ) {
 				selected_rows = dropdown.find( '.select-grid tr' );
 			} else {
 				selected_rows = dropdown.find( '.unselect-grid tr' );

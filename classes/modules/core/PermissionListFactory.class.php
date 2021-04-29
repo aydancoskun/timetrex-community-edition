@@ -40,44 +40,44 @@
  */
 class PermissionListFactory extends PermissionFactory implements IteratorAggregate {
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 						WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PermissionListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -90,25 +90,25 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PermissionListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$pcf = new PermissionControlFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $pcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pcf->getTable() . ' as b
 					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
@@ -121,32 +121,32 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 	}
 
 	/**
-	 * @param string $company_id UUID
+	 * @param string $company_id            UUID
 	 * @param string $permission_control_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where                  Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order                  Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PermissionListFactory
 	 */
-	function getByCompanyIdAndPermissionControlId( $company_id, $permission_control_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndPermissionControlId( $company_id, $permission_control_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $permission_control_id == '') {
-			return FALSE;
+		if ( $permission_control_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'permission_control_id' => TTUUID::castUUID($permission_control_id),
-					);
+		$ph = [
+				'company_id'            => TTUUID::castUUID( $company_id ),
+				'permission_control_id' => TTUUID::castUUID( $permission_control_id ),
+		];
 
 		$pcf = new PermissionControlFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $pcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pcf->getTable() . ' as b
 					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND a.permission_control_id = ?
@@ -160,49 +160,49 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 	}
 
 	/**
-	 * @param string $company_id UUID
+	 * @param string $company_id            UUID
 	 * @param string $permission_control_id UUID
 	 * @param $section
 	 * @param $name
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where                  Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order                  Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PermissionListFactory
 	 */
-	function getByCompanyIdAndPermissionControlIdAndSectionAndName( $company_id, $permission_control_id, $section, $name, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndPermissionControlIdAndSectionAndName( $company_id, $permission_control_id, $section, $name, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $permission_control_id == '') {
-			return FALSE;
+		if ( $permission_control_id == '' ) {
+			return false;
 		}
 
-		if ( $section == '') {
-			return FALSE;
+		if ( $section == '' ) {
+			return false;
 		}
 
-		if ( $name == '') {
-			return FALSE;
+		if ( $name == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'permission_control_id' => TTUUID::castUUID($permission_control_id),
-					'section' => $section,
-					//'name' => $name, //Allow a list of names.
-					);
+		$ph = [
+				'company_id'            => TTUUID::castUUID( $company_id ),
+				'permission_control_id' => TTUUID::castUUID( $permission_control_id ),
+				'section'               => $section,
+				//'name' => $name, //Allow a list of names.
+		];
 
 		$pcf = new PermissionControlFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $pcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pcf->getTable() . ' as b
 					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND a.permission_control_id = ?
 						AND a.section = ?
-						AND a.name in ('. $this->getListSQL($name, $ph) .')
+						AND a.name in (' . $this->getListSQL( $name, $ph ) . ')
 						AND ( a.deleted = 0 AND b.deleted = 0)';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -213,52 +213,52 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 	}
 
 	/**
-	 * @param string $company_id UUID
+	 * @param string $company_id            UUID
 	 * @param string $permission_control_id UUID
 	 * @param $section
 	 * @param $name
 	 * @param $value
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where                  Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order                  Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PermissionListFactory
 	 */
-	function getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_id, $permission_control_id, $section, $name, $value, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $company_id, $permission_control_id, $section, $name, $value, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $permission_control_id == '') {
-			return FALSE;
+		if ( $permission_control_id == '' ) {
+			return false;
 		}
 
-		if ( $section == '') {
-			return FALSE;
+		if ( $section == '' ) {
+			return false;
 		}
 
-		if ( $name == '') {
-			return FALSE;
+		if ( $name == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'permission_control_id' => TTUUID::castUUID($permission_control_id),
-					'section' => $section,
-					'value' => (int)$value,
-					//'name' => $name, //Allow a list of names.
-					);
+		$ph = [
+				'company_id'            => TTUUID::castUUID( $company_id ),
+				'permission_control_id' => TTUUID::castUUID( $permission_control_id ),
+				'section'               => $section,
+				'value'                 => (int)$value,
+				//'name' => $name, //Allow a list of names.
+		];
 
 		$pcf = new PermissionControlFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $pcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pcf->getTable() . ' as b
 					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND a.permission_control_id = ?
 						AND a.section = ?
 						AND a.value = ?
-						AND a.name in ('. $this->getListSQL($name, $ph) .')
+						AND a.name in (' . $this->getListSQL( $name, $ph ) . ')
 						AND ( a.deleted = 0 AND b.deleted = 0)';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -271,54 +271,54 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 	/**
 	 * @param string $company_id UUID
 	 * @param $section
-	 * @param int $date EPOCH
+	 * @param int $date          EPOCH
 	 * @param array $valid_ids
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PermissionListFactory
 	 */
-	function getByCompanyIdAndSectionAndDateAndValidIDs( $company_id, $section, $date = NULL, $valid_ids = array(), $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndSectionAndDateAndValidIDs( $company_id, $section, $date = null, $valid_ids = [], $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $section == '') {
-			return FALSE;
+		if ( $section == '' ) {
+			return false;
 		}
 
-		if ( $date == '') {
+		if ( $date == '' ) {
 			$date = 0;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$pcf = new PermissionControlFactory();
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $pcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pcf->getTable() . ' as b
 					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND (
 								(
-								a.section in ('. $this->getListSQL($section, $ph) .') ';
+								a.section in (' . $this->getListSQL( $section, $ph ) . ') ';
 
 		//When the Mobile App/TimeClock are doing a reload database, $date should always be 0. That forces the query to just send data for $valid_user_ids.
 		//  All other cases it will send data for all current users always, or records that were recently created/updated.
-		if ( isset($date) AND $date > 0 ) {
+		if ( isset( $date ) && $date > 0 ) {
 			//Append the same date twice for created and updated.
 			$ph[] = (int)$date;
 			$ph[] = (int)$date;
-			$query	.=	'		AND ( a.created_date >= ? OR a.updated_date >= ? ) ) ';
+			$query .= '		AND ( a.created_date >= ? OR a.updated_date >= ? ) ) ';
 		} else {
-			$query	.=	' ) ';
+			$query .= ' ) ';
 		}
 
-		if ( isset($valid_ids) AND is_array($valid_ids) AND count($valid_ids) > 0 ) {
-			$query	.=	' OR a.id in ('. $this->getListSQL( $valid_ids, $ph, 'uuid') .') ';
+		if ( isset( $valid_ids ) && is_array( $valid_ids ) && count( $valid_ids ) > 0 ) {
+			$query .= ' OR a.id in (' . $this->getListSQL( $valid_ids, $ph, 'uuid' ) . ') ';
 		}
 
 		$query .= '	)
@@ -333,22 +333,22 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $user_id UUID
+	 * @param string $user_id    UUID
 	 * @return bool|PermissionListFactory
 	 */
-	function getAllPermissionsByCompanyIdAndUserId( $company_id, $user_id) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getAllPermissionsByCompanyIdAndUserId( $company_id, $user_id ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $user_id == '') {
-			return FALSE;
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'user_id' => TTUUID::castUUID($user_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'user_id'    => TTUUID::castUUID( $user_id ),
+		];
 
 		$pcf = new PermissionControlFactory();
 		$puf = new PermissionUserFactory();
@@ -358,10 +358,10 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query = '
 					SELECT	a.*,
 							b.level as level
-					FROM	'. $this->getTable() .' as a,
-							'. $pcf->getTable() .' as b,
-							'. $puf->getTable() .' as c,
-							'. $uf->getTable() .' as uf
+					FROM	' . $this->getTable() . ' as a,
+							' . $pcf->getTable() . ' as b,
+							' . $puf->getTable() . ' as c,
+							' . $uf->getTable() . ' as uf
 					WHERE 
 						uf.company_id = ?
 						AND	uf.id = ?
@@ -372,6 +372,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 				';
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
+
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
@@ -379,34 +380,34 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 
 	/**
 	 * @param string $company_id UUID
-	 * @param int $date EPOCH
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param int $date          EPOCH
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool
 	 */
-	function getIsModifiedByCompanyIdAndDate( $company_id, $date, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getIsModifiedByCompanyIdAndDate( $company_id, $date, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $date == '') {
-			return FALSE;
+		if ( $date == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'created_date' => $date,
-					'updated_date' => $date,
-					'deleted_date' => $date,
-					);
+		$ph = [
+				'company_id'   => TTUUID::castUUID( $company_id ),
+				'created_date' => $date,
+				'updated_date' => $date,
+				'deleted_date' => $date,
+		];
 
 		$pcf = new PermissionControlFactory();
 
 		//INCLUDE Deleted rows in this query.
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $pcf->getTable() .' as b
+					from	' . $this->getTable() . ' as a,
+							' . $pcf->getTable() . ' as b
 					where
 							b.company_id = ?
 						AND
@@ -415,14 +416,16 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->db->SelectLimit($query, 1, -1, $ph);
+		$this->rs = $this->db->SelectLimit( $query, 1, -1, $ph );
 		if ( $this->getRecordCount() > 0 ) {
-			Debug::text('Rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Rows have been modified: ' . $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
-			return TRUE;
+			return true;
 		}
-		Debug::text('Rows have NOT been modified', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::text( 'Rows have NOT been modified', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 }
+
 ?>

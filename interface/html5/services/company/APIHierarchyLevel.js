@@ -45,7 +45,6 @@ var APIHierarchyLevel = ServiceCaller.extend( {
 
 	},
 
-
 	getHierarchyLevelOptions: function() {
 
 		return this.argumentsHandler( this.className, 'getHierarchyLevelOptions', arguments );
@@ -57,7 +56,5 @@ var APIHierarchyLevel = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'ReMapHierarchyLevels', arguments );
 
 	}
-
-
 
 } );

@@ -46,7 +46,7 @@ class InstallSchema_1107A extends InstallSchema_Base {
 	function preInstall() {
 		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -60,7 +60,7 @@ class InstallSchema_1107A extends InstallSchema_Base {
 
 		$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->StartTransaction();
-		$clf->getAll( NULL, NULL, NULL, array('created_date' => 'asc') );
+		$clf->getAll( null, null, null, [ 'created_date' => 'asc' ] );
 		Debug::Text( 'Get all companies. Found: ' . $clf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach ( $clf as $cf ) {
@@ -68,16 +68,15 @@ class InstallSchema_1107A extends InstallSchema_Base {
 
 				//Make sure system -> login permissions are allowed.
 				$pclf = TTnew( 'PermissionControlListFactory' ); /** @var PermissionControlListFactory $pclf */
-				$pclf->getByCompanyId( $cf->getId(), NULL, NULL, NULL, array('name' => 'asc') ); //Force order to prevent references to columns that haven't been created yet.
+				$pclf->getByCompanyId( $cf->getId(), null, null, null, [ 'name' => 'asc' ] ); //Force order to prevent references to columns that haven't been created yet.
 				if ( $pclf->getRecordCount() > 0 ) {
 					foreach ( $pclf as $pc_obj ) {
-						$plf = TTnew( 'PermissionListFactory' );
-						/** @var PermissionListFactory $plf */
+						$plf = TTnew( 'PermissionListFactory' ); /** @var PermissionListFactory $plf */
 						$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $cf->getId(), $pc_obj->getId(), 'system', 'login', 1 ); //Only return records where permission is ALLOWED.
 						if ( $plf->getRecordCount() == 0 ) {
 							Debug::text( '  Permission Group: ' . $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9 );
 							Debug::text( '    Found permission group WITHOUT system -> login allowed, add enabled: ' . $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9 );
-							$pc_obj->setPermission( array('system' => array('login' => TRUE)) );
+							$pc_obj->setPermission( [ 'system' => [ 'login' => true ] ] );
 						}
 					}
 				}
@@ -88,7 +87,8 @@ class InstallSchema_1107A extends InstallSchema_Base {
 		$clf->CommitTransaction();
 		unset( $clf );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

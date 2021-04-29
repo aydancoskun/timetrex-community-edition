@@ -35,7 +35,6 @@
  ********************************************************************************/
 
 
-
 /**
  * @package Modules\Import
  */
@@ -43,41 +42,41 @@ class ImportAccrual extends Import {
 
 	public $class_name = 'APIAccrual';
 
-	public $accrual_policy_account_options = FALSE;
+	public $accrual_policy_account_options = false;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|bool|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'columns':
-				$apf = TTNew('AccrualFactory'); /** @var AccrualFactory $apf */
-				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('accrual_policy_account', 'type', 'amount', 'date_stamp'), Misc::trimSortPrefix( $apf->getOptions('columns') ) ) );
+				$apf = TTNew( 'AccrualFactory' ); /** @var AccrualFactory $apf */
+				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( [ 'accrual_policy_account', 'type', 'amount', 'date_stamp' ], Misc::trimSortPrefix( $apf->getOptions( 'columns' ) ) ) );
 
 				break;
 			case 'column_aliases':
 				//Used for converting column names after they have been parsed.
-				$retval = array(
-								'type' => 'type_id',
-								'accrual_policy_account' => 'accrual_policy_account_id',
-								);
+				$retval = [
+						'type'                   => 'type_id',
+						'accrual_policy_account' => 'accrual_policy_account_id',
+				];
 				break;
 			case 'import_options':
-				$retval = array(
-								'-1010-fuzzy_match' => TTi18n::getText('Enable smart matching.'),
-								);
+				$retval = [
+						'-1010-fuzzy_match' => TTi18n::getText( 'Enable smart matching.' ),
+				];
 				break;
 			case 'parse_hint':
-				$upf = TTnew('UserPreferenceFactory'); /** @var UserPreferenceFactory $upf */
+				$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 
-				$retval = array(
-								'date_stamp' => $upf->getOptions('date_format'),
-								'amount' => $upf->getOptions('time_unit_format'),
-								);
+				$retval = [
+						'date_stamp' => $upf->getOptions( 'date_format' ),
+						'amount'     => $upf->getOptions( 'time_unit_format' ),
+				];
 				break;
 		}
 
@@ -103,11 +102,11 @@ class ImportAccrual extends Import {
 	 */
 	function _postParseRow( $row_number, $raw_row ) {
 		$raw_row['user_id'] = $this->getUserIdByRowData( $raw_row );
-		if ( $raw_row['user_id'] == FALSE ) {
-			unset($raw_row['user_id']);
+		if ( $raw_row['user_id'] == false ) {
+			unset( $raw_row['user_id'] );
 		}
 
-		if ( isset($raw_row['date_stamp']) ) {
+		if ( isset( $raw_row['date_stamp'] ) ) {
 			$raw_row['time_stamp'] = $raw_row['date_stamp']; //AcrualFactory wants time_stamp column not date_stamp, so convert that here.
 		}
 
@@ -131,12 +130,12 @@ class ImportAccrual extends Import {
 	 */
 	function getAccrualPolicyAccountOptions() {
 		//Get accrual policies
-		$aplf = TTNew('AccrualPolicyAccountListFactory'); /** @var AccrualPolicyAccountListFactory $aplf */
+		$aplf = TTNew( 'AccrualPolicyAccountListFactory' ); /** @var AccrualPolicyAccountListFactory $aplf */
 		$aplf->getByCompanyId( $this->company_id );
-		$this->accrual_policy_account_options = (array)$aplf->getArrayByListFactory( $aplf, FALSE );
-		unset($aplf);
+		$this->accrual_policy_account_options = (array)$aplf->getArrayByListFactory( $aplf, false );
+		unset( $aplf );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -145,8 +144,8 @@ class ImportAccrual extends Import {
 	 * @param null $parse_hint
 	 * @return array|bool|int|mixed
 	 */
-	function parse_accrual_policy_account( $input, $default_value = NULL, $parse_hint = NULL ) {
-		if ( trim($input) == '' ) {
+	function parse_accrual_policy_account( $input, $default_value = null, $parse_hint = null ) {
+		if ( trim( $input ) == '' ) {
 			return TTUUID::getZeroID(); //Default Wage Group
 		}
 
@@ -155,7 +154,7 @@ class ImportAccrual extends Import {
 		}
 
 		$retval = $this->findClosestMatch( $input, $this->accrual_policy_account_options );
-		if ( $retval === FALSE ) {
+		if ( $retval === false ) {
 			$retval = -1; //Make sure this fails.
 		}
 
@@ -168,7 +167,7 @@ class ImportAccrual extends Import {
 	 * @param null $parse_hint
 	 * @return false|int
 	 */
-	function parse_date_stamp( $input, $default_value = NULL, $parse_hint = NULL ) {
+	function parse_date_stamp( $input, $default_value = null, $parse_hint = null ) {
 		return $this->parse_date( $input, $default_value, $parse_hint );
 	}
 
@@ -178,17 +177,17 @@ class ImportAccrual extends Import {
 	 * @param null $parse_hint
 	 * @return array|bool|mixed
 	 */
-	function parse_type( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$af = TTnew('AccrualFactory'); /** @var AccrualFactory $af */
+	function parse_type( $input, $default_value = null, $parse_hint = null ) {
+		$af = TTnew( 'AccrualFactory' ); /** @var AccrualFactory $af */
 		$options = $af->getOptions( 'user_type' );
 
-		if ( isset($options[$input]) ) {
+		if ( isset( $options[$input] ) ) {
 			return $input;
 		} else {
-			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
+			if ( $this->getImportOptions( 'fuzzy_match' ) == true ) {
 				return $this->findClosestMatch( $input, $options, 50 );
 			} else {
-				return array_search( strtolower($input), array_map('strtolower', $options) );
+				return array_search( strtolower( $input ), array_map( 'strtolower', $options ) );
 			}
 		}
 	}
@@ -200,14 +199,15 @@ class ImportAccrual extends Import {
 	 * @param null $raw_row
 	 * @return bool|float|int|number|string
 	 */
-	function parse_amount( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
+	function parse_amount( $input, $default_value = null, $parse_hint = null, $raw_row = null ) {
 		$val = new Validator();
 
 		TTDate::setTimeUnitFormat( $parse_hint );
 
-		$retval = TTDate::parseTimeUnit( $val->stripNonTimeUnit($input) );
+		$retval = TTDate::parseTimeUnit( $val->stripNonTimeUnit( $input ) );
 
 		return $retval;
 	}
 }
+
 ?>

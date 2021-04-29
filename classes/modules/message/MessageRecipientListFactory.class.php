@@ -41,44 +41,44 @@
 class MessageRecipientListFactory extends MessageRecipientFactory implements IteratorAggregate {
 
 	/**
-	 * @param int $limit Limit the number of records returned
-	 * @param int $page Page number of records to return for pagination
+	 * @param int $limit   Limit the number of records returned
+	 * @param int $page    Page number of records to return for pagination
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return $this
 	 */
-	function getAll( $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAll( $limit = null, $page = null, $where = null, $order = null ) {
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->rs = $this->ExecuteSQL( $query, NULL, $limit, $page );
+		$this->rs = $this->ExecuteSQL( $query, null, $limit, $page );
 
 		return $this;
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $id   UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|MessageRecipientListFactory
 	 */
-	function getById( $id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
+	function getById( $id, $where = null, $order = null ) {
+		if ( $id == '' ) {
+			return false;
 		}
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
 
 		$query = '
 					select	*
-					from	'. $this->getTable() .'
+					from	' . $this->getTable() . '
 					where	id = ?
 					AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -91,25 +91,25 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 
 	/**
 	 * @param string $company_id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|MessageRecipientListFactory
 	 */
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyId( $company_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+		];
 
 		$query = '
 					SELECT a.*
-					FROM '. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
+					FROM ' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as b ON a.user_id = b.id
 					WHERE
 							b.company_id = ?
 							AND ( a.deleted = 0 AND b.deleted = 0 )
@@ -121,40 +121,40 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $user_id UUID
-	 * @param string $id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param string $user_id    UUID
+	 * @param string $id         UUID
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|MessageRecipientListFactory
 	 */
-	function getByCompanyIdAndUserIdAndId( $company_id, $user_id, $id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndUserIdAndId( $company_id, $user_id, $id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $user_id == '') {
-			return FALSE;
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $id == '') {
-			return FALSE;
+		if ( $id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'user_id' => TTUUID::castUUID($user_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'user_id'    => TTUUID::castUUID( $user_id ),
+		];
 
 		$query = '
 					SELECT a.*
-					FROM '. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
+					FROM ' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as b ON a.user_id = b.id
 					WHERE
 							b.company_id = ?
 							AND a.user_id = ?
-							AND a.id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
+							AND a.id in (' . $this->getListSQL( $id, $ph, 'uuid' ) . ')
 							AND a.deleted = 0
 					';
 		$this->rs = $this->ExecuteSQL( $query, $ph );
@@ -164,40 +164,40 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $user_id UUID
-	 * @param string $id UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param string $user_id    UUID
+	 * @param string $id         UUID
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|MessageRecipientListFactory
 	 */
-	function getByCompanyIdAndUserIdAndMessageSenderId( $company_id, $user_id, $id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndUserIdAndMessageSenderId( $company_id, $user_id, $id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $user_id == '') {
-			return FALSE;
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $id == '') {
-			return FALSE;
+		if ( $id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'user_id' => TTUUID::castUUID($user_id),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'user_id'    => TTUUID::castUUID( $user_id ),
+		];
 
 		$query = '
 					SELECT a.*
-					FROM '. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
+					FROM ' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as b ON a.user_id = b.id
 					WHERE
 							b.company_id = ?
 							AND a.user_id = ?
-							AND a.message_sender_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
+							AND a.message_sender_id in (' . $this->getListSQL( $id, $ph, 'uuid' ) . ')
 							AND a.deleted = 0
 					';
 		$this->rs = $this->ExecuteSQL( $query, $ph );
@@ -207,47 +207,47 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $user_id UUID
-	 * @param string $id UUID
+	 * @param string $user_id    UUID
+	 * @param string $id         UUID
 	 * @param int $status_id
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|MessageRecipientListFactory
 	 */
-	function getByCompanyIdAndUserIdAndMessageSenderIdAndStatus( $company_id, $user_id, $id, $status_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
+	function getByCompanyIdAndUserIdAndMessageSenderIdAndStatus( $company_id, $user_id, $id, $status_id, $where = null, $order = null ) {
+		if ( $company_id == '' ) {
+			return false;
 		}
 
-		if ( $user_id == '') {
-			return FALSE;
+		if ( $user_id == '' ) {
+			return false;
 		}
 
-		if ( $id == '') {
-			return FALSE;
+		if ( $id == '' ) {
+			return false;
 		}
 
-		if ( $status_id == '') {
-			return FALSE;
+		if ( $status_id == '' ) {
+			return false;
 		}
 
 		$uf = new UserFactory();
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($company_id),
-					'user_id' => TTUUID::castUUID($user_id),
-					'status_id' => (int)$status_id,
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $company_id ),
+				'user_id'    => TTUUID::castUUID( $user_id ),
+				'status_id'  => (int)$status_id,
+		];
 
 		$query = '
 					SELECT a.*
-					FROM '. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
+					FROM ' . $this->getTable() . ' as a
+						LEFT JOIN ' . $uf->getTable() . ' as b ON a.user_id = b.id
 					WHERE
 							b.company_id = ?
 							AND a.user_id = ?
 							AND a.status_id = ?
-							AND a.message_sender_id in ('. $this->getListSQL( $id, $ph, 'uuid' ) .')
+							AND a.message_sender_id in (' . $this->getListSQL( $id, $ph, 'uuid' ) . ')
 							AND a.deleted = 0
 					';
 		$this->rs = $this->ExecuteSQL( $query, $ph );
@@ -256,4 +256,5 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 	}
 
 }
+
 ?>

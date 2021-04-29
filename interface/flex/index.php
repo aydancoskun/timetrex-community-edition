@@ -34,12 +34,12 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('../../includes/global.inc.php');
-$form_vars = FormVariables::GetVariables( array('desktop') );
-if ( array_key_exists( 'desktop', $form_vars ) AND $form_vars['desktop'] != 1 ) { //isset() won't work here as 'desktop' key can be NULL
-	unset($form_vars['desktop']);
+require_once( '../../includes/global.inc.php' );
+$form_vars = FormVariables::GetVariables( [ 'desktop' ] );
+if ( array_key_exists( 'desktop', $form_vars ) && $form_vars['desktop'] != 1 ) { //isset() won't work here as 'desktop' key can be NULL
+	unset( $form_vars['desktop'] );
 }
 
-header('HTTP/1.1 301 Moved Permanently');
-Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL().'html5/') );
+header( 'HTTP/1.1 301 Moved Permanently' );
+Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL() . 'html5/' ) );
 ?>

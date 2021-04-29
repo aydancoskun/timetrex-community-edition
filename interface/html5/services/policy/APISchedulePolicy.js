@@ -61,6 +61,4 @@ var APISchedulePolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportSchedulePolicy', arguments );
 	}
 
-
-
 } );

@@ -39,36 +39,36 @@
  * This file should run once a day.
  *
  */
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-$offset = 86400*60; //60 days
+$offset = 86400 * 60; //60 days
 
 $hplf = new HolidayPolicyListFactory();
 
 //Get all holiday policies
-$hplf->getAll(NULL, NULL, NULL );
+$hplf->getAll( null, null, null );
 
 $epoch = time();
 
-foreach ($hplf as $hp_obj) {
+foreach ( $hplf as $hp_obj ) {
 	//Get all recurring holidays
 	$recurring_holiday_ids = $hp_obj->getRecurringHoliday();
 
-	if ( is_array($recurring_holiday_ids) AND count($recurring_holiday_ids) > 0 ) {
-		Debug::Text('Found Recurring Holidays...', __FILE__, __LINE__, __METHOD__,10);
-		foreach( $recurring_holiday_ids as $recurring_holiday_id) {
+	if ( is_array( $recurring_holiday_ids ) && count( $recurring_holiday_ids ) > 0 ) {
+		Debug::Text( 'Found Recurring Holidays...', __FILE__, __LINE__, __METHOD__, 10 );
+		foreach ( $recurring_holiday_ids as $recurring_holiday_id ) {
 			$rhlf = new RecurringHolidayListFactory();
 			$rhlf->getById( $recurring_holiday_id );
 			if ( $rhlf->getRecordCount() == 1 ) {
 				$rh_obj = $rhlf->getCurrent();
-				Debug::Text('Found Recurring Holiday: '. $rh_obj->getName(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text( 'Found Recurring Holiday: ' . $rh_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 
 				$next_holiday_date = $rh_obj->getNextDate( $epoch );
-				Debug::Text('Next Holiday Date: '. TTDate::getDate('DATE+TIME', $next_holiday_date), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text( 'Next Holiday Date: ' . TTDate::getDate( 'DATE+TIME', $next_holiday_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				if ( $next_holiday_date <= ($epoch + $offset) ) {
-					Debug::Text('Next Holiday Date is within Time Period (offset) adding...', __FILE__, __LINE__, __METHOD__,10);
+				if ( $next_holiday_date <= ( $epoch + $offset ) ) {
+					Debug::Text( 'Next Holiday Date is within Time Period (offset) adding...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$hf = new HolidayFactory();
 					$hf->setHolidayPolicyId( $hp_obj->getId() );
@@ -79,12 +79,11 @@ foreach ($hplf as $hp_obj) {
 						$hf->Save();
 					}
 				} else {
-					Debug::Text('Next Holiday Date is NOT within Time Period (offset)!', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text( 'Next Holiday Date is NOT within Time Period (offset)!', __FILE__, __LINE__, __METHOD__, 10 );
 				}
 			}
 		}
 	}
-
 	/*
 	$end_date = NULL;
 

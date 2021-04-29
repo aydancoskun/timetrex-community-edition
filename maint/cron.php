@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUndefinedVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
  * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
@@ -39,15 +39,15 @@
  * Run this script every minute from the real cron.
  *
  */
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == TRUE ) {
+if ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == true ) {
 	Debug::text( 'CRON: Installer is enabled, skipping cron jobs for now...', __FILE__, __LINE__, __METHOD__, 0 );
-} elseif ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == TRUE ) {
+} else if ( isset( $config_vars['other']['down_for_maintenance'] ) && $config_vars['other']['down_for_maintenance'] == true ) {
 	Debug::text( 'CRON: System is down for maintenance, skipping cron jobs for now...', __FILE__, __LINE__, __METHOD__, 0 );
 } else {
-	if ( isset($config_vars['path']['php_cli']) AND $config_vars['path']['php_cli'] != '' ) {
+	if ( isset( $config_vars['path']['php_cli'] ) && $config_vars['path']['php_cli'] != '' ) {
 		//$current_epoch = strtotime('28-Mar-08 1:30 PM');
 		$current_epoch = TTDate::getTime();
 
@@ -65,7 +65,7 @@ if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']
 				if ( $cjlf->getRecordCount() > 0 ) {
 					foreach ( $cjlf as $cjf_obj ) {
 						//Debug::text('Checking if Job ID: '. $job_id .' is scheduled to run...', __FILE__, __LINE__, __METHOD__, 0);
-						if ( $cjf_obj->isScheduledToRun( $current_epoch ) == TRUE ) {
+						if ( $cjf_obj->isScheduledToRun( $current_epoch ) == true ) {
 							$executed_jobs++;
 							$cjf_obj->Execute( $config_vars['path']['php_cli'], dirname( __FILE__ ) );
 						}

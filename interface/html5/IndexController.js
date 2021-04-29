@@ -23,8 +23,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 		//error: Uncaught ReferenceError: XXXXViewController is not defined ininterface/html5/#!m=TimeSheet line 3
 		// Happens when quickly click on context menu and network is slow.
 		if ( window[view_id + 'ViewController'] &&
-				LocalCacheData.current_open_primary_controller &&
-				LocalCacheData.current_open_primary_controller.viewId === view_id ) {
+			LocalCacheData.current_open_primary_controller &&
+			LocalCacheData.current_open_primary_controller.viewId === view_id ) {
 			LocalCacheData.current_open_primary_controller.setSelectLayout();
 			LocalCacheData.current_open_primary_controller.search();
 		}
@@ -88,7 +88,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		if ( LocalCacheData.all_url_args.sm === 'ResetPassword' && LocalCacheData.all_url_args.key ) {
 			IndexViewController.openWizard( 'ResetForgotPasswordWizard', null, function() {
-				delete LocalCacheData.all_url_args.sm, LocalCacheData.all_url_args.key;
+				delete LocalCacheData.all_url_args.sm;
+				delete LocalCacheData.all_url_args.key;
 				TAlertManager.showAlert( $.i18n._( 'Password has been changed successfully, you may now login.' ) );
 				var new_url = Global.getBaseURL().split( '#' )[0];
 				Global.setURLToBrowser( new_url + '#!m=Login' );
@@ -127,12 +128,12 @@ var ApplicationRouter = Backbone.Router.extend( {
 								case 'MessageControl':
 									if ( args.t === 'message' ) {
 										if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-												(!checkIds()) ) {
+											( !checkIds() ) ) {
 											openEditView( edit_id, true );
 										}
 									} else if ( args.t === 'request' ) {
 										if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-												(LocalCacheData.current_open_primary_controller.current_select_message_control_data.id != edit_id) ) {
+											( LocalCacheData.current_open_primary_controller.current_select_message_control_data.id != edit_id ) ) {
 											openEditView( edit_id, true );
 										}
 									}
@@ -150,7 +151,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 					return;
 				} else {
 					if ( LocalCacheData.current_open_primary_controller.edit_view &&
-							LocalCacheData.current_open_primary_controller.current_edit_record ) {
+						LocalCacheData.current_open_primary_controller.current_edit_record ) {
 
 						if ( LocalCacheData.current_open_primary_controller.is_mass_editing ) {
 							return;
@@ -215,30 +216,30 @@ var ApplicationRouter = Backbone.Router.extend( {
 			}
 			switch ( view_id ) {
 				case 'JobApplication':
-					require(['autolinker/Autolinker.min', 'pdfjs-dist/build/pdf', 'pdfjs/compatibility', 'pdfjs/ui_utils', 'pdfjs/text_layer_builder'], function (autolinker) {
+					require( ['autolinker/Autolinker.min', 'pdfjs-dist/build/pdf', 'pdfjs/compatibility', 'pdfjs/ui_utils', 'pdfjs/text_layer_builder'], function( autolinker ) {
 						window.Autolinker = autolinker;
-						Global.loadViewSource(view_id, view_id + 'ViewController.js', function () {
+						Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
 							var permission_id = view_id;
-							if (PermissionManager.checkTopLevelPermission(permission_id)) {
-								BaseViewController.loadView(view_id);
+							if ( PermissionManager.checkTopLevelPermission( permission_id ) ) {
+								BaseViewController.loadView( view_id );
 							} else {
-								TAlertManager.showAlert('Permission denied', 'ERROR', function () {
-									if (LocalCacheData.getLoginUserPreference().default_login_screen) {
-										TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
+								TAlertManager.showAlert( 'Permission denied', 'ERROR', function() {
+									if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+										TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
 									} else {
-										TopMenuManager.goToView('Home');
+										TopMenuManager.goToView( 'Home' );
 									}
-								});
-								Debug.Text('Navigation permission denied. Permission: ' + permission_id, 'IndexController.js', 'IndexController', 'showRibbonMenuAndLoadView', 10);
+								} );
+								Debug.Text( 'Navigation permission denied. Permission: ' + permission_id, 'IndexController.js', 'IndexController', 'showRibbonMenuAndLoadView', 10 );
 							}
-						});
-					});
+						} );
+					} );
 					break;
 				default:
-					Global.loadViewSource(view_id, view_id + 'ViewController.js', function () {
+					Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
 						var permission_id = view_id;
 
-						switch (view_id) {
+						switch ( view_id ) {
 							case 'ClientGroup':
 								permission_id = 'Client';
 								break;
@@ -252,28 +253,28 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 						}
 
-						if (view_id === 'Login' || view_id === 'Home' || PermissionManager.checkTopLevelPermission(permission_id)) {
-							BaseViewController.loadView(view_id);
+						if ( view_id === 'Login' || view_id === 'Home' || PermissionManager.checkTopLevelPermission( permission_id ) ) {
+							BaseViewController.loadView( view_id );
 						} else {
-							if (LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView') {
-								if (LocalCacheData.getLoginUserPreference().default_login_screen) {
-									TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
+							if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView' ) {
+								if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+									TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
 								} else {
-									TopMenuManager.goToView('Home');
+									TopMenuManager.goToView( 'Home' );
 								}
 							} else {
-								TAlertManager.showAlert('Permission denied', 'ERROR', function () {
-									if (LocalCacheData.getLoginUserPreference().default_login_screen) {
-										TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
+								TAlertManager.showAlert( 'Permission denied', 'ERROR', function() {
+									if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+										TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
 									} else {
-										TopMenuManager.goToView('Home');
+										TopMenuManager.goToView( 'Home' );
 									}
-								});
+								} );
 							}
-							Debug.Text('Navigation permission denied. Permission: ' + permission_id, 'IndexController.js', 'IndexController', 'showRibbonMenuAndLoadView', 10);
+							Debug.Text( 'Navigation permission denied. Permission: ' + permission_id, 'IndexController.js', 'IndexController', 'showRibbonMenuAndLoadView', 10 );
 						}
 
-					});
+					} );
 					break;
 			}
 
@@ -295,13 +296,13 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 			//Add feedback event
 			Global.bottomFeedbackLinkContainer().css( 'display', 'block' );
-			$('#feedback-link').off('click.feedback').on('click.feedback', function() {
-				$().TFeedback({
+			$( '#feedback-link' ).off( 'click.feedback' ).on( 'click.feedback', function() {
+				$().TFeedback( {
 					source: 'ManualTrigger',
 					manual_trigger: true,
 					prompt_for_feedback: true // regardless of server feedback state input, click should always allow feedback
-				});
-			});
+				} );
+			} );
 
 			$( '#copy_right_info_1' ).css( 'display', 'inline' );
 			$( '#copy_right_logo_link' ).attr( 'href', 'https://' + LocalCacheData.getLoginData().organization_url );
@@ -411,6 +412,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			internet_connection_available = false;
 			is_testing_internet_connection = false;
 		}
+
 		var img = new Image();
 		is_testing_internet_connection = true;
 		img.onload = function() {
@@ -426,7 +428,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 	//CompanyName - User name at top left
 	setLoginInformationLabelAndChat: function() {
-
 		//Add login informaiton
 		var current_company = LocalCacheData.getCurrentCompany();
 		var current_user = LocalCacheData.getLoginUser();
@@ -434,41 +435,37 @@ var ApplicationRouter = Backbone.Router.extend( {
 		var label_container = $( '<div class=\'login-information-div\'><span class=\'login-information\'></span></div>' );
 		label_container.children().eq( 0 ).text( label );
 		Global.topContainer().append( label_container );
+
 		this.testInternetConnection();
 
 		if ( ( APIGlobal.pre_login_data.demo_mode === false && Global.getProductEdition() >= 15 ) ) {
-			var permission_api = new (APIFactory.getAPIClass( 'APIPermissionControl' ))();
-			var filter = {};
-			filter.filter_data = {};
-			filter.filter_data.id = [LocalCacheData.getLoginUser().permission_control_id];
-			permission_api.getPermissionControl( filter, {
-				onResult: function( result ) {
-					var permission = result.getResult()[0];
-					//Error: TypeError: permission is undefined interface/html5/IndexController.js?v=9.0.4-20151123-153601 line 405
-					if ( permission && permission.level > 10 ) {
-						var chat = $( '<a href="javascript:void(0)" onclick="return openSupportChat()" class="tt-liveChat top-container-liveChat">Live Chat w/Support</a>' ); //Add chat
-						var check_connection_timer = setInterval( function() {
-							if ( !is_testing_internet_connection ) {
-								clearInterval( check_connection_timer );
-								if ( internet_connection_available && current_user ) {
-									require( ['live-chat'], function() {
-										Global.topContainer().append( chat );
-									} );
-								}
-							}
-						}, 500 );
-					}
-				}
-			} );
+			//Get permission level from already downloaded permissions, rather than making another API call to PermissionControl for that.
+			var permission = PermissionManager.getPermissionData();
+			if ( permission && permission['_system'] && permission['_system']['level'] ) {
 
+				var permission_level = permission['_system']['level'];
+				if ( permission_level > 40 ) { //40=Supervisor (Subordinates Only)
+					var chat = $( '<a href="javascript:void(0)" onclick="return openSupportChat()" class="tt-liveChat top-container-liveChat">Live Chat w/Support</a>' ); //Add chat
+					var check_connection_timer = setInterval( function() {
+						if ( !is_testing_internet_connection ) {
+							clearInterval( check_connection_timer );
+							if ( internet_connection_available && current_user ) {
+								require( ['live-chat'], function() {
+									Global.topContainer().append( chat );
+								} );
+							}
+						}
+					}, 500 );
+				}
+			}
 		}
 	},
 
 	setContentDivHeight: function() {
-		Global.contentContainer().css( 'height', (Global.bodyHeight() - Global.topContainer().height()) );
+		Global.contentContainer().css( 'height', ( Global.bodyHeight() - Global.topContainer().height() ) );
 
 		$( window ).resize( function() {
-			Global.contentContainer().css( 'height', (Global.bodyHeight() - Global.topContainer().height()) );
+			Global.contentContainer().css( 'height', ( Global.bodyHeight() - Global.topContainer().height() ) );
 		} );
 
 		Global.contentContainer().removeClass( 'content-container' );
@@ -607,7 +604,6 @@ IndexViewController.openWizard = function( wizardName, defaultData, callBack ) {
 	BaseWizardController.default_data = defaultData;
 	BaseWizardController.call_back = callBack;
 
-
 	switch ( wizardName ) {
 		default:
 			// track edit view only view
@@ -618,9 +614,7 @@ IndexViewController.openWizard = function( wizardName, defaultData, callBack ) {
 			break;
 	}
 
-
 };
-
 
 //ATTN: New wizards should go through this
 IndexViewController.openWizardController = function( wizardName, filter_data, source_view ) {
@@ -674,9 +668,9 @@ IndexViewController.openWizardController = function( wizardName, filter_data, so
 
 };
 
-IndexViewController.openReport = function (parent_view_controller, view_name, id, tab_name) {
-	Global.closeEditViews( function () {
-		if (LocalCacheData.current_open_report_controller) {
+IndexViewController.openReport = function( parent_view_controller, view_name, id, tab_name ) {
+	Global.closeEditViews( function() {
+		if ( LocalCacheData.current_open_report_controller ) {
 			LocalCacheData.current_open_report_controller.removeEditView();
 		}
 
@@ -686,49 +680,49 @@ IndexViewController.openReport = function (parent_view_controller, view_name, id
 			default:
 				var path = Global.getViewPathByViewId( view_name );
 				if ( path ) {
-					require([path + view_name + 'ViewController'], function () {
-						Debug.Text('R-LOADING: ' + view_name, 'IndexViewController.js', 'IndexViewController', 'openReport', 10);
+					require( [path + view_name + 'ViewController'], function() {
+						Debug.Text( 'R-LOADING: ' + view_name, 'IndexViewController.js', 'IndexViewController', 'openReport', 10 );
 						/* jshint ignore:start */
-						TTPromise.add('Reports', 'openReport');
-						$view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
+						TTPromise.add( 'Reports', 'openReport' );
+						$view_controller = eval( 'new ' + view_name + 'ViewController( {edit_only_mode: true} ); ' );
 						/* jshint ignore:end */
 
-						TTPromise.wait('Reports', 'openReport', function () {
-							doNext(view_name, tab_name);
-						});
+						TTPromise.wait( 'Reports', 'openReport', function() {
+							doNext( view_name, tab_name );
+						} );
 
-						function doNext(view_name, tab_name) {
+						function doNext( view_name, tab_name ) {
 							$view_controller.parent_view_controller = parent_view_controller;
 							$view_controller.openEditView();
 
 							var current_url = window.location.href;
-							if (current_url.indexOf('&sm') > 0) {
-								current_url = current_url.substring(0, current_url.indexOf('&sm'));
+							if ( current_url.indexOf( '&sm' ) > 0 ) {
+								current_url = current_url.substring( 0, current_url.indexOf( '&sm' ) );
 							}
 							current_url = current_url + '&sm=' + view_name;
 
-							if (LocalCacheData.default_edit_id_for_next_open_edit_view) {
+							if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
 								current_url = current_url + '&sid=' + LocalCacheData.default_edit_id_for_next_open_edit_view;
 							}
 
-							if (typeof tab_name != 'undefined') {
+							if ( typeof tab_name != 'undefined' ) {
 								LocalCacheData.current_open_report_controller.selected_tab = tab_name;
 								current_url += '&tab=' + tab_name;
-							} else if (window.location.href.indexOf('&tab=') > -1) {
+							} else if ( window.location.href.indexOf( '&tab=' ) > -1 ) {
 								var tab_name = window.location.href;
-								tab_name = tab_name.substr((window.location.href.indexOf('&tab=') + 5)); //get the selected tab name
-								tab_name = tab_name.substr(0, window.location.href.indexOf('&')); // incase there are subsequent arguments after the tab argument
+								tab_name = tab_name.substr( ( window.location.href.indexOf( '&tab=' ) + 5 ) ); //get the selected tab name
+								tab_name = tab_name.substr( 0, window.location.href.indexOf( '&' ) ); // incase there are subsequent arguments after the tab argument
 								current_url += '&tab=' + tab_name;
 							}
 
-							Global.setURLToBrowser(current_url);
+							Global.setURLToBrowser( current_url );
 
 						}
 
-					});
+					} );
 					break;
 				} else {
-					console.debug('Report View does not exist! View Name: ' + view_name);
+					console.debug( 'Report View does not exist! View Name: ' + view_name );
 					if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
 						Global.setURLToBrowser( ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url );
 					}
@@ -757,10 +751,10 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 	function doNext() {
 		var view_controller = null;
 
-		if ( !PermissionManager.checkTopLevelPermission(view_name) && view_name !== 'Map' ) {
-			if (LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView') {
-				if (LocalCacheData.getLoginUserPreference().default_login_screen) {
-					TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
+		if ( !PermissionManager.checkTopLevelPermission( view_name ) && view_name !== 'Map' ) {
+			if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView' ) {
+				if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+					TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
 				} else {
 					TopMenuManager.goToView( 'Home' );
 				}
@@ -781,7 +775,7 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 			action_function = 'openAddView';
 		}
 
-		if ( !action_function )  {
+		if ( !action_function ) {
 			action_function = 'openEditView';
 		}
 
@@ -796,7 +790,7 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 		// track edit view only view
 		Global.trackView( view_name );
 
-		Global.loadViewSource( view_name, view_name + 'ViewController.js', function () {
+		Global.loadViewSource( view_name, view_name + 'ViewController.js', function() {
 			/* jshint ignore:start */
 			view_controller = eval( 'new ' + view_name + 'ViewController( {edit_only_mode: true} ); ' );
 			/* jshint ignore:end */
@@ -827,10 +821,10 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 
 IndexViewController.setNotificationBar = function( target ) {
 
-	var api = new (APIFactory.getAPIClass( 'APINotification' ))();
+	var api = new ( APIFactory.getAPIClass( 'APINotification' ) )();
 
 	//Error: TypeError: api.getNotification is not a function in /interface/html5/IndexController.js?v=8.0.0-20141117-095711 line 529
-	if ( !api || !api.getNotification || typeof(api.getNotification) !== 'function' ) {
+	if ( !api || !api.getNotification || typeof ( api.getNotification ) !== 'function' ) {
 		return;
 	}
 

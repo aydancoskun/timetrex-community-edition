@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.SeparatedBox = function( options ) {
 		var opts = $.extend( {}, $.fn.SeparatedBox.defaults, options );
@@ -57,4 +57,4 @@
 
 	$.fn.SeparatedBox.defaults = {};
 
-})( jQuery );
+} )( jQuery );

@@ -3,199 +3,223 @@
  */
 /*!*lg*!*/
 /*@media (min-width: 1200px) {*/
-    /*.quick_punch_container {*/
-        /*max-width: 700px;*/
-    /*}*/
+/*.quick_punch_container {*/
+/*max-width: 700px;*/
+/*}*/
 /*}*/
 /*!*md*!*/
 /*@media (min-width: 992px) {*/
-    /*.quick_punch_container {*/
-        /*max-width: 700px;*/
-    /*}*/
+/*.quick_punch_container {*/
+/*max-width: 700px;*/
+/*}*/
 /*}*/
 /*sm*/
 body {
-    min-height: 100%;
-    height: auto;
-    width: 100%;
-    position: absolute;
+	min-height: 100%;
+	height: auto;
+	width: 100%;
+	position: absolute;
 }
-@media (min-width: 768px){
-    .quick_punch_container {
-        max-width: 700px;
-    }
+
+@media (min-width: 768px) {
+	.quick_punch_container {
+		max-width: 700px;
+	}
 }
+
 .quick_punch_container {
-    max-width: 500px;
+	max-width: 500px;
 }
 
 .navbar-punch-login {
-    margin: 0 -15px 0 -15px;
-}
-.navbar-punch-login .company-logo img {
-    max-height: 40px; /* Not ideal, should just set nav header height, and let img take 100%. But original code is mix of flex and overrides. This is the neatest solution for now. */
-}
-.form-signin {
-    max-width: 330px;
-    padding: 15px;
-    margin: 0 auto;
-}
-.form-signin .form-control {
-    margin-bottom: 10px;
-}
-.form-signin .forgot-password {
-    cursor: pointer;
-}
-/*.content-container {*/
-    /*padding-bottom: 108px;*/
-/*}*/
-.footer {
-    /*min-height: 68px;*/
-    height: 68px;
-    width: 100%;
-    padding: 14px 0 14px;
-    background-color: #262626;
-    text-align: center;
-    padding-top: 24px;
-    margin-top: 40px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-}
-.footer .footer-menu a:hover {
-    text-decoration: none;
-    cursor: pointer;
-}
-.footer .footer-copyright {
-    color: #787878;
-    margin: 0;
-}
-.close-icon {
-    position: absolute;
-    top: 0px;
-    right: 8px;
-    cursor: pointer;
-}
-.error-tip {
-    border: 1px solid #D95252 !important;
+	margin: 0 -15px 0 -15px;
 }
 
-.tooltip .tooltip-inner{
-    background-color: red;
+.navbar-punch-login .company-logo img {
+	max-height: 40px; /* Not ideal, should just set nav header height, and let img take 100%. But original code is mix of flex and overrides. This is the neatest solution for now. */
 }
+
+.form-signin {
+	max-width: 330px;
+	padding: 15px;
+	margin: 0 auto;
+}
+
+.form-signin .form-control {
+	margin-bottom: 10px;
+}
+
+.form-signin .forgot-password {
+	cursor: pointer;
+}
+
+/*.content-container {*/
+/*padding-bottom: 108px;*/
+/*}*/
+.footer {
+	/*min-height: 68px;*/
+	height: 68px;
+	width: 100%;
+	padding: 14px 0 14px;
+	background-color: #262626;
+	text-align: center;
+	padding-top: 24px;
+	margin-top: 40px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+}
+
+.footer .footer-menu a:hover {
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.footer .footer-copyright {
+	color: #787878;
+	margin: 0;
+}
+
+.close-icon {
+	position: absolute;
+	top: 0px;
+	right: 8px;
+	cursor: pointer;
+}
+
+.error-tip {
+	border: 1px solid #d95252 !important;
+}
+
+.tooltip .tooltip-inner {
+	background-color: red;
+}
+
 .tooltip.top .tooltip-arrow {
-    /*border-left-color: red;*/
-    border-top-color: red;
-    /*border-bottom-color: red;*/
-    /*border-right-color: red;*/
+	/*border-left-color: red;*/
+	border-top-color: red;
+	/*border-bottom-color: red;*/
+	/*border-right-color: red;*/
 }
+
 .quick-punch-form-container {
-    max-width: 767px;
-    width: 100%;
-    margin: 0 auto;
+	max-width: 767px;
+	width: 100%;
+	margin: 0 auto;
 }
+
 #quick_punch_container label {
-    text-align: right; min-height: 22px; padding-bottom: 0;
-    color: #0a4a7e;
-    font-weight: 700;
+	text-align: right; min-height: 22px; padding-bottom: 0;
+	color: #0a4a7e;
+	font-weight: 700;
 }
 
 #quick_punch_container label.transfer {
-    color: #333;
-    font-weight: 100;
+	color: #333333;
+	font-weight: 100;
 }
+
 #quick_punch_container .input-panel {
-    text-align: left
+	text-align: left
 }
+
 #quick_punch_container .input-panel .checkbox div {
-    padding-left: 20px
+	padding-left: 20px
 }
+
 #quick_punch_container .input-panel .good-label {
-    min-height: 22px;line-height: 34px;padding: 0;margin-left: 15px; width: 30px;
+	min-height: 22px;line-height: 34px;padding: 0;margin-left: 15px; width: 30px;
 }
+
 #quick_punch_container .input-panel .bad-label {
-    min-height: 22px;line-height: 34px;margin: 0; width: 40px;
+	min-height: 22px;line-height: 34px;margin: 0; width: 40px;
 }
+
 #quick_punch_container input, #quick_punch_container textarea {
-    border-color: #c7e0f2;
-    background-color: #fff;
-    -webkit-border-radius: 0;
-    -moz-border-radius: 0;
-    border-radius: 0;
-    height: 34px;
+	border-color: #c7e0f2;
+	background-color: #ffffff;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+	height: 34px;
 }
 
 .punch-modal.in .modal-dialog {
-    -webkit-transform: translate(0,-50%);
-    -ms-transform: translate(0,-50%);
-    -o-transform: translate(0,-50%);
-    transform: translate(0,-50%);
-}
-.punch-modal .modal-dialog {
-    position:absolute;
-    left:0;
-    right:0;
-    top:50%
-}
-body {
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 14px;
-    line-height: 1.42857143;
-    color: #333;
-    background-color: #fff;
+	-webkit-transform: translate(0, -50%);
+	-ms-transform: translate(0, -50%);
+	-o-transform: translate(0, -50%);
+	transform: translate(0, -50%);
 }
 
-.row{
-    margin-top:10px;
+.punch-modal .modal-dialog {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%
 }
+
+body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.42857143;
+	color: #333333;
+	background-color: #ffffff;
+}
+
+.row {
+	margin-top: 10px;
+}
+
 .footer .row {
-    margin-top: 0; /* Negate the row margin for footer, as it stops vertical centering */
+	margin-top: 0; /* Negate the row margin for footer, as it stops vertical centering */
 }
+
 .navbar-default {
-    background-color: #f8f8f8;
-    border-color: #e7e7e7;
+	background-color: #f8f8f8;
+	border-color: #e7e7e7;
 }
 
 .navbar {
-    padding-top:5px;
-    padding-bottom: 5px;
-    position: relative;
-    height: 50px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    background-color: #f8f8f8;
-    border-color: #e7e7e7;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	position: relative;
+	height: 50px;
+	margin-bottom: 20px;
+	border: 1px solid transparent;
+	background-color: #f8f8f8;
+	border-color: #e7e7e7;
 }
 
 select.form-control:not([size]):not([multiple]) {
-    height: auto;
+	height: auto;
 }
 
 .btn-primary {
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    background: #426d9d;
-    color: #fff;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	background: #426d9d;
+	color: #ffffff;
 }
 
 .btn-danger {
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    background: #cd403c;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	background: #cd403c;
 }
 
 /* To hide the spinner up/down arrows on quickpunch login */
 /* For Firefox */
 .quick_punch_login_container input[type='number'] {
-    -moz-appearance:textfield;
+	-moz-appearance: textfield;
 }
+
 /* Webkit browsers like Safari and Chrome */
 .quick_punch_login_container input[type=number]::-webkit-inner-spin-button,
 .quick_punch_login_container input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+	-webkit-appearance: none;
+	margin: 0;
 }
 
 /* Sets the input field of type number for quick punch password to disc characters to obscure the password.
@@ -203,5 +227,5 @@ select.form-control:not([size]):not([multiple]) {
  * Works together with QuickPunchLoginViewController.checkForWebkitTextSecuritySupport() to be replaced with a type="password" element if not supported by browser.
  */
 .quick_punch_login_container input[type=number]#quick_punch_password {
-    -webkit-text-security: disc;
+	-webkit-text-security: disc;
 }

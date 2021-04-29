@@ -18,9 +18,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'exception_policy_control';
 		this.context_menu_name = $.i18n._( 'Exception Policy' );
 		this.navigation_label = $.i18n._( 'Exception Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIExceptionPolicyControl' ))();
-		this.api_exception_policy = new (APIFactory.getAPIClass( 'APIExceptionPolicy' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIExceptionPolicyControl' ) )();
+		this.api_exception_policy = new ( APIFactory.getAPIClass( 'APIExceptionPolicy' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -30,7 +30,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
@@ -59,7 +59,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIExceptionPolicyControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIExceptionPolicyControl' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HIERARCHY,
@@ -127,7 +127,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 	},
 
 	_continueDoCopyAsNew: function() {
-		this.setCurrentEditViewState('new');
+		this.setCurrentEditViewState( 'new' );
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
 			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
@@ -179,7 +179,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		if ( !exception_control_id ) {
 
 			this.api_exception_policy.getExceptionPolicyDefaultData( args, true, {
-				onResult: function ( res ) {
+				onResult: function( res ) {
 
 					if ( !$this.edit_view ) {
 						return;
@@ -196,7 +196,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 						data[key].id = '';
 						array_data.push( data[key] );
 					}
-					array_data = array_data.sort( function ( a, b ) {
+					array_data = array_data.sort( function( a, b ) {
 						return Global.compare( a, b, 'type_id' );
 					} );
 
@@ -210,7 +210,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			args.filter_data.exception_policy_control_id = exception_control_id;
 
 			this.api_exception_policy.getExceptionPolicyDefaultData( args, true, {
-				onResult: function ( res ) {
+				onResult: function( res ) {
 
 					if ( !$this.edit_view ) {
 						return;
@@ -229,7 +229,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 						array_data.push( data[key] );
 					}
 
-					array_data = array_data.sort( function ( a, b ) {
+					array_data = array_data.sort( function( a, b ) {
 						return Global.compare( a, b, 'type_id' );
 					} );
 
@@ -239,7 +239,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 					ep_filter.filter_data = { exception_policy_control_id: exception_control_id };
 
 					$this.api_exception_policy.getExceptionPolicy( ep_filter, true, {
-						onResult: function ( ep_res ) {
+						onResult: function( ep_res ) {
 
 							if ( !$this.edit_view ) {
 								return;
@@ -256,7 +256,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 								array_data.push( data[key] );
 							}
 
-							array_data = array_data.sort( function ( a, b ) {
+							array_data = array_data.sort( function( a, b ) {
 								return Global.compare( a, b, 'type_id' );
 							} );
 
@@ -351,7 +351,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		form_item_input.setValue( data.active );
 		widgets[form_item_input.getField()] = form_item_input;
 		row.children().eq( 0 ).append( form_item_input );
-		form_item_input.attr( 'exception_policy_id', (data.id && this.parent_controller.current_edit_record.id) ? data.id : '' );
+		form_item_input.attr( 'exception_policy_id', ( data.id && this.parent_controller.current_edit_record.id ) ? data.id : '' );
 		this.setWidgetEnableBaseOnParentController( form_item_input );
 
 		//Code
@@ -420,7 +420,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		if ( typeof index != 'undefined' ) {
 
 			row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
-			this.rows_widgets_array.splice( (index), 0, widgets );
+			this.rows_widgets_array.splice( ( index ), 0, widgets );
 
 		} else {
 			$( render ).append( row );
@@ -617,7 +617,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -629,7 +629,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -637,6 +637,5 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

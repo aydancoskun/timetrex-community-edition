@@ -63,6 +63,4 @@ var APIKPIReport = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

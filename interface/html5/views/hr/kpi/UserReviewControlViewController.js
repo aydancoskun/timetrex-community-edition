@@ -27,10 +27,10 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_review_control';
 		this.context_menu_name = $.i18n._( 'Reviews' );
 		this.navigation_label = $.i18n._( 'Review' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUserReviewControl' ))();
-		this.kpi_group_api = new (APIFactory.getAPIClass( 'APIKPIGroup' ))();
-		this.user_review_api = new (APIFactory.getAPIClass( 'APIUserReview' ))();
-		this.kpi_api = new (APIFactory.getAPIClass( 'APIKPI' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserReviewControl' ) )();
+		this.kpi_group_api = new ( APIFactory.getAPIClass( 'APIKPIGroup' ) )();
+		this.user_review_api = new ( APIFactory.getAPIClass( 'APIUserReview' ) )();
+		this.kpi_api = new ( APIFactory.getAPIClass( 'APIKPI' ) )();
 		this.document_object_type_id = 220;
 		this.render();
 
@@ -48,7 +48,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary( 'UserReviewControl' );
 
 	},
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
@@ -113,7 +113,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUserReviewControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUserReviewControl' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.KPI_REVIEW_CONTROL,
@@ -139,7 +139,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -156,7 +156,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		// Reviewer
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -424,7 +424,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -436,7 +436,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'reviewer_user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -529,7 +529,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'kpi_id',
 				layout_name: ALayoutIDs.KPI,
-				api_class: (APIFactory.getAPIClass( 'APIKPI' )),
+				api_class: ( APIFactory.getAPIClass( 'APIKPI' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -541,7 +541,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -553,7 +553,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1012,8 +1012,8 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 		this._super( 'onLeftArrowClick' );
 	},
-	searchDone: function(){
-		this._super('searchDone');
+	searchDone: function() {
+		this._super( 'searchDone' );
 		TTPromise.resolve( 'ReviewView', 'init' );
 	}
 

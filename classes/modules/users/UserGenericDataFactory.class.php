@@ -47,16 +47,17 @@ class UserGenericDataFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'user_id' => 'User',
-										'script' => 'Script',
-										'name' => 'Name',
-										'is_default' => 'Default',
-										'data' => 'Data',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'         => 'ID',
+				'company_id' => 'Company',
+				'user_id'    => 'User',
+				'script'     => 'Script',
+				'name'       => 'Name',
+				'is_default' => 'Default',
+				'data'       => 'Data',
+				'deleted'    => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -73,6 +74,7 @@ class UserGenericDataFactory extends Factory {
 	 */
 	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -89,6 +91,7 @@ class UserGenericDataFactory extends Factory {
 	 */
 	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -103,9 +106,10 @@ class UserGenericDataFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setScript( $value) {
+	function setScript( $value ) {
 		//Strip out double slashes, as sometimes those occur and they cause the saved settings to not appear.
-		$value = self::handleScriptName( trim($value) );
+		$value = self::handleScriptName( trim( $value ) );
+
 		return $this->setGenericDataValue( 'script', $value );
 	}
 
@@ -113,52 +117,52 @@ class UserGenericDataFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		if ( $this->getCompany() == FALSE ) {
-			return FALSE;
+	function isUniqueName( $name ) {
+		if ( $this->getCompany() == false ) {
+			return false;
 		}
 
 		//Allow no user_id to be set yet, as that would be company generic data.
 
-		if ( $this->getScript() == FALSE ) {
-			return FALSE;
+		if ( $this->getScript() == false ) {
+			return false;
 		}
 
-		$name = trim($name);
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'script' => $this->getScript(),
-					'name' => TTi18n::strtolower( $name ),
-					);
+		$ph = [
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'script'     => $this->getScript(),
+				'name'       => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->getTable() .'
+		$query = 'select id from ' . $this->getTable() . '
 					where
 						company_id = ?
 						AND script = ?
 						AND lower(name) = ? ';
-		if (  $this->getUser() != '' ) {
-			$query .= ' AND user_id = \''. TTUUID::castUUID($this->getUser()) .'\'';
+		if ( $this->getUser() != '' ) {
+			$query .= ' AND user_id = \'' . TTUUID::castUUID( $this->getUser() ) . '\'';
 		} else {
-			$query .= ' AND ( user_id = \''. TTUUID::getZeroID() .'\' OR user_id is NULL )';
+			$query .= ' AND ( user_id = \'' . TTUUID::getZeroID() . '\' OR user_id is NULL )';
 		}
 		$query .= ' AND deleted = 0';
 
-		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$name_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -174,6 +178,7 @@ class UserGenericDataFactory extends Factory {
 	 */
 	function setName( $value ) {
 		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -189,42 +194,43 @@ class UserGenericDataFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefault( $value ) {
-		return $this->setGenericDataValue( 'is_default', $this->toBool($value)  );
+		return $this->setGenericDataValue( 'is_default', $this->toBool( $value ) );
 	}
 
 	/**
 	 * @return bool|mixed
 	 */
 	function getData() {
-		$retval = json_decode( $this->getGenericDataValue( 'data' ), TRUE ); //If the data is corrupted, stop any PHP warning.
-		if ( $retval !== FALSE ) {
+		$retval = json_decode( $this->getGenericDataValue( 'data' ), true ); //If the data is corrupted, stop any PHP warning.
+		if ( $retval !== false ) {
 			return $retval;
 		}
 
-		Debug::Text('Failed to unserialize data: "'. $this->getGenericDataValue( 'data' ) .'"', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::Text( 'Failed to unserialize data: "' . $this->getGenericDataValue( 'data' ) . '"', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 
 	/**
 	 * @param $value
 	 * @return bool
 	 */
-	function setData( $value) {
-		$this->setGenericDataValue( 'data', json_encode($value) );
+	function setData( $value ) {
+		$this->setGenericDataValue( 'data', json_encode( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 
-		if ( $this->getDeleted() == FALSE ) {
+		if ( $this->getDeleted() == false ) {
 			// Company
 			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 			$this->Validator->isResultSetWithRows( 'company',
@@ -232,7 +238,7 @@ class UserGenericDataFactory extends Factory {
 												   TTi18n::gettext( 'Invalid Company' )
 			);
 			// User
-			if ( $this->getUser() != '' AND $this->getUser() != TTUUID::getZeroID() ) {
+			if ( $this->getUser() != '' && $this->getUser() != TTUUID::getZeroID() ) {
 				$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 				$this->Validator->isResultSetWithRows( 'user',
 													   $ulf->getByID( $this->getUser() ),
@@ -251,7 +257,7 @@ class UserGenericDataFactory extends Factory {
 										TTi18n::gettext( 'Invalid name' ),
 										1, 100
 			);
-			if ( $this->Validator->isError( 'name' ) == FALSE ) {
+			if ( $this->Validator->isError( 'name' ) == false ) {
 				$this->Validator->isTrue( 'name',
 										  $this->isUniqueName( $this->getName() ),
 										  TTi18n::gettext( 'Name already exists' )
@@ -263,12 +269,12 @@ class UserGenericDataFactory extends Factory {
 			//
 			if ( $this->getName() == '' ) {
 				$this->Validator->isTRUE( 'name',
-										  FALSE,
+										  false,
 										  TTi18n::gettext( 'Invalid name' ) );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -279,19 +285,19 @@ class UserGenericDataFactory extends Factory {
 			$this->setUser( TTUUID::getZeroID() ); //Use 0 instead of NULL;
 		}
 
-		if ( $this->getDefault() == TRUE ) {
+		if ( $this->getDefault() == true ) {
 			//Remove default flag from all other entries.
 			$ugdlf = TTnew( 'UserGenericDataListFactory' ); /** @var UserGenericDataListFactory $ugdlf */
-			if ( $this->getUser() == TTUUID::getZeroID() OR $this->getUser() == '' ) {
-				$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getCompany(), $this->getScript(), TRUE );
+			if ( $this->getUser() == TTUUID::getZeroID() || $this->getUser() == '' ) {
+				$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getCompany(), $this->getScript(), true );
 			} else {
-				$ugdlf->getByUserIdAndScriptAndDefault( $this->getUser(), $this->getScript(), TRUE );
+				$ugdlf->getByUserIdAndScriptAndDefault( $this->getUser(), $this->getScript(), true );
 			}
 			if ( $ugdlf->getRecordCount() > 0 ) {
-				foreach( $ugdlf as $ugd_obj ) {
+				foreach ( $ugdlf as $ugd_obj ) {
 					if ( $ugd_obj->getId() != $this->getId() ) { //Don't remove default flag from ourselves when editing an existing record.
 						Debug::Text( '  Removing Default Flag From: ' . $ugd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-						$ugd_obj->setDefault( FALSE );
+						$ugd_obj->setDefault( false );
 						if ( $ugd_obj->isValid() ) {
 							$ugd_obj->Save();
 						}
@@ -300,26 +306,26 @@ class UserGenericDataFactory extends Factory {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
-/*
-	//Disable this for now, as it bombards the log with messages that are mostly useless.
-	function addLog( $log_action ) {
-		if ( $this->getUser() == FALSE AND $this->getDefault() == TRUE ) {
-			//Bypass logging on Company Default Save.
-			return TRUE;
-		}
+	/*
+		//Disable this for now, as it bombards the log with messages that are mostly useless.
+		function addLog( $log_action ) {
+			if ( $this->getUser() == FALSE AND $this->getDefault() == TRUE ) {
+				//Bypass logging on Company Default Save.
+				return TRUE;
+			}
 
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee/Company Generic Data'), NULL, $this->getTable() );
-	}
-*/
+			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee/Company Generic Data'), NULL, $this->getTable() );
+		}
+	*/
 
 	/**
 	 * @param $script_name
 	 * @return mixed
 	 */
 	static function handleScriptName( $script_name ) {
-		return str_replace('//', '/', $script_name);
+		return str_replace( '//', '/', $script_name );
 	}
 
 	/**
@@ -329,11 +335,11 @@ class UserGenericDataFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -345,32 +351,31 @@ class UserGenericDataFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -380,4 +385,5 @@ class UserGenericDataFactory extends Factory {
 	}
 
 }
+
 ?>

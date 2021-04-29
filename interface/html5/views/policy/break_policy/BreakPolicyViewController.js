@@ -16,8 +16,8 @@ BreakPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'break_policy';
 		this.context_menu_name = $.i18n._( 'Break Policy' );
 		this.navigation_label = $.i18n._( 'Break Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIBreakPolicy' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIBreakPolicy' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 		this.render();
 		this.buildContextMenu();
 
@@ -45,7 +45,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBreakPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBreakPolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BREAK_POLICY,
@@ -148,7 +148,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -160,7 +160,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -206,7 +206,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -218,7 +218,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -230,7 +230,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -242,7 +242,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

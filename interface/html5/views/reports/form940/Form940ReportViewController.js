@@ -13,7 +13,7 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Form 940' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'Form940ReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIForm940Report' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIForm940Report' ) )();
 		this.include_form_setup = true;
 	},
 
@@ -34,7 +34,7 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		this.initDropDownOptions( options, function( result ) {
 
-			new (APIFactory.getAPIClass( 'APICompany' ))().getOptions( 'province', 'US', {
+			new ( APIFactory.getAPIClass( 'APICompany' ) )().getOptions( 'province', 'US', {
 				onResult: function( provinceResult ) {
 
 					$this.province_array = Global.buildRecordArray( provinceResult.getResult() );
@@ -47,7 +47,7 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			groups: {
 				form: {
@@ -87,8 +87,11 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		this.edit_view_tabs[3].push( tab3_column1 );
 
+		var form_item_input;
+		var form_item;
+
 		//Type of Return
-		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input = form_item_input.AComboBox( {
 			field: 'return_type',
@@ -153,12 +156,12 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		// this.addEditFieldToColumn( $.i18n._( 'Total Payments (Line 3)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Exempt Payments (Line 4)
-		v_box = $( '<div class=\'v-box\'></div>' );
+		var v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -172,10 +175,10 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
-		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -194,7 +197,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		form_item_input.TCheckbox( { field: 'line_9' } );
 		this.addEditFieldToColumn( $.i18n._( 'Were ALL taxable FUTA wages excluded from State UI? (Line 9)' ), form_item_input, tab3_column1 );
-
 
 		//Wages Excluded From State Unemployement Tax (Line 10)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );

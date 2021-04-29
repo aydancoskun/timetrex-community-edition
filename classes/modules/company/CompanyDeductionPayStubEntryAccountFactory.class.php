@@ -42,24 +42,23 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	protected $table = 'company_deduction_pay_stub_entry_account';
 	protected $pk_sequence_name = 'company_deduction_pay_stub_entry_account_id_seq'; //PK Sequence name
 
-	protected $pay_stub_entry_account_obj = NULL;
+	protected $pay_stub_entry_account_obj = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'type':
-				$retval = array(
-										10 => TTi18n::gettext('Include'),
-										20 => TTi18n::gettext('Exclude'),
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Include' ),
+						20 => TTi18n::gettext( 'Exclude' ),
+				];
 				break;
-
 		}
 
 		return $retval;
@@ -69,17 +68,18 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	 * @return bool|null
 	 */
 	function getPayStubEntryAccountObject() {
-		if ( is_object($this->pay_stub_entry_account_obj) ) {
+		if ( is_object( $this->pay_stub_entry_account_obj ) ) {
 			return $this->pay_stub_entry_account_obj;
 		} else {
 			$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
 			$psealf->getById( $this->getPayStubEntryAccount() );
 			if ( $psealf->getRecordCount() > 0 ) {
 				$this->pay_stub_entry_account_obj = $psealf->getCurrent();
+
 				return $this->pay_stub_entry_account_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -94,28 +94,30 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setCompanyDeduction( $value) {
+	function setCompanyDeduction( $value ) {
 		$value = TTUUID::castUUID( $value );
-		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'ID: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $value != TTUUID::getZeroID() ) {
 			return $this->setGenericDataValue( 'company_deduction_id', $value );
 		}
-		return FALSE;
+
+		return false;
 	}
 
 	/**
 	 * @return int
 	 */
 	function getType() {
-		return $this->getGenericDataValue('type_id' );
+		return $this->getGenericDataValue( 'type_id' );
 	}
 
 	/**
 	 * @param $value
 	 * @return bool
 	 */
-	function setType( $value) {
-		$value = (int)trim($value);
+	function setType( $value ) {
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'type_id', $value );
 	}
 
@@ -131,9 +133,10 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setPayStubEntryAccount( $value) {
+	function setPayStubEntryAccount( $value ) {
 		$value = TTUUID::castUUID( $value );
-		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'ID: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+
 		return $this->setGenericDataValue( 'pay_stub_entry_account_id', $value );
 	}
 
@@ -155,22 +158,22 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Type
-		$this->Validator->inArrayKey(	'type',
-												$this->getType(),
-												TTi18n::gettext('Incorrect Type'),
-												$this->getOptions('type')
-											);
+		$this->Validator->inArrayKey( 'type',
+									  $this->getType(),
+									  TTi18n::gettext( 'Incorrect Type' ),
+									  $this->getOptions( 'type' )
+		);
 
 		// Pay Stub Account
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' ); /** @var PayStubEntryAccountListFactory $psealf */
-		$this->Validator->isResultSetWithRows(	'pay_stub_entry_account',
-														$psealf->getByID($this->getPayStubEntryAccount()),
-														TTi18n::gettext('Pay Stub Account is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'pay_stub_entry_account',
+											   $psealf->getByID( $this->getPayStubEntryAccount() ),
+											   TTi18n::gettext( 'Pay Stub Account is invalid' )
+		);
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -178,75 +181,75 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -254,30 +257,30 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -286,12 +289,14 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$obj = $this->getPayStubEntryAccountObject();
-		if ( is_object($obj) ) {
-			$type = Option::getByKey($this->getType(), Misc::TrimSortPrefix( $this->getOptions('type') ) );
-			return TTLog::addEntry( $this->getCompanyDeduction(), $log_action, $type .' '. TTi18n::getText('Pay Stub Account').': '. $obj->getName(), NULL, $this->getTable() );
+		if ( is_object( $obj ) ) {
+			$type = Option::getByKey( $this->getType(), Misc::TrimSortPrefix( $this->getOptions( 'type' ) ) );
+
+			return TTLog::addEntry( $this->getCompanyDeduction(), $log_action, $type . ' ' . TTi18n::getText( 'Pay Stub Account' ) . ': ' . $obj->getName(), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

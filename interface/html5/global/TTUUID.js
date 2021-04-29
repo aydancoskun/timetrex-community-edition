@@ -17,7 +17,7 @@ TTUUID.generateUUID = function( seed ) {
 	}
 
 	if ( seed == null || seed.length != 12 ) {
-		seed = (TTUUID.randomUI08() | 1) * 0x10000000000 + TTUUID.randomUI40();
+		seed = ( TTUUID.randomUI08() | 1 ) * 0x10000000000 + TTUUID.randomUI40();
 	}
 
 	var now = new Date().getTime();
@@ -41,10 +41,10 @@ TTUUID.generateUUID = function( seed ) {
 
 	var tf = TTUUID.getTimeFieldValues( timestamp );
 	var tl = tf.low + tick;
-	var thav = (tf.hi & 0xFFF) | 0x1000;
+	var thav = ( tf.hi & 0xFFF ) | 0x1000;
 
 	sequence &= 0x3FFF;
-	var cshar = (sequence >>> 8) | 0x80;
+	var cshar = ( sequence >>> 8 ) | 0x80;
 	var csl = sequence & 0xFF;
 
 	return TTUUID.fromParts( tl, tf.mid, thav, cshar, csl, node );
@@ -82,11 +82,11 @@ TTUUID.fromParts = function( timeLow, timeMid, timeHiAndVersion, clockSeqHiAndRe
 	// 	+ TTUUID.paddedString(node.toString(16), 12);
 
 	var hex =
-			TTUUID.paddedString( timeHiAndVersion.toString( 16 ), 4 ) + TTUUID.paddedString( timeMid.toString( 16 ), 4 )
-			+ '-' + TTUUID.paddedString( timeLow.toString( 16 ).substring( 0, 4 ), 4 )
-			+ '-' + TTUUID.paddedString( timeLow.toString( 16 ).substring( 5, 8 ), 4 )
-			+ '-' + TTUUID.paddedString( clockSeqHiAndReserved.toString( 16 ), 2 ) + TTUUID.paddedString( clockSeqLow.toString( 16 ), 2 )
-			+ '-' + node.toString().substring( 0, 12 );
+		TTUUID.paddedString( timeHiAndVersion.toString( 16 ), 4 ) + TTUUID.paddedString( timeMid.toString( 16 ), 4 )
+		+ '-' + TTUUID.paddedString( timeLow.toString( 16 ).substring( 0, 4 ), 4 )
+		+ '-' + TTUUID.paddedString( timeLow.toString( 16 ).substring( 5, 8 ), 4 )
+		+ '-' + TTUUID.paddedString( clockSeqHiAndReserved.toString( 16 ), 2 ) + TTUUID.paddedString( clockSeqLow.toString( 16 ), 2 )
+		+ '-' + node.toString().substring( 0, 12 );
 
 	return hex;
 };
@@ -114,18 +114,18 @@ TTUUID.randomUI14 = function() {
 };
 
 TTUUID.randomUI40 = function() {
-	return (0 | Math.random() * (1 << 30)) + (0 | Math.random() * (1 << 40 - 30)) * (1 << 30);
+	return ( 0 | Math.random() * ( 1 << 30 ) ) + ( 0 | Math.random() * ( 1 << 40 - 30 ) ) * ( 1 << 30 );
 };
 
 TTUUID.getTimeFieldValues = function( time ) {
 	var ts = time - Date.UTC( 1582, 9, 15 );
-	var hm = ((ts / 0x100000000) * 10000) & 0xFFFFFFF;
-	return { low: ((ts & 0xFFFFFFF) * 10000) % 0x100000000, mid: hm & 0xFFFF, hi: hm >>> 16, timestamp: ts };
+	var hm = ( ( ts / 0x100000000 ) * 10000 ) & 0xFFFFFFF;
+	return { low: ( ( ts & 0xFFFFFFF ) * 10000 ) % 0x100000000, mid: hm & 0xFFFF, hi: hm >>> 16, timestamp: ts };
 };
 
 TTUUID.paddedString = function( string, length, z ) {
 	string = String( string );
-	z = (!z) ? '0' : z;
+	z = ( !z ) ? '0' : z;
 	var i = length - string.length;
 	for ( ; i > 0; i >>>= 1, z += z ) {
 		if ( i & 1 ) {
@@ -136,5 +136,5 @@ TTUUID.paddedString = function( string, length, z ) {
 };
 
 TTUUID.getRandomInt = function( min, max ) {
-	return Math.floor( Math.random() * (max - min + 1) ) + min;
-}
+	return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+};

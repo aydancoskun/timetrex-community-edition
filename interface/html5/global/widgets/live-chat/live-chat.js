@@ -7,13 +7,13 @@ if ( current_company && current_user ) {
 	LHCChatOptions.attr = new Array();
 	LHCChatOptions.attr.push( {
 		'name': 'email',
-		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email),
+		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email ),
 		'type': 'hidden',
 		'size': 0
 	} );
 	LHCChatOptions.attr.push( {
 		'name': 'phone',
-		'value': ( current_user.work_phone != '' ? current_user.work_phone : current_user.home_phone),
+		'value': ( current_user.work_phone != '' ? current_user.work_phone : current_user.home_phone ),
 		'type': 'hidden',
 		'size': 0
 	} );
@@ -32,7 +32,7 @@ if ( current_company && current_user ) {
 	} );
 	LHCChatOptions.attr_online.push( {
 		'name': 'email',
-		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email),
+		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email ),
 		'hidden': true
 	} );
 	LHCChatOptions.attr_online.push( { 'name': 'company', 'value': current_company.name, 'hidden': true } );
@@ -45,12 +45,12 @@ if ( current_company && current_user ) {
 	} );
 	LHCChatOptions.attr_prefill.push( {
 		'name': 'email',
-		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email),
+		'value': ( current_user.work_email != '' ? current_user.work_email : current_user.home_email ),
 		'hidden': true
 	} );
 	LHCChatOptions.attr_prefill.push( {
 		'name': 'phone',
-		'value': ( current_user.work_phone != '' ? current_user.work_phone : current_user.home_phone),
+		'value': ( current_user.work_phone != '' ? current_user.work_phone : current_user.home_phone ),
 		'hidden': true
 	} );
 	LHCChatOptions.attr_prefill.push( { 'name': 'company', 'value': current_company.name, 'hidden': true } );
@@ -68,17 +68,19 @@ if ( current_company && current_user ) {
 
 	//Only make a call to load the chat service JS when the chat button is actually clicked. This should help reduce the chance of JS errors occurring for users who never use the chat.
 	function openSupportChat() {
-		(function() {
+		( function() {
 			var po = document.createElement( 'script' );
 			po.type = 'text/javascript';
 			po.async = true;
-			var refferer = (document.referrer) ? encodeURIComponent( document.referrer.substr( document.referrer.indexOf( '://' ) + 1 ) ) : '';
-			var location = (document.location) ? encodeURIComponent( window.location.href.substring( window.location.protocol.length ) ) : '';
+			var refferer = ( document.referrer ) ? encodeURIComponent( document.referrer.substr( document.referrer.indexOf( '://' ) + 1 ) ) : '';
+			var location = ( document.location ) ? encodeURIComponent( window.location.href.substring( window.location.protocol.length ) ) : '';
 			po.src = 'https://chat.timetrex.com/index.php/chat/getstatus/(click)/internal/(position)/api/(ma)/br/(dot)/true/(units)/pixels/(leaveamessage)/true/(department)/2/(disable_pro_active)/true?r=' + refferer + '&l=' + location + '&ttr=' + new Date().getTime();
 			po.crossOrigin = 'anonymous';
-			po.onload = function() { return lh_inst.lh_openchatWindow(); }; //Wait for script to load before popping up chat box.
+			po.onload = function() {
+				return lh_inst.lh_openchatWindow();
+			}; //Wait for script to load before popping up chat box.
 			var s = document.getElementsByTagName( 'script' )[0];
 			s.parentNode.insertBefore( po, s );
-		})();
+		} )();
 	}
 }

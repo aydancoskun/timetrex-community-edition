@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TCheckbox = function( options ) {
 		var opts = $.extend( {}, $.fn.TCheckbox.defaults, options );
@@ -53,7 +53,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper checkbox-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 				check_box.change( function() {
 					$this.trigger( 'formItemChange', [$this] );
@@ -166,4 +166,4 @@
 
 	$.fn.TCheckbox.defaults = {};
 
-})( jQuery );
+} )( jQuery );

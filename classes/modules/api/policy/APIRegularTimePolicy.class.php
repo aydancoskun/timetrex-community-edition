@@ -47,19 +47,19 @@ class APIRegularTimePolicy extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * Get options for dropdown boxes.
 	 * @param bool|string $name Name of options to return, ie: 'columns', 'type', 'status'
-	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
+	 * @param mixed $parent     Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return bool|array
 	 */
-	function getOptions( $name = FALSE, $parent = NULL ) {
+	function getOptions( $name = false, $parent = null ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('regular_time_policy', 'enabled')
-					OR !( $this->getPermissionObject()->Check('regular_time_policy', 'view') OR $this->getPermissionObject()->Check('regular_time_policy', 'view_own') OR $this->getPermissionObject()->Check('regular_time_policy', 'view_child') ) ) ) {
+				&& ( !$this->getPermissionObject()->Check( 'regular_time_policy', 'enabled' )
+						|| !( $this->getPermissionObject()->Check( 'regular_time_policy', 'view' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'view_own' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'view_child' ) ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -73,20 +73,20 @@ class APIRegularTimePolicy extends APIFactory {
 	function getRegularTimePolicyDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting overtime policy default data...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Getting overtime policy default data...', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$data = array(
-						'company_id' => $company_obj->getId(),
-						'calculation_order' => 100,
-						'rate' => '1.00',
-						'accrual_rate' => '1.00',
-						'branch_selection_type_id' => 10,
-						'department_selection_type_id' => 10,
-						'job_group_selection_type_id' => 10,
-						'job_selection_type_id' => 10,
-						'job_item_group_selection_type_id' => 10,
-						'job_item_selection_type_id' => 10,
-					);
+		$data = [
+				'company_id'                       => $company_obj->getId(),
+				'calculation_order'                => 100,
+				'rate'                             => '1.00',
+				'accrual_rate'                     => '1.00',
+				'branch_selection_type_id'         => 10,
+				'department_selection_type_id'     => 10,
+				'job_group_selection_type_id'      => 10,
+				'job_selection_type_id'            => 10,
+				'job_item_group_selection_type_id' => 10,
+				'job_item_selection_type_id'       => 10,
+		];
 
 		return $this->returnHandler( $data );
 	}
@@ -97,32 +97,32 @@ class APIRegularTimePolicy extends APIFactory {
 	 * @param bool $disable_paging
 	 * @return array
 	 */
-	function getRegularTimePolicy( $data = NULL, $disable_paging = FALSE ) {
+	function getRegularTimePolicy( $data = null, $disable_paging = false ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( !$this->getPermissionObject()->Check('regular_time_policy', 'enabled')
-				OR !( $this->getPermissionObject()->Check('regular_time_policy', 'view') OR $this->getPermissionObject()->Check('regular_time_policy', 'view_own') OR $this->getPermissionObject()->Check('regular_time_policy', 'view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check( 'regular_time_policy', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'regular_time_policy', 'view' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'view_own' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'view_child' ) ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
+			$data['filter_columns'] = $this->handlePermissionFilterColumns( ( isset( $data['filter_columns'] ) ) ? $data['filter_columns'] : null, Misc::trimSortPrefix( $this->getOptions( 'list_columns' ) ) );
 		}
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'regular_time_policy', 'view' );
 
 		$blf = TTnew( 'RegularTimePolicyListFactory' ); /** @var RegularTimePolicyListFactory $blf */
-		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
+		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
-			$retarr = array();
-			foreach( $blf as $b_obj ) {
+			$retarr = [];
+			foreach ( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}
 
 			return $this->returnHandler( $retarr );
 		}
 
-		return $this->returnHandler( TRUE ); //No records returned.
+		return $this->returnHandler( true ); //No records returned.
 	}
 
 	/**
@@ -131,9 +131,10 @@ class APIRegularTimePolicy extends APIFactory {
 	 * @param bool $disable_paging
 	 * @return array|bool
 	 */
-	function exportRegularTimePolicy( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+	function exportRegularTimePolicy( $format = 'csv', $data = null, $disable_paging = true ) {
 		$result = $this->stripReturnHandler( $this->getRegularTimePolicy( $data, $disable_paging ) );
-		return $this->exportRecords( $format, 'export_regular_time_policy', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+
+		return $this->exportRecords( $format, 'export_regular_time_policy', $result, ( ( isset( $data['filter_columns'] ) ) ? $data['filter_columns'] : null ) );
 	}
 
 	/**
@@ -142,7 +143,7 @@ class APIRegularTimePolicy extends APIFactory {
 	 * @return array
 	 */
 	function getCommonRegularTimePolicyData( $data ) {
-		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getRegularTimePolicy( $data, TRUE ) ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getRegularTimePolicy( $data, true ) ) );
 	}
 
 	/**
@@ -151,7 +152,7 @@ class APIRegularTimePolicy extends APIFactory {
 	 * @return array
 	 */
 	function validateRegularTimePolicy( $data ) {
-		return $this->setRegularTimePolicy( $data, TRUE );
+		return $this->setRegularTimePolicy( $data, true );
 	}
 
 	/**
@@ -161,69 +162,69 @@ class APIRegularTimePolicy extends APIFactory {
 	 * @param bool $ignore_warning
 	 * @return array|bool
 	 */
-	function setRegularTimePolicy( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
+	function setRegularTimePolicy( $data, $validate_only = false, $ignore_warning = true ) {
 		$validate_only = (bool)$validate_only;
 		$ignore_warning = (bool)$ignore_warning;
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		if ( !$this->getPermissionObject()->Check('regular_time_policy', 'enabled')
-				OR !( $this->getPermissionObject()->Check('regular_time_policy', 'edit') OR $this->getPermissionObject()->Check('regular_time_policy', 'edit_own') OR $this->getPermissionObject()->Check('regular_time_policy', 'edit_child') OR $this->getPermissionObject()->Check('regular_time_policy', 'add') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check( 'regular_time_policy', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'regular_time_policy', 'edit' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'edit_own' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'edit_child' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'add' ) ) ) {
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		if ( $validate_only == TRUE ) {
-			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
+		if ( $validate_only == true ) {
+			Debug::Text( 'Validating Only!', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		list( $data, $total_records ) = $this->convertToMultipleRecords( $data );
-		Debug::Text('Received data for: '. $total_records .' RegularTimePolicys', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Received data for: ' . $total_records . ' RegularTimePolicys', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		$validator = $save_result = $key = FALSE;
-		if ( is_array($data) AND $total_records > 0 ) {
-			foreach( $data as $key => $row ) {
+		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
+		$validator = $save_result = $key = false;
+		if ( is_array( $data ) && $total_records > 0 ) {
+			foreach ( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'RegularTimePolicyListFactory' ); /** @var RegularTimePolicyListFactory $lf */
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] != '' ) {
+				if ( isset( $row['id'] ) && $row['id'] != '' ) {
 					//Modifying existing object.
 					//Get overtime policy object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							$validate_only == TRUE
-							OR
+								$validate_only == true
+								||
 								(
-								$this->getPermissionObject()->Check('regular_time_policy', 'edit')
-									OR ( $this->getPermissionObject()->Check('regular_time_policy', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+										$this->getPermissionObject()->Check( 'regular_time_policy', 'edit' )
+										|| ( $this->getPermissionObject()->Check( 'regular_time_policy', 'edit_own' ) && $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === true )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text( 'Row Exists, getting current data for ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
+							$primary_validator->isTrue( 'permission', false, TTi18n::gettext( 'Edit permission denied' ) );
 						}
 					} else {
 						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('regular_time_policy', 'add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check( 'regular_time_policy', 'add' ), TTi18n::gettext( 'Add permission denied' ) );
 
 					$row['id'] = $lf->getNextInsertId();
 				}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 				$is_valid = $primary_validator->isValid( $ignore_warning );
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
+					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					//Force Company ID to current company.
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
@@ -232,24 +233,24 @@ class APIRegularTimePolicy extends APIFactory {
 					$lf->Validator->setValidateOnly( $validate_only );
 
 					$is_valid = $lf->isValid( $ignore_warning );
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-						if ( $validate_only == TRUE ) {
-							$save_result[$key] = TRUE;
+					if ( $is_valid == true ) {
+						Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
+						if ( $validate_only == true ) {
+							$save_result[$key] = true;
 						} else {
-							$save_result[$key] = $lf->Save( TRUE, TRUE );
+							$save_result[$key] = $lf->Save( true, true );
 						}
 						$validator_stats['valid_records']++;
 					}
 				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $is_valid == false ) {
+					Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
 					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				} elseif ( $validate_only == TRUE ) {
+				} else if ( $validate_only == true ) {
 					$lf->FailTransaction();
 				}
 
@@ -260,7 +261,7 @@ class APIRegularTimePolicy extends APIFactory {
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 
 	/**
@@ -269,27 +270,27 @@ class APIRegularTimePolicy extends APIFactory {
 	 * @return array|bool
 	 */
 	function deleteRegularTimePolicy( $data ) {
-		if ( !is_array($data) ) {
-			$data = array($data);
+		if ( !is_array( $data ) ) {
+			$data = [ $data ];
 		}
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		if ( !$this->getPermissionObject()->Check('regular_time_policy', 'enabled')
-				OR !( $this->getPermissionObject()->Check('regular_time_policy', 'delete') OR $this->getPermissionObject()->Check('regular_time_policy', 'delete_own') OR $this->getPermissionObject()->Check('regular_time_policy', 'delete_child') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check( 'regular_time_policy', 'enabled' )
+				|| !( $this->getPermissionObject()->Check( 'regular_time_policy', 'delete' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'delete_own' ) || $this->getPermissionObject()->Check( 'regular_time_policy', 'delete_child' ) ) ) {
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		Debug::Text('Received data for: '. count($data) .' RegularTimePolicys', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Received data for: ' . count( $data ) . ' RegularTimePolicys', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$total_records = count($data);
-		$validator = $save_result = $key = FALSE;
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) AND $total_records > 0 ) {
-			foreach( $data as $key => $id ) {
+		$total_records = count( $data );
+		$validator = $save_result = $key = false;
+		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
+		if ( is_array( $data ) && $total_records > 0 ) {
+			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'RegularTimePolicyListFactory' ); /** @var RegularTimePolicyListFactory $lf */
 				$lf->StartTransaction();
@@ -299,38 +300,38 @@ class APIRegularTimePolicy extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('regular_time_policy', 'delete')
-								OR ( $this->getPermissionObject()->Check('regular_time_policy', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						if ( $this->getPermissionObject()->Check( 'regular_time_policy', 'delete' )
+								|| ( $this->getPermissionObject()->Check( 'regular_time_policy', 'delete_own' ) && $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === true ) ) {
+							Debug::Text( 'Record Exists, deleting record ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 							$lf = $lf->getCurrent();
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
+							$primary_validator->isTrue( 'permission', false, TTi18n::gettext( 'Delete permission denied' ) );
 						}
 					} else {
 						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 					}
 				} else {
-					$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+					$primary_validator->isTrue( 'id', false, TTi18n::gettext( 'Delete permission denied, record does not exist' ) );
 				}
 
 				//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				$is_valid = $primary_validator->isValid();
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setDeleted(TRUE);
+				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
+					Debug::Text( 'Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10 );
+					$lf->setDeleted( true );
 
 					$is_valid = $lf->isValid();
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
+					if ( $is_valid == true ) {
+						Debug::Text( 'Record Deleted...', __FILE__, __LINE__, __METHOD__, 10 );
 						$save_result[$key] = $lf->Save();
 						$validator_stats['valid_records']++;
 					}
 				}
 
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $is_valid == false ) {
+					Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
@@ -343,7 +344,7 @@ class APIRegularTimePolicy extends APIFactory {
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 
 	/**
@@ -352,30 +353,32 @@ class APIRegularTimePolicy extends APIFactory {
 	 * @return array
 	 */
 	function copyRegularTimePolicy( $data ) {
-		if ( !is_array($data) ) {
-			$data = array($data);
+		if ( !is_array( $data ) ) {
+			$data = [ $data ];
 		}
 
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
+		if ( !is_array( $data ) ) {
+			return $this->returnHandler( false );
 		}
 
-		Debug::Text('Received data for: '. count($data) .' RegularTimePolicys', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Received data for: ' . count( $data ) . ' RegularTimePolicys', __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$src_rows = $this->stripReturnHandler( $this->getRegularTimePolicy( array('filter_data' => array('id' => $data) ), TRUE ) );
-		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
-			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
+		$src_rows = $this->stripReturnHandler( $this->getRegularTimePolicy( [ 'filter_data' => [ 'id' => $data ] ], true ) );
+		if ( is_array( $src_rows ) && count( $src_rows ) > 0 ) {
+			Debug::Arr( $src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10 );
+			foreach ( $src_rows as $key => $row ) {
+				unset( $src_rows[$key]['id'], $src_rows[$key]['manual_id'] );     //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
+
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setRegularTimePolicy( $src_rows ); //Save copied rows
 		}
 
-		return $this->returnHandler( FALSE );
+		return $this->returnHandler( false );
 	}
 }
+
 ?>

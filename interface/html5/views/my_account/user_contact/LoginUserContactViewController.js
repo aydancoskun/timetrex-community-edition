@@ -15,8 +15,8 @@ LoginUserContactViewController = BaseViewController.extend( {
 		this.script_name = 'LoginUserContactView';
 		this.table_name_key = 'bank_account';
 		this.context_menu_name = $.i18n._( 'Contact Information' );
-		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -43,7 +43,7 @@ LoginUserContactViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -296,6 +296,5 @@ LoginUserContactViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'SIN/SSN' ), form_item_input, tab_contact_information_column2, '' );
 
 	}
-
 
 } );

@@ -6,18 +6,18 @@
 class PaymentServicesClientAPI {
 	protected $url = 'https://paymentservices.timetrex.com/api/soap/api.php';
 
-	protected $user_name = NULL;
-	protected $password = NULL;
+	protected $user_name = null;
+	protected $password = null;
 
-	protected $cookies = array();
+	protected $cookies = [];
 
 	//protected $session_id = NULL;
 	//protected $session_hash = NULL; //Used to determine if we need to login again because the URL or Session changed.
-	protected $class_factory = NULL;
+	protected $class_factory = null;
 	protected $namespace = 'urn:api';
 	protected $protocol_version = 1;
 
-	protected $soap_obj = NULL; //Persistent SOAP object.
+	protected $soap_obj = null; //Persistent SOAP object.
 
 	/**
 	 * PaymentServicesClientAPI constructor.
@@ -27,7 +27,7 @@ class PaymentServicesClientAPI {
 	 * @param null $url
 	 * @param null $cookies
 	 */
-	function __construct( $class = NULL, $user_name = NULL, $password = NULL, $url = NULL, $cookies = NULL ) {
+	function __construct( $class = null, $user_name = null, $password = null, $url = null, $cookies = null ) {
 		global $PAYMENTSERVICES_URL, $PAYMENTSERVICES_COOKIES, $PAYMENTSERVICES_USER, $PAYMENTSERVICES_PASSWORD;
 
 		ini_set( 'default_socket_timeout', 3600 );
@@ -36,7 +36,7 @@ class PaymentServicesClientAPI {
 			$url = $PAYMENTSERVICES_URL;
 		}
 
-		if ( $cookies == '' AND ( isset($PAYMENTSERVICES_COOKIES) AND is_array( $PAYMENTSERVICES_COOKIES ) ) ) {
+		if ( $cookies == '' && ( isset( $PAYMENTSERVICES_COOKIES ) && is_array( $PAYMENTSERVICES_COOKIES ) ) ) {
 			$cookies = $PAYMENTSERVICES_COOKIES;
 		}
 
@@ -58,7 +58,7 @@ class PaymentServicesClientAPI {
 		$this->setURL( $url );
 		$this->setClass( $class );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -67,7 +67,7 @@ class PaymentServicesClientAPI {
 	function getSoapClientObject() {
 		$url_pieces[] = 'Class=' . $this->class_factory;
 
-		if ( strpos( $this->url, '?' ) === FALSE ) {
+		if ( strpos( $this->url, '?' ) === false ) {
 			$url_separator = '?';
 		} else {
 			$url_separator = '&';
@@ -77,22 +77,22 @@ class PaymentServicesClientAPI {
 
 		//Try to maintain existing SOAP object as there could be cookies associated with it.
 		if ( !is_object( $this->soap_obj ) ) {
-			if ( PRODUCTION == FALSE ) {
+			if ( PRODUCTION == false ) {
 				//Allow self-signed certificates to be accepted when not in production mode.
-				$stream_context_options = array(
-						'ssl' => array(
+				$stream_context_options = [
+						'ssl' => [
 							// set some SSL/TLS specific options
-							'verify_peer'       => FALSE,
-							'verify_peer_name'  => FALSE,
-							'allow_self_signed' => TRUE,
-						),
-				);
+							'verify_peer'       => false,
+							'verify_peer_name'  => false,
+							'allow_self_signed' => true,
+						],
+				];
 			} else {
-				$stream_context_options = array();
+				$stream_context_options = [];
 			}
 			$steam_context = stream_context_create( $stream_context_options );
 
-			$retval = new SoapClient( NULL, array(
+			$retval = new SoapClient( null, [
 												  'stream_context'     => $steam_context,
 												  'location'           => $url,
 												  'uri'                => $this->namespace,
@@ -106,7 +106,7 @@ class PaymentServicesClientAPI {
 												  'compression'        => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
 												  'trace'              => 1,
 												  'exceptions'         => 0,
-										  )
+										  ]
 			);
 
 			if ( is_array( $this->cookies ) ) {
@@ -130,10 +130,10 @@ class PaymentServicesClientAPI {
 		if ( $user_name != '' ) {
 			$this->user_name = $user_name;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -144,10 +144,10 @@ class PaymentServicesClientAPI {
 		if ( $password != '' ) {
 			$this->password = $password;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -158,10 +158,10 @@ class PaymentServicesClientAPI {
 		if ( is_array( $cookies ) ) {
 			$this->cookies = $cookies;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -172,10 +172,10 @@ class PaymentServicesClientAPI {
 		if ( $url != '' ) {
 			$this->url = $url;
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -185,7 +185,7 @@ class PaymentServicesClientAPI {
 	function setClass( $value ) {
 		$this->class_factory = trim( $value );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -201,22 +201,22 @@ class PaymentServicesClientAPI {
 	 * @param array $args
 	 * @return bool|PaymentServicesClientAPIReturnHandler
 	 */
-	function __call( $function_name, $args = array() ) {
+	function __call( $function_name, $args = [] ) {
 		if ( is_object( $this->getSoapClientObject() ) ) {
-			$retval = call_user_func_array( array($this->getSoapClientObject(), $function_name), $args );
+			$retval = call_user_func_array( [ $this->getSoapClientObject(), $function_name ], $args );
 
 			if ( is_soap_fault( $retval ) ) {
 				//trigger_error( 'SOAP Fault: (Code: ' . $retval->faultcode . ', String: ' . $retval->faultstring . ') - Request: ' . $this->getSoapClientObject()->__getLastRequest() . ' Response: ' . $this->getSoapClientObject()->__getLastResponse(), E_USER_NOTICE );
 				//Debug::Arr( array('last_request' => $this->getSoapClientObject()->__getLastRequest(), 'last_response' => $this->getSoapClientObject()->__getLastResponse()), 'SOAP Fault: '. $retval->faultstring .' Code: '. $retval->faultcode, __FILE__, __LINE__, __METHOD__, 10);
-				throw new Exception('SOAP Fault: '. $retval->faultstring .' (Code: '. $retval->faultcode .')', (int)$retval->faultcode );
+				throw new Exception( 'SOAP Fault: ' . $retval->faultstring . ' (Code: ' . $retval->faultcode . ')', (int)$retval->faultcode );
 
-				return FALSE;
+				//return false;
 			}
 
 			return new PaymentServicesClientAPIReturnHandler( $function_name, $args, $retval );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
 
@@ -237,9 +237,9 @@ class PaymentServicesClientAPIReturnHandler {
 					'details' =>  $details,
 					)
 	*/
-	protected $function_name = NULL;
-	protected $args = NULL;
-	protected $result_data = FALSE;
+	protected $function_name = null;
+	protected $args = null;
+	protected $result_data = false;
 
 	/**
 	 * PaymentServicesClientAPIReturnHandler constructor.
@@ -252,7 +252,7 @@ class PaymentServicesClientAPIReturnHandler {
 		$this->args = $args;
 		$this->result_data = $result_data;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -282,18 +282,18 @@ class PaymentServicesClientAPIReturnHandler {
 	function __toString() {
 		$eol = "<br>\n";
 
-		$output = array();
+		$output = [];
 		$output[] = '=====================================';
 		$output[] = 'Function: ' . $this->getFunction() . '()';
-		if ( is_object( $this->getArgs() ) OR is_array( $this->getArgs() ) ) {
+		if ( is_object( $this->getArgs() ) || is_array( $this->getArgs() ) ) {
 			$output[] = 'Args: ' . count( $this->getArgs() );
 		} else {
 			$output[] = 'Args: ' . $this->getArgs();
 		}
 		$output[] = '-------------------------------------';
 		$output[] = 'Returned:';
-		$output[] = ( $this->isValid() === TRUE ) ? 'IsValid: YES' : 'IsValid: NO';
-		if ( $this->isValid() === TRUE ) {
+		$output[] = ( $this->isValid() === true ) ? 'IsValid: YES' : 'IsValid: NO';
+		if ( $this->isValid() === true ) {
 			$output[] = 'Return Value: ' . $this->getResult();
 		} else {
 			$output[] = 'Code: ' . $this->getCode();
@@ -327,7 +327,7 @@ class PaymentServicesClientAPIReturnHandler {
 			return (bool)$this->result_data['api_retval'];
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -335,47 +335,47 @@ class PaymentServicesClientAPIReturnHandler {
 	 */
 	function isError() { //Opposite of isValid()
 		if ( isset( $this->result_data['api_retval'] ) ) {
-			if ( $this->result_data['api_retval'] === FALSE ) {
-				return TRUE;
+			if ( $this->result_data['api_retval'] === false ) {
+				return true;
 			} else {
-				return FALSE;
+				return false;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCode() {
-		if ( isset( $this->result_data['api_details'] ) AND isset( $this->result_data['api_details']['code'] ) ) {
+		if ( isset( $this->result_data['api_details'] ) && isset( $this->result_data['api_details']['code'] ) ) {
 			return $this->result_data['api_details']['code'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDescription() {
-		if ( isset( $this->result_data['api_details'] ) AND isset( $this->result_data['api_details']['description'] ) ) {
+		if ( isset( $this->result_data['api_details'] ) && isset( $this->result_data['api_details']['description'] ) ) {
 			return $this->result_data['api_details']['description'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDetails() {
-		if ( isset( $this->result_data['api_details'] ) AND isset( $this->result_data['api_details']['details'] ) ) {
+		if ( isset( $this->result_data['api_details'] ) && isset( $this->result_data['api_details']['details'] ) ) {
 			return $this->result_data['api_details']['details'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -384,12 +384,12 @@ class PaymentServicesClientAPIReturnHandler {
 	function getDetailsDescription() {
 		$details = $this->getDetails();
 		if ( is_array( $details ) ) {
-			$retval = array();
+			$retval = [];
 
-			foreach( $details as $key => $row_details ) {
+			foreach ( $details as $key => $row_details ) {
 				foreach ( $row_details as $field => $field_details ) {
-					foreach( $field_details as $detail ) {
-						$retval[] = '['. $field .'] '. $detail;
+					foreach ( $field_details as $detail ) {
+						$retval[] = '[' . $field . '] ' . $detail;
 					}
 				}
 			}
@@ -397,51 +397,51 @@ class PaymentServicesClientAPIReturnHandler {
 			return implode( ' ', $retval );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getRecordDetails() {
-		if ( isset( $this->result_data['api_details'] ) AND isset( $this->result_data['api_details']['record_details'] ) ) {
+		if ( isset( $this->result_data['api_details'] ) && isset( $this->result_data['api_details']['record_details'] ) ) {
 			return $this->result_data['api_details']['record_details'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getTotalRecords() {
-		if ( isset( $this->result_data['api_details'] ) AND isset( $this->result_data['api_details']['record_details'] ) AND isset( $this->result_data['api_details']['record_details']['total_records'] ) ) {
+		if ( isset( $this->result_data['api_details'] ) && isset( $this->result_data['api_details']['record_details'] ) && isset( $this->result_data['api_details']['record_details']['total_records'] ) ) {
 			return $this->result_data['api_details']['record_details']['total_records'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getValidRecords() {
-		if ( isset( $this->result_data['api_details'] ) AND isset( $this->result_data['api_details']['record_details'] ) AND isset( $this->result_data['api_details']['record_details']['valid_records'] ) ) {
+		if ( isset( $this->result_data['api_details'] ) && isset( $this->result_data['api_details']['record_details'] ) && isset( $this->result_data['api_details']['record_details']['valid_records'] ) ) {
 			return $this->result_data['api_details']['record_details']['valid_records'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getInValidRecords() {
-		if ( isset( $this->result_data['api_details'] ) AND isset( $this->result_data['api_details']['record_details'] ) AND isset( $this->result_data['api_details']['record_details']['invalid_records'] ) ) {
+		if ( isset( $this->result_data['api_details'] ) && isset( $this->result_data['api_details']['record_details'] ) && isset( $this->result_data['api_details']['record_details']['invalid_records'] ) ) {
 			return $this->result_data['api_details']['record_details']['invalid_records'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**

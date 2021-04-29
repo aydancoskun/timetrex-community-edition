@@ -28,8 +28,8 @@ PayCodeWizardController = BaseWizardController.extend( {
 			case 1:
 				var label = this.getLabel();
 				label.html( $.i18n._( 'This wizard will migrate data associated with one pay code to another pay code without recalculating timesheets or otherwise affecting employees time or wages.' ) + '<br><br>' +
-						'<span style="color: #ff0000; font-weight: bold;">' + $.i18n._( 'WARNING' ) + ': ' + '</span>' +
-						$.i18n._( 'This operation can not be reversed once complete.' ) );
+					'<span style="color: #ff0000; font-weight: bold;">' + $.i18n._( 'WARNING' ) + ': ' + '</span>' +
+					$.i18n._( 'This operation can not be reversed once complete.' ) );
 
 				this.content_div.append( label );
 				break;
@@ -44,7 +44,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 				var first_hr = content_clone.find( '.first-hr' );
 				first_hr.find( '.wizard-item-label > span' ).text( $.i18n._( 'Select Source Pay Codes' ) + ': ' );
-				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayCode' )), true, ALayoutIDs.PAY_CODE, 'source_pay_code_ids' );
+				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayCode' ) ), true, ALayoutIDs.PAY_CODE, 'source_pay_code_ids' );
 				first_hr.find( '.wizard-item-widget' ).append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step][a_combobox.getField()] = a_combobox;
@@ -53,7 +53,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 				var second_hr = content_clone.find( '.second-hr' );
 				second_hr.find( '.wizard-item-label > span' ).text( $.i18n._( 'Select Destination Pay Code' ) + ': ' );
-				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayCode' )), false, ALayoutIDs.PAY_CODE, 'dest_pay_code_id' );
+				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayCode' ) ), false, ALayoutIDs.PAY_CODE, 'dest_pay_code_id' );
 				second_hr.find( '.wizard-item-widget' ).append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step][a_combobox.getField()] = a_combobox;
@@ -75,7 +75,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 		var source_pay_code_ids = this.stepsDataDic[2].source_pay_code_ids;
 		var dest_pay_code_id = this.stepsDataDic[2].dest_pay_code_id;
 
-		var pay_code_api = new (APIFactory.getAPIClass( 'APIPayCode' ))();
+		var pay_code_api = new ( APIFactory.getAPIClass( 'APIPayCode' ) )();
 
 		pay_code_api.migratePayCode( source_pay_code_ids, dest_pay_code_id, {
 			onResult: function( result ) {
@@ -89,7 +89,6 @@ PayCodeWizardController = BaseWizardController.extend( {
 				} else {
 					TAlertManager.showErrorAlert( result );
 				}
-
 
 			}
 		} );
@@ -150,6 +149,5 @@ PayCodeWizardController = BaseWizardController.extend( {
 		}
 
 	}
-
 
 } );

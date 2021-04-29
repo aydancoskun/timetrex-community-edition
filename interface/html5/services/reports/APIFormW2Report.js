@@ -63,6 +63,4 @@ var APIFormW2Report = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

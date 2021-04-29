@@ -18,7 +18,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 	day_of_month_array: null,
 	day_of_week_array: null,
 
-	frequency_week_array: null,
+	week_interval_array: null,
 	remittance_source_account_array: null,
 	sub_event_view_controller: null,
 
@@ -34,12 +34,12 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		this.viewId = 'PayrollRemittanceAgencyEvent';
 		this.context_menu_name = $.i18n._( 'Remittance Agency Event' );
 		this.navigation_label = $.i18n._( 'Remittance Agency Event' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
-		this.api_user_report = new (APIFactory.getAPIClass( 'APIUserReportData' ))();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.api_user_report = new ( APIFactory.getAPIClass( 'APIUserReportData' ) )();
 		this.month_of_quarter_array = Global.buildRecordArray( { 1: 1, 2: 2, 3: 3 } );
 
 		this.render();
@@ -70,12 +70,11 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'frequency' );
-		this.initDropDownOption( 'payroll_remittance_agency', 'payroll_remittance_agency' );
 
-		this.api.getOptions( 'week', {
+		this.api.getOptions( 'week_interval', {
 			onResult: function( res ) {
 				res = res.getResult();
-				$this.frequency_week_array = res;
+				$this.week_interval_array = res;
 			}
 
 		} );
@@ -197,6 +196,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 			arg = this.current_edit_record['frequency_id'];
 		}
+
 		Debug.Text( 'Selected Frequency: ' + arg, null, null, null, 10 );
 		this.detachElement( 'week' );
 		this.detachElement( 'primary_month' );
@@ -358,7 +358,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
@@ -375,7 +375,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
 			show_search_inputs: true,
@@ -436,7 +436,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'week' } );
-		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.frequency_week_array ) ) );
+		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.week_interval_array ) ) );
 		this.addEditFieldToColumn( $.i18n._( 'Week' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency quarter Month
@@ -445,7 +445,6 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( { field: 'quarter_month' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_quarter_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Month of Quarter' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
-
 
 		// Day of the week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -456,7 +455,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 			show_search_inputs: true,
@@ -474,7 +473,6 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'due_date_delay_days', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Due Date Delay Days' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
-
 		// Effective Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {
@@ -485,7 +483,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		//user to remind
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -526,7 +524,6 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Recalculate Dates From' ), form_item_input, tab_payroll_remittance_agency_event_column_1 );
 
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'start_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
@@ -545,9 +542,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 	}
 
-
 } );
-
 
 PayrollRemittanceAgencyEventViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'PayrollRemittanceAgencyEvent', 'SubPayrollRemittanceAgencyEventView.html', function( result ) {

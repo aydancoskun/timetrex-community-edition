@@ -42,23 +42,24 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	protected $table = 'holiday_policy_recurring_holiday';
 	protected $pk_sequence_name = 'holiday_policy_recurring_holiday_id_seq'; //PK Sequence name
 
-	protected $recurring_holiday_obj = NULL;
+	protected $recurring_holiday_obj = null;
 
 	/**
 	 * @return bool|null
 	 */
 	function getRecurringHolidayObject() {
-		if ( is_object($this->recurring_holiday_obj) ) {
+		if ( is_object( $this->recurring_holiday_obj ) ) {
 			return $this->recurring_holiday_obj;
 		} else {
 			$lf = TTnew( 'RecurringHolidayListFactory' ); /** @var RecurringHolidayListFactory $lf */
 			$lf->getById( $this->getRecurringHoliday() );
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->recurring_holiday_obj = $lf->getCurrent();
+
 				return $this->recurring_holiday_obj;
 			}
 
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -73,8 +74,9 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setHolidayPolicy( $value) {
+	function setHolidayPolicy( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'holiday_policy_id', $value );
 	}
 
@@ -89,8 +91,9 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setRecurringHoliday( $value) {
+	function setRecurringHoliday( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'recurring_holiday_id', $value );
 	}
 
@@ -103,26 +106,26 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 		//
 
 		// Holiday Policy
-		if ( $this->getHolidayPolicy() == '' OR $this->getHolidayPolicy() == TTUUID::getZeroID() ) {
+		if ( $this->getHolidayPolicy() == '' || $this->getHolidayPolicy() == TTUUID::getZeroID() ) {
 			$hplf = TTnew( 'HolidayPolicyListFactory' ); /** @var HolidayPolicyListFactory $hplf */
-			$this->Validator->isResultSetWithRows(	'holiday_policy',
-													  $hplf->getByID($this->getHolidayPolicy()),
-													  TTi18n::gettext('Invalid Holiday Policy')
+			$this->Validator->isResultSetWithRows( 'holiday_policy',
+												   $hplf->getByID( $this->getHolidayPolicy() ),
+												   TTi18n::gettext( 'Invalid Holiday Policy' )
 			);
 		}
 
 		// Selected Recurring Holiday
 		$rhlf = TTnew( 'RecurringHolidayListFactory' ); /** @var RecurringHolidayListFactory $rhlf */
-		$this->Validator->isResultSetWithRows(	'recurring_holiday',
-														$rhlf->getByID($this->getRecurringHoliday()),
-														TTi18n::gettext('Selected Recurring Holiday is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'recurring_holiday',
+											   $rhlf->getByID( $this->getRecurringHoliday() ),
+											   TTi18n::gettext( 'Selected Recurring Holiday is invalid' )
+		);
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -131,75 +134,75 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -207,30 +210,30 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -239,11 +242,12 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$obj = $this->getRecurringHolidayObject();
-		if ( is_object($obj) ) {
-			return TTLog::addEntry( $this->getHolidayPolicy(), $log_action, TTi18n::getText('Recurring Holiday').': '. $obj->getName(), NULL, $this->getTable() );
+		if ( is_object( $obj ) ) {
+			return TTLog::addEntry( $this->getHolidayPolicy(), $log_action, TTi18n::getText( 'Recurring Holiday' ) . ': ' . $obj->getName(), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

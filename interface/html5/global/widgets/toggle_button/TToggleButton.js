@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.TToggleButton = function( options ) {
 
@@ -71,4 +71,4 @@
 
 	$.fn.TToggleButton.defaults = {};
 
-})( jQuery );
+} )( jQuery );

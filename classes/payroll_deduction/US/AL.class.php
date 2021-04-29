@@ -48,178 +48,178 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 															50 => 'Status "MS"'
 										);
 	*/
-	var $state_income_tax_rate_options = array(
-			20120101 => array(
-					10 => array(
-							array('income' => 500, 'rate' => 2, 'constant' => 0),
-							array('income' => 2500, 'rate' => 4, 'constant' => 10),
-							array('income' => 3000, 'rate' => 5, 'constant' => 90),
-					),
-					20 => array(
-							array('income' => 1000, 'rate' => 2, 'constant' => 0),
-							array('income' => 5000, 'rate' => 4, 'constant' => 20),
-							array('income' => 6000, 'rate' => 5, 'constant' => 180),
-					),
-					30 => array(
-							array('income' => 500, 'rate' => 2, 'constant' => 0),
-							array('income' => 2500, 'rate' => 4, 'constant' => 10),
-							array('income' => 3000, 'rate' => 5, 'constant' => 90),
-					),
-					40 => array(
-							array('income' => 500, 'rate' => 2, 'constant' => 0),
-							array('income' => 2500, 'rate' => 4, 'constant' => 10),
-							array('income' => 3000, 'rate' => 5, 'constant' => 90),
-					),
-					50 => array(
-							array('income' => 500, 'rate' => 2, 'constant' => 0),
-							array('income' => 2500, 'rate' => 4, 'constant' => 10),
-							array('income' => 3000, 'rate' => 5, 'constant' => 90),
-					),
-			),
-			20060101 => array(
-					10 => array(
-							array('income' => 500, 'rate' => 2, 'constant' => 0),
-							array('income' => 3000, 'rate' => 4, 'constant' => 10),
-							array('income' => 3000, 'rate' => 5, 'constant' => 110),
-					),
-					20 => array(
-							array('income' => 1000, 'rate' => 2, 'constant' => 0),
-							array('income' => 6000, 'rate' => 4, 'constant' => 20),
-							array('income' => 6000, 'rate' => 5, 'constant' => 220),
-					),
-					30 => array(
-							array('income' => 500, 'rate' => 2, 'constant' => 0),
-							array('income' => 3000, 'rate' => 4, 'constant' => 10),
-							array('income' => 3000, 'rate' => 5, 'constant' => 110),
-					),
-					40 => array(
-							array('income' => 500, 'rate' => 2, 'constant' => 0),
-							array('income' => 3000, 'rate' => 4, 'constant' => 10),
-							array('income' => 3000, 'rate' => 5, 'constant' => 110),
-					),
-					50 => array(
-							array('income' => 500, 'rate' => 2, 'constant' => 0),
-							array('income' => 3000, 'rate' => 4, 'constant' => 10),
-							array('income' => 3000, 'rate' => 5, 'constant' => 110),
-					),
-			),
-	);
+	var $state_income_tax_rate_options = [
+			20120101 => [
+					10 => [
+							[ 'income' => 500, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 2500, 'rate' => 4, 'constant' => 10 ],
+							[ 'income' => 3000, 'rate' => 5, 'constant' => 90 ],
+					],
+					20 => [
+							[ 'income' => 1000, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 5000, 'rate' => 4, 'constant' => 20 ],
+							[ 'income' => 6000, 'rate' => 5, 'constant' => 180 ],
+					],
+					30 => [
+							[ 'income' => 500, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 2500, 'rate' => 4, 'constant' => 10 ],
+							[ 'income' => 3000, 'rate' => 5, 'constant' => 90 ],
+					],
+					40 => [
+							[ 'income' => 500, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 2500, 'rate' => 4, 'constant' => 10 ],
+							[ 'income' => 3000, 'rate' => 5, 'constant' => 90 ],
+					],
+					50 => [
+							[ 'income' => 500, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 2500, 'rate' => 4, 'constant' => 10 ],
+							[ 'income' => 3000, 'rate' => 5, 'constant' => 90 ],
+					],
+			],
+			20060101 => [
+					10 => [
+							[ 'income' => 500, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 3000, 'rate' => 4, 'constant' => 10 ],
+							[ 'income' => 3000, 'rate' => 5, 'constant' => 110 ],
+					],
+					20 => [
+							[ 'income' => 1000, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 6000, 'rate' => 4, 'constant' => 20 ],
+							[ 'income' => 6000, 'rate' => 5, 'constant' => 220 ],
+					],
+					30 => [
+							[ 'income' => 500, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 3000, 'rate' => 4, 'constant' => 10 ],
+							[ 'income' => 3000, 'rate' => 5, 'constant' => 110 ],
+					],
+					40 => [
+							[ 'income' => 500, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 3000, 'rate' => 4, 'constant' => 10 ],
+							[ 'income' => 3000, 'rate' => 5, 'constant' => 110 ],
+					],
+					50 => [
+							[ 'income' => 500, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 3000, 'rate' => 4, 'constant' => 10 ],
+							[ 'income' => 3000, 'rate' => 5, 'constant' => 110 ],
+					],
+			],
+	];
 
-	var $state_options = array(
-			20130709 => array( //09-Jul-13 (was 13-Jul-09)
-							   'standard_deduction_rate'    => 0,
-							   'standard_deduction_maximum' => array(
-									   '10' => array(
-										   //1 = Income
-										   //2 = Reduce By
-										   //3 = Reduce by for every amount over the prev income level.
-										   //4 = Previous Income
-										   0 => array(20499, 2500, 0, 0, 0),
-										   1 => array(30000, 2500, 25, 500, 20499),
-										   2 => array(30000, 2000, 0, 0, 30000),
-									   ),
-									   '20' => array(
-											   0 => array(20499, 7500, 0, 0, 0),
-											   1 => array(30000, 7500, 175, 500, 20499),
-											   2 => array(30000, 4000, 0, 0, 30000),
-									   ),
-									   '30' => array(
-											   0 => array(20499, 2500, 0, 0, 0),
-											   1 => array(30000, 2500, 25, 500, 20000),
-											   2 => array(30000, 2000, 0, 0, 30000),
-									   ),
-									   '40' => array(
-											   0 => array(20499, 4700, 0, 0, 0),
-											   1 => array(30000, 4700, 135, 500, 20499),
-											   2 => array(30000, 2000, 0, 0, 30000),
-									   ),
-									   '50' => array(
-											   0 => array(10249, 3750, 0, 0, 0),
-											   1 => array(15000, 3750, 88, 250, 10249),
-											   2 => array(15000, 2000, 0, 0, 15000),
-									   ),
-							   ),
-							   'personal_deduction'         => array(
-									   '10' => 1500,
-									   '20' => 3000,
-									   '30' => 0,
-									   '40' => 3000,
-									   '50' => 1500,
-							   ),
+	var $state_options = [
+			20130709 => [ //09-Jul-13 (was 13-Jul-09)
+						  'standard_deduction_rate'    => 0,
+						  'standard_deduction_maximum' => [
+								  '10' => [
+									  //1 = Income
+									  //2 = Reduce By
+									  //3 = Reduce by for every amount over the prev income level.
+									  //4 = Previous Income
+									  0 => [ 20499, 2500, 0, 0, 0 ],
+									  1 => [ 30000, 2500, 25, 500, 20499 ],
+									  2 => [ 30000, 2000, 0, 0, 30000 ],
+								  ],
+								  '20' => [
+										  0 => [ 20499, 7500, 0, 0, 0 ],
+										  1 => [ 30000, 7500, 175, 500, 20499 ],
+										  2 => [ 30000, 4000, 0, 0, 30000 ],
+								  ],
+								  '30' => [
+										  0 => [ 20499, 2500, 0, 0, 0 ],
+										  1 => [ 30000, 2500, 25, 500, 20000 ],
+										  2 => [ 30000, 2000, 0, 0, 30000 ],
+								  ],
+								  '40' => [
+										  0 => [ 20499, 4700, 0, 0, 0 ],
+										  1 => [ 30000, 4700, 135, 500, 20499 ],
+										  2 => [ 30000, 2000, 0, 0, 30000 ],
+								  ],
+								  '50' => [
+										  0 => [ 10249, 3750, 0, 0, 0 ],
+										  1 => [ 15000, 3750, 88, 250, 10249 ],
+										  2 => [ 15000, 2000, 0, 0, 15000 ],
+								  ],
+						  ],
+						  'personal_deduction'         => [
+								  '10' => 1500,
+								  '20' => 3000,
+								  '30' => 0,
+								  '40' => 3000,
+								  '50' => 1500,
+						  ],
 
-							   'dependant_allowance' => array(
-									   0 => array(20000, 1000),
-									   1 => array(100000, 500),
-									   2 => array(100000, 300),
-							   ),
-			),
-			20070101 => array(
+						  'dependant_allowance' => [
+								  0 => [ 20000, 1000 ],
+								  1 => [ 100000, 500 ],
+								  2 => [ 100000, 300 ],
+						  ],
+			],
+			20070101 => [
 					'standard_deduction_rate'    => 0,
-					'standard_deduction_maximum' => array(
-							'10' => array(
+					'standard_deduction_maximum' => [
+							'10' => [
 								//1 = Income
 								//2 = Reduce By
 								//3 = Reduce by for every amount over the prev income level.
 								//4 = Previous Income
-								0 => array(20000, 2500, 0, 0, 0),
-								1 => array(30000, 2500, 25, 500, 20000),
-								2 => array(30000, 2000, 0, 0, 30000),
-							),
-							'20' => array(
-									0 => array(20000, 7500, 0, 0, 0),
-									1 => array(30000, 7500, 175, 500, 20000),
-									2 => array(30000, 4000, 0, 0, 30000),
-							),
-							'30' => array(
-									0 => array(20000, 2500, 0, 0, 0),
-									1 => array(30000, 2500, 25, 500, 20000),
-									2 => array(30000, 2000, 0, 0, 30000),
-							),
-							'40' => array(
-									0 => array(20000, 4700, 0, 0, 0),
-									1 => array(30000, 4700, 135, 500, 20000),
-									2 => array(30000, 2000, 0, 0, 30000),
-							),
-							'50' => array(
-									0 => array(10000, 3750, 0, 0, 0),
-									1 => array(15000, 3750, 88, 250, 10000),
-									2 => array(15000, 2000, 0, 0, 15000),
-							),
-					),
-					'personal_deduction'         => array(
+								0 => [ 20000, 2500, 0, 0, 0 ],
+								1 => [ 30000, 2500, 25, 500, 20000 ],
+								2 => [ 30000, 2000, 0, 0, 30000 ],
+							],
+							'20' => [
+									0 => [ 20000, 7500, 0, 0, 0 ],
+									1 => [ 30000, 7500, 175, 500, 20000 ],
+									2 => [ 30000, 4000, 0, 0, 30000 ],
+							],
+							'30' => [
+									0 => [ 20000, 2500, 0, 0, 0 ],
+									1 => [ 30000, 2500, 25, 500, 20000 ],
+									2 => [ 30000, 2000, 0, 0, 30000 ],
+							],
+							'40' => [
+									0 => [ 20000, 4700, 0, 0, 0 ],
+									1 => [ 30000, 4700, 135, 500, 20000 ],
+									2 => [ 30000, 2000, 0, 0, 30000 ],
+							],
+							'50' => [
+									0 => [ 10000, 3750, 0, 0, 0 ],
+									1 => [ 15000, 3750, 88, 250, 10000 ],
+									2 => [ 15000, 2000, 0, 0, 15000 ],
+							],
+					],
+					'personal_deduction'         => [
 							'10' => 1500,
 							'20' => 3000,
 							'30' => 0,
 							'40' => 3000,
 							'50' => 1500,
-					),
+					],
 
-					'dependant_allowance' => array(
-							0 => array(20000, 1000),
-							1 => array(100000, 500),
-							2 => array(100000, 300),
-					),
-			),
-			20060101 => array(
+					'dependant_allowance' => [
+							0 => [ 20000, 1000 ],
+							1 => [ 100000, 500 ],
+							2 => [ 100000, 300 ],
+					],
+			],
+			20060101 => [
 					'standard_deduction_rate'    => 20,
-					'standard_deduction_maximum' => array(
+					'standard_deduction_maximum' => [
 							'10' => 2000,
 							'20' => 4000,
 							'30' => 2000,
 							'40' => 2000,
 							'50' => 2000,
-					),
-					'personal_deduction'         => array(
+					],
+					'personal_deduction'         => [
 							'10' => 1500,
 							'20' => 3000,
 							'30' => 0,
 							'40' => 3000,
 							'50' => 1500,
-					),
+					],
 
 					'dependant_allowance' => 300,
-			),
-	);
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -242,34 +242,34 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 
 	function getDataByIncome( $income, $arr ) {
 		if ( !is_array( $arr ) ) {
-			return FALSE;
+			return false;
 		}
 
 		$prev_value = 0;
 		$total_rates = count( $arr ) - 1;
 		$i = 0;
 		foreach ( $arr as $key => $values ) {
-			if ( $this->getAnnualTaxableIncome() > $prev_value AND $this->getAnnualTaxableIncome() <= $values[0] ) {
+			if ( $this->getAnnualTaxableIncome() > $prev_value && $this->getAnnualTaxableIncome() <= $values[0] ) {
 				return $values;
-			} elseif ( $i == $total_rates ) {
+			} else if ( $i == $total_rates ) {
 				return $values;
 			}
 			$prev_value = $values[0];
 			$i++;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function getStateStandardDeduction() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		if ( $this->getDate() >= 20070101 ) {
 			Debug::text( 'Standard Deduction Formula (NEW)', __FILE__, __LINE__, __METHOD__, 10 );
-			$deduction_arr = $this->getDataByIncome( $this->getAnnualTaxableIncome(), $retarr['standard_deduction_maximum'][ $this->getStateFilingStatus() ] );
+			$deduction_arr = $this->getDataByIncome( $this->getAnnualTaxableIncome(), $retarr['standard_deduction_maximum'][$this->getStateFilingStatus()] );
 
 			if ( $deduction_arr[3] > 0 ) {
 				Debug::text( 'Complex Standard Deduction Formula (NEW)', __FILE__, __LINE__, __METHOD__, 10 );
@@ -285,8 +285,8 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 
 			$deduction = bcmul( $this->getAnnualTaxableIncome(), $rate );
 
-			if ( $deduction >= $retarr['standard_deduction_maximum'][ $this->getStateFilingStatus() ] ) {
-				$deduction = $retarr['standard_deduction_maximum'][ $this->getStateFilingStatus() ];
+			if ( $deduction >= $retarr['standard_deduction_maximum'][$this->getStateFilingStatus()] ) {
+				$deduction = $retarr['standard_deduction_maximum'][$this->getStateFilingStatus()];
 			}
 		}
 
@@ -297,12 +297,11 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 
 	function getStatePersonalDeduction() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
-		$deduction = $retarr['personal_deduction'][ $this->getStateFilingStatus() ];
+		$deduction = $retarr['personal_deduction'][$this->getStateFilingStatus()];
 
 		Debug::text( 'Personal Deduction: ' . $deduction . ' Filing Status: ' . $this->getStateFilingStatus(), __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -311,9 +310,8 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 
 	function getStateDependantAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		if ( $this->getDate() >= 20070101 ) {

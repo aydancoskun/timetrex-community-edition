@@ -48,5 +48,4 @@ var APIPayPeriod = ServiceCaller.extend( {
 
 	}
 
-
 } );

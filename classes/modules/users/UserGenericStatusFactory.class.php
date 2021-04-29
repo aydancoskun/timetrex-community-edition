@@ -40,12 +40,12 @@
  */
 class UserGenericStatusFactory extends Factory {
 	protected $table = 'user_generic_status';
-	protected $pk_sequence_name = 'user_generic_status_id_seq'; //PK Sequence name
+	protected $pk_sequence_name = 'user_generic_status_id_seq';          //PK Sequence name
 	protected $batch_sequence_name = 'user_generic_status_batch_id_seq'; //PK Sequence name
 
-	protected $batch_id = NULL;
-	protected $queue = NULL;
-	static protected $static_queue = NULL;
+	protected $batch_id = null;
+	protected $queue = null;
+	static protected $static_queue = null;
 
 
 	/**
@@ -53,41 +53,40 @@ class UserGenericStatusFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'status':
-				$retval = array(
-										10 => TTi18n::gettext('Failed'),
-										20 => TTi18n::gettext('Warning'),
-										//25 => TTi18n::gettext('Notice'), //Friendly than a warning.
-										30 => TTi18n::gettext('Success'),
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Failed' ),
+						20 => TTi18n::gettext( 'Warning' ),
+						//25 => TTi18n::gettext('Notice'), //Friendly than a warning.
+						30 => TTi18n::gettext( 'Success' ),
+				];
 				break;
 			case 'columns':
-				$retval = array(
-										'-1010-label' => TTi18n::gettext('Label'),
-										'-1020-status' => TTi18n::gettext('Status'),
-										'-1030-description' => TTi18n::gettext('Description'),
+				$retval = [
+						'-1010-label'       => TTi18n::gettext( 'Label' ),
+						'-1020-status'      => TTi18n::gettext( 'Status' ),
+						'-1030-description' => TTi18n::gettext( 'Description' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'label',
-								'status',
-								'description',
-								);
+				$retval = [
+						'label',
+						'status',
+						'description',
+				];
 				break;
-
 		}
 
 		return $retval;
@@ -107,6 +106,7 @@ class UserGenericStatusFactory extends Factory {
 	 */
 	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -147,7 +147,8 @@ class UserGenericStatusFactory extends Factory {
 	 * @return bool
 	 */
 	function setStatus( $value ) {
-		$value = (int)trim($value);
+		$value = (int)trim( $value );
+
 		return $this->setGenericDataValue( 'status_id', $value );
 	}
 
@@ -163,7 +164,8 @@ class UserGenericStatusFactory extends Factory {
 	 * @return bool
 	 */
 	function setLabel( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'label', $value );
 	}
 
@@ -179,7 +181,8 @@ class UserGenericStatusFactory extends Factory {
 	 * @return bool
 	 */
 	function setDescription( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'description', $value );
 	}
 
@@ -195,7 +198,8 @@ class UserGenericStatusFactory extends Factory {
 	 * @return bool
 	 */
 	function setLink( $value ) {
-		$value = trim($value);
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'link', $value );
 	}
 
@@ -205,11 +209,11 @@ class UserGenericStatusFactory extends Factory {
 	 * @return bool
 	 */
 	static function isStaticQueue() {
-		if ( is_array( self::$static_queue ) AND count(self::$static_queue) > 0 ) {
-			return TRUE;
+		if ( is_array( self::$static_queue ) && count( self::$static_queue ) > 0 ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -223,9 +227,9 @@ class UserGenericStatusFactory extends Factory {
 	 * @return bool
 	 */
 	static function clearStaticQueue() {
-		self::$static_queue = NULL;
+		self::$static_queue = null;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -235,18 +239,18 @@ class UserGenericStatusFactory extends Factory {
 	 * @param null $link
 	 * @return bool
 	 */
-	static function queueGenericStatus( $label, $status, $description = NULL, $link = NULL ) {
-		Debug::Text('Add Generic Status row to queue... Label: '. $label .' Status: '. $status, __FILE__, __LINE__, __METHOD__, 10);
-		$arr = array(
-					'label' => $label,
-					'status' => $status,
-					'description' => $description,
-					'link' => $link
-					);
+	static function queueGenericStatus( $label, $status, $description = null, $link = null ) {
+		Debug::Text( 'Add Generic Status row to queue... Label: ' . $label . ' Status: ' . $status, __FILE__, __LINE__, __METHOD__, 10 );
+		$arr = [
+				'label'       => $label,
+				'status'      => $status,
+				'description' => $description,
+				'link'        => $link,
+		];
 
 		self::$static_queue[] = $arr;
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -261,20 +265,20 @@ class UserGenericStatusFactory extends Factory {
 
 		UserGenericStatusFactory::clearStaticQueue();
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function saveQueue() {
-		if ( is_array($this->queue) ) {
-			Debug::Arr($this->queue, 'Generic Status Queue', __FILE__, __LINE__, __METHOD__, 10);
-			foreach( $this->queue as $key => $queue_data ) {
+		if ( is_array( $this->queue ) ) {
+			Debug::Arr( $this->queue, 'Generic Status Queue', __FILE__, __LINE__, __METHOD__, 10 );
+			foreach ( $this->queue as $key => $queue_data ) {
 
 				$ugsf = TTnew( 'UserGenericStatusFactory' ); /** @var UserGenericStatusFactory $ugsf */
 				$ugsf->setUser( $this->getUser() );
-				if ( TTUUID::isUUID( $this->getBatchId() ) AND $this->getBatchID() != TTUUID::getZeroID() AND $this->getBatchID() != TTUUID::getNotExistID() ) {
+				if ( TTUUID::isUUID( $this->getBatchId() ) && $this->getBatchID() != TTUUID::getZeroID() && $this->getBatchID() != TTUUID::getNotExistID() ) {
 					$ugsf->setBatchID( $this->getBatchID() );
 				} else {
 					$this->setBatchId( $this->getNextBatchId() );
@@ -288,15 +292,16 @@ class UserGenericStatusFactory extends Factory {
 				if ( $ugsf->isValid() ) {
 					$ugsf->Save();
 
-					unset($this->queue[$key]);
+					unset( $this->queue[$key] );
 				}
 			}
 
-			return TRUE;
+			return true;
 		}
 
-		Debug::Text('Generic Status Queue Empty', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::Text( 'Generic Status Queue Empty', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 
 	/*
@@ -330,55 +335,56 @@ class UserGenericStatusFactory extends Factory {
 		//
 		// User
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$this->Validator->isResultSetWithRows(	'user',
-														$ulf->getByID($this->getUser()),
-														TTi18n::gettext('Invalid Employee')
-													);
+		$this->Validator->isResultSetWithRows( 'user',
+											   $ulf->getByID( $this->getUser() ),
+											   TTi18n::gettext( 'Invalid Employee' )
+		);
 		// Batch ID
-		$this->Validator->isUUID(	'batch_id',
-											$this->getBatchID(),
-											TTi18n::gettext('Invalid Batch ID')
-										);
+		$this->Validator->isUUID( 'batch_id',
+								  $this->getBatchID(),
+								  TTi18n::gettext( 'Invalid Batch ID' )
+		);
 		// Status
-		$this->Validator->inArrayKey(	'status',
-											$this->getStatus(),
-											TTi18n::gettext('Incorrect Status'),
-											$this->getOptions('status')
-										);
+		$this->Validator->inArrayKey( 'status',
+									  $this->getStatus(),
+									  TTi18n::gettext( 'Incorrect Status' ),
+									  $this->getOptions( 'status' )
+		);
 		// Label
-		$this->Validator->isLength(	'label',
-											$this->getLabel(),
-											TTi18n::gettext('Invalid label'),
-											1, 1024
-										);
+		$this->Validator->isLength( 'label',
+									$this->getLabel(),
+									TTi18n::gettext( 'Invalid label' ),
+									1, 1024
+		);
 		// Description
 		if ( $this->getDescription() != '' ) {
-			$this->Validator->isLength(	'description',
-												$this->getDescription(),
-												TTi18n::gettext('Invalid description'),
-												1, 1024
-											);
+			$this->Validator->isLength( 'description',
+										$this->getDescription(),
+										TTi18n::gettext( 'Invalid description' ),
+										1, 1024
+			);
 		}
 		// Link
 		if ( $this->getLink() != '' ) {
-			$this->Validator->isLength(	'link',
-												$this->getLink(),
-												TTi18n::gettext('Invalid link'),
-												1, 1024
-											);
+			$this->Validator->isLength( 'link',
+										$this->getLink(),
+										TTi18n::gettext( 'Invalid link' ),
+										1, 1024
+			);
 		}
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

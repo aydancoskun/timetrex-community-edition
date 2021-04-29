@@ -53,8 +53,9 @@ class LogDetailFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setSystemLog( $value) {
+	function setSystemLog( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'system_log_id', $value );
 	}
 
@@ -69,8 +70,9 @@ class LogDetailFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setField( $value) {
-		$value = trim($value);
+	function setField( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'field', $value );
 	}
 
@@ -85,8 +87,9 @@ class LogDetailFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setOldValue( $value) {
-		$value = trim($value);
+	function setOldValue( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'old_value', $value );
 	}
 
@@ -101,8 +104,9 @@ class LogDetailFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setNewValue( $value) {
-		$value = trim($value);
+	function setNewValue( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'new_value', $value );
 	}
 
@@ -115,13 +119,13 @@ class LogDetailFactory extends Factory {
 	 * @return bool
 	 */
 	function diffData( $arr1, $arr2 ) {
-		if ( !is_array($arr1) OR !is_array($arr2) ) {
-			return FALSE;
+		if ( !is_array( $arr1 ) || !is_array( $arr2 ) ) {
+			return false;
 		}
 
-		$retarr = FALSE;
-		foreach( $arr1 as $key => $val ) {
-			if ( !isset($arr2[$key]) OR is_array($val) OR is_array($arr2[$key]) OR ( $arr2[$key] != $val ) ) {
+		$retarr = false;
+		foreach ( $arr1 as $key => $val ) {
+			if ( !isset( $arr2[$key] ) || is_array( $val ) || is_array( $arr2[$key] ) || ( $arr2[$key] != $val ) ) {
 				$retarr[$key] = $val;
 			}
 		}
@@ -136,21 +140,22 @@ class LogDetailFactory extends Factory {
 	 * @return bool
 	 */
 	function addLogDetail( $action_id, $system_log_id, $object ) {
-		$start_time = microtime(TRUE);
+		$start_time = microtime( true );
 
 		//Only log detail records on add, edit, delete, undelete
 		//Logging data on Add/Delete/UnDelete, or anything but Edit will greatly bloat the database, on the order of tens of thousands of entries
 		//per day. The issue though is its nice to know exactly what data was originally added, then what was edited, and what was finally deleted.
 		//We may need to remove logging for added data, but leave it for edit/delete, so we know exactly what data was deleted.
-		if ( !in_array($action_id, array(10, 20, 30, 31, 40) ) ) {
-			Debug::text('Invalid Action ID: '. $action_id, __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+		if ( !in_array( $action_id, [ 10, 20, 30, 31, 40 ] ) ) {
+			Debug::text( 'Invalid Action ID: ' . $action_id, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
-		if ( TTUUID::isUUID($system_log_id) AND $system_log_id != TTUUID::getZeroID() AND $system_log_id != TTUUID::getNotExistID() AND is_object($object) ) {
+		if ( TTUUID::isUUID( $system_log_id ) && $system_log_id != TTUUID::getZeroID() && $system_log_id != TTUUID::getNotExistID() && is_object( $object ) ) {
 			//Remove "Plugin" from the end of the class name incase plugins are enabled.
-			$class = str_replace('Plugin', '', get_class( $object ) );
-			Debug::text('System Log ID: '. $system_log_id .' Class: '. $class, __FILE__, __LINE__, __METHOD__, 10);
+			$class = str_replace( 'Plugin', '', get_class( $object ) );
+			Debug::text( 'System Log ID: ' . $system_log_id . ' Class: ' . $class, __FILE__, __LINE__, __METHOD__, 10 );
 			//Debug::Arr($object->data, 'Object Data: ', __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Arr($object->old_data, 'Object Old Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -162,8 +167,8 @@ class LogDetailFactory extends Factory {
 			//Debug::Arr($new_data, 'New Data Arr: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $action_id == 20 ) { //Edit
 				if ( method_exists( $object, 'setObjectFromArray' ) ) {
-					if ( isset($object->old_data) AND isset( $object->old_data['password'] ) ) { //Password from old_data is encrypted, and if put back into the class always causes validation error.
-						$object->old_data['password'] = NULL;
+					if ( isset( $object->old_data ) && isset( $object->old_data['password'] ) ) { //Password from old_data is encrypted, and if put back into the class always causes validation error.
+						$object->old_data['password'] = null;
 					}
 
 					$tmp_class = new $class;
@@ -176,7 +181,7 @@ class LogDetailFactory extends Factory {
 					//$old_data = $object->old_data;
 					$tmp_class->setObjectFromArray( $object->old_data );
 					$old_data = $tmp_class->data;
-					unset($tmp_class);
+					unset( $tmp_class );
 				} else {
 					$old_data = $object->old_data;
 				}
@@ -187,21 +192,21 @@ class LogDetailFactory extends Factory {
 
 				//We don't want to include any sub-arrays, as those classes should take care of their own logging, even though it may be slower in some cases.
 				$diff_arr = array_diff_assoc( (array)$new_data, (array)$old_data );
-			} elseif ( $action_id == 30 ) { //Delete
-				$old_data = array();
+			} else if ( $action_id == 30 ) { //Delete
+				$old_data = [];
 				if ( method_exists( $object, 'setObjectFromArray' ) ) {
 					//Run the old data back through the objects own setObjectFromArray(), so any necessary values can be parsed.
 					$tmp_class = new $class;
 					$tmp_class->setObjectFromArray( $object->data );
 					$diff_arr = $tmp_class->data;
-					unset($tmp_class);
+					unset( $tmp_class );
 				} else {
 					$diff_arr = $object->data;
 				}
 			} else { //Add
 				//Debug::text('Not editing, skipping the diff process...', __FILE__, __LINE__, __METHOD__, 10);
 				//No need to store data that is added, as its already in the database, and if it gets changed or deleted we store it then.
-				$old_data = array();
+				$old_data = [];
 				$diff_arr = $object->data;
 			}
 			//Debug::Arr($old_data, 'Old Data Arr: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -235,7 +240,7 @@ class LogDetailFactory extends Factory {
 							$diff_arr['home_email_is_valid'],
 							$diff_arr['home_email_is_valid_key'],
 							$diff_arr['home_email_is_valid_date']
-							);
+					);
 					break;
 				case 'UserPreferenceFactory':
 				case 'UserPreferenceListFactory':
@@ -253,13 +258,13 @@ class LogDetailFactory extends Factory {
 							$diff_arr['secondary_date_ldom'],
 							$diff_arr['secondary_transaction_date_ldom'],
 							$diff_arr['secondary_transaction_date_bd']
-							);
+					);
 					break;
 				case 'PayPeriodFactory':
 				case 'PayPeriodListFactory':
 					unset(
 							$diff_arr['is_primary']
-							);
+					);
 					break;
 				case 'PayStubEntryFactory':
 				case 'PayStubEntryListFactory':
@@ -267,7 +272,7 @@ class LogDetailFactory extends Factory {
 				case 'PayStubTransactionListFactory':
 					unset(
 							$diff_arr['pay_stub_id']
-							);
+					);
 					break;
 				case 'StationFactory':
 				case 'StationListFactory':
@@ -279,14 +284,14 @@ class LogDetailFactory extends Factory {
 							$diff_arr['mode_flag'], //This is changed often for some reason, would be nice to audit it though.
 							$diff_arr['work_code_definition'],
 							$diff_arr['allowed_date']
-						);
+					);
 					break;
 				case 'ScheduleFactory':
 				case 'ScheduleListFactory':
 					unset(
 							$diff_arr['recurring_schedule_template_control_id'],
 							$diff_arr['replaced_id']
-							);
+					);
 					break;
 				case 'PunchFactory':
 				case 'PunchListFactory':
@@ -296,7 +301,7 @@ class LogDetailFactory extends Factory {
 							$diff_arr['original_time_stamp'],
 							$diff_arr['punch_control_id'],
 							$diff_arr['station_id']
-							);
+					);
 					break;
 				case 'PunchControlFactory':
 				case 'PunchControlListFactory':
@@ -304,35 +309,29 @@ class LogDetailFactory extends Factory {
 							$diff_arr['date_stamp'], //Logged in Punch Factory instead.
 							$diff_arr['overlap'],
 							$diff_arr['actual_total_time']
-							);
+					);
 					break;
 				case 'ExceptionPolicyFactory':
 				case 'ExceptionPolicyListFactory':
 					unset(
 							$diff_arr['enable_authorization']
-							);
+					);
 					break;
 				case 'GEOFenceFactory':
 				case 'GEOFenceListFactory':
-					if ( $this->getDatabaseType() === 'mysql' ) {
-						unset(
-							$diff_arr['geo_circle'],
-							$diff_arr['geo_polygon']
-						);
-					}
 					break;
 				case 'AccrualFactory':
 				case 'AccrualListFactory':
 					unset(
 							$diff_arr['user_date_total_id']
-							);
+					);
 					break;
 				case 'JobItemFactory':
 				case 'JobItemListFactory':
 					unset(
 							$diff_arr['type_id'],
 							$diff_arr['department_id']
-							);
+					);
 					break;
 				case 'ClientContactFactory':
 				case 'ClientContactListFactory':
@@ -340,31 +339,31 @@ class LogDetailFactory extends Factory {
 							$diff_arr['password'],
 							$diff_arr['password_reset_key'],
 							$diff_arr['password_reset_date']
-							);
+					);
 					break;
 				case 'UserReviewFactory':
 				case 'UserReviewListFactory':
 					unset(
 							$diff_arr['user_review_control_id']
-							);
+					);
 					break;
 				case 'ClientPaymentFactory':
 				case 'ClientPaymentListFactory':
 					if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 						//Only log secure values.
-						if ( isset($diff_arr['cc_number']) ) {
-							$old_data['cc_number'] = ( isset($old_data['cc_number']) ) ? $object->getSecureCreditCardNumber( Misc::decrypt( $old_data['cc_number'] ) ) : '';
-							$new_data['cc_number'] = ( isset($new_data['cc_number']) ) ? $object->getSecureCreditCardNumber( Misc::decrypt( $new_data['cc_number'] ) ) : '';
+						if ( isset( $diff_arr['cc_number'] ) ) {
+							$old_data['cc_number'] = ( isset( $old_data['cc_number'] ) ) ? $object->getSecureCreditCardNumber( Misc::decrypt( $old_data['cc_number'] ) ) : '';
+							$new_data['cc_number'] = ( isset( $new_data['cc_number'] ) ) ? $object->getSecureCreditCardNumber( Misc::decrypt( $new_data['cc_number'] ) ) : '';
 						}
 
-						if ( isset($diff_arr['bank_account']) ) {
-							$old_data['bank_account'] = ( isset($old_data['bank_account']) ) ? $object->getSecureAccount( $old_data['bank_account'] ) : '';
-							$new_data['bank_account'] = ( isset($new_data['bank_account']) ) ? $object->getSecureAccount( $new_data['bank_account'] ) : '';
+						if ( isset( $diff_arr['bank_account'] ) ) {
+							$old_data['bank_account'] = ( isset( $old_data['bank_account'] ) ) ? $object->getSecureAccount( $old_data['bank_account'] ) : '';
+							$new_data['bank_account'] = ( isset( $new_data['bank_account'] ) ) ? $object->getSecureAccount( $new_data['bank_account'] ) : '';
 						}
 
-						if ( isset($diff_arr['cc_check']) ) {
-							$old_data['cc_check'] = ( isset($old_data['cc_check']) ) ? $object->getSecureCreditCardCheck( $old_data['cc_check'] ) : '';
-							$new_data['cc_check'] = ( isset($new_data['cc_check']) ) ? $object->getSecureCreditCardCheck( $new_data['cc_check'] ) : '';
+						if ( isset( $diff_arr['cc_check'] ) ) {
+							$old_data['cc_check'] = ( isset( $old_data['cc_check'] ) ) ? $object->getSecureCreditCardCheck( $old_data['cc_check'] ) : '';
+							$new_data['cc_check'] = ( isset( $new_data['cc_check'] ) ) ? $object->getSecureCreditCardCheck( $new_data['cc_check'] ) : '';
 						}
 					}
 					break;
@@ -373,9 +372,9 @@ class LogDetailFactory extends Factory {
 				case 'RemittanceDestinationAccountFactory':
 				case 'RemittanceDestinationAccountListFactory':
 					//Only log secure values.
-					if ( isset($diff_arr['value3']) ) {
-						$old_data['value3'] = ( isset($old_data['value3']) ) ? $object->getSecureValue3( $object->getValue3( $old_data['value3'] ) ) : '';
-						$new_data['value3'] = ( isset($new_data['value3']) ) ? $object->getSecureValue3( $object->getValue3( $new_data['value3'] ) ) : '';
+					if ( isset( $diff_arr['value3'] ) ) {
+						$old_data['value3'] = ( isset( $old_data['value3'] ) ) ? $object->getSecureValue3( $object->getValue3( $old_data['value3'] ) ) : '';
+						$new_data['value3'] = ( isset( $new_data['value3'] ) ) ? $object->getSecureValue3( $object->getValue3( $new_data['value3'] ) ) : '';
 					}
 					break;
 				case 'JobApplicantFactory':
@@ -388,7 +387,7 @@ class LogDetailFactory extends Factory {
 							$diff_arr['last_name_metaphone']
 							//$diff_arr['longitude'],
 							//$diff_arr['latitude']
-							);
+					);
 					break;
 				case 'ReportScheduleFactory':
 				case 'ReportScheduleListFactory':
@@ -396,16 +395,15 @@ class LogDetailFactory extends Factory {
 							$diff_arr['user_report_data_id'],
 							$diff_arr['state_id']
 					);
-				break;
+					break;
 				case 'LegalEntityFactory':
 				case 'LegalEntityListFactory':
 					//Only log secure values.
-					if ( isset($diff_arr['payment_services_api_key']) ) {
-						$old_data['payment_services_api_key'] = ( isset($old_data['payment_services_api_key']) ) ? $object->getSecurePaymentServicesAPIKey( $object->getPaymentServicesAPIKey( $old_data['payment_services_api_key'] ) ) : '';
-						$new_data['payment_services_api_key'] = ( isset($new_data['payment_services_api_key']) ) ? $object->getSecurePaymentServicesAPIKey( $object->getPaymentServicesAPIKey( $new_data['payment_services_api_key'] ) ) : '';
+					if ( isset( $diff_arr['payment_services_api_key'] ) ) {
+						$old_data['payment_services_api_key'] = ( isset( $old_data['payment_services_api_key'] ) ) ? $object->getSecurePaymentServicesAPIKey( $object->getPaymentServicesAPIKey( $old_data['payment_services_api_key'] ) ) : '';
+						$new_data['payment_services_api_key'] = ( isset( $new_data['payment_services_api_key'] ) ) ? $object->getSecurePaymentServicesAPIKey( $object->getPaymentServicesAPIKey( $new_data['payment_services_api_key'] ) ) : '';
 					}
 					break;
-
 			}
 
 			//Ignore specific columns here, like updated_date, updated_by, etc...
@@ -430,62 +428,63 @@ class LogDetailFactory extends Factory {
 					$diff_arr['deleted_by'],
 					$diff_arr['deleted_by_id'],
 					$diff_arr['deleted']
-					);
+			);
 
 			//Debug::Arr($diff_arr, 'Array Diff: ', __FILE__, __LINE__, __METHOD__, 10);
-			if ( is_array($diff_arr) AND count($diff_arr) > 0 ) {
-				$ph = array();
-				$data = array();
-				foreach( $diff_arr as $field => $value ) {
+			if ( is_array( $diff_arr ) && count( $diff_arr ) > 0 ) {
+				$ph = [];
+				$data = [];
+				foreach ( $diff_arr as $field => $value ) {
 
-					$old_value = NULL;
-					if ( isset($old_data[$field]) ) {
+					$old_value = null;
+					if ( isset( $old_data[$field] ) ) {
 						$old_value = $old_data[$field];
-						if ( is_bool($old_value) AND $old_value === FALSE ) {
-							$old_value = NULL;
-						} elseif ( is_array($old_value) ) {
+						if ( is_bool( $old_value ) && $old_value === false ) {
+							$old_value = null;
+						} else if ( is_array( $old_value ) ) {
 							//$old_value = serialize($old_value);
 							//If the old value is an array, replace it with NULL because it will always match the NEW value too.
-							$old_value = NULL;
+							$old_value = null;
 						}
 					}
 
 					$new_value = $new_data[$field];
-					if ( is_bool($new_value) AND $new_value === FALSE ) {
-						$new_value = NULL;
-					} elseif ( is_array($new_value) ) {
-						$new_value = serialize($new_value);
-					} elseif ( isset($old_data[$field]) == FALSE AND $new_value == TTUUID::getZeroID() ) { //Don't log cases where old value doesn't exist but new value is a zero UUID.
-						$new_value = NULL;
+					if ( is_bool( $new_value ) && $new_value === false ) {
+						$new_value = null;
+					} else if ( is_array( $new_value ) ) {
+						$new_value = serialize( $new_value );
+					} else if ( isset( $old_data[$field] ) == false && $new_value == TTUUID::getZeroID() ) { //Don't log cases where old value doesn't exist but new value is a zero UUID.
+						$new_value = null;
 					}
 
 					//Debug::Text('Old Value: '. $old_value .' New Value: '. $new_value, __FILE__, __LINE__, __METHOD__, 10);
-					if ( !($old_value == '' AND $new_value == '') ) {
+					if ( !( $old_value == '' && $new_value == '' ) ) {
 						$ph[] = $this->getNextInsertId(); //This needs work before UUID and after.
-						$ph[] = TTUUID::castUUID($system_log_id);
+						$ph[] = TTUUID::castUUID( $system_log_id );
 						$ph[] = $field;
 						$ph[] = $new_value;
 						$ph[] = $old_value;
 						$data[] = '(?, ?, ?, ?, ?)';
 					}
 				}
-				unset($value); //code standards
+				unset( $value ); //code standards
 
-				if ( empty($data) == FALSE ) {
+				if ( empty( $data ) == false ) {
 					//Save data in a single SQL query.
-					$query = 'INSERT INTO '. $this->getTable() .'(ID, SYSTEM_LOG_ID, FIELD, NEW_VALUE, OLD_VALUE) VALUES'. implode(',', $data );
+					$query = 'INSERT INTO ' . $this->getTable() . '(ID, SYSTEM_LOG_ID, FIELD, NEW_VALUE, OLD_VALUE) VALUES' . implode( ',', $data );
 					//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 					$this->ExecuteSQL( $query, $ph );
 
-					Debug::Text('Logged detail records in: '. (microtime(TRUE) - $start_time), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'Logged detail records in: ' . ( microtime( true ) - $start_time ), __FILE__, __LINE__, __METHOD__, 10 );
 
-					return TRUE;
+					return true;
 				}
 			}
 		}
 
-		Debug::Text('Not logging detail records, likely no data changed in: '. (microtime(TRUE) - $start_time) .'s', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::Text( 'Not logging detail records, likely no data changed in: ' . ( microtime( true ) - $start_time ) . 's', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 
 	/**
@@ -497,37 +496,37 @@ class LogDetailFactory extends Factory {
 		//
 
 		// System log
-		if ( $this->getSystemLog() !== FALSE AND $this->getSystemLog() != TTUUID::getZeroID() ) {
+		if ( $this->getSystemLog() !== false && $this->getSystemLog() != TTUUID::getZeroID() ) {
 			$llf = TTnew( 'LogListFactory' ); /** @var LogListFactory $llf */
-			$this->Validator->isResultSetWithRows(	'user',
-														$llf->getByID($this->getSystemLog()),
-														TTi18n::gettext('System log is invalid')
-													);
+			$this->Validator->isResultSetWithRows( 'user',
+												   $llf->getByID( $this->getSystemLog() ),
+												   TTi18n::gettext( 'System log is invalid' )
+			);
 		}
 		// Field
-		$this->Validator->isString(		'field',
-										$this->getField(),
-										TTi18n::gettext('Field is invalid')
-									);
+		$this->Validator->isString( 'field',
+									$this->getField(),
+									TTi18n::gettext( 'Field is invalid' )
+		);
 		// Old value
-		$this->Validator->isLength(		'old_value',
-												$this->getOldValue(),
-												TTi18n::gettext('Old value is invalid'),
-												0,
-												1024
-											);
+		$this->Validator->isLength( 'old_value',
+									$this->getOldValue(),
+									TTi18n::gettext( 'Old value is invalid' ),
+									0,
+									1024
+		);
 		// New value
-		$this->Validator->isLength(		'new_value',
-												$this->getNewValue(),
-												TTi18n::gettext('New value is invalid'),
-												0,
-												1024
-											);
+		$this->Validator->isLength( 'new_value',
+									$this->getNewValue(),
+									TTi18n::gettext( 'New value is invalid' ),
+									0,
+									1024
+		);
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -535,75 +534,75 @@ class LogDetailFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -611,41 +610,42 @@ class LogDetailFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		if ($this->getDate() === FALSE ) {
+		if ( $this->getDate() === false ) {
 			$this->setDate();
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

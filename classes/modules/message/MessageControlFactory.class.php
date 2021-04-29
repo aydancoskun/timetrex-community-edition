@@ -42,121 +42,121 @@ class MessageControlFactory extends Factory {
 	protected $table = 'message_control';
 	protected $pk_sequence_name = 'message_control_id_seq'; //PK Sequence name
 
-	protected $obj_handler = NULL;
+	protected $obj_handler = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'status':
-				$retval = array(
-										10 => TTi18n::gettext('UNREAD'),
-										20 => TTi18n::gettext('READ')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'UNREAD' ),
+						20 => TTi18n::gettext( 'READ' ),
+				];
 				break;
 			case 'type':
-				$retval = array(
-										5 => 'email',
-										//10 => 'default_schedule',
-										//20 => 'schedule_amendment',
-										//30 => 'shift_amendment',
-										40 => 'authorization',
-										50 => 'request',
-										60 => 'job',
-										70 => 'job_item',
-										80 => 'client',
-										90 => 'timesheet',
-										100 => 'user' //For notes assigned to users?
-									);
+				$retval = [
+						5   => 'email',
+						//10 => 'default_schedule',
+						//20 => 'schedule_amendment',
+						//30 => 'shift_amendment',
+						40  => 'authorization',
+						50  => 'request',
+						60  => 'job',
+						70  => 'job_item',
+						80  => 'client',
+						90  => 'timesheet',
+						100 => 'user' //For notes assigned to users?
+				];
 				break;
 			case 'type_to_api_map': //Maps the object_type_id to an API class that we can use to determine if the user has access to view the specific records or not.
-				$retval = array(
-										//5 => 'email', //Email is never linked to another class
-										//10 => 'default_schedule',
-										//20 => 'schedule_amendment',
-										//30 => 'shift_amendment',
-										40 => 'APIAuthorization',
-										50 => 'APIRequest',
-										60 => 'APIJob',
-										70 => 'APIJobItem',
-										80 => 'APIClient',
-										90 => 'APITimeSheet',
-										100 => 'APIUser' //For notes assigned to users?
-									);
+				$retval = [
+					//5 => 'email', //Email is never linked to another class
+					//10 => 'default_schedule',
+					//20 => 'schedule_amendment',
+					//30 => 'shift_amendment',
+					40  => 'APIAuthorization',
+					50  => 'APIRequest',
+					60  => 'APIJob',
+					70  => 'APIJobItem',
+					80  => 'APIClient',
+					90  => 'APITimeSheet',
+					100 => 'APIUser' //For notes assigned to users?
+				];
 				break;
 			case 'object_type':
 			case 'object_name':
-				$retval = array(
-										5 => TTi18n::gettext('Email'), //Email from user to another
-										10 => TTi18n::gettext('Recurring Schedule'),
-										20 => TTi18n::gettext('Schedule Amendment'),
-										30 => TTi18n::gettext('Shift Amendment'),
-										40 => TTi18n::gettext('Authorization'),
-										50 => TTi18n::gettext('Request'),
-										60 => TTi18n::gettext('Job'),
-										70 => TTi18n::gettext('Task'),
-										80 => TTi18n::gettext('Client'),
-										90 => TTi18n::gettext('TimeSheet'),
-										100 => TTi18n::gettext('Employee') //For notes assigned to users?
-									);
+				$retval = [
+						5   => TTi18n::gettext( 'Email' ), //Email from user to another
+						10  => TTi18n::gettext( 'Recurring Schedule' ),
+						20  => TTi18n::gettext( 'Schedule Amendment' ),
+						30  => TTi18n::gettext( 'Shift Amendment' ),
+						40  => TTi18n::gettext( 'Authorization' ),
+						50  => TTi18n::gettext( 'Request' ),
+						60  => TTi18n::gettext( 'Job' ),
+						70  => TTi18n::gettext( 'Task' ),
+						80  => TTi18n::gettext( 'Client' ),
+						90  => TTi18n::gettext( 'TimeSheet' ),
+						100 => TTi18n::gettext( 'Employee' ) //For notes assigned to users?
+				];
 				break;
 			case 'folder':
-				$retval = array(
-										10 => TTi18n::gettext('Inbox'),
-										20 => TTi18n::gettext('Sent')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'Inbox' ),
+						20 => TTi18n::gettext( 'Sent' ),
+				];
 				break;
 			case 'priority':
-				$retval = array(
-										10 => TTi18n::gettext('LOW'),
-										50 => TTi18n::gettext('NORMAL'),
-										100 => TTi18n::gettext('HIGH'),
-										110 => TTi18n::gettext('URGENT')
-									);
+				$retval = [
+						10  => TTi18n::gettext( 'LOW' ),
+						50  => TTi18n::gettext( 'NORMAL' ),
+						100 => TTi18n::gettext( 'HIGH' ),
+						110 => TTi18n::gettext( 'URGENT' ),
+				];
 				break;
 			case 'columns':
-				$retval = array(
-										'-1010-from_first_name' => TTi18n::gettext('From: First Name'),
-										'-1020-from_middle_name' => TTi18n::gettext('From: Middle Name'),
-										'-1030-from_last_name' => TTi18n::gettext('From: Last Name'),
+				$retval = [
+						'-1010-from_first_name'  => TTi18n::gettext( 'From: First Name' ),
+						'-1020-from_middle_name' => TTi18n::gettext( 'From: Middle Name' ),
+						'-1030-from_last_name'   => TTi18n::gettext( 'From: Last Name' ),
 
-										'-1110-to_first_name' => TTi18n::gettext('To: First Name'),
-										'-1120-to_middle_name' => TTi18n::gettext('To: Middle Name'),
-										'-1130-to_last_name' => TTi18n::gettext('To: Last Name'),
+						'-1110-to_first_name'  => TTi18n::gettext( 'To: First Name' ),
+						'-1120-to_middle_name' => TTi18n::gettext( 'To: Middle Name' ),
+						'-1130-to_last_name'   => TTi18n::gettext( 'To: Last Name' ),
 
-										'-1200-subject' => TTi18n::gettext('Subject'),
-										'-1210-object_type' => TTi18n::gettext('Type'),
+						'-1200-subject'     => TTi18n::gettext( 'Subject' ),
+						'-1210-object_type' => TTi18n::gettext( 'Type' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										//'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										//'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						//'-2020-updated_by' => TTi18n::gettext('Updated By'),
+						//'-2030-updated_date' => TTi18n::gettext('Updated Date'),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'from_first_name',
-								'from_last_name',
-								'to_first_name',
-								'to_last_name',
-								'subject',
-								'object_type',
-								'created_date',
-								);
+				$retval = [
+						'from_first_name',
+						'from_last_name',
+						'to_first_name',
+						'to_last_name',
+						'subject',
+						'object_type',
+						'created_date',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array();
+				$retval = [];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array();
+				$retval = [];
 				break;
 		}
 
@@ -168,30 +168,31 @@ class MessageControlFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
+		$variable_function_map = [
+				'id' => 'ID',
 
-										'from_user_id' => 'FromUserID',
-										'from_first_name' => FALSE,
-										'from_middle_name' => FALSE,
-										'from_last_name' => FALSE,
+				'from_user_id'     => 'FromUserID',
+				'from_first_name'  => false,
+				'from_middle_name' => false,
+				'from_last_name'   => false,
 
-										'to_user_id' => 'ToUserID',
-										'to_first_name' => FALSE,
-										'to_middle_name' => FALSE,
-										'to_last_name' => FALSE,
+				'to_user_id'     => 'ToUserID',
+				'to_first_name'  => false,
+				'to_middle_name' => false,
+				'to_last_name'   => false,
 
-										'status_id' => FALSE,
-										'object_type_id' => 'ObjectType',
-										'object_type' => FALSE,
-										'object_id' => 'Object',
-										'parent_id' => 'Parent',
-										'priority_id' => 'Priority',
-										'subject' => 'Subject',
-										'body' => 'Body',
-										'require_ack' => 'RequireAck',
-										'deleted' => 'Deleted',
-										);
+				'status_id'      => false,
+				'object_type_id' => 'ObjectType',
+				'object_type'    => false,
+				'object_id'      => 'Object',
+				'parent_id'      => 'Parent',
+				'priority_id'    => 'Priority',
+				'subject'        => 'Subject',
+				'body'           => 'Body',
+				'require_ack'    => 'RequireAck',
+				'deleted'        => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -217,7 +218,8 @@ class MessageControlFactory extends Factory {
 		if ( $value != '' ) {
 			return $this->setGenericTempDataValue( 'from_user_id', $value );
 		}
-		return FALSE;
+
+		return false;
 	}
 
 	/**
@@ -228,27 +230,28 @@ class MessageControlFactory extends Factory {
 	}
 
 	/**
-	 * @param string $ids UUID
+	 * @param string|string[] $ids UUID
 	 * @return bool
 	 */
 	function setToUserId( $ids ) {
-		if ( !is_array($ids) ) {
-			$ids = array($ids);
+		if ( !is_array( $ids ) ) {
+			$ids = [ $ids ];
 		}
 
-		$ids = array_unique($ids);
-		if ( count($ids) > 0 ) {
-			$tmp_ids = array(); //Reset the TO array, so if this is called multiple times, we don't keep adding more and more users to it.
-			foreach( $ids as $id ) {
-				if ( TTUUID::isUUID( $id ) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() ) {
+		$ids = array_unique( $ids );
+		if ( count( $ids ) > 0 ) {
+			$tmp_ids = []; //Reset the TO array, so if this is called multiple times, we don't keep adding more and more users to it.
+			foreach ( $ids as $id ) {
+				if ( TTUUID::isUUID( $id ) && $id != TTUUID::getZeroID() && $id != TTUUID::getNotExistID() ) {
 					$tmp_ids[] = $id;
 				}
 			}
 			$this->setGenericTempDataValue( 'to_user_id', $tmp_ids );
 
-			return TRUE;
+			return true;
 		}
-		return FALSE;
+
+		return false;
 	}
 
 	/**
@@ -267,19 +270,19 @@ class MessageControlFactory extends Factory {
 		if ( $value != '' ) {
 			return $this->setGenericTempDataValue( 'message_sender_id', $value );
 		}
-		return FALSE;
 
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function isAck() {
-		if ( $this->getRequireAck() == TRUE AND $this->getColumn('ack_date') == '' ) {
-			return FALSE;
+		if ( $this->getRequireAck() == true && $this->getColumn( 'ack_date' ) == '' ) {
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -294,8 +297,9 @@ class MessageControlFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setParent( $value) {
+	function setParent( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericTempDataValue( 'parent_id', $value );
 	}
 
@@ -311,7 +315,7 @@ class MessageControlFactory extends Factory {
 	 * @return null|object
 	 */
 	function getObjectHandler() {
-		if ( is_object($this->obj_handler) ) {
+		if ( is_object( $this->obj_handler ) ) {
 			return $this->obj_handler;
 		} else {
 			switch ( $this->getObjectType() ) {
@@ -345,8 +349,9 @@ class MessageControlFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setObjectType( $value) {
-		$value = trim($value);
+	function setObjectType( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'object_type_id', $value );
 	}
 
@@ -361,8 +366,9 @@ class MessageControlFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setObject( $value) {
-		$value = trim($value);
+	function setObject( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'object_id', $value );
 	}
 
@@ -377,12 +383,13 @@ class MessageControlFactory extends Factory {
 	 * @param null $value
 	 * @return bool
 	 */
-	function setPriority( $value = NULL) {
-		$value = (int)trim($value);
+	function setPriority( $value = null ) {
+		$value = (int)trim( $value );
 
-		if ( empty($value) ) {
+		if ( empty( $value ) ) {
 			$value = 50;
 		}
+
 		return $this->setGenericDataValue( 'priority_id', $value );
 	}
 
@@ -397,8 +404,9 @@ class MessageControlFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setSubject( $value) {
-		$value = trim($value);
+	function setSubject( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'subject', $value );
 	}
 
@@ -413,8 +421,9 @@ class MessageControlFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setBody( $value) {
-		$value = trim($value);
+	function setBody( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'body', $value );
 	}
 
@@ -429,102 +438,101 @@ class MessageControlFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setRequireAck( $value) {
-		return $this->setGenericDataValue( 'require_ack', $this->toBool($value) );
+	function setRequireAck( $value ) {
+		return $this->setGenericDataValue( 'require_ack', $this->toBool( $value ) );
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getEnableEmailMessage() {
-		if ( isset($this->email_message) ) {
+		if ( isset( $this->email_message ) ) {
 			return $this->email_message;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setEnableEmailMessage( $bool) {
+	function setEnableEmailMessage( $bool ) {
 		$this->email_message = $bool;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Parent
-		if ( $this->getParent() !== FALSE AND $this->getParent() != TTUUID::getZeroID() ) {
-			$this->Validator->isUUID(				'parent',
-															$this->getParent(),
-															TTi18n::gettext('Parent is invalid')
-														);
+		if ( $this->getParent() !== false && $this->getParent() != TTUUID::getZeroID() ) {
+			$this->Validator->isUUID( 'parent',
+									  $this->getParent(),
+									  TTi18n::gettext( 'Parent is invalid' )
+			);
 		}
 		// Object Type
-		$this->Validator->inArrayKey(	'object_type',
-												$this->getObjectType(),
-												TTi18n::gettext('Object Type is invalid'),
-												$this->getOptions('type')
-											);
+		$this->Validator->inArrayKey( 'object_type',
+									  $this->getObjectType(),
+									  TTi18n::gettext( 'Object Type is invalid' ),
+									  $this->getOptions( 'type' )
+		);
 		// Object
-		$this->Validator->isResultSetWithRows(	'object',
-												( is_object( $this->getObjectHandler() ) ) ? $this->getObjectHandler()->getByID($this->getObject()) : FALSE,
-												TTi18n::gettext('Object is invalid')
-											);
+		$this->Validator->isResultSetWithRows( 'object',
+											   ( is_object( $this->getObjectHandler() ) ) ? $this->getObjectHandler()->getByID( $this->getObject() ) : false,
+											   TTi18n::gettext( 'Object is invalid' )
+		);
 		// Priority
-		if ( $this->getPriority() !== FALSE ) {
-			$this->Validator->inArrayKey(	'priority',
-												$this->getPriority(),
-												TTi18n::gettext('Invalid Priority'),
-												$this->getOptions('priority')
-											);
+		if ( $this->getPriority() !== false ) {
+			$this->Validator->inArrayKey( 'priority',
+										  $this->getPriority(),
+										  TTi18n::gettext( 'Invalid Priority' ),
+										  $this->getOptions( 'priority' )
+			);
 		}
 		// Subject
-		if ( $this->getSubject() !== FALSE ) {
-			$this->Validator->isLength(		'subject',
-													$this->getSubject(),
-													TTi18n::gettext('Subject is too short'),
-													2,
-													99999
-												);
-			$this->Validator->isLength(		'subject',
-											   $this->getSubject(),
-											   TTi18n::gettext('Subject is too long'),
-											   0,
-											   100
+		if ( $this->getSubject() !== false ) {
+			$this->Validator->isLength( 'subject',
+										$this->getSubject(),
+										TTi18n::gettext( 'Subject is too short' ),
+										2,
+										99999
 			);
-
+			$this->Validator->isLength( 'subject',
+										$this->getSubject(),
+										TTi18n::gettext( 'Subject is too long' ),
+										0,
+										100
+			);
 		}
 
 		// Message body
 		//Flex interface validates the message too soon, make it skip a 0 length message when only validating.
-		if ( $this->Validator->getValidateOnly() == TRUE AND $this->getBody() == '' ) {
+		if ( $this->Validator->getValidateOnly() == true && $this->getBody() == '' ) {
 			$minimum_length = 0;
 		} else {
 			$minimum_length = 2;
 		}
 		$this->Validator->isLength( 'body',
-											$this->getBody(),
-											TTi18n::gettext( 'Message body is too short.' ),
-											$minimum_length,
-											( 1024 * 9999999 )
-										);
-		if ( $this->Validator->isError('body') == FALSE ) {
+									$this->getBody(),
+									TTi18n::gettext( 'Message body is too short.' ),
+									$minimum_length,
+				( 1024 * 9999999 )
+		);
+		if ( $this->Validator->isError( 'body' ) == false ) {
 			$this->Validator->isLength( 'body',
-												$this->getBody(),
-												TTi18n::gettext( 'Message body is too long.' ),
-												0,
-												( 1024 * 10 )
-											);
+										$this->getBody(),
+										TTi18n::gettext( 'Message body is too long.' ),
+										0,
+					( 1024 * 10 )
+			);
 		}
 
 		//
@@ -533,57 +541,56 @@ class MessageControlFactory extends Factory {
 
 
 		//Only validate from/to user if there is a subject and body set, otherwise validation will fail on a new object with no data all the time.
-		if ( $this->getSubject() != '' AND $this->getBody() != '' ) {
-			if ( $this->Validator->hasError( 'from' ) == FALSE AND $this->getFromUserId() == '' ) {
-				$this->Validator->isTrue(	'from',
-											FALSE,
-											TTi18n::gettext('Message sender is invalid') );
-
+		if ( $this->getSubject() != '' && $this->getBody() != '' ) {
+			if ( $this->Validator->hasError( 'from' ) == false && $this->getFromUserId() == '' ) {
+				$this->Validator->isTrue( 'from',
+										  false,
+										  TTi18n::gettext( 'Message sender is invalid' ) );
 			}
 
 			//Messages attached to objects do not require a recipient.
-			if ( $this->Validator->hasError( 'to' ) == FALSE AND $this->getObjectType() == 5 AND ( $this->getToUserId() == '' OR ( is_array( $this->getToUserId() ) AND count( $this->getToUserId() ) == 0 ) ) ) {
-				$this->Validator->isTrue(	'to_user_id',
-											FALSE,
-											TTi18n::gettext('Please specify at least one employee') );
+			if ( $this->Validator->hasError( 'to' ) == false && $this->getObjectType() == 5 && ( $this->getToUserId() == '' || ( is_array( $this->getToUserId() ) && count( $this->getToUserId() ) == 0 ) ) ) {
+				$this->Validator->isTrue( 'to_user_id',
+										  false,
+										  TTi18n::gettext( 'Please specify at least one employee' ) );
 			}
 		}
 
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == false ) {
 			if ( $this->getObjectType() == '' ) {
-					$this->Validator->isTrue(	'object_type_id',
-												FALSE,
-												TTi18n::gettext('Object type is invalid') );
+				$this->Validator->isTrue( 'object_type_id',
+										  false,
+										  TTi18n::gettext( 'Object type is invalid' ) );
 			}
 
-			if ( $this->Validator->hasError( 'object' ) == FALSE AND $this->getObject() == '' ) {
-					$this->Validator->isTrue(	'object',
-												FALSE,
-												TTi18n::gettext('Object must be specified') );
+			if ( $this->Validator->hasError( 'object' ) == false && $this->getObject() == '' ) {
+				$this->Validator->isTrue( 'object',
+										  false,
+										  TTi18n::gettext( 'Object must be specified' ) );
 			}
 		}
 
 		//If deleted is TRUE, we need to make sure all sender/recipient records are also deleted.
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @param string $company_id UUID
-	 * @param string $user_id UUID
-	 * @param string|array $ids UUID
+	 * @param string $user_id    UUID
+	 * @param string|array $ids  UUID
 	 * @return bool
 	 */
 	static function markRecipientMessageAsRead( $company_id, $user_id, $ids ) {
-		if ( $company_id == '' OR $user_id == '' OR $ids == '' OR ( is_array( $ids ) AND count( $ids ) == 0 ) ) {
-			return FALSE;
+		if ( $company_id == '' || $user_id == '' || $ids == '' || ( is_array( $ids ) && count( $ids ) == 0 ) ) {
+			return false;
 		}
 
-		Debug::Arr($ids, 'Message Recipeint Ids: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $ids, 'Message Recipeint Ids: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$mrlf = TTnew( 'MessageRecipientListFactory' ); /** @var MessageRecipientListFactory $mrlf */
 		$mrlf->getByCompanyIdAndUserIdAndMessageSenderIdAndStatus( $company_id, $user_id, $ids, 10 );
 		if ( $mrlf->getRecordCount() > 0 ) {
-			foreach( $mrlf as $mr_obj ) {
+			foreach ( $mrlf as $mr_obj ) {
 				$mr_obj->setStatus( 20 ); //Read
 				if ( $mr_obj->isValid() ) {
 					$mr_obj->Save();
@@ -591,7 +598,7 @@ class MessageControlFactory extends Factory {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -599,59 +606,61 @@ class MessageControlFactory extends Factory {
 	 */
 	function getEmailMessageAddresses() {
 		//Remove the From User from any recipicient list so we don't send emails back to ourselves.
-		$user_ids = array_diff( $this->getToUserId(), array( $this->getFromUserId() ) );
-		if ( isset($user_ids) AND is_array($user_ids) AND count($user_ids) > 0 ) {
+		$user_ids = array_diff( $this->getToUserId(), [ $this->getFromUserId() ] );
+		if ( isset( $user_ids ) && is_array( $user_ids ) && count( $user_ids ) > 0 ) {
 			//Get user preferences and determine if they accept email notifications.
-			Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Arr( $user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
-			$uplf->getByUserIdAndEnableLogin( $user_ids, TRUE ); //Only email employees/supervisors who can still login.
+			$uplf->getByUserIdAndEnableLogin( $user_ids, true ); //Only email employees/supervisors who can still login.
 			if ( $uplf->getRecordCount() > 0 ) {
-				$retarr = array();
-				foreach( $uplf as $up_obj ) {
-					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getEnableLogin() == 10 ) {
-						if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
+				$retarr = [];
+				foreach ( $uplf as $up_obj ) {
+					if ( $up_obj->getEnableEmailNotificationMessage() == true && is_object( $up_obj->getUserObject() ) && $up_obj->getUserObject()->getEnableLogin() == 10 ) {
+						if ( $up_obj->getUserObject()->getWorkEmail() != '' && $up_obj->getUserObject()->getWorkEmailIsValid() == true ) {
 							$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getWorkEmail(), $up_obj->getUserObject() );
 						}
 
-						if ( $up_obj->getEnableEmailNotificationHome() AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getHomeEmail() != '' AND $up_obj->getUserObject()->getHomeEmailIsValid() == TRUE ) {
+						if ( $up_obj->getEnableEmailNotificationHome() && is_object( $up_obj->getUserObject() ) && $up_obj->getUserObject()->getHomeEmail() != '' && $up_obj->getUserObject()->getHomeEmailIsValid() == true ) {
 							$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getHomeEmail(), $up_obj->getUserObject() );
 						}
 					}
 				}
 
-				if ( isset($retarr) ) {
-					Debug::Arr($retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__, 10);
-					return array_unique($retarr);
+				if ( isset( $retarr ) ) {
+					Debug::Arr( $retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+					return array_unique( $retarr );
 				}
 			} else {
-				Debug::Text('No user preferences available, or user is not active...', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'No user preferences available, or user is not active...', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function emailMessage() {
-		Debug::Text('emailMessage: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'emailMessage: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$email_to_arr = $this->getEmailMessageAddresses();
-		if ( $email_to_arr == FALSE ) {
-			return FALSE;
+		if ( $email_to_arr == false ) {
+			return false;
 		}
 
 		//Get from User Object so we can include more information in the message.
 		if ( is_object( $this->getFromUserObject() ) ) {
 			$u_obj = $this->getFromUserObject();
 		} else {
-			Debug::Text('From object does not exist: '. $this->getFromUserID(), __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+			Debug::Text( 'From object does not exist: ' . $this->getFromUserID(), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
-		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Message') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>';
+		$from = $reply_to = '"' . APPLICATION_NAME . ' - ' . TTi18n::gettext( 'Message' ) . '" <' . Misc::getEmailLocalPart() . '@' . Misc::getEmailDomain() . '>';
 
 //		Always make sure ReplyTo is the generic email address that will cause a bounce.
 //		global $current_user;
@@ -659,74 +668,75 @@ class MessageControlFactory extends Factory {
 //			$reply_to = Misc::formatEmailAddress( $current_user->getWorkEmail(), $current_user );
 //		}
 
-		Debug::Text('To: '. implode(',', $email_to_arr), __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Text('From: '. $from .' Reply-To: '. $reply_to, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'To: ' . implode( ',', $email_to_arr ), __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::Text( 'From: ' . $from . ' Reply-To: ' . $reply_to, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//Define subject/body variables here.
-		$search_arr = array(
-							'#from_employee_first_name#',
-							'#from_employee_last_name#',
-							'#from_employee_default_branch#',
-							'#from_employee_default_department#',
-							'#from_employee_group#',
-							'#from_employee_title#',
-							'#company_name#',
-							'#link#',
-							);
+		$search_arr = [
+				'#from_employee_first_name#',
+				'#from_employee_last_name#',
+				'#from_employee_default_branch#',
+				'#from_employee_default_department#',
+				'#from_employee_group#',
+				'#from_employee_title#',
+				'#company_name#',
+				'#link#',
+		];
 
-		$replace_arr = array(
-							$u_obj->getFirstName(),
-							$u_obj->getLastName(),
-							( is_object( $u_obj->getDefaultBranchObject() ) ) ? $u_obj->getDefaultBranchObject()->getName() : NULL,
-							( is_object( $u_obj->getDefaultDepartmentObject() ) ) ? $u_obj->getDefaultDepartmentObject()->getName() : NULL,
-							( is_object( $u_obj->getGroupObject() ) ) ? $u_obj->getGroupObject()->getName() : NULL,
-							( is_object( $u_obj->getTitleObject() ) ) ? $u_obj->getTitleObject()->getName() : NULL,
-							( is_object( $u_obj->getCompanyObject() ) ) ? $u_obj->getCompanyObject()->getName() : NULL,
-							NULL,
-							);
+		$replace_arr = [
+				$u_obj->getFirstName(),
+				$u_obj->getLastName(),
+				( is_object( $u_obj->getDefaultBranchObject() ) ) ? $u_obj->getDefaultBranchObject()->getName() : null,
+				( is_object( $u_obj->getDefaultDepartmentObject() ) ) ? $u_obj->getDefaultDepartmentObject()->getName() : null,
+				( is_object( $u_obj->getGroupObject() ) ) ? $u_obj->getGroupObject()->getName() : null,
+				( is_object( $u_obj->getTitleObject() ) ) ? $u_obj->getTitleObject()->getName() : null,
+				( is_object( $u_obj->getCompanyObject() ) ) ? $u_obj->getCompanyObject()->getName() : null,
+				null,
+		];
 
-		$email_subject = TTi18n::gettext('New message waiting in').' '. APPLICATION_NAME;
+		$email_subject = TTi18n::gettext( 'New message waiting in' ) . ' ' . APPLICATION_NAME;
 
-		$email_body	 = TTi18n::gettext('*DO NOT REPLY TO THIS EMAIL - PLEASE USE THE LINK BELOW INSTEAD*')."\n\n";
-		$email_body .= TTi18n::gettext('You have a new message waiting for you in').' '. APPLICATION_NAME."\n";
-		$email_body .= ( $this->getSubject() != '' ) ? TTi18n::gettext('Subject').': '. $this->getSubject()."\n" : NULL;
-		$email_body .= TTi18n::gettext('From').': #from_employee_first_name# #from_employee_last_name#'."\n";
-		$email_body .= ( $replace_arr[2] != '' ) ? TTi18n::gettext('Default Branch').': #from_employee_default_branch#'."\n" : NULL;
-		$email_body .= ( $replace_arr[3] != '' ) ? TTi18n::gettext('Default Department').': #from_employee_default_department#'."\n" : NULL;
-		$email_body .= ( $replace_arr[4] != '' ) ? TTi18n::gettext('Group').': #from_employee_group#'."\n" : NULL;
-		$email_body .= ( $replace_arr[5] != '' ) ? TTi18n::gettext('Title').': #from_employee_title#'."\n" : NULL;
+		$email_body = TTi18n::gettext( '*DO NOT REPLY TO THIS EMAIL - PLEASE USE THE LINK BELOW INSTEAD*' ) . "\n\n";
+		$email_body .= TTi18n::gettext( 'You have a new message waiting for you in' ) . ' ' . APPLICATION_NAME . "\n";
+		$email_body .= ( $this->getSubject() != '' ) ? TTi18n::gettext( 'Subject' ) . ': ' . $this->getSubject() . "\n" : null;
+		$email_body .= TTi18n::gettext( 'From' ) . ': #from_employee_first_name# #from_employee_last_name#' . "\n";
+		$email_body .= ( $replace_arr[2] != '' ) ? TTi18n::gettext( 'Default Branch' ) . ': #from_employee_default_branch#' . "\n" : null;
+		$email_body .= ( $replace_arr[3] != '' ) ? TTi18n::gettext( 'Default Department' ) . ': #from_employee_default_department#' . "\n" : null;
+		$email_body .= ( $replace_arr[4] != '' ) ? TTi18n::gettext( 'Group' ) . ': #from_employee_group#' . "\n" : null;
+		$email_body .= ( $replace_arr[5] != '' ) ? TTi18n::gettext( 'Title' ) . ': #from_employee_title#' . "\n" : null;
 
-		$email_body .= TTi18n::gettext('Link').': <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+		$email_body .= TTi18n::gettext( 'Link' ) . ': <a href="' . Misc::getURLProtocol() . '://' . Misc::getHostName() . Environment::getDefaultInterfaceBaseURL() . '">' . APPLICATION_NAME . ' ' . TTi18n::gettext( 'Login' ) . '</a>';
 
-		$email_body .= ( $replace_arr[6] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
+		$email_body .= ( $replace_arr[6] != '' ) ? "\n\n\n" . TTi18n::gettext( 'Company' ) . ': #company_name#' . "\n" : null; //Always put at the end
 
 		$subject = str_replace( $search_arr, $replace_arr, $email_subject );
-		Debug::Text('Subject: '. $subject, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Subject: ' . $subject, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$headers = array(
-							'From'		=> $from,
-							'Subject'	=> $subject,
-							//Reply-To/Return-Path are handled in TTMail.
-						);
+		$headers = [
+				'From'    => $from,
+				'Subject' => $subject,
+				//Reply-To/Return-Path are handled in TTMail.
+		];
 
-		$body = '<html><body><pre>'.str_replace( $search_arr, $replace_arr, $email_body ).'</pre></body></html>';
-		Debug::Text('Body: '. $body, __FILE__, __LINE__, __METHOD__, 10);
+		$body = '<html><body><pre>' . str_replace( $search_arr, $replace_arr, $email_body ) . '</pre></body></html>';
+		Debug::Text( 'Body: ' . $body, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$mail = new TTMail();
 		$mail->setTo( $email_to_arr );
 		$mail->setHeaders( $headers );
 
-		@$mail->getMIMEObject()->setHTMLBody($body);
+		@$mail->getMIMEObject()->setHTMLBody( $body );
 
 		$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
 		$retval = $mail->Send();
 
-		if ( $retval == TRUE ) {
-			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Email Message to').': '. implode(', ', $email_to_arr), NULL, $this->getTable() );
-			return TRUE;
+		if ( $retval == true ) {
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText( 'Email Message to' ) . ': ' . implode( ', ', $email_to_arr ), null, $this->getTable() );
+
+			return true;
 		}
 
-		return TRUE; //Always return true
+		return true; //Always return true
 	}
 
 	/**
@@ -735,18 +745,18 @@ class MessageControlFactory extends Factory {
 	function preSave() {
 		//Check to make sure the 'From' user_id doesn't appear in the 'To' user list as well.
 		$from_user_id_key = array_search( $this->getFromUserId(), (array)$this->getToUserId() );
-		if ( $from_user_id_key !== FALSE ) {
+		if ( $from_user_id_key !== false ) {
 			$to_user_ids = $this->getToUserId();
-			unset($to_user_ids[$from_user_id_key]);
+			unset( $to_user_ids[$from_user_id_key] );
 			$this->setToUserId( $to_user_ids );
 
-			Debug::text('From user is assigned as a To user as well, removing...'. $from_user_id_key, __FILE__, __LINE__, __METHOD__, 9);
+			Debug::text( 'From user is assigned as a To user as well, removing...' . $from_user_id_key, __FILE__, __LINE__, __METHOD__, 9 );
 		}
 
-		Debug::Arr($this->getFromUserId(), 'From: ', __FILE__, __LINE__, __METHOD__, 9);
-		Debug::Arr($this->getToUserId(), 'Sending To: ', __FILE__, __LINE__, __METHOD__, 9);
+		Debug::Arr( $this->getFromUserId(), 'From: ', __FILE__, __LINE__, __METHOD__, 9 );
+		Debug::Arr( $this->getToUserId(), 'Sending To: ', __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -754,10 +764,10 @@ class MessageControlFactory extends Factory {
 	 */
 	function postSave() {
 		//Save Sender/Recipient records for this message.
-		if ( $this->getDeleted() == FALSE ) {
+		if ( $this->getDeleted() == false ) {
 			$to_user_ids = $this->getToUserId();
-			if ( $to_user_ids != FALSE ) {
-				foreach( $to_user_ids as $to_user_id ) {
+			if ( $to_user_ids != false ) {
+				foreach ( $to_user_ids as $to_user_id ) {
 					//We need one message_sender record for every recipient record, otherwise when a message is sent to
 					//multiple recipients, and one of them replies, the parent_id will point to original sender record which
 					//then maps to every single recipient, making it hard to show messages just between the specific users.
@@ -767,7 +777,7 @@ class MessageControlFactory extends Factory {
 					//each recipient.
 					$msf = TTnew( 'MessageSenderFactory' ); /** @var MessageSenderFactory $msf */
 					$msf->setUser( $this->getFromUserId() );
-					Debug::Text('Parent ID: '. $this->getParent(), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'Parent ID: ' . $this->getParent(), __FILE__, __LINE__, __METHOD__, 10 );
 
 					//Only specify parent if the object type is message.
 					if ( $this->getObjectType() == 5 ) {
@@ -783,13 +793,13 @@ class MessageControlFactory extends Factory {
 					if ( $msf->isValid() ) {
 						$message_sender_id = $msf->Save();
 						$this->setMessageSenderId( $message_sender_id ); //Used mainly for migration purposes, so we can obtain this from outside the class.
-						Debug::Text('Message Sender ID: '. $message_sender_id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::Text( 'Message Sender ID: ' . $message_sender_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-						if ( $message_sender_id != FALSE ) {
+						if ( $message_sender_id != false ) {
 							$mrf = TTnew( 'MessageRecipientFactory' ); /** @var MessageRecipientFactory $mrf */
 							$mrf->setUser( $to_user_id );
 							$mrf->setMessageSender( $message_sender_id );
-							if ( isset($this->migration_status) ) {
+							if ( isset( $this->migration_status ) ) {
 								$mrf->setStatus( $this->migration_status );
 							}
 							$mrf->setCreatedBy( $this->getCreatedBy() );
@@ -804,17 +814,17 @@ class MessageControlFactory extends Factory {
 				}
 
 				//Send email to all recipients.
-				if ( $this->getEnableEmailMessage() == TRUE ) {
+				if ( $this->getEnableEmailMessage() == true ) {
 					$this->emailMessage();
 				}
 			} //else {
-				//If no recipients are specified (user replying to their own request before a superior does, or a user sending a request without a hierarchy)
-				//Make sure we have at least one sender record.
-				//Either that or make sure we always reply to ALL senders and recipients in the thread.
+			//If no recipients are specified (user replying to their own request before a superior does, or a user sending a request without a hierarchy)
+			//Make sure we have at least one sender record.
+			//Either that or make sure we always reply to ALL senders and recipients in the thread.
 			//}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -824,11 +834,11 @@ class MessageControlFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -840,25 +850,25 @@ class MessageControlFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
+	function getObjectAsArray( $include_columns = null ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
-		$data = array();
+		$data = [];
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'to_user_id':
 						case 'to_first_name':
 						case 'to_middle_name':
@@ -881,7 +891,6 @@ class MessageControlFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -891,4 +900,5 @@ class MessageControlFactory extends Factory {
 	}
 
 }
+
 ?>

@@ -45,30 +45,29 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 	public function setUpPage() {
 		//$this->currentWindow()->maximize();
-		$this->currentWindow()->size( array('width' => $this->width, 'height' => $this->height) );
-
+		$this->currentWindow()->size( [ 'width' => $this->width, 'height' => $this->height ] );
 	}
 
 	function testUIScreenShot() {
 		//$this->screenshot_path = DIRECTORY_SEPARATOR . 'home' . DIRECTORY_SEPARATOR . $this->getOSUser() . DIRECTORY_SEPARATOR . 'public_html' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'UIScreenShotTest' . DIRECTORY_SEPARATOR . APPLICATION_VERSION . '-' . date( 'Ymd-His' );
-		$this->screenshot_path = DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'www'. DIRECTORY_SEPARATOR . 'UIScreenShotTest' . DIRECTORY_SEPARATOR . $this->getOSUser() . '-' . APPLICATION_VERSION . '-' . date( 'Ymd-His' );
+		$this->screenshot_path = DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'UIScreenShotTest' . DIRECTORY_SEPARATOR . $this->getOSUser() . '-' . APPLICATION_VERSION . '-' . date( 'Ymd-His' );
 
-		$user_login_info = array(
+		$user_login_info = [
 				'demoadmin2' => 'demo.de',
 				'john.doe2'  => 'demo.jo',
 				'jane.doe2'  => 'demo.ja',
-		);
+		];
 
-		$resolution_array = array(
-			array( 'w' => 1920, 'h' => 1080 ),
-			//array( 'w' => 1440, 'h' => 900), //Not serving much purpose at this time.
-			array( 'w' => 1280, 'h' => 800 ),
-			//array( 'w' => 1366, 'h' => 768 ),
+		$resolution_array = [
+				[ 'w' => 1920, 'h' => 1080 ],
+				//array( 'w' => 1440, 'h' => 900), //Not serving much purpose at this time.
+				[ 'w' => 1280, 'h' => 800 ],
+				//array( 'w' => 1366, 'h' => 768 ),
 
-			//array( 'w' => 320, 'h' => 568 ), //iphone crashes tests, can find anything (maybe because it's off screen?)
-			//array( 'w' => 1027, 'h' => 728 ), //too small
-			//array( 'w' => 1280 , 'h' => 720 ), //smallest?
-		);
+				//array( 'w' => 320, 'h' => 568 ), //iphone crashes tests, can find anything (maybe because it's off screen?)
+				//array( 'w' => 1027, 'h' => 728 ), //too small
+				//array( 'w' => 1280 , 'h' => 720 ), //smallest?
+		];
 
 		//single entry point to make error trapping easier
 		try {
@@ -76,12 +75,12 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 				$this->width = $resolution['w'];
 				$this->height = $resolution['h'];
 				$win = $this->currentWindow();
-				$win->size( array('width' => $this->width, 'height' => $this->height) );
+				$win->size( [ 'width' => $this->width, 'height' => $this->height ] );
 
 				foreach ( $user_login_info as $user => $pass ) {
 					Debug::Text( 'logging in as ' . $user, __FILE__, __LINE__, __METHOD__, 10 );
 					$this->startTesting( $user, $pass );
-					$this->assertEquals( TRUE, TRUE, 'Test Completed Successfully.' );
+					$this->assertEquals( true, true, 'Test Completed Successfully.' );
 				}
 			}
 		} catch ( Exception $e ) {
@@ -91,11 +90,10 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 			$this->waitForUIInitComplete();
 			$this->takeScreenshot( $this->screenshot_path . DIRECTORY_SEPARATOR . 'error.png' );
-			$this->assertEquals( FALSE, TRUE, 'The test exited with an error: ' . $e->getMessage() );
+			$this->assertEquals( false, true, 'The test exited with an error: ' . $e->getMessage() );
 
 			$this->quit(); //Close browser.
 		}
-
 	}
 
 	function startTesting( $user, $pass ) {
@@ -123,7 +121,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 		$menu_elements = $this->getArrayBySelector( '#ribbon ul li:not(.context-menu) a' );
 
-		$menu_element_ids = array();
+		$menu_element_ids = [];
 		// looping because we need the ids to check that the elements are still connected to the
 		// DOM as they may not be when we get to processing them in this array
 		foreach ( $menu_elements as $root_element ) {
@@ -133,24 +131,24 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 		}
 
 		unset( $menu_elements );
-		$hit_debugger = FALSE;
+		$hit_debugger = false;
 
 		foreach ( $menu_element_ids as $id ) {
 			Debug::Text( 'ROOT MENU ELEMENT: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
-			if ( $this->byId( $id ) == FALSE ) {
+			if ( $this->byId( $id ) == false ) {
 				Debug::Text( 'Menu item does not exist - A.', __FILE__, __LINE__, __METHOD__, 10 );
 				continue;
 			}
 
 			$root_el = $this->byId( $id );
 
-			if ( ( isset( $debug_menu_item ) == FALSE AND $this->byId( $id ) == FALSE OR $id == '' ) OR
-					( isset( $debug_menu_item ) AND $debug_menu_item != $id AND $hit_debugger == FALSE ) ) {
+			if ( ( isset( $debug_menu_item ) == false && $this->byId( $id ) == false || $id == '' ) ||
+					( isset( $debug_menu_item ) && $debug_menu_item != $id && $hit_debugger == false ) ) {
 
 				Debug::Text( 'Menu item does not exist or debug limited - B.', __FILE__, __LINE__, __METHOD__, 10 );
 				continue;
 			} else {
-				$hit_debugger = TRUE; // comment this out to test just the debug item. Defualt is to test everything forward of specified debug menu item.
+				$hit_debugger = true; // comment this out to test just the debug item. Defualt is to test everything forward of specified debug menu item.
 			}
 
 			$resolution = $this->width . 'x' . $this->height;
@@ -162,13 +160,13 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 				//company and invoice need to start clean:
 				$this->waitThenClick( '#PayPeriodSchedule' );
 				$this->waitForUIInitComplete();
-			} elseif ( $id == 'menu:invoiceMenu' ) {
+			} else if ( $id == 'menu:invoiceMenu' ) {
 				$this->waitForUIInitComplete();
 			}
 			$this->waitThenClick( '#' . $root_el->attribute( 'id' ) );
 
 			$this->waitForUIInitComplete();
-			if ( $id != 'menu:helpMenu' AND $id != 'menu:reportMenu' ) {
+			if ( $id != 'menu:helpMenu' && $id != 'menu:reportMenu' ) {
 				Debug::Text( 'Processing Top Level Menu Element: [' . $id . '] screenshot filename: ' . $screenshot_filename, __FILE__, __LINE__, __METHOD__, 10 );
 				$this->takeScreenshot( $screenshot_filename );
 				$this->processSubMenu( $id, $root_el, $menu_screenshot_path );
@@ -191,7 +189,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 		//array of sub elements in which we do not want to click any action icons.
 		//these are mostly actions that have only save and cancel buttons
-		$no_action_icons = array(
+		$no_action_icons = [
 				'inout',
 				'userdefault',
 				'company',
@@ -204,13 +202,13 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 				'importcsv',
 				'quickstartwizard',
 
-		);
+		];
 
 		$sub_menu_container_id = str_replace( 'menu:', '', $root_id );
 		Debug::Text( 'Processing Submenus at: #' . $sub_menu_container_id . ' .ribbon-sub-menu-icon', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$sub_menu_elements = $this->getArrayBySelector( '#ribbon #' . $sub_menu_container_id . ' .ribbon-sub-menu-icon' );
-		$sub_menu_ids = array();
+		$sub_menu_ids = [];
 		//blank or invalid ids should not be clicked (for example, don't log out before the test is done)
 		if ( isset( $debug_sub_menu ) ) {
 			$sub_menu_ids = $debug_sub_menu;
@@ -227,10 +225,10 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 		if ( count( $sub_menu_ids ) > 0 ) {
 			foreach ( $sub_menu_ids as $id ) {
-				$root_el = $this->byId( $root_el->attribute('id') ); //Refresh root element to avoid: stale element reference: element is not attached to the page document
+				$root_el = $this->byId( $root_el->attribute( 'id' ) ); //Refresh root element to avoid: stale element reference: element is not attached to the page document
 
 				$css_sel = '#' . $sub_menu_container_id . ' #' . $id;
-				if ( $id == 'Logout' OR $id == '' OR $this->byId( $id ) == FALSE ) {
+				if ( $id == 'Logout' || $id == '' || $this->byId( $id ) == false ) {
 					Debug::Text( 'Menu item does not exist or debug limited. - D.', __FILE__, __LINE__, __METHOD__, 10 );
 					continue;
 				}
@@ -248,7 +246,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 				Debug::Text( 'Taking screenshot for submenu element: ' . $id . ' screenshot filename: ' . $submenu_screenshot_filename, __FILE__, __LINE__, __METHOD__, 10 );
 				$this->takeScreenshot( $submenu_screenshot_filename );
 
-				if ( in_array( strtolower( $id ), $no_action_icons ) === FALSE ) {
+				if ( in_array( strtolower( $id ), $no_action_icons ) === false ) {
 					$this->processContextIcons( $submenu_screenshot_path, $root_el, $this->byId( $id ) );
 				}
 
@@ -264,7 +262,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 					case 'companybankaccount':
 					case 'invoiceconfig':
 						$this->processTabs( $submenu_screenshot_path, $root_id, $sub_el->attribute( 'id' ) );
-						$this->processEditScreen( $submenu_screenshot_path, $root_el, $sub_el, FALSE );
+						$this->processEditScreen( $submenu_screenshot_path, $root_el, $sub_el, false );
 
 						$this->clickCancel( $sub_el->attribute( 'id' ) );
 						break;
@@ -287,7 +285,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 						break;
 					case 'paystubtransactionicon':
 					case 'punches':
-						$this->processEditScreen( $submenu_screenshot_path, $root_el, $sub_el, FALSE );
+						$this->processEditScreen( $submenu_screenshot_path, $root_el, $sub_el, false );
 						break;
 					case 'documentgroup':
 					case 'governmentdocument':
@@ -296,14 +294,14 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 					case 'schedule':
 						break;
 					default:
-						$this->processEditScreen( $submenu_screenshot_path, $root_el, $sub_el, FALSE );
+						$this->processEditScreen( $submenu_screenshot_path, $root_el, $sub_el, false );
 						break;
 				}
 
 				$this->waitForUIInitComplete();
 
 				Debug::Text( 'Reset to the top-level menu: ' . $root_id, __FILE__, __LINE__, __METHOD__, 10 );
-				$this->waitThenClick( '#'. $root_id );
+				$this->waitThenClick( '#' . $root_id );
 
 				$this->waitForUIInitComplete();
 			}
@@ -317,15 +315,15 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 		$this->waitThenClick( '#' . $sub_el->attribute( 'id' ) );
 		$this->waitForUIInitComplete();
 
-		return TRUE;
+		return true;
 	}
 
 	function clickMinimizedWindow() {
 		Debug::Text( 'Clicking minimized tab...', __FILE__, __LINE__, __METHOD__, 10 );
 		$this->waitThenClick( '.view-min-tab' );
-		sleep(1); //For some reason without this we get this exception often when going to Payroll -> Pay Stubs, Pay Stub Transaction, then clicking the minimized window: #ribbon .context-menu a - stale element reference: element is not attached to the page document
+		sleep( 1 ); //For some reason without this we get this exception often when going to Payroll -> Pay Stubs, Pay Stub Transaction, then clicking the minimized window: #ribbon .context-menu a - stale element reference: element is not attached to the page document
 
-		return TRUE;
+		return true;
 	}
 
 	function processContextIcons( $path, $root_el, $sub_el ) {
@@ -336,7 +334,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 		$sub_el_id = $sub_el->attribute( 'id' );
 
 		//array of action icons we do not wish to click
-		$skip_array = array(
+		$skip_array = [
 			//no need
 			'overrideicon',
 			'swapicon',
@@ -369,7 +367,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 			'generatepaystub',
 			'accumulatedtimeicon',
-		);
+		];
 
 		//$this->clickRootAndSub( $root_el, $sub_el );
 		$this->waitForUIInitComplete();
@@ -378,15 +376,15 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 		$this->waitUntil( function () use ( $sub_el ) {
 			$this->waitUntilByCssSelector( '#ribbon .context-menu a' );
 			$context_menu_id = $this->byCssSelector( '#ribbon .context-menu a' )->attribute( 'ref' );
-			$sub_element_id = $sub_el->attribute( 'id' ) .'ContextMenu';
-			Debug::Text( 'Context menu should match:  ID: '. $context_menu_id .' does not match: '. $sub_element_id, __FILE__, __LINE__, __METHOD__, 10 );
+			$sub_element_id = $sub_el->attribute( 'id' ) . 'ContextMenu';
+			Debug::Text( 'Context menu should match:  ID: ' . $context_menu_id . ' does not match: ' . $sub_element_id, __FILE__, __LINE__, __METHOD__, 10 );
 			if ( $context_menu_id == $sub_element_id ) {
-				return TRUE;
+				return true;
 			} else {
-				Debug::Text( 'Waiting for context menu to switch to expected one:  ID: '. $context_menu_id .' does not match: '. $sub_element_id, __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( 'Waiting for context menu to switch to expected one:  ID: ' . $context_menu_id . ' does not match: ' . $sub_element_id, __FILE__, __LINE__, __METHOD__, 10 );
 			}
 
-			return NULL;
+			return null;
 		}, 2000, 50 );
 
 		//get the current view id from js
@@ -394,20 +392,20 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 		$context_menu_id = $this->byCssSelector( '#ribbon .context-menu a' )->attribute( 'ref' );
 
 		$action_icon_elements = $this->getArrayBySelector( '#' . $context_menu_id . ' li:not(.disable-image):not(.invisible-image) .ribbon-sub-menu-icon' );
-		$elements = array();
+		$elements = [];
 		foreach ( $action_icon_elements as $el ) {
 			$elements[] = '#' . $context_menu_id . ' #' . $el->attribute( 'id' );
 		}
 		unset( $action_icon_elements );
 
 		foreach ( $elements as $selector ) {
-			if ( $this->isThere( $selector ) == FALSE ) {
+			if ( $this->isThere( $selector ) == false ) {
 				continue;
 			}
 			$el = $this->byCssSelector( $selector );
 			$id = $el->attribute( 'id' );
-			if ( in_array( strtolower( $id ), $skip_array ) == FALSE ) {
-				if ( !$this->byCssSelector( $selector ) OR ( !isset( $context_menu_debug_id ) OR stristr( strtolower( $selector ), $context_menu_debug_id ) ) == FALSE ) {
+			if ( in_array( strtolower( $id ), $skip_array ) == false ) {
+				if ( !$this->byCssSelector( $selector ) || ( !isset( $context_menu_debug_id ) || stristr( strtolower( $selector ), $context_menu_debug_id ) ) == false ) {
 					$this->waitForUIInitComplete();
 					continue;
 				}
@@ -420,7 +418,6 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 					Debug::Text( 'Clicking: Context menu.', __FILE__, __LINE__, __METHOD__, 10 );
 					$this->waitUntilByCssSelector( '#ribbon .context-menu a' );
 					$this->waitThenClick( '#ribbon .context-menu a' );
-
 				} else {
 					Debug::Text( 'Clicking: Root and Sub element.', __FILE__, __LINE__, __METHOD__, 10 );
 					$this->clickRootAndSub( $root_el, $sub_el );
@@ -435,7 +432,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 				$this->waitUntilByCssSelector( '#ribbon .context-menu a' );
 
 				Debug::Text( '********   Taking screenshot for context menu element: ' . $id . ' screenshot filename: ' . $path . DIRECTORY_SEPARATOR . $id . '.png', __FILE__, __LINE__, __METHOD__, 10 );
-				$this->takeScreenshot( $path . DIRECTORY_SEPARATOR . $id . '.png', TRUE );
+				$this->takeScreenshot( $path . DIRECTORY_SEPARATOR . $id . '.png', true );
 
 				//process tabs on applicable views
 				$this->waitForUIInitComplete();
@@ -482,7 +479,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 //						$this->processTabs ( $path . DIRECTORY_SEPARATOR . $id, $root_id, $sub_el_id, $id, TRUE );
 //						break;
 					default:
-						$this->processTabs( $path . DIRECTORY_SEPARATOR . $id, $root_id, $sub_el_id, $id, TRUE );
+						$this->processTabs( $path . DIRECTORY_SEPARATOR . $id, $root_id, $sub_el_id, $id, true );
 
 						//no hashtag
 						$this->clickCancel();
@@ -503,12 +500,12 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 		$this->waitForUIInitComplete();
 	}
 
-	function processTabs( $path, $root_id, $sub_id = FALSE, $el_id = FALSE, $is_edit_view = FALSE ) {
+	function processTabs( $path, $root_id, $sub_id = false, $el_id = false, $is_edit_view = false ) {
 
 		Debug::Text( 'Determining tab id:', __FILE__, __LINE__, __METHOD__, 10 );
-		if ( $el_id != FALSE ) {
+		if ( $el_id != false ) {
 			$id = $el_id;
-		} elseif ( $sub_id != FALSE ) {
+		} else if ( $sub_id != false ) {
 			$id = $sub_id;
 		} else {
 			$id = $root_id;
@@ -518,13 +515,13 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 		Debug::Text( 'Processing Tabs for: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$skip_first = FALSE;
+		$skip_first = false;
 		if ( count( $css_selectors ) > 1 ) {
 			foreach ( $css_selectors as $name => $tab_el ) {
 				echo "'Processing Tab: ' . $name";
 				Debug::Text( 'Processing Tab: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
-				if ( $skip_first === FALSE ) {
-					$skip_first = TRUE;
+				if ( $skip_first === false ) {
+					$skip_first = true;
 					continue;
 				}
 
@@ -532,13 +529,13 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 				$this->waitForUIInitComplete();
 
-				if ( $is_edit_view != FALSE ) {
+				if ( $is_edit_view != false ) {
 					$screenshotFileName = $path . DIRECTORY_SEPARATOR . 'edit_view_' . $name . '.png';
 				} else {
 					$screenshotFileName = $path . DIRECTORY_SEPARATOR . $name . '.png';
 				}
 				Debug::Text( 'Taking screenshot for Tab: ' . $name . ' screenshot filename: ' . $screenshotFileName, __FILE__, __LINE__, __METHOD__, 10 );
-				$this->takeScreenshot( $screenshotFileName, TRUE );
+				$this->takeScreenshot( $screenshotFileName, true );
 			}
 
 
@@ -553,7 +550,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 	}
 
 	function getTabs( $clicked_icon_name, $sub_menu_id ) {
-		$ignore_array = array(
+		$ignore_array = [
 			//causes crash, does not have more than one tab we care about.
 			'loginuserbankaccount',
 			'inouticon',
@@ -571,30 +568,30 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 			'processpayrollwizard',
 			'payrollremittanceagencyeventwizard',
-		);
+		];
 
-		if ( in_array( strtolower( $clicked_icon_name ), $ignore_array ) == TRUE ) {
+		if ( in_array( strtolower( $clicked_icon_name ), $ignore_array ) == true ) {
 			Debug::Text( 'Not even looking at tabs', __FILE__, __LINE__, __METHOD__, 10 );
 
-			return array();
+			return [];
 		}
 
 		$this->waitForUIInitComplete();
 
 		$css_selector = '.edit-view.' . $sub_menu_id . 'EditView .edit-view-tab-bar .ui-tabs-nav a';
 
-		if ( $sub_menu_id == 'TimeSheet' AND
-				( strtolower( $clicked_icon_name ) == 'addicon' OR strtolower( $clicked_icon_name ) == 'addabsenceicon' ) ) {
+		if ( $sub_menu_id == 'TimeSheet' &&
+				( strtolower( $clicked_icon_name ) == 'addicon' || strtolower( $clicked_icon_name ) == 'addabsenceicon' ) ) {
 			$css_selector = '.edit-view.timesheet-editview .edit-view-tab-bar .ui-tabs-nav a';
 		}
 		Debug::Text( 'tab find css: ' . $css_selector, __FILE__, __LINE__, __METHOD__, 10 );
 		$tabs = $this->getArrayBySelector( $css_selector );
 
-		$tab_css_selectors = array();
+		$tab_css_selectors = [];
 		foreach ( $tabs as $el ) {
 			Debug::Text( 'Noticing Tab.' . $el->attribute( 'ref' ), __FILE__, __LINE__, __METHOD__, 10 );
 			if ( $this->isThere( '#' . $el->attribute( 'id' ) ) ) {
-				$tab_css_selectors[ $el->attribute( 'ref' ) ] = '.edit-view a#' . $el->attribute( 'id' );
+				$tab_css_selectors[$el->attribute( 'ref' )] = '.edit-view a#' . $el->attribute( 'id' );
 			}
 		}
 		unset( $tabs );
@@ -606,13 +603,13 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 		Debug::Text( 'Looking At Edit View: ' . $root_el->attribute( 'id' ) . ' Sub View: ' . $sub_el->attribute( 'id' ), __FILE__, __LINE__, __METHOD__, 10 );
 		$root_id = $root_el->attribute( 'id' );
 		$sub_el_id = $sub_el->attribute( 'id' );
-		if ( $context_el != FALSE ) {
+		if ( $context_el != false ) {
 			$context_id = $context_el->attribute( 'id' );
 		} else {
 			$context_id = $sub_el->attribute( 'id' );
 		}
 
-		$ignore_list = array(
+		$ignore_list = [
 			//popovers that have grids under them so the grid is found and causes a crash.
 			'inout',
 			'changepassword',
@@ -634,21 +631,22 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 			'exception',
 			'companybankaccount',
 			'company',
-		);
+		];
 
-		if ( ( isset( $sub_el ) AND in_array( strtolower( $sub_el->attribute( 'id' ) ), $ignore_list ) ) OR
-				( isset( $sub_el ) AND in_array( strtolower( $sub_el->attribute( 'id' ) ), $ignore_list ) AND isset( $context_el ) AND in_array( strtolower( $context_el->attribute( 'id' ) ), $ignore_list ) ) ) {
+		if ( ( isset( $sub_el ) && in_array( strtolower( $sub_el->attribute( 'id' ) ), $ignore_list ) ) ||
+				( isset( $sub_el ) && in_array( strtolower( $sub_el->attribute( 'id' ) ), $ignore_list ) && isset( $context_el ) && in_array( strtolower( $context_el->attribute( 'id' ) ), $ignore_list ) ) ) {
 			Debug::Text( 'Skipping due to ignore list...', __FILE__, __LINE__, __METHOD__, 10 );
+
 			return;
 		}
 
 		$css_selector = '.grid-div .ui-jqgrid .ui-jqgrid-btable tr:nth-child(2) td:nth-child(2)';
 		$this->waitForUIInitComplete();
-		if ( $this->isThere( '.grid-div .no-result-div' ) === FALSE AND $this->isThere( $css_selector ) === TRUE AND $this->isThere( '#' . $sub_el->attribute( 'id' ) . 'ContextMenu #viewIcon' ) ) {
+		if ( $this->isThere( '.grid-div .no-result-div' ) === false && $this->isThere( $css_selector ) === true && $this->isThere( '#' . $sub_el->attribute( 'id' ) . 'ContextMenu #viewIcon' ) ) {
 			Debug::Text( 'Processing Edit View: ' . $root_el->attribute( 'id' ) . '=>' . $sub_el->attribute( 'id' ), __FILE__, __LINE__, __METHOD__, 10 );
 
 			$this->waitThenClick( $css_selector );
-			if ( strtolower( $sub_el_id ) == 'paystub' OR strtolower( $sub_el_id ) == 'invoice' ) {
+			if ( strtolower( $sub_el_id ) == 'paystub' || strtolower( $sub_el_id ) == 'invoice' ) {
 				$this->waitThenClick( '#' . $sub_el->attribute( 'id' ) . 'ContextMenu #editIcon' );
 			} else {
 				$this->waitThenClick( '#' . $sub_el->attribute( 'id' ) . 'ContextMenu #viewIcon' );
@@ -659,7 +657,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 
 			Debug::Text( 'Taking screenshot for Edit View: ' . $root_id . '=>' . $sub_el_id . ' screenshot filename: ' . $screenshotFileName, __FILE__, __LINE__, __METHOD__, 10 );
 			$this->takeScreenshot( $screenshotFileName );
-			$this->processTabs( $submenu_screenshot_path . DIRECTORY_SEPARATOR . 'edit_view_' . $context_id, $root_id, $sub_el_id, $context_id, TRUE );
+			$this->processTabs( $submenu_screenshot_path . DIRECTORY_SEPARATOR . 'edit_view_' . $context_id, $root_id, $sub_el_id, $context_id, true );
 			//does every edit have a cancel? NO. Exceptions is the exception, so it's in the ignore_list.
 			Debug::Text( 'Clicking Cancel at end of processEditScreen()', __FILE__, __LINE__, __METHOD__, 10 );
 			//$this->clickCancel($sub_el_id);
@@ -671,4 +669,5 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 		Debug::Text( 'Done...', __FILE__, __LINE__, __METHOD__, 10 );
 	}
 }
+
 ?>

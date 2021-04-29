@@ -49,106 +49,105 @@ class CompanyGenericTagFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'object_type':
-				$retval = array(
-										//These could be names instead?
-										//These need to match table names, so PurgeDatabase can properly purge them.
-										100 => 'company',
-										110 => 'branch',
-										120 => 'department',
-										130 => 'station',
-										140 => 'hierarchy_control',
-										150 => 'request',
-										160 => 'message',
-										170 => 'policy_group',
+				$retval = [
+					//These could be names instead?
+					//These need to match table names, so PurgeDatabase can properly purge them.
+					100 => 'company',
+					110 => 'branch',
+					120 => 'department',
+					130 => 'station',
+					140 => 'hierarchy_control',
+					150 => 'request',
+					160 => 'message',
+					170 => 'policy_group',
 
-										200 => 'users',
-										210 => 'user_wage',
-										220 => 'user_title',
-										230 => 'user_contact',
+					200 => 'users',
+					210 => 'user_wage',
+					220 => 'user_title',
+					230 => 'user_contact',
 
-										250 => 'qualification',
-										251 => 'user_skill',
-										252 => 'user_education',
-										253 => 'user_license',
-										254 => 'user_language',
-										255 => 'user_membership',
+					250 => 'qualification',
+					251 => 'user_skill',
+					252 => 'user_education',
+					253 => 'user_license',
+					254 => 'user_language',
+					255 => 'user_membership',
 
-										300 => 'pay_stub_amendment',
+					300 => 'pay_stub_amendment',
 
-										310 => 'kpi',
-										320 => 'user_review_control',
-										330 => 'user_review',
+					310 => 'kpi',
+					320 => 'user_review_control',
+					330 => 'user_review',
 
-										350 => 'job_vacancy',
-										360 => 'job_applicant',
-										370 => 'job_applicant_location',
-										380 => 'job_applicant_employment',
-										390 => 'job_applicant_reference',
+					350 => 'job_vacancy',
+					360 => 'job_applicant',
+					370 => 'job_applicant_location',
+					380 => 'job_applicant_employment',
+					390 => 'job_applicant_reference',
 
-										391 => 'job_applicant_skill',
-										392 => 'job_applicant_education',
-										393 => 'job_applicant_language',
-										394 => 'job_applicant_license',
-										395 => 'job_applicant_membership',
+					391 => 'job_applicant_skill',
+					392 => 'job_applicant_education',
+					393 => 'job_applicant_language',
+					394 => 'job_applicant_license',
+					395 => 'job_applicant_membership',
 
-										400 => 'schedule',
-										410 => 'recurring_schedule_template',
+					400 => 'schedule',
+					410 => 'recurring_schedule_template',
 
-										500 => 'user_report_data',
-										510 => 'report_schedule',
+					500 => 'user_report_data',
+					510 => 'report_schedule',
 
-										600 => 'job',
-										610 => 'job_item',
+					600 => 'job',
+					610 => 'job_item',
 
-										700 => 'document',
+					700 => 'document',
 
-										800 => 'client',
-										810 => 'client_contact',
-										820 => 'client_payment',
+					800 => 'client',
+					810 => 'client_contact',
+					820 => 'client_payment',
 
-										900 => 'product',
-										910 => 'invoice',
-										920 => 'invoice_transaction',
+					900 => 'product',
+					910 => 'invoice',
+					920 => 'invoice_transaction',
 
-										930 => 'user_expense',
+					930 => 'user_expense',
 
-										950 => 'job_application',
-									);
+					950 => 'job_application',
+				];
 				break;
 			case 'columns':
-				$retval = array(
-										'-1010-object_type' => TTi18n::gettext('Object'),
-										'-1020-name' => TTi18n::gettext('Name'),
-										'-1030-description' => TTi18n::gettext('Description'),
+				$retval = [
+						'-1010-object_type' => TTi18n::gettext( 'Object' ),
+						'-1020-name'        => TTi18n::gettext( 'Name' ),
+						'-1030-description' => TTi18n::gettext( 'Description' ),
 
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
-							);
+						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
+						'-2010-created_date' => TTi18n::gettext( 'Created Date' ),
+						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
+						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
+				];
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
-				$retval = array(
-								'name',
-								'description',
-								);
+				$retval = [
+						'name',
+						'description',
+				];
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
-				$retval = array(
-								'name',
-								);
+				$retval = [
+						'name',
+				];
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
-				$retval = array(
-								);
+				$retval = [];
 				break;
 		}
 
@@ -160,16 +159,17 @@ class CompanyGenericTagFactory extends Factory {
 	 * @return array
 	 */
 	function _getVariableToFunctionMap( $data ) {
-		$variable_function_map = array(
-										'id' => 'ID',
-										'company_id' => 'Company',
-										'object_type_id' => 'ObjectType',
-										'object_type' => FALSE,
-										'description' => 'Description',
-										'name' => 'Name',
-										'name_metaphone' => 'NameMetaphone',
-										'deleted' => 'Deleted',
-										);
+		$variable_function_map = [
+				'id'             => 'ID',
+				'company_id'     => 'Company',
+				'object_type_id' => 'ObjectType',
+				'object_type'    => false,
+				'description'    => 'Description',
+				'name'           => 'Name',
+				'name_metaphone' => 'NameMetaphone',
+				'deleted'        => 'Deleted',
+		];
+
 		return $variable_function_map;
 	}
 
@@ -184,8 +184,9 @@ class CompanyGenericTagFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setCompany( $value) {
+	function setCompany( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -200,8 +201,9 @@ class CompanyGenericTagFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setObjectType( $value) {
-		$value = trim($value);
+	function setObjectType( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'object_type_id', $value );
 	}
 
@@ -209,56 +211,57 @@ class CompanyGenericTagFactory extends Factory {
 	 * @param $name
 	 * @return bool
 	 */
-	function isUniqueName( $name) {
-		Debug::Arr($this->getCompany(), 'Company: ', __FILE__, __LINE__, __METHOD__, 10);
-		if ( $this->getCompany() == FALSE ) {
-			return FALSE;
+	function isUniqueName( $name ) {
+		Debug::Arr( $this->getCompany(), 'Company: ', __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $this->getCompany() == false ) {
+			return false;
 		}
 
-		$name = trim($name);
+		$name = trim( $name );
 		if ( $name == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		$ph = array(
-					'company_id' => TTUUID::castUUID($this->getCompany()),
-					'object_type_id' => (int)$this->getObjectType(),
-					'name' => TTi18n::strtolower($name),
-					);
+		$ph = [
+				'company_id'     => TTUUID::castUUID( $this->getCompany() ),
+				'object_type_id' => (int)$this->getObjectType(),
+				'name'           => TTi18n::strtolower( $name ),
+		];
 
-		$query = 'select id from '. $this->getTable() .'
+		$query = 'select id from ' . $this->getTable() . '
 					where company_id = ?
 						AND object_type_id = ?
 						AND lower(name) = ?
 						AND deleted = 0';
-		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+		$name_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $name_id === FALSE ) {
-			return TRUE;
+		if ( $name_id === false ) {
+			return true;
 		} else {
-			if ($name_id == $this->getId() ) {
-				return TRUE;
+			if ( $name_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @return bool|mixed
 	 */
 	function getName() {
-		return $this->getGenericDataValue('name');
+		return $this->getGenericDataValue( 'name' );
 	}
 
 	/**
 	 * @param $value
 	 * @return bool
 	 */
-	function setName( $value) {
-		$value = trim($value);
+	function setName( $value ) {
+		$value = trim( $value );
 		$this->setNameMetaphone( $value );
+
 		return $this->setGenericDataValue( 'name', $value );
 	}
 
@@ -273,12 +276,13 @@ class CompanyGenericTagFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setNameMetaphone( $value) {
-		$value = metaphone( trim($value) );
-		if	( $value != '' ) {
+	function setNameMetaphone( $value ) {
+		$value = metaphone( trim( $value ) );
+		if ( $value != '' ) {
 			return $this->setGenericDataValue( 'name_metaphone', $value );
 		}
-		return FALSE;
+
+		return false;
 	}
 
 	/**
@@ -292,8 +296,9 @@ class CompanyGenericTagFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setDescription( $value) {
-		$value = trim($value);
+	function setDescription( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'description', $value );
 	}
 
@@ -307,54 +312,54 @@ class CompanyGenericTagFactory extends Factory {
 		// Company
 		if ( $this->getCompany() != TTUUID::getZeroID() ) {
 			$clf = TTnew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
-			$this->Validator->isResultSetWithRows(	'company',
-															$clf->getByID($this->getCompany()),
-															TTi18n::gettext('Company is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'company',
+												   $clf->getByID( $this->getCompany() ),
+												   TTi18n::gettext( 'Company is invalid' )
+			);
 		}
 		// Object Type
-		$this->Validator->inArrayKey(	'object_type',
-												$this->getObjectType(),
-												TTi18n::gettext('Object Type is invalid'),
-												$this->getOptions('object_type')
-											);
+		$this->Validator->inArrayKey( 'object_type',
+									  $this->getObjectType(),
+									  TTi18n::gettext( 'Object Type is invalid' ),
+									  $this->getOptions( 'object_type' )
+		);
 		// Tag name
-		$this->Validator->isLength(		'name',
-												$this->getName(),
-												TTi18n::gettext('Tag is too short or too long'),
-												2,
-												100
-											);
-		if ( $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isRegEx(		'name',
-												$this->getName(),
-												TTi18n::gettext('Incorrect characters in tag'),
-												$this->name_validator_regex
-											);
+		$this->Validator->isLength( 'name',
+									$this->getName(),
+									TTi18n::gettext( 'Tag is too short or too long' ),
+									2,
+									100
+		);
+		if ( $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isRegEx( 'name',
+									   $this->getName(),
+									   TTi18n::gettext( 'Incorrect characters in tag' ),
+									   $this->name_validator_regex
+			);
 		}
-		if ( $this->Validator->isError('name') == FALSE ) {
-			$this->Validator->isTrue(		'name',
-												$this->isUniqueName($this->getName()),
-												TTi18n::gettext('Tag already exists')
-											);
+		if ( $this->Validator->isError( 'name' ) == false ) {
+			$this->Validator->isTrue( 'name',
+									  $this->isUniqueName( $this->getName() ),
+									  TTi18n::gettext( 'Tag already exists' )
+			);
 		}
 		// Description
-		$this->Validator->isLength(	'description',
-											$this->getDescription(),
-											TTi18n::gettext('Description is invalid'),
-											0, 255
-										);
+		$this->Validator->isLength( 'description',
+									$this->getDescription(),
+									TTi18n::gettext( 'Description is invalid' ),
+									0, 255
+		);
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -364,10 +369,10 @@ class CompanyGenericTagFactory extends Factory {
 		$this->removeCache( $this->getId() );
 
 		//if ( $this->getDeleted() == TRUE ) {
-			//Unassign all tagged objects.
+		//Unassign all tagged objects.
 		//}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -377,11 +382,11 @@ class CompanyGenericTagFactory extends Factory {
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-			foreach( $variable_function_map as $key => $function ) {
-				if ( isset($data[$key]) ) {
+			foreach ( $variable_function_map as $key => $function ) {
+				if ( isset( $data[$key] ) ) {
 
-					$function = 'set'.$function;
-					switch( $key ) {
+					$function = 'set' . $function;
+					switch ( $key ) {
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -393,27 +398,27 @@ class CompanyGenericTagFactory extends Factory {
 
 			$this->setCreatedAndUpdatedColumns( $data );
 
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param null $include_columns
 	 * @return array
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
-		$data = array();
+	function getObjectAsArray( $include_columns = null ) {
+		$data = [];
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
-			foreach( $variable_function_map as $variable => $function_stub ) {
-				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+			foreach ( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == null || ( isset( $include_columns[$variable] ) && $include_columns[$variable] == true ) ) {
 
-					$function = 'get'.$function_stub;
-					switch( $variable ) {
+					$function = 'get' . $function_stub;
+					switch ( $variable ) {
 						case 'object_type':
-							$function = 'get'.$variable;
+							$function = 'get' . $variable;
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -426,7 +431,6 @@ class CompanyGenericTagFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
@@ -441,16 +445,16 @@ class CompanyGenericTagFactory extends Factory {
 	 * @param $tags
 	 * @return array|bool
 	 */
-	static function parseTags( $tags) {
-		if ( $tags != '' AND !is_array($tags) ) {
-			$retarr = array(
-							'add' => array(),
-							'delete' => array(),
-							'all' => array(),
-							);
-			$split_tags = explode(',', str_replace( array(' ', ';'), ',', $tags) ); //Support " " (space) and ";" and ", " as separators.
-			if ( is_array($split_tags) AND count($split_tags) > 0 ) {
-				foreach( $split_tags as $raw_tag ) {
+	static function parseTags( $tags ) {
+		if ( $tags != '' && !is_array( $tags ) ) {
+			$retarr = [
+					'add'    => [],
+					'delete' => [],
+					'all'    => [],
+			];
+			$split_tags = explode( ',', str_replace( [ ' ', ';' ], ',', $tags ) ); //Support " " (space) and ";" and ", " as separators.
+			if ( is_array( $split_tags ) && count( $split_tags ) > 0 ) {
+				foreach ( $split_tags as $raw_tag ) {
 					$raw_tag = trim( $raw_tag );
 					$tag = trim( preg_replace( '/^[\+\-]/', '', $raw_tag ) );
 
@@ -458,8 +462,8 @@ class CompanyGenericTagFactory extends Factory {
 						continue;
 					}
 
-					$retarr['all'][] = TTi18n::strtolower($tag);
-					if ( substr($raw_tag, 0, 1) == '-' ) {
+					$retarr['all'][] = TTi18n::strtolower( $tag );
+					if ( substr( $raw_tag, 0, 1 ) == '-' ) {
 						$retarr['delete'][] = $tag;
 					} else {
 						$retarr['add'][] = $tag;
@@ -476,7 +480,7 @@ class CompanyGenericTagFactory extends Factory {
 			return $retarr;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -486,47 +490,47 @@ class CompanyGenericTagFactory extends Factory {
 	 * @return array|bool
 	 */
 	static function getOrCreateTags( $company_id, $object_type_id, $parsed_tags ) {
-		if ( is_array($parsed_tags) ) {
-			$existing_tags = array();
+		if ( is_array( $parsed_tags ) ) {
+			$existing_tags = [];
 			//Get the IDs for all tags
 			$cgtlf = TTnew( 'CompanyGenericTagListFactory' ); /** @var CompanyGenericTagListFactory $cgtlf */
-			$cgtlf->getByCompanyIdAndObjectTypeAndTags($company_id, $object_type_id, $parsed_tags['all']);
+			$cgtlf->getByCompanyIdAndObjectTypeAndTags( $company_id, $object_type_id, $parsed_tags['all'] );
 			if ( $cgtlf->getRecordCount() > 0 ) {
-				foreach( $cgtlf as $cgt_obj ) {
-					$existing_tags[TTi18n::strtolower($cgt_obj->getName())] = $cgt_obj->getID();
+				foreach ( $cgtlf as $cgt_obj ) {
+					$existing_tags[TTi18n::strtolower( $cgt_obj->getName() )] = $cgt_obj->getID();
 				}
 				//Debug::Arr($existing_tags, 'aExisting tags:', __FILE__, __LINE__, __METHOD__, 10);
-				$tags_diff = array_diff( $parsed_tags['all'], array_keys($existing_tags) );
+				$tags_diff = array_diff( $parsed_tags['all'], array_keys( $existing_tags ) );
 			} else {
 				//Debug::Text('No Existing tags!', __FILE__, __LINE__, __METHOD__, 10);
 				$tags_diff = array_values( $parsed_tags['add'] );
 			}
-			unset($cgtlf, $cgt_obj);
+			unset( $cgtlf, $cgt_obj );
 			//Debug::Arr($tags_diff, 'Tags Diff: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( isset($tags_diff) AND is_array($tags_diff) ) {
+			if ( isset( $tags_diff ) && is_array( $tags_diff ) ) {
 				//Add new tags.
-				foreach( $tags_diff as $new_tag ) {
-					$new_tag = trim($new_tag);
-					$cgtf = TTnew('CompanyGenericTagFactory'); /** @var CompanyGenericTagFactory $cgtf */
+				foreach ( $tags_diff as $new_tag ) {
+					$new_tag = trim( $new_tag );
+					$cgtf = TTnew( 'CompanyGenericTagFactory' ); /** @var CompanyGenericTagFactory $cgtf */
 					$cgtf->setCompany( $company_id );
 					$cgtf->setObjectType( $object_type_id );
 					$cgtf->setName( $new_tag );
 					if ( $cgtf->isValid() ) {
 						$insert_id = $cgtf->Save();
-						$existing_tags[TTi18n::strtolower($new_tag)] = $insert_id;
+						$existing_tags[TTi18n::strtolower( $new_tag )] = $insert_id;
 					}
 				}
-				unset($tags_diff, $new_tag, $cgtf, $insert_id);
+				unset( $tags_diff, $new_tag, $cgtf, $insert_id );
 			}
 
 			//Debug::Arr($existing_tags, 'Existing Tags: ', __FILE__, __LINE__, __METHOD__, 10);
-			if ( empty($existing_tags) == FALSE) {
+			if ( empty( $existing_tags ) == false ) {
 				return $existing_tags;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -534,8 +538,9 @@ class CompanyGenericTagFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Tag') .': '. $this->getName(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Tag' ) . ': ' . $this->getName(), null, $this->getTable(), $this );
 	}
 
 }
+
 ?>

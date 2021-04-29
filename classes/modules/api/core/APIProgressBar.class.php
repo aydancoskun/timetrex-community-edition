@@ -41,7 +41,7 @@
 class APIProgressBar {
 	protected $main_class = 'ProgressBar';
 
-	protected $obj = NULL;
+	protected $obj = null;
 
 	/**
 	 * APIProgressBar constructor.
@@ -49,19 +49,19 @@ class APIProgressBar {
 	public function __construct() {
 		$this->obj = new ProgressBar();
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @param bool $key
 	 * @return bool
 	 */
-	function get( $key = FALSE ) {
+	function get( $key = false ) {
 		if ( $key != '' ) {
 			return $this->obj->get( $key );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -73,4 +73,5 @@ class APIProgressBar {
 		return $this->obj->test( $key, $total_iterations = 10 );
 	}
 }
+
 ?>

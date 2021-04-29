@@ -34,10 +34,10 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: pivot_table.php [OPTIONS] [Input CSV File] [Output CSV File]\n";
 	$help_output .= "  Options:\n";
 	$help_output .= "    -pivot_column [Existing column to pivot on]\n";
@@ -47,59 +47,59 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 	echo $help_output;
 } else {
 	//Handle command line arguments
-	$last_arg = count($argv)-1;
+	$last_arg = count( $argv ) - 1;
 
-	if ( in_array('-pivot_column', $argv) ) {
-		$data['pivot_column'] = trim($argv[(array_search('-pivot_column', $argv) + 1)]);
+	if ( in_array( '-pivot_column', $argv ) ) {
+		$data['pivot_column'] = trim( $argv[ ( array_search( '-pivot_column', $argv ) + 1 ) ] );
 	} else {
-		$data['pivot_column'] = FALSE; //Default to first column.
+		$data['pivot_column'] = false; //Default to first column.
 	}
 
-	if ( in_array('-category_column', $argv) ) {
-		$data['category_column'] = trim($argv[(array_search('-category_column', $argv) + 1)]);
+	if ( in_array( '-category_column', $argv ) ) {
+		$data['category_column'] = trim( $argv[ ( array_search( '-category_column', $argv ) + 1 ) ] );
 	} else {
 		$data['category_column'] = 'Category';
 	}
 
-	if ( in_array('-data_column', $argv) ) {
-		$data['data_column'] = trim($argv[(array_search('-data_column', $argv) + 1)]);
+	if ( in_array( '-data_column', $argv ) ) {
+		$data['data_column'] = trim( $argv[ ( array_search( '-data_column', $argv ) + 1 ) ] );
 	} else {
 		$data['data_column'] = 'Data';
 	}
 
-	$input_file = $argv[count($argv)-2];
-	$output_file = $argv[count($argv)-1];
+	$input_file = $argv[ count( $argv ) - 2 ];
+	$output_file = $argv[ count( $argv ) - 1 ];
 
-	if ( file_exists($input_file) ) {
-		$input_arr = Misc::parseCSV( $input_file, TRUE );
-		if ( is_array($input_arr) ) {
-			if ( $data['pivot_column'] == FALSE ) {
-				$data['pivot_column'] = key($input_arr[0]);
+	if ( file_exists( $input_file ) ) {
+		$input_arr = Misc::parseCSV( $input_file, true );
+		if ( is_array( $input_arr ) ) {
+			if ( $data['pivot_column'] == false ) {
+				$data['pivot_column'] = key( $input_arr[0] );
 			}
 
 			$i = 0;
-			foreach( $input_arr as $input_row ) {
-				foreach( $input_row as $input_column_name => $input_column_data ) {
+			foreach ( $input_arr as $input_row ) {
+				foreach ( $input_row as $input_column_name => $input_column_data ) {
 					if ( $input_column_name != $data['pivot_column'] AND $input_column_data != '' ) {
-						if ( isset($input_row[$data['pivot_column']]) ) {
-							$output_arr[$i][$data['pivot_column']] = $input_row[$data['pivot_column']];
+						if ( isset( $input_row[ $data['pivot_column'] ] ) ) {
+							$output_arr[ $i ][ $data['pivot_column'] ] = $input_row[ $data['pivot_column'] ];
 						}
 
-						$output_arr[$i][$data['category_column']] = $input_column_name;
-						$output_arr[$i][$data['data_column']] = $input_column_data;
+						$output_arr[ $i ][ $data['category_column'] ] = $input_column_name;
+						$output_arr[ $i ][ $data['data_column'] ] = $input_column_data;
 
 						$i++;
 					}
 				}
 			}
 
-			if ( isset($output_arr) ) {
-				$column_keys = array_keys($output_arr[0]);
-				foreach( $column_keys as $column_key ) {
-					$columns[$column_key] = $column_key;
+			if ( isset( $output_arr ) ) {
+				$column_keys = array_keys( $output_arr[0] );
+				foreach ( $column_keys as $column_key ) {
+					$columns[ $column_key ] = $column_key;
 				}
 
-				$output_csv = Misc::Array2CSV( $output_arr, $columns, FALSE );
+				$output_csv = Misc::Array2CSV( $output_arr, $columns, false );
 				file_put_contents( $output_file, $output_csv );
 			}
 		} else {

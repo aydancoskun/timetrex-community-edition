@@ -20,7 +20,7 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 				return;
 			}
 
-			var api = new (APIFactory.getAPIClass( 'APIPayStubTransaction' ))();
+			var api = new ( APIFactory.getAPIClass( 'APIPayStubTransaction' ) )();
 			var filter_data = {};
 			if ( external_data ) {
 				var temp_filter_data = external_data.filter_data;

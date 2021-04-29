@@ -33,7 +33,4 @@ var APIUserGroup = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'dragNdropUserGroup', arguments );
 	}
 
-
-
-
 } );

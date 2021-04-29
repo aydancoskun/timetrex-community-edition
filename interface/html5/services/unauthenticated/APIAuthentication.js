@@ -53,7 +53,6 @@ var APIAuthentication = ServiceCaller.extend( {
 
 	},
 
-
 	passwordReset: function() {
 
 		return this.argumentsHandler( this.className, 'passwordReset', arguments );

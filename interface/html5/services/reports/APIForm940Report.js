@@ -63,6 +63,4 @@ var APIForm940Report = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

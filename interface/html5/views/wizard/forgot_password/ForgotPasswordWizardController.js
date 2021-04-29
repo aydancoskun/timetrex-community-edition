@@ -11,7 +11,7 @@ ForgotPasswordWizardController = BaseWizardController.extend( {
 		if ( this.default_data && typeof this.default_data.api_class != 'undefined' ) {
 			this.api = this.default_data.api_class;
 		} else {
-			this.api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+			this.api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
 		}
 		this.render();
 	},

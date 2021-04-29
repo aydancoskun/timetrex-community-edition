@@ -25,7 +25,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		this.steps = 6;
 		this.current_step = 1;
 		this.wizard_id = 'ProcessPayrollWizard';
-		this.api_import = new (APIFactory.getAPIClass( 'APIImport' ))();
+		this.api_import = new ( APIFactory.getAPIClass( 'APIImport' ) )();
 
 		this.render();
 	},
@@ -226,7 +226,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		this.last_id = id;
 
 		//Clone this array because its currently a reference to the raw grid data itself and grid.setData() clears out the grid before rendering it again, which results in a blank grid when switching from a saved mapping, then back to the original.
-		select_data = this.setSampleRowBaseOnImportFile( select_data ).slice(0);
+		select_data = this.setSampleRowBaseOnImportFile( select_data ).slice( 0 );
 
 		grid.setData( select_data );
 
@@ -264,7 +264,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		filter_data.script = 'import_wizard' + this.stepsDataDic[1].import_class;
 		filter_data.deleted = false;
 		args.filter_data = filter_data;
-		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().getUserGenericData( args, {
+		new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )().getUserGenericData( args, {
 			onResult: function( result ) {
 				var res_data = result.getResult();
 				if ( $.type( res_data ) !== 'array' ) {
@@ -272,8 +272,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				} else {
 					//Force sorting by name so -- DEFAULT -- record appears at the top.
 					res_data.sort( function( a, b ) {
-								return Global.compare( a, b, 'name' );
-							}
+							return Global.compare( a, b, 'name' );
+						}
 					);
 
 					$this.saved_layout_array = res_data;
@@ -302,8 +302,6 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	getLayoutById: function( select_id ) {
 		var len = this.saved_layout_array.length;
 
-		select_id = select_id;
-
 		for ( var i = 0; i < len; i++ ) {
 			var layout = this.saved_layout_array[i];
 
@@ -324,7 +322,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		TAlertManager.showConfirmAlert( $.i18n._( 'Are you sure you wish to continue?' ), null, function( flag ) {
 			if ( flag ) {
-				new (APIFactory.getAPIClass( 'APIUserGenericData' ))().deleteUserGenericData( select_id, {
+				new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )().deleteUserGenericData( select_id, {
 					onResult: function( result ) {
 						$this.onSavedLayoutChange( $this.saved_layout_array[0].id );
 						$this.getSavedMapping();
@@ -343,7 +341,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		select_layout.data = this.stepsDataDic[this.current_step].import_data_for_layout;
 
-		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( select_layout, {
+		new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )().setUserGenericData( select_layout, {
 			onResult: function( result ) {
 				//Refresh saved mapping data once it has been saved on the server.
 				// This makes it so if the user clicks the UPDATE button, then switches to another saved mapping, then switches back, they will see their most recent settings.
@@ -362,7 +360,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		args.is_default = ( is_default && is_default == true ? true : false );
 		args.data = this.stepsDataDic[this.current_step].import_data_for_layout;
 
-		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( args, {
+		new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )().setUserGenericData( args, {
 			onResult: function( result ) {
 				if ( !result.isValid() ) {
 					TAlertManager.showErrorAlert( result );
@@ -559,11 +557,11 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		} else {
 			widget = $( '<input custom_cell="true" ' +
-					'render_type="text" ' +
-					'id="' + row_id + '_' + col_model.name + '" ' +
-					'type="text" ' +
-					'class="t-text-input" ' +
-					'style="width: 97%">' );
+				'render_type="text" ' +
+				'id="' + row_id + '_' + col_model.name + '" ' +
+				'type="text" ' +
+				'class="t-text-input" ' +
+				'style="width: 97%">' );
 
 			widget.text( cell_value );
 		}
@@ -682,8 +680,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 										}
 
 										raw_data.sort( function( a, b ) {
-													return Global.compare( a, b, 'map_column_name' );
-												}
+												return Global.compare( a, b, 'map_column_name' );
+											}
 										);
 
 										// use to set Sample row to same layout
@@ -750,9 +748,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 						} else {
 							var data_grid_error_source = $this.createErrorSource( result.getDetails() );
 							$this.showErrorGrid( $.i18n._( 'Verification failed due to the following reasons' ) + ': ',
-									data_grid_error_source,
-									$.i18n._( 'Continue to the next step to skip importing invalid records.' ),
-									result.getRecordDetails() );
+								data_grid_error_source,
+								$.i18n._( 'Continue to the next step to skip importing invalid records.' ),
+								result.getRecordDetails() );
 
 						}
 
@@ -781,9 +779,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 							var data_grid_error_source = $this.createErrorSource( result.getDetails() );
 
 							$this.showErrorGrid( $.i18n._( 'Import failed due to the following reasons' ) + ':',
-									data_grid_error_source,
-									$.i18n._( 'Invalid records have been skipped, all other records have been imported successfully.' ),
-									result.getRecordDetails() );
+								data_grid_error_source,
+								$.i18n._( 'Invalid records have been skipped, all other records have been imported successfully.' ),
+								result.getRecordDetails() );
 
 						}
 
@@ -816,7 +814,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			width: 60,
 			sortable: false,
 			title: false,
-			fixed:true
+			fixed: true
 		};
 		columns.push( column_info );
 
@@ -864,10 +862,10 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		grid = new TTGrid( 'error_grid', {
 			sortable: false,
-			width: (this.content_div.width() - 2)
+			width: ( this.content_div.width() - 2 )
 		}, columns );
 		grid.setData( data_grid_error_source );
-		grid.setGridColumnsWidth( null, { max_grid_width: (this.content_div.width() - 2) } );
+		grid.setGridColumnsWidth( null, { max_grid_width: ( this.content_div.width() - 2 ) } );
 	},
 
 	createErrorSource: function( error_array ) {
@@ -996,12 +994,12 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			} else {
 
 				widget = $( '<input custom_cell="true" ' +
-						'render_type="text" ' +
-						'id="' + row_id + '_parse_hint" ' +
-						'value="" ' +
-						'type="text" ' +
-						'class="t-text-input" ' +
-						'style="width: 97%">' );
+					'render_type="text" ' +
+					'id="' + row_id + '_parse_hint" ' +
+					'value="" ' +
+					'type="text" ' +
+					'class="t-text-input" ' +
+					'style="width: 97%">' );
 
 				parse_hint_widget.parent().append( widget );
 				parse_hint_widget.remove();

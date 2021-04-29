@@ -47,5 +47,4 @@ var APIRoundIntervalPolicy = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'exportRoundIntervalPolicy', arguments );
 	}
 
-
 } );

@@ -40,34 +40,34 @@
  */
 class PayrollDeduction_US_VA extends PayrollDeduction_US {
 
-	var $state_income_tax_rate_options = array(
-			20060101 => array(
-					0 => array(
-							array('income' => 3000, 'rate' => 2, 'constant' => 0),
-							array('income' => 5000, 'rate' => 3, 'constant' => 60),
-							array('income' => 17000, 'rate' => 5, 'constant' => 120),
-							array('income' => 17000, 'rate' => 5.75, 'constant' => 720),
-					),
-			),
-	);
+	var $state_income_tax_rate_options = [
+			20060101 => [
+					0 => [
+							[ 'income' => 3000, 'rate' => 2, 'constant' => 0 ],
+							[ 'income' => 5000, 'rate' => 3, 'constant' => 60 ],
+							[ 'income' => 17000, 'rate' => 5, 'constant' => 120 ],
+							[ 'income' => 17000, 'rate' => 5.75, 'constant' => 720 ],
+					],
+			],
+	];
 
-	var $state_options = array(
-			20190101 => array(
+	var $state_options = [
+			20190101 => [
 					'standard_deduction' => 4500,
 					'allowance'          => 930,
 					'age65_allowance'    => 800,
-			),
-			20080101 => array(
+			],
+			20080101 => [
 					'standard_deduction' => 3000,
 					'allowance'          => 930,
 					'age65_allowance'    => 800,
-			),
-			20060101 => array(
+			],
+			20060101 => [
 					'standard_deduction' => 3000,
 					'allowance'          => 900,
 					'age65_allowance'    => 800,
-			),
-	);
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -84,9 +84,8 @@ class PayrollDeduction_US_VA extends PayrollDeduction_US {
 
 	function getStateStandardDeductionAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$retval = $retarr['standard_deduction'];
@@ -98,9 +97,8 @@ class PayrollDeduction_US_VA extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['allowance'];
@@ -114,9 +112,8 @@ class PayrollDeduction_US_VA extends PayrollDeduction_US {
 
 	function getStateAge65AllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['age65_allowance'];

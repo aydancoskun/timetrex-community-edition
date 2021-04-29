@@ -12,7 +12,7 @@ EthnicGroupViewController = BaseViewController.extend( {
 		this.table_name_key = 'ethnic_group';
 		this.context_menu_name = $.i18n._( 'Ethnic Groups' );
 		this.navigation_label = $.i18n._( 'Ethnic Group' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIEthnicGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIEthnicGroup' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -22,7 +22,7 @@ EthnicGroupViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
@@ -44,7 +44,7 @@ EthnicGroupViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIEthnicGroup' )),
+			api_class: ( APIFactory.getAPIClass( 'APIEthnicGroup' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ETHNIC_GROUP,
@@ -93,7 +93,7 @@ EthnicGroupViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -105,7 +105,7 @@ EthnicGroupViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -113,6 +113,5 @@ EthnicGroupViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

@@ -43,5 +43,4 @@ var APIUserReview = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'copyUserReview', arguments );
 	}
 
-
 } );

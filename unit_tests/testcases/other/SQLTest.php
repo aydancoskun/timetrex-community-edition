@@ -40,8 +40,8 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_' . uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -61,23 +61,23 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100 );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
 		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	function getListFactoryClassList( $equal_parts = 1 ) {
 		global $global_class_map;
 
-		$retarr = array();
+		$retarr = [];
 
 		//Get all ListFactory classes
 		foreach ( $global_class_map as $class_name => $class_file_name ) {
-			if ( strpos( $class_name, 'ListFactory' ) !== FALSE ) {
+			if ( strpos( $class_name, 'ListFactory' ) !== false ) {
 				$retarr[] = $class_name;
 			}
 		}
@@ -94,7 +94,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 			Debug::text( 'Checking Class: ' . $factory_name . ' File: ' . $class_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 
-			$filter_data_types = array(
+			$filter_data_types = [
 					'not_set',
 					'true',
 					'false',
@@ -105,7 +105,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 					'large_int',
 					'string',
 					'array',
-			);
+			];
 
 			//Parse filter array keys from class file so we can populate them with dummy data.
 			preg_match_all( '/\$filter_data\[\'([a-z0-9_]*)\'\]/i', file_get_contents( $class_file_name ), $filter_data_match );
@@ -114,12 +114,12 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 				foreach ( $filter_data_types as $filter_data_type ) {
 					Debug::Text( 'Filter Data Type: ' . $filter_data_type, __FILE__, __LINE__, __METHOD__, 10 );
 
-					$filter_data = array();
+					$filter_data = [];
 
 					$filter_data_match[1] = array_unique( $filter_data_match[1] );
 					foreach ( $filter_data_match[1] as $filter_data_key ) {
 						//Skip sort_column/sort_order
-						if ( in_array( $filter_data_key, array('sort_column', 'sort_order') ) ) {
+						if ( in_array( $filter_data_key, [ 'sort_column', 'sort_order' ] ) ) {
 							continue;
 						}
 
@@ -130,13 +130,13 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 						// Arrays
 						switch ( $filter_data_type ) {
 							case 'true':
-								$filter_data[$filter_data_key] = TRUE;
+								$filter_data[$filter_data_key] = true;
 								break;
 							case 'false':
-								$filter_data[$filter_data_key] = FALSE;
+								$filter_data[$filter_data_key] = false;
 								break;
 							case 'null':
-								$filter_data[$filter_data_key] = NULL;
+								$filter_data[$filter_data_key] = null;
 								break;
 							case 'empty_string':
 								$filter_data[$filter_data_key] = '';
@@ -154,7 +154,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 								$filter_data[$filter_data_key] = 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 );
 								break;
 							case 'array':
-								$filter_data[$filter_data_key] = array(rand( 0, 128 ), rand( 2147483648, 21474836489 ), 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 ));
+								$filter_data[$filter_data_key] = [ rand( 0, 128 ), rand( 2147483648, 21474836489 ), 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 ) ];
 								break;
 							case 'not_set':
 								break;
@@ -165,31 +165,31 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 					$lf = TTNew( $factory_name );
 					switch ( $factory_name ) {
 						case 'RecurringScheduleControlListFactory':
-							$retarr = $lf->getAPIExpandedSearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
-							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object( $retarr ), TRUE );
+							$retarr = $lf->getAPIExpandedSearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
+							$this->assertNotEquals( $retarr, false );
+							$this->assertTrue( is_object( $retarr ), true );
 
-							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
-							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object( $retarr ), TRUE );
+							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
+							$this->assertNotEquals( $retarr, false );
+							$this->assertTrue( is_object( $retarr ), true );
 							break;
 						case 'ScheduleListFactory':
-							$retarr = $lf->getSearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
-							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object( $retarr ), TRUE );
+							$retarr = $lf->getSearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
+							$this->assertNotEquals( $retarr, false );
+							$this->assertTrue( is_object( $retarr ), true );
 
-							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
-							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object( $retarr ), TRUE );
+							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
+							$this->assertNotEquals( $retarr, false );
+							$this->assertTrue( is_object( $retarr ), true );
 							break;
 						case 'MessageControlListFactory':
 							$filter_data['current_user_id'] = $this->user_id;
 						default:
 							if ( method_exists( $lf, 'getAPISearchByCompanyIdAndArrayCriteria' ) ) {
-								//Make sure we test pagination, especially with MySQL due to its limitation with subqueries and need for _ADODB_COUNT workarounds, $limit = NULL, $page = NULL, $where = NULL, $order = NULL
-								$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
-								$this->assertNotEquals( $retarr, FALSE );
-								$this->assertTrue( is_object( $retarr ), TRUE );
+								//Make sure we test pagination, especially with subqueries and the need for _ADODB_COUNT workarounds, $limit = NULL, $page = NULL, $where = NULL, $order = NULL
+								$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
+								$this->assertNotEquals( $retarr, false );
+								$this->assertTrue( is_object( $retarr ), true );
 							}
 							break;
 					}
@@ -199,26 +199,26 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 			Debug::text( 'Done...', __FILE__, __LINE__, __METHOD__, 10 );
 
-			return TRUE;
+			return true;
 		} else {
 			Debug::text( 'Class does not exist: ' . $factory_name, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function runSQLTestOnListFactoryMethods( $factory_name ) {
-		if ( in_array( $factory_name, array(
+		if ( in_array( $factory_name, [
 											'HierarchyListFactory',
 											'PolicyGroupAccrualPolicyListFactory',
 											'PolicyGroupOverTimePolicyListFactory',
 											'PolicyGroupPremiumPolicyListFactory',
 											'PolicyGroupRoundIntervalPolicyListFactory',
 											'ProductTaxPolicyProductListFactory',
-									)
+									]
 		)
 		) {
-			return TRUE; //Deprecated classes.
+			return true; //Deprecated classes.
 		}
 
 		if ( class_exists( $factory_name ) ) {
@@ -230,31 +230,25 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 				global $db;
 				foreach ( $raw_methods as $raw_method ) {
 					if ( $factory_name == $raw_method->class
-							AND (
-									strpos( $raw_method->name, 'getAll' ) !== FALSE
-									OR strpos( $raw_method->name, 'getBy' ) !== FALSE
-									OR strpos( $raw_method->name, 'Report' ) !== FALSE
+							&& (
+									strpos( $raw_method->name, 'getAll' ) !== false
+									|| strpos( $raw_method->name, 'getBy' ) !== false
+									|| strpos( $raw_method->name, 'Report' ) !== false
 							)
-							AND (
-									strncmp( $db->databaseType, 'mysql', 5 ) != 0
-									OR
-									//Exclude function calls that are known to not work in MySQL.
-									( strncmp( $db->databaseType, 'mysql', 5 ) == 0 AND !in_array( $raw_method->name, array('getByPhonePunchDataByCompanyIdAndStartDateAndEndDate') ) )
-							)
-							AND (
+							&& (
 								//Skip getByCompanyIdArray() functions, but include getBy*AndArrayCriteria(). So just check if its ends with Array or not.
 							( substr( $raw_method->name, -5 ) !== 'Array' )
 							)
 					) {
 						Debug::text( 'Class: ' . $factory_name . ' Method: ' . $raw_method->name, __FILE__, __LINE__, __METHOD__, 10 );
 
-						$test_modes = array('default', 'fuzz');
+						$test_modes = [ 'default', 'fuzz' ];
 						foreach ( $test_modes as $test_mode ) {
 							Debug::text( '  Test Mode: ' . $test_mode, __FILE__, __LINE__, __METHOD__, 10 );
 							//Get method arguments.
 							$method_parameters = $raw_method->getParameters();
 							if ( is_array( $method_parameters ) ) {
-								$input_arguments = array();
+								$input_arguments = [];
 								foreach ( $method_parameters as $method_parameter ) {
 									Debug::text( '  Parameter: ' . $method_parameter->name, __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -303,16 +297,15 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 										case 'RequestListFactory':
 											switch ( $method_parameter->name ) {
 												case 'hierarchy_level_map':
-													$input_argument = array(
-															array(
+													$input_argument = [
+															[
 																	'hierarchy_control_id' => 1,
 																	'level'                => 1,
 																	'last_level'           => 2,
 																	'object_type_id'       => 10,
-															)
-													);
+															],
+													];
 													break;
-
 											}
 											break;
 										case 'ExceptionListFactory':
@@ -320,28 +313,27 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 												case 'time_period':
 													$input_argument = 'week';
 													break;
-
 											}
 											break;
 									}
 
 									if ( $test_mode == 'fuzz' ) {
 										//If LIMIT argument is available always set it to 1 to reduce memory usage.
-										if ( in_array( $method_parameter->name, array('where', 'order', 'page') ) ) {
-											$input_argument = NULL;
-										} elseif ( !isset( $input_argument ) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
+										if ( in_array( $method_parameter->name, [ 'where', 'order', 'page' ] ) ) {
+											$input_argument = null;
+										} else if ( !isset( $input_argument ) && ( $method_parameter->name == 'id' || strpos( $method_parameter->name, '_id' ) !== false || $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
 											$input_argument = 'false'; //Try passing a string where ID is expected.
-										} elseif ( !isset( $input_argument ) ) {
+										} else if ( !isset( $input_argument ) ) {
 											$input_argument = 2;
 										}
 										$input_arguments[] = $input_argument;
 									} else {
 										//If LIMIT argument is available always set it to 1 to reduce memory usage.
-										if ( in_array( $method_parameter->name, array('where', 'order', 'page') ) ) {
-											$input_argument = NULL;
-										} elseif ( !isset( $input_argument ) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
+										if ( in_array( $method_parameter->name, [ 'where', 'order', 'page' ] ) ) {
+											$input_argument = null;
+										} else if ( !isset( $input_argument ) && ( $method_parameter->name == 'id' || strpos( $method_parameter->name, '_id' ) !== false || $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
 											$input_argument = 1;
-										} elseif ( !isset( $input_argument ) ) {
+										} else if ( !isset( $input_argument ) ) {
 											$input_argument = 2;
 										}
 										$input_arguments[] = $input_argument;
@@ -349,7 +341,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 									unset( $input_argument );
 								}
 
-								if ( isset( $input_arguments ) AND is_array( $input_arguments ) ) {
+								if ( isset( $input_arguments ) && is_array( $input_arguments ) ) {
 									Debug::Arr( $input_arguments, '    Calling Class: ' . $factory_name . ' Method: ' . $raw_method->name, __FILE__, __LINE__, __METHOD__, 10 );
 									$lf = TTNew( $factory_name );
 									switch ( $factory_name . '::' . $raw_method->name ) {
@@ -358,41 +350,40 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 											//Skip due to failures.
 											break;
 										case 'CompanyListFactory::getByPhoneID':
-											$retarr = call_user_func_array( array($lf, $raw_method->name), $input_arguments );
+											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
-												$this->assertEquals( $retarr, FALSE ); //This will be FALSE
+												$this->assertEquals( $retarr, false ); //This will be FALSE
 											} else {
-												$this->assertNotEquals( $retarr, FALSE );
-												$this->assertTrue( is_object( $retarr ), TRUE );
+												$this->assertNotEquals( $retarr, false );
+												$this->assertTrue( is_object( $retarr ), true );
 											}
 											break;
 										case 'MessageControlListFactory::getByCompanyIdAndObjectTypeAndObjectAndNotUser':
-											$retarr = call_user_func_array( array($lf, $raw_method->name), $input_arguments );
-											$this->assertEquals( $retarr, FALSE ); //This will be FALSE, but it still executes a query.
+											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
+											$this->assertEquals( $retarr, false ); //This will be FALSE, but it still executes a query.
 											//$this->assertTrue( is_object($retarr), TRUE );
 											break;
 										case 'CompanyListFactory::getByPhoneID':
 										case 'PayStubEntryListFactory::getByPayStubIdAndEntryNameId':
 											//FUZZ tests should return FALSE, otherwise they should be normal.
-											$retarr = call_user_func_array( array($lf, $raw_method->name), $input_arguments );
+											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
-												$this->assertEquals( $retarr, FALSE ); //This will be FALSE
+												$this->assertEquals( $retarr, false ); //This will be FALSE
 											} else {
-												$this->assertNotEquals( $retarr, FALSE );
-												$this->assertTrue( is_object( $retarr ), TRUE );
+												$this->assertNotEquals( $retarr, false );
+												$this->assertTrue( is_object( $retarr ), true );
 											}
 											break;
 										default:
-											$retarr = call_user_func_array( array($lf, $raw_method->name), $input_arguments );
+											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
 											//Debug::Arr($retarr, '    RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
-											$this->assertNotEquals( $retarr, FALSE );
-											$this->assertTrue( is_object( $retarr ), TRUE );
+											$this->assertNotEquals( $retarr, false );
+											$this->assertTrue( is_object( $retarr ), true );
 											break;
 									}
 								} else {
 									Debug::text( '  No INPUT arguments... Skipping Class: ' . $factory_name . ' Method: ' . $raw_method->name, __FILE__, __LINE__, __METHOD__, 10 );
 								}
-
 							}
 						}
 					} else {
@@ -403,12 +394,12 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 			Debug::text( 'Done...', __FILE__, __LINE__, __METHOD__, 10 );
 
-			return TRUE;
+			return true;
 		} else {
 			Debug::text( 'Class does not exist: ' . $factory_name, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function runSQLSortTestOnListFactory( $factory_name ) {
@@ -419,19 +410,19 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			Debug::text( 'Checking Class: ' . $factory_name . ' File: ' . $class_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 
 			$lf = TTNew( $factory_name );
-			if ( method_exists( $lf, 'getOptions') ) {
+			if ( method_exists( $lf, 'getOptions' ) ) {
 				if ( method_exists( $lf, 'getAPISearchByCompanyIdAndArrayCriteria' ) ) {
-					$columns = array_fill_keys( array_keys( array_flip( array_keys( Misc::trimSortPrefix( $lf->getOptions('columns') ) ) ) ), 'asc'); //Set sort order to ASC for all columns.
-					if ( is_array($columns) ) {
+					$columns = array_fill_keys( array_keys( array_flip( array_keys( Misc::trimSortPrefix( $lf->getOptions( 'columns' ) ) ) ) ), 'asc' ); //Set sort order to ASC for all columns.
+					if ( is_array( $columns ) ) {
 						try {
 							//$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, array('a.bogus' => 'asc') );
-							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, $columns );
-							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object( $retarr ), TRUE );
+							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, [], 1, 1, null, $columns );
+							$this->assertNotEquals( $retarr, false );
+							$this->assertTrue( is_object( $retarr ), true );
 						} catch ( Exception $e ) {
-							Debug::Arr( $columns,  'Columns: ', __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::Arr( $columns, 'Columns: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-							$this->assertTrue( FALSE );
+							$this->assertTrue( false );
 						}
 					} else {
 						Debug::text( 'getOptions(\'columns\') does not return any data, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -443,12 +434,12 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 			Debug::text( 'Done...', __FILE__, __LINE__, __METHOD__, 10 );
 
-			return TRUE;
+			return true;
 		} else {
 			Debug::text( 'Class does not exist: ' . $factory_name, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function runSQLTestOnEdition( $product_edition = TT_PRODUCT_ENTERPRISE, $class_list ) {
@@ -456,7 +447,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$original_product_edition = getTTProductEdition();
 
-		$this->assertTrue( TRUE );
+		$this->assertTrue( true );
 		if ( $product_edition <= $original_product_edition ) {
 			$TT_PRODUCT_EDITION = $product_edition;
 			Debug::text( 'Checking against Edition: ' . getTTProductEditionName(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -464,21 +455,21 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			//Loop through all ListFactory classes testing SQL queries.
 
 			//Run tests with count rows enabled, then with it disabled as well.
-			$db->pageExecuteCountRows = FALSE;
+			$db->pageExecuteCountRows = false;
 			foreach ( $class_list as $class_name ) {
 				//$this->runSQLSortTestOnListFactory( $class_name );  //FIXME: Re-enable when we have time and make sure all sorting works.
 				$this->runSQLTestOnListFactoryMethods( $class_name );
 				$this->runSQLTestOnListFactory( $class_name );
 			}
 
-			$db->pageExecuteCountRows = TRUE;
+			$db->pageExecuteCountRows = true;
 			foreach ( $class_list as $class_name ) {
 				$this->runSQLTestOnListFactoryMethods( $class_name );
 				$this->runSQLTestOnListFactory( $class_name );
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -622,82 +613,74 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		//PageExecute($query, $limit, $page, $ph)
 
-		$db->pageExecuteCountRows = TRUE;
+		$db->pageExecuteCountRows = true;
 
 		try {
 			$query = 'SELECT id FROM currency';
 			$db->PageExecute( $query, 2, 2 );
-			$this->assertTrue( TRUE );
-		}  catch ( Exception $e ) {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( true );
+		} catch ( Exception $e ) {
+			$this->assertTrue( false );
 		}
 
 		try {
 			$query = 'SELECT id, status_id FROM currency';
 			$db->PageExecute( $query, 2, 2 );
-			$this->assertTrue( TRUE );
-		}  catch ( Exception $e ) {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( true );
+		} catch ( Exception $e ) {
+			$this->assertTrue( false );
 		}
 
 		try {
 			$query = 'SELECT a.id FROM currency AS a LEFT JOIN company as tmp ON a.id = tmp.id';
 			$db->PageExecute( $query, 2, 2 );
-			$this->assertTrue( TRUE );
-		}  catch ( Exception $e ) {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( true );
+		} catch ( Exception $e ) {
+			$this->assertTrue( false );
 		}
 
 		try {
 			$query = 'SELECT a.id FROM currency AS a LEFT JOIN ( SELECT id FROM company ) as tmp ON a.id = tmp.id';
 			$db->PageExecute( $query, 2, 2 );
-			$this->assertTrue( TRUE );
-		}  catch ( Exception $e ) {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( true );
+		} catch ( Exception $e ) {
+			$this->assertTrue( false );
 		}
 
 		try {
 			$query = 'SELECT a.id, a.status_id FROM currency AS a LEFT JOIN ( SELECT id, status_id FROM company ) as tmp ON a.id = tmp.id';
 			$db->PageExecute( $query, 2, 2 );
-			$this->assertTrue( TRUE );
-		}  catch ( Exception $e ) {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( true );
+		} catch ( Exception $e ) {
+			$this->assertTrue( false );
 		}
 
 		try {
 			$query = 'SELECT * FROM ( SELECT a.id FROM currency AS a LEFT JOIN company as tmp ON a.id = tmp.id ) as tmp2';
 			$db->PageExecute( $query, 2, 2 );
-			$this->assertTrue( TRUE );
-		}  catch ( Exception $e ) {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( true );
+		} catch ( Exception $e ) {
+			$this->assertTrue( false );
 		}
 
 		try {
 			$query = 'SELECT _ADODB_COUNT id, (SELECT 1 FROM currency LIMIT 1) _ADODB_COUNT AS tmp FROM users';
 			$db->PageExecute( $query, 2, 2 );
 
-			$this->assertTrue( TRUE );
+			$this->assertTrue( true );
 		} catch ( Exception $e ) {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( false );
 		}
 
-		//This will fail on MySQL, but pass on PostgreSQL. Since this query should have the _ADODB_COUNT keyword above to make it work on all databases.
+		//This query should have the _ADODB_COUNT keyword above to make it work on all databases.
 		//It works on PGSQL because it can wrap it in a sub-query, ie: SELECT count(*) FROM ( $query )
 		try {
 			$query = 'SELECT id, (SELECT 1 FROM currency LIMIT 1) AS tmp FROM users';
 			$db->PageExecute( $query, 2, 2 );
 
-			//Expect everything to succeed on PGSQL.
-			if ( strncmp( $db->databaseType, 'mysql', 5 ) != 0 ) {
-				$this->assertTrue( TRUE ); //PGSQL
-			}
+			$this->assertTrue( true ); //PGSQL
 		} catch ( Exception $e ) {
-			//Expect an exception on MySQL.
-			if ( strncmp( $db->databaseType, 'mysql', 5 ) == 0 ) {
-				$this->assertTrue( TRUE ); //MYSQL
-			} else {
-				$this->assertTrue( FALSE ); //PGSQL
-			}
+			$this->assertTrue( false ); //PGSQL
 		}
 	}
 
@@ -711,105 +694,104 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$utlf = new UserTitleListFactory();
 
 		//Test standard case that should work.
-		$sort_arr = array(
-				'a.name' => 'asc'
-		);
-		$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+		$sort_arr = [
+				'a.name' => 'asc',
+		];
+		$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, [], null, null, null, $sort_arr );
 
 		//var_dump( $utlf->rs->sql );
-		if ( stripos( $utlf->rs->sql, 'a.name' ) !== FALSE ) {
-			$this->assertTrue( TRUE );
+		if ( stripos( $utlf->rs->sql, 'a.name' ) !== false ) {
+			$this->assertTrue( true );
 		} else {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( false );
 		}
 
 
 		//Test advanced case that should work.
-		$sort_arr = array(
-				//'a.name = \'test\'' => 'asc'
-				'a.created_date = 0' => 'asc'
-		);
-		$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+		$sort_arr = [
+			//'a.name = \'test\'' => 'asc'
+			'a.created_date = 0' => 'asc',
+		];
+		$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, [], null, null, null, $sort_arr );
 
 		//var_dump( $utlf->rs->sql );
-		if ( stripos( $utlf->rs->sql, 'a.created_date = 0' ) !== FALSE ) {
-			$this->assertTrue( TRUE );
+		if ( stripos( $utlf->rs->sql, 'a.created_date = 0' ) !== false ) {
+			$this->assertTrue( true );
 		} else {
-			$this->assertTrue( FALSE );
+			$this->assertTrue( false );
 		}
-
 
 
 		//Test advanced case that does not work currently, but we may need to get to work.
 		try {
 			$pself = new PayStubEntryListFactory();
-			$sort_arr = array(
-					'abs(a.created_date)' => 'asc'
-			);
+			$sort_arr = [
+					'abs(a.created_date)' => 'asc',
+			];
 
-			$pself->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+			$pself->getAPISearchByCompanyIdAndArrayCriteria( 1, [], null, null, null, $sort_arr );
 			//var_dump( $pself->rs->sql );
-			if ( stripos( $pself->rs->sql, 'abs(a.created_date)' ) !== FALSE ) {
-				$this->assertTrue( FALSE );
+			if ( stripos( $pself->rs->sql, 'abs(a.created_date)' ) !== false ) {
+				$this->assertTrue( false );
 			} else {
-				$this->assertTrue( TRUE );
+				$this->assertTrue( true );
 			}
 		} catch ( Exception $e ) {
-			$this->assertTrue( TRUE );
+			$this->assertTrue( true );
 		}
 
 
 		//Test SQL injection in the ORDER BY clause.
 		try {
-			$sort_arr = array(
-								'created_by' => '(SELECT 1)-- .id.'
-								);
-			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+			$sort_arr = [
+					'created_by' => '(SELECT 1)-- .id.',
+			];
+			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, [], null, null, null, $sort_arr );
 
 			//var_dump( $utlf->rs->sql );
-			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== FALSE ) {
-				$this->assertTrue( FALSE );
+			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== false ) {
+				$this->assertTrue( false );
 			} else {
-				$this->assertTrue( TRUE );
+				$this->assertTrue( true );
 			}
 		} catch ( Exception $e ) {
-			$this->assertTrue( TRUE );
+			$this->assertTrue( true );
 		}
 
 
 		//Test SQL injection with brackets and "--"
 		try {
-			$sort_arr = array(
-								'(SELECT 1)-- .id.' => 1
-								);
-			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+			$sort_arr = [
+					'(SELECT 1)-- .id.' => 1,
+			];
+			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, [], null, null, null, $sort_arr );
 
 			//var_dump( $utlf->rs->sql );
-			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== FALSE ) {
-				$this->assertTrue( FALSE );
+			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== false ) {
+				$this->assertTrue( false );
 			} else {
-				$this->assertTrue( TRUE );
+				$this->assertTrue( true );
 			}
 		} catch ( Exception $e ) {
-			$this->assertTrue( TRUE );
+			$this->assertTrue( true );
 		}
 
 
 		//Test SQL injection with ";" and "--"
 		try {
-			$sort_arr = array(
-					'; (SELECT 1)-- .id.' => 1
-			);
-			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+			$sort_arr = [
+					'; (SELECT 1)-- .id.' => 1,
+			];
+			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, [], null, null, null, $sort_arr );
 
 			//var_dump( $utlf->rs->sql );
-			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== FALSE ) {
-				$this->assertTrue( FALSE );
+			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== false ) {
+				$this->assertTrue( false );
 			} else {
-				$this->assertTrue( TRUE );
+				$this->assertTrue( true );
 			}
 		} catch ( Exception $e ) {
-			$this->assertTrue( TRUE );
+			$this->assertTrue( true );
 		}
 
 
@@ -827,81 +809,82 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 	 * @param $name
 	 * @return ReflectionMethod
 	 */
-	protected static function getMethod($name) {
-		$class = new ReflectionClass('UserListFactory');
-		$method = $class->getMethod($name);
-		$method->setAccessible(true);
+	protected static function getMethod( $name ) {
+		$class = new ReflectionClass( 'UserListFactory' );
+		$method = $class->getMethod( $name );
+		$method->setAccessible( true );
+
 		return $method;
 	}
 
 	/**
 	 * @group SQL_testWhereClauseSQL
 	 */
-	function testWhereClauseSQL( ) {
-		$method = self::getMethod('getWhereClauseSQL');
+	function testWhereClauseSQL() {
+		$method = self::getMethod( 'getWhereClauseSQL' );
 		$ulf = new UserListFactory();
 
 
 		//Boolean TRUE
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', (bool)TRUE, 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', (bool)true, 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 1 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', (int)1, 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', (int)1, 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 1 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', 1, 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', 1, 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 1 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', 1.00, 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', 1.00, 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 1 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', '1', 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', '1', 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 1 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', 'TRUE', 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', 'TRUE', 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 1 );
 
 
 		//Boolean FALSE
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', (bool)FALSE, 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', (bool)false, 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 0 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', (int)0, 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', (int)0, 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 0 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', 0, 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', 0, 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 0 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', 0.00, 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', 0.00, 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 0 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', '0', 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', '0', 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 0 );
 
-		$ph = array();
-		$retval = $method->invokeArgs($ulf, array( 'a.private', 'FALSE', 'boolean', &$ph ) );
+		$ph = [];
+		$retval = $method->invokeArgs( $ulf, [ 'a.private', 'FALSE', 'boolean', &$ph ] );
 		$this->assertEquals( $retval, ' AND a.private = ? ' );
 		$this->assertEquals( $ph[0], 0 );
 	}
@@ -911,7 +894,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 
 		$uf->StartTransaction();
@@ -941,7 +924,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 	}
 
 	function testTransactionNestingB() {
@@ -949,48 +932,48 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 
 		$uf->StartTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 1 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 		$uf->StartTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 2 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 		$uf->StartTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 3 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 		$uf->FailTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 3 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 
 		$uf->CommitTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 2 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 
 		$uf->CommitTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 1 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 
 		$uf->CommitTransaction();
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 	}
 
 	function testTransactionNestingC() {
@@ -998,38 +981,38 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 
 		$uf->StartTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 1 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 		$uf->StartTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 2 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 		$uf->StartTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 3 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 		$uf->FailTransaction();
 		$this->assertEquals( $uf->db->transCnt, 1 );
 		$this->assertEquals( $uf->db->transOff, 3 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 
-		$uf->CommitTransaction( TRUE ); //Unest all transactions.
+		$uf->CommitTransaction( true ); //Unest all transactions.
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 	}
 
 	function testTransactionNestingC2() {
@@ -1037,7 +1020,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 
 		$uf->StartTransaction();
@@ -1051,11 +1034,11 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$uf->StartTransaction();
 		$uf->FailTransaction();
 
-		$uf->CommitTransaction( TRUE ); //Unest all transactions.
+		$uf->CommitTransaction( true ); //Unest all transactions.
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 	}
 
 	function testTransactionNestingC3() {
@@ -1063,7 +1046,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, TRUE );
+		$this->assertEquals( $uf->db->_transOK, true );
 
 
 		$uf->StartTransaction();
@@ -1079,10 +1062,10 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$uf->FailTransaction();
 		$uf->FailTransaction();
 
-		$uf->CommitTransaction( TRUE ); //Unest all transactions.
+		$uf->CommitTransaction( true ); //Unest all transactions.
 
 		$this->assertEquals( $uf->db->transCnt, 0 );
 		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, FALSE );
+		$this->assertEquals( $uf->db->_transOK, false );
 	}
 }

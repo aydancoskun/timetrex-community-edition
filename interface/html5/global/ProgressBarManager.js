@@ -1,4 +1,4 @@
-var ProgressBar = (function() {
+var ProgressBar = ( function() {
 
 	var loading_box = null;
 
@@ -61,7 +61,7 @@ var ProgressBar = (function() {
 		TTPromise.resolve( 'ProgressBar', 'overlay_visible' );
 	};
 
-	cancelProgressBar = function() {
+	var cancelProgressBar = function() {
 		if ( get_progress_timer ) {
 			clearInterval( get_progress_timer );
 			get_progress_timer = false;
@@ -135,7 +135,7 @@ var ProgressBar = (function() {
 
 			} );
 			// css only spinner - and yes, it does unfortunately need all those divs. They are for each of the spokes of the circle.
-			circle = $('<div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>');
+			circle = $( '<div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>' );
 
 			$( 'body' ).append( loadngBox );
 			loading_box = $( '#progressBar' );
@@ -211,8 +211,8 @@ var ProgressBar = (function() {
 		progress_bar.css( 'display', 'block' );
 		time_remaining.css( 'display', 'block' );
 
-		complete_info.text( data.current_iteration + ' / ' + data.total_iterations + ' ' + (percentage * 100).toFixed( 0 ) + '%' );
-		progress_bar.prop( 'value', (percentage * 100) );
+		complete_info.text( data.current_iteration + ' / ' + data.total_iterations + ' ' + ( percentage * 100 ).toFixed( 0 ) + '%' );
+		progress_bar.prop( 'value', ( percentage * 100 ) );
 
 		if ( !last_iteration ) {
 			time_remaining.text( 'Calculating remaining time...' );
@@ -220,8 +220,8 @@ var ProgressBar = (function() {
 
 			if ( last_iteration !== data.current_iteration || !second_timer ) {
 
-				time_offset = (data.last_update_time - data.start_time) * (data.total_iterations / data.current_iteration);
-				time_offset = time_offset - (data.last_update_time - data.start_time);
+				time_offset = ( data.last_update_time - data.start_time ) * ( data.total_iterations / data.current_iteration );
+				time_offset = time_offset - ( data.last_update_time - data.start_time );
 
 				if ( isNaN( time_offset ) || time_offset <= 0 ) {
 					time_offset = 0;
@@ -254,7 +254,7 @@ var ProgressBar = (function() {
 				}
 
 				if ( time_offset > 0 ) {
-					time_offset = (time_offset - 1);
+					time_offset = ( time_offset - 1 );
 				}
 
 				if ( time_offset <= 0 ) {
@@ -294,8 +294,8 @@ var ProgressBar = (function() {
 						TAlertManager.showAlert( res_data.message );
 					} else {
 						if ( res_data === true ||
-								($.type( res_data ) === 'array' && res_data.length === 0) || !res_data.total_iterations ||
-								$.type( res_data.total_iterations ) !== 'number' ) {
+							( $.type( res_data ) === 'array' && res_data.length === 0 ) || !res_data.total_iterations ||
+							$.type( res_data.total_iterations ) !== 'number' ) {
 							stopProgress();
 							return;
 						} else {
@@ -443,4 +443,4 @@ var ProgressBar = (function() {
 		noProgressForNextCall: noProgressForNextCall
 	};
 
-})();
+} )();

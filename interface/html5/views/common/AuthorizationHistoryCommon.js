@@ -31,13 +31,13 @@ AuthorizationHistory = {
 		var separate_box = $( '.authorization-grid-div .grid-title' );
 		separate_box.html( '' );
 
-		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
+		var form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( { label: $.i18n._( 'Authorization History' ) } );
 		form_item_input.attr( 'id', 'authorization_history' );
 		host.addEditFieldToColumn( null, form_item_input, separate_box );
 
 		this.host_view_controller = host;
-		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
+		this.authorization_api = new ( APIFactory.getAPIClass( 'APIAuthorization' ) )();
 
 		var $this = this;
 		this.getAuthorizationHistoryColumns( function() {
@@ -103,11 +103,11 @@ AuthorizationHistory = {
 
 	setAuthorizationGridSize: function() {
 		var history_height_unit;
-		if ( (!this.authorization_history_grid || !this.authorization_history_grid.grid.is( ':visible' )) ) {
+		if ( ( !this.authorization_history_grid || !this.authorization_history_grid.grid.is( ':visible' ) ) ) {
 			return;
 		}
 		history_height_unit = this.authorization_history_grid.getData().length;
-		history_height_unit > 5 && (history_height_unit = 5);
+		history_height_unit > 5 && ( history_height_unit = 5 );
 		this.authorization_history_grid.grid.setGridWidth( $( this.host_view_controller.edit_view.find( '#authorization_history' ) ).width() );
 		this.authorization_history_grid.grid.setGridHeight( history_height_unit * 25 );
 	},

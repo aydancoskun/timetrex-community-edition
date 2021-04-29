@@ -40,23 +40,23 @@
  */
 class PayrollDeduction_US_IN extends PayrollDeduction_US {
 
-	var $state_options = array(
-			20170101 => array(
+	var $state_options = [
+			20170101 => [
 					'rate'                => 3.23,
 					'allowance'           => 1000, //Deduction Constant Table A for 1 allowance * 12 months.
 					'dependant_allowance' => 1500, //Deduction Constant Table B for 1 allowance * 12 months.
-			),
-			20150101 => array(
+			],
+			20150101 => [
 					'rate'                => 3.3,
 					'allowance'           => 1000,
 					'dependant_allowance' => 1500,
-			),
-			20060101 => array(
+			],
+			20060101 => [
 					'rate'                => 3.4,
 					'allowance'           => 1000,
 					'dependant_allowance' => 1500,
-			),
-	);
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -72,8 +72,8 @@ class PayrollDeduction_US_IN extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['allowance'];
@@ -87,8 +87,8 @@ class PayrollDeduction_US_IN extends PayrollDeduction_US {
 
 	function getStateDependantAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['dependant_allowance'];
@@ -107,8 +107,8 @@ class PayrollDeduction_US_IN extends PayrollDeduction_US {
 
 		if ( $annual_income > 0 ) {
 			$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-			if ( $retarr == FALSE ) {
-				return FALSE;
+			if ( $retarr == false ) {
+				return false;
 			}
 
 			$rate = bcdiv( $retarr['rate'], 100 );

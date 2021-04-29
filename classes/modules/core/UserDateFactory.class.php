@@ -42,8 +42,8 @@ class UserDateFactory extends Factory {
 	protected $table = 'user_date';
 	protected $pk_sequence_name = 'user_date_id_seq'; //PK Sequence name
 
-	var $user_obj = NULL;
-	var $pay_period_obj = NULL;
+	var $user_obj = null;
+	var $pay_period_obj = null;
 
 	/**
 	 * @return bool
@@ -70,8 +70,9 @@ class UserDateFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -80,34 +81,20 @@ class UserDateFactory extends Factory {
 	 */
 	function findPayPeriod() {
 		if ( $this->getDateStamp() > 0
-				AND TTUUID::isUUID( $this->getUser() ) AND $this->getUser() != TTUUID::getZeroID() AND $this->getUser() != TTUUID::getNotExistID() ) {
-			//FIXME: With MySQL since it doesn't handle timezones very well I think we need to
-			//get the timezone of the payperiod schedule for this user, and set the timezone to that
-			//before we go searching for a pay period, otherwise the wrong payperiod might be returned.
-			//This might happen when the MySQL server is in one timezone (ie: CST) and the pay period
-			//schedule is set to another timezone (ie: PST)
-			//This could severely slow down a lot of operations though, so make this specific to MySQL only.
+				&& TTUUID::isUUID( $this->getUser() ) && $this->getUser() != TTUUID::getZeroID() && $this->getUser() != TTUUID::getNotExistID() ) {
 			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
 			$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getDateStamp() );
 			if ( $pplf->getRecordCount() == 1 ) {
 				$pay_period_id = $pplf->getCurrent()->getID();
-				Debug::Text('Pay Period Id: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'Pay Period Id: ' . $pay_period_id, __FILE__, __LINE__, __METHOD__, 10 );
+
 				return $pay_period_id;
 			}
-			/*
-			$pay_period = $pplf->getCurrent();
-
-			Debug::Text('Pay Period Id: '. $pay_period->getId(), __FILE__, __LINE__, __METHOD__, 10);
-
-			if ( $pay_period->getId() !== FALSE ) {
-				return $pay_period->getId();
-			}
-			*/
 		}
 
-		Debug::Text('Unable to find pay period for User ID: '. $this->getUser() .' Date Stamp: '. $this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Unable to find pay period for User ID: ' . $this->getUser() . ' Date Stamp: ' . $this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -121,12 +108,13 @@ class UserDateFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPayPeriod( $value = NULL) {
-		$value = trim($value);
-		if ( $value == NULL ) {
+	function setPayPeriod( $value = null ) {
+		$value = trim( $value );
+		if ( $value == null ) {
 			$value = $this->findPayPeriod();
 		}
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'pay_period_id', $value );
 	}
 
@@ -134,10 +122,10 @@ class UserDateFactory extends Factory {
 	 * @param bool $raw
 	 * @return bool|int
 	 */
-	function getDateStamp( $raw = FALSE ) {
+	function getDateStamp( $raw = false ) {
 		$value = $this->getGenericDataValue( 'date_stamp' );
-		if ( $value !== FALSE ) {
-			if ( $raw === TRUE ) {
+		if ( $value !== false ) {
+			if ( $raw === true ) {
 				return $value;
 			} else {
 				//return $this->db->UnixTimeStamp( $this->data['start_date'] );
@@ -147,31 +135,32 @@ class UserDateFactory extends Factory {
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $value EPOCH
 	 * @return bool
 	 */
-	function setDateStamp( $value) {
-		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+	function setDateStamp( $value ) {
+		$value = ( !is_int( $value ) ) ? trim( $value ) : $value; //Dont trim integer values, as it changes them to strings.
+
 		return $this->setGenericDataValue( 'date_stamp', $value );
 	}
 
 	/**
 	 * @param string $user_id UUID
-	 * @param int $date EPOCH
+	 * @param int $date       EPOCH
 	 * @param null $timezone
 	 * @return bool
 	 */
-	static function findOrInsertUserDate( $user_id, $date, $timezone = NULL ) {
+	static function findOrInsertUserDate( $user_id, $date, $timezone = null ) {
 		//Allow	 user_id=0 for saving open schedule shifts.
-		$user_id = TTUUID::castUUID($user_id);
-		if ( $user_id != '' AND $date > 0 ) {
+		$user_id = TTUUID::castUUID( $user_id );
+		if ( $user_id != '' && $date > 0 ) {
 			$date = TTDate::getMiddleDayEpoch( $date ); //Use mid day epoch so the timezone conversion across DST doesn't affect the date.
 
-			if ( $timezone == NULL ) {
+			if ( $timezone == null ) {
 				//Find the employees preferred timezone, base the user date off that instead of the pay period timezone,
 				//as it can be really confusing to the user if they punch in at 10AM on Sept 27th, but it records as Sept 26th because
 				//the PP Schedule timezone is 12hrs different or something.
@@ -189,10 +178,11 @@ class UserDateFactory extends Factory {
 			$udlf->getByUserIdAndDate( $user_id, $date );
 			if ( $udlf->getRecordCount() == 1 ) {
 				$id = $udlf->getCurrent()->getId();
+
 				//Debug::text(' Found Already Existing User Date ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 				return $id;
-			} elseif ( $udlf->getRecordCount() == 0 ) {
-				Debug::text(' Inserting new UserDate row. User ID: '. $user_id .' Date: '. $date, __FILE__, __LINE__, __METHOD__, 10);
+			} else if ( $udlf->getRecordCount() == 0 ) {
+				Debug::text( ' Inserting new UserDate row. User ID: ' . $user_id . ' Date: ' . $date, __FILE__, __LINE__, __METHOD__, 10 );
 
 				//Insert new row
 				$udf = TTnew( 'UserDateFactory' ); /** @var UserDateFactory $udf */
@@ -203,33 +193,34 @@ class UserDateFactory extends Factory {
 				if ( $udf->isValid() ) {
 					return $udf->Save();
 				} else {
-					Debug::text(' INVALID user date row. Pay Period Locked?', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text( ' INVALID user date row. Pay Period Locked?', __FILE__, __LINE__, __METHOD__, 10 );
 				}
-			} elseif ( $udlf->getRecordCount() > 1 ) {
-				Debug::text(' More then 1 user date row was detected!!: '. $udlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			} else if ( $udlf->getRecordCount() > 1 ) {
+				Debug::text( ' More then 1 user date row was detected!!: ' . $udlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		} else {
-			Debug::text(' Invalid arguments... User ID: '. $user_id .' Date: '. $date, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( ' Invalid arguments... User ID: ' . $user_id . ' Date: ' . $date, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		Debug::text(' Cant find or insert User Date ID. User ID: '. $user_id .' Date: '. $date, __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::text( ' Cant find or insert User Date ID. User ID: ' . $user_id . ' Date: ' . $date, __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 
 	/**
 	 * @param string $user_id UUID
-	 * @param int $date EPOCH
+	 * @param int $date       EPOCH
 	 * @return bool
 	 */
-	static function getUserDateID( $user_id, $date) {
-		$user_date_id = UserDateFactory::findOrInsertUserDate( $user_id, $date);
-		Debug::text(' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__, 10);
+	static function getUserDateID( $user_id, $date ) {
+		$user_date_id = UserDateFactory::findOrInsertUserDate( $user_id, $date );
+		Debug::text( ' User Date ID: ' . $user_date_id, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $user_date_id != '' ) {
 			return $user_date_id;
 		}
-		Debug::text(' No User Date ID found', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( ' No User Date ID found', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -242,10 +233,7 @@ class UserDateFactory extends Factory {
 	 * @return bool
 	 */
 	static function deleteChildren( $user_date_id ) {
-		if (  $user_date_id == '' ) {
-			return FALSE;
-		}
-
+		return false;
 	}
 
 	/**
@@ -253,127 +241,128 @@ class UserDateFactory extends Factory {
 	 */
 	function isUnique() {
 		//Allow user_id=0 for OPEN scheduled shifts.
-		if ( $this->getUser() === FALSE ) {
-			return FALSE;
+		if ( $this->getUser() === false ) {
+			return false;
 		}
 
-		if ( $this->getDateStamp() == FALSE	 ) {
-			return FALSE;
+		if ( $this->getDateStamp() == false ) {
+			return false;
 		}
 
-		$ph = array(
-					'user_id' => $this->getUser(),
-					'date_stamp' => $this->db->BindDate( $this->getDateStamp() ),
-					);
+		$ph = [
+				'user_id'    => $this->getUser(),
+				'date_stamp' => $this->db->BindDate( $this->getDateStamp() ),
+		];
 
-		$query = 'select id from '. $this->getTable() .' where user_id = ? AND date_stamp = ? AND deleted=0';
-		$user_date_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($user_date_id, 'Unique User Date.', __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'select id from ' . $this->getTable() . ' where user_id = ? AND date_stamp = ? AND deleted=0';
+		$user_date_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $user_date_id, 'Unique User Date.', __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $user_date_id === FALSE ) {
-			return TRUE;
+		if ( $user_date_id === false ) {
+			return true;
 		} else {
-			if ($user_date_id == $this->getId() ) {
-				return TRUE;
+			if ( $user_date_id == $this->getId() ) {
+				return true;
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
-	function Validate( $ignore_warning = TRUE ) {
+	function Validate( $ignore_warning = true ) {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		// User
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-			$this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($this->getUser()),
-															TTi18n::gettext('Invalid Employee')
-														);
+			$this->Validator->isResultSetWithRows( 'user',
+												   $ulf->getByID( $this->getUser() ),
+												   TTi18n::gettext( 'Invalid Employee' )
+			);
 		}
 		// Pay Period
-		if ( $this->getPayPeriod() != FALSE ) {
+		if ( $this->getPayPeriod() != false ) {
 			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
-			$this->Validator->isResultSetWithRows(	'pay_period',
-															$pplf->getByID($this->getPayPeriod()),
-															TTi18n::gettext('Invalid Pay Period')
-														);
+			$this->Validator->isResultSetWithRows( 'pay_period',
+												   $pplf->getByID( $this->getPayPeriod() ),
+												   TTi18n::gettext( 'Invalid Pay Period' )
+			);
 		}
 		// Date
-		$this->Validator->isDate(		'date_stamp',
-												$this->getDateStamp(),
-												TTi18n::gettext('Incorrect date')
-											);
-		if ( $this->Validator->isError('date_stamp') == FALSE ) {
+		$this->Validator->isDate( 'date_stamp',
+								  $this->getDateStamp(),
+								  TTi18n::gettext( 'Incorrect date' )
+		);
+		if ( $this->Validator->isError( 'date_stamp' ) == false ) {
 			if ( $this->getDateStamp() <= 0 ) {
-				$this->Validator->isTRUE(		'date_stamp',
-												FALSE,
-												TTi18n::gettext('Incorrect date')
-											);
+				$this->Validator->isTRUE( 'date_stamp',
+										  false,
+										  TTi18n::gettext( 'Incorrect date' )
+				);
 			}
- 		}
+		}
 
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
 		//Make sure pay period isn't locked!
-		if ( TTUUID::isUUID( $this->getPayPeriod() ) AND $this->getPayPeriod() != TTUUID::getZeroID() AND $this->getPayPeriod() != TTUUID::getNotExistID() ) {
-			if ( is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getIsLocked() == TRUE ) {
-				$this->Validator->isTRUE(	'pay_period',
-											FALSE,
-											TTi18n::gettext('Pay Period is Currently Locked') );
+		if ( TTUUID::isUUID( $this->getPayPeriod() ) && $this->getPayPeriod() != TTUUID::getZeroID() && $this->getPayPeriod() != TTUUID::getNotExistID() ) {
+			if ( is_object( $this->getPayPeriodObject() ) && $this->getPayPeriodObject()->getIsLocked() == true ) {
+				$this->Validator->isTRUE( 'pay_period',
+										  false,
+										  TTi18n::gettext( 'Pay Period is Currently Locked' ) );
 			}
 		}
 
 		//Make sure this is a UNIQUE user_date row.
-		$this->Validator->isTRUE(	'date_stamp',
-									$this->isUnique(),
-									TTi18n::gettext('Employee can not have duplicate entries on the same day') );
+		$this->Validator->isTRUE( 'date_stamp',
+								  $this->isUnique(),
+								  TTi18n::gettext( 'Employee can not have duplicate entries on the same day' ) );
 
 
 		//Make sure the date isn't BEFORE the first pay period.
 		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
-		$pplf->getByUserID( $this->getUser(), 1, NULL, NULL, array('a.start_date' => 'asc') );
+		$pplf->getByUserID( $this->getUser(), 1, null, null, [ 'a.start_date' => 'asc' ] );
 		if ( $pplf->getRecordCount() > 0 ) {
 			$first_pp_obj = $pplf->getCurrent();
 			if ( $this->getDateStamp() < $first_pp_obj->getStartDate() ) {
-				$this->Validator->isTRUE(	'pay_period',
-											FALSE,
-											TTi18n::gettext('Date specified is before the first pay period started') );
+				$this->Validator->isTRUE( 'pay_period',
+										  false,
+										  TTi18n::gettext( 'Date specified is before the first pay period started' ) );
 			}
 		}
-			//else {
-			//This causes a validation error when saving a record without a pay period (ie: in the future a few weeks)
-			//Therefore its breaking critical functionality and should be disabled.
-			//This also affects saving OPEN shifts when as no user is assigned to them and therefore no pay period.
-			/*
-			$this->Validator->isTRUE(	'pay_period',
-										FALSE,
-										TTi18n::gettext('Pay period missing or employee is not assigned to a pay period schedule') );
-			*/
-			//}
+		//else {
+		//This causes a validation error when saving a record without a pay period (ie: in the future a few weeks)
+		//Therefore its breaking critical functionality and should be disabled.
+		//This also affects saving OPEN shifts when as no user is assigned to them and therefore no pay period.
+		/*
+		$this->Validator->isTRUE(	'pay_period',
+									FALSE,
+									TTi18n::gettext('Pay period missing or employee is not assigned to a pay period schedule') );
+		*/
 
-		return TRUE;
+		//}
+
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		if ( $this->getDeleted() == TRUE ) {
+		if ( $this->getDeleted() == true ) {
 			//Delete (for real) any already deleted rows in hopes to prevent a
 			//unique index conflict across user_id, date_stamp, deleted
 			$udlf = TTnew( 'UserDateListFactory' ); /** @var UserDateListFactory $udlf */
-			$udlf->deleteByUserIdAndDateAndDeleted( $this->getUser(), $this->getDateStamp(), TRUE );
+			$udlf->deleteByUserIdAndDateAndDeleted( $this->getUser(), $this->getDateStamp(), true );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -385,15 +374,15 @@ class UserDateFactory extends Factory {
 		//Debug::Text('Post Save... Deleted: '. (int)$this->getDeleted(), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Delete punch control/schedules assigned to this.
-		if ( $this->getDeleted() == TRUE ) {
+		if ( $this->getDeleted() == true ) {
 
 			//Delete schedules assigned to this user date.
 			//Turn off any re-calc's
 			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 			$slf->getByUserDateID( $this->getId() );
 			if ( $slf->getRecordCount() > 0 ) {
-				foreach( $slf as $schedule_obj ) {
-					$schedule_obj->setDeleted(TRUE);
+				foreach ( $slf as $schedule_obj ) {
+					$schedule_obj->setDeleted( true );
 					$schedule_obj->Save();
 				}
 			}
@@ -401,8 +390,8 @@ class UserDateFactory extends Factory {
 			$pclf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $pclf */
 			$pclf->getByUserDateID( $this->getId() );
 			if ( $pclf->getRecordCount() > 0 ) {
-				foreach( $pclf as $pc_obj ) {
-					$pc_obj->setDeleted(TRUE);
+				foreach ( $pclf as $pc_obj ) {
+					$pc_obj->setDeleted( true );
 					$pc_obj->Save();
 				}
 			}
@@ -411,8 +400,8 @@ class UserDateFactory extends Factory {
 			$elf = TTnew( 'ExceptionListFactory' ); /** @var ExceptionListFactory $elf */
 			$elf->getByUserDateID( $this->getId() );
 			if ( $elf->getRecordCount() > 0 ) {
-				foreach( $elf as $e_obj ) {
-					$e_obj->setDeleted(TRUE);
+				foreach ( $elf as $e_obj ) {
+					$e_obj->setDeleted( true );
 					$e_obj->Save();
 				}
 			}
@@ -421,14 +410,15 @@ class UserDateFactory extends Factory {
 			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			$udtlf->getByUserDateID( $this->getId() );
 			if ( $udtlf->getRecordCount() > 0 ) {
-				foreach( $udtlf as $udt_obj ) {
-					$udt_obj->setDeleted(TRUE);
+				foreach ( $udtlf as $udt_obj ) {
+					$udt_obj->setDeleted( true );
 					$udt_obj->Save();
 				}
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

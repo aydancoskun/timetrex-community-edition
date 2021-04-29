@@ -38,64 +38,65 @@
  * @group CAPayrollDeductionTest2015
  */
 class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
-	public $company_id = NULL;
+	public $company_id = null;
 
 	public function setUp() {
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
+		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
 
-		$this->tax_table_file = dirname(__FILE__).'/CAPayrollDeductionTest2015.csv';
+		$this->tax_table_file = dirname( __FILE__ ) . '/CAPayrollDeductionTest2015.csv';
 
 		$this->company_id = PRIMARY_COMPANY_ID;
 
-		TTDate::setTimeZone('Etc/GMT+8'); //Force to non-DST timezone. 'PST' isnt actually valid.
+		TTDate::setTimeZone( 'Etc/GMT+8' ); //Force to non-DST timezone. 'PST' isnt actually valid.
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
-		return TRUE;
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return true;
 	}
 
-	public function mf($amount) {
-		return Misc::MoneyFormat($amount, FALSE);
+	public function mf( $amount ) {
+		return Misc::MoneyFormat( $amount, false );
 	}
 
 	//
 	// January 2015
 	//
 	function testCSVFile() {
-		$this->assertEquals( file_exists($this->tax_table_file), TRUE);
+		$this->assertEquals( file_exists( $this->tax_table_file ), true );
 
-		$test_rows = Misc::parseCSV( $this->tax_table_file, TRUE );
+		$test_rows = Misc::parseCSV( $this->tax_table_file, true );
 
-		$total_rows = ( count($test_rows) + 1 );
+		$total_rows = ( count( $test_rows ) + 1 );
 		$i = 2;
-		foreach( $test_rows as $row ) {
+		foreach ( $test_rows as $row ) {
 			//Debug::text('Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10);
-			if ( isset($row['gross_income']) AND isset($row['low_income']) AND isset($row['high_income'])
-					AND $row['gross_income'] == '' AND $row['low_income'] != '' AND $row['high_income'] != '' ) {
-				$row['gross_income'] = ( $row['low_income'] + ( ($row['high_income'] - $row['low_income']) / 2 ) );
+			if ( isset( $row['gross_income'] ) && isset( $row['low_income'] ) && isset( $row['high_income'] )
+					&& $row['gross_income'] == '' && $row['low_income'] != '' && $row['high_income'] != '' ) {
+				$row['gross_income'] = ( $row['low_income'] + ( ( $row['high_income'] - $row['low_income'] ) / 2 ) );
 			}
-			if ( $row['country'] != '' AND $row['gross_income'] != '' ) {
+			if ( $row['country'] != '' && $row['gross_income'] != '' ) {
 				//echo $i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'] ."\n";
 
 				$pd_obj = new PayrollDeduction( $row['country'], $row['province'] );
 				$pd_obj->setDate( strtotime( $row['date'] ) );
-				$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+				$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 				$pd_obj->setAnnualPayPeriods( $row['pay_periods'] );
 
 				$pd_obj->setFederalTotalClaimAmount( $row['federal_claim'] ); //Amount from 2005, Should use amount from 2007 automatically.
 				$pd_obj->setProvincialTotalClaimAmount( $row['provincial_claim'] );
 				//$pd_obj->setWCBRate( 0.18 );
 
-				$pd_obj->setEIExempt( FALSE );
-				$pd_obj->setCPPExempt( FALSE );
+				$pd_obj->setEIExempt( false );
+				$pd_obj->setCPPExempt( false );
 
-				$pd_obj->setFederalTaxExempt( FALSE );
-				$pd_obj->setProvincialTaxExempt( FALSE );
+				$pd_obj->setFederalTaxExempt( false );
+				$pd_obj->setProvincialTaxExempt( false );
 
 				$pd_obj->setYearToDateCPPContribution( 0 );
 				$pd_obj->setYearToDateEIContribution( 0 );
@@ -117,26 +118,26 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		}
 
 		//Make sure all rows are tested.
-		$this->assertEquals( $total_rows, ( $i - 1 ));
+		$this->assertEquals( $total_rows, ( $i - 1 ) );
 	}
 
 	function testCA_2015a_Example() {
-		Debug::text('CA - Example Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
 		$pd_obj->setFederalTotalClaimAmount( 29721.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 17593 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -149,22 +150,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_Example1() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 18214 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -177,22 +178,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_Example2() {
-		Debug::text('CA - Example2 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example2 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 18214 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -205,22 +206,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_Example3() {
-		Debug::text('CA - Example3 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example3 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 18214 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -233,22 +234,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_Example4() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 9938 );
 		$pd_obj->setWCBRate( 0 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -261,22 +262,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_GovExample1() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 18214 );
 		$pd_obj->setWCBRate( 0 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -289,22 +290,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_GovExample2() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 9938 );
 		$pd_obj->setWCBRate( 0 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -317,22 +318,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_GovExample3() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'ON');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'ON' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 9863 );
 		$pd_obj->setWCBRate( 0 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -345,22 +346,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_GovExample4() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 7708 );
 		$pd_obj->setWCBRate( 0 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -376,22 +377,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	// CPP/ EI
 	//
 	function testCA_2015a_BiWeekly_CPP_LowIncome() {
-		Debug::text('CA - BiWeekly - CPP - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - BiWeekly - CPP - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -404,22 +405,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_SemiMonthly_CPP_LowIncome() {
-		Debug::text('CA - BiWeekly - CPP - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - BiWeekly - CPP - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -432,22 +433,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_SemiMonthly_MAXCPP_LowIncome() {
-		Debug::text('CA - BiWeekly - MAXCPP - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - BiWeekly - MAXCPP - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 2478.95 ); //2479.95 - 1.00
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -462,22 +463,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_EI_LowIncome() {
-		Debug::text('CA - EI - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - EI - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
@@ -492,22 +493,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015a_MAXEI_LowIncome() {
-		Debug::text('CA - MAXEI - Beginning of 2006 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - MAXEI - Beginning of 2006 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
 		$pd_obj->setWCBRate( 0.18 );
 
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
 
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 929.60 ); //930.60 - 1.00
@@ -522,19 +523,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_FormulaA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -543,7 +544,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -555,7 +556,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -567,7 +568,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -579,7 +580,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -591,7 +592,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -603,7 +604,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -615,7 +616,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -627,7 +628,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -639,7 +640,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -651,7 +652,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -663,7 +664,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -675,7 +676,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -690,7 +691,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 7688.4675 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -701,19 +702,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( TRUE ); //EI/CPP exempt so we don't have to track YTD amounts.
-		$pd_obj->setCPPExempt( TRUE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( true ); //EI/CPP exempt so we don't have to track YTD amounts.
+		$pd_obj->setCPPExempt( true );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -722,7 +723,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -734,7 +735,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -746,7 +747,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -758,7 +759,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -770,7 +771,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -782,7 +783,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -794,7 +795,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -806,7 +807,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -818,7 +819,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -830,7 +831,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -842,7 +843,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -854,7 +855,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -869,7 +870,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 8200.05 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -880,19 +881,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -901,7 +902,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -913,7 +914,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -925,7 +926,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -937,7 +938,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -949,7 +950,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -961,7 +962,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -973,7 +974,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -985,7 +986,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -997,7 +998,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1009,7 +1010,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1021,7 +1022,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1033,7 +1034,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1048,7 +1049,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 4964.55 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -1059,19 +1060,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 20 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -1080,7 +1081,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1092,7 +1093,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1104,7 +1105,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1116,7 +1117,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1128,7 +1129,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1140,7 +1141,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1152,7 +1153,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1164,7 +1165,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1176,7 +1177,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1188,7 +1189,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1200,7 +1201,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1212,7 +1213,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -1227,7 +1228,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 4429.05 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -1238,7 +1239,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaC() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//
 		// Has mostly periodic pay periods, then a few out-of-cycle ones.
@@ -1248,17 +1249,17 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		// Full test with EI/CPP YTD amounts.
 		//
 
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -1269,7 +1270,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setDate( strtotime( '08-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1286,7 +1287,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP2
-		$pd_obj->setDate(strtotime('22-Jan-2015'));
+		$pd_obj->setDate( strtotime( '22-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1303,7 +1304,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP3
-		$pd_obj->setDate(strtotime('05-Feb-2015'));
+		$pd_obj->setDate( strtotime( '05-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1320,7 +1321,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP4
-		$pd_obj->setDate(strtotime('19-Feb-2015'));
+		$pd_obj->setDate( strtotime( '19-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1337,7 +1338,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP5
-		$pd_obj->setDate(strtotime('05-Mar-2015'));
+		$pd_obj->setDate( strtotime( '05-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1354,7 +1355,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP6
-		$pd_obj->setDate(strtotime('19-Mar-2015'));
+		$pd_obj->setDate( strtotime( '19-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1371,7 +1372,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP7
-		$pd_obj->setDate(strtotime('02-Apr-2015'));
+		$pd_obj->setDate( strtotime( '02-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1388,7 +1389,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP8
-		$pd_obj->setDate(strtotime('16-Apr-2015'));
+		$pd_obj->setDate( strtotime( '16-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1405,7 +1406,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP9
-		$pd_obj->setDate(strtotime('30-Apr-2015'));
+		$pd_obj->setDate( strtotime( '30-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1422,7 +1423,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP10
-		$pd_obj->setDate(strtotime('14-May-2015'));
+		$pd_obj->setDate( strtotime( '14-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1439,7 +1440,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP11
-		$pd_obj->setDate(strtotime('28-May-2015'));
+		$pd_obj->setDate( strtotime( '28-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1456,7 +1457,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP12
-		$pd_obj->setDate(strtotime('11-Jun-2015'));
+		$pd_obj->setDate( strtotime( '11-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1473,7 +1474,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP13
-		$pd_obj->setDate(strtotime('25-Jun-2015'));
+		$pd_obj->setDate( strtotime( '25-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1490,7 +1491,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP14
-		$pd_obj->setDate(strtotime('09-Jul-2015'));
+		$pd_obj->setDate( strtotime( '09-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1507,7 +1508,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP15
-		$pd_obj->setDate(strtotime('23-Jul-2015'));
+		$pd_obj->setDate( strtotime( '23-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1524,7 +1525,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP16
-		$pd_obj->setDate(strtotime('06-Aug-2015'));
+		$pd_obj->setDate( strtotime( '06-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1541,7 +1542,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP17
-		$pd_obj->setDate(strtotime('20-Aug-2015'));
+		$pd_obj->setDate( strtotime( '20-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1558,7 +1559,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP18
-		$pd_obj->setDate(strtotime('03-Sep-2015'));
+		$pd_obj->setDate( strtotime( '03-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1575,7 +1576,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP19
-		$pd_obj->setDate(strtotime('17-Sep-2015'));
+		$pd_obj->setDate( strtotime( '17-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1592,7 +1593,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP20
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1609,7 +1610,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP21
-		$pd_obj->setDate(strtotime('15-Oct-2015'));
+		$pd_obj->setDate( strtotime( '15-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1626,7 +1627,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP22
-		$pd_obj->setDate(strtotime('29-Oct-2015'));
+		$pd_obj->setDate( strtotime( '29-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1643,7 +1644,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP23
-		$pd_obj->setDate(strtotime('12-Nov-2015'));
+		$pd_obj->setDate( strtotime( '12-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1660,7 +1661,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP24
-		$pd_obj->setDate(strtotime('26-Nov-2015'));
+		$pd_obj->setDate( strtotime( '26-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1678,7 +1679,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		//PP25 (A)
 		$pd_obj->setFormulaType( 10 ); //NonPeriodic
-		$pd_obj->setDate(strtotime('10-Dec-2015'));
+		$pd_obj->setDate( strtotime( '10-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1696,7 +1697,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		//PP25 (B)
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
-		$pd_obj->setDate(strtotime('10-Dec-2015'));
+		$pd_obj->setDate( strtotime( '10-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 2 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1714,7 +1715,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		//PP26
 		$pd_obj->setFormulaType( 10 ); //Periodic
-		$pd_obj->setDate(strtotime('24-Dec-2015'));
+		$pd_obj->setDate( strtotime( '24-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1731,11 +1732,11 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		$this->assertEquals( $ytd_gross_income, 33431.04 );
-		$this->assertEquals( $this->mf($ytd_deduction), 2827.19 ); //Was: 2837.42
+		$this->assertEquals( $this->mf( $ytd_deduction ), 2827.19 ); //Was: 2837.42
 
 		//Actual Income/Deductions for the year.
 		$pd_obj->setFormulaType( 10 ); //Periodic
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -1749,7 +1750,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		//Actual Income/Deductions for the year.
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -1763,7 +1764,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaC2() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//
 		// Has mostly periodic pay periods, then a few out-of-cycle ones.
@@ -1773,17 +1774,17 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		// Full test with EI/CPP YTD amounts.
 		//
 
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -1794,7 +1795,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setDate( strtotime( '08-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1811,7 +1812,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP2
-		$pd_obj->setDate(strtotime('22-Jan-2015'));
+		$pd_obj->setDate( strtotime( '22-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1828,7 +1829,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP3
-		$pd_obj->setDate(strtotime('05-Feb-2015'));
+		$pd_obj->setDate( strtotime( '05-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1845,7 +1846,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP4
-		$pd_obj->setDate(strtotime('19-Feb-2015'));
+		$pd_obj->setDate( strtotime( '19-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1862,7 +1863,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP5
-		$pd_obj->setDate(strtotime('05-Mar-2015'));
+		$pd_obj->setDate( strtotime( '05-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1879,7 +1880,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP6
-		$pd_obj->setDate(strtotime('19-Mar-2015'));
+		$pd_obj->setDate( strtotime( '19-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1896,7 +1897,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP7
-		$pd_obj->setDate(strtotime('02-Apr-2015'));
+		$pd_obj->setDate( strtotime( '02-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1913,7 +1914,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP8
-		$pd_obj->setDate(strtotime('16-Apr-2015'));
+		$pd_obj->setDate( strtotime( '16-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1930,7 +1931,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP9
-		$pd_obj->setDate(strtotime('30-Apr-2015'));
+		$pd_obj->setDate( strtotime( '30-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1947,7 +1948,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP10
-		$pd_obj->setDate(strtotime('14-May-2015'));
+		$pd_obj->setDate( strtotime( '14-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1964,7 +1965,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP11
-		$pd_obj->setDate(strtotime('28-May-2015'));
+		$pd_obj->setDate( strtotime( '28-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1981,7 +1982,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP12
-		$pd_obj->setDate(strtotime('11-Jun-2015'));
+		$pd_obj->setDate( strtotime( '11-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -1998,7 +1999,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP13
-		$pd_obj->setDate(strtotime('25-Jun-2015'));
+		$pd_obj->setDate( strtotime( '25-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2015,7 +2016,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP14
-		$pd_obj->setDate(strtotime('09-Jul-2015'));
+		$pd_obj->setDate( strtotime( '09-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2032,7 +2033,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP15
-		$pd_obj->setDate(strtotime('23-Jul-2015'));
+		$pd_obj->setDate( strtotime( '23-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2049,7 +2050,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP16
-		$pd_obj->setDate(strtotime('06-Aug-2015'));
+		$pd_obj->setDate( strtotime( '06-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2066,7 +2067,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP17
-		$pd_obj->setDate(strtotime('20-Aug-2015'));
+		$pd_obj->setDate( strtotime( '20-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2083,7 +2084,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP18
-		$pd_obj->setDate(strtotime('03-Sep-2015'));
+		$pd_obj->setDate( strtotime( '03-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2100,7 +2101,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP19
-		$pd_obj->setDate(strtotime('17-Sep-2015'));
+		$pd_obj->setDate( strtotime( '17-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2117,7 +2118,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP20
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2134,7 +2135,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP21
-		$pd_obj->setDate(strtotime('15-Oct-2015'));
+		$pd_obj->setDate( strtotime( '15-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2151,7 +2152,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP22
-		$pd_obj->setDate(strtotime('29-Oct-2015'));
+		$pd_obj->setDate( strtotime( '29-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2168,7 +2169,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP23
-		$pd_obj->setDate(strtotime('12-Nov-2015'));
+		$pd_obj->setDate( strtotime( '12-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2185,7 +2186,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		//PP24
-		$pd_obj->setDate(strtotime('26-Nov-2015'));
+		$pd_obj->setDate( strtotime( '26-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2207,7 +2208,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		//PP25 (A)
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
-		$pd_obj->setDate(strtotime('10-Dec-2015'));
+		$pd_obj->setDate( strtotime( '10-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2225,7 +2226,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		//PP25 (B)
 		$pd_obj->setFormulaType( 10 ); //NonPeriodic
-		$pd_obj->setDate(strtotime('10-Dec-2015'));
+		$pd_obj->setDate( strtotime( '10-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 2 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2243,7 +2244,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		//PP26
 		$pd_obj->setFormulaType( 10 ); //Periodic
-		$pd_obj->setDate(strtotime('24-Dec-2015'));
+		$pd_obj->setDate( strtotime( '24-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2260,11 +2261,11 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_ei += $pd_obj->getEmployeeEI();
 
 		$this->assertEquals( $ytd_gross_income, 33431.04 );
-		$this->assertEquals( $this->mf($ytd_deduction), 2806.23 );
+		$this->assertEquals( $this->mf( $ytd_deduction ), 2806.23 );
 
 		//Actual Income/Deductions for the year.
 		$pd_obj->setFormulaType( 10 ); //Periodic
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2278,7 +2279,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		//Actual Income/Deductions for the year.
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2292,28 +2293,28 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaA() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//
 		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
 		//
 
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( TRUE ); //CPP Exempt, to eliminate the CPP exemption amount as cause for differences.
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( true ); //CPP Exempt, to eliminate the CPP exemption amount as cause for differences.
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setDate( strtotime( '08-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -2328,22 +2329,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		//Leave all $pd_obj settings the same, just switch to non-periodic
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 20 ); //Non-Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( TRUE ); //CPP Exempt, to eliminate the CPP exemption amount as cause for differences.
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( true ); //CPP Exempt, to eliminate the CPP exemption amount as cause for differences.
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setDate( strtotime( '08-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -2357,7 +2358,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//
 		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
@@ -2366,23 +2367,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		// Full test with EI/CPP YTD amounts with dynamically calculated CPP amounts.
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setDate( strtotime( '08-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2398,23 +2399,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		//Leave all $pd_obj settings the same, just switch to non-periodic
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 20 ); //Non-Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setDate( strtotime( '08-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2429,7 +2430,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaC() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//
 		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
@@ -2438,23 +2439,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		// Full test with EI/CPP YTD amounts. However use static CPP amounts rather than calculated ones, as they can differ due to the CPP exemption of $3500.
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setDate( strtotime( '08-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
@@ -2470,23 +2471,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		//Leave all $pd_obj settings the same, just switch to non-periodic
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 20 ); //Non-Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setDate( strtotime( '08-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2501,7 +2502,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaD() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//
 		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
@@ -2510,23 +2511,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		// Full test with EI/CPP YTD amounts. However use static CPP amounts rather than calculated ones, as they can differ due to the CPP exemption of $3500.
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 13 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 13 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2542,23 +2543,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		//Leave all $pd_obj settings the same, just switch to non-periodic
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 13 );
 		$pd_obj->setFormulaType( 20 ); //Non-Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 13 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2573,7 +2574,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaE() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//
 		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
@@ -2582,23 +2583,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		// Full test with EI/CPP YTD amounts. However use static CPP amounts rather than calculated ones, as they can differ due to the CPP exemption of $3500.
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('15-Dec-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '15-Dec-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('15-Dec-2015'));
+		$pd_obj->setDate( strtotime( '15-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 26 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2614,23 +2615,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		//Leave all $pd_obj settings the same, just switch to non-periodic
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('15-Dec-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '15-Dec-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 20 ); //Non-Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('15-Dec-2015'));
+		$pd_obj->setDate( strtotime( '15-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 26 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2645,7 +2646,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaF() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//
 		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
@@ -2654,23 +2655,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		// Full test with EI/CPP YTD amounts. However use static CPP amounts rather than calculated ones, as they can differ due to the CPP exemption of $3500.
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 22 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2686,23 +2687,23 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//
 		//Leave all $pd_obj settings the same, just switch to non-periodic
 		//
-		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'PE' );
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
 		$pd_obj->setFormulaType( 20 ); //Non-Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		//First PP
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( 22 );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setCurrentPayrollRunId( 1 );
@@ -2717,20 +2718,20 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaH() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( true ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setHireAdjustedAnnualPayPeriods( 6 );
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( TRUE ); //EI/CPP exempt so we don't have to track YTD amounts.
-		$pd_obj->setCPPExempt( TRUE );
-		$pd_obj->setFederalTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( true ); //EI/CPP exempt so we don't have to track YTD amounts.
+		$pd_obj->setCPPExempt( true );
+		$pd_obj->setFederalTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -2742,7 +2743,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		//Test starting in the middle of the year.
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2755,7 +2756,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 2 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2768,7 +2769,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 3 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2781,7 +2782,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 4 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2794,7 +2795,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 5 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2807,7 +2808,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setHireAdjustedCurrentPayPeriod( 6 );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
@@ -2823,7 +2824,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 2629.05 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -2834,19 +2835,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_Periodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -2855,7 +2856,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2867,7 +2868,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2879,7 +2880,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2891,7 +2892,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2903,7 +2904,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2915,7 +2916,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2927,7 +2928,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2939,7 +2940,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2951,7 +2952,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2963,7 +2964,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2975,7 +2976,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -2987,7 +2988,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3002,7 +3003,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 2287.6904999994003 ); //2301.9679999992
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -3013,19 +3014,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -3034,7 +3035,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3046,7 +3047,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3058,7 +3059,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3070,7 +3071,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3082,7 +3083,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3094,7 +3095,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3106,7 +3107,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3118,7 +3119,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3130,7 +3131,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3142,7 +3143,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3154,7 +3155,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3166,7 +3167,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3181,7 +3182,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 2234 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -3192,19 +3193,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_Periodic_FormulaC() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -3213,7 +3214,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3225,7 +3226,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3237,7 +3238,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3249,7 +3250,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3261,7 +3262,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3273,7 +3274,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3285,7 +3286,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3297,7 +3298,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3309,7 +3310,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3321,7 +3322,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3333,7 +3334,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3345,7 +3346,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3360,7 +3361,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 1399.4841666661998 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -3371,19 +3372,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaC() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -3392,7 +3393,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3404,7 +3405,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3416,7 +3417,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3428,7 +3429,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3440,7 +3441,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3452,7 +3453,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3464,7 +3465,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3476,7 +3477,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3488,7 +3489,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3500,7 +3501,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3512,7 +3513,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3524,7 +3525,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3539,7 +3540,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 1458.4259999999999 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -3550,19 +3551,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_Periodic_FormulaD() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -3571,7 +3572,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3583,7 +3584,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3595,7 +3596,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3607,7 +3608,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3619,7 +3620,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3631,7 +3632,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3643,7 +3644,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3655,7 +3656,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3667,7 +3668,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3679,7 +3680,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3691,7 +3692,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3703,7 +3704,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3718,7 +3719,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 2521.6399999992004 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -3729,19 +3730,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaD() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -3750,7 +3751,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP1
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3762,7 +3763,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP2
-		$pd_obj->setDate(strtotime('01-Feb-2015'));
+		$pd_obj->setDate( strtotime( '01-Feb-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3774,7 +3775,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP3
-		$pd_obj->setDate(strtotime('01-Mar-2015'));
+		$pd_obj->setDate( strtotime( '01-Mar-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3786,7 +3787,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP4
-		$pd_obj->setDate(strtotime('01-Apr-2015'));
+		$pd_obj->setDate( strtotime( '01-Apr-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3798,7 +3799,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-May-2015'));
+		$pd_obj->setDate( strtotime( '01-May-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3810,7 +3811,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3822,7 +3823,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3834,7 +3835,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3846,7 +3847,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3858,7 +3859,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3870,7 +3871,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3882,7 +3883,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3898,7 +3899,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $ytd_deduction, 2465 );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -3909,19 +3910,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaE() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -3930,7 +3931,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP5
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3942,7 +3943,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('01-Jun-2015'));
+		$pd_obj->setDate( strtotime( '01-Jun-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3954,7 +3955,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setDate( strtotime( '01-Jul-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3966,7 +3967,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setDate( strtotime( '01-Aug-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3978,7 +3979,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setDate( strtotime( '01-Sep-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -3990,7 +3991,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setDate( strtotime( '01-Oct-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4002,7 +4003,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setDate( strtotime( '01-Nov-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4014,7 +4015,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4030,7 +4031,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setDate( strtotime( '01-Dec-2015' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -4041,19 +4042,19 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaF() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 10027 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -4062,7 +4063,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP5
-		$pd_obj->setDate(strtotime('08-Mar-2016'));
+		$pd_obj->setDate( strtotime( '08-Mar-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4074,7 +4075,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('23-Mar-2016'));
+		$pd_obj->setDate( strtotime( '23-Mar-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4086,7 +4087,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('08-Apr-2016'));
+		$pd_obj->setDate( strtotime( '08-Apr-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4098,7 +4099,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('23-Apr-2016'));
+		$pd_obj->setDate( strtotime( '23-Apr-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4110,7 +4111,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('08-May-2016'));
+		$pd_obj->setDate( strtotime( '08-May-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4123,7 +4124,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('23-May-2016'));
+		$pd_obj->setDate( strtotime( '23-May-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4135,7 +4136,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('08-Jun-2016'));
+		$pd_obj->setDate( strtotime( '08-Jun-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4147,7 +4148,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('23-Jun-2016'));
+		$pd_obj->setDate( strtotime( '23-Jun-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4159,7 +4160,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP13
-		$pd_obj->setDate(strtotime('08-Jul-2016'));
+		$pd_obj->setDate( strtotime( '08-Jul-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4171,7 +4172,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP14
-		$pd_obj->setDate(strtotime('23-Jul-2016'));
+		$pd_obj->setDate( strtotime( '23-Jul-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4183,7 +4184,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP15
-		$pd_obj->setDate(strtotime('08-Aug-2016'));
+		$pd_obj->setDate( strtotime( '08-Aug-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4195,7 +4196,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP16
-		$pd_obj->setDate(strtotime('23-Aug-2016'));
+		$pd_obj->setDate( strtotime( '23-Aug-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4207,7 +4208,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP17
-		$pd_obj->setDate(strtotime('08-Sep-2016'));
+		$pd_obj->setDate( strtotime( '08-Sep-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4219,7 +4220,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP18
-		$pd_obj->setDate(strtotime('23-Sep-2016'));
+		$pd_obj->setDate( strtotime( '23-Sep-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4231,7 +4232,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP19
-		$pd_obj->setDate(strtotime('08-Oct-2016'));
+		$pd_obj->setDate( strtotime( '08-Oct-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4243,7 +4244,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP20
-		$pd_obj->setDate(strtotime('23-Oct-2016'));
+		$pd_obj->setDate( strtotime( '23-Oct-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4255,7 +4256,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP21
-		$pd_obj->setDate(strtotime('08-Nov-2016'));
+		$pd_obj->setDate( strtotime( '08-Nov-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4267,7 +4268,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP22
-		$pd_obj->setDate(strtotime('23-Nov-2016'));
+		$pd_obj->setDate( strtotime( '23-Nov-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4279,7 +4280,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP23
-		$pd_obj->setDate(strtotime('08-Dec-2016'));
+		$pd_obj->setDate( strtotime( '08-Dec-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4291,7 +4292,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		//PP24
-		$pd_obj->setDate(strtotime('23-Dec-2016'));
+		$pd_obj->setDate( strtotime( '23-Dec-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4307,7 +4308,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2016'));
+		$pd_obj->setDate( strtotime( '01-Dec-2016' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -4315,23 +4316,22 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 27449.47 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '27449.47' );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '728.68' );
-
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaF() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2015'));
-		$pd_obj->setEnableCPPAndEIDeduction(FALSE); //Deduct CPP/EI.
+		$pd_obj = new PayrollDeduction( 'CA', 'BC' );
+		$pd_obj->setDate( strtotime( '01-Jan-2015' ) );
+		$pd_obj->setEnableCPPAndEIDeduction( false ); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 10027 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
-		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setEIExempt( false );
+		$pd_obj->setCPPExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
+		$pd_obj->setProvincialTaxExempt( false );
 		$pd_obj->setYearToDateCPPContribution( 0 );
 		$pd_obj->setYearToDateEIContribution( 0 );
 
@@ -4340,7 +4340,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction = 0;
 
 		//PP5
-		$pd_obj->setDate(strtotime('08-Mar-2016'));
+		$pd_obj->setDate( strtotime( '08-Mar-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4352,7 +4352,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP6
-		$pd_obj->setDate(strtotime('23-Mar-2016'));
+		$pd_obj->setDate( strtotime( '23-Mar-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4364,7 +4364,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP7
-		$pd_obj->setDate(strtotime('08-Apr-2016'));
+		$pd_obj->setDate( strtotime( '08-Apr-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4376,7 +4376,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP8
-		$pd_obj->setDate(strtotime('23-Apr-2016'));
+		$pd_obj->setDate( strtotime( '23-Apr-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4388,7 +4388,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP9
-		$pd_obj->setDate(strtotime('08-May-2016'));
+		$pd_obj->setDate( strtotime( '08-May-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4401,7 +4401,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP10
-		$pd_obj->setDate(strtotime('23-May-2016'));
+		$pd_obj->setDate( strtotime( '23-May-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4413,7 +4413,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP11
-		$pd_obj->setDate(strtotime('08-Jun-2016'));
+		$pd_obj->setDate( strtotime( '08-Jun-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4425,7 +4425,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP12
-		$pd_obj->setDate(strtotime('23-Jun-2016'));
+		$pd_obj->setDate( strtotime( '23-Jun-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4437,7 +4437,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP13
-		$pd_obj->setDate(strtotime('08-Jul-2016'));
+		$pd_obj->setDate( strtotime( '08-Jul-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4449,7 +4449,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP14
-		$pd_obj->setDate(strtotime('23-Jul-2016'));
+		$pd_obj->setDate( strtotime( '23-Jul-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4461,7 +4461,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP15
-		$pd_obj->setDate(strtotime('08-Aug-2016'));
+		$pd_obj->setDate( strtotime( '08-Aug-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4473,7 +4473,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP16
-		$pd_obj->setDate(strtotime('23-Aug-2016'));
+		$pd_obj->setDate( strtotime( '23-Aug-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4485,7 +4485,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP17
-		$pd_obj->setDate(strtotime('08-Sep-2016'));
+		$pd_obj->setDate( strtotime( '08-Sep-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4497,7 +4497,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP18
-		$pd_obj->setDate(strtotime('23-Sep-2016'));
+		$pd_obj->setDate( strtotime( '23-Sep-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4509,7 +4509,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP19
-		$pd_obj->setDate(strtotime('08-Oct-2016'));
+		$pd_obj->setDate( strtotime( '08-Oct-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4521,7 +4521,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP20
-		$pd_obj->setDate(strtotime('23-Oct-2016'));
+		$pd_obj->setDate( strtotime( '23-Oct-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4533,7 +4533,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP21
-		$pd_obj->setDate(strtotime('08-Nov-2016'));
+		$pd_obj->setDate( strtotime( '08-Nov-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4545,7 +4545,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP22
-		$pd_obj->setDate(strtotime('23-Nov-2016'));
+		$pd_obj->setDate( strtotime( '23-Nov-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4557,7 +4557,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP23
-		$pd_obj->setDate(strtotime('08-Dec-2016'));
+		$pd_obj->setDate( strtotime( '08-Dec-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4569,7 +4569,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDEductions();
 
 		//PP24
-		$pd_obj->setDate(strtotime('23-Dec-2016'));
+		$pd_obj->setDate( strtotime( '23-Dec-2016' ) );
 		$pd_obj->setCurrentPayPeriod( $current_pay_period );
 		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
@@ -4585,7 +4585,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 
 		//PP1 (Next moving into the next year)
-		$pd_obj->setDate(strtotime('08-Jan-2017'));
+		$pd_obj->setDate( strtotime( '08-Jan-2017' ) );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
 		$pd_obj->setYearToDateDeduction( 0 );
@@ -4594,7 +4594,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDEductions() ), '132.42' );
 
 		//Actual Income/Deductions for the year.
-		$pd_obj->setDate(strtotime('01-Dec-2016'));
+		$pd_obj->setDate( strtotime( '01-Dec-2016' ) );
 		$pd_obj->setAnnualPayPeriods( 1 );
 		$pd_obj->setCurrentPayPeriod( 1 );
 		$pd_obj->setYearToDateGrossIncome( 0 );
@@ -4604,4 +4604,5 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDEductions() ), '2222.17' );
 	}
 }
+
 ?>

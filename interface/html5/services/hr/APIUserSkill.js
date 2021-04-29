@@ -61,6 +61,4 @@ var APIUserSkill = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

@@ -49,7 +49,7 @@ class InstallSchema_1100A extends InstallSchema_Base {
 
 		//No need to manually generate the UUID SEED as its done and written to the config file automatically as part of InstallSchema_Base->replaceSQLVariables()
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -64,17 +64,17 @@ class InstallSchema_1100A extends InstallSchema_Base {
 		$cache->clean();
 
 		global $PRIMARY_KEY_IS_UUID;
-		$PRIMARY_KEY_IS_UUID = TRUE;
+		$PRIMARY_KEY_IS_UUID = true;
 
 		//Migrate UserGenericData (ie: Saved Search & Layout) to UUIDs
 		$ugdlf = new UserGenericDataListFactory();
-		$ugdlf->getAll( NULL, NULL, NULL, array( 'created_date' => 'asc', 'id' => 'asc') ); //Order by ID, in cases where their might be conflicting names or invalid records, the last record should be preserved.
+		$ugdlf->getAll( null, null, null, [ 'created_date' => 'asc', 'id' => 'asc' ] ); //Order by ID, in cases where their might be conflicting names or invalid records, the last record should be preserved.
 		if ( $ugdlf->getRecordCount() > 0 ) {
 			foreach ( $ugdlf as $ugdf ) {
-				Debug::text( '   UserGenericData: ID: ' . $ugdf->getId() .' Name: '. $ugdf->getName() .' Script: '. $ugdf->getScript(), __FILE__, __LINE__, __METHOD__, 9 );
-				if ( strpos( $ugdf->getScript(), '/interface/' ) !== FALSE ) { //Skip all reports and legacy data from TT v5 or lower.
+				Debug::text( '   UserGenericData: ID: ' . $ugdf->getId() . ' Name: ' . $ugdf->getName() . ' Script: ' . $ugdf->getScript(), __FILE__, __LINE__, __METHOD__, 9 );
+				if ( strpos( $ugdf->getScript(), '/interface/' ) !== false ) { //Skip all reports and legacy data from TT v5 or lower.
 					Debug::text( '   Deleting legacy interface record...', __FILE__, __LINE__, __METHOD__, 9 );
-					$ugdf->setDeleted(TRUE);
+					$ugdf->setDeleted( true );
 				} else {
 					Debug::text( '   Updating to UUIDs...', __FILE__, __LINE__, __METHOD__, 9 );
 
@@ -89,19 +89,19 @@ class InstallSchema_1100A extends InstallSchema_Base {
 					$ugdf->save();
 				} else {
 					Debug::Arr( $ugdf->Validator->getTextErrors(), '   Deleting legacy interface record due to being invalid...', __FILE__, __LINE__, __METHOD__, 9 );
-					$ugdf->setDeleted(TRUE);
+					$ugdf->setDeleted( true );
 					if ( $ugdf->isValid() ) {
 						$ugdf->save();
 					}
 				}
 			}
 		}
-		unset($ugdlf, $ugdf);
+		unset( $ugdlf, $ugdf );
 
 
 		//Migrate ReportCustomData to UUIDs
 		$rcdlf = new UserReportDataListFactory();
-		$rcdlf->getAll( NULL, NULL, NULL, array( 'created_date' => 'asc', 'id' => 'asc') ); //Order by ID, in cases where their might be conflicting names or invalid records, the last record should be preserved.
+		$rcdlf->getAll( null, null, null, [ 'created_date' => 'asc', 'id' => 'asc' ] ); //Order by ID, in cases where their might be conflicting names or invalid records, the last record should be preserved.
 		if ( $rcdlf->getRecordCount() > 0 ) {
 			foreach ( $rcdlf as $rcdf ) {
 				$rcdf->setData( $this->convertUserReportData( $rcdf->getData(), $rcdf->getScript() ) );
@@ -109,16 +109,16 @@ class InstallSchema_1100A extends InstallSchema_Base {
 					$rcdf->save();
 				} else {
 					Debug::Arr( $rcdf->Validator->getTextErrors(), '   Deleting invalid saved report data due to being invalid...', __FILE__, __LINE__, __METHOD__, 9 );
-					$rcdf->setDeleted(TRUE);
+					$rcdf->setDeleted( true );
 					if ( $rcdf->isValid() ) {
 						$rcdf->save();
 					}
 				}
 			}
 		}
-		unset($rcdlf, $rcdf);
+		unset( $rcdlf, $rcdf );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -131,27 +131,27 @@ class InstallSchema_1100A extends InstallSchema_Base {
 			return $data;
 		}
 
-		$exclude_keys = array(
-			'filter_sort',
-			'display_columns',
+		$exclude_keys = [
+				'filter_sort',
+				'display_columns',
 
-			'type_id',
-			'status_id',
+				'type_id',
+				'status_id',
 
-			'other_id1',
-			'other_id2',
-			'other_id3',
-			'other_id4',
-			'other_id5',
+				'other_id1',
+				'other_id2',
+				'other_id3',
+				'other_id4',
+				'other_id5',
 
-			'mx_internal_uid',
-		);
+				'mx_internal_uid',
+		];
 
 		foreach ( $data as $key => $value ) {
-			if ( is_array($value) ) {
+			if ( is_array( $value ) ) {
 				$data[$key] = $this->convertUserGenericData( $value, $script );
 			} else {
-				if ( ( is_numeric($key) OR $key == 'id' OR strpos( $key, '_id' ) !== FALSE ) AND !in_array( $key, $exclude_keys, TRUE ) ) {
+				if ( ( is_numeric( $key ) || $key == 'id' || strpos( $key, '_id' ) !== false ) && !in_array( $key, $exclude_keys, true ) ) {
 					$data[$key] = TTUUID::convertIntToUUID( $value );
 				}
 			}
@@ -168,7 +168,7 @@ class InstallSchema_1100A extends InstallSchema_Base {
 	 */
 	function convertUserReportData( $data, $script ) {
 		//Debug::Arr( $data,'+++ pre conversion data (possibly recursive) ', __FILE__, __LINE__, __METHOD__, 9 );
-		$config_fields_to_convert = array(
+		$config_fields_to_convert = [
 				'company_deduction_id',
 				'legal_entity_id',
 				'user_title_id',
@@ -226,11 +226,11 @@ class InstallSchema_1100A extends InstallSchema_Base {
 				'job_group_id',
 				'job_item_group_id',
 				'ethnic_group_id',
-		);
+		];
 
-		foreach( $data as $key => $setup_data ) {
-			if ( in_array( $key, $config_fields_to_convert ) AND is_numeric($data[$key]) ) {
-				$data[$key] = TTUUID::convertIntToUUID($data[$key]);
+		foreach ( $data as $key => $setup_data ) {
+			if ( in_array( $key, $config_fields_to_convert ) && is_numeric( $data[$key] ) ) {
+				$data[$key] = TTUUID::convertIntToUUID( $data[$key] );
 			} else {
 				switch ( $key ) {
 					case 'time_period':
@@ -256,38 +256,36 @@ class InstallSchema_1100A extends InstallSchema_Base {
 							$data[$key] = $this->install_obj->convertArrayElementsToUUID( $data[$key] );
 						}
 						break;
-
 				}
 			}
 		}
 
 		if ( isset( $data['config'] ) ) {
-			foreach( $data['config'] as $key => $row ) {
+			foreach ( $data['config'] as $key => $row ) {
 				if ( in_array( $key, $config_fields_to_convert ) ) {
 					$data['config'][$key] = $this->install_obj->convertArrayElementsToUUID( $data['config'][$key] );
 				}
-				if ( isset( $row['include_pay_stub_entry_account'] ) OR isset( $row['include_pay_stub_entry_account'] ) ) {
+				if ( isset( $row['include_pay_stub_entry_account'] ) || isset( $row['exclude_pay_stub_entry_account'] ) ) {
 					$data['config'][$key]['include_pay_stub_entry_account'] = $this->install_obj->convertArrayElementsToUUID( $data['config'][$key]['include_pay_stub_entry_account'] );
 					$data['config'][$key]['exclude_pay_stub_entry_account'] = $this->install_obj->convertArrayElementsToUUID( $data['config'][$key]['exclude_pay_stub_entry_account'] );
 				}
 			}
 		} else {
-			foreach( $data as $key => $row ) {
-				if ( isset( $row['include_pay_stub_entry_account'] ) OR isset( $row['include_pay_stub_entry_account'] ) ) {
+			foreach ( $data as $key => $row ) {
+				if ( isset( $row['include_pay_stub_entry_account'] ) || isset( $row['exclude_pay_stub_entry_account'] ) ) {
 					$data[$key]['include_pay_stub_entry_account'] = $this->install_obj->convertArrayElementsToUUID( $data[$key]['include_pay_stub_entry_account'] );
 					$data[$key]['exclude_pay_stub_entry_account'] = $this->install_obj->convertArrayElementsToUUID( $data[$key]['exclude_pay_stub_entry_account'] );
 				}
-
 			}
 		}
 
 		if ( isset( $data['other_box'] ) ) {
-			foreach( $data['other_box'] as $index=>$box ) {
-				foreach( $box as $key=>$row ) {
+			foreach ( $data['other_box'] as $index => $box ) {
+				foreach ( $box as $key => $row ) {
 					if ( in_array( $key, $config_fields_to_convert ) ) {
 						$data['other_box'][$index][$key] = $this->install_obj->convertArrayElementsToUUID( $data['other_box'][$index][$key] );
 					}
-					if ( isset( $row['include_pay_stub_entry_account'] ) OR isset( $row['include_pay_stub_entry_account'] ) ) {
+					if ( isset( $row['include_pay_stub_entry_account'] ) || isset( $row['exclude_pay_stub_entry_account'] ) ) {
 						$data['other_box'][$index][$key]['include_pay_stub_entry_account'] = $this->install_obj->convertArrayElementsToUUID( $data['other_box'][$index][$key]['include_pay_stub_entry_account'] );
 						$data['other_box'][$index][$key]['exclude_pay_stub_entry_account'] = $this->install_obj->convertArrayElementsToUUID( $data['other_box'][$index][$key]['exclude_pay_stub_entry_account'] );
 					}
@@ -296,31 +294,31 @@ class InstallSchema_1100A extends InstallSchema_Base {
 		}
 
 		//PayrollExportReport needs its own section because of the custom setup data.
-		if ( $script == 'PayrollExportReport' AND isset($data['export_type']) ) {
-			$export_types = array('adp', 'adp_advanced', 'adp_resource', 'paychex_preview', 'paychex_preview_advanced_job', 'paychex_online','ceridian_insync', 'millenium','quickbooks', 'quickbooks_advanced', 'surepayroll', 'chris21', 'va_munis', 'accero', 'compupay', 'sage_50', 'meditech', 'csv', 'csv_advanced', 'other', 'cms_pbj');
+		if ( $script == 'PayrollExportReport' && isset( $data['export_type'] ) ) {
+			$export_types = [ 'adp', 'adp_advanced', 'adp_resource', 'paychex_preview', 'paychex_preview_advanced_job', 'paychex_online', 'ceridian_insync', 'millenium', 'quickbooks', 'quickbooks_advanced', 'surepayroll', 'chris21', 'va_munis', 'accero', 'compupay', 'sage_50', 'meditech', 'csv', 'csv_advanced', 'other', 'cms_pbj' ];
 
-			if ( isset($data['export_columns']) AND in_array( $data['export_type'], $export_types ) ) {
+			if ( isset( $data['export_columns'] ) && in_array( $data['export_type'], $export_types ) ) {
 				//Legacy Export Setup data format (1 export type) - Upgrade to new format while we UUIDify it.
-				foreach( $data['export_columns'] as $key => $setup_data ) {
+				foreach ( $data['export_columns'] as $key => $setup_data ) {
 					if ( in_array( $key, $export_types ) ) {
 						$data[$key]['columns'] = $data[$key][$key]['columns'] = $this->install_obj->processColumns( $data['export_columns'][$key]['columns'] );
 					}
 				}
-				unset($data['export_columns']);
+				unset( $data['export_columns'] );
 
 				//Move any remaining array elements inside export_type specific key.
-				foreach( $data as $key => $setup_data ) {
-					if ( $key != 'export_type' AND $key != $data['export_type'] ) {
+				foreach ( $data as $key => $setup_data ) {
+					if ( $key != 'export_type' && $key != $data['export_type'] ) {
 						$data[$data['export_type']][$key] = $setup_data;
 						unset( $data[$key] );
 					}
 				}
 			} else {
 				//New Export Setup data format (multiple export types)
-				foreach( $data as $key => $setup_data ) {
+				foreach ( $data as $key => $setup_data ) {
 					if ( in_array( $key, $export_types ) ) {
 						$data[$key]['columns'] = $this->install_obj->processColumns( $data[$key]['columns'] );
-						if ( isset( $data[$key][$key] ) AND isset( $data[$key][$key]['columns'] ) ) {
+						if ( isset( $data[$key][$key] ) && isset( $data[$key][$key]['columns'] ) ) {
 							$data[$key][$key]['columns'] = $this->install_obj->processColumns( $data[$key][$key]['columns'] );
 						}
 					}
@@ -333,4 +331,5 @@ class InstallSchema_1100A extends InstallSchema_Base {
 		return $data;
 	}
 }
+
 ?>

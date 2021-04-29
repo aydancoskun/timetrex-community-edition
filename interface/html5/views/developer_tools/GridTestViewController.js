@@ -25,14 +25,13 @@ GridTestViewController = BaseViewController.extend( {
 		this.table_name_key = 'grid_test';
 		this.context_menu_name = $.i18n._( 'Grid Test' );
 		this.navigation_label = $.i18n._( 'AwesomBox Test' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
 		this.select_company_id = LocalCacheData.getCurrentCompany().id;
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
 		this.user_id_array = [];
 
 		this.edit_view_grid_array = [];
-
 
 		this.grid_container_id = TTUUID.generateUUID();
 		this.render();
@@ -66,15 +65,15 @@ GridTestViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0] = [];
 		this.edit_view_tabs[0].push( tab_employee_column1 );
 
-		var $div_grid_container = $('<div id="' + this.grid_container_id + '">');
-		tab_employee_column1.append(  $div_grid_container );
+		var $div_grid_container = $( '<div id="' + this.grid_container_id + '">' );
+		tab_employee_column1.append( $div_grid_container );
 
 		/** build the test grids **/
-		var $grid = this.addGrid( 1 )
+		var $grid = this.addGrid( 1 );
 		$div_grid_container.append( $grid );
 		$grid.setData( this.getFakeData( 1 ) );
 
-		var  column_header_text_array = [
+		var column_header_text_array = [
 			'column name',
 			'column name2',
 			'column name3',
@@ -82,15 +81,15 @@ GridTestViewController = BaseViewController.extend( {
 			'column name5',
 			'column name6'
 		];
-		var $grid = this.addGrid( 6, column_header_text_array )
+		var $grid = this.addGrid( 6, column_header_text_array );
 		$div_grid_container.append( $grid );
 		$grid.setData( this.getFakeData( 6, true ) );
 
-		var $grid = this.addGrid( 12 )
+		var $grid = this.addGrid( 12 );
 		$div_grid_container.append( $grid );
 		$grid.setData( this.getFakeData( 12 ) );
 
-		var $grid = this.addGrid( 40 )
+		var $grid = this.addGrid( 40 );
 		$div_grid_container.append( $grid );
 		$grid.setData( this.getFakeData( 40 ) );
 
@@ -101,7 +100,7 @@ GridTestViewController = BaseViewController.extend( {
 		TTPromise.resolve( 'Gridtest', 'init' );
 	},
 
-	getGridSetup: function ( ) {
+	getGridSetup: function() {
 		var setup = {
 			container_selector: '.edit-view-tab',
 			sub_grid_mode: true,
@@ -121,13 +120,13 @@ GridTestViewController = BaseViewController.extend( {
 		return setup;
 	},
 
-	addGrid: function ( column_count, column_header_text_array ) {
+	addGrid: function( column_count, column_header_text_array ) {
 		var container_selector = 'test_grid_' + column_count;
-		$( '#' + this.grid_container_id ).append( $('<table id="'+ container_selector + '" >') );
+		$( '#' + this.grid_container_id ).append( $( '<table id="' + container_selector + '" >' ) );
 
-		column_info_array = [];
+		var column_info_array = [];
 		for ( var n = 0; n < column_count; n++ ) {
-			var letter = (n + 10).toString( 36 );
+			var letter = ( n + 10 ).toString( 36 );
 			var text = 'Column ' + letter;
 			if ( column_header_text_array ) {
 				text = column_header_text_array[n];
@@ -152,7 +151,7 @@ GridTestViewController = BaseViewController.extend( {
 		for ( var n = 0; n < 4; n++ ) {
 			var data_element = {};
 			for ( var m = 0; m < column_count; m++ ) {
-				var letter = (m+10).toString(36);
+				var letter = ( m + 10 ).toString( 36 );
 				if ( randomize ) {
 					data_element[letter] = TTUUID.generateUUID();
 				} else {
@@ -160,7 +159,7 @@ GridTestViewController = BaseViewController.extend( {
 				}
 
 			}
-			data.push(data_element);
+			data.push( data_element );
 		}
 		return data;
 	},
@@ -170,7 +169,7 @@ GridTestViewController = BaseViewController.extend( {
 		this.search_fields = [];
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -185,21 +184,21 @@ GridTestViewController = BaseViewController.extend( {
 	//override that forces same data to grid at all times.
 	search: function() {
 		var result_data = JSON.parse( '[{"id":"11e85213-a799-d200-b041-123456abcdef","status":"Active","employee_number":100,"first_name":"Mr.","last_name":"FAKE","full_name":"Administrator, Mr.","home_phone":"471-438-3900","is_owner":true,"is_child":false},' +
-				'{"id":"11e85213-ad34-e0e0-8541-123456abcdef","status":"Active","employee_number":13,"first_name":"Tristen","last_name":"Braun","full_name":"FAKE Braun, Tristen","home_phone":"527-500-4852","is_owner":false,"is_child":true},' +
-				'{"id":"11e85213-af64-d0e0-9b00-123456abcdef","status":"Active","employee_number":20,"first_name":"Jane","last_name":"Doe","full_name":"FAKE Doe, Jane","home_phone":"477-443-9650","is_owner":false,"is_child":true},' +
-				'{"id":"11e85213-ac44-1830-9908-123456abcdef","status":"Active","employee_number":10,"first_name":"John","last_name":"Doe","full_name":"FAKE Doe, John","home_phone":"464-547-9452","is_owner":false,"is_child":true}]' );
+			'{"id":"11e85213-ad34-e0e0-8541-123456abcdef","status":"Active","employee_number":13,"first_name":"Tristen","last_name":"Braun","full_name":"FAKE Braun, Tristen","home_phone":"527-500-4852","is_owner":false,"is_child":true},' +
+			'{"id":"11e85213-af64-d0e0-9b00-123456abcdef","status":"Active","employee_number":20,"first_name":"Jane","last_name":"Doe","full_name":"FAKE Doe, Jane","home_phone":"477-443-9650","is_owner":false,"is_child":true},' +
+			'{"id":"11e85213-ac44-1830-9908-123456abcdef","status":"Active","employee_number":10,"first_name":"John","last_name":"Doe","full_name":"FAKE Doe, John","home_phone":"464-547-9452","is_owner":false,"is_child":true}]' );
 		this.user_id_array = result_data;
 		result_data = this.processResultData( result_data );
 		this.grid.setData( result_data );
 		this.grid.setGridColumnsWidth();
-		this.current_edit_record  = result_data[0];
+		this.current_edit_record = result_data[0];
 		this.setCurrentEditViewState( 'edit' );
 
 		TTPromise.add( 'Gridtest', 'init' );
 		var $this = this;
 		TTPromise.wait( 'Gridtest', 'init', function() {
 			$this.initEditView();
-		});
+		} );
 
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 	},
@@ -208,9 +207,8 @@ GridTestViewController = BaseViewController.extend( {
 		var $this = this;
 		setTimeout( function() {
 			$this.setTabOVisibility( true );
-			$('.edit-view-tab-bar').css('opacity', 1);
+			$( '.edit-view-tab-bar' ).css( 'opacity', 1 );
 		}, 2500 );
 	},
-
 
 } );

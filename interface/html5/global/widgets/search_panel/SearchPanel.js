@@ -1,4 +1,4 @@
-(function( $ ) {
+( function( $ ) {
 
 	$.fn.SearchPanel = function( options ) {
 		var opts = $.extend( {}, $.fn.SearchPanel.defaults, options );
@@ -57,7 +57,7 @@
 					continue;
 				}
 				// For Authorizations views
-				if ( key === 'hierarchy_level' && (filter[key].value == 1 || filter[key].value.value == 1) ) {
+				if ( key === 'hierarchy_level' && ( filter[key].value == 1 || filter[key].value.value == 1 ) ) {
 					continue;
 				}
 				hasFilter = true;
@@ -185,7 +185,6 @@
 			var layout_selector = $( this ).find( '#layout_selector' );
 
 			var column_selector = Global.loadWidget( 'global/widgets/awesomebox/ADropDown.html' );
-
 
 			var searchButtonDiv = $( this ).find( '.search-btn-div' );
 
@@ -328,4 +327,4 @@
 
 	$.fn.SearchPanel.defaults = {};
 
-})( jQuery );
+} )( jQuery );

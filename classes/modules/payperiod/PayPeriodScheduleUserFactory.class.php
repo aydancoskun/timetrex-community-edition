@@ -42,8 +42,8 @@ class PayPeriodScheduleUserFactory extends Factory {
 	protected $table = 'pay_period_schedule_user';
 	protected $pk_sequence_name = 'pay_period_schedule_user_id_seq'; //PK Sequence name
 
-	protected $user_obj = NULL;
-	protected $pay_period_schedule_obj = NULL;
+	protected $user_obj = null;
+	protected $pay_period_schedule_obj = null;
 
 	/**
 	 * @return bool
@@ -70,8 +70,9 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPayPeriodSchedule( $value) {
+	function setPayPeriodSchedule( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'pay_period_schedule_id', $value );
 	}
 
@@ -79,22 +80,22 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function isUniqueUser( $id) {
+	function isUniqueUser( $id ) {
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
 
-		$ph = array(
-					'id' => TTUUID::castUUID($id),
-					);
+		$ph = [
+				'id' => TTUUID::castUUID( $id ),
+		];
 
-		$query = 'select a.id from '. $this->getTable() .' as a, '. $ppslf->getTable() .' as b where a.pay_period_schedule_id = b.id AND a.user_id = ? AND b.deleted=0';
-		$user_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($user_id, 'Unique User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'select a.id from ' . $this->getTable() . ' as a, ' . $ppslf->getTable() . ' as b where a.pay_period_schedule_id = b.id AND a.user_id = ? AND b.deleted=0';
+		$user_id = $this->db->GetOne( $query, $ph );
+		Debug::Arr( $user_id, 'Unique User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $user_id === FALSE ) {
-			return TRUE;
+		if ( $user_id === false ) {
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -108,10 +109,12 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -122,23 +125,23 @@ class PayPeriodScheduleUserFactory extends Factory {
 		// Pay Period Schedule
 		if ( $this->getPayPeriodSchedule() == TTUUID::getZeroID() ) {
 			$ppslf = TTnew( 'PayPeriodScheduleListFactory' ); /** @var PayPeriodScheduleListFactory $ppslf */
-			$this->Validator->isResultSetWithRows(	'pay_period_schedule',
-															$ppslf->getByID($this->getPayPeriodSchedule()),
-															TTi18n::gettext('Pay Period Schedule is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'pay_period_schedule',
+												   $ppslf->getByID( $this->getPayPeriodSchedule() ),
+												   TTi18n::gettext( 'Pay Period Schedule is invalid' )
+			);
 		}
 		// Selected Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-			$this->Validator->isResultSetWithRows(	'user',
-														$ulf->getByID($this->getUser()),
-														TTi18n::gettext('Selected Employee is invalid')
-													);
-			if ( $this->Validator->isError('user') == FALSE ) {
-				$this->Validator->isTrue(		'user',
-														$this->isUniqueUser($this->getUser()),
-														TTi18n::gettext('Selected Employee is already assigned to another Pay Period Schedule')
-													);
+			$this->Validator->isResultSetWithRows( 'user',
+												   $ulf->getByID( $this->getUser() ),
+												   TTi18n::gettext( 'Selected Employee is invalid' )
+			);
+			if ( $this->Validator->isError( 'user' ) == false ) {
+				$this->Validator->isTrue( 'user',
+										  $this->isUniqueUser( $this->getUser() ),
+										  TTi18n::gettext( 'Selected Employee is already assigned to another Pay Period Schedule' )
+				);
 			}
 		}
 
@@ -146,7 +149,7 @@ class PayPeriodScheduleUserFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.
@@ -155,75 +158,75 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -231,30 +234,30 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -263,11 +266,12 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 */
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
-		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getPayPeriodSchedule(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
+		if ( is_object( $u_obj ) ) {
+			return TTLog::addEntry( $this->getPayPeriodSchedule(), $log_action, TTi18n::getText( 'Employee' ) . ': ' . $u_obj->getFullName( false, true ), null, $this->getTable() );
 		}
 
-		return FALSE;
+		return false;
 	}
 }
+
 ?>

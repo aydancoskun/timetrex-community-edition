@@ -34,8 +34,8 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
 /*
  Proceedure to Convert MySQL to PostgreSQL:
@@ -44,31 +44,31 @@ require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR
 */
 
 
-if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: convert_mysql_to_postgresql.php [data]\n";
 	$help_output .= " [data] = 'truncate'\n";
 	echo $help_output;
 } else {
 	//Handle command line arguments
-	$last_arg = count($argv)-1;
+	$last_arg = count( $argv ) - 1;
 
-	if ( isset($db) AND is_object($db) AND strncmp($db->databaseType,'mysql',5) != 0) {
+	if ( isset( $db ) AND is_object( $db ) AND strncmp( $db->databaseType, 'mysql', 5 ) != 0 ) {
 		echo "ERROR: This script must be run on MySQL only!";
-		exit(255);
+		exit( 255 );
 	}
 
-	if ( isset($argv[$last_arg]) AND $argv[$last_arg] != '' ) {
-		$type = trim(strtolower($argv[$last_arg]));
+	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
+		$type = trim( strtolower( $argv[ $last_arg ] ) );
 
-		$dict = NewDataDictionary($db);
+		$dict = NewDataDictionary( $db );
 		$tables = $dict->MetaTables();
 
 		$sequence_modifier = 1000;
 
-		$out = NULL;
-		foreach( $tables as $table ) {
+		$out = null;
+		foreach ( $tables as $table ) {
 			if ( $type == 'truncate' ) {
-				echo 'TRUNCATE '. $table .';'."\n";
+				echo 'TRUNCATE ' . $table . ';' . "\n";
 			}
 		}
 	}

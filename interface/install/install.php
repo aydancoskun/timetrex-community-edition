@@ -45,12 +45,12 @@ echo "<html><body>";
 echo "Checking pre-flight requirements... ";
 echo " 1...";
 
-ini_set('display_errors', 1 ); //Try to display any errors that may arise on this page.
-ini_set('default_socket_timeout', 5);
-ini_set('allow_url_fopen', 1);
+ini_set( 'display_errors', 1 ); //Try to display any errors that may arise on this page.
+ini_set( 'default_socket_timeout', 5 );
+ini_set( 'allow_url_fopen', 1 );
 
 echo " 2...";
-if ( isset($_GET['external_installer']) ) {
+if ( isset( $_GET['external_installer'] ) ) {
 	$external_installer = (int)$_GET['external_installer'];
 } else {
 	$external_installer = 0;
@@ -60,14 +60,14 @@ echo " 3...";
 //$templates_c_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'templates_c';
 
 echo " 4...";
-$redir = TRUE;
-if ( version_compare( PHP_VERSION, '7.0.0', '<') == 1 ) {
-	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.0</b> or greater!<br><br>\n";
-	$redir = FALSE;
+$redir = true;
+if ( version_compare( PHP_VERSION, '7.0.0', '<' ) == 1 ) {
+	echo "You are currently using PHP v<b>" . PHP_VERSION . "</b> TimeTrex requires PHP <b>v7.0</b> or greater!<br><br>\n";
+	$redir = false;
 }
-if ( version_compare( PHP_VERSION, '7.4.99', '>') == 1 ) {
-	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.4.x</b> or earlier!<br><br>\n";
-	$redir = FALSE;
+if ( version_compare( PHP_VERSION, '7.4.99', '>' ) == 1 ) {
+	echo "You are currently using PHP v<b>" . PHP_VERSION . "</b> TimeTrex requires PHP <b>v7.4.x</b> or earlier!<br><br>\n";
+	$redir = false;
 }
 
 echo " 5...";
@@ -82,17 +82,17 @@ echo " 6...";
 //	echo "PHP INTL extension is not installed, TimeTrex requires INTL to be installed.<br><br>\n";
 //	$redir = FALSE;
 //}
-if ( extension_loaded( 'gettext' ) == FALSE ) {
+if ( extension_loaded( 'gettext' ) == false ) {
 	echo "PHP GetText extension is not installed, TimeTrex requires GetText to be installed.<br><br>\n";
-	$redir = FALSE;
+	$redir = false;
 }
-if ( extension_loaded( 'mbstring' ) == FALSE ) {
+if ( extension_loaded( 'mbstring' ) == false ) {
 	echo "PHP MBSTRING extension is not installed, TimeTrex requires MBSTRING to be installed.<br><br>\n";
-	$redir = FALSE;
+	$redir = false;
 }
-if ( extension_loaded( 'json' ) == FALSE ) {
+if ( extension_loaded( 'json' ) == false ) {
 	echo "PHP JSON extension is not installed, TimeTrex requires JSON to be installed.<br><br>\n";
-	$redir = FALSE;
+	$redir = false;
 }
 
 echo " 7...";
@@ -107,15 +107,15 @@ echo " 7...";
 //unset($test_template_c_sub_dir);
 
 echo " 9...";
-$handle = @fopen('http://www.timetrex.com/pre_install.php?os='. PHP_OS .'&php_version='. PHP_VERSION .'&redir='. (int)$redir .'&web_server='. urlencode( substr( $_SERVER['SERVER_SOFTWARE'], 0, 20 ) ) .'&external_installer='. $external_installer .'&url='. urlencode($_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'].$_SERVER['REQUEST_URI']), 'r');
-@fclose($handle);
+$handle = @fopen( 'http://www.timetrex.com/pre_install.php?os=' . PHP_OS . '&php_version=' . PHP_VERSION . '&redir=' . (int)$redir . '&web_server=' . urlencode( substr( $_SERVER['SERVER_SOFTWARE'], 0, 20 ) ) . '&external_installer=' . $external_installer . '&url=' . urlencode( $_SERVER['HTTP_HOST'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'] ), 'r' );
+@fclose( $handle );
 
 echo " 10...";
-if ( $redir == TRUE ) {
+if ( $redir == true ) {
 	echo " PASSED!<br><br>\n";
-	echo "Please wait while we automatically redirect you to the <a href='License.php?external_installer=". $external_installer ."'>installer</a>.";
+	echo "Please wait while we automatically redirect you to the <a href='License.php?external_installer=" . $external_installer . "'>installer</a>.";
 	//echo "<meta http-equiv='refresh' content='0;url=License.php?external_installer=". $external_installer ."'>";
-	echo "<meta http-equiv='refresh' content='0;url=../html5/index.php?installer=1&disable_db=1&external_installer=". $external_installer ."#!m=Install&a=license&external_installer=". $external_installer ."'>";
+	echo "<meta http-equiv='refresh' content='0;url=../html5/index.php?installer=1&disable_db=1&external_installer=" . $external_installer . "#!m=Install&a=license&external_installer=" . $external_installer . "'>";
 } else {
 	echo " FAILED!<br><br>\n";
 	echo "For installation support, please join our community <a href=\"https://forums.timetrex.com\" target=\"_blank\">forums</a> or

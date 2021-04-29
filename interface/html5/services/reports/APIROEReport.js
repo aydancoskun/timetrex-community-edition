@@ -2,43 +2,43 @@ var APIROEReport = ServiceCaller.extend( {
 	key_name: 'ROEReport',
 	className: 'APIROEReport',
 
-	getTemplate: function () {
+	getTemplate: function() {
 		return this.argumentsHandler( this.className, 'getTemplate', arguments );
 	},
 
-	getCommonROEReportData: function () {
+	getCommonROEReportData: function() {
 		return this.argumentsHandler( this.className, 'getCommonROEReportData', arguments );
 	},
 
-	getROEReport: function () {
+	getROEReport: function() {
 		return this.argumentsHandler( this.className, 'getROEReport', arguments );
 	},
 
-	setROEReport: function () {
+	setROEReport: function() {
 		return this.argumentsHandler( this.className, 'setROEReport', arguments );
 	},
 
-	getROEReportDefaultData: function () {
+	getROEReportDefaultData: function() {
 		return this.argumentsHandler( this.className, 'getROEReportDefaultData', arguments );
 	},
 
-	deleteROEReport: function () {
+	deleteROEReport: function() {
 		return this.argumentsHandler( this.className, 'deleteROEReport', arguments );
 	},
 
-	validateROEReport: function () {
+	validateROEReport: function() {
 		return this.argumentsHandler( this.className, 'validateROEReport', arguments );
 	},
 
-	validateReport: function () {
+	validateReport: function() {
 		return this.argumentsHandler( this.className, 'validateReport', arguments );
 	},
 
-	setCompanyFormConfig: function () {
+	setCompanyFormConfig: function() {
 		return this.argumentsHandler( this.className, 'setCompanyFormConfig', arguments );
 	},
 
-	getCompanyFormConfig: function () {
+	getCompanyFormConfig: function() {
 		return this.argumentsHandler( this.className, 'getCompanyFormConfig', arguments );
 	}
 } );

@@ -46,7 +46,7 @@ class InstallSchema_1110A extends InstallSchema_Base {
 	function preInstall() {
 		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -55,7 +55,8 @@ class InstallSchema_1110A extends InstallSchema_Base {
 	function postInstall() {
 		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

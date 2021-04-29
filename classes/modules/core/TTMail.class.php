@@ -38,8 +38,6 @@
 /**
  * @package Core
  */
-
-
 /*
  Config options:
 
@@ -50,16 +48,17 @@
  smtp_username=test1
  smtp_password=testpass
 */
-class TTMail {
-	private $mime_obj = NULL;
-	private $mail_obj = NULL;
 
-	private $data = NULL;
-	public $default_mime_config = array(
-										'html_charset' => 'UTF-8',
-										'text_charset' => 'UTF-8',
-										'head_charset' => 'UTF-8',
-										);
+class TTMail {
+	private $mime_obj = null;
+	private $mail_obj = null;
+
+	private $data = null;
+	public $default_mime_config = [
+			'html_charset' => 'UTF-8',
+			'text_charset' => 'UTF-8',
+			'head_charset' => 'UTF-8',
+	];
 
 	/**
 	 * TTMail constructor.
@@ -67,19 +66,19 @@ class TTMail {
 	function __construct() {
 		//For some reason the EOL defaults to \r\n, which seems to screw with Amavis
 		//This also prevents wordwrapping at 70 chars.
-		if ( !defined('MAIL_MIMEPART_CRLF') ) {
-			define('MAIL_MIMEPART_CRLF', "\n");
+		if ( !defined( 'MAIL_MIMEPART_CRLF' ) ) {
+			define( 'MAIL_MIMEPART_CRLF', "\n" );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return Mail_Mime|null
 	 */
 	function getMimeObject() {
-		if ( $this->mime_obj == NULL ) {
-			require_once('Mail/mime.php');
+		if ( $this->mime_obj == null ) {
+			require_once( 'Mail/mime.php' );
 			$this->mime_obj = @new Mail_Mime();
 		}
 
@@ -90,37 +89,37 @@ class TTMail {
 	 * @return null|object
 	 */
 	function getMailObject() {
-		if ( $this->mail_obj == NULL ) {
-			require_once('Mail.php');
+		if ( $this->mail_obj == null ) {
+			require_once( 'Mail.php' );
 
 			//Determine if use Mail/SMTP, or SOAP.
 			$delivery_method = $this->getDeliveryMethod();
 
 			if ( $delivery_method == 'mail' ) {
-				$this->mail_obj = Mail::factory('mail');
-			} elseif ( $delivery_method == 'sendmail' ) {
-				$this->mail_obj = Mail::factory('sendmail');
-			} elseif ( $delivery_method == 'smtp' ) {
+				$this->mail_obj = Mail::factory( 'mail' );
+			} else if ( $delivery_method == 'sendmail' ) {
+				$this->mail_obj = Mail::factory( 'sendmail' );
+			} else if ( $delivery_method == 'smtp' ) {
 				$smtp_config = $this->getSMTPConfig();
 
-				$mail_config = array(
-									'host' => $smtp_config['host'],
-									'port' => $smtp_config['port'],
-									);
+				$mail_config = [
+						'host' => $smtp_config['host'],
+						'port' => $smtp_config['port'],
+				];
 
-				if ( isset($smtp_config['username']) AND $smtp_config['username'] != '' ) {
+				if ( isset( $smtp_config['username'] ) && $smtp_config['username'] != '' ) {
 					//Removed 'user_name' as it wasn't working with postfix.
 					$mail_config['username'] = $smtp_config['username'];
 					$mail_config['password'] = $smtp_config['password'];
-					$mail_config['auth'] = TRUE;
+					$mail_config['auth'] = true;
 				}
 
 				//Allow self-signed TLS certificates by default, which were disabled by default in PHP v5.6 -- See comments here: http://php.net/manual/en/migration56.openssl.php
 				//This should fix error messages like: authentication failure [SMTP: STARTTLS failed (code: 220, response: 2.0.0 SMTP server ready)
-				$mail_config['socket_options'] = array( 'ssl' => array( 'verify_peer' => FALSE, 'verify_peer_name' => FALSE, 'allow_self_signed' => TRUE ) );
+				$mail_config['socket_options'] = [ 'ssl' => [ 'verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true ] ];
 
-				$this->mail_obj = Mail::factory('smtp', $mail_config );
-				Debug::Arr($mail_config, 'SMTP Config: ', __FILE__, __LINE__, __METHOD__, 10);
+				$this->mail_obj = Mail::factory( 'smtp', $mail_config );
+				Debug::Arr( $mail_config, 'SMTP Config: ', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 
@@ -133,12 +132,12 @@ class TTMail {
 	function getDeliveryMethod() {
 		global $config_vars;
 
-		$possible_values = array( 'mail', 'soap', 'smtp', 'sendmail' );
-		if ( isset( $config_vars['mail']['delivery_method'] ) AND in_array( strtolower( trim($config_vars['mail']['delivery_method']) ), $possible_values ) ) {
+		$possible_values = [ 'mail', 'soap', 'smtp', 'sendmail' ];
+		if ( isset( $config_vars['mail']['delivery_method'] ) && in_array( strtolower( trim( $config_vars['mail']['delivery_method'] ) ), $possible_values ) ) {
 			return $config_vars['mail']['delivery_method'];
 		}
 
-		if ( DEPLOYMENT_ON_DEMAND == TRUE ) {
+		if ( DEPLOYMENT_ON_DEMAND == true ) {
 			return 'mail';
 		}
 
@@ -151,12 +150,12 @@ class TTMail {
 	function getSMTPConfig() {
 		global $config_vars;
 
-		$retarr = array(
-						'host' => NULL,
-						'port' => 25,
-						'username' => NULL,
-						'password' => NULL,
-						);
+		$retarr = [
+				'host'     => null,
+				'port'     => 25,
+				'username' => null,
+				'password' => null,
+		];
 
 		if ( isset( $config_vars['mail']['smtp_host'] ) ) {
 			$retarr['host'] = $config_vars['mail']['smtp_host'];
@@ -180,7 +179,8 @@ class TTMail {
 	 * @return array
 	 */
 	function getMIMEHeaders() {
-		$mime_headers = @$this->getMIMEObject()->headers( $this->getHeaders(), TRUE );
+		$mime_headers = @$this->getMIMEObject()->headers( $this->getHeaders(), true );
+
 		//Debug::Arr($this->data['headers'], 'MIME Headers: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $mime_headers;
 	}
@@ -193,7 +193,7 @@ class TTMail {
 			return $this->data['headers'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -201,17 +201,17 @@ class TTMail {
 	 * @param bool $include_default
 	 * @return bool
 	 */
-	function setHeaders( $headers, $include_default = FALSE ) {
+	function setHeaders( $headers, $include_default = false ) {
 		$this->data['headers'] = $headers;
 
-		if ( $include_default == TRUE ) {
+		if ( $include_default == true ) {
 			//May have to go to base64 encoding all data for proper UTF-8 support.
 			$this->data['headers']['Content-type'] = 'text/html; charset="UTF-8"';
 		}
 
 		//Debug::Arr($this->data['headers'], 'Headers: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -222,7 +222,7 @@ class TTMail {
 			return $this->data['to'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -232,7 +232,7 @@ class TTMail {
 	function setTo( $email ) {
 		$this->data['to'] = $email;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -243,7 +243,7 @@ class TTMail {
 			return $this->data['body'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -253,7 +253,7 @@ class TTMail {
 	function setBody( $body ) {
 		$this->data['body'] = $body;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -261,7 +261,7 @@ class TTMail {
 	 * @return mixed
 	 */
 	function setDefaultTXTBody() {
-		return @$this->getMIMEObject()->setTXTBody( TTi18n::getText('This email contains HTML content, please open in a HTML enabled email viewer.') ); //Having a text/plain body helps reduce spam score.
+		return @$this->getMIMEObject()->setTXTBody( TTi18n::getText( 'This email contains HTML content, please open in a HTML enabled email viewer.' ) ); //Having a text/plain body helps reduce spam score.
 	}
 
 	/**
@@ -270,44 +270,48 @@ class TTMail {
 	 * @return mixed
 	 */
 	function parseEmailAddress( $address ) {
-		if ( preg_match('/(?<=[<\[]).*?(?=[>\]]$)/', $address, $match) ) {
+		if ( preg_match( '/(?<=[<\[]).*?(?=[>\]]$)/', $address, $match ) ) {
 			$retval = $match[0];
 		} else {
 			$retval = $address;
 		}
 
-		return filter_var($retval, FILTER_VALIDATE_EMAIL); //Make sure we filter the email address here, so if using -f params, we aren't exploitable, for example an email address like: "Attacker -Param2 -Param3"@test.com
+		return filter_var( $retval, FILTER_VALIDATE_EMAIL ); //Make sure we filter the email address here, so if using -f params, we aren't exploitable, for example an email address like: "Attacker -Param2 -Param3"@test.com
 	}
 
 	/**
 	 * @param bool $force
 	 * @return bool
 	 */
-	function Send( $force = FALSE ) {
+	function Send( $force = false ) {
 		global $config_vars;
-		Debug::Arr($this->getTo(), 'Attempting to send email To: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $this->getTo(), 'Attempting to send email To: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( $this->getTo() == FALSE ) {
-			Debug::Text('To Address invalid...', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+		if ( $this->getTo() == false ) {
+			Debug::Text( 'To Address invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
-		if ( $this->getBody() == FALSE ) {
-			Debug::Text('Body invalid...', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+		if ( $this->getBody() == false ) {
+			Debug::Text( 'Body invalid...', __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
-		Debug::Text('Sending Email: Body Size: '. strlen( $this->getBody() ) .' Method: '. $this->getDeliveryMethod() .' To: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Sending Email: Body Size: ' . strlen( $this->getBody() ) . ' Method: ' . $this->getDeliveryMethod() . ' To: ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( PRODUCTION == FALSE AND $force !== TRUE ) {
-			Debug::Text('Not in production mode, not sending emails...', __FILE__, __LINE__, __METHOD__, 10);
+		if ( PRODUCTION == false && $force !== true ) {
+			Debug::Text( 'Not in production mode, not sending emails...', __FILE__, __LINE__, __METHOD__, 10 );
+
 			//$to = 'root@localhost';
-			return FALSE;
+			return false;
 		}
 
-		if ( DEMO_MODE == TRUE ) {
-			Debug::Text('In DEMO mode, not sending emails...', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
+		if ( DEMO_MODE == true ) {
+			Debug::Text( 'In DEMO mode, not sending emails...', __FILE__, __LINE__, __METHOD__, 10 );
+
+			return false;
 		}
 
 		//if ( !isset($this->data['headers']['Date']) ) {
@@ -316,10 +320,10 @@ class TTMail {
 
 		$this->data['headers']['X-TimeTrex-Version'] = APPLICATION_VERSION;
 		$this->data['headers']['X-TimeTrex-Edition'] = getTTProductEditionName();
-		$this->data['headers']['X-TimeTrex-Hostname'] = Misc::getURLProtocol() .'://'.Misc::getHostName( TRUE ).Environment::getBaseURL();
+		$this->data['headers']['X-TimeTrex-Hostname'] = Misc::getURLProtocol() . '://' . Misc::getHostName( true ) . Environment::getBaseURL();
 
 		if ( !is_array( $this->getTo() ) ) {
-			$to = array( $this->getTo() );
+			$to = [ $this->getTo() ];
 		} else {
 			//Even though the RFC says the local part of email address is case sensitive, it should never really be required in the real-world.
 			//This prevents duplicate emails from being sent to email@mydomain.com and Email@mydomain.com or EMAIL@mydomain.com
@@ -327,22 +331,22 @@ class TTMail {
 		}
 
 		//When using SMTP, we have to manually send to each envelope-to, but make sure the original TO header is set.
-		$secondary_to = array();
-		if ( $this->getDeliveryMethod() == 'smtp' AND isset($this->data['headers']['Cc']) AND $this->data['headers']['Cc'] != '' ) {
-			$secondary_to = array_merge( $secondary_to, array_map('trim', explode(',', $this->data['headers']['Cc'] ) ) );
+		$secondary_to = [];
+		if ( $this->getDeliveryMethod() == 'smtp' && isset( $this->data['headers']['Cc'] ) && $this->data['headers']['Cc'] != '' ) {
+			$secondary_to = array_merge( $secondary_to, array_map( 'trim', explode( ',', $this->data['headers']['Cc'] ) ) );
 		}
-		if ( $this->getDeliveryMethod() == 'smtp' AND isset($this->data['headers']['Bcc']) AND $this->data['headers']['Bcc'] != '' ) {
-			$secondary_to = array_merge( $secondary_to, array_map('trim', explode(',', $this->data['headers']['Bcc'] ) ) );
+		if ( $this->getDeliveryMethod() == 'smtp' && isset( $this->data['headers']['Bcc'] ) && $this->data['headers']['Bcc'] != '' ) {
+			$secondary_to = array_merge( $secondary_to, array_map( 'trim', explode( ',', $this->data['headers']['Bcc'] ) ) );
 		}
 		$secondary_to = array_diff( $secondary_to, $to ); //Make sure the CC/BCC doesn't contain any of the TO addresses, so we don't send duplicate emails.
 
 		$i = 0;
-		foreach( $to as $recipient ) {
-			Debug::Text($i .'. Recipient: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
+		foreach ( $to as $recipient ) {
+			Debug::Text( $i . '. Recipient: ' . $recipient, __FILE__, __LINE__, __METHOD__, 10 );
 			//Make sure its at least a partially valid email address, otherwise just skip without returning FALSE.
 			//  Without this a CC recipient of '"John Doe" <>' will fail and return FALSE making other functions think email failed.
-			if ( strpos( $recipient, '@' ) === FALSE ) {
-				Debug::Text('  Recipient email address is invalid, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+			if ( strpos( $recipient, '@' ) === false ) {
+				Debug::Text( '  Recipient email address is invalid, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
 				continue;
 			}
 
@@ -351,8 +355,8 @@ class TTMail {
 			//Check to see if they want to force a return-path for better bounce handling.
 			//However if the envelope from header does not match the From header
 			//It may trigger spam filtering due to email mismatch/forgery (EDT_SDHA_ADR_FRG)
-			if ( !isset($this->data['headers']['Return-Path']) AND isset($config_vars['other']['email_return_path_local_part']) AND $config_vars['other']['email_return_path_local_part'] != '' ) {
-				$this->data['headers']['Return-Path'] = Misc::getEmailReturnPathLocalPart( $recipient ) .'@'. Misc::getEmailDomain();
+			if ( !isset( $this->data['headers']['Return-Path'] ) && isset( $config_vars['other']['email_return_path_local_part'] ) && $config_vars['other']['email_return_path_local_part'] != '' ) {
+				$this->data['headers']['Return-Path'] = Misc::getEmailReturnPathLocalPart( $recipient ) . '@' . Misc::getEmailDomain();
 			}
 
 			//Debug::Arr($this->getMIMEHeaders(), 'Sending Email To: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
@@ -362,37 +366,37 @@ class TTMail {
 				case 'mail':
 					if ( $this->getDeliveryMethod() == 'mail' ) {
 						$this->getMailObject()->_params = '-t'; //The -t option specifies that exim should build the recipients list from the 'To', 'Cc', and 'Bcc' headers rather than from the arguments list.
-						if ( isset($this->data['headers']['Return-Path']) ) {
-							$this->getMailObject()->_params .= ' -f'. $this->parseEmailAddress( $this->data['headers']['Return-Path'] );
-						} elseif ( isset($this->data['headers']['From']) ) {
-							$this->getMailObject()->_params .= ' -f'. $this->parseEmailAddress( $this->data['headers']['From'] );
+						if ( isset( $this->data['headers']['Return-Path'] ) ) {
+							$this->getMailObject()->_params .= ' -f' . $this->parseEmailAddress( $this->data['headers']['Return-Path'] );
+						} else if ( isset( $this->data['headers']['From'] ) ) {
+							$this->getMailObject()->_params .= ' -f' . $this->parseEmailAddress( $this->data['headers']['From'] );
 						}
 					}
 
 					$send_retval = $this->getMailObject()->send( $recipient, $this->getMIMEHeaders(), $this->getBody() );
-					if ( PEAR::isError($send_retval) ) {
-						Debug::Text('Send Email Failed... Error: '. $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
-						$send_retval = FALSE;
+					if ( PEAR::isError( $send_retval ) ) {
+						Debug::Text( 'Send Email Failed... Error: ' . $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+						$send_retval = false;
 					}
 
 					//When using SMTP, we have to manually send to each envelope-to, but make sure the original TO header is set.
-					if ( $this->getDeliveryMethod() == 'smtp' AND isset($secondary_to) AND is_array($secondary_to) AND count($secondary_to) > 0 ) {
+					if ( $this->getDeliveryMethod() == 'smtp' && isset( $secondary_to ) && is_array( $secondary_to ) && count( $secondary_to ) > 0 ) {
 						$x = 0;
-						foreach( $secondary_to as $cc_key => $cc_recipient ) {
+						foreach ( $secondary_to as $cc_key => $cc_recipient ) {
 							//Make sure its at least a partially valid email address, otherwise just skip without returning FALSE.
 							//  Without this a CC recipient of '"John Doe" <>' will fail and return FALSE making other functions think email failed.
-							if ( strpos( $cc_recipient, '@' ) === FALSE ) {
-								Debug::Text('  CC Recipient email address is invalid, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+							if ( strpos( $cc_recipient, '@' ) === false ) {
+								Debug::Text( '  CC Recipient email address is invalid, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
 								continue;
 							}
 
-							Debug::Text('  '. $x .'. CC Recipient: '. $cc_recipient, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text( '  ' . $x . '. CC Recipient: ' . $cc_recipient, __FILE__, __LINE__, __METHOD__, 10 );
 							$send_retval = $this->getMailObject()->send( $cc_recipient, $this->getMIMEHeaders(), $this->getBody() );
 							if ( PEAR::isError( $send_retval ) ) {
 								Debug::Text( 'Send Email Failed... Error: ' . $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
-								$send_retval = FALSE;
+								$send_retval = false;
 							}
-							unset($secondary_to[$cc_key]); //Remove CC recipient from array so we don't send it multiple times if there are multiple recipients.
+							unset( $secondary_to[$cc_key] ); //Remove CC recipient from array so we don't send it multiple times if there are multiple recipients.
 							$x++;
 						}
 					}
@@ -403,19 +407,21 @@ class TTMail {
 					break;
 			}
 
-			if ( $send_retval != TRUE ) {
-				Debug::Arr($send_retval, 'Send Email Failed To: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
+			if ( $send_retval != true ) {
+				Debug::Arr( $send_retval, 'Send Email Failed To: ' . $recipient, __FILE__, __LINE__, __METHOD__, 10 );
 			}
 
 			$i++;
 		}
 
-		if ( $send_retval == TRUE ) {
-			return TRUE;
+		if ( $send_retval == true ) {
+			return true;
 		}
 
-		Debug::Arr($send_retval, 'Send Email Failed!', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
+		Debug::Arr( $send_retval, 'Send Email Failed!', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return false;
 	}
 }
+
 ?>

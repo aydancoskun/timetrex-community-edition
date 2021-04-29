@@ -18,8 +18,8 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'holiday_policy';
 		this.context_menu_name = $.i18n._( 'Holiday Policy' );
 		this.navigation_label = $.i18n._( 'Holiday Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIHolidayPolicy' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIHolidayPolicy' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 		this.render();
 		this.buildContextMenu();
 
@@ -61,7 +61,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIHolidayPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIHolidayPolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HOLIDAY_POLICY,
@@ -81,14 +81,17 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_holiday_policy_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		//Name
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_holiday_policy_column1, '' );
 
 		form_item_input.parent().width( '45%' );
-
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
@@ -115,7 +118,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Recurring Holidays
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRecurringHoliday' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRecurringHoliday' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.RECURRING_HOLIDAY,
 			show_search_inputs: true,
@@ -165,13 +168,11 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Employee Must Work at Least' ), [form_item_minimum_worked_days_input, form_item_minimum_worked_period_days_input, form_item_worked_scheduled_days_combobox], tab_eligibility_column1, '', widgetContainer, true );
 
-
 		// Default Schedules Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'shift_on_holiday_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.shift_on_holiday_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'On the Holiday, the Employee' ), form_item_input, tab_eligibility_column1, '', null, true );
-
 
 		// Employee Must Work at Least
 		form_item_minimum_worked_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -205,7 +206,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Eligible Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -223,7 +224,6 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[2].push( tab_holiday_time_column1 );
 
-
 		// Total Time over
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'average_time_days', width: 30 } );
@@ -238,7 +238,6 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_average_time_frequency_combobox );
 
 		this.addEditFieldToColumn( $.i18n._( 'Total Time Over' ), [form_item_input, form_item_average_time_frequency_combobox], tab_holiday_time_column1, '', widgetContainer, true );
-
 
 		// Average Time over
 		var form_item_average_time_worked_days_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -266,7 +265,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -299,11 +298,10 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Always Apply Over Time/Premium Policies' ), form_item_input, tab_holiday_time_column1, '', widgetContainer, true );
 
-
 		// Rounding Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRoundIntervalPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRoundIntervalPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
 			show_search_inputs: true,
@@ -315,7 +313,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
@@ -447,7 +445,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -459,7 +457,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,

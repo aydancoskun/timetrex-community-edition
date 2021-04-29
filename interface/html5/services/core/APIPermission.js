@@ -21,10 +21,4 @@ var APIPermission = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'filterPresetPermissions', arguments );
 	}
 
-
-
-
-
-
-
 } );

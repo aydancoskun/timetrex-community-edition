@@ -43,19 +43,19 @@ class DependencyTree {
 		Take a look at PEAR: Structures_Graph
 	*/
 
-	var $raw_data = NULL;
-	var $raw_data_order = array();
+	var $raw_data = null;
+	var $raw_data_order = [];
 
-	protected $provide_id_raw_data = array();
-	protected $require_id_raw_data = array();
+	protected $provide_id_raw_data = [];
+	protected $require_id_raw_data = [];
 
-	protected $provide_ids = NULL;
+	protected $provide_ids = null;
 
-	protected $tree = NULL;
+	protected $tree = null;
 
 
 	// set this flag to true to enable tree ordering, eg, the final output will have whole trees in contiguous array slice.
-	protected $tree_ordering = FALSE; // faster without tree ordering.
+	protected $tree_ordering = false; // faster without tree ordering.
 
 	/**
 	 * @return bool
@@ -72,20 +72,20 @@ class DependencyTree {
 	}
 
 	/**
-	 * @param string $id ID of node
+	 * @param string $id                 ID of node
 	 * @param string|int|array $requires array of IDs this node requires
 	 * @param string|int|array $provides array of IDs this node provides
-	 * @param int $order integer to help resolve circular dependencies, lower order comes first.
+	 * @param int $order                 integer to help resolve circular dependencies, lower order comes first.
 	 * @return bool
 	 */
 	function addNode( $id, $requires, $provides, $order = 0 ) {
 		if ( $id == '' ) {
-			return FALSE;
+			return false;
 		}
 
-		if ( isset( $this->raw_data[ $id ] ) ) {
+		if ( isset( $this->raw_data[$id] ) ) {
 			//ID already exists.
-			return FALSE;
+			return false;
 		}
 
 		$dtn = new DependencyTreeNode();
@@ -99,7 +99,7 @@ class DependencyTree {
 		$this->addObjectByProvideIDs( $dtn->getProvides(), $dtn );
 		$this->addObjectByRequireIDs( $dtn->getRequires(), $dtn );
 
-		$this->raw_data[ $id ] = $dtn;
+		$this->raw_data[$id] = $dtn;
 		if ( $this->tree_ordering ) {
 			array_push( $this->raw_data_order, $dtn );
 		}
@@ -107,7 +107,7 @@ class DependencyTree {
 		unset( $dtn );
 
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -118,11 +118,11 @@ class DependencyTree {
 	private function addObjectByProvideIDs( $provide_ids, $obj ) {
 		if ( is_array( $provide_ids ) ) {
 			foreach ( $provide_ids as $provide_id ) {
-				$this->provide_id_raw_data[ $provide_id ][] = $obj;
+				$this->provide_id_raw_data[$provide_id][] = $obj;
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -133,11 +133,11 @@ class DependencyTree {
 	private function addObjectByRequireIDs( $requires_ids, $obj ) {
 		if ( is_array( $requires_ids ) ) {
 			foreach ( $requires_ids as $require_id ) {
-				$this->require_id_raw_data[ $require_id ][] = $obj;
+				$this->require_id_raw_data[$require_id][] = $obj;
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -148,7 +148,7 @@ class DependencyTree {
 			return $this->provide_ids;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -162,7 +162,7 @@ class DependencyTree {
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -172,7 +172,7 @@ class DependencyTree {
 		if ( is_array( $this->raw_data ) ) {
 			foreach ( $this->raw_data as $obj ) {
 				if ( is_array( $obj->getRequires() ) ) {
-					$valid_require_ids = array();
+					$valid_require_ids = [];
 					foreach ( $obj->getRequires() as $require_id ) {
 						if ( in_array( $require_id, (array)$this->getProvideIDs() ) ) {
 							$valid_require_ids[] = $require_id;
@@ -185,7 +185,7 @@ class DependencyTree {
 
 		//Debug::Arr($this->raw_data, 'With Valid Require Ids', __FILE__, __LINE__, __METHOD__, 10);
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -202,7 +202,7 @@ class DependencyTree {
 		if ( $this->tree_ordering ) {
 			if ( $a->getTreeNumber() < $b->getTreeNumber() ) {
 				return -1;
-			} elseif ( $a->getTreeNumber() > $b->getTreeNumber() ) {
+			} else if ( $a->getTreeNumber() > $b->getTreeNumber() ) {
 				return 1;
 			}
 		}
@@ -226,7 +226,7 @@ class DependencyTree {
 		return strnatcasecmp( $a->getId(), $b->getId() );
 
 		// should probably never reach here, but if the ids are the same, they might as well be equal.
-		return 0;
+		//return 0;
 	}
 
 	/**
@@ -235,9 +235,9 @@ class DependencyTree {
 	 * @param $tree_number
 	 * @param array $marked_edges
 	 */
-	function markTreeNumber( $node, $tree_number, $marked_edges = array() ) {
+	function markTreeNumber( $node, $tree_number, $marked_edges = [] ) {
 		// mark the node. but should we check to see if it was marked under another tree number?
-		if ( $node->getTreeNumber() !== NULL ) {
+		if ( $node->getTreeNumber() !== null ) {
 			return;
 		}
 		$node->setTreeNumber( $tree_number );
@@ -245,12 +245,12 @@ class DependencyTree {
 		// first look to see if any other node gives what this node requires
 		if ( is_array( $node->getRequires() ) ) {
 			foreach ( $node->getRequires() as $require_id ) {
-				if ( isset( $this->provide_id_raw_data[ $require_id ] ) ) {
-					foreach ( $this->provide_id_raw_data[ $require_id ] as $obj ) { // (we already know obj provides this req id...)
+				if ( isset( $this->provide_id_raw_data[$require_id] ) ) {
+					foreach ( $this->provide_id_raw_data[$require_id] as $obj ) { // (we already know obj provides this req id...)
 						if ( $node->getId() != $obj->getId() ) {
-							if ( !isset( $marked_edges[ $node->getId() ][ $obj->getId() ] ) ) {
-								$marked_edges[ $node->getId() ][ $obj->getId() ] = TRUE;
-								$marked_edges[ $obj->getId() ][ $node->getId() ] = TRUE;
+							if ( !isset( $marked_edges[$node->getId()][$obj->getId()] ) ) {
+								$marked_edges[$node->getId()][$obj->getId()] = true;
+								$marked_edges[$obj->getId()][$node->getId()] = true;
 								$this->markTreeNumber( $obj, $tree_number, $marked_edges );
 							}
 						}
@@ -262,12 +262,12 @@ class DependencyTree {
 		// now vice versa
 		if ( is_array( $node->getProvides() ) ) {
 			foreach ( $node->getProvides() as $provide_id ) {
-				if ( isset( $this->require_id_raw_data[ $provide_id ] ) ) {
-					foreach ( $this->require_id_raw_data[ $provide_id ] as $obj ) { // (we already know obj provides this req id...)
+				if ( isset( $this->require_id_raw_data[$provide_id] ) ) {
+					foreach ( $this->require_id_raw_data[$provide_id] as $obj ) { // (we already know obj provides this req id...)
 						if ( $node->getId() != $obj->getId() ) {
-							if ( !isset( $marked_edges[ $node->getId() ][ $obj->getId() ] ) ) {
-								$marked_edges[ $node->getId() ][ $obj->getId() ] = TRUE;
-								$marked_edges[ $obj->getId() ][ $node->getId() ] = TRUE;
+							if ( !isset( $marked_edges[$node->getId()][$obj->getId()] ) ) {
+								$marked_edges[$node->getId()][$obj->getId()] = true;
+								$marked_edges[$obj->getId()][$node->getId()] = true;
 								$this->markTreeNumber( $obj, $tree_number, $marked_edges );
 							}
 						}
@@ -285,13 +285,13 @@ class DependencyTree {
 	 * @param int $depth
 	 * @return int
 	 */
-	function _findDepth( $obj, &$marked_edges = array(), $depth = 0 ) {
+	function _findDepth( $obj, &$marked_edges = [], $depth = 0 ) {
 		if ( is_array( $obj->getRequires() ) ) {
 			foreach ( $obj->getRequires() as $req_id ) {
-				if ( isset( $this->provide_id_raw_data[ $req_id ] ) ) {
-					foreach ( $this->provide_id_raw_data[ $req_id ] as $node ) { // (we already know obj provides this req id...)
-						if ( !isset( $marked_edges[ $node->getId() ][ $obj->getId() ] ) ) {
-							$marked_edges[ $node->getId() ][ $obj->getId() ] = TRUE;
+				if ( isset( $this->provide_id_raw_data[$req_id] ) ) {
+					foreach ( $this->provide_id_raw_data[$req_id] as $node ) { // (we already know obj provides this req id...)
+						if ( !isset( $marked_edges[$node->getId()][$obj->getId()] ) ) {
+							$marked_edges[$node->getId()][$obj->getId()] = true;
 							$this->_findDepth( $node, $marked_edges, ( $depth + 1 ) );
 						}
 					}
@@ -303,7 +303,7 @@ class DependencyTree {
 			return count( $marked_edges );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -311,7 +311,7 @@ class DependencyTree {
 	 */
 	function _buildTree() {
 		if ( !is_array( $this->raw_data ) ) {
-			return FALSE;
+			return false;
 		}
 
 		$this->deleteOrphanRequireIDs();
@@ -322,7 +322,7 @@ class DependencyTree {
 			// this needs to be handled properly.
 			$treenumber = 0;
 			foreach ( $this->raw_data_order as $obj ) {
-				if ( $obj->getTreeNumber() === NULL ) {
+				if ( $obj->getTreeNumber() === null ) {
 					$this->markTreeNumber( $obj, $treenumber++ );
 				}
 			}
@@ -335,12 +335,12 @@ class DependencyTree {
 			$obj->setDepth( $this->_findDepth( $obj ) );
 		}
 
-		usort( $this->raw_data, array($this, 'sort') );
+		usort( $this->raw_data, [ $this, 'sort' ] );
 
 		//Debug::Arr($this->provide_id_raw_data, 'provides, raw', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this, 'After - Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$retarr = array();
+		$retarr = [];
 		foreach ( $this->raw_data as $obj ) {
 			$retarr[] = $obj->getId();
 		}
@@ -374,7 +374,7 @@ class DependencyTreeNode {
 			$this->data['id'] = $id;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -385,7 +385,7 @@ class DependencyTreeNode {
 			return $this->data['id'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -395,7 +395,7 @@ class DependencyTreeNode {
 	function setDepth( $arg ) {
 		$this->data['depth'] = (int)$arg;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -406,7 +406,7 @@ class DependencyTreeNode {
 			return $this->data['depth'];
 		}
 
-		return NULL;
+		return null;
 	}
 
 	/**
@@ -416,24 +416,24 @@ class DependencyTreeNode {
 	function setRequires( $arr ) {
 		if ( $arr != '' ) {
 			if ( !is_array( $arr ) ) {
-				$arr = array($arr);
+				$arr = [ $arr ];
 			}
 
 			$this->data['requires'] = array_unique( $arr );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
-	 * @return bool
+	 * @return bool|array
 	 */
 	function getRequires() {
 		if ( isset( $this->data['requires'] ) ) {
 			return $this->data['requires'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -443,13 +443,13 @@ class DependencyTreeNode {
 	function setProvides( $arr ) {
 		if ( $arr != '' ) {
 			if ( !is_array( $arr ) ) {
-				$arr = array($arr);
+				$arr = [ $arr ];
 			}
 
 			$this->data['provides'] = array_unique( $arr );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 
@@ -459,22 +459,22 @@ class DependencyTreeNode {
 	 */
 	function removeCircularDependency() {
 		//Check to see if any item in $requires also appears in $provides, if so strip them out as it creates a circular dependency within the same node.
-		if ( is_array( $this->getRequires() ) AND is_array( $this->getProvides() ) ) {
+		if ( is_array( $this->getRequires() ) && is_array( $this->getProvides() ) ) {
 			$this->data['requires'] = array_diff( $this->getRequires(), $this->getProvides() );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
-	 * @return bool
+	 * @return bool|array
 	 */
 	function getProvides() {
 		if ( isset( $this->data['provides'] ) ) {
 			return $this->data['provides'];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -484,7 +484,7 @@ class DependencyTreeNode {
 	function setTreeNumber( $treenumber ) {
 		$this->data['treenumber'] = (int)$treenumber;
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -495,7 +495,7 @@ class DependencyTreeNode {
 			return $this->data['treenumber'];
 		}
 
-		return NULL;
+		return null;
 	}
 
 	/**
@@ -505,7 +505,7 @@ class DependencyTreeNode {
 	function setOrder( $order ) {
 		$this->data['order'] = $order; //Allow int/strings.
 
-		return TRUE;
+		return true;
 	}
 
 	/**

@@ -22,9 +22,9 @@ UserSkillViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_skill';
 		this.context_menu_name = $.i18n._( 'Skills' );
 		this.navigation_label = $.i18n._( 'Skill' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUserSkill' ))();
-		this.qualification_api = new (APIFactory.getAPIClass( 'APIQualification' ))();
-		this.qualification_group_api = new (APIFactory.getAPIClass( 'APIQualificationGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserSkill' ) )();
+		this.qualification_api = new ( APIFactory.getAPIClass( 'APIQualification' ) )();
+		this.qualification_group_api = new ( APIFactory.getAPIClass( 'APIQualificationGroup' ) )();
 		this.document_object_type_id = 125;
 		this.render();
 
@@ -61,13 +61,13 @@ UserSkillViewController = BaseViewController.extend( {
 
 	cancelOtherSubViewSelectedStatus: function() {
 		switch ( true ) {
-			case typeof( this.parent_view_controller.sub_user_education_view_controller ) !== 'undefined':
+			case typeof ( this.parent_view_controller.sub_user_education_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_education_view_controller.unSelectAll();
-			case typeof( this.parent_view_controller.sub_user_license_view_controller ) !== 'undefined':
+			case typeof ( this.parent_view_controller.sub_user_license_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_license_view_controller.unSelectAll();
-			case typeof( this.parent_view_controller.sub_user_membership_view_controller ) !== 'undefined':
+			case typeof ( this.parent_view_controller.sub_user_membership_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_membership_view_controller.unSelectAll();
-			case typeof( this.parent_view_controller.sub_user_language_view_controller ) !== 'undefined':
+			case typeof ( this.parent_view_controller.sub_user_language_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_language_view_controller.unSelectAll();
 				break;
 		}
@@ -179,7 +179,7 @@ UserSkillViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUserSkill' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUserSkill' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_SKILL,
@@ -202,7 +202,7 @@ UserSkillViewController = BaseViewController.extend( {
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -222,7 +222,7 @@ UserSkillViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIQualification' )),
+			api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.QUALIFICATION,
 			show_search_inputs: true,
@@ -310,7 +310,7 @@ UserSkillViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -333,7 +333,7 @@ UserSkillViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'qualification_id',
 				layout_name: ALayoutIDs.QUALIFICATION,
-				api_class: (APIFactory.getAPIClass( 'APIQualification' )),
+				api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -408,7 +408,7 @@ UserSkillViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -420,7 +420,7 @@ UserSkillViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -486,7 +486,7 @@ UserSkillViewController = BaseViewController.extend( {
 		}
 	},
 
-	searchDone: function(){
+	searchDone: function() {
 		this._super( 'searchDone' );
 		TTPromise.resolve( 'Employee_Qualifications_Tab', 'UserSkillViewController' );
 	}

@@ -55,6 +55,4 @@ var APIUserLanguage = ServiceCaller.extend( {
 
 	}
 
-
-
 } );

@@ -53,8 +53,9 @@ class HelpGroupFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setHelpGroupControl( $value) {
+	function setHelpGroupControl( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'help_group_control_id', $value );
 	}
 
@@ -69,8 +70,9 @@ class HelpGroupFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setHelp( $value) {
+	function setHelp( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'help_id', $value );
 	}
 
@@ -85,8 +87,9 @@ class HelpGroupFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setOrder( $value) {
-		$value = trim($value);
+	function setOrder( $value ) {
+		$value = trim( $value );
+
 		return $this->setGenericDataValue( 'order_value', $value );
 	}
 
@@ -96,75 +99,75 @@ class HelpGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeleted() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param $bool
 	 * @return bool
 	 */
-	function setDeleted( $bool) {
-		return FALSE;
+	function setDeleted( $bool ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setCreatedDate( $epoch = NULL) {
-		return FALSE;
+	function setCreatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getCreatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setCreatedBy( $id = NULL) {
-		return FALSE;
+	function setCreatedBy( $id = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setUpdatedDate( $epoch = NULL) {
-		return FALSE;
+	function setUpdatedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getUpdatedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setUpdatedBy( $id = NULL) {
-		return FALSE;
+	function setUpdatedBy( $id = null ) {
+		return false;
 	}
 
 
@@ -172,30 +175,30 @@ class HelpGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function getDeletedDate() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param int $epoch EPOCH
 	 * @return bool
 	 */
-	function setDeletedDate( $epoch = NULL) {
-		return FALSE;
+	function setDeletedDate( $epoch = null ) {
+		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function getDeletedBy() {
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setDeletedBy( $id = NULL) {
-		return FALSE;
+	function setDeletedBy( $id = null ) {
+		return false;
 	}
 
 	/**
@@ -207,27 +210,28 @@ class HelpGroupFactory extends Factory {
 		//
 		// Help Group Control
 		$hgclf = TTnew( 'HelpGroupControlListFactory' ); /** @var HelpGroupControlListFactory $hgclf */
-		$this->Validator->isResultSetWithRows(	'help_group_control',
-														$hgclf->getByID($this->getHelpGroupControl()),
-														TTi18n::gettext('Help Group Control is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'help_group_control',
+											   $hgclf->getByID( $this->getHelpGroupControl() ),
+											   TTi18n::gettext( 'Help Group Control is invalid' )
+		);
 		// Help Entry
 		$hlf = TTnew( 'HelpListFactory' ); /** @var HelpListFactory $hlf */
-		$this->Validator->isResultSetWithRows(	'help',
-														$hlf->getByID($this->getHelp()),
-														TTi18n::gettext('Help Entry is invalid')
-													);
+		$this->Validator->isResultSetWithRows( 'help',
+											   $hlf->getByID( $this->getHelp() ),
+											   TTi18n::gettext( 'Help Entry is invalid' )
+		);
 		// Order
-		$this->Validator->isNumeric(	'order',
-												$this->getOrder(),
-												TTi18n::gettext('Order is invalid')
-											);
+		$this->Validator->isNumeric( 'order',
+									 $this->getOrder(),
+									 TTi18n::gettext( 'Order is invalid' )
+		);
 
 
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

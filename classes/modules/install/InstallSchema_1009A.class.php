@@ -44,38 +44,38 @@ class InstallSchema_1009A extends InstallSchema_Base {
 	 * @return bool
 	 */
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Add Calendar Based Accruals to Cron.
-		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR .'maint'. DIRECTORY_SEPARATOR;
+		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR . 'maint' . DIRECTORY_SEPARATOR;
 		if ( PHP_OS == 'WINNT' ) {
-			$cron_job_base_command = 'php-win.exe '. $maint_base_path;
+			$cron_job_base_command = 'php-win.exe ' . $maint_base_path;
 		} else {
-			$cron_job_base_command = 'php '. $maint_base_path;
+			$cron_job_base_command = 'php ' . $maint_base_path;
 		}
-		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text( 'Cron Job Base Command: ' . $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9 );
 
 		$cjf = TTnew( 'CronJobFactory' ); /** @var CronJobFactory $cjf */
-		$cjf->setName('AddAccrualPolicyTime');
-		$cjf->setMinute(30);
-		$cjf->setHour(1);
-		$cjf->setDayOfMonth('*');
-		$cjf->setMonth('*');
-		$cjf->setDayOfWeek('*');
-		$cjf->setCommand($cron_job_base_command.'AddAccrualPolicyTime.php');
+		$cjf->setName( 'AddAccrualPolicyTime' );
+		$cjf->setMinute( 30 );
+		$cjf->setHour( 1 );
+		$cjf->setDayOfMonth( '*' );
+		$cjf->setMonth( '*' );
+		$cjf->setDayOfWeek( '*' );
+		$cjf->setCommand( $cron_job_base_command . 'AddAccrualPolicyTime.php' );
 		$cjf->Save();
 
-		return TRUE;
-
+		return true;
 	}
 }
+
 ?>

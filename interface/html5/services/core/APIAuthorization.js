@@ -39,5 +39,4 @@ var APIAuthorization = ServiceCaller.extend( {
 
 	}
 
-
 } );

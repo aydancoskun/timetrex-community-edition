@@ -1,23 +1,23 @@
 <?php
 
 /********************************************************************************\
- * Copyright (C) Carl Taylor (cjtaylor@adepteo.com)								*
- * Copyright (C) Torben Nehmer (torben@nehmer.net) for Code Cleanup				*
- *																				*
- * This program is free software; you can redistribute it and/or				*
- * modify it under the terms of the GNU General Public License					*
- * as published by the Free Software Foundation; either version 2				*
- * of the License, or (at your option) any later version.						*
- *																				*
+ * Copyright (C) Carl Taylor (cjtaylor@adepteo.com)                                *
+ * Copyright (C) Torben Nehmer (torben@nehmer.net) for Code Cleanup                *
+ *                                                                                *
+ * This program is free software; you can redistribute it and/or                *
+ * modify it under the terms of the GNU General Public License                    *
+ * as published by the Free Software Foundation; either version 2                *
+ * of the License, or (at your option) any later version.                        *
+ *                                                                                *
  * This program is distributed in the hope that it will be useful, *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of				*
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the				*
- * GNU General Public License for more details.									*
- *																				*
- * You should have received a copy of the GNU General Public License			*
- * along with this program; if not, write to the Free Software					*
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.	*
-\********************************************************************************/
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of                *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.     See the                *
+ * GNU General Public License for more details.                                    *
+ *                                                                                *
+ * You should have received a copy of the GNU General Public License            *
+ * along with this program; if not, write to the Free Software                    *
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.    *
+ * \********************************************************************************/
 
 /// Enable multiple timers to aid profiling of performance over sections of code
 
@@ -41,59 +41,60 @@ class Profiler {
 	 * @param bool $output_enabled
 	 * @param bool $trace_enabled
 	 */
-	function __construct( $output_enabled=false, $trace_enabled=false)
-	{
-		$this->description = array();
-		$this->startTime = array();
-		$this->endTime = array();
+	function __construct( $output_enabled = false, $trace_enabled = false ) {
+		$this->description = [];
+		$this->startTime = [];
+		$this->endTime = [];
 		$this->initTime = 0;
 		$this->cur_timer = "";
-		$this->stack = array();
+		$this->stack = [];
 		$this->trail = "";
 		$this->trace = "";
-		$this->count = array();
-		$this->running = array();
+		$this->count = [];
+		$this->running = [];
 		$this->initTime = $this->getMicroTime();
 		$this->output_enabled = $output_enabled;
 		$this->trace_enabled = $trace_enabled;
-		$this->startTimer('unprofiled');
+		$this->startTimer( 'unprofiled' );
 	}
 
 	// Public Methods
 
 	/**
-	*	Start an individual timer
-	*	This will pause the running timer and place it on a stack.
-	*	@param string $name name of the timer
-	*	@param string optional $desc description of the timer
-	*/
-	function startTimer($name, $desc="" ) {
-		$this->trace.="start   $name\n";
-		$n=array_push( $this->stack, $this->cur_timer );
-		$this->__suspendTimer( $this->stack[$n-1] );
+	 *    Start an individual timer
+	 *    This will pause the running timer and place it on a stack.
+	 * @param string $name name of the timer
+	 * @param string optional $desc description of the timer
+	 */
+	function startTimer( $name, $desc = "" ) {
+		$this->trace .= "start   $name\n";
+		$n = array_push( $this->stack, $this->cur_timer );
+		$this->__suspendTimer( $this->stack[$n - 1] );
 		$this->startTime[$name] = $this->getMicroTime();
-		$this->cur_timer=$name;
+		$this->cur_timer = $name;
 		$this->description[$name] = $desc;
-		if (!array_key_exists($name, $this->count))
+		if ( !array_key_exists( $name, $this->count ) ) {
 			$this->count[$name] = 1;
-		else
+		} else {
 			$this->count[$name]++;
+		}
 	}
 
 	/**
-	*	Stop an individual timer
-	*	Restart the timer that was running before this one
-	*	@param string $name name of the timer
-	*/
-	function stopTimer($name) {
-		$this->trace.="stop	   $name\n";
+	 *    Stop an individual timer
+	 *    Restart the timer that was running before this one
+	 * @param string $name name of the timer
+	 */
+	function stopTimer( $name ) {
+		$this->trace .= "stop	   $name\n";
 		$this->endTime[$name] = $this->getMicroTime();
-		if (!array_key_exists($name, $this->running))
-			$this->running[$name] = $this->elapsedTime($name);
-		else
-			$this->running[$name] += $this->elapsedTime($name);
-		$this->cur_timer=array_pop($this->stack);
-		$this->__resumeTimer($this->cur_timer);
+		if ( !array_key_exists( $name, $this->running ) ) {
+			$this->running[$name] = $this->elapsedTime( $name );
+		} else {
+			$this->running[$name] += $this->elapsedTime( $name );
+		}
+		$this->cur_timer = array_pop( $this->stack );
+		$this->__resumeTimer( $this->cur_timer );
 	}
 
 	/**
@@ -102,106 +103,107 @@ class Profiler {
 	 * @param $name
 	 * @return int|mixed
 	 */
-	function elapsedTime($name) {
+	function elapsedTime( $name ) {
 		// This shouldn't happen, but it does once.
-		if (!array_key_exists($name, $this->startTime))
+		if ( !array_key_exists( $name, $this->startTime ) ) {
 			return 0;
+		}
 
-		if(array_key_exists($name, $this->endTime)) {
-			return ($this->endTime[$name] - $this->startTime[$name]);
+		if ( array_key_exists( $name, $this->endTime ) ) {
+			return ( $this->endTime[$name] - $this->startTime[$name] );
 		} else {
 			$now = $this->getMicroTime();
-			return ($now - $this->startTime[$name]);
+
+			return ( $now - $this->startTime[$name] );
 		}
 	}//end start_time
 
 	/**
-	*	Measure the elapsed time since the profile class was initialised
-	*
-	*/
+	 *    Measure the elapsed time since the profile class was initialised
+	 *
+	 */
 	function elapsedOverall() {
 		$oaTime = $this->getMicroTime() - $this->initTime;
-		return($oaTime);
+
+		return ( $oaTime );
 	}//end start_time
 
 	/**
 	 *    print out a log of all the timers that were registered
 	 * @param bool $enabled
 	 */
-	function printTimers($enabled=false)
-	{
-		if($this->output_enabled||$enabled) {
+	function printTimers( $enabled = false ) {
+		if ( $this->output_enabled || $enabled ) {
 			$TimedTotal = 0;
 			$tot_perc = 0;
-			ksort($this->description);
-			print("<pre>\n");
+			ksort( $this->description );
+			print( "<pre>\n" );
 			$oaTime = $this->getMicroTime() - $this->initTime;
-			echo"============================================================================\n";
+			echo "============================================================================\n";
 			echo "								PROFILER OUTPUT\n";
-			echo"============================================================================\n";
-			print( "Calls					 Time  Routine\n");
-			echo"-----------------------------------------------------------------------------\n";
-			foreach( $this->description as $key => $val ) {
-				$t = $this->elapsedTime($key);
-				if ( isset($this->running[$key]) ) {
+			echo "============================================================================\n";
+			print( "Calls					 Time  Routine\n" );
+			echo "-----------------------------------------------------------------------------\n";
+			foreach ( $this->description as $key => $val ) {
+				$t = $this->elapsedTime( $key );
+				if ( isset( $this->running[$key] ) ) {
 					$total = $this->running[$key];
 				} else {
 					$total = 0;
 				}
 				$count = $this->count[$key];
 				$TimedTotal += $total;
-				$perc = ($total/$oaTime)*100;
-				$tot_perc+=$perc;
+				$perc = ( $total / $oaTime ) * 100;
+				$tot_perc += $perc;
 				// $perc=sprintf("%3.2f", $perc );
-				printf( "%3d	%3.4f ms (%3.2f %%)	 %s\n", $count, $total*1000, $perc, $key);
+				printf( "%3d	%3.4f ms (%3.2f %%)	 %s\n", $count, $total * 1000, $perc, $key );
 			}
 
 			echo "\n";
 
-			$missed = $oaTime-$TimedTotal;
-			$perc = ($missed/$oaTime)*100;
-			$tot_perc+=$perc;
+			$missed = $oaTime - $TimedTotal;
+			$perc = ( $missed / $oaTime ) * 100;
+			$tot_perc += $perc;
 			// $perc=sprintf("%3.2f", $perc );
-			printf( "		%3.4f ms (%3.2f %%)	 %s\n", $missed*1000, $perc, "Missed");
+			printf( "		%3.4f ms (%3.2f %%)	 %s\n", $missed * 1000, $perc, "Missed" );
 
-			echo"============================================================================\n";
+			echo "============================================================================\n";
 
-			printf( "		%3.4f ms (%3.2f %%)	 %s\n", $oaTime*1000, $tot_perc, "OVERALL TIME");
+			printf( "		%3.4f ms (%3.2f %%)	 %s\n", $oaTime * 1000, $tot_perc, "OVERALL TIME" );
 
-			echo"============================================================================\n";
+			echo "============================================================================\n";
 
-			print("</pre>");
+			print( "</pre>" );
 		}
 	}
 
 	/**
 	 * @param bool $enabled
 	 */
-	function printTrace( $enabled=false )
-	{
-		if($this->trace_enabled||$enabled) {
-			print("<pre>");
-			print("Trace\n$this->trace\n\n");
-			print("</pre>");
+	function printTrace( $enabled = false ) {
+		if ( $this->trace_enabled || $enabled ) {
+			print( "<pre>" );
+			print( "Trace\n$this->trace\n\n" );
+			print( "</pre>" );
 		}
 	}
 
 	/// Internal Use Only Functions
 
 	/**
-	* Get the current time as accuratly as possible
-	*
-	*/
+	 * Get the current time as accuratly as possible
+	 *
+	 */
 	function getMicroTime() {
-	return microtime(TRUE);
+		return microtime( true );
 	}
 
 	/**
 	 * resume  an individual timer
 	 * @param $name
 	 */
-	function __resumeTimer($name) {
-		$this->trace.="resume  $name\n";
+	function __resumeTimer( $name ) {
+		$this->trace .= "resume  $name\n";
 		$this->startTime[$name] = $this->getMicroTime();
 	}
 
@@ -209,29 +211,33 @@ class Profiler {
 	 *    suspend     an individual timer
 	 * @param $name
 	 */
-	function __suspendTimer($name) {
-		$this->trace.="suspend $name\n";
+	function __suspendTimer( $name ) {
+		$this->trace .= "suspend $name\n";
 		$this->endTime[$name] = $this->getMicroTime();
-		if (!array_key_exists($name, $this->running))
-			$this->running[$name] = $this->elapsedTime($name);
-		else
-			$this->running[$name] += $this->elapsedTime($name);
+		if ( !array_key_exists( $name, $this->running ) ) {
+			$this->running[$name] = $this->elapsedTime( $name );
+		} else {
+			$this->running[$name] += $this->elapsedTime( $name );
+		}
 	}
 }
 
 /**
  * @param $name
  */
-function profiler_start( $name) {
-	if (array_key_exists("midcom_profiler", $GLOBALS))
-	$GLOBALS["midcom_profiler"]->startTimer ($name);
+function profiler_start( $name ) {
+	if ( array_key_exists( "midcom_profiler", $GLOBALS ) ) {
+		$GLOBALS["midcom_profiler"]->startTimer( $name );
+	}
 }
 
 /**
  * @param $name
  */
-function profiler_stop( $name) {
-	if (array_key_exists("midcom_profiler", $GLOBALS))
-	$GLOBALS["midcom_profiler"]->stopTimer ($name);
+function profiler_stop( $name ) {
+	if ( array_key_exists( "midcom_profiler", $GLOBALS ) ) {
+		$GLOBALS["midcom_profiler"]->stopTimer( $name );
+	}
 }
+
 ?>

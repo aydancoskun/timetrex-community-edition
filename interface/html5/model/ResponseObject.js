@@ -10,4 +10,4 @@ var ResponseObject = Base.extend( {
 
 	//we may have more
 
-} )
+} );

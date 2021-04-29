@@ -38,26 +38,25 @@
 /**
  * @package Core
  */
-
 //Use this class to serializer arrays in PHP, XML, and JSON formats.
 class Serializer {
-	protected $available_formats = array('PHP', 'XML', 'JSON');
-	protected $format = NULL;
+	protected $available_formats = [ 'PHP', 'XML', 'JSON' ];
+	protected $format = null;
 
-	protected $simple_xml_obj = NULL;
+	protected $simple_xml_obj = null;
 
 	/**
 	 * Serializer constructor.
 	 * @param string $format
 	 */
 	function __construct( $format = 'XML' ) {
-		$format = strtoupper($format);
+		$format = strtoupper( $format );
 
-		if ( in_array($format, $this->available_formats) == TRUE ) {
+		if ( in_array( $format, $this->available_formats ) == true ) {
 			$this->format = $format;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -73,7 +72,7 @@ class Serializer {
 	 * @return mixed
 	 */
 	function PHPDeSerialize( $data ) {
-		return deserialize( $data );
+		return unserialize( $data );
 	}
 
 	/**
@@ -96,18 +95,18 @@ class Serializer {
 	 * @param $xml
 	 * @return array|string
 	 */
-	function extractXML( $xml) {
-		if (! ( $xml->children() ) ) {
+	function extractXML( $xml ) {
+		if ( !( $xml->children() ) ) {
 			return (string)$xml;
 		}
 
-		$element = array();
+		$element = [];
 		foreach ( $xml->children() as $child ) {
 			$name = $child->getName();
-			if ( count($xml->$name) == 1 ) {
-				$element[$name] = $this->extractXML($child);
+			if ( count( $xml->$name ) == 1 ) {
+				$element[$name] = $this->extractXML( $child );
 			} else {
-				$element[$name][] = $this->extractXML($child);
+				$element[$name][] = $this->extractXML( $child );
 			}
 		}
 
@@ -141,19 +140,19 @@ class Serializer {
 					'id' => string '6217' (length=4)
 					'company_id' => string '1064' (length=4)
 			*/
-			foreach( $data as $class => $objects ) {
-				$this->simple_xml_obj = new SimpleXMLElement('<timetrex></timetrex>');
+			foreach ( $data as $class => $objects ) {
+				$this->simple_xml_obj = new SimpleXMLElement( '<timetrex></timetrex>' );
 
-				foreach( $objects as $value ) {
+				foreach ( $objects as $value ) {
 					$tmp_xml = $this->simple_xml_obj->addChild( $class, '' );
 
-					array_walk_recursive( $value, array( $this, 'XMLArrayWalkCallBack' ), $tmp_xml );
+					array_walk_recursive( $value, [ $this, 'XMLArrayWalkCallBack' ], $tmp_xml );
 				}
 			}
 		}
 
 		$retval = $this->simple_xml_obj->asXML();
-		unset($this->simple_xml_obj);
+		unset( $this->simple_xml_obj );
 
 		return $retval;
 	}
@@ -168,7 +167,7 @@ class Serializer {
 			return $this->extractXML( $xml );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -176,9 +175,9 @@ class Serializer {
 	 * @return mixed
 	 */
 	function serialize( $data ) {
-		$function = $this->format.'Serialize';
+		$function = $this->format . 'Serialize';
 
-		return $this->$function($data);
+		return $this->$function( $data );
 	}
 
 	/**
@@ -186,9 +185,10 @@ class Serializer {
 	 * @return mixed
 	 */
 	function deserialize( $data ) {
-		$function = $this->format.'DeSerialize';
+		$function = $this->format . 'DeSerialize';
 
-		return $this->$function($data);
+		return $this->$function( $data );
 	}
 }
+
 ?>

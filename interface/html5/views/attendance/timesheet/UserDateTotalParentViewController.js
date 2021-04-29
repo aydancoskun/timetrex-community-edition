@@ -13,7 +13,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_date_total_parent';
 		this.context_menu_name = $.i18n._( 'Accumulated Time' );
 		this.navigation_label = $.i18n._( 'Accumulated Time' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUserDateTotal' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserDateTotal' ) )();
 
 		this.render();
 
@@ -39,7 +39,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		}
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		return { include: ['default'] };
 	},
 
@@ -49,7 +49,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 
 		if ( $this.edit_only_mode ) {
 
-			TTPromise.add('UserDateTotalParent', 'init');
+			TTPromise.add( 'UserDateTotalParent', 'init' );
 			if ( !$this.edit_view ) {
 				$this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
@@ -61,9 +61,9 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 				user_id: LocalCacheData.all_url_args.user_id,
 				date_stamp: date_stamp
 			};
-			TTPromise.wait('UserDateTotalParent', 'init', function(){
+			TTPromise.wait( 'UserDateTotalParent', 'init', function() {
 				$this.initEditView();
-			});
+			} );
 
 		} else {
 			if ( !this.edit_view ) {
@@ -90,7 +90,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		};
 		this.setTabModel( tab_model );
 
-		TTPromise.resolve('UserDateTotalParent', 'init');
+		TTPromise.resolve( 'UserDateTotalParent', 'init' );
 	},
 
 	setCurrentEditRecordData: function() {

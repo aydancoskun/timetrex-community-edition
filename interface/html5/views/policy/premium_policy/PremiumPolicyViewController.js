@@ -36,14 +36,14 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'premium_policy';
 		this.context_menu_name = $.i18n._( 'Premium Policy' );
 		this.navigation_label = $.i18n._( 'Premium Policy' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPremiumPolicy' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPremiumPolicy' ) )();
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_group_api = new (APIFactory.getAPIClass( 'APIJobGroup' ))();
-			this.job_item_group_api = new (APIFactory.getAPIClass( 'APIJobItemGroup' ))();
+			this.job_group_api = new ( APIFactory.getAPIClass( 'APIJobGroup' ) )();
+			this.job_item_group_api = new ( APIFactory.getAPIClass( 'APIJobItemGroup' ) )();
 		}
 
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 		this.render();
 		this.buildContextMenu();
 
@@ -106,7 +106,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPremiumPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPremiumPolicy' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PREMIUM_POLICY,
@@ -189,7 +189,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -202,7 +202,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -215,7 +215,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -406,7 +406,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -447,7 +447,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -521,7 +521,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -586,7 +586,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -839,7 +839,6 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	},
 
-
 	onTypeChange: function() {
 
 		$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
@@ -1020,7 +1019,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1032,20 +1031,19 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
-
 			new SearchField( {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1057,7 +1055,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1065,6 +1063,5 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

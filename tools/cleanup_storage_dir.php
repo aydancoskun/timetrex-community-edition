@@ -34,30 +34,30 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
+if ( $argc < 1 OR ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
 	$help_output = "Usage: cleanup_storage_dir.php [options] [company_id]\n";
 	$help_output .= "    -n				Dry-run\n";
 	echo $help_output;
 } else {
 	//Handle command line arguments
-	$last_arg = ( count($argv) - 1 );
+	$last_arg = ( count( $argv ) - 1 );
 
-	if ( in_array('-n', $argv) ) {
-		$dry_run = TRUE;
+	if ( in_array( '-n', $argv ) ) {
+		$dry_run = true;
 		echo "Using DryRun!\n";
 	} else {
-		$dry_run = FALSE;
+		$dry_run = false;
 	}
 
-	if ( isset($argv[$last_arg]) AND is_numeric($argv[$last_arg]) ) {
-		$company_id = $argv[$last_arg];
+	if ( isset( $argv[ $last_arg ] ) AND is_numeric( $argv[ $last_arg ] ) ) {
+		$company_id = $argv[ $last_arg ];
 	}
 
 	//Force flush after each output line.
-	ob_implicit_flush( TRUE );
+	ob_implicit_flush( true );
 	ob_end_flush();
 
 	//Top level storage dir.
@@ -72,34 +72,34 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 
 	//Punch Images
 	$punch_image_dir = $storage_dir . DIRECTORY_SEPARATOR . 'punch_images';
-	echo "Punch Images: ". $punch_image_dir ."\n";
+	echo "Punch Images: " . $punch_image_dir . "\n";
 
 	$plf = new PunchListFactory();
 
-	$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator( $punch_image_dir ), RecursiveIteratorIterator::SELF_FIRST);
+	$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $punch_image_dir ), RecursiveIteratorIterator::SELF_FIRST );
 	$i = 0;
 	foreach ( $files as $file ) {
-		if ( $file->isFile() == TRUE ) {
-			$punch_id = str_replace( '.'.pathinfo( $file->getFileName(), PATHINFO_EXTENSION ), '', $file->getFilename() );
+		if ( $file->isFile() == true ) {
+			$punch_id = str_replace( '.' . pathinfo( $file->getFileName(), PATHINFO_EXTENSION ), '', $file->getFilename() );
 			$plf->getById( $punch_id );
-			if ( $plf->getRecordCount() == 0 OR ( $plf->getRecordCount() == 1 AND (bool)$plf->getCurrent()->getHasImage() == FALSE ) ) {
-				echo 'Path+File: ' . $file->getPathName() . ' File: ' . $file->getFilename() . ' Punch ID: ' . $punch_id . ' File mTime: '. TTDate::getDate('DATE+TIME', filectime( $file->getPathName() ) ) . "\n";
-				Debug::Text('Path+File: ' . $file->getPathName() . ' File: ' . $file->getFilename() . ' Punch ID: ' . $punch_id . ' File mTime: '. TTDate::getDate('DATE+TIME', filectime( $file->getPathName() ) ), __FILE__, __LINE__, __METHOD__, 10);
+			if ( $plf->getRecordCount() == 0 OR ( $plf->getRecordCount() == 1 AND (bool)$plf->getCurrent()->getHasImage() == false ) ) {
+				echo 'Path+File: ' . $file->getPathName() . ' File: ' . $file->getFilename() . ' Punch ID: ' . $punch_id . ' File mTime: ' . TTDate::getDate( 'DATE+TIME', filectime( $file->getPathName() ) ) . "\n";
+				Debug::Text( 'Path+File: ' . $file->getPathName() . ' File: ' . $file->getFilename() . ' Punch ID: ' . $punch_id . ' File mTime: ' . TTDate::getDate( 'DATE+TIME', filectime( $file->getPathName() ) ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				echo '  Punch does not exist, or does not have image, deleting orphaned image file: '. (int)$plf->getRecordCount() ."\n";
-				Debug::Text('  Punch does not exist, or does not have image, deleting orphaned image file: '. (int)$plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+				echo '  Punch does not exist, or does not have image, deleting orphaned image file: ' . (int)$plf->getRecordCount() . "\n";
+				Debug::Text( '  Punch does not exist, or does not have image, deleting orphaned image file: ' . (int)$plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
-				if ( $dry_run == FALSE ) {
+				if ( $dry_run == false ) {
 					@unlink( $file->getPathName() );
 					$i++;
 				}
 			} else {
-				echo '  Punch still exists, leaving image alone. Punch ID: '. $punch_id ."\n";
-				Debug::Text('  Punch still exists, leaving image alone. Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__, 10);
+				echo '  Punch still exists, leaving image alone. Punch ID: ' . $punch_id . "\n";
+				Debug::Text( '  Punch still exists, leaving image alone. Punch ID: ' . $punch_id, __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 	}
-	echo "Deleted Punch Images: ". $i ."\n";
+	echo "Deleted Punch Images: " . $i . "\n";
 }
 echo "Done...\n";
 Debug::WriteToLog();

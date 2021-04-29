@@ -35,24 +35,24 @@
  ********************************************************************************/
 
 class Form940ReportTest extends PHPUnit_Framework_TestCase {
-	protected $company_id = NULL;
-	protected $user_id = NULL;
-	protected $pay_period_schedule_id = NULL;
-	protected $pay_period_objs = NULL;
-	protected $pay_stub_account_link_arr = NULL;
+	protected $company_id = null;
+	protected $user_id = null;
+	protected $pay_period_schedule_id = null;
+	protected $pay_period_objs = null;
+	protected $pay_stub_account_link_arr = null;
 
 	public function setUp() {
 		global $dd;
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->currency_id = $dd->createCurrency( $this->company_id, 10 );
 
@@ -65,18 +65,18 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
-		$dd->createPayrollRemittanceAgency( $this->company_id, NULL, $this->legal_entity_id ); //Must go before createCompanyDeduction()
+		$dd->createPayrollRemittanceAgency( $this->company_id, null, $this->legal_entity_id ); //Must go before createCompanyDeduction()
 
 		//Company Deductions
-		$dd->createCompanyDeduction( $this->company_id, NULL, $this->legal_entity_id );
+		$dd->createCompanyDeduction( $this->company_id, null, $this->legal_entity_id );
 
 		//Create multiple state tax/deductions.
-		$sp = TTNew('SetupPresets'); /** @var SetupPresets $sp */
+		$sp = TTNew( 'SetupPresets' ); /** @var SetupPresets $sp */
 		$sp->setCompany( $this->company_id );
-		$sp->setUser( NULL );
+		$sp->setUser( null );
 		$sp->PayStubAccounts( 'US', 'CA' );
-		$sp->PayrollRemittanceAgencys( 'US', 'CA', NULL, NULL, $this->legal_entity_id );
-		$sp->CompanyDeductions( 'US', 'CA', NULL, NULL, $this->legal_entity_id );
+		$sp->PayrollRemittanceAgencys( 'US', 'CA', null, null, $this->legal_entity_id );
+		$sp->CompanyDeductions( 'US', 'CA', null, null, $this->legal_entity_id );
 
 		//Need to define the California State Unemployment Percent.
 		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
@@ -88,7 +88,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 				$cd_obj->Save();
 			}
 		} else {
-			$this->assertTrue( FALSE, 'CA - Unemployment Insurance failed to be created.' );
+			$this->assertTrue( false, 'CA - Unemployment Insurance failed to be created.' );
 		}
 
 		//Need to define the California State Unemployment Percent.
@@ -101,28 +101,28 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 				$cd_obj->Save();
 			}
 		} else {
-			$this->assertTrue( FALSE, 'NY - Unemployment Insurance failed to be created.' );
+			$this->assertTrue( false, 'NY - Unemployment Insurance failed to be created.' );
 		}
 
 
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 10  ); // Check
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 20  ); // US - EFT
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 30  ); // CA - EFT
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 10 ); // Check
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 20 ); // US - EFT
+		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 30 ); // CA - EFT
 
 		//createUser() also handles remittance destination accounts.
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 11, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 12, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 14, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 19, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids );
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids ); //Different State
-		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $remittance_source_account_ids ); //Different State
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 10, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 11, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 12, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 13, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 14, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 15, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 16, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 17, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 18, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 19, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 20, null, null, null, null, null, null, null, $remittance_source_account_ids ); //Different State
+		$this->user_id[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 21, null, null, null, null, null, null, null, $remittance_source_account_ids ); //Different State
 
 
 		//Get User Object.
@@ -138,27 +138,27 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id[0] );
 
-		return TRUE;
+		return true;
 	}
 
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return TRUE;
+		return true;
 	}
 
 	function getPayStubAccountLinkArray() {
-		$this->pay_stub_account_link_arr = array(
-			'total_gross' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Gross'),
-			'total_deductions' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Deductions'),
-			'employer_contribution' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 40, 'Employer Total Contributions'),
-			'net_pay' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 40, 'Net Pay'),
-			'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
-			'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation - Accrual Release'),
-			'vacation_accrual' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 50, 'Vacation Accrual'),
-			);
+		$this->pay_stub_account_link_arr = [
+				'total_gross'              => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Gross' ),
+				'total_deductions'         => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Total Deductions' ),
+				'employer_contribution'    => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Employer Total Contributions' ),
+				'net_pay'                  => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 40, 'Net Pay' ),
+				'regular_time'             => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ),
+				'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Vacation - Accrual Release' ),
+				'vacation_accrual'         => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 50, 'Vacation Accrual' ),
+		];
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayPeriodSchedule() {
@@ -179,17 +179,17 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartDayOfWeek( TTDate::getDayOfWeek( $anchor_date ) );
 		$ppsf->setTransactionDate( 7 );
 
-		$ppsf->setTransactionDateBusinessDay( TRUE );
-		$ppsf->setTimeZone('PST8PDT');
+		$ppsf->setTransactionDateBusinessDay( true );
+		$ppsf->setTimeZone( 'PST8PDT' );
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4 * 3600) );
-		$ppsf->setMaximumShiftTime( (16 * 3600) );
+		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
+		$ppsf->setMaximumShiftTime( ( 16 * 3600 ) );
 
-		$ppsf->setEnableInitialPayPeriods( FALSE );
+		$ppsf->setEnableInitialPayPeriods( false );
 		if ( $ppsf->isValid() ) {
-			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			$insert_id = $ppsf->Save( false );
+			Debug::Text( 'Pay Period Schedule ID: ' . $insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 			$ppsf->setUser( $this->user_id );
 			$ppsf->Save();
@@ -199,10 +199,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
 
-		return FALSE;
-
+		return false;
 	}
 
 	function createPayPeriods() {
@@ -215,19 +214,18 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					$end_date = TTDate::getEndDayEpoch( strtotime('23-Dec-2018') );
+					$end_date = TTDate::getEndDayEpoch( strtotime( '23-Dec-2018' ) );
 				} else {
 					$end_date = TTDate::incrementDate( $end_date, 14, 'day' );
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'I: ' . $i . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 + 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, ( 86400 + 3600 ), false ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
-
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function getAllPayPeriods() {
@@ -235,8 +233,8 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//$pplf->getByCompanyId( $this->company_id );
 		$pplf->getByPayPeriodScheduleId( $this->pay_period_schedule_id );
 		if ( $pplf->getRecordCount() > 0 ) {
-			foreach( $pplf as $pp_obj ) {
-				Debug::text('Pay Period... Start: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			foreach ( $pplf as $pp_obj ) {
+				Debug::text( 'Pay Period... Start: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getStartDate() ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 
 				$this->pay_period_objs[] = $pp_obj;
 			}
@@ -244,21 +242,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 
 		$this->pay_period_objs = array_reverse( $this->pay_period_objs );
 
-		return TRUE;
+		return true;
 	}
 
 	function getPayStubEntryArray( $pay_stub_id ) {
 		//Check Pay Stub to make sure it was created correctly.
 		$pself = new PayStubEntryListFactory();
-		$pself->getByPayStubId( $pay_stub_id ) ;
+		$pself->getByPayStubId( $pay_stub_id );
 		if ( $pself->getRecordCount() > 0 ) {
-			foreach( $pself as $pse_obj ) {
-				$ps_entry_arr[$pse_obj->getPayStubEntryNameId()][] = array(
-					'rate' => $pse_obj->getRate(),
-					'units' => $pse_obj->getUnits(),
-					'amount' => $pse_obj->getAmount(),
-					'ytd_amount' => $pse_obj->getYTDAmount(),
-					);
+			foreach ( $pself as $pse_obj ) {
+				$ps_entry_arr[$pse_obj->getPayStubEntryNameId()][] = [
+						'rate'       => $pse_obj->getRate(),
+						'units'      => $pse_obj->getUnits(),
+						'amount'     => $pse_obj->getAmount(),
+						'ytd_amount' => $pse_obj->getYTDAmount(),
+				];
 			}
 		}
 
@@ -266,7 +264,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 			return $ps_entry_arr;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function createPayStubAmendment( $pay_stub_entry_name_id, $amount, $effective_date, $user_id ) {
@@ -282,25 +280,25 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 
 		$psaf->setEffectiveDate( $effective_date );
 
-		$psaf->setAuthorized(TRUE);
+		$psaf->setAuthorized( true );
 		if ( $psaf->isValid() ) {
 			$psaf->Save();
 		} else {
-			Debug::text(' ERROR: Pay Stub Amendment Failed!', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( ' ERROR: Pay Stub Amendment Failed!', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	function createPayStub( $user_id ) {
-		for( $i = 0; $i <= 26; $i++ ) { //Calculate pay stubs for each pay period.
+		for ( $i = 0; $i <= 26; $i++ ) { //Calculate pay stubs for each pay period.
 			$cps = new CalculatePayStub();
 			$cps->setUser( $user_id );
 			$cps->setPayPeriod( $this->pay_period_objs[$i]->getId() );
 			$cps->calculate();
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -308,7 +306,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testMonthlyDepositSingleEmployeeCreditReductionA() {
 
-		foreach( $this->user_id as $user_id ) {
+		foreach ( $this->user_id as $user_id ) {
 			//1st Quarter - Stay below 7000 FUTA limit
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
@@ -384,9 +382,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
@@ -401,53 +399,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '2042.01',
-								'exempt_payments' => '20.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.34',
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '2042.01',
+								'exempt_payments'       => '20.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.34',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.81',
-								'after_adjustment_tax' => '88.94',
-						),
+								'adjustment_tax'        => '76.81',
+								'after_adjustment_tax'  => '88.94',
+						],
 				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '2041.89',
-								'exempt_payments' => '20.63',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.26',
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '2041.89',
+								'exempt_payments'       => '20.63',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.26',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.81',
-								'after_adjustment_tax' => '88.94',
-						),
+								'adjustment_tax'        => '76.81',
+								'after_adjustment_tax'  => '88.94',
+						],
 				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '2041.77',
-								'exempt_payments' => '20.59',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.18',
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '2041.77',
+								'exempt_payments'       => '20.59',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.18',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.80',
-								'after_adjustment_tax' => '88.93',
-						),
+								'adjustment_tax'        => '76.80',
+								'after_adjustment_tax'  => '88.93',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '6125.67',
-								'exempt_payments' => '61.89',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '6063.78',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '6125.67',
+								'exempt_payments'       => '61.89',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '6063.78',
 								'before_adjustment_tax' => '36.38',
-								'adjustment_tax' => '230.42',
-								'after_adjustment_tax' => '266.81',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '230.42',
+								'after_adjustment_tax'  => '266.81',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -473,12 +471,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 230.42 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 266.80 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 266.80 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16b, null );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for 2nd Quarter
@@ -486,9 +483,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -504,53 +501,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '2041.65',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '1084.88',
-								'taxable_wages' => '936.22',
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '2041.65',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '1084.88',
+								'taxable_wages'         => '936.22',
 								'before_adjustment_tax' => '5.62',
-								'adjustment_tax' => '35.58',
-								'after_adjustment_tax' => '41.19',
-						),
+								'adjustment_tax'        => '35.58',
+								'after_adjustment_tax'  => '41.19',
+						],
 				1 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '3062.37',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.56',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '3062.37',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.56',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '2041.57',
-								'exempt_payments' => '20.56',
-								'excess_payments' => '2021.01',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '2041.57',
+								'exempt_payments'       => '20.56',
+								'excess_payments'       => '2021.01',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '7145.59',
-								'exempt_payments' => '71.92',
-								'excess_payments' => '6137.45',
-								'taxable_wages' => '936.22',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '7145.59',
+								'exempt_payments'       => '71.92',
+								'excess_payments'       => '6137.45',
+								'taxable_wages'         => '936.22',
 								'before_adjustment_tax' => '5.62',
-								'adjustment_tax' => '35.58',
-								'after_adjustment_tax' => '41.19',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '35.58',
+								'after_adjustment_tax'  => '41.19',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -574,12 +571,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16d, NULL );
-
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
+		$this->assertEquals( $form_objs->objs[0]->l16d, null );
 
 
 		//Generate Report for 3rd Quarter
@@ -587,9 +583,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -605,53 +601,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '2041.51',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '2020.96',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '2041.51',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '2020.96',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				1 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '2041.45',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.91',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '2041.45',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.91',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '2041.41',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.87',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '2041.41',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.87',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '6124.37',
-								'exempt_payments' => '61.63',
-								'excess_payments' => '6062.74',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '6124.37',
+								'exempt_payments'       => '61.63',
+								'excess_payments'       => '6062.74',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -676,12 +672,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for 4th Quarter
@@ -689,9 +684,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -707,53 +702,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '2041.43',
-								'exempt_payments' => '20.57',
-								'excess_payments' => '2020.86',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '2041.43',
+								'exempt_payments'       => '20.57',
+								'excess_payments'       => '2020.86',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				1 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '3061.98',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.17',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '3061.98',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.17',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '2041.27',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.73',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '2041.27',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.73',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '7144.68',
-								'exempt_payments' => '71.92',
-								'excess_payments' => '7072.76',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '7144.68',
+								'exempt_payments'       => '71.92',
+								'excess_payments'       => '7072.76',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -778,12 +773,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for entire year with Line 10
@@ -791,169 +785,169 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '31-Dec-2019' ); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
-				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '2042.01',
-								'exempt_payments' => '20.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.34',
+		$should_match_arr = [
+				0  =>
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '2042.01',
+								'exempt_payments'       => '20.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.34',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.81',
-								'after_adjustment_tax' => '88.94',
-						),
-				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '2041.89',
-								'exempt_payments' => '20.63',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.26',
+								'adjustment_tax'        => '76.81',
+								'after_adjustment_tax'  => '88.94',
+						],
+				1  =>
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '2041.89',
+								'exempt_payments'       => '20.63',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.26',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.81',
-								'after_adjustment_tax' => '88.94',
-						),
-				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '2041.77',
-								'exempt_payments' => '20.59',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.18',
+								'adjustment_tax'        => '76.81',
+								'after_adjustment_tax'  => '88.94',
+						],
+				2  =>
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '2041.77',
+								'exempt_payments'       => '20.59',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.18',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.80',
-								'after_adjustment_tax' => '88.93',
-						),
-				3 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '2041.65',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '1084.88',
-								'taxable_wages' => '936.22',
+								'adjustment_tax'        => '76.80',
+								'after_adjustment_tax'  => '88.93',
+						],
+				3  =>
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '2041.65',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '1084.88',
+								'taxable_wages'         => '936.22',
 								'before_adjustment_tax' => '5.62',
-								'adjustment_tax' => '35.58',
-								'after_adjustment_tax' => '41.19',
-						),
-				4 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '3062.37',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.56',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '35.58',
+								'after_adjustment_tax'  => '41.19',
+						],
+				4  =>
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '3062.37',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.56',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				5 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '2041.57',
-								'exempt_payments' => '20.56',
-								'excess_payments' => '2021.01',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				5  =>
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '2041.57',
+								'exempt_payments'       => '20.56',
+								'excess_payments'       => '2021.01',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				6 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '2041.51',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '2020.96',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				6  =>
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '2041.51',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '2020.96',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				7 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '2041.45',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.91',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				7  =>
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '2041.45',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.91',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				8 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '2041.41',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.87',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				8  =>
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '2041.41',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.87',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				9 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '2041.43',
-								'exempt_payments' => '20.57',
-								'excess_payments' => '2020.86',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				9  =>
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '2041.43',
+								'exempt_payments'       => '20.57',
+								'excess_payments'       => '2020.86',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				10 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '3061.98',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.17',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '3061.98',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.17',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				11 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '2041.27',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.73',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '2041.27',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.73',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				12 =>
-						array (
-								'date_month' => 'Grand Total[12]:',
-								'total_payments' => '26540.31',
-								'exempt_payments' => '267.36',
-								'excess_payments' => '19272.95',
-								'taxable_wages' => '7000.00',
+						[
+								'date_month'            => 'Grand Total[12]:',
+								'total_payments'        => '26540.31',
+								'exempt_payments'       => '267.36',
+								'excess_payments'       => '19272.95',
+								'taxable_wages'         => '7000.00',
 								'before_adjustment_tax' => '42.00',
-								'adjustment_tax' => '266.00',
-								'after_adjustment_tax' => '308.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '266.00',
+								'after_adjustment_tax'  => '308.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -978,7 +972,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 478.77 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 478.77 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
@@ -990,169 +984,169 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		//$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '31-Dec-2019' ); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
-				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '2042.01',
-								'exempt_payments' => '20.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.34',
+		$should_match_arr = [
+				0  =>
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '2042.01',
+								'exempt_payments'       => '20.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.34',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.81',
-								'after_adjustment_tax' => '88.94',
-						),
-				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '2041.89',
-								'exempt_payments' => '20.63',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.26',
+								'adjustment_tax'        => '76.81',
+								'after_adjustment_tax'  => '88.94',
+						],
+				1  =>
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '2041.89',
+								'exempt_payments'       => '20.63',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.26',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.81',
-								'after_adjustment_tax' => '88.94',
-						),
-				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '2041.77',
-								'exempt_payments' => '20.59',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.18',
+								'adjustment_tax'        => '76.81',
+								'after_adjustment_tax'  => '88.94',
+						],
+				2  =>
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '2041.77',
+								'exempt_payments'       => '20.59',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.18',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '76.80',
-								'after_adjustment_tax' => '88.93',
-						),
-				3 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '2041.65',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '1084.88',
-								'taxable_wages' => '936.22',
+								'adjustment_tax'        => '76.80',
+								'after_adjustment_tax'  => '88.93',
+						],
+				3  =>
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '2041.65',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '1084.88',
+								'taxable_wages'         => '936.22',
 								'before_adjustment_tax' => '5.62',
-								'adjustment_tax' => '35.58',
-								'after_adjustment_tax' => '41.19',
-						),
-				4 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '3062.37',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.56',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '35.58',
+								'after_adjustment_tax'  => '41.19',
+						],
+				4  =>
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '3062.37',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.56',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				5 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '2041.57',
-								'exempt_payments' => '20.56',
-								'excess_payments' => '2021.01',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				5  =>
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '2041.57',
+								'exempt_payments'       => '20.56',
+								'excess_payments'       => '2021.01',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				6 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '2041.51',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '2020.96',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				6  =>
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '2041.51',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '2020.96',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				7 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '2041.45',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.91',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				7  =>
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '2041.45',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.91',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				8 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '2041.41',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.87',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				8  =>
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '2041.41',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.87',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				9 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '2041.43',
-								'exempt_payments' => '20.57',
-								'excess_payments' => '2020.86',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				9  =>
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '2041.43',
+								'exempt_payments'       => '20.57',
+								'excess_payments'       => '2020.86',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				10 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '3061.98',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.17',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '3061.98',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.17',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				11 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '2041.27',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.73',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '2041.27',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.73',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				12 =>
-						array (
-								'date_month' => 'Grand Total[12]:',
-								'total_payments' => '26540.31',
-								'exempt_payments' => '267.36',
-								'excess_payments' => '19272.95',
-								'taxable_wages' => '7000.00',
+						[
+								'date_month'            => 'Grand Total[12]:',
+								'total_payments'        => '26540.31',
+								'exempt_payments'       => '267.36',
+								'excess_payments'       => '19272.95',
+								'taxable_wages'         => '7000.00',
 								'before_adjustment_tax' => '42.00',
-								'adjustment_tax' => '266.00',
-								'after_adjustment_tax' => '308.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '266.00',
+								'after_adjustment_tax'  => '308.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -1177,13 +1171,13 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -1191,7 +1185,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testMonthlyDepositSingleEmployeeNoCreditReductionA() {
 
-		foreach( $this->user_id as $user_id ) {
+		foreach ( $this->user_id as $user_id ) {
 			//1st Quarter - Stay below 7000 FUTA limit
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
@@ -1267,9 +1261,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
@@ -1284,53 +1278,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '2042.01',
-								'exempt_payments' => '20.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.34',
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '2042.01',
+								'exempt_payments'       => '20.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.34',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
 				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '2041.89',
-								'exempt_payments' => '20.63',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.26',
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '2041.89',
+								'exempt_payments'       => '20.63',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.26',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
 				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '2041.77',
-								'exempt_payments' => '20.59',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.18',
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '2041.77',
+								'exempt_payments'       => '20.59',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.18',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '6125.67',
-								'exempt_payments' => '61.89',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '6063.78',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '6125.67',
+								'exempt_payments'       => '61.89',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '6063.78',
 								'before_adjustment_tax' => '36.38',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '36.38',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '36.38',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -1356,12 +1350,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16b, null );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for 2nd Quarter
@@ -1369,9 +1362,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -1387,53 +1380,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '2041.65',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '1084.88',
-								'taxable_wages' => '936.22',
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '2041.65',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '1084.88',
+								'taxable_wages'         => '936.22',
 								'before_adjustment_tax' => '5.62',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '5.62',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '5.62',
+						],
 				1 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '3062.37',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.56',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '3062.37',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.56',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '2041.57',
-								'exempt_payments' => '20.56',
-								'excess_payments' => '2021.01',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '2041.57',
+								'exempt_payments'       => '20.56',
+								'excess_payments'       => '2021.01',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '7145.59',
-								'exempt_payments' => '71.92',
-								'excess_payments' => '6137.45',
-								'taxable_wages' => '936.22',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '7145.59',
+								'exempt_payments'       => '71.92',
+								'excess_payments'       => '6137.45',
+								'taxable_wages'         => '936.22',
 								'before_adjustment_tax' => '5.62',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '5.62',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '5.62',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -1457,12 +1450,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16d, NULL );
-
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
+		$this->assertEquals( $form_objs->objs[0]->l16d, null );
 
 
 		//Generate Report for 3rd Quarter
@@ -1470,9 +1462,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -1488,53 +1480,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '2041.51',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '2020.96',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '2041.51',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '2020.96',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				1 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '2041.45',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.91',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '2041.45',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.91',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '2041.41',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.87',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '2041.41',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.87',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '6124.37',
-								'exempt_payments' => '61.63',
-								'excess_payments' => '6062.74',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '6124.37',
+								'exempt_payments'       => '61.63',
+								'excess_payments'       => '6062.74',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -1559,12 +1551,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for 4th Quarter
@@ -1572,9 +1563,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -1590,53 +1581,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '2041.43',
-								'exempt_payments' => '20.57',
-								'excess_payments' => '2020.86',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '2041.43',
+								'exempt_payments'       => '20.57',
+								'excess_payments'       => '2020.86',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				1 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '3061.98',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.17',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '3061.98',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.17',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '2041.27',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.73',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '2041.27',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.73',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '7144.68',
-								'exempt_payments' => '71.92',
-								'excess_payments' => '7072.76',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '7144.68',
+								'exempt_payments'       => '71.92',
+								'excess_payments'       => '7072.76',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -1661,12 +1652,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for entire year with Line 10
@@ -1674,169 +1664,169 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '31-Dec-2019' ); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
-				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '2042.01',
-								'exempt_payments' => '20.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.34',
+		$should_match_arr = [
+				0  =>
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '2042.01',
+								'exempt_payments'       => '20.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.34',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
-				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '2041.89',
-								'exempt_payments' => '20.63',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.26',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
+				1  =>
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '2041.89',
+								'exempt_payments'       => '20.63',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.26',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
-				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '2041.77',
-								'exempt_payments' => '20.59',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.18',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
+				2  =>
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '2041.77',
+								'exempt_payments'       => '20.59',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.18',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
-				3 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '2041.65',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '1084.88',
-								'taxable_wages' => '936.22',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
+				3  =>
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '2041.65',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '1084.88',
+								'taxable_wages'         => '936.22',
 								'before_adjustment_tax' => '5.62',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '5.62',
-						),
-				4 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '3062.37',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.56',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '5.62',
+						],
+				4  =>
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '3062.37',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.56',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				5 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '2041.57',
-								'exempt_payments' => '20.56',
-								'excess_payments' => '2021.01',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				5  =>
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '2041.57',
+								'exempt_payments'       => '20.56',
+								'excess_payments'       => '2021.01',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				6 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '2041.51',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '2020.96',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				6  =>
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '2041.51',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '2020.96',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				7 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '2041.45',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.91',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				7  =>
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '2041.45',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.91',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				8 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '2041.41',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.87',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				8  =>
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '2041.41',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.87',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				9 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '2041.43',
-								'exempt_payments' => '20.57',
-								'excess_payments' => '2020.86',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				9  =>
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '2041.43',
+								'exempt_payments'       => '20.57',
+								'excess_payments'       => '2020.86',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				10 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '3061.98',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.17',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '3061.98',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.17',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				11 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '2041.27',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.73',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '2041.27',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.73',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				12 =>
-						array (
-								'date_month' => 'Grand Total[12]:',
-								'total_payments' => '26540.31',
-								'exempt_payments' => '267.36',
-								'excess_payments' => '19272.95',
-								'taxable_wages' => '7000.00',
+						[
+								'date_month'            => 'Grand Total[12]:',
+								'total_payments'        => '26540.31',
+								'exempt_payments'       => '267.36',
+								'excess_payments'       => '19272.95',
+								'taxable_wages'         => '7000.00',
 								'before_adjustment_tax' => '42.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '42.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '42.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -1861,7 +1851,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 142.03 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 142.03 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
@@ -1873,169 +1863,169 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		//$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '31-Dec-2019' ); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
-				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '2042.01',
-								'exempt_payments' => '20.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.34',
+		$should_match_arr = [
+				0  =>
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '2042.01',
+								'exempt_payments'       => '20.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.34',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
-				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '2041.89',
-								'exempt_payments' => '20.63',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.26',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
+				1  =>
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '2041.89',
+								'exempt_payments'       => '20.63',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.26',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
-				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '2041.77',
-								'exempt_payments' => '20.59',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '2021.18',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
+				2  =>
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '2041.77',
+								'exempt_payments'       => '20.59',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '2021.18',
 								'before_adjustment_tax' => '12.13',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '12.13',
-						),
-				3 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '2041.65',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '1084.88',
-								'taxable_wages' => '936.22',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '12.13',
+						],
+				3  =>
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '2041.65',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '1084.88',
+								'taxable_wages'         => '936.22',
 								'before_adjustment_tax' => '5.62',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '5.62',
-						),
-				4 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '3062.37',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.56',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '5.62',
+						],
+				4  =>
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '3062.37',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.56',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				5 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '2041.57',
-								'exempt_payments' => '20.56',
-								'excess_payments' => '2021.01',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				5  =>
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '2041.57',
+								'exempt_payments'       => '20.56',
+								'excess_payments'       => '2021.01',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				6 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '2041.51',
-								'exempt_payments' => '20.55',
-								'excess_payments' => '2020.96',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				6  =>
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '2041.51',
+								'exempt_payments'       => '20.55',
+								'excess_payments'       => '2020.96',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				7 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '2041.45',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.91',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				7  =>
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '2041.45',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.91',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				8 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '2041.41',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.87',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				8  =>
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '2041.41',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.87',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				9 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '2041.43',
-								'exempt_payments' => '20.57',
-								'excess_payments' => '2020.86',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				9  =>
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '2041.43',
+								'exempt_payments'       => '20.57',
+								'excess_payments'       => '2020.86',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				10 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '3061.98',
-								'exempt_payments' => '30.81',
-								'excess_payments' => '3031.17',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '3061.98',
+								'exempt_payments'       => '30.81',
+								'excess_payments'       => '3031.17',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				11 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '2041.27',
-								'exempt_payments' => '20.54',
-								'excess_payments' => '2020.73',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '2041.27',
+								'exempt_payments'       => '20.54',
+								'excess_payments'       => '2020.73',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				12 =>
-						array (
-								'date_month' => 'Grand Total[12]:',
-								'total_payments' => '26540.31',
-								'exempt_payments' => '267.36',
-								'excess_payments' => '19272.95',
-								'taxable_wages' => '7000.00',
+						[
+								'date_month'            => 'Grand Total[12]:',
+								'total_payments'        => '26540.31',
+								'exempt_payments'       => '267.36',
+								'excess_payments'       => '19272.95',
+								'taxable_wages'         => '7000.00',
 								'before_adjustment_tax' => '42.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '42.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '42.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -2060,13 +2050,13 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -2074,7 +2064,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testMonthlyDepositManyEmployeesCreditReductionA() {
 
-		foreach( $this->user_id as $user_id ) {
+		foreach ( $this->user_id as $user_id ) {
 			//1st Quarter - Stay below 7000 FUTA limit
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
@@ -2148,9 +2138,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
@@ -2165,53 +2155,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '26546.13',
-								'exempt_payments' => '268.71',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26277.42',
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '26546.13',
+								'exempt_payments'       => '268.71',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26277.42',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '998.54',
-								'after_adjustment_tax' => '1156.21',
-						),
+								'adjustment_tax'        => '998.54',
+								'after_adjustment_tax'  => '1156.21',
+						],
 				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '26544.57',
-								'exempt_payments' => '268.19',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26276.38',
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '26544.57',
+								'exempt_payments'       => '268.19',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26276.38',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '998.50',
-								'after_adjustment_tax' => '1156.16',
-						),
+								'adjustment_tax'        => '998.50',
+								'after_adjustment_tax'  => '1156.16',
+						],
 				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '26543.01',
-								'exempt_payments' => '267.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26275.34',
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '26543.01',
+								'exempt_payments'       => '267.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26275.34',
 								'before_adjustment_tax' => '157.65',
-								'adjustment_tax' => '998.46',
-								'after_adjustment_tax' => '1156.11',
-						),
+								'adjustment_tax'        => '998.46',
+								'after_adjustment_tax'  => '1156.11',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '79633.71',
-								'exempt_payments' => '804.57',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '78829.14',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '79633.71',
+								'exempt_payments'       => '804.57',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '78829.14',
 								'before_adjustment_tax' => '472.97',
-								'adjustment_tax' => '2995.51',
-								'after_adjustment_tax' => '3468.48',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '2995.51',
+								'after_adjustment_tax'  => '3468.48',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -2237,12 +2227,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 2995.51 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 3468.48 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 3468.48 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16b, null );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for 2nd Quarter
@@ -2250,9 +2239,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -2268,53 +2257,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '26541.45',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '14103.44',
-								'taxable_wages' => '12170.86',
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '26541.45',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '14103.44',
+								'taxable_wages'         => '12170.86',
 								'before_adjustment_tax' => '73.03',
-								'adjustment_tax' => '462.49',
-								'after_adjustment_tax' => '535.52',
-						),
+								'adjustment_tax'        => '462.49',
+								'after_adjustment_tax'  => '535.52',
+						],
 				1 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '39810.81',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39410.28',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '39810.81',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39410.28',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '26540.41',
-								'exempt_payments' => '267.28',
-								'excess_payments' => '26273.13',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '26540.41',
+								'exempt_payments'       => '267.28',
+								'excess_payments'       => '26273.13',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '92892.67',
-								'exempt_payments' => '934.96',
-								'excess_payments' => '79786.85',
-								'taxable_wages' => '12170.86',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '92892.67',
+								'exempt_payments'       => '934.96',
+								'excess_payments'       => '79786.85',
+								'taxable_wages'         => '12170.86',
 								'before_adjustment_tax' => '73.03',
-								'adjustment_tax' => '462.49',
-								'after_adjustment_tax' => '535.52',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '462.49',
+								'after_adjustment_tax'  => '535.52',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -2338,12 +2327,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 3915.08 );
-
 
 
 		//Generate Report for 3rd Quarter
@@ -2351,9 +2339,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -2369,53 +2357,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '26539.63',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '26272.48',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '26539.63',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '26272.48',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				1 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '26538.85',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.83',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '26538.85',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.83',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '26538.33',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.31',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '26538.33',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.31',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '79616.81',
-								'exempt_payments' => '801.19',
-								'excess_payments' => '78815.62',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '79616.81',
+								'exempt_payments'       => '801.19',
+								'excess_payments'       => '78815.62',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -2440,12 +2428,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 4377.57 );
-
 
 
 		//Generate Report for 4th Quarter
@@ -2453,9 +2440,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -2471,53 +2458,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '26538.59',
-								'exempt_payments' => '267.41',
-								'excess_payments' => '26271.18',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '26538.59',
+								'exempt_payments'       => '267.41',
+								'excess_payments'       => '26271.18',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				1 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '39805.74',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39405.21',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '39805.74',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39405.21',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '26536.51',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26269.49',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '26536.51',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26269.49',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '92880.84',
-								'exempt_payments' => '934.96',
-								'excess_payments' => '91945.88',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '92880.84',
+								'exempt_payments'       => '934.96',
+								'excess_payments'       => '91945.88',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -2542,12 +2529,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 4377.57 );
-
 
 
 		//Generate Report for entire year with Line 10.
@@ -2555,169 +2541,169 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '31-Dec-2019' ); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
-				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '26546.13',
-								'exempt_payments' => '268.71',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26277.42',
+		$should_match_arr = [
+				0  =>
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '26546.13',
+								'exempt_payments'       => '268.71',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26277.42',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '998.54',
-								'after_adjustment_tax' => '1156.21',
-						),
-				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '26544.57',
-								'exempt_payments' => '268.19',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26276.38',
+								'adjustment_tax'        => '998.54',
+								'after_adjustment_tax'  => '1156.21',
+						],
+				1  =>
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '26544.57',
+								'exempt_payments'       => '268.19',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26276.38',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '998.50',
-								'after_adjustment_tax' => '1156.16',
-						),
-				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '26543.01',
-								'exempt_payments' => '267.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26275.34',
+								'adjustment_tax'        => '998.50',
+								'after_adjustment_tax'  => '1156.16',
+						],
+				2  =>
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '26543.01',
+								'exempt_payments'       => '267.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26275.34',
 								'before_adjustment_tax' => '157.65',
-								'adjustment_tax' => '998.46',
-								'after_adjustment_tax' => '1156.11',
-						),
-				3 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '26541.45',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '14103.44',
-								'taxable_wages' => '12170.86',
+								'adjustment_tax'        => '998.46',
+								'after_adjustment_tax'  => '1156.11',
+						],
+				3  =>
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '26541.45',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '14103.44',
+								'taxable_wages'         => '12170.86',
 								'before_adjustment_tax' => '73.03',
-								'adjustment_tax' => '462.49',
-								'after_adjustment_tax' => '535.52',
-						),
-				4 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '39810.81',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39410.28',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '462.49',
+								'after_adjustment_tax'  => '535.52',
+						],
+				4  =>
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '39810.81',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39410.28',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				5 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '26540.41',
-								'exempt_payments' => '267.28',
-								'excess_payments' => '26273.13',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				5  =>
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '26540.41',
+								'exempt_payments'       => '267.28',
+								'excess_payments'       => '26273.13',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				6 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '26539.63',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '26272.48',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				6  =>
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '26539.63',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '26272.48',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				7 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '26538.85',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.83',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				7  =>
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '26538.85',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.83',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				8 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '26538.33',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.31',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				8  =>
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '26538.33',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.31',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				9 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '26538.59',
-								'exempt_payments' => '267.41',
-								'excess_payments' => '26271.18',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				9  =>
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '26538.59',
+								'exempt_payments'       => '267.41',
+								'excess_payments'       => '26271.18',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				10 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '39805.74',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39405.21',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '39805.74',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39405.21',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				11 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '26536.51',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26269.49',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '26536.51',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26269.49',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				12 =>
-						array (
-								'date_month' => 'Grand Total[12]:',
-								'total_payments' => '345024.03',
-								'exempt_payments' => '3475.68',
-								'excess_payments' => '250548.35',
-								'taxable_wages' => '91000.00',
+						[
+								'date_month'            => 'Grand Total[12]:',
+								'total_payments'        => '345024.03',
+								'exempt_payments'       => '3475.68',
+								'excess_payments'       => '250548.35',
+								'taxable_wages'         => '91000.00',
 								'before_adjustment_tax' => '546.00',
-								'adjustment_tax' => '3458.00',
-								'after_adjustment_tax' => '4004.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '3458.00',
+								'after_adjustment_tax'  => '4004.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -2742,7 +2728,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 5023.60 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 5023.60 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
@@ -2754,169 +2740,169 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		//$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = TRUE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = true; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '31-Dec-2019' ); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
-				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '26546.13',
-								'exempt_payments' => '268.71',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26277.42',
+		$should_match_arr = [
+				0  =>
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '26546.13',
+								'exempt_payments'       => '268.71',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26277.42',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '998.54',
-								'after_adjustment_tax' => '1156.21',
-						),
-				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '26544.57',
-								'exempt_payments' => '268.19',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26276.38',
+								'adjustment_tax'        => '998.54',
+								'after_adjustment_tax'  => '1156.21',
+						],
+				1  =>
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '26544.57',
+								'exempt_payments'       => '268.19',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26276.38',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '998.50',
-								'after_adjustment_tax' => '1156.16',
-						),
-				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '26543.01',
-								'exempt_payments' => '267.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26275.34',
+								'adjustment_tax'        => '998.50',
+								'after_adjustment_tax'  => '1156.16',
+						],
+				2  =>
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '26543.01',
+								'exempt_payments'       => '267.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26275.34',
 								'before_adjustment_tax' => '157.65',
-								'adjustment_tax' => '998.46',
-								'after_adjustment_tax' => '1156.11',
-						),
-				3 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '26541.45',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '14103.44',
-								'taxable_wages' => '12170.86',
+								'adjustment_tax'        => '998.46',
+								'after_adjustment_tax'  => '1156.11',
+						],
+				3  =>
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '26541.45',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '14103.44',
+								'taxable_wages'         => '12170.86',
 								'before_adjustment_tax' => '73.03',
-								'adjustment_tax' => '462.49',
-								'after_adjustment_tax' => '535.52',
-						),
-				4 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '39810.81',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39410.28',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '462.49',
+								'after_adjustment_tax'  => '535.52',
+						],
+				4  =>
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '39810.81',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39410.28',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				5 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '26540.41',
-								'exempt_payments' => '267.28',
-								'excess_payments' => '26273.13',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				5  =>
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '26540.41',
+								'exempt_payments'       => '267.28',
+								'excess_payments'       => '26273.13',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				6 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '26539.63',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '26272.48',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				6  =>
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '26539.63',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '26272.48',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				7 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '26538.85',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.83',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				7  =>
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '26538.85',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.83',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				8 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '26538.33',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.31',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				8  =>
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '26538.33',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.31',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				9 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '26538.59',
-								'exempt_payments' => '267.41',
-								'excess_payments' => '26271.18',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				9  =>
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '26538.59',
+								'exempt_payments'       => '267.41',
+								'excess_payments'       => '26271.18',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				10 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '39805.74',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39405.21',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '39805.74',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39405.21',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				11 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '26536.51',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26269.49',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '26536.51',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26269.49',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				12 =>
-						array (
-								'date_month' => 'Grand Total[12]:',
-								'total_payments' => '345024.03',
-								'exempt_payments' => '3475.68',
-								'excess_payments' => '250548.35',
-								'taxable_wages' => '91000.00',
+						[
+								'date_month'            => 'Grand Total[12]:',
+								'total_payments'        => '345024.03',
+								'exempt_payments'       => '3475.68',
+								'excess_payments'       => '250548.35',
+								'taxable_wages'         => '91000.00',
 								'before_adjustment_tax' => '546.00',
-								'adjustment_tax' => '3458.00',
-								'after_adjustment_tax' => '4004.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '3458.00',
+								'after_adjustment_tax'  => '4004.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -2941,13 +2927,13 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
 		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 919.57 );
 
-		return TRUE;
+		return true;
 	}
 
 	/*
@@ -2955,7 +2941,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testMonthlyDepositManyEmployeesNoCreditReductionA() {
 
-		foreach( $this->user_id as $user_id ) {
+		foreach ( $this->user_id as $user_id ) {
 			//1st Quarter - Stay below 7000 FUTA limit
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ), 1000.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
 			$this->createPayStubAmendment( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ), 10.34, TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getEndDate() ), $user_id );
@@ -3029,9 +3015,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
@@ -3046,53 +3032,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '26546.13',
-								'exempt_payments' => '268.71',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26277.42',
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '26546.13',
+								'exempt_payments'       => '268.71',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26277.42',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.66',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.66',
+						],
 				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '26544.57',
-								'exempt_payments' => '268.19',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26276.38',
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '26544.57',
+								'exempt_payments'       => '268.19',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26276.38',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.66',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.66',
+						],
 				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '26543.01',
-								'exempt_payments' => '267.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26275.34',
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '26543.01',
+								'exempt_payments'       => '267.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26275.34',
 								'before_adjustment_tax' => '157.65',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.65',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.65',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '79633.71',
-								'exempt_payments' => '804.57',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '78829.14',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '79633.71',
+								'exempt_payments'       => '804.57',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '78829.14',
 								'before_adjustment_tax' => '472.97',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '472.97',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '472.97',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -3118,12 +3104,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, NULL );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16b, null );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for 2nd Quarter
@@ -3131,9 +3116,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -3149,53 +3134,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '26541.45',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '14103.44',
-								'taxable_wages' => '12170.86',
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '26541.45',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '14103.44',
+								'taxable_wages'         => '12170.86',
 								'before_adjustment_tax' => '73.03',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '73.03',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '73.03',
+						],
 				1 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '39810.81',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39410.28',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '39810.81',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39410.28',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '26540.41',
-								'exempt_payments' => '267.28',
-								'excess_payments' => '26273.13',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '26540.41',
+								'exempt_payments'       => '267.28',
+								'excess_payments'       => '26273.13',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '92892.67',
-								'exempt_payments' => '934.96',
-								'excess_payments' => '79786.85',
-								'taxable_wages' => '12170.86',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '92892.67',
+								'exempt_payments'       => '934.96',
+								'excess_payments'       => '79786.85',
+								'taxable_wages'         => '12170.86',
 								'before_adjustment_tax' => '73.03',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '73.03',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '73.03',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 		$report_obj->_outputPDFForm( 'pdf_form' ); //Calculate values for Form so they can be checked too.
@@ -3220,12 +3205,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for 3rd Quarter
@@ -3233,9 +3217,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -3251,53 +3235,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '26539.63',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '26272.48',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '26539.63',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '26272.48',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				1 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '26538.85',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.83',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '26538.85',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.83',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '26538.33',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.31',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '26538.33',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.31',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '79616.81',
-								'exempt_payments' => '801.19',
-								'excess_payments' => '78815.62',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '79616.81',
+								'exempt_payments'       => '801.19',
+								'excess_payments'       => '78815.62',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -3323,12 +3307,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for 4th Quarter
@@ -3336,9 +3319,9 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
@@ -3354,53 +3337,53 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
+		$should_match_arr = [
 				0 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '26538.59',
-								'exempt_payments' => '267.41',
-								'excess_payments' => '26271.18',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '26538.59',
+								'exempt_payments'       => '267.41',
+								'excess_payments'       => '26271.18',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				1 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '39805.74',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39405.21',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '39805.74',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39405.21',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				2 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '26536.51',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26269.49',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '26536.51',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26269.49',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				3 =>
-						array (
-								'date_month' => 'Grand Total[3]:',
-								'total_payments' => '92880.84',
-								'exempt_payments' => '934.96',
-								'excess_payments' => '91945.88',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'Grand Total[3]:',
+								'total_payments'        => '92880.84',
+								'exempt_payments'       => '934.96',
+								'excess_payments'       => '91945.88',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -3426,12 +3409,11 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
-
 
 
 		//Generate Report for entire year with Line 10.
@@ -3439,169 +3421,169 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '31-Dec-2019' ); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
-				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '26546.13',
-								'exempt_payments' => '268.71',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26277.42',
+		$should_match_arr = [
+				0  =>
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '26546.13',
+								'exempt_payments'       => '268.71',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26277.42',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.66',
-						),
-				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '26544.57',
-								'exempt_payments' => '268.19',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26276.38',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.66',
+						],
+				1  =>
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '26544.57',
+								'exempt_payments'       => '268.19',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26276.38',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.66',
-						),
-				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '26543.01',
-								'exempt_payments' => '267.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26275.34',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.66',
+						],
+				2  =>
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '26543.01',
+								'exempt_payments'       => '267.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26275.34',
 								'before_adjustment_tax' => '157.65',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.65',
-						),
-				3 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '26541.45',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '14103.44',
-								'taxable_wages' => '12170.86',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.65',
+						],
+				3  =>
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '26541.45',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '14103.44',
+								'taxable_wages'         => '12170.86',
 								'before_adjustment_tax' => '73.03',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '73.03',
-						),
-				4 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '39810.81',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39410.28',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '73.03',
+						],
+				4  =>
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '39810.81',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39410.28',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				5 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '26540.41',
-								'exempt_payments' => '267.28',
-								'excess_payments' => '26273.13',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				5  =>
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '26540.41',
+								'exempt_payments'       => '267.28',
+								'excess_payments'       => '26273.13',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				6 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '26539.63',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '26272.48',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				6  =>
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '26539.63',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '26272.48',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				7 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '26538.85',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.83',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				7  =>
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '26538.85',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.83',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				8 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '26538.33',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.31',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				8  =>
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '26538.33',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.31',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				9 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '26538.59',
-								'exempt_payments' => '267.41',
-								'excess_payments' => '26271.18',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				9  =>
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '26538.59',
+								'exempt_payments'       => '267.41',
+								'excess_payments'       => '26271.18',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				10 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '39805.74',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39405.21',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '39805.74',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39405.21',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				11 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '26536.51',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26269.49',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '26536.51',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26269.49',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				12 =>
-						array (
-								'date_month' => 'Grand Total[12]:',
-								'total_payments' => '345024.03',
-								'exempt_payments' => '3475.68',
-								'excess_payments' => '250548.35',
-								'taxable_wages' => '91000.00',
+						[
+								'date_month'            => 'Grand Total[12]:',
+								'total_payments'        => '345024.03',
+								'exempt_payments'       => '3475.68',
+								'excess_payments'       => '250548.35',
+								'taxable_wages'         => '91000.00',
 								'before_adjustment_tax' => '546.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '546.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '546.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -3627,10 +3609,10 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 646.03 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 646.03 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 100.03 );
 
 		//Generate Report for entire year with Line 10 *without line 10*
@@ -3638,169 +3620,169 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setUserObject( $this->user_obj );
 		$report_obj->setPermissionObject( new Permission() );
 		$form_config = $report_obj->getCompanyFormConfig();
-		$form_config['exempt_payments']['include_pay_stub_entry_account'] = array( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Tips') ); //Exempt Payments
+		$form_config['exempt_payments']['include_pay_stub_entry_account'] = [ CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Tips' ) ]; //Exempt Payments
 		//$form_config['line_10'] = 100.03; //This is ignored unless the time period is the entire year.
-		$form_config['enable_credit_reduction_test'] = FALSE; //Forces bogus credit reducation rates for testing.
+		$form_config['enable_credit_reduction_test'] = false; //Forces bogus credit reducation rates for testing.
 		$report_obj->setFormConfig( $form_config );
 
 
 		$report_config = Misc::trimSortPrefix( $report_obj->getTemplate( 'by_month' ) );
 
 		$report_config['time_period']['time_period'] = 'custom_date';
-		$report_config['time_period']['start_date'] = strtotime('01-Jan-2019');
-		$report_config['time_period']['end_date'] = strtotime('31-Dec-2019'); //Need to do the entire year so 'line_10' from above is used.
+		$report_config['time_period']['start_date'] = strtotime( '01-Jan-2019' );
+		$report_config['time_period']['end_date'] = strtotime( '31-Dec-2019' ); //Need to do the entire year so 'line_10' from above is used.
 		$report_obj->setConfig( $report_config );
 		//var_dump($report_config);
 
 		$report_output = $report_obj->getOutput( 'raw' );
 		//var_export($report_output);
 
-		$should_match_arr = array (
-				0 =>
-						array (
-								'date_month' => 'January',
-								'total_payments' => '26546.13',
-								'exempt_payments' => '268.71',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26277.42',
+		$should_match_arr = [
+				0  =>
+						[
+								'date_month'            => 'January',
+								'total_payments'        => '26546.13',
+								'exempt_payments'       => '268.71',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26277.42',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.66',
-						),
-				1 =>
-						array (
-								'date_month' => 'February',
-								'total_payments' => '26544.57',
-								'exempt_payments' => '268.19',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26276.38',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.66',
+						],
+				1  =>
+						[
+								'date_month'            => 'February',
+								'total_payments'        => '26544.57',
+								'exempt_payments'       => '268.19',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26276.38',
 								'before_adjustment_tax' => '157.66',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.66',
-						),
-				2 =>
-						array (
-								'date_month' => 'March',
-								'total_payments' => '26543.01',
-								'exempt_payments' => '267.67',
-								'excess_payments' => '0.00',
-								'taxable_wages' => '26275.34',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.66',
+						],
+				2  =>
+						[
+								'date_month'            => 'March',
+								'total_payments'        => '26543.01',
+								'exempt_payments'       => '267.67',
+								'excess_payments'       => '0.00',
+								'taxable_wages'         => '26275.34',
 								'before_adjustment_tax' => '157.65',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '157.65',
-						),
-				3 =>
-						array (
-								'date_month' => 'April',
-								'total_payments' => '26541.45',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '14103.44',
-								'taxable_wages' => '12170.86',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '157.65',
+						],
+				3  =>
+						[
+								'date_month'            => 'April',
+								'total_payments'        => '26541.45',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '14103.44',
+								'taxable_wages'         => '12170.86',
 								'before_adjustment_tax' => '73.03',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '73.03',
-						),
-				4 =>
-						array (
-								'date_month' => 'May',
-								'total_payments' => '39810.81',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39410.28',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '73.03',
+						],
+				4  =>
+						[
+								'date_month'            => 'May',
+								'total_payments'        => '39810.81',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39410.28',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				5 =>
-						array (
-								'date_month' => 'June',
-								'total_payments' => '26540.41',
-								'exempt_payments' => '267.28',
-								'excess_payments' => '26273.13',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				5  =>
+						[
+								'date_month'            => 'June',
+								'total_payments'        => '26540.41',
+								'exempt_payments'       => '267.28',
+								'excess_payments'       => '26273.13',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				6 =>
-						array (
-								'date_month' => 'July',
-								'total_payments' => '26539.63',
-								'exempt_payments' => '267.15',
-								'excess_payments' => '26272.48',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				6  =>
+						[
+								'date_month'            => 'July',
+								'total_payments'        => '26539.63',
+								'exempt_payments'       => '267.15',
+								'excess_payments'       => '26272.48',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				7 =>
-						array (
-								'date_month' => 'August',
-								'total_payments' => '26538.85',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.83',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				7  =>
+						[
+								'date_month'            => 'August',
+								'total_payments'        => '26538.85',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.83',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				8 =>
-						array (
-								'date_month' => 'September',
-								'total_payments' => '26538.33',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26271.31',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				8  =>
+						[
+								'date_month'            => 'September',
+								'total_payments'        => '26538.33',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26271.31',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
-				9 =>
-						array (
-								'date_month' => 'October',
-								'total_payments' => '26538.59',
-								'exempt_payments' => '267.41',
-								'excess_payments' => '26271.18',
-								'taxable_wages' => '0.00',
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
+				9  =>
+						[
+								'date_month'            => 'October',
+								'total_payments'        => '26538.59',
+								'exempt_payments'       => '267.41',
+								'excess_payments'       => '26271.18',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				10 =>
-						array (
-								'date_month' => 'November',
-								'total_payments' => '39805.74',
-								'exempt_payments' => '400.53',
-								'excess_payments' => '39405.21',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'November',
+								'total_payments'        => '39805.74',
+								'exempt_payments'       => '400.53',
+								'excess_payments'       => '39405.21',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				11 =>
-						array (
-								'date_month' => 'December',
-								'total_payments' => '26536.51',
-								'exempt_payments' => '267.02',
-								'excess_payments' => '26269.49',
-								'taxable_wages' => '0.00',
+						[
+								'date_month'            => 'December',
+								'total_payments'        => '26536.51',
+								'exempt_payments'       => '267.02',
+								'excess_payments'       => '26269.49',
+								'taxable_wages'         => '0.00',
 								'before_adjustment_tax' => '0.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '0.00',
-						),
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '0.00',
+						],
 				12 =>
-						array (
-								'date_month' => 'Grand Total[12]:',
-								'total_payments' => '345024.03',
-								'exempt_payments' => '3475.68',
-								'excess_payments' => '250548.35',
-								'taxable_wages' => '91000.00',
+						[
+								'date_month'            => 'Grand Total[12]:',
+								'total_payments'        => '345024.03',
+								'exempt_payments'       => '3475.68',
+								'excess_payments'       => '250548.35',
+								'taxable_wages'         => '91000.00',
 								'before_adjustment_tax' => '546.00',
-								'adjustment_tax' => '0.00',
-								'after_adjustment_tax' => '546.00',
-								'_total' => true,
-						),
-		);
+								'adjustment_tax'        => '0.00',
+								'after_adjustment_tax'  => '546.00',
+								'_total'                => true,
+						],
+		];
 		$this->assertEquals( $report_output, $should_match_arr );
 
 
@@ -3826,13 +3808,14 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
 		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
 		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l14, null );
 		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
 		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, NULL );
+		$this->assertEquals( $form_objs->objs[0]->l16c, null );
 		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

@@ -10,7 +10,7 @@ OtherFieldViewController = BaseViewController.extend( {
 		this.table_name_key = 'other_field';
 		this.context_menu_name = $.i18n._( 'Custom Field' );
 		this.navigation_label = $.i18n._( 'Custom Field' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIOtherField' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIOtherField' ) )();
 
 		this.render();
 		this.buildContextMenu();
@@ -20,7 +20,7 @@ OtherFieldViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
@@ -54,7 +54,7 @@ OtherFieldViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIOtherField' )),
+			api_class: ( APIFactory.getAPIClass( 'APIOtherField' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.OTHER_FIELD,
@@ -167,7 +167,7 @@ OtherFieldViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -179,7 +179,7 @@ OtherFieldViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -187,6 +187,5 @@ OtherFieldViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

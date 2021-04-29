@@ -47,49 +47,50 @@ class Sort {
 	 * @param string $col2_order
 	 * @return mixed
 	 */
-	static function multiSort( $data, $col1, $col2 = NULL, $col1_order = 'ASC', $col2_order = 'ASC' ) {
+	static function multiSort( $data, $col1, $col2 = null, $col1_order = 'ASC', $col2_order = 'ASC' ) {
 		global $profiler;
 
 		$profiler->startTimer( 'multiSort()' );
 		//Debug::Text('Sorting... Col1: '. $col1 .' Col2: '. $col2 .' Col1 Order: '. $col1_order .' Col2 Order: '. $col2_order, __FILE__, __LINE__, __METHOD__, 10);
 
-		$sort_col1 = array();
-		$sort_col2 = array();
-		foreach ($data as $key => $row) {
-			if ( isset($row[$col1]) ) {
+		$sort_col1 = [];
+		$sort_col2 = [];
+		foreach ( $data as $key => $row ) {
+			if ( isset( $row[$col1] ) ) {
 				$sort_col1[$key] = $row[$col1];
 			} else {
-				$sort_col1[$key] = NULL;
+				$sort_col1[$key] = null;
 			}
 
-			if ( $col2 !== NULL ) {
-				if ( isset($row[$col2]) ) {
+			if ( $col2 !== null ) {
+				if ( isset( $row[$col2] ) ) {
 					$sort_col2[$key] = $row[$col2];
 				} else {
-					$sort_col2[$key] = NULL;
+					$sort_col2[$key] = null;
 				}
 			}
 		}
 
-		if ( strtolower($col1_order) == 'desc' OR $col1_order == -1 ) {
+		if ( strtolower( $col1_order ) == 'desc' || $col1_order == -1 ) {
 			$col1_order = SORT_DESC;
 		} else {
 			$col1_order = SORT_ASC;
 		}
 
-		if ( strtolower($col2_order) == 'desc' OR $col2_order == -1 ) {
+		if ( strtolower( $col2_order ) == 'desc' || $col2_order == -1 ) {
 			$col2_order = SORT_DESC;
 		} else {
 			$col2_order = SORT_ASC;
 		}
 
-		if ( is_array($sort_col2) AND count($sort_col2) > 0 ) {
-			array_multisort($sort_col1, $col1_order, $sort_col2, $col2_order, $data);
+		if ( is_array( $sort_col2 ) && count( $sort_col2 ) > 0 ) {
+			array_multisort( $sort_col1, $col1_order, $sort_col2, $col2_order, $data );
 		} else {
-			array_multisort($sort_col1, $col1_order, $data);
+			array_multisort( $sort_col1, $col1_order, $data );
 		}
 
 		$profiler->stopTimer( 'multiSort()' );
+
 		return $data;
 	}
 
@@ -104,36 +105,36 @@ class Sort {
 		global $profiler;
 		$profiler->startTimer( 'Sort()' );
 
-		if ( !is_array($array) ) {
-			return FALSE;
+		if ( !is_array( $array ) ) {
+			return false;
 		}
 
-		if ( !is_array($cols) ) {
+		if ( !is_array( $cols ) ) {
 			return $array; //No sorting to do.
 		}
 
-		$colarr = array();
-		foreach( $cols as $col => $order ) {
-			$colarr[$col] = array();
-			foreach( $array as $k => $row ) {
-				if ( isset($row[$col]) ) {
+		$colarr = [];
+		foreach ( $cols as $col => $order ) {
+			$colarr[$col] = [];
+			foreach ( $array as $k => $row ) {
+				if ( isset( $row[$col] ) ) {
 					//Check if the value is an array with a 'sort' column, ie: array('sort' => 12345678, 'display' => '01-Jan-10' )
-					if ( is_array($row[$col]) ) {
-						$colarr[$col]['_'.$k] = strtolower( $row[$col]['sort'] );
+					if ( is_array( $row[$col] ) ) {
+						$colarr[$col]['_' . $k] = strtolower( $row[$col]['sort'] );
 					} else {
-						$colarr[$col]['_'.$k] = strtolower( $row[$col] );
+						$colarr[$col]['_' . $k] = strtolower( $row[$col] );
 					}
 				} else {
 					//If the sorting column is invalid, use NULL value instead.
-					$colarr[$col]['_'.$k] = NULL;
+					$colarr[$col]['_' . $k] = null;
 				}
 			}
 		}
 
-		$params = array();
-		$order_type = array();
-		$tmp_order_element = array();
-		foreach( $cols as $col => $order ) {
+		$params = [];
+		$order_type = [];
+		$tmp_order_element = [];
+		foreach ( $cols as $col => $order ) {
 			$params[] = &$colarr[$col];
 			$order = (array)$order;
 
@@ -141,17 +142,17 @@ class Sort {
 			//the first value of each item in the column array. Because call_user_func_array() requires parameters based by reference
 			//we need to jump through hoops to make this an array that we can then later reference.
 			$order_type[$col] = SORT_REGULAR;
-			if ( isset($colarr[$col]['_0']) AND is_numeric($colarr[$col]['_0']) ) {
+			if ( isset( $colarr[$col]['_0'] ) && is_numeric( $colarr[$col]['_0'] ) ) {
 				//Debug::Text('Using Numeric Sorting for Column: '. $col .' based on: '. $colarr[$col]['_0'], __FILE__, __LINE__, __METHOD__, 10);
 				$order_type[$col] = SORT_NUMERIC;
 			}
 
-			foreach( $order as $order_element ) {
+			foreach ( $order as $order_element ) {
 				//pass by reference, as required by php 5.3
 				if ( !is_numeric( $order_element ) ) {
-					if ( strtolower($order_element) == 'asc' ) {
+					if ( strtolower( $order_element ) == 'asc' ) {
 						$tmp_order_element[$col] = SORT_ASC;
-					} elseif ( strtolower($order_element) == 'desc' ) {
+					} else if ( strtolower( $order_element ) == 'desc' ) {
 						$tmp_order_element[$col] = SORT_DESC;
 					}
 				} else {
@@ -164,29 +165,29 @@ class Sort {
 		}
 
 		//Debug::Arr($params, 'aSort Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		call_user_func_array('array_multisort', $params);
+		call_user_func_array( 'array_multisort', $params );
 		//Debug::Arr($params, 'bSort Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$retarr = array();
-		$keys = array();
-		$first = TRUE;
-		foreach( $colarr as $col => $arr ) {
-			foreach( $arr as $k => $v ) {
-				if ($first) {
-					$keys[$k] = substr($k, 1);
+		$retarr = [];
+		$keys = [];
+		$first = true;
+		foreach ( $colarr as $col => $arr ) {
+			foreach ( $arr as $k => $v ) {
+				if ( $first ) {
+					$keys[$k] = substr( $k, 1 );
 				}
 				$k = $keys[$k];
 
-				if ( !isset($retarr[$k]) ) {
+				if ( !isset( $retarr[$k] ) ) {
 					$retarr[$k] = $array[$k];
 				}
 
-				if ( isset($array[$k][$col]) ) {
+				if ( isset( $array[$k][$col] ) ) {
 					$retarr[$k][$col] = $array[$k][$col];
 				}
 			}
-			unset($v); //code standards
-			$first = FALSE;
+			unset( $v ); //code standards
+			$first = false;
 		}
 
 		$profiler->stopTimer( 'Sort()' );
@@ -194,4 +195,5 @@ class Sort {
 		return $retarr;
 	}
 }
+
 ?>

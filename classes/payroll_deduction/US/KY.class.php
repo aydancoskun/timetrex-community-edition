@@ -40,74 +40,74 @@
  */
 class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
-	var $state_income_tax_rate_options = array(
+	var $state_income_tax_rate_options = [
 		//20180101 - Switched to 5% flat rate, see getStateTaxPayable() below
-		20060101 => array(
-				0 => array(
-						array('income' => 3000, 'rate' => 2, 'constant' => 0),
-						array('income' => 4000, 'rate' => 3, 'constant' => 60),
-						array('income' => 5000, 'rate' => 4, 'constant' => 90),
-						array('income' => 8000, 'rate' => 5, 'constant' => 130),
-						array('income' => 75000, 'rate' => 5.8, 'constant' => 280),
-						array('income' => 75000, 'rate' => 6, 'constant' => 4166),
-				),
-		),
-	);
+		20060101 => [
+				0 => [
+						[ 'income' => 3000, 'rate' => 2, 'constant' => 0 ],
+						[ 'income' => 4000, 'rate' => 3, 'constant' => 60 ],
+						[ 'income' => 5000, 'rate' => 4, 'constant' => 90 ],
+						[ 'income' => 8000, 'rate' => 5, 'constant' => 130 ],
+						[ 'income' => 75000, 'rate' => 5.8, 'constant' => 280 ],
+						[ 'income' => 75000, 'rate' => 6, 'constant' => 4166 ],
+				],
+		],
+	];
 
-	var $state_options = array(
-			20200101 => array(
+	var $state_options = [
+			20200101 => [
 					'standard_deduction' => 2650,
 					'allowance'          => 0, //Removed as of 2018
-			),
-			20190101 => array(
+			],
+			20190101 => [
 					'standard_deduction' => 2590,
 					'allowance'          => 0, //Removed as of 2018
-			),
-			20180101 => array(
+			],
+			20180101 => [
 					'standard_deduction' => 2530,
 					'allowance'          => 0, //Removed as of 2018
-			),
-			20170101 => array(
+			],
+			20170101 => [
 					'standard_deduction' => 2480,
 					'allowance'          => 10,
-			),
-			20160101 => array(
+			],
+			20160101 => [
 					'standard_deduction' => 2460,
 					'allowance'          => 20,
-			),
-			20150101 => array(
+			],
+			20150101 => [
 					'standard_deduction' => 2440,
 					'allowance'          => 20,
-			),
-			20140101 => array(
+			],
+			20140101 => [
 					'standard_deduction' => 2400,
 					'allowance'          => 20,
-			),
-			20130101 => array(
+			],
+			20130101 => [
 					'standard_deduction' => 2360,
 					'allowance'          => 20,
-			),
-			20120101 => array(
+			],
+			20120101 => [
 					'standard_deduction' => 2290,
 					'allowance'          => 20,
-			),
-			20090101 => array(
+			],
+			20090101 => [
 					'standard_deduction' => 2190,
 					'allowance'          => 20,
-			),
-			20080101 => array(
+			],
+			20080101 => [
 					'standard_deduction' => 2100,
 					'allowance'          => 20,
-			),
-			20070101 => array(
+			],
+			20070101 => [
 					'standard_deduction' => 2050,
 					'allowance'          => 20,
-			),
-			20060101 => array(
+			],
+			20060101 => [
 					'standard_deduction' => 1970,
 					'allowance'          => 22,
-			),
-	);
+			],
+	];
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -122,9 +122,8 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 	function getStateStandardDeduction() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$retval = $retarr['standard_deduction'];
@@ -136,9 +135,8 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 	function getStateAllowanceAmount() {
 		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
-		if ( $retarr == FALSE ) {
-			return FALSE;
-
+		if ( $retarr == false ) {
+			return false;
 		}
 
 		$allowance_arr = $retarr['allowance'];
@@ -155,7 +153,7 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			if ( $this->getDate() >= 20180101 ) { //Switched to flat rate 5%
+			if ( $this->getDate() >= 20180101 ) {        //Switched to flat rate 5%
 				$retval = bcmul( $annual_income, 0.05 ); //5%
 			} else {
 				$rate = $this->getData()->getStateRate( $annual_income );

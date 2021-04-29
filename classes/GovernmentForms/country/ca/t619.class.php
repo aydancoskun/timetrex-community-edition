@@ -45,22 +45,22 @@ class GovernmentForms_CA_T619 extends GovernmentForms_CA {
 	public $xml_schema = 'layout-topologie.xsd';
 
 	public function getFilterFunction( $name ) {
-		$variable_function_map = array(
+		$variable_function_map = [
 			//'year' => 'isNumeric',
 			//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-		);
+		];
 
-		if ( isset( $variable_function_map[ $name ] ) ) {
-			return $variable_function_map[ $name ];
+		if ( isset( $variable_function_map[$name] ) ) {
+			return $variable_function_map[$name];
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	public function getTemplateSchema( $name = NULL ) {
-		$template_schema = array();
+	public function getTemplateSchema( $name = null ) {
+		$template_schema = [];
 
-		if ( isset( $template_schema[ $name ] ) ) {
+		if ( isset( $template_schema[$name] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -82,17 +82,17 @@ class GovernmentForms_CA_T619 extends GovernmentForms_CA {
 		}
 		$this->status = strtoupper( trim( $value ) );
 
-		return TRUE;
+		return true;
 	}
 
 	function filterPhone( $value ) {
 		//Strip non-digits.
 		$value = $this->stripNonNumeric( $value );
 		if ( $value != '' ) {
-			return array(substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ));
+			return [ substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ) ];
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	function _outputXML() {
@@ -105,17 +105,17 @@ class GovernmentForms_CA_T619 extends GovernmentForms_CA {
 		}
 		$xml->T619->addChild( 'sbmt_ref_id', $this->reference_id ); //Submission Reference Identification, unique 8 char alphanumeric.
 		//$xml->T619->addChild('rpt_tcd', 'O'); //Report Type, O = Original, A = Amended, C = Cancel. Entire batch must be the same I think.
-		$xml->T619->addChild( 'rpt_tcd', $this->getStatus() ); //Report Type, O = Original, A = Amended, C = Cancel. Entire batch must be the same I think.
+		$xml->T619->addChild( 'rpt_tcd', $this->getStatus() );      //Report Type, O = Original, A = Amended, C = Cancel. Entire batch must be the same I think.
 		if ( $this->transmitter_number == '' ) {
 			$this->transmitter_number = 'MM555555'; //Default transmitter number to use if they don't supply one.
 		}
-		$xml->T619->addChild( 'trnmtr_nbr', $this->transmitter_number ); //Transmitter number, provided by CRA if filing more then one return
-		$xml->T619->addChild( 'trnmtr_tcd', 4 ); //Transmitter type indicator.  1 = Submitting your returns, 2 = Submitting others returns (service providers), 3 = Submitting returns using a purchased software package, 4 = Software Vendor.
-		$xml->T619->addChild( 'summ_cnt', 0 ); //Total number of summary records.
-		$xml->T619->addChild( 'lang_cd', 'E' ); //Language
+		$xml->T619->addChild( 'trnmtr_nbr', $this->transmitter_number );                                                 //Transmitter number, provided by CRA if filing more then one return
+		$xml->T619->addChild( 'trnmtr_tcd', 4 );                                                                         //Transmitter type indicator.  1 = Submitting your returns, 2 = Submitting others returns (service providers), 3 = Submitting returns using a purchased software package, 4 = Software Vendor.
+		$xml->T619->addChild( 'summ_cnt', 0 );                                                                           //Total number of summary records.
+		$xml->T619->addChild( 'lang_cd', 'E' );                                                                          //Language
 
 		//Transmitter name
-		$xml->T619->addChild( 'TRNMTR_NM' ); //Employee name
+		$xml->T619->addChild( 'TRNMTR_NM' );                                                                             //Employee name
 		$xml->T619->TRNMTR_NM->addChild( 'l1_nm', substr( Misc::stripHTMLSpecialChars( $this->company_name ), 0, 30 ) ); //Transmitter name, max length 30.
 
 		//Transmitter Address
@@ -151,11 +151,11 @@ class GovernmentForms_CA_T619 extends GovernmentForms_CA {
 
 		$xml->addChild( 'Return' );
 
-		return TRUE;
+		return true;
 	}
 
 	function _outputPDF() {
-		return FALSE;
+		return false;
 	}
 }
 

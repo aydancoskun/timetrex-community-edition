@@ -46,7 +46,7 @@ class InstallSchema_1109A extends InstallSchema_Base {
 	function preInstall() {
 		Debug::text( 'preInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -56,7 +56,7 @@ class InstallSchema_1109A extends InstallSchema_Base {
 		Debug::text( 'postInstall: ' . $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9 );
 
 		//Handle new permissions.
-		$clf = TTNew('CompanyListFactory'); /** @var CompanyListFactory $clf */
+		$clf = TTNew( 'CompanyListFactory' ); /** @var CompanyListFactory $clf */
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			$x = 0;
@@ -65,7 +65,7 @@ class InstallSchema_1109A extends InstallSchema_Base {
 
 				//Go through each permission group, and adjust the Levels so we can fit Terminated Employee in.
 				$pclf = new PermissionControlListFactory;
-				$pclf->getByCompanyId( $company_obj->getId(), NULL, NULL, NULL, array('name' => 'asc') ); //Force order to prevent references to columns that haven't been created yet.
+				$pclf->getByCompanyId( $company_obj->getId(), null, null, null, [ 'name' => 'asc' ] ); //Force order to prevent references to columns that haven't been created yet.
 				if ( $pclf->getRecordCount() > 0 ) {
 					foreach ( $pclf as $pc_obj ) {
 
@@ -75,22 +75,22 @@ class InstallSchema_1109A extends InstallSchema_Base {
 							if ( $new_level > 100 ) {
 								$new_level = 100;
 							}
-						} elseif( $pc_obj->getLevel() >= 20 ) {
+						} else if ( $pc_obj->getLevel() >= 20 ) {
 							$new_level = ( $pc_obj->getLevel() + 60 );
-						} elseif( $pc_obj->getLevel() >= 18 ) {
+						} else if ( $pc_obj->getLevel() >= 18 ) {
 							$new_level = ( $pc_obj->getLevel() + 52 );
-						} elseif( $pc_obj->getLevel() >= 15 ) {
+						} else if ( $pc_obj->getLevel() >= 15 ) {
 							$new_level = ( $pc_obj->getLevel() + 35 );
-						} elseif( $pc_obj->getLevel() >= 10 ) {
+						} else if ( $pc_obj->getLevel() >= 10 ) {
 							$new_level = ( $pc_obj->getLevel() + 30 );
-						} elseif( $pc_obj->getLevel() >= 3 ) {
+						} else if ( $pc_obj->getLevel() >= 3 ) {
 							$new_level = ( $pc_obj->getLevel() + 27 );
-						} elseif( $pc_obj->getLevel() >= 2 ) {
+						} else if ( $pc_obj->getLevel() >= 2 ) {
 							$new_level = ( $pc_obj->getLevel() + 18 );
-						} elseif( $pc_obj->getLevel() >= 1 ) {
+						} else if ( $pc_obj->getLevel() >= 1 ) {
 							$new_level = ( $pc_obj->getLevel() + 9 );
 						}
-						Debug::text( 'Permission Group: '. $pc_obj->getName() .' Current Level: '. $pc_obj->getLevel() .' New Level: '. $new_level, __FILE__, __LINE__, __METHOD__, 9 );
+						Debug::text( 'Permission Group: ' . $pc_obj->getName() . ' Current Level: ' . $pc_obj->getLevel() . ' New Level: ' . $new_level, __FILE__, __LINE__, __METHOD__, 9 );
 
 						$pc_obj->setLevel( $new_level );
 						if ( $pc_obj->isValid() ) {
@@ -104,9 +104,9 @@ class InstallSchema_1109A extends InstallSchema_Base {
 				Debug::text( '  Add Terminated Employee permission group: ', __FILE__, __LINE__, __METHOD__, 9 );
 				$pf = new PermissionFactory;
 
-				$preset_flags = array_keys( $pf->getOptions('preset_flags') );
-				$preset_options = $pf->getOptions('preset');
-				$preset_level_options = $pf->getOptions('preset_level');
+				$preset_flags = array_keys( $pf->getOptions( 'preset_flags' ) );
+				$preset_options = $pf->getOptions( 'preset' );
+				$preset_level_options = $pf->getOptions( 'preset_level' );
 
 				$pcf = TTnew( 'PermissionControlFactory' ); /** @var PermissionControlFactory $pcf */
 				$pcf->setCompany( $company_obj->getID() );
@@ -114,11 +114,11 @@ class InstallSchema_1109A extends InstallSchema_Base {
 				$pcf->setDescription( '' );
 				$pcf->setLevel( $preset_level_options[5] );
 				if ( $pcf->isValid() ) {
-					$pcf_id = $pcf->Save( FALSE );
+					$pcf_id = $pcf->Save( false );
 					$pf->applyPreset( $pcf_id, 5, $preset_flags );
 
 					Debug::Text( '  Terminated Employee Permission Group ID: ' . $pcf_id, __FILE__, __LINE__, __METHOD__, 10 );
-					if ( TTUUID::isUUID( $pcf_id ) AND $pcf_id != TTUUID::getZeroID() ) {
+					if ( TTUUID::isUUID( $pcf_id ) && $pcf_id != TTUUID::getZeroID() ) {
 						//Add terminated employee permission group to User Defaults
 						$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 						$udlf->getByCompanyId( $company_obj->getID() );
@@ -140,38 +140,38 @@ class InstallSchema_1109A extends InstallSchema_Base {
 							foreach ( $ulf as $user_obj ) {
 								Debug::Text( 'Updating User: ' . $user_obj->getId() . ' Username: ' . $user_obj->getUserName(), __FILE__, __LINE__, __METHOD__, 10 );
 
-								$login_expire_date = NULL;
+								$login_expire_date = null;
 								if ( $user_obj->getStatus() != 10 ) {
-									$enable_login = FALSE;
+									$enable_login = false;
 									if ( $user_obj->getTerminationDate() != '' ) {
 										$login_expire_date = TTDate::incrementDate( ( ( $company_obj->getTerminatedUserDisableLoginType() == 10 ) ? TTDate::getEndYearEpoch( $user_obj->getTerminationDate() ) : $user_obj->getTerminationDate() ), $company_obj->getTerminatedUserDisableLoginAfterDays(), 'day' );
 										if ( TTDate::getMiddleDayEpoch( $login_expire_date ) > TTDate::getMiddleDayEpoch( time() ) ) {
-											$enable_login = TRUE;
+											$enable_login = true;
 										} else {
-											$login_expire_date = NULL;
+											$login_expire_date = null;
 										}
 									}
 								} else {
-									$enable_login = TRUE;
+									$enable_login = true;
 								}
 
 								//Update user with direct SQL query to speed it up and avoid running into non-related validation errors like wage effective dates and such.
-								$ph = array(
-										'enable_login' => (int)$enable_login,
-										'login_expire_date' => ( $login_expire_date !== NULL ) ? $this->db->bindDate( $login_expire_date ) : NULL,
+								$ph = [
+										'enable_login'                     => (int)$enable_login,
+										'login_expire_date'                => ( $login_expire_date !== null ) ? $this->db->bindDate( $login_expire_date ) : null,
 										'terminated_permission_control_id' => $pcf_id,
-								);
+								];
 
 								$ph[] = $user_obj->getId(); //User ID
 
 								//Fix cases where birth date is the same or after the hire date.
 								$birth_date_sql = '';
-								if ( $user_obj->getBirthDate() != '' AND $user_obj->getHireDate() != '' AND TTDate::getMiddleDayEpoch( $user_obj->getBirthDate() ) >= TTDate::getMiddleDayEpoch( $user_obj->getHireDate() ) ) {
-									Debug::Text( '  Birth Date ('. TTDate::getDATE('DATE', $user_obj->getBirthDate() ) .') is on or after Hire Date ('. TTDate::getDATE('DATE', $user_obj->getHireDate() ) .'), clearing it... User: ' . $user_obj->getId() . ' Username: ' . $user_obj->getUserName(), __FILE__, __LINE__, __METHOD__, 10 );
+								if ( $user_obj->getBirthDate() != '' && $user_obj->getHireDate() != '' && TTDate::getMiddleDayEpoch( $user_obj->getBirthDate() ) >= TTDate::getMiddleDayEpoch( $user_obj->getHireDate() ) ) {
+									Debug::Text( '  Birth Date (' . TTDate::getDATE( 'DATE', $user_obj->getBirthDate() ) . ') is on or after Hire Date (' . TTDate::getDATE( 'DATE', $user_obj->getHireDate() ) . '), clearing it... User: ' . $user_obj->getId() . ' Username: ' . $user_obj->getUserName(), __FILE__, __LINE__, __METHOD__, 10 );
 									$birth_date_sql = ', birth_date = NULL'; //Only update birth_date if its invalid. Otherwise don't modify it at all to make sure its modified to be incorrect somehow.
 								}
 
-								$query = 'UPDATE '. $user_obj->getTable() .' SET enable_login = ?, login_expire_date = ?, terminated_permission_control_id = ? '. $birth_date_sql .' WHERE id = ?';
+								$query = 'UPDATE ' . $user_obj->getTable() . ' SET enable_login = ?, login_expire_date = ?, terminated_permission_control_id = ? ' . $birth_date_sql . ' WHERE id = ?';
 								//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10 );
 								$this->db->Execute( $query, $ph );
 								unset( $enable_login, $login_expire_date );
@@ -180,13 +180,14 @@ class InstallSchema_1109A extends InstallSchema_Base {
 						unset( $ulf, $user_obj );
 					}
 				}
-				unset($preset_flags, $preset_options, $preset_level_options, $pcf, $pf, $pcf_id);
+				unset( $preset_flags, $preset_options, $preset_level_options, $pcf, $pf, $pcf_id );
 
 				$x++;
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 }
+
 ?>

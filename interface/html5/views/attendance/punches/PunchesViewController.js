@@ -17,7 +17,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	is_mass_adding: false,
 
-	init: function ( options ) {
+	init: function( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PunchesEditView.html';
 		this.permission_id = 'punch';
@@ -45,7 +45,7 @@ PunchesViewController = BaseViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary();
 	},
 
-	jobUIValidate: function ( p_id ) {
+	jobUIValidate: function( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -58,7 +58,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	jobItemUIValidate: function ( p_id ) {
+	jobItemUIValidate: function( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -71,7 +71,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	branchUIValidate: function ( p_id ) {
+	branchUIValidate: function( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -83,7 +83,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	departmentUIValidate: function ( p_id ) {
+	departmentUIValidate: function( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -95,7 +95,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	goodQuantityUIValidate: function ( p_id ) {
+	goodQuantityUIValidate: function( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -107,7 +107,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	badQuantityUIValidate: function ( p_id ) {
+	badQuantityUIValidate: function( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -120,7 +120,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	noteUIValidate: function ( p_id ) {
+	noteUIValidate: function( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -132,7 +132,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	stationValidate: function () {
+	stationValidate: function() {
 		if ( PermissionManager.validate( 'station', 'enabled' ) ) {
 			return true;
 		}
@@ -140,7 +140,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	//Speical permission check for views, need override
-	initPermission: function () {
+	initPermission: function() {
 		this._super( 'initPermission' );
 
 		if ( this.jobUIValidate() ) {
@@ -193,7 +193,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	initOptions: function () {
+	initOptions: function() {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
@@ -203,7 +203,7 @@ PunchesViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'status', 'user_status_id', this.user_api, null, 'user_status_array' );
 
 		this.user_group_api.getUserGroup( '', false, false, {
-			onResult: function ( res ) {
+			onResult: function( res ) {
 				res = res.getResult();
 
 				res = Global.buildTreeRecord( res );
@@ -216,17 +216,17 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onEditStationDone: function () {
+	onEditStationDone: function() {
 		this.setStation();
 	},
 
-	setStation: function () {
+	setStation: function() {
 
 		var $this = this;
 		var arg = { filter_data: { id: this.current_edit_record.station_id } };
 
 		this.api_station.getStation( arg, {
-			onResult: function ( result ) {
+			onResult: function( result ) {
 				$this.station = result.getResult()[0];
 				var widget = $this.edit_view_ui_dic['station_id'];
 				widget.setValue( $this.station.type + '-' + $this.station.description );
@@ -236,7 +236,7 @@ PunchesViewController = BaseViewController.extend( {
 		} );
 	},
 
-	uniformVariable: function ( records ) {
+	uniformVariable: function( records ) {
 		if ( !records.hasOwnProperty( 'time_stamp' ) ) {
 			records.time_stamp = false;
 		}
@@ -244,7 +244,7 @@ PunchesViewController = BaseViewController.extend( {
 		return records;
 	},
 
-	buildEditViewUI: function () {
+	buildEditViewUI: function() {
 
 		this._super( 'buildEditViewUI' );
 
@@ -334,7 +334,7 @@ PunchesViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 
 		// Check if view only mode. To prevent option appearing but disabled, as disabled checkboxes are not very clear - same in TimeSheetViewController
-		if( this.is_viewing ) {
+		if ( this.is_viewing ) {
 			// dev-note: not sure if we need to pass widgetContainer here, or if we can omit if its only one element now (due to the if is_viewing).
 			// to be safe, will continue to use widgetContainer for this case. We only want to affect viewing mode (hide rounding checkbox), less risk of regression to keep widget container in.
 			this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab_punch_column1, '', widgetContainer, true );
@@ -397,7 +397,7 @@ PunchesViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: ( function ( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_coder.setValue( val.manual_id );
@@ -429,7 +429,7 @@ PunchesViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: ( function ( val ) {
+				setRealValueCallBack: ( function( val ) {
 					if ( val ) {
 						job_item_coder.setValue( val.manual_id );
 					}
@@ -516,7 +516,7 @@ PunchesViewController = BaseViewController.extend( {
 			this.location_wrapper.append( accuracy );
 			this.location_wrapper.append( $( '<span>m</span>' ) );
 			this.addEditFieldToColumn( $.i18n._( 'Location' ), [latitude, longitude, accuracy], tab_punch_column1, '', widgetContainer, true );
-			widgetContainer.click( function () {
+			widgetContainer.click( function() {
 				$this.onMapClick();
 			} );
 
@@ -543,7 +543,7 @@ PunchesViewController = BaseViewController.extend( {
 		form_item_input.TText( { field: 'station_id' } );
 		this.addEditFieldToColumn( $.i18n._( 'Station' ), form_item_input, tab_punch_column1, '', null, true, true );
 
-		form_item_input.click( function () {
+		form_item_input.click( function() {
 			if ( $this.current_edit_record.station_id && $this.show_station_ui ) {
 				IndexViewController.openEditView( $this, 'Station', $this.current_edit_record.station_id );
 			}
@@ -563,7 +563,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	//set widget disablebility if view mode or edit mode
-	setEditViewWidgetsMode: function () {
+	setEditViewWidgetsMode: function() {
 		var did_clean_dic = {};
 		for ( var key in this.edit_view_ui_dic ) {
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
@@ -620,7 +620,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	//Make sure this.current_edit_record is updated before validate
-	validate: function () {
+	validate: function() {
 
 		var $this = this;
 
@@ -656,7 +656,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		this.api['validate' + this.api.key_name]( record, {
-			onResult: function ( result ) {
+			onResult: function( result ) {
 				$this.validateResult( result );
 
 			}
@@ -666,10 +666,10 @@ PunchesViewController = BaseViewController.extend( {
 	// TODO: not ideal to need to have this here. want to use the base view version,
 	//  but need this in order to prevent it using the uniformVariable function in BaseViewController version,
 	//  as Punches uniformVariable function does something additional
-	buildMassEditSaveRecord: function ( mass_edit_record_ids, changed_fields ) {
+	buildMassEditSaveRecord: function( mass_edit_record_ids, changed_fields ) {
 		var $this = this;
 		var mass_records = [];
-		$.each( mass_edit_record_ids, function ( index, value ) {
+		$.each( mass_edit_record_ids, function( index, value ) {
 			var common_record = Global.clone( changed_fields );
 			common_record.id = value;
 			mass_records.push( common_record );
@@ -677,7 +677,7 @@ PunchesViewController = BaseViewController.extend( {
 		return mass_records;
 	},
 
-	buildMassAddRecord: function ( current_edit_record ) {
+	buildMassAddRecord: function( current_edit_record ) {
 		var record = [];
 		var dates_array = current_edit_record.punch_dates;
 
@@ -708,7 +708,7 @@ PunchesViewController = BaseViewController.extend( {
 		return record;
 	},
 
-	parserDatesRange: function ( date ) {
+	parserDatesRange: function( date ) {
 		var dates = date.split( ' - ' );
 		var resultArray = [];
 		var beginDate = Global.strToDate( dates[0] );
@@ -726,7 +726,7 @@ PunchesViewController = BaseViewController.extend( {
 		return resultArray;
 	},
 
-	setCurrentEditRecordData: function () {
+	setCurrentEditRecordData: function() {
 
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -756,7 +756,6 @@ PunchesViewController = BaseViewController.extend( {
 						break;
 					case 'job_id':
 						if ( ( Global.getProductEdition() >= 20 ) ) {
-
 							var args = {};
 							args.filter_data = { status_id: 10, user_id: this.current_edit_record.user_id };
 							widget.setDefaultArgs( args );
@@ -765,7 +764,7 @@ PunchesViewController = BaseViewController.extend( {
 						break;
 					case 'job_item_id':
 						if ( ( Global.getProductEdition() >= 20 ) ) {
-							args = {};
+							var args = {};
 							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
 							widget.setValue( this.current_edit_record[key] );
@@ -822,9 +821,9 @@ PunchesViewController = BaseViewController.extend( {
 		this.isEditChange();
 
 	},
-	setLocationValue: function ( location_data ) {
+	setLocationValue: function( location_data ) {
 		if ( Global.getProductEdition() >= 15 ) {
-			if( location_data ) {
+			if ( location_data ) {
 				this.current_edit_record.latitude = location_data.latitude;
 				this.current_edit_record.longitude = location_data.longitude;
 				this.current_edit_record.position_accuracy = location_data.position_accuracy; //If position is manually modified, it should always be set to 0m.
@@ -842,7 +841,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	isEditChange: function () {
+	isEditChange: function() {
 
 		if ( this.current_edit_record.id || this.is_mass_editing ) {
 			this.edit_view_ui_dic['user_id'].setEnabled( false );
@@ -852,7 +851,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	//set tab 0 visible after all data set done. This be hide when init edit view data
-	setEditViewDataDone: function () {
+	setEditViewDataDone: function() {
 		// Remove this on 14.9.14 because adding tab url support, ned set url when tab index change and
 		// need know what's current doing action. See if this cause any problem
 		//LocalCacheData.current_doing_context_action = '';
@@ -876,68 +875,21 @@ PunchesViewController = BaseViewController.extend( {
 		TTPromise.resolve( 'init', 'init' );
 	},
 
-	initSubLogView: function ( tab_id ) {
-		var $this = this;
-
-		if ( !this.current_edit_record.id ) {
-			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
-			return;
+	setSubLogViewFilter: function() {
+		if ( !this.sub_log_view_controller ) {
+			return false;
 		}
 
-		if ( this.sub_log_view_controller ) {
-			this.sub_log_view_controller.buildContextMenu( true );
-			this.sub_log_view_controller.setDefaultMenu();
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function ( filter ) {
-
-				filter['table_name_object_id'] = {
-					'punch': [this.parent_edit_record.id],
-					'punch_control': [this.parent_edit_record.punch_control_id]
-				};
-
-				return filter;
+		this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+			filter['table_name_object_id'] = {
+				'punch': [this.parent_edit_record.id],
+				'punch_control': [this.parent_edit_record.punch_control_id]
 			};
 
-			$this.sub_log_view_controller.initData();
-			return;
-		}
+			return filter;
+		};
 
-		Global.loadScript( 'views/core/log/LogViewController.js', function () {
-			var tab = $this.edit_view_tab.find( '#' + tab_id );
-
-			var firstColumn = tab.find( '.first-column-sub-view' );
-
-			TTPromise.add( 'initSubAudit', 'init' );
-			TTPromise.wait( 'initSubAudit', 'init', function () {
-				firstColumn.css( 'opacity', '1' );
-			} );
-
-			firstColumn.css( 'opacity', '0' ); //Hide the grid while its loading/sizing.
-
-			Global.trackView( 'Sub' + 'Log' + 'View' );
-			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-		} );
-
-		function beforeLoadView() {
-
-		}
-
-		function afterLoadView( subViewController ) {
-			$this.sub_log_view_controller = subViewController;
-			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function ( filter ) {
-				filter['table_name_object_id'] = {
-					'punch': [this.parent_edit_record.id],
-					'punch_control': [this.parent_edit_record.punch_control_id]
-				};
-
-				return filter;
-			};
-			$this.sub_log_view_controller.parent_view_controller = $this;
-			$this.sub_log_view_controller.postInit = function () {
-				this.initData();
-			};
-		}
+		return true;
 	},
 
 //	showNoResultCover: function() {
@@ -954,7 +906,7 @@ PunchesViewController = BaseViewController.extend( {
 //		this.initRightClickMenu( RightClickMenuType.NORESULTBOX );
 //	},
 
-	buildOtherFieldUI: function ( field, label ) {
+	buildOtherFieldUI: function( field, label ) {
 
 		if ( !this.edit_view_tab ) {
 			return;
@@ -988,7 +940,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onAddResult: function ( result ) {
+	onAddResult: function( result ) {
 		var $this = this;
 		var result_data = result.getResult();
 
@@ -1007,7 +959,7 @@ PunchesViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	buildSearchFields: function () {
+	buildSearchFields: function() {
 
 		this._super( 'buildSearchFields' );
 		var default_args = { permission_section: 'punch' };
@@ -1193,7 +1145,7 @@ PunchesViewController = BaseViewController.extend( {
 		];
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: [
@@ -1233,7 +1185,7 @@ PunchesViewController = BaseViewController.extend( {
 		return context_menu_model;
 	},
 
-	onMapClick: function () {
+	onMapClick: function() {
 		// only trigger map load in specific product editions.
 		if ( ( Global.getProductEdition() >= 15 ) ) {
 			ProgressBar.showProgressBar();
@@ -1260,7 +1212,7 @@ PunchesViewController = BaseViewController.extend( {
 				//check for mass edit as well. <-- not sure what this refers to, assuming the same happens in mass edit, but maps are disabled on mass edit atm.
 				punches.push( this.current_edit_record );
 				// from the edit view we want to allow single markers to be draggable.
-				if( !this.is_viewing ) {
+				if ( !this.is_viewing ) {
 					// make sure that when view only (so no save) marker is not draggable, and thus no new marker can be added either.
 					map_options.single_marker_draggable = true;
 				}
@@ -1330,7 +1282,7 @@ PunchesViewController = BaseViewController.extend( {
 		} );
 	},
 
-	setDefaultMenu: function ( doNotSetFocus ) {
+	setDefaultMenu: function( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -1419,7 +1371,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	setEditMenu: function () {
+	setEditMenu: function() {
 
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
@@ -1505,7 +1457,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onNavigationClick: function ( iconName ) {
+	onNavigationClick: function( iconName ) {
 		var $this = this;
 		var filter;
 		var temp_filter;
@@ -1533,7 +1485,7 @@ PunchesViewController = BaseViewController.extend( {
 						temp_filter.filter_data.id = [selectedId];
 
 						this.api['get' + this.api.key_name]( temp_filter, {
-							onResult: function ( result ) {
+							onResult: function( result ) {
 
 								var result_data = result.getResult();
 
@@ -1573,7 +1525,7 @@ PunchesViewController = BaseViewController.extend( {
 						temp_filter.filter_data.id = [selectedId];
 
 						this.api['get' + this.api.key_name]( temp_filter, {
-							onResult: function ( result ) {
+							onResult: function( result ) {
 								var result_data = result.getResult();
 
 								if ( !result_data ) {
@@ -1593,7 +1545,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 	},
 
-	setEditMenuSaveAndContinueIcon: function ( context_btn, pId ) {
+	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn, pId );
 
 		if ( this.is_mass_editing || this.is_viewing || this.isMassDateOrMassUser() ) {
@@ -1608,9 +1560,9 @@ PunchesViewController = BaseViewController.extend( {
 		return data;
 	},
 
-	_continueDoCopyAsNew: function () {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
-		this.setCurrentEditViewState('new');
+		this.setCurrentEditViewState( 'new' );
 		this.is_mass_adding = true;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
@@ -1628,7 +1580,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 	},
 
-	isMassDateOrMassUser: function () {
+	isMassDateOrMassUser: function() {
 		if ( this.is_mass_adding ) {
 			if ( this.current_edit_record.punch_dates && this.current_edit_record.punch_dates.length > 1 ) {
 				return true;
@@ -1644,7 +1596,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	onSaveAndCopy: function ( ignoreWarning ) {
+	onSaveAndCopy: function( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -1661,19 +1613,19 @@ PunchesViewController = BaseViewController.extend( {
 
 		this.clearNavigationData();
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function ( result ) {
+			onResult: function( result ) {
 				$this.onSaveAndCopyResult( result );
 
 			}
 		} );
 	},
 
-	onSaveAndNewClick: function ( ignoreWarning ) {
+	onSaveAndNewClick: function( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
-		this.setCurrentEditViewState('new');
+		this.setCurrentEditViewState( 'new' );
 		var record = this.current_edit_record;
 		if ( this.is_mass_adding ) {
 			record = this.buildMassAddRecord( record );
@@ -1681,14 +1633,14 @@ PunchesViewController = BaseViewController.extend( {
 			record = this.uniformVariable( record );
 		}
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function ( result ) {
+			onResult: function( result ) {
 				$this.onSaveAndNewResult( result );
 
 			}
 		} );
 	},
 
-	onMassEditClick: function () {
+	onMassEditClick: function() {
 
 		var $this = this;
 		$this.is_add = false;
@@ -1702,7 +1654,7 @@ PunchesViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 		this.mass_edit_record_ids = [];
 
-		$.each( grid_selected_id_array, function ( index, value ) {
+		$.each( grid_selected_id_array, function( index, value ) {
 			$this.mass_edit_record_ids.push( value );
 		} );
 
@@ -1710,7 +1662,7 @@ PunchesViewController = BaseViewController.extend( {
 		filter.filter_data.id = this.mass_edit_record_ids;
 
 		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
-			onResult: function ( result ) {
+			onResult: function( result ) {
 				var result_data = result.getResult();
 
 				if ( !result_data ) {
@@ -1718,10 +1670,10 @@ PunchesViewController = BaseViewController.extend( {
 				}
 
 				$this.api['getOptions']( 'unique_columns', {
-					onResult: function ( result ) {
+					onResult: function( result ) {
 						$this.unique_columns = result.getResult();
 						$this.api['getOptions']( 'linked_columns', {
-							onResult: function ( result1 ) {
+							onResult: function( result1 ) {
 								$this.linked_columns = result1.getResult();
 
 								if ( $this.sub_view_mode && $this.parent_key ) {
@@ -1742,7 +1694,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveAndContinue: function ( ignoreWarning ) {
+	onSaveAndContinue: function( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -1765,13 +1717,13 @@ PunchesViewController = BaseViewController.extend( {
 		this.current_edit_record = this.uniformVariable( this.current_edit_record );
 
 		this.api['set' + this.api.key_name]( this.current_edit_record, false, ignoreWarning, {
-			onResult: function ( result ) {
+			onResult: function( result ) {
 				$this.onSaveAndContinueResult( result );
 			}
 		} );
 	},
 
-	onFormItemChange: function ( target, doNotValidate ) {
+	onFormItemChange: function( target, doNotValidate ) {
 
 		var $this = this;
 		this.setIsChanged( target );
@@ -1829,25 +1781,25 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onMapSaveClick: function(dataset, successCallback) {
-		this.savePunchPosition(dataset, successCallback);
+	onMapSaveClick: function( dataset, successCallback ) {
+		this.savePunchPosition( dataset, successCallback );
 	},
 
-	savePunchPosition: function (moved_unsaved_markers, successCallback) {
-		if ( !moved_unsaved_markers || moved_unsaved_markers.length !== 1) {
+	savePunchPosition: function( moved_unsaved_markers, successCallback ) {
+		if ( !moved_unsaved_markers || moved_unsaved_markers.length !== 1 ) {
 			Debug.Text( 'ERROR: Invalid params/data passed to function.', 'PunchesViewController.js', 'PunchesViewController', 'savePunchPosition', 1 );
 			return false;
 		}
 
 		// Regardless of record type, we want to just pass the value back, rather than a api save from map, then another save from parent view.
 		// Map info will only be saved if user clicks save on the parent edit view.
-		this.setLocationValue(moved_unsaved_markers[0]);
+		this.setLocationValue( moved_unsaved_markers[0] );
 		successCallback();
 		this.is_changed = true;
 		return true;
 	},
 
-	getSelectEmployee: function ( full_item ) {
+	getSelectEmployee: function( full_item ) {
 		var user;
 		if ( full_item ) {
 			user = LocalCacheData.getLoginUser();
@@ -1857,7 +1809,7 @@ PunchesViewController = BaseViewController.extend( {
 		return user;
 	},
 
-	getFilterColumnsFromDisplayColumns: function ( column_filter, enable_system_columns ) {
+	getFilterColumnsFromDisplayColumns: function( column_filter, enable_system_columns ) {
 		if ( column_filter == undefined ) {
 			column_filter = {};
 		}

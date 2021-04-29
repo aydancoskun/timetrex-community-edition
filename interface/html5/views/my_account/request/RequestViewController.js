@@ -14,7 +14,6 @@ RequestViewController = RequestViewCommonController.extend( {
 	hierarchy_type_id: false,
 	messages: null,
 
-
 	init: function( options ) {
 		//this._super('initialize', options);
 		this.edit_view_tpl = 'RequestEditView.html';
@@ -24,20 +23,20 @@ RequestViewController = RequestViewCommonController.extend( {
 		this.table_name_key = 'request';
 		this.context_menu_name = $.i18n._( 'Requests' );
 		this.navigation_label = $.i18n._( 'Request' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRequest' ))();
-		this.api_absence_policy = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
-		this.api_schedule = new (APIFactory.getAPIClass( 'APISchedule' ))();
-		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
+		this.api_absence_policy = new ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) )();
+		this.api_schedule = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
+		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
 
 		if ( ( Global.getProductEdition() >= 15 ) ) {
-			this.api_request_schedule = new (APIFactory.getAPIClass( 'APIRequestSchedule' ))();
+			this.api_request_schedule = new ( APIFactory.getAPIClass( 'APIRequestSchedule' ) )();
 		}
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 		}
 
-		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
+		this.authorization_api = new ( APIFactory.getAPIClass( 'APIAuthorization' ) )();
 
 		this.initPermission();
 		this.render();
@@ -213,7 +212,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			widgetContainer.append( fri );
 			widgetContainer.append( sat );
 
-			widgetContainer.addClass('request_edit_view_effective_days');
+			widgetContainer.addClass( 'request_edit_view_effective_days' );
 
 			this.addEditFieldToColumn( $.i18n._( 'Effective Days' ), [form_item_sun_checkbox, form_item_mon_checkbox, form_item_tue_checkbox, form_item_wed_checkbox, form_item_thu_checkbox, form_item_fri_checkbox, form_item_sat_checkbox], tab_request_column1, '', widgetContainer, false, true );
 
@@ -235,7 +234,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			//Schedule Policy
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APISchedulePolicy' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
 				show_search_inputs: true,
@@ -247,7 +246,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			//Absence Policy
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 				customSearchFilter: function() {
 					return { filter_data: { user_id: LocalCacheData.getLoginUser().id } };
 				},
@@ -270,7 +269,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			//branch
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.BRANCH,
 				show_search_inputs: true,
@@ -284,7 +283,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			//Dept
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.DEPARTMENT,
 				show_search_inputs: true,
@@ -301,17 +300,17 @@ RequestViewController = RequestViewCommonController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APIJob' )),
+					api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB,
 					show_search_inputs: true,
 					set_empty: true,
-					setRealValueCallBack: (function( val ) {
+					setRealValueCallBack: ( function( val ) {
 
 						if ( val ) {
 							job_coder.setValue( val.manual_id );
 						}
-					}),
+					} ),
 					field: 'job_id',
 					added_items: [
 						{ value: '-1', label: Global.default_item },
@@ -329,7 +328,6 @@ RequestViewController = RequestViewCommonController.extend( {
 				widgetContainer.append( form_item_input );
 				this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_request_column1, '', widgetContainer, true );
 
-
 				if ( !this.show_job_ui ) {
 					//invalid permissions
 					this.detachElement( 'job_id' );
@@ -338,17 +336,17 @@ RequestViewController = RequestViewCommonController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+					api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB_ITEM,
 					show_search_inputs: true,
 					set_empty: true,
-					setRealValueCallBack: (function( val ) {
+					setRealValueCallBack: ( function( val ) {
 
 						if ( val ) {
 							job_item_coder.setValue( val.manual_id );
 						}
-					}),
+					} ),
 					field: 'job_item_id',
 					added_items: [
 						{ value: '-1', label: Global.default_item },
@@ -398,7 +396,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -450,7 +448,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -462,7 +460,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -471,7 +469,7 @@ RequestViewController = RequestViewCommonController.extend( {
 		];
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -602,7 +600,6 @@ RequestViewController = RequestViewCommonController.extend( {
 		var $this = this;
 		this._super( 'setEditViewDataDone' );
 		if ( this.is_viewing ) {
-
 
 		} else {
 			if ( Global.isSet( $this.messages ) ) {
@@ -815,7 +812,7 @@ RequestViewController = RequestViewCommonController.extend( {
 	},
 
 	onTypeChanged: function( arg ) {
-		if ( this.current_edit_record && Global.getProductEdition() >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) && (this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40) ) { //schedule adjustment || absence selected
+		if ( this.current_edit_record && Global.getProductEdition() >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) { //schedule adjustment || absence selected
 
 			if ( this.edit_view_ui_dic.date_stamp ) {
 				this.edit_view_ui_dic.date_stamp.parents( '.edit-view-form-item-div' ).hide();
@@ -837,7 +834,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			}
 			this.onWorkingStatusChanged();
 
-			$this = this;
+			var $this = this;
 			this.setRequestFormDefaultData( arg, function() {
 				$this.getAvailableBalance();
 				$this.setCurrentEditRecordData( this.current_edit_record );
@@ -906,9 +903,9 @@ RequestViewController = RequestViewCommonController.extend( {
 		} else {
 			retval = true;
 		}
-		$().TFeedback({
+		$().TFeedback( {
 			source: 'Send'
-		});
+		} );
 		return retval;
 	},
 
@@ -941,7 +938,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			ignoreWarning = false;
 		}
 
-		for ( key in $this.current_edit_record ) {
+		for ( var key in $this.current_edit_record ) {
 			if ( $this.edit_view_ui_dic[key] != undefined ) {
 				$this.current_edit_record[key] = $this.edit_view_ui_dic[key].getValue();
 			}
@@ -962,16 +959,16 @@ RequestViewController = RequestViewCommonController.extend( {
 			this.setCurrentEditRecordData();
 			record = this.uniformVariable( this.current_edit_record );
 			EmbeddedMessage.reply( [record], ignoreWarning, function( result ) {
-						if ( result.isValid() ) {
-							var id = $this.current_edit_record.id;
-							//see #2224 - Unable to get property 'find' of undefined
-							$this.removeEditView();
-							$this.onViewClick( id );
-						} else {
-							$this.setErrorTips( result );
-							$this.setErrorMenu();
-						}
+					if ( result.isValid() ) {
+						var id = $this.current_edit_record.id;
+						//see #2224 - Unable to get property 'find' of undefined
+						$this.removeEditView();
+						$this.onViewClick( id );
+					} else {
+						$this.setErrorTips( result );
+						$this.setErrorMenu();
 					}
+				}
 			);
 		}
 	},
@@ -1140,18 +1137,18 @@ RequestViewController = RequestViewCommonController.extend( {
 
 		function finishFormItemChange() {
 			if ( key === 'date_stamp' ||
-					key === 'start_date_stamps' ||
-					key === 'start_date' ||
-					key === 'end_date' ||
-					key === 'start_date_stamp' ||
-					key === 'start_time' ||
-					key === 'end_time' ||
-					key === 'schedule_policy_id' ||
-					key === 'absence_policy_id' ) {
+				key === 'start_date_stamps' ||
+				key === 'start_date' ||
+				key === 'end_date' ||
+				key === 'start_date_stamp' ||
+				key === 'start_time' ||
+				key === 'end_time' ||
+				key === 'schedule_policy_id' ||
+				key === 'absence_policy_id' ) {
 
 				if ( $this.current_edit_record['date_stamp'] !== '' &&
-						$this.current_edit_record['start_time'] !== '' &&
-						$this.current_edit_record['end_time'] !== '' ) {
+					$this.current_edit_record['start_time'] !== '' &&
+					$this.current_edit_record['end_time'] !== '' ) {
 
 					$this.getScheduleTotalTime();
 				} else {

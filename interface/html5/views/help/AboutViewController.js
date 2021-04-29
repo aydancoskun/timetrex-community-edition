@@ -14,8 +14,8 @@ AboutViewController = BaseViewController.extend( {
 		this.viewId = 'About';
 		this.script_name = 'AboutView';
 		this.context_menu_name = $.i18n._( 'About' );
-		this.api = new (APIFactory.getAPIClass( 'APIAbout' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIAbout' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 
 		this.render();
 
@@ -421,12 +421,10 @@ AboutViewController = BaseViewController.extend( {
 		form_item_input.TText( { field: 'schema_version_group_C' } );
 		this.addEditFieldToColumn( $.i18n._( 'Group C' ), form_item_input, tab_about_column1 );
 
-
 		// Group D
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'schema_version_group_D' } );
 		this.addEditFieldToColumn( $.i18n._( 'Group D' ), form_item_input, tab_about_column1 );
-
 
 		// Separated Box
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
@@ -452,12 +450,11 @@ AboutViewController = BaseViewController.extend( {
 				} else {
 					//TAlertManager.showAlert( $.i18n._( 'Invalid license file' ) )
 					TAlertManager.showAlert( res );
-					$( '#file_browser').val(''); //Clear the file name from beside the "Choose File" button.
+					$( '#file_browser' ).val( '' ); //Clear the file name from beside the "Choose File" button.
 				}
 
 			}
 		} );
 	}
-
 
 } );

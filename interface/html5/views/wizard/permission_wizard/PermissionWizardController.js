@@ -15,7 +15,7 @@ PermissionWizardController = BaseWizardController.extend( {
 
 	render: function() {
 		this._super( 'render' );
-		this.api_permission = new (APIFactory.getAPIClass( 'APIPermission' ))();
+		this.api_permission = new ( APIFactory.getAPIClass( 'APIPermission' ) )();
 		this.initCurrentStep();
 
 	},
@@ -301,6 +301,5 @@ PermissionWizardController = BaseWizardController.extend( {
 		}
 
 	}
-
 
 } );

@@ -22,8 +22,8 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		this.table_name_key = 'recurring_holiday';
 		this.context_menu_name = $.i18n._( 'Recurring Holiday' );
 		this.navigation_label = $.i18n._( 'Recurring Holiday' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRecurringHoliday' ))();
-		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRecurringHoliday' ) )();
+		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
 		this.render();
 		this.buildContextMenu();
 
@@ -73,7 +73,7 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRecurringHoliday' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRecurringHoliday' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.RECURRING_HOLIDAY,
@@ -82,7 +82,6 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
 
 		//Tab 0 start
 
@@ -209,7 +208,6 @@ RecurringHolidayViewController = BaseViewController.extend( {
 			this.attachElement( 'day_of_month' );
 			this.attachElement( 'month_int' );
 
-
 		}
 
 		this.editFieldResize();
@@ -242,7 +240,6 @@ RecurringHolidayViewController = BaseViewController.extend( {
 			}
 		}
 
-
 		this.editFieldResize();
 	},
 
@@ -265,7 +262,7 @@ RecurringHolidayViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -277,7 +274,7 @@ RecurringHolidayViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -285,6 +282,5 @@ RecurringHolidayViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-
 
 } );

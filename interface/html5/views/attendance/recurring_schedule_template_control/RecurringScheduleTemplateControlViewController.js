@@ -24,9 +24,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'recurring_schedule_template_control';
 		this.context_menu_name = $.i18n._( 'Recurring Templates' );
 		this.navigation_label = $.i18n._( 'Recurring Template' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ))();
-		this.schedule_api = new (APIFactory.getAPIClass( 'APISchedule' ))();
-		this.recurring_schedule_template_api = new (APIFactory.getAPIClass( 'APIRecurringScheduleTemplate' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ) )();
+		this.schedule_api = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
+		this.recurring_schedule_template_api = new ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplate' ) )();
 
 		this.document_object_type_id = 10;
 
@@ -63,7 +63,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		var form_item_input;
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.RECURRING_TEMPLATE_CONTROL,
@@ -111,7 +111,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -205,7 +205,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			args.filter_data.recurring_schedule_template_control_id = this.current_edit_record.id ? this.current_edit_record.id : this.copied_record_id;
 			this.copied_record_id = '';
 			$this.recurring_schedule_template_api['get' + $this.recurring_schedule_template_api.key_name]( args, {
-				onResult: function ( res ) {
+				onResult: function( res ) {
 					if ( !$this.edit_view ) {
 						return;
 					}
@@ -227,7 +227,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			this.getDefaultData( index );
 		} else {
 
-			var row_id = (data.id && this.parent_controller.current_edit_record.id) ? data.id : TTUUID.generateUUID();
+			var row_id = ( data.id && this.parent_controller.current_edit_record.id ) ? data.id : TTUUID.generateUUID();
 			var row = this.getRowRender(); //Get Row render
 			var render = this.getRender(); //get render, should be a table
 			var widgets = {}; //Save each row's widgets
@@ -269,7 +269,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 				width: 132,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
@@ -408,7 +408,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
+				api_class: ( APIFactory.getAPIClass( 'APISchedulePolicy' ) ),
 				width: 80,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
@@ -440,7 +440,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				width: 80,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.BRANCH,
@@ -471,7 +471,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				width: 80,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -480,7 +480,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				field: 'department_id',
 				custom_first_label: Global.default_item
 			} );
-			form_item_input.setValue( (data.department_id) ? data.department_id : '' );
+			form_item_input.setValue( ( data.department_id ) ? data.department_id : '' );
 			widgets[form_item_input.getField()] = form_item_input;
 
 			divContainer2.append( label_2 );
@@ -504,7 +504,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APIJob' )),
+					api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 					width: 80,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB,
@@ -529,7 +529,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+					api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 					width: 80,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB_ITEM,
@@ -570,7 +570,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			if ( typeof index != 'undefined' ) {
 
 				row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
-				this.rows_widgets_array.splice( (index), 0, widgets );
+				this.rows_widgets_array.splice( ( index ), 0, widgets );
 
 			} else {
 				$( render ).append( row );
@@ -602,7 +602,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			var schedulePolicyId = row_widgets.schedule_policy_id.getValue();
 
 			if ( startTime !== '' && endTime !== '' && schedulePolicyId !== '' ) {
-				var result = this.schedule_api.getScheduleTotalTime(startTime, endTime, schedulePolicyId, { async: false });
+				var result = this.schedule_api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, { async: false } );
 				if ( result ) {
 					var total_time = result.getResult();
 
@@ -645,11 +645,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 					id: recurring_schedule_template_id
 				};
 
-				if (Global.getProductEdition() >= 15) {
+				if ( Global.getProductEdition() >= 15 ) {
 					data.open_shift_multiplier = row.open_shift_multiplier.getValue();
 				}
 
-				if ((Global.getProductEdition() >= 20)) {
+				if ( ( Global.getProductEdition() >= 20 ) ) {
 
 					data.job_id = row.job_id.getValue();
 					data.job_item_id = row.job_item_id.getValue();
@@ -657,7 +657,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				}
 
 				data.recurring_schedule_template_control_id = current_edit_item_id;
-				result.push(data);
+				result.push( data );
 			}
 		}
 
@@ -701,15 +701,15 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	},
 
 	renameObjectKey: function( obj, old_key, new_key ) {
-		if (old_key !== new_key) {
-			Object.defineProperty(obj, new_key,
-				Object.getOwnPropertyDescriptor(obj, old_key));
+		if ( old_key !== new_key ) {
+			Object.defineProperty( obj, new_key,
+				Object.getOwnPropertyDescriptor( obj, old_key ) );
 			delete obj[old_key];
 		}
 	},
 
 	_continueDoCopyAsNew: function() {
-		this.setCurrentEditViewState('new');
+		this.setCurrentEditViewState( 'new' );
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 
 		if ( Global.isSet( this.edit_view ) ) {
@@ -719,8 +719,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				var new_uuid = TTUUID.generateUUID();
 				var old_recurring_schedule_template_id = this.editor.rows_widgets_array[i].week.attr( 'recurring_schedule_template_id' );
 
-				this.renameObjectKey( this.editor.rows_widgets_array[i], 'start_time'+ old_recurring_schedule_template_id, 'start_time'+ new_uuid );
-				this.renameObjectKey( this.editor.rows_widgets_array[i], 'end_time'+ old_recurring_schedule_template_id, 'end_time'+ new_uuid );
+				this.renameObjectKey( this.editor.rows_widgets_array[i], 'start_time' + old_recurring_schedule_template_id, 'start_time' + new_uuid );
+				this.renameObjectKey( this.editor.rows_widgets_array[i], 'end_time' + old_recurring_schedule_template_id, 'end_time' + new_uuid );
 
 				this.editor.rows_widgets_array[i].week.attr( 'recurring_schedule_template_id', new_uuid );
 			}
@@ -781,7 +781,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'id',
 				layout_name: ALayoutIDs.RECURRING_TEMPLATE_CONTROL,
-				api_class: (APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' )),
+				api_class: ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -793,7 +793,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -805,7 +805,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -814,7 +814,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		];
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [],
 			include: [{

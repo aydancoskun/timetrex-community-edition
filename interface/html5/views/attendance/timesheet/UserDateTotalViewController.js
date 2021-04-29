@@ -13,8 +13,8 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_date_total';
 		this.context_menu_name = $.i18n._( 'Accumulated Time' );
 		this.navigation_label = $.i18n._( 'Accumulated Time' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIUserDateTotal' ))();
-		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIUserDateTotal' ) )();
+		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
 
 		if ( PermissionManager.validate( this.permission_id, 'add' ) || PermissionManager.validate( this.permission_id, 'edit' ) ) {
 			$( this.el ).find( '.warning-message' ).text( $.i18n._( 'WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative.' ) );
@@ -41,11 +41,13 @@ UserDateTotalViewController = BaseViewController.extend( {
 	},
 
 	setGridSize: function() {
-		if ( (!this.grid || !this.grid.grid.is( ':visible' )) ) {
-			return;
-		}
-		this.grid.grid.setGridWidth( $( this.el ).parent().width() - 2 );
-		this.grid.grid.setGridHeight( $( this.el ).parents( '#tab_user_date_total_parent' ).height() - 55 );
+		// if ( ( !this.grid || !this.grid.grid.is( ':visible' ) ) ) {
+		// 	return;
+		// }
+		//this.grid.grid.setGridWidth( $( this.el ).parent().width() - 2 );
+
+		message_offset = ( $( this.el ).find( '.warning-message' ).outerHeight() * 2 ) + 27;
+		this.grid.grid.setGridHeight( $( this.el ).parents( '#tab_user_date_total_parent' ).height() - message_offset );
 	},
 
 	setGridCellBackGround: function() {
@@ -75,7 +77,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 	},
 
-	getCustomContextMenuModel: function () {
+	getCustomContextMenuModel: function() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy, ContextMenuIconName.export_excel],
 			include: ['default']
@@ -114,8 +116,8 @@ UserDateTotalViewController = BaseViewController.extend( {
 					this.current_edit_record.end_time_stamp = '';
 
 					//Trigger onChange event for above fields, so in mass edit they are marked as changed.
-					this.edit_view_form_item_dic.start_time_stamp.find('input').trigger('change', '');
-					this.edit_view_form_item_dic.end_time_stamp.find('input').trigger('change', '');
+					this.edit_view_form_item_dic.start_time_stamp.find( 'input' ).trigger( 'change', '' );
+					this.edit_view_form_item_dic.end_time_stamp.find( 'input' ).trigger( 'change', '' );
 				}
 				this.calculateAmount();
 				break;
@@ -127,7 +129,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		if ( key !== 'override' ) {
 			this.edit_view_ui_dic.override.setValue( true );
 			this.current_edit_record.override = true;
-			this.edit_view_form_item_dic.override.find('input').trigger('change', '1'); //Trigger onChange event for above fields, so in mass edit they are marked as changed.
+			this.edit_view_form_item_dic.override.find( 'input' ).trigger( 'change', '1' ); //Trigger onChange event for above fields, so in mass edit they are marked as changed.
 		}
 
 		if ( !doNotValidate ) {
@@ -137,7 +139,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 	},
 
 	calculateAmount: function() {
-		this.current_edit_record.total_time_amount = (this.current_edit_record.total_time / 3600) * parseFloat( this.current_edit_record.hourly_rate );
+		this.current_edit_record.total_time_amount = ( this.current_edit_record.total_time / 3600 ) * parseFloat( this.current_edit_record.hourly_rate );
 		this.edit_view_ui_dic.total_time_amount.setValue( this.current_edit_record.total_time_amount.toFixed( 4 ) );
 	},
 
@@ -149,12 +151,12 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
 		if ( $this.api ) {
 			$this.api['get' + $this.api.key_name + 'DefaultData'](
-					this.parent_edit_record.user_id,
-					this.parent_edit_record.date_stamp, {
-						onResult: function( result ) {
-							$this.onAddResult( result );
-						}
-					} );
+				this.parent_edit_record.user_id,
+				this.parent_edit_record.date_stamp, {
+					onResult: function( result ) {
+						$this.onAddResult( result );
+					}
+				} );
 		}
 
 	},
@@ -183,7 +185,6 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 	/* jshint ignore:start */
 	setDefaultMenu: function( doNotSetFocus ) {
-
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=UserDateTotal line 282
 		if ( !this.context_menu_array ) {
@@ -351,7 +352,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		}
 
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
-				PermissionManager.validate( p_id, 'edit_job' ) ) {
+			PermissionManager.validate( p_id, 'edit_job' ) ) {
 			return true;
 		}
 		return false;
@@ -388,7 +389,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		}
 
 		if ( PermissionManager.validate( p_id, 'edit_quantity' ) &&
-				PermissionManager.validate( p_id, 'edit_bad_quantity' ) ) {
+			PermissionManager.validate( p_id, 'edit_bad_quantity' ) ) {
 			return true;
 		}
 		return false;
@@ -426,7 +427,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			switch ( key ) {
 				case 'user_id':
 					var current_widget = this.edit_view_ui_dic['first_last_name'];
-					new (APIFactory.getAPIClass( 'APIUser' ))().getUser( { filter_data: { id: this.current_edit_record[key] } }, {
+					new ( APIFactory.getAPIClass( 'APIUser' ) )().getUser( { filter_data: { id: this.current_edit_record[key] } }, {
 						onResult: function( result ) {
 
 							if ( result.isValid() ) {
@@ -532,11 +533,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 			var item = this.object_type_array[i];
 
 			if ( item.value == 20 ||
-					item.value == 25 ||
-					item.value == 30 ||
-					item.value == 40 ||
-					item.value == 100 ||
-					item.value == 110 ) {
+				item.value == 25 ||
+				item.value == 30 ||
+				item.value == 40 ||
+				item.value == 100 ||
+				item.value == 110 ) {
 				array.push( item );
 			}
 
@@ -558,7 +559,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUserDateTotal' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUserDateTotal' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.WAGE,
@@ -603,7 +604,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Regular Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRegularTimePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIRegularTimePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
 			show_search_inputs: true,
@@ -616,7 +617,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
@@ -629,7 +630,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Overtime Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIOvertimePolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIOvertimePolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.OVER_TIME_POLICY,
 			show_search_inputs: true,
@@ -642,7 +643,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Premium Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPremiumPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPremiumPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PREMIUM_POLICY,
 			show_search_inputs: true,
@@ -655,7 +656,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Meal Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIMealPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIMealPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.MEAL_POLICY,
 			show_search_inputs: true,
@@ -668,7 +669,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Break Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBreakPolicy' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBreakPolicy' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BREAK_POLICY,
 			show_search_inputs: true,
@@ -681,7 +682,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -694,7 +695,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -711,7 +712,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -730,17 +731,17 @@ UserDateTotalViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'job_id'
 			} );
 
@@ -762,17 +763,17 @@ UserDateTotalViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function( val ) {
 
 					if ( val ) {
 						job_item_coder.setValue( val.manual_id );
 					}
-				}),
+				} ),
 				field: 'job_item_id'
 			} );
 
@@ -805,7 +806,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			show_search_inputs: true,

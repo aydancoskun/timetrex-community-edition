@@ -34,10 +34,10 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'global.inc.php' );
+require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'CLI.inc.php' );
 
-if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: delete_user_identification.php [OPTIONS] [user_name]\n";
 	$help_output .= "  Options:\n";
 	$help_output .= "    -n [Dryrun, don't actually delete any data]\n";
@@ -45,27 +45,27 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	echo $help_output;
 } else {
 	//Handle command line arguments
-	if ( in_array('-n', $argv) ) {
-		$data['dryrun'] = TRUE;
+	if ( in_array( '-n', $argv ) ) {
+		$data['dryrun'] = true;
 	} else {
-		$data['dryrun'] = FALSE;
+		$data['dryrun'] = false;
 	}
 
-	if ( in_array('-t', $argv) ) {
-		$data['t'] = trim( $argv[array_search('-t', $argv)+1] );
+	if ( in_array( '-t', $argv ) ) {
+		$data['t'] = trim( $argv[ array_search( '-t', $argv ) + 1 ] );
 	} else {
-		$data['t'] = FALSE;
+		$data['t'] = false;
 	}
 
-	if ( $data['t'] == FALSE ) {
+	if ( $data['t'] == false ) {
 		echo "Type not specified, use 'ALL' to delete all identification records.\n";
-		exit(1);
+		exit( 1 );
 	}
 
-	$last_arg = count($argv)-1;
+	$last_arg = count( $argv ) - 1;
 
-	if ( isset($argv[$last_arg]) AND $argv[$last_arg] != '' ) {
-		$user_name = $argv[$last_arg];
+	if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
+		$user_name = $argv[ $last_arg ];
 
 		//Get user_id from user_name
 		$ulf = new UserListFactory();
@@ -73,7 +73,7 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		if ( $ulf->getRecordCount() == 1 ) {
 			$u_obj = $ulf->getCurrent();
 
-			echo "Found user ". $u_obj->getFullName() .", attempting to delete identification information...\n";
+			echo "Found user " . $u_obj->getFullName() . ", attempting to delete identification information...\n";
 			ob_flush();
 
 			$uilf = new UserIdentificationListFactory();
@@ -85,11 +85,11 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			}
 
 			if ( $uilf->getRecordCount() > 0 ) {
-				foreach( $uilf as $ui_obj ) {
+				foreach ( $uilf as $ui_obj ) {
 					if ( $ui_obj->getType() != 5 ) { //Skip password history records.
-						$ui_obj->setDeleted( TRUE );
+						$ui_obj->setDeleted( true );
 						if ( $ui_obj->isValid() ) {
-							echo "  Deleting Identification Record (". $ui_obj->getID() .") of type '". Option::getByKey( $ui_obj->getType(), $ui_obj->getOptions('type') ) ."' (".$ui_obj->getType().") from ". $u_obj->getFullName() ."\n";
+							echo "  Deleting Identification Record (" . $ui_obj->getID() . ") of type '" . Option::getByKey( $ui_obj->getType(), $ui_obj->getOptions( 'type' ) ) . "' (" . $ui_obj->getType() . ") from " . $u_obj->getFullName() . "\n";
 							$ui_obj->Save();
 						}
 					}
@@ -98,12 +98,12 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 				echo "ERROR: No identification records to delete!\n";
 			}
 
-			if ( $data['dryrun'] == TRUE ) {
+			if ( $data['dryrun'] == true ) {
 				echo "NOTICE: Dry-run enabled, not committing changed to database!\n";
 				$uilf->FailTransaction();
 			}
 			$uilf->CommitTransaction();
-		} elseif ( $ulf->getRecordCount() > 2 ) {
+		} else if ( $ulf->getRecordCount() > 2 ) {
 			echo "Found more then one user with the same user name, not deleting any data!\n";
 		} else {
 			echo "User name not found!\n";

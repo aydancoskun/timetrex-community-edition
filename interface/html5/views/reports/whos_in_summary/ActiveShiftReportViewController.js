@@ -11,7 +11,7 @@ ActiveShiftReportViewController = ReportBaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Whos In Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'ActiveShiftReportView.html';
-		this.api = new (APIFactory.getAPIClass( 'APIActiveShiftReport' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIActiveShiftReport' ) )();
 	},
 
 	getCustomContextMenuModel: function() {

@@ -41,22 +41,22 @@
 class MessageRecipientFactory extends Factory {
 	protected $table = 'message_recipient';
 	protected $pk_sequence_name = 'message_recipient_id_seq'; //PK Sequence name
-	protected $obj_handler = NULL;
+	protected $obj_handler = null;
 
 	/**
 	 * @param $name
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $parent = null ) {
 
-		$retval = NULL;
-		switch( $name ) {
+		$retval = null;
+		switch ( $name ) {
 			case 'status':
-				$retval = array(
-										10 => TTi18n::gettext('UNREAD'),
-										20 => TTi18n::gettext('READ')
-									);
+				$retval = [
+						10 => TTi18n::gettext( 'UNREAD' ),
+						20 => TTi18n::gettext( 'READ' ),
+				];
 				break;
 		}
 
@@ -74,8 +74,9 @@ class MessageRecipientFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setUser( $value) {
+	function setUser( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -90,8 +91,9 @@ class MessageRecipientFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setMessageSender( $value) {
+	function setMessageSender( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'message_sender_id', $value );
 	}
 
@@ -106,8 +108,9 @@ class MessageRecipientFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setMessageControl( $value) {
+	function setMessageControl( $value ) {
 		$value = TTUUID::castUUID( $value );
+
 		return $this->setGenericDataValue( 'message_control_id', $value );
 	}
 
@@ -122,9 +125,10 @@ class MessageRecipientFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setStatus( $value) {
-		$value = (int)trim($value);
+	function setStatus( $value ) {
+		$value = (int)trim( $value );
 		$this->setStatusDate();
+
 		return $this->setGenericDataValue( 'status_id', $value );
 	}
 
@@ -139,11 +143,12 @@ class MessageRecipientFactory extends Factory {
 	 * @param int $value EPOCH
 	 * @return bool
 	 */
-	function setStatusDate( $value = NULL) {
-		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
-		if ($value == NULL) {
+	function setStatusDate( $value = null ) {
+		$value = ( !is_int( $value ) ) ? trim( $value ) : $value; //Dont trim integer values, as it changes them to strings.
+		if ( $value == null ) {
 			$value = TTDate::getTime();
 		}
+
 		return $this->setGenericDataValue( 'status_date', $value );
 	}
 
@@ -151,11 +156,11 @@ class MessageRecipientFactory extends Factory {
 	 * @return bool
 	 */
 	function isAck() {
-		if ($this->getRequireAck() == TRUE AND $this->getAckDate() == '' ) {
-			return FALSE;
+		if ( $this->getRequireAck() == true && $this->getAckDate() == '' ) {
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -169,14 +174,14 @@ class MessageRecipientFactory extends Factory {
 	 * @param $value
 	 * @return bool
 	 */
-	function setAck( $value) {
-		$this->setGenericDataValue( 'ack', $this->toBool($value) );
-		if ( $this->getAck() == TRUE ) {
+	function setAck( $value ) {
+		$this->setGenericDataValue( 'ack', $this->toBool( $value ) );
+		if ( $this->getAck() == true ) {
 			$this->setAckDate();
 			$this->setAckBy();
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -190,14 +195,15 @@ class MessageRecipientFactory extends Factory {
 	 * @param int $value EPOCH
 	 * @return bool
 	 */
-	function setAckDate( $value = NULL) {
-		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
-		if ($value == NULL) {
+	function setAckDate( $value = null ) {
+		$value = ( !is_int( $value ) ) ? trim( $value ) : $value; //Dont trim integer values, as it changes them to strings.
+		if ( $value == null ) {
 			$value = TTDate::getTime();
 		}
-		return $this->setGenericDataValue( 'ack_date', $value );
 
+		return $this->setGenericDataValue( 'ack_date', $value );
 	}
+
 	/**
 	 * @return bool
 	 */
@@ -208,14 +214,14 @@ class MessageRecipientFactory extends Factory {
 		// Employee
 		if ( $this->getUser() != TTUUID::getZeroID() ) {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-			$this->Validator->isResultSetWithRows(	'user',
-															$ulf->getByID($this->getUser()),
-															TTi18n::gettext('Invalid Employee')
-														);
+			$this->Validator->isResultSetWithRows( 'user',
+												   $ulf->getByID( $this->getUser() ),
+												   TTi18n::gettext( 'Invalid Employee' )
+			);
 		}
 		// Message Sender
-		if ( $this->isNew() == TRUE ) { //If the sender deletes their sent message, this validation will fail if the receiving tries to view/mark the message as read.
-			if ( $this->getMessageSender() !== FALSE ) {
+		if ( $this->isNew() == true ) { //If the sender deletes their sent message, this validation will fail if the receiving tries to view/mark the message as read.
+			if ( $this->getMessageSender() !== false ) {
 				$mslf = TTnew( 'MessageSenderListFactory' ); /** @var MessageSenderListFactory $mslf */
 				$this->Validator->isResultSetWithRows( 'message_sender_id',
 													   $mslf->getByID( $this->getMessageSender() ),
@@ -225,56 +231,59 @@ class MessageRecipientFactory extends Factory {
 		}
 
 		// Message Control
-		if ( $this->getMessageControl() !== FALSE ) {
+		if ( $this->getMessageControl() !== false ) {
 			$mclf = TTnew( 'MessageControlListFactory' ); /** @var MessageControlListFactory $mclf */
-			$this->Validator->isResultSetWithRows(	'message_control_id',
-															$mclf->getByID($this->getMessageControl()),
-															TTi18n::gettext('Message Control is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'message_control_id',
+												   $mclf->getByID( $this->getMessageControl() ),
+												   TTi18n::gettext( 'Message Control is invalid' )
+			);
 		}
 		// Status
-		if ( $this->getStatus() !== FALSE ) {
-			$this->Validator->inArrayKey(	'status',
-													$this->getStatus(),
-													TTi18n::gettext('Incorrect Status'),
-													$this->getOptions('status')
-												);
+		if ( $this->getStatus() !== false ) {
+			$this->Validator->inArrayKey( 'status',
+										  $this->getStatus(),
+										  TTi18n::gettext( 'Incorrect Status' ),
+										  $this->getOptions( 'status' )
+			);
 		}
 		// Date
-		if ( $this->getStatusDate() !== FALSE ) {
-			$this->Validator->isDate(		'status_date',
-													$this->getStatusDate(),
-													TTi18n::gettext('Incorrect Date')
-												);
+		if ( $this->getStatusDate() !== false ) {
+			$this->Validator->isDate( 'status_date',
+									  $this->getStatusDate(),
+									  TTi18n::gettext( 'Incorrect Date' )
+			);
 		}
 		// Acknowledge Date
-		if ( $this->getAckDate() !== FALSE ) {
-			$this->Validator->isDate(		'ack_date',
-													$this->getAckDate(),
-													TTi18n::gettext('Invalid Acknowledge Date')
-												);
+		if ( $this->getAckDate() !== false ) {
+			$this->Validator->isDate( 'ack_date',
+									  $this->getAckDate(),
+									  TTi18n::gettext( 'Invalid Acknowledge Date' )
+			);
 		}
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
-		return TRUE;
+		return true;
 	}
+
 	/**
 	 * @return bool
 	 */
 	function preSave() {
-		if ( $this->getStatus() == FALSE ) {
+		if ( $this->getStatus() == false ) {
 			$this->setStatus( 10 ); //UNREAD
 		}
-		return TRUE;
+
+		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	function postSave() {
-		return TRUE;
+		return true;
 	}
 }
+
 ?>
