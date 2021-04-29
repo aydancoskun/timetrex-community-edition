@@ -3,20 +3,13 @@
  Global variables
 */
 $TIMETREX_URL = 'https://demo.timetrex.com/next-release/api/json/api.php';
-$TIMETREX_USERNAME = 'demoadmin1';
-$TIMETREX_PASSWORD = 'demo';
+$TIMETREX_API_KEY = ''; //API SESSION KEY to use for all API requests, obtained immediately below.
 
 //Build URL given a Class and Method to call.
 //Format is: http://demo.timetrex.com/api/json/api.php?Class=<CLASS>&Method=<METHOD>&SessionID=<SessionID>
-function buildURL( $class, $method, $session_id = false ) {
-	global $TIMETREX_URL, $TIMETREX_SESSION_ID;
+function buildURL( $class, $method ) {
+	global $TIMETREX_URL;
 	$url = $TIMETREX_URL . '?Class=' . $class . '&Method=' . $method;
-	if ( $session_id != '' || $TIMETREX_SESSION_ID != '' ) {
-		if ( $session_id == '' ) {
-			$session_id = $TIMETREX_SESSION_ID;
-		}
-		$url .= '&SessionID=' . $session_id;
-	}
 
 	return $url;
 }
@@ -66,12 +59,16 @@ function handleResult( $result, $raw = false ) {
 
 //Post data (array of arguments) to URL
 function postToURL( $url, $data = null, $raw_result = false ) {
-	$curl_connection = curl_init( $url );
+	$curl_connection = curl_init();
+	curl_setopt( $curl_connection, CURLOPT_URL, $url );
+	curl_setopt( $curl_connection, CURLOPT_REFERER, $url ); //**IMPORTANT: Referer should always be sent to avoid requests being rejected due to CSRF security checks.
 	curl_setopt( $curl_connection, CURLOPT_CONNECTTIMEOUT, 600 );
 	curl_setopt( $curl_connection, CURLOPT_RETURNTRANSFER, true );
 	curl_setopt( $curl_connection, CURLOPT_SSL_VERIFYPEER, false );
 	curl_setopt( $curl_connection, CURLOPT_FOLLOWLOCATION, 1 );
-	curl_setopt( $curl_connection, CURLOPT_REFERER, $url ); //**IMPORTANT: Referer should always be sent to avoid requests being rejected due to CSRF security checks.
+
+	global $TIMETREX_API_KEY;
+	curl_setopt( $curl_connection, CURLOPT_HTTPHEADER, [ 'Cookie: SessionID='. $TIMETREX_API_KEY ] ); //Send API Key as a cookie.
 
 	//When sending JSON data to POST, it must be sent as: json=<JSON DATA>
 	//<JSON DATA> should be an associative array with the first level being the number of arguments, where each argument can be of mixed type. ie:
@@ -99,20 +96,24 @@ function postToURL( $url, $data = null, $raw_result = false ) {
 	return handleResult( json_decode( $result, true ), $raw_result );
 }
 
-//IMPORTANT: When passing separate arguments to a function the order must be maintained and proper.
-//           So when passing named key => value pairs always ensure that the order is preserved when the data is JSON encoded.
-$arguments = [ 'user_name' => $TIMETREX_USERNAME, 'password' => $TIMETREX_PASSWORD ];
+if ( !isset( $TIMETREX_API_KEY ) || $TIMETREX_API_KEY == '' ) {
+	//IMPORTANT: When passing separate arguments to a function the order must be correctly maintained.
+	//           So when passing named key => value pairs always ensure that the order is preserved when the data is JSON encoded.
+	$arguments = [ 'user_name' => 'demoadmin1', 'password' => 'demo' ];
 
-//      Alternatively you can send integer key => value pairs, similar to the below which may help to ensure order is maintained.
-//$arguments = array( $TIMETREX_USERNAME, $TIMETREX_PASSWORD);  //Or
-//$arguments = array( 0 => $TIMETREX_USERNAME, 1 => $TIMETREX_PASSWORD);
-
-$TIMETREX_SESSION_ID = postToURL( buildURL( 'APIAuthentication', 'Login' ), $arguments );
-if ( $TIMETREX_SESSION_ID == false ) {
-	echo "Login Failed!<br>\n";
-	exit;
+	//      Alternatively you can send integer key => value pairs, similar to the below which may help to ensure order is maintained.
+	//$arguments = [ $TIMETREX_USERNAME, $TIMETREX_PASSWORD ];  //Or
+	//$arguments = [ 0 => $TIMETREX_USERNAME, 1 => $TIMETREX_PASSWORD ];
+	$TIMETREX_API_KEY = postToURL( buildURL( 'APIAuthentication', 'registerAPIKey' ), $arguments );
+	if ( $TIMETREX_API_KEY == false ) {
+		echo "Login Failed, please check username/password or URL to ensure it is correct!<br>\n";
+		exit;
+	} else {
+		echo "Permanent API KEY SESSION registered, you may now define this in your code for all subsequent API calls:<br>\n";
+		echo "\$TIMETREX_API_KEY = '" . $TIMETREX_API_KEY . "'<br>\n";
+		exit;
+	}
 }
-echo "Session ID: $TIMETREX_SESSION_ID<br>\n";
 
 //
 //Get data for two employees by user_name or primary key/ID.
@@ -121,12 +122,13 @@ echo "Session ID: $TIMETREX_SESSION_ID<br>\n";
 $arguments = [
 		'filter_data' => [
 			//'id' => array('11e817cb-7dcc-7130-b939-5431e6810149','11e817cb-8385-8e50-97f3-5431e6810149')
-			'user_name' => [ 'jane.doe1', 'tristen.braun1' ],
+			'user_name' => 'john.doe1',
 		],
 ];
 $user_data = postToURL( buildURL( 'APIUser', 'getUser' ), [ $arguments ] );
 //var_dump( $user_data );
-/* //Example returned data: )
+
+/* //Example returned data:
 array(2) {
   [0]=>
   array(98) {
@@ -198,7 +200,6 @@ array(2) {
     string(36) "11e7fa4d-025e-93e0-bc8b-21ea65522ba3"
     ["policy_group"]=>
     string(7) "Default"
-
     ["first_name"]=>
     string(7) "Tristen"
     ["first_name_metaphone"]=>
@@ -275,16 +276,6 @@ array(2) {
     string(12) "1.0000000000"
     ["sin"]=>
     string(9) "401240815"
-    ["other_id1"]=>
-    bool(false)
-    ["other_id2"]=>
-    bool(false)
-    ["other_id3"]=>
-    bool(false)
-    ["other_id4"]=>
-    bool(false)
-    ["other_id5"]=>
-    bool(false)
     ["note"]=>
     bool(false)
     ["longitude"]=>
@@ -386,7 +377,6 @@ array(2) {
     string(36) "11e7fa4d-025e-93e0-bc8b-21ea65522ba3"
     ["policy_group"]=>
     string(7) "Default"
-
     ["first_name"]=>
     string(4) "Jane"
     ["first_name_metaphone"]=>
@@ -463,16 +453,6 @@ array(2) {
     string(12) "1.2000000000"
     ["sin"]=>
     string(9) "695238280"
-    ["other_id1"]=>
-    bool(false)
-    ["other_id2"]=>
-    bool(false)
-    ["other_id3"]=>
-    bool(false)
-    ["other_id4"]=>
-    bool(false)
-    ["other_id5"]=>
-    bool(false)
     ["note"]=>
     bool(false)
     ["longitude"]=>
@@ -506,6 +486,7 @@ array(2) {
   }
 }
 */
+
 
 //
 //Update data for the second employee, mark their status as Terminated and update Termination Date

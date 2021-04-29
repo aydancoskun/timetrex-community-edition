@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -62,65 +62,65 @@ class ValidatorTest extends PHPUnit_Framework_TestCase {
 
 		$validator = new Validator();
 
-		$this->assertEquals( $validator->isFloat( 'unit_test', 12.9 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', 12.91 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', 12.9123 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', 12.91234 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '12.9' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '12.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '12.9123' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '12.91234' ), true );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', 12.9 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', 12.91 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', 12.9123 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', 12.91234 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '12.9' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '12.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '12.9123' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '12.91234' ) );
 
-		$this->assertEquals( $validator->isFloat( 'unit_test', -12.9 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', -12.91 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', -12.9123 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', -12.91234 ), true );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', -12.9 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', -12.91 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', -12.9123 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', -12.91234 ) );
 
-		$this->assertEquals( $validator->isFloat( 'unit_test', '123.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '1234.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '30 000.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '1 234.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '1,234.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '1, 234.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', ' 1, 234.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', ' 1, 234.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', ' 1, 234.91 ' ), true );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '123.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '1234.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '30 000.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '1 234.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '1,234.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '1, 234.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1, 234.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1, 234.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1, 234.91 ' ) );
 
-		$this->assertEquals( $validator->isFloat( 'unit_test', '1 234.91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '1.234,91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '30 000,91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '1. 234,91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', ' 1. 234,91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', ' 1. 234,91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', ' 1. 234,91 ' ), true );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '1 234.91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '1.234,91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '30 000,91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '1. 234,91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1. 234,91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1. 234,91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1. 234,91 ' ) );
 
-		$this->assertEquals( $validator->isFloat( 'unit_test', .91 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', ',91' ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', 12, 9 ), true );
-		$this->assertEquals( $validator->isFloat( 'unit_test', '12,9' ), true );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', .91 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', ',91' ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', 12, 9 ) );
+		$this->assertEquals( true, $validator->isFloat( 'unit_test', '12,9' ) );
 
 		TTi18n::setLocale( 'es_ES' );
 		if ( TTi18n::getThousandsSymbol() == '.' && TTi18n::getDecimalSymbol() == ',' ) {
-			$this->assertEquals( $validator->isFloat( 'unit_test', .91 ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', ',91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', 12, 9 ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', '12,9' ), true );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', .91 ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', ',91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', 12, 9 ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '12,9' ) );
 
-			$this->assertEquals( $validator->isFloat( 'unit_test', '123.91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', '1234.91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', '1 234.91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', '1,234.91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', '1, 234.91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', ' 1, 234.91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', ' 1, 234.91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', ' 1, 234.91 ' ), true );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '123.91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '1234.91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '1 234.91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '1,234.91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '1, 234.91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1, 234.91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1, 234.91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1, 234.91 ' ) );
 
-			$this->assertEquals( $validator->isFloat( 'unit_test', '1 234.91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', '1.234,91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', '1. 234,91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', ' 1. 234,91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', ' 1. 234,91' ), true );
-			$this->assertEquals( $validator->isFloat( 'unit_test', ' 1. 234,91 ' ), true );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '1 234.91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '1.234,91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', '1. 234,91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1. 234,91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1. 234,91' ) );
+			$this->assertEquals( true, $validator->isFloat( 'unit_test', ' 1. 234,91 ' ) );
 		}
 	}
 
@@ -129,72 +129,70 @@ class ValidatorTest extends PHPUnit_Framework_TestCase {
 
 		$validator = new Validator();
 
-		$this->assertEquals( $validator->stripNonFloat( 12.9 ), 12.9 );
-		$this->assertEquals( $validator->stripNonFloat( 12.91 ), 12.91 );
-		$this->assertEquals( $validator->stripNonFloat( 12.9123 ), 12.9123 );
-		$this->assertEquals( $validator->stripNonFloat( 12.91234 ), 12.91234 );
-		$this->assertEquals( $validator->stripNonFloat( '12.9' ), '12.9' );
-		$this->assertEquals( $validator->stripNonFloat( '12.91' ), '12.91' );
-		$this->assertEquals( $validator->stripNonFloat( '12.9123' ), '12.9123' );
-		$this->assertEquals( $validator->stripNonFloat( '12.91234' ), '12.91234' );
+		$this->assertEquals( 12.9, $validator->stripNonFloat( 12.9 ) );
+		$this->assertEquals( 12.91, $validator->stripNonFloat( 12.91 ) );
+		$this->assertEquals( 12.9123, $validator->stripNonFloat( 12.9123 ) );
+		$this->assertEquals( 12.91234, $validator->stripNonFloat( 12.91234 ) );
+		$this->assertEquals( '12.9', $validator->stripNonFloat( '12.9' ) );
+		$this->assertEquals( '12.91', $validator->stripNonFloat( '12.91' ) );
+		$this->assertEquals( '12.9123', $validator->stripNonFloat( '12.9123' ) );
+		$this->assertEquals( '12.91234', $validator->stripNonFloat( '12.91234' ) );
 
-		$this->assertEquals( $validator->stripNonFloat( -12.9 ), -12.9 );
-		$this->assertEquals( $validator->stripNonFloat( -12.91 ), -12.91 );
-		$this->assertEquals( $validator->stripNonFloat( -12.9123 ), -12.9123 );
-		$this->assertEquals( $validator->stripNonFloat( -12.91234 ), -12.91234 );
+		$this->assertEquals( -12.9, $validator->stripNonFloat( -12.9 ) );
+		$this->assertEquals( -12.91, $validator->stripNonFloat( -12.91 ) );
+		$this->assertEquals( -12.9123, $validator->stripNonFloat( -12.9123 ) );
+		$this->assertEquals( -12.91234, $validator->stripNonFloat( -12.91234 ) );
 
-		$this->assertEquals( $validator->stripNonFloat( '-123.91' ), '-123.91' );
-		$this->assertEquals( $validator->stripNonFloat( '123.91' ), '123.91' );
-		$this->assertEquals( $validator->stripNonFloat( '1234.91' ), '1234.91' );
-		$this->assertEquals( $validator->stripNonFloat( '1 234.91' ), '1234.91' );
-		$this->assertEquals( $validator->stripNonFloat( '1,234.91' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( '1, 234.91' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( ' 1, 234.91' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( ' 1, 234.91' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( ' 1, 234.91 ' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '-123.91', $validator->stripNonFloat( '-123.91' ) );
+		$this->assertEquals( '123.91', $validator->stripNonFloat( '123.91' ) );
+		$this->assertEquals( '1234.91', $validator->stripNonFloat( '1234.91' ) );
+		$this->assertEquals( '1234.91', $validator->stripNonFloat( '1 234.91' ) );
+		$this->assertEquals( '1234.91', $validator->stripNonFloat( '1,234.91' ) );    //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1234.91', $validator->stripNonFloat( '1, 234.91' ) );   //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1234.91', $validator->stripNonFloat( ' 1, 234.91' ) );  //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1234.91', $validator->stripNonFloat( ' 1, 234.91' ) );  //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1234.91', $validator->stripNonFloat( ' 1, 234.91 ' ) ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
 
-		$this->assertEquals( $validator->stripNonFloat( '1 234.91' ), '1234.91' );
-		$this->assertEquals( $validator->stripNonFloat( '1.234,91' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( '1. 234,91' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( ' 1. 234,91' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( ' 1. 234,91' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( ' 1. 234,91 ' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1234.91', $validator->stripNonFloat( '1 234.91' ) );
+		$this->assertEquals( '1.23491', $validator->stripNonFloat( '1.234,91' ) );    //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1.23491', $validator->stripNonFloat( '1. 234,91' ) );   //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1.23491', $validator->stripNonFloat( ' 1. 234,91' ) );  //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1.23491', $validator->stripNonFloat( ' 1. 234,91' ) );  //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '1.23491', $validator->stripNonFloat( ' 1. 234,91 ' ) ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
 
-		$this->assertEquals( $validator->stripNonFloat( .91 ), .91 );
-		$this->assertEquals( $validator->stripNonFloat( ',91' ), '91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( 12, 9 ), 12 ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-		$this->assertEquals( $validator->stripNonFloat( '12,9' ), '129' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( .91, $validator->stripNonFloat( .91 ) );
+		$this->assertEquals( '91', $validator->stripNonFloat( ',91' ) );   //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+		$this->assertEquals( '129', $validator->stripNonFloat( '12,9' ) ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
 
-		$this->assertEquals( $validator->stripNonFloat( 'A123.91' ), '123.91' );
-		$this->assertEquals( $validator->stripNonFloat( 'A123.91B' ), '123.91' );
-		$this->assertEquals( $validator->stripNonFloat( '12A3.91' ), '123.91' );
-		$this->assertEquals( $validator->stripNonFloat( '123A.91' ), '123.91' );
-		$this->assertEquals( $validator->stripNonFloat( '123.A91' ), '123.91' );
+		$this->assertEquals( '123.91', $validator->stripNonFloat( 'A123.91' ) );
+		$this->assertEquals( '123.91', $validator->stripNonFloat( 'A123.91B' ) );
+		$this->assertEquals( '123.91', $validator->stripNonFloat( '12A3.91' ) );
+		$this->assertEquals( '123.91', $validator->stripNonFloat( '123A.91' ) );
+		$this->assertEquals( '123.91', $validator->stripNonFloat( '123.A91' ) );
 
-		$this->assertEquals( $validator->stripNonFloat( '*&#$#\'"123.JKLFDJFL91' ), '123.91' );
+		$this->assertEquals( '123.91', $validator->stripNonFloat( '*&#$#\'"123.JKLFDJFL91' ) );
 
 		TTi18n::setLocale( 'es_ES' );
 		if ( TTi18n::getThousandsSymbol() == '.' && TTi18n::getDecimalSymbol() == ',' ) {
-			$this->assertEquals( $validator->stripNonFloat( .91 ), .91 );
-			$this->assertEquals( $validator->stripNonFloat( ',91' ), '91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( 12, 9 ), 12 ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( '12,9' ), '129' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( .91, $validator->stripNonFloat( .91 ) );
+			$this->assertEquals( '91', $validator->stripNonFloat( ',91' ) );   //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '129', $validator->stripNonFloat( '12,9' ) ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
 
-			$this->assertEquals( $validator->stripNonFloat( '123.91' ), '123.91' );
-			$this->assertEquals( $validator->stripNonFloat( '1234.91' ), '1234.91' );
-			$this->assertEquals( $validator->stripNonFloat( '1 234.91' ), '1234.91' );
-			$this->assertEquals( $validator->stripNonFloat( '1,234.91' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( '1, 234.91' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( ' 1, 234.91' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( ' 1, 234.91' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( ' 1, 234.91 ' ), '1234.91' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '123.91', $validator->stripNonFloat( '123.91' ) );
+			$this->assertEquals( '1234.91', $validator->stripNonFloat( '1234.91' ) );
+			$this->assertEquals( '1234.91', $validator->stripNonFloat( '1 234.91' ) );
+			$this->assertEquals( '1234.91', $validator->stripNonFloat( '1,234.91' ) );    //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1234.91', $validator->stripNonFloat( '1, 234.91' ) );   //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1234.91', $validator->stripNonFloat( ' 1, 234.91' ) );  //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1234.91', $validator->stripNonFloat( ' 1, 234.91' ) );  //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1234.91', $validator->stripNonFloat( ' 1, 234.91 ' ) ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
 
-			$this->assertEquals( $validator->stripNonFloat( '1 234.91' ), '1234.91' );
-			$this->assertEquals( $validator->stripNonFloat( '1.234,91' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( '1. 234,91' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( ' 1. 234,91' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( ' 1. 234,91' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
-			$this->assertEquals( $validator->stripNonFloat( ' 1. 234,91 ' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1234.91', $validator->stripNonFloat( '1 234.91' ) );
+			$this->assertEquals( '1.23491', $validator->stripNonFloat( '1.234,91' ) );    //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1.23491', $validator->stripNonFloat( '1. 234,91' ) );   //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1.23491', $validator->stripNonFloat( ' 1. 234,91' ) );  //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1.23491', $validator->stripNonFloat( ' 1. 234,91' ) );  //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
+			$this->assertEquals( '1.23491', $validator->stripNonFloat( ' 1. 234,91 ' ) ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
 		}
 	}
 
@@ -206,34 +204,34 @@ class ValidatorTest extends PHPUnit_Framework_TestCase {
 		//
 		// SIN - Canada
 		//
-		$this->assertEquals( $validator->isSIN( 'sin', '765 904 024', null, 'CA' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', '765904024', null, 'CA' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', ' 765904024 ', null, 'CA' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', ' 765-904-024 ', null, 'CA' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', ' 765/904/024 ', null, 'CA' ), true );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '765 904 024', null, 'CA' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '765904024', null, 'CA' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', ' 765904024 ', null, 'CA' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', ' 765-904-024 ', null, 'CA' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', ' 765/904/024 ', null, 'CA' ) );
 
-		$this->assertEquals( $validator->isSIN( 'sin', '765 904 024', null, 'CA' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', '958 752 115', null, 'CA' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', '046 454 286', null, 'CA' ), true ); //As of around 2015, SINs starting with 0 apparently can now be valid rather than just fictitious purposes.
+		$this->assertEquals( true, $validator->isSIN( 'sin', '765 904 024', null, 'CA' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '958 752 115', null, 'CA' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '046 454 286', null, 'CA' ) ); //As of around 2015, SINs starting with 0 apparently can now be valid rather than just fictitious purposes.
 
 		//Special ones that can be entered if employee does not have one, or its unknown. Some tax documents may require this.
-		$this->assertEquals( $validator->isSIN( 'sin', '999 999 999', null, 'CA' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', '000 000 000', null, 'CA' ), true );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '999 999 999', null, 'CA' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '000 000 000', null, 'CA' ) );
 
 		//Bogus ones that should fail.
-		$this->assertEquals( $validator->isSIN( 'sin', '123 456 789', null, 'CA' ), false );
-		$this->assertEquals( $validator->isSIN( 'sin', '987 654 321', null, 'CA' ), false );
+		$this->assertEquals( false, $validator->isSIN( 'sin', '123 456 789', null, 'CA' ) );
+		$this->assertEquals( false, $validator->isSIN( 'sin', '987 654 321', null, 'CA' ) );
 
 		//
 		// SSN - US
 		//
-		$this->assertEquals( $validator->isSIN( 'sin', '662-20-0887', null, 'US' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', '662/20/0887', null, 'US' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', '662 20 0887', null, 'US' ), true );
-		$this->assertEquals( $validator->isSIN( 'sin', '662200887', null, 'US' ), true );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '662-20-0887', null, 'US' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '662/20/0887', null, 'US' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '662 20 0887', null, 'US' ) );
+		$this->assertEquals( true, $validator->isSIN( 'sin', '662200887', null, 'US' ) );
 
 		// Foriegn
-		$this->assertEquals( $validator->isSIN( 'sin', 'ABC662200887', null, 'UK' ), true );
+		$this->assertEquals( true, $validator->isSIN( 'sin', 'ABC662200887', null, 'UK' ) );
 	}
 }
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1319,11 +1319,13 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 			$filter_data['user_group_id'] = $filter_data['group_id'];
 		}
 
-		$additional_order_fields = [ 'user_status_id', 'last_name', 'first_name', 'default_branch', 'default_department', 'user_group', 'title', 'country', 'province', 'currency' ];
+		$additional_order_fields = [ 'user_status_id', 'last_name', 'first_name', 'default_branch', 'default_department', 'user_group', 'title', 'country', 'province', 'currency', 'b.city' ];
 
 		$sort_column_aliases = [
 				'user_status' => 'user_status_id',
 				'status'      => 'status_id',
+				'type'        => 'type_id',
+				'city'        => 'b.city',
 		];
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == null ) {

@@ -1,8 +1,13 @@
-ResetForgotPasswordWizardController = BaseWizardController.extend( {
+class ResetForgotPasswordWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard'
+		} );
 
-	el: '.wizard',
+		super( options );
+	}
 
-	init: function() {
+	init() {
 		//this._super('initialize' );
 
 		this.title = $.i18n._( 'Reset Password' );
@@ -11,23 +16,23 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 		if ( this.default_data && typeof this.default_data.api_class != 'undefined' ) {
 			this.api = this.default_data.api_class;
 		} else {
-			this.api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
+			this.api = TTAPI.APIAuthentication;
 		}
 		this.render();
-	},
+	}
 
-	render: function() {
+	render() {
 		var $this = this;
-		this._super( 'render' );
+		super.render();
 		// $( this.el ).css( {left:  ( Global.bodyWidth() - $(this.el ).width() )/2} );
 		//
 		// $( window ).resize( function() {
 		// 	$( $this.el ).css( {left:  ( Global.bodyWidth() - $($this.el ).width() )/2} );
 		// } );
 		this.initCurrentStep();
-	},
+	}
 
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		var $this = this;
 		this.content_div.empty();
@@ -70,10 +75,9 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 				this.stepsWidgetDic[this.current_step][confirm_password.getField()] = confirm_password;
 				break;
 		}
+	}
 
-	},
-
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -89,14 +93,12 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
+	buildCurrentStepData() {
+	}
 
-	buildCurrentStepData: function() {
-
-	},
-
-	onCloseClick: function() {
+	onCloseClick() {
 		$( this.el ).remove();
 		LocalCacheData.current_open_wizard_controller = null;
 		LocalCacheData.extra_filter_for_next_open_view = null;
@@ -110,11 +112,11 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 			}
 		}
 		Global.setURLToBrowser( location );
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 
 		var new_password = this.stepsDataDic[1].new_password;
@@ -148,9 +150,8 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 					}
 				} );
 		}
-
 	}
 
-} );
+}
 
 ResetForgotPasswordWizardController.type = '';

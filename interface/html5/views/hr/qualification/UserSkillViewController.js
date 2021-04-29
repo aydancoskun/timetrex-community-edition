@@ -1,19 +1,25 @@
-UserSkillViewController = BaseViewController.extend( {
-	el: '#user_skill_view_container',
+class UserSkillViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_skill_view_container',
 
-	_required_files: ['APIUserSkill', 'APIQualification', 'APIQualificationGroup', 'APICompanyGenericTag'],
 
-	proficiency_array: null,
-	document_object_type_id: null,
-	qualification_group_api: null,
-	qualification_api: null,
-	qualification_group_array: null,
-	source_type_array: null,
-	qualification_array: null,
 
-	sub_view_grid_autosize: true,
+			proficiency_array: null,
+			document_object_type_id: null,
+			qualification_group_api: null,
+			qualification_api: null,
+			qualification_group_array: null,
+			source_type_array: null,
+			qualification_array: null,
 
-	init: function( options ) {
+			sub_view_grid_autosize: true
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserSkillEditView.html';
 		this.permission_id = 'user_skill';
@@ -22,9 +28,9 @@ UserSkillViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_skill';
 		this.context_menu_name = $.i18n._( 'Skills' );
 		this.navigation_label = $.i18n._( 'Skill' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserSkill' ) )();
-		this.qualification_api = new ( APIFactory.getAPIClass( 'APIQualification' ) )();
-		this.qualification_group_api = new ( APIFactory.getAPIClass( 'APIQualificationGroup' ) )();
+		this.api = TTAPI.APIUserSkill;
+		this.qualification_api = TTAPI.APIQualification;
+		this.qualification_group_api = TTAPI.APIQualificationGroup;
 		this.document_object_type_id = 125;
 		this.render();
 
@@ -34,14 +40,13 @@ UserSkillViewController = BaseViewController.extend( {
 			this.initData();
 			this.setSelectRibbonMenuIfNecessary( 'UserSkill' );
 		}
+	}
 
-	},
+	showNoResultCover( show_new_btn ) {
+		super.showNoResultCover( ( this.sub_view_mode ) ? true : false );
+	}
 
-	showNoResultCover: function( show_new_btn ) {
-		this._super( 'showNoResultCover', ( this.sub_view_mode ) ? true : false );
-	},
-
-	onGridSelectRow: function() {
+	onGridSelectRow() {
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
 			this.cancelOtherSubViewSelectedStatus();
@@ -49,17 +54,17 @@ UserSkillViewController = BaseViewController.extend( {
 			this.buildContextMenu();
 		}
 		this.setDefaultMenu();
-	},
+	}
 
-	onGridSelectAll: function() {
+	onGridSelectAll() {
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
 			this.cancelOtherSubViewSelectedStatus();
 		}
 		this.setDefaultMenu();
-	},
+	}
 
-	cancelOtherSubViewSelectedStatus: function() {
+	cancelOtherSubViewSelectedStatus() {
 		switch ( true ) {
 			case typeof ( this.parent_view_controller.sub_user_education_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_education_view_controller.unSelectAll();
@@ -71,18 +76,18 @@ UserSkillViewController = BaseViewController.extend( {
 				this.parent_view_controller.sub_user_language_view_controller.unSelectAll();
 				break;
 		}
-	},
+	}
 
-	onAddClick: function() {
+	onAddClick() {
 
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
 		}
 
-		this._super( 'onAddClick' );
-	},
+		super.onAddClick();
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'proficiency' );
@@ -118,10 +123,9 @@ UserSkillViewController = BaseViewController.extend( {
 				}
 			}
 		} );
+	}
 
-	},
-
-	onMassEditClick: function() {
+	onMassEditClick() {
 
 		var $this = this;
 		$this.is_add = false;
@@ -162,12 +166,11 @@ UserSkillViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -179,7 +182,7 @@ UserSkillViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserSkill' ) ),
+			api_class: TTAPI.APIUserSkill,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_SKILL,
@@ -199,10 +202,14 @@ UserSkillViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_skill_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		// Employee
-		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -222,7 +229,7 @@ UserSkillViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
+			api_class: TTAPI.APIQualification,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.QUALIFICATION,
 			show_search_inputs: true,
@@ -260,8 +267,8 @@ UserSkillViewController = BaseViewController.extend( {
 
 		widgets.push( form_item_input );
 
-		var widgetContainer = $( '<div class="widget-h-box"></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Automatic' ) + '</span>' );
+		widgetContainer = $( '<div class="widget-h-box"></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Automatic' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -292,12 +299,11 @@ UserSkillViewController = BaseViewController.extend( {
 
 		form_item_input.TTagInput( { field: 'tag', object_type_id: 251 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_skill_column1, '', null, null, true );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 
 		var default_args = {};
 		default_args.permission_section = 'user_skill';
@@ -310,7 +316,7 @@ UserSkillViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -333,7 +339,7 @@ UserSkillViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'qualification_id',
 				layout_name: ALayoutIDs.QUALIFICATION,
-				api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
+				api_class: TTAPI.APIQualification,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -408,7 +414,7 @@ UserSkillViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -420,25 +426,25 @@ UserSkillViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		if ( this.current_edit_record['enable_calc_experience'] ) {
 			this.edit_view_ui_dic['experience'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['experience'].setEnabled( true );
 		}
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -465,10 +471,9 @@ UserSkillViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	calcExperience: function() {
+	calcExperience() {
 		this.edit_view_ui_dic['experience'].setEnabled( false );
 		var first_used_date = this.edit_view_ui_dic['first_used_date'].getValue();
 		var last_used_date = this.edit_view_ui_dic['last_used_date'].getValue();
@@ -484,13 +489,13 @@ UserSkillViewController = BaseViewController.extend( {
 		} else {
 			this.edit_view_ui_dic['experience'].setValue( 0 );
 		}
-	},
+	}
 
-	searchDone: function() {
-		this._super( 'searchDone' );
+	searchDone() {
+		super.searchDone();
 		TTPromise.resolve( 'Employee_Qualifications_Tab', 'UserSkillViewController' );
 	}
-} );
+}
 
 UserSkillViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserSkill', 'SubUserSkillView.html', function( result ) {

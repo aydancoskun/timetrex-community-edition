@@ -5,16 +5,21 @@ require_once( '../../classes/modules/api/client/TimeTrexClientAPI.class.php' );
  Global variables
 */
 $TIMETREX_URL = 'https://demo.timetrex.com/next-release/api/soap/api.php';
-$TIMETREX_USERNAME = 'demoadmin1';
-$TIMETREX_PASSWORD = 'demo';
-
-$api_session = new TimeTrexClientAPI();
-$api_session->Login( $TIMETREX_USERNAME, $TIMETREX_PASSWORD );
-if ( $TIMETREX_SESSION_ID == false ) {
-	echo "Login Failed!<br>\n";
-	exit;
+$TIMETREX_API_KEY = ''; //API SESSION KEY to use for all API requests, obtained immediately below.
+if ( !isset( $TIMETREX_API_KEY ) || $TIMETREX_API_KEY == '' ) {
+	//Register a API key for use with all subsequent API calls.
+	$api_session = new TimeTrexClientAPI();
+	$TIMETREX_API_KEY = $api_session->registerAPIKey( 'demoadmin1', 'demo' );
+	if ( $TIMETREX_API_KEY == false ) {
+		echo "Login Failed, please check username/password or URL to ensure it is correct!<br>\n";
+		exit;
+	} else {
+		echo "Permanent API KEY SESSION registered, you may now define this in your code for all subsequent API calls:<br>\n";
+		echo "\$TIMETREX_API_KEY = '" . $TIMETREX_API_KEY . "'<br>\n";
+		exit;
+	}
 }
-echo "Session ID: $TIMETREX_SESSION_ID<br>\n";
+
 
 //
 //Get data for two employees by user_name or primary key/ID.
@@ -24,8 +29,8 @@ $user_obj = new TimeTrexClientAPI( 'User' );
 $result = $user_obj->getUser(
 		[
 				'filter_data' => [
-					//'id' => array('11e817cb-7dcc-7130-b939-5431e6810149','11e817cb-8385-8e50-97f3-5431e6810149')
-					'user_name' => [ 'jane.doe1', 'tristen.braun1' ],
+					//'id' => [ '11e817cb-7dcc-7130-b939-5431e6810149','11e817cb-8385-8e50-97f3-5431e6810149' ],
+					'user_name' => 'john.doe1',
 				],
 		]
 );
@@ -33,7 +38,7 @@ $result = $user_obj->getUser(
 $user_data = $result->getResult();
 print $result;
 
-/* //Example returned data: )
+/* //Example returned data:
 array(2) {
   [0]=>
   array(98) {
@@ -105,7 +110,6 @@ array(2) {
 	string(36) "11e7fa4d-025e-93e0-bc8b-21ea65522ba3"
 	["policy_group"]=>
 	string(7) "Default"
-
 	["first_name"]=>
 	string(7) "Tristen"
 	["first_name_metaphone"]=>
@@ -182,16 +186,6 @@ array(2) {
 	string(12) "1.0000000000"
 	["sin"]=>
 	string(9) "401240815"
-	["other_id1"]=>
-	bool(false)
-	["other_id2"]=>
-	bool(false)
-	["other_id3"]=>
-	bool(false)
-	["other_id4"]=>
-	bool(false)
-	["other_id5"]=>
-	bool(false)
 	["note"]=>
 	bool(false)
 	["longitude"]=>
@@ -293,7 +287,6 @@ array(2) {
 	string(36) "11e7fa4d-025e-93e0-bc8b-21ea65522ba3"
 	["policy_group"]=>
 	string(7) "Default"
-
 	["first_name"]=>
 	string(4) "Jane"
 	["first_name_metaphone"]=>

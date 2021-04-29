@@ -1,26 +1,32 @@
-PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
-	name: 'review',
-	api: null,
-	_required_files: ['APIPayrollRemittanceAgencyEvent'],
-	el: $( '.wizard.process_transactions_wizard' ),
+class PayrollRemittanceAgencyEventWizardStepReview extends WizardStep {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			name: 'review',
+			api: null,
 
-	init: function() {
+			el: $( '.wizard.process_transactions_wizard' )
+		} );
+
+		super( options );
+	}
+
+	init() {
 		var $this = this;
 		require( this._required_files, function() {
-			$this.api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
+			$this.api = TTAPI.APIPayrollRemittanceAgencyEvent;
 			$this.render();
 		} );
-	},
+	}
 
-	getPreviousStepName: function() {
+	getPreviousStepName() {
 		return 'home';
-	},
+	}
 
-	getNextStepName: function() {
+	getNextStepName() {
 		return 'submit';
-	},
+	}
 
-	_render: function() {
+	_render() {
 		this.setTitle( $.i18n._( 'Review and Verify Information' ) );
 		this.setInstructions( $.i18n._( 'Review and verify all necessary information' ) + ': ' );
 
@@ -186,10 +192,9 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 
 			$this.getWizardObject().enableButtons();
 		} );
+	}
 
-	},
-
-	_onNavigationClick: function( icon ) {
+	_onNavigationClick( icon ) {
 		//When navigating away, link the wizard.
 		var $this = this;
 		switch ( $this.getWizardObject().selected_remittance_agency_event.type_id ) {
@@ -355,9 +360,9 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 						break;
 				}
 		}
-	},
+	}
 
-	initRightClickMenuForTaxReportViewButton: function() {
+	initRightClickMenuForTaxReportViewButton() {
 		var $this = this;
 		var selector = '#taxReportsIcon';
 		if ( $( selector ).length == 0 ) {
@@ -381,9 +386,9 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 			items: items,
 			zIndex: 50
 		} );
-	},
+	}
 
-	getViewButtonRightClickItems: function() {
+	getViewButtonRightClickItems() {
 		var $this = this;
 		var items = {};
 
@@ -409,4 +414,4 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend( {
 
 		return items;
 	}
-} );
+}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -41,6 +41,28 @@
 class PayrollDeduction_US_ID extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = [
+			20200616 => [
+					10 => [
+							[ 'income' => 12400, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 13968, 'rate' => 1.125, 'constant' => 0 ],
+							[ 'income' => 15536, 'rate' => 3.125, 'constant' => 18 ],
+							[ 'income' => 17104, 'rate' => 3.625, 'constant' => 67 ],
+							[ 'income' => 18672, 'rate' => 4.625, 'constant' => 124 ],
+							[ 'income' => 20240, 'rate' => 5.625, 'constant' => 197 ],
+							[ 'income' => 24160, 'rate' => 6.625, 'constant' => 285 ],
+							[ 'income' => 24160, 'rate' => 6.925, 'constant' => 545 ],
+					],
+					20 => [
+							[ 'income' => 24800, 'rate' => 0, 'constant' => 0 ],
+							[ 'income' => 27936, 'rate' => 1.125, 'constant' => 0 ],
+							[ 'income' => 31072, 'rate' => 3.125, 'constant' => 35 ],
+							[ 'income' => 34208, 'rate' => 3.625, 'constant' => 133 ],
+							[ 'income' => 37344, 'rate' => 4.625, 'constant' => 247 ],
+							[ 'income' => 40480, 'rate' => 5.625, 'constant' => 392 ],
+							[ 'income' => 48320, 'rate' => 6.625, 'constant' => 568 ],
+							[ 'income' => 48320, 'rate' => 6.925, 'constant' => 1087 ],
+					],
+			],
 			20190627 => [
 					10 => [
 							[ 'income' => 12200, 'rate' => 0, 'constant' => 0 ],

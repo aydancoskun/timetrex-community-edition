@@ -1,29 +1,31 @@
-AboutViewController = BaseViewController.extend( {
+class AboutViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			_required_files: ['TImage', 'TImageBrowser'],
 
-	_required_files: ['APIAbout'],
+			date_api: null,
 
-	date_api: null,
+			employeeActive: []
+		} );
 
-	employeeActive: [],
+		super( options );
+	}
 
-	_required_files: ['TImage', 'TImageBrowser', 'APIAbout', 'APIDate'],
-
-	init: function( options ) {
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.viewId = 'About';
 		this.script_name = 'AboutView';
 		this.context_menu_name = $.i18n._( 'About' );
-		this.api = new ( APIFactory.getAPIClass( 'APIAbout' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.api = TTAPI.APIAbout;
+		this.date_api = TTAPI.APITTDate;
 
 		this.render();
 
 		this.initData();
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -38,17 +40,17 @@ AboutViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.check_updates:
 				this.onCheckClick();
 				break;
 		}
-	},
+	}
 
-	onCheckClick: function() {
+	onCheckClick() {
 		var $this = this;
 		this.api['isNewVersionAvailable']( {
 			onResult: function( result ) {
@@ -57,11 +59,11 @@ AboutViewController = BaseViewController.extend( {
 				$this.initEditView();
 			}
 		} );
-	},
+	}
 
-	getAboutData: function( callBack ) {
+	getAboutData( callBack ) {
 		var $this = this;
-		$this.api['get' + $this.api.key_name]( {
+		$this.api['getAboutData']( {
 			onResult: function( result ) {
 				var result_data = result.getResult();
 				if ( Global.isSet( result_data ) ) {
@@ -70,9 +72,9 @@ AboutViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	openEditView: function() {
+	openEditView() {
 		var $this = this;
 
 		if ( $this.edit_only_mode ) {
@@ -83,7 +85,7 @@ AboutViewController = BaseViewController.extend( {
 			}
 
 			$this.getAboutData( function( result ) {
-				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+				// Waiting for the TTAPI.API returns data to set the current edit record.
 				$this.current_edit_record = result;
 
 				$this.initEditView();
@@ -91,14 +93,12 @@ AboutViewController = BaseViewController.extend( {
 			} );
 
 		}
+	}
 
-	},
+	setUIWidgetFieldsToCurrentEditRecord() {
+	}
 
-	setUIWidgetFieldsToCurrentEditRecord: function() {
-
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		if ( !Global.isSet( this.current_edit_record['license_data'] ) ) {
 			this.current_edit_record['license_data'] = {};
@@ -229,15 +229,14 @@ AboutViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.setActiveEmployees();
-	},
+	}
 
-	setActiveEmployees: function() {
+	setActiveEmployees() {
 
 		if ( this.employeeActive.length > 0 ) {
 			for ( var i in this.employeeActive ) {
@@ -272,11 +271,11 @@ AboutViewController = BaseViewController.extend( {
 
 			this.editFieldResize( 0 );
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_about': { 'label': $.i18n._( 'About' ) },
@@ -430,10 +429,9 @@ AboutViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( { label: $.i18n._( 'Employees (Active / InActive)' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_about_column1, '', null, true, false, 'user_active_inactive' );
+	}
 
-	},
-
-	uploadLicense: function( obj ) {
+	uploadLicense( obj ) {
 		var $this = this;
 		var file = this.edit_view_ui_dic['license_browser'].getValue();
 		$this.api.uploadFile( file, 'object_type=license&object_id=', {
@@ -457,4 +455,4 @@ AboutViewController = BaseViewController.extend( {
 		} );
 	}
 
-} );
+}

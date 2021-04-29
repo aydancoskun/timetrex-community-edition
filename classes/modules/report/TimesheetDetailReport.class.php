@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -813,15 +813,15 @@ class TimesheetDetailReport extends Report {
 	 */
 	function splitDataByHoursWorked( $row, $dynamic_columns ) {
 		$retval = [];
-		if ( isset( $row['min_punch_time_stamp'] ) && isset( $row['max_punch_time_stamp'] ) && $row['min_punch_time_stamp'] > 0 && $row['max_punch_time_stamp'] > 0 ) {
-			$total_hour_rows = ceil( ( TTDate::roundTime( $row['max_punch_time_stamp'], 3600, 30 ) - TTDate::roundTime( $row['min_punch_time_stamp'], 3600, 10 ) ) / 3600 );
+		if ( isset( $row['raw_min_punch_time_stamp'] ) && isset( $row['raw_max_punch_time_stamp'] ) && $row['raw_min_punch_time_stamp'] > 0 && $row['raw_max_punch_time_stamp'] > 0 ) {
+			$total_hour_rows = abs( ceil( ( TTDate::roundTime( $row['raw_max_punch_time_stamp'], 3600, 30 ) - TTDate::roundTime( $row['raw_min_punch_time_stamp'], 3600, 10 ) ) / 3600 ) );
 			if ( $total_hour_rows == 0 ) {
 				$total_hour_rows = 1;
 			}
 
-			$start_time = TTDate::roundTime( $row['min_punch_time_stamp'], 3600, 10 );
+			$start_time = TTDate::roundTime( $row['raw_min_punch_time_stamp'], 3600, 10 );
 			//If the employee punches out exact at 5:00PM, minus 1 second from that time so its recorded as an hour for 4:00PM and not 5:00PM.
-			$end_time = TTDate::roundTime( ( $row['max_punch_time_stamp'] - 1 ), 3600, 10 );
+			$end_time = TTDate::roundTime( ( $row['raw_max_punch_time_stamp'] - 1 ), 3600, 10 );
 
 			//Debug::Text('Total Hours: '. $total_hour_rows .' Start Time: '. TTDate::getDATE('DATE+TIME', $start_time ) .' End Time: '. TTDate::getDATE('DATE+TIME', $end_time ), __FILE__, __LINE__, __METHOD__, 10);
 			$x = 0;
@@ -830,19 +830,19 @@ class TimesheetDetailReport extends Report {
 				$retval[$i]['worked_hour_of_day'] = $i;
 
 
-				if ( $row['min_punch_time_stamp'] > $i && ( $row['min_punch_time_stamp'] - $i ) < 3600 ) {
-					$partial_hour = 3600 - ( $row['min_punch_time_stamp'] - $i );
-				} else if ( $row['max_punch_time_stamp'] > $i && ( $row['max_punch_time_stamp'] - $i ) < 3600 ) {
-					$partial_hour = ( $row['max_punch_time_stamp'] - $i );
+				if ( $row['raw_min_punch_time_stamp'] > $i && ( $row['raw_min_punch_time_stamp'] - $i ) < 3600 ) {
+					$partial_hour = ( 3600 - ( $row['raw_min_punch_time_stamp'] - $i ) );
+				} else if ( $row['raw_max_punch_time_stamp'] > $i && ( $row['raw_max_punch_time_stamp'] - $i ) < 3600 ) {
+					$partial_hour = ( $row['raw_max_punch_time_stamp'] - $i );
 				} else {
 					$partial_hour = 3600;
 				}
 
 				//Handle partial hours. Though we don't need to do this as we track the number of hours worked per hour as well, so that gives us man hours.
-//				if ( $row['min_punch_time_stamp'] > $i AND ( $row['min_punch_time_stamp'] - $i ) < 3600 ) {
-//					$retval[$i]['worked_hour_of_day_total'] = ( TTDate::roundTime( ( $row['min_punch_time_stamp'] - $i ), 900, 10 ) / 3600 );
-//				} elseif( $row['max_punch_time_stamp'] > $i AND ( $row['max_punch_time_stamp'] - $i ) < 3600 ) {
-//					$retval[$i]['worked_hour_of_day_total'] = ( TTDate::roundTime( ( $row['max_punch_time_stamp'] - $i ), 900, 10 ) / 3600 );
+//				if ( $row['raw_min_punch_time_stamp'] > $i AND ( $row['raw_min_punch_time_stamp'] - $i ) < 3600 ) {
+//					$retval[$i]['worked_hour_of_day_total'] = ( TTDate::roundTime( ( $row['raw_min_punch_time_stamp'] - $i ), 900, 10 ) / 3600 );
+//				} elseif( $row['raw_max_punch_time_stamp'] > $i AND ( $row['raw_max_punch_time_stamp'] - $i ) < 3600 ) {
+//					$retval[$i]['worked_hour_of_day_total'] = ( TTDate::roundTime( ( $row['raw_max_punch_time_stamp'] - $i ), 900, 10 ) / 3600 );
 //				} else {
 //					$retval[$i]['worked_hour_of_day_total'] = 1.00;
 //				}
@@ -850,7 +850,7 @@ class TimesheetDetailReport extends Report {
 				$retval[$i]['worked_hour_of_day_total'] = 1.00;
 
 				foreach ( $row as $column => $value ) {
-					if ( isset( $dynamic_columns[$column] ) && is_numeric( $value ) && !in_array( $column, [ 'min_punch_time_stamp', 'max_punch_time_stamp' ] ) ) {
+					if ( isset( $dynamic_columns[$column] ) && is_numeric( $value ) && !in_array( $column, [ 'raw_min_punch_time_stamp', 'raw_max_punch_time_stamp' ] ) ) {
 						//$retval[$i][$column] = ( $value / $total_hour_rows );
 						if ( $column == 'worked_time' ) {
 							$retval[$i][$column] = $partial_hour;
@@ -866,7 +866,7 @@ class TimesheetDetailReport extends Report {
 			}
 		}
 
-		if ( !isset( $retval ) ) {
+		if ( empty( $retval ) ) {
 			$retval[0] = $row;
 		}
 
@@ -906,7 +906,7 @@ class TimesheetDetailReport extends Report {
 			$pclf = TTnew( 'PunchControlListFactory' ); /** @var PunchControlListFactory $pclf */
 			$pclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $punch_control_filter_data );
 			Debug::Text( 'Got punch control data... Total Rows: ' . $pclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pclf->getRecordCount(), null, TTi18n::getText( 'Retrieving Punch Notes Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pclf->getRecordCount(), null, TTi18n::getText( 'Retrieving Punch Notes Data...' ) );
 			if ( $pclf->getRecordCount() > 0 ) {
 				foreach ( $pclf as $key => $pc_obj ) {
 					if ( $pc_obj->getNote() != '' ) {
@@ -917,7 +917,7 @@ class TimesheetDetailReport extends Report {
 							$this->tmp_data['punch_control_rows'][TTUUID::castUUID( $pc_obj->getColumn( 'user_id' ) )][$date_stamp][TTUUID::castUUID( $pc_obj->getBranch() )][TTUUID::castUUID( $pc_obj->getDepartment() )]['udt_note'] = $pc_obj->getNote();
 						}
 					}
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				}
 			}
 			unset( $pclf, $pc_obj, $punch_control_filter_data, $date_stamp );
@@ -927,7 +927,7 @@ class TimesheetDetailReport extends Report {
 		$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 		$udtlf->getTimesheetDetailReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Total Rows: ' . $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udtlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $udtlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		$include_no_data_rows_arr = [];
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach ( $udtlf as $key => $udt_obj ) {
@@ -989,6 +989,9 @@ class TimesheetDetailReport extends Report {
 								'pay_period'                  => strtotime( $udt_obj->getColumn( 'pay_period_transaction_date' ) ),
 								'pay_period_id'               => $udt_obj->getColumn( 'pay_period_id' ),
 
+								'raw_min_punch_time_stamp'	  => strtotime( $udt_obj->getColumn( 'start_time_stamp' ) ), //This is required for calculating Worked Hour Of Day
+								'raw_max_punch_time_stamp'	  => strtotime( $udt_obj->getColumn( 'end_time_stamp' ) ), //This is required for calculating Worked Hour Of Day
+
 								//Normalize the timestamps to the same day, otherwise min/max aggregates will always use what times are on the first/last days.
 								'min_punch_time_stamp'        => ( $udt_obj->getObjectType() == 10 && $udt_obj->getColumn( 'start_time_stamp' ) != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn( 'start_time_stamp' ) ), 86400 ) : null,
 								'max_punch_time_stamp'        => ( $udt_obj->getObjectType() == 10 && $udt_obj->getColumn( 'end_time_stamp' ) != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn( 'end_time_stamp' ) ), 86400 ) : null,
@@ -1006,6 +1009,9 @@ class TimesheetDetailReport extends Report {
 									'pay_period_transaction_date' => strtotime( $udt_obj->getColumn( 'pay_period_transaction_date' ) ),
 									'pay_period'                  => strtotime( $udt_obj->getColumn( 'pay_period_transaction_date' ) ),
 									'pay_period_id'               => $udt_obj->getColumn( 'pay_period_id' ),
+
+									'raw_min_punch_time_stamp'	  => null, //This is required for calculating Worked Hour Of Day
+								    'raw_max_punch_time_stamp'	  => null, //This is required for calculating Worked Hour Of Day
 
 									'min_punch_time_stamp' => null,
 									'max_punch_time_stamp' => null,
@@ -1112,7 +1118,7 @@ class TimesheetDetailReport extends Report {
 					}
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 			unset( $udt_obj, $user_id, $date_stamp, $branch_id, $department_id, $currency_rate, $currency_id, $time_columns );
 		}
@@ -1174,7 +1180,7 @@ class TimesheetDetailReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), [ 'province' => true, 'hire_date' => true, 'termination_date' => true, 'title_id' => true ] ) );
 			$this->tmp_data['user'][$u_obj->getId()]['user_province'] = $this->tmp_data['user'][$u_obj->getId()]['province']; //Used in Payroll Export for PBJ.
@@ -1207,7 +1213,7 @@ class TimesheetDetailReport extends Report {
 				unset( $tmp_pay_period_id, $tmp_date_stamps, $tmp_date_stamp, $tmp_pay_period_data );
 			}
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		unset( $include_no_data_rows_arr );
 		//Debug::Arr($this->form_data, 'zUser Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1216,20 +1222,20 @@ class TimesheetDetailReport extends Report {
 		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text( ' Branch Total Rows: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $blf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $blf as $key => $b_obj ) {
 			$this->tmp_data['default_branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'default_branch_', (array)$b_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'province' => true, 'manual_id' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
 			$this->tmp_data['branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'branch_', (array)$b_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'province' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
 			//For backwards compatibility with saved reports, use "branch" and "branch_name" as the same thing.
 			$this->tmp_data['branch'][$b_obj->getId()]['branch'] = $this->tmp_data['branch'][$b_obj->getId()]['branch_name'];
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$dlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text( ' Department Total Rows: ' . $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $dlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $dlf as $key => $d_obj ) {
 			$this->tmp_data['default_department'][$d_obj->getId()] = Misc::addKeyPrefix( 'default_department_', (array)$d_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'province' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
 			$this->tmp_data['department'][$d_obj->getId()] = Misc::addKeyPrefix( 'department_', (array)$d_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'province' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
@@ -1237,7 +1243,7 @@ class TimesheetDetailReport extends Report {
 			//For backwards compatibility with saved reports, use "branch" and "branch_name" as the same thing.
 			$this->tmp_data['department'][$d_obj->getId()]['department'] = $this->tmp_data['department'][$d_obj->getId()]['department_name'];
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['default_department'], 'Default Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data['department'], 'Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1247,10 +1253,10 @@ class TimesheetDetailReport extends Report {
 		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text( ' User Title Total Rows: ' . $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$user_title_column_config = array_merge( (array)Misc::removeKeyPrefix( 'user_title_', (array)$this->getColumnDataConfig() ), [ 'id' => true, 'name' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ); //Always include title_id column so we can merge title data.
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $utlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Titles...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $utlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Titles...' ) );
 		foreach ( $utlf as $key => $ut_obj ) {
 			$this->tmp_data['user_title'][$ut_obj->getId()] = Misc::addKeyPrefix( 'user_title_', (array)$ut_obj->getObjectAsArray( $user_title_column_config ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user_title'],'user_title_data', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1322,7 +1328,7 @@ class TimesheetDetailReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess( $format = null ) {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['user_date_total'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['user_date_total'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		$columns = $this->getColumnDataConfig();
 		$dynamic_columns = Misc::trimSortPrefix( $this->getOptions( 'dynamic_columns' ) );
@@ -1448,7 +1454,7 @@ class TimesheetDetailReport extends Report {
 						}
 					}
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				$key++;
 			}
 			unset( $this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3 );
@@ -2102,26 +2108,26 @@ class TimesheetDetailReport extends Report {
 			$filter_data = $this->getFilterConfig();
 			$columns = Misc::trimSortPrefix( $this->getOptions( 'columns' ) );
 
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), 2, null, TTi18n::getText( 'Querying Database...' ) ); //Iterations need to be 2, otherwise progress bar is not created.
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), 2 );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), 2, null, TTi18n::getText( 'Querying Database...' ) ); //Iterations need to be 2, otherwise progress bar is not created.
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), 2 );
 
 			if ( $format == 'pdf_timesheet_detail' ) {
 				$plf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf */
 				$plf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 				Debug::Text( 'Got punch data... Total Rows: ' . $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), null, TTi18n::getText( 'Retrieving Punch Data...' ) );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $plf->getRecordCount(), null, TTi18n::getText( 'Retrieving Punch Data...' ) );
 				if ( $plf->getRecordCount() > 0 ) {
 					foreach ( $plf as $key => $p_obj ) {
 						$date_stamp = (int)TTDate::getMiddleDayEpoch( TTDate::strtotime( $p_obj->getColumn( 'date_stamp' ) ) );
 						$this->form_data['user_date_total'][TTUUID::castUUID( $p_obj->getColumn( 'user_id' ) )]['punch_rows'][TTUUID::castUUID( $p_obj->getColumn( 'pay_period_id' ) )][$date_stamp][$p_obj->getPunchControlID()][$p_obj->getStatus()] = [ 'status_id' => $p_obj->getStatus(), 'type_id' => $p_obj->getType(), 'type_code' => $p_obj->getTypeCode(), 'time_stamp' => $p_obj->getTimeStamp() ];
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 					}
 				}
 				unset( $plf, $p_obj, $date_stamp );
 			}
 
 			Debug::Text( 'Drawing timesheets...', __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->form_data['user_date_total'] ), null, TTi18n::getText( 'Generating TimeSheets...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->form_data['user_date_total'] ), null, TTi18n::getText( 'Generating TimeSheets...' ) );
 			$key = 0;
 			$page_count = 0;
 			foreach ( $this->form_data['user_date_total'] as $user_data ) {
@@ -2233,7 +2239,7 @@ class TimesheetDetailReport extends Report {
 					}
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				if ( ( $key % 25 ) == 0 && $this->isSystemLoadValid() == false ) {
 					return false;
 				}

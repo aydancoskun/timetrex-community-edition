@@ -1,12 +1,17 @@
-QuickStartWizardController = BaseWizardController.extend( {
+class QuickStartWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg',
+			selected_province_index: -1,
+			selected_country_index: -1,
 
-	el: '.wizard-bg',
-	selected_province_index: -1,
-	selected_country_index: -1,
 
-	_required_files: ['APIPayPeriodSchedule', 'APIUserPreference', 'APICurrentUser'],
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Quick Start Wizard' );
@@ -14,17 +19,16 @@ QuickStartWizardController = BaseWizardController.extend( {
 		this.current_step = 1;
 
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initCurrentStep();
-
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 		var $this = this;
 		this.content_div.empty();
 		this.stepsWidgetDic[this.current_step] = {};
@@ -145,7 +149,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 				form_item_input.TText( { field: 'legal_entity_id' } );
 				form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+					api_class: TTAPI.APILegalEntity,
 					allow_multiple_selection: true,
 					layout_name: ALayoutIDs.LEGAL_ENTITY,
 					show_search_inputs: false,
@@ -193,9 +197,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				break;
 		}
-	},
+	}
 
-	initInsideEditorData: function() {
+	initInsideEditorData() {
 		var $this = this;
 
 		var current_step_data = this.stepsDataDic[this.current_step];
@@ -213,10 +217,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 			editor.setValue( current_step_data.country );
 
 		}
+	}
 
-	},
-
-	insideEditorSetValue: function( val ) {
+	insideEditorSetValue( val ) {
 		var len = val.length;
 		this.removeAllRows();
 
@@ -230,17 +233,16 @@ QuickStartWizardController = BaseWizardController.extend( {
 		} else {
 			this.addRow();
 		}
+	}
 
-	},
-
-	insideEditorRemoveRow: function( row ) {
+	insideEditorRemoveRow( row ) {
 		var index = row[0].rowIndex - 1;
 		row.remove();
 		this.rows_widgets_array.splice( index, 1 );
 		this.removeLastRowLine();
-	},
+	}
 
-	insideEditorAddRow: function( data, index ) {
+	insideEditorAddRow( data, index ) {
 
 		var form_item_input;
 
@@ -267,7 +269,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 		var country = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		country.TComboBox( { field: 'country', set_empty: true, set_select_item_when_set_source_data: true } );
 
-		var country_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		var country_api = TTAPI.APICompany;
 
 		country_api.getOptions( 'country', {
 			onResult: function( result ) {
@@ -355,9 +357,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 				province.setSelectedIndex( $this.parent_controller.selected_province_index );
 			}
 		}
-	},
+	}
 
-	setProvince: function( val, province ) {
+	setProvince( val, province ) {
 		var $this = this;
 
 		if ( !val.country ) {
@@ -368,7 +370,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		}
 
-		var country_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		var country_api = TTAPI.APICompany;
 
 		country_api.getOptions( 'province', val.country, {
 			onResult: function( res ) {
@@ -379,9 +381,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 				TTPromise.resolve( 'QuickStartWizard', 'setProvince' );
 			}
 		} );
-	},
+	}
 
-	onFrequencyChange: function( target ) {
+	onFrequencyChange( target ) {
 
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var grid = current_step_ui['example_dates'];
@@ -397,10 +399,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 		if ( first_cell_val ) {
 			this.setDefaultDates( true );
 		}
+	}
 
-	},
-
-	setDateGrid: function( gridId, grid_div, height ) {
+	setDateGrid( gridId, grid_div, height ) {
 		var $this = this;
 
 		this.content_div.append( grid_div );
@@ -430,19 +431,19 @@ QuickStartWizardController = BaseWizardController.extend( {
 			$this.setGridGroupColumns( gridId );
 
 		} );
-	},
+	}
 
-	onTextInputRender: function( cell_value, related_data, row ) {
+	onTextInputRender( cell_value, related_data, row ) {
 
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowId;
 
-		var date_picker = $( '<div custom_cell="true" render_type="date_picker" id="' + row_id + '_' + col_model.name + '" class="t-date-picker-div"><input class="t-date-picker" type="text" value="' + cell_value + '" /><img id="tDatePickerIcon" class="t-date-picker-icon"/></div>' );
+		var date_picker = $( '<div custom_cell="true" render_type="date_picker" id="' + row_id + '_' + col_model.name + '" class="t-date-picker-div"><input class="t-date-picker" type="text" value="' + cell_value + '"></input><img id="tDatePickerIcon" class="t-date-picker-icon"></img>' );
 
 		return date_picker.get( 0 ).outerHTML;
-	},
+	}
 
-	onCloseClick: function() {
+	onCloseClick() {
 		var $this = this;
 		if ( !LocalCacheData.getCurrentCompany().is_setup_complete ) {
 			TAlertManager.showConfirmAlert( $.i18n._( 'Would you like to be reminded to complete the Quick Start Wizard next time you login?' ), '', function( flag ) {
@@ -451,7 +452,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 					company.id = LocalCacheData.getCurrentCompany().id;
 					company.is_setup_complete = true;
 
-					var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+					var company_api = TTAPI.APICompany;
 					LocalCacheData.getCurrentCompany().is_setup_complete = true;
 
 					company_api.setCompany( company, {
@@ -469,9 +470,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 			LocalCacheData.current_open_wizard_controller = null;
 
 		}
-	},
+	}
 
-	onStep3DatePickerChange: function( target ) {
+	onStep3DatePickerChange( target ) {
 
 		var $this = this;
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -503,10 +504,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 				break;
 			}
 		}
+	}
 
-	},
-
-	setDefaultDates: function( show_alert ) {
+	setDefaultDates( show_alert ) {
 		var $this = this;
 		if ( show_alert ) {
 			TAlertManager.showConfirmAlert( $.i18n._( 'Would you like to pre-populate all date fields based on the first start date' ), '', function( flag ) {
@@ -525,7 +525,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 			var data = grid.getData();
 			var first_date = data[0].start_date;
 
-			var api = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
+			var api = TTAPI.APIPayPeriodSchedule;
 
 			api.detectPayPeriodScheduleDates( type_id, first_date, {
 				onResult: function( result ) {
@@ -537,10 +537,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	getGridColumns: function( gridId, callBack ) {
+	getGridColumns( gridId, callBack ) {
 		var column_info_array = [];
 		var $this = this;
 
@@ -591,10 +590,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 		}
 
 		callBack( column_info_array );
+	}
 
-	},
-
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 		var $this = this;
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -606,8 +604,8 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				Global.setWidgetEnabled( this.next_btn, false );
 				Global.setWidgetEnabled( this.back_btn, false );
-				var api_user_preference = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
-				var api_current_user = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
+				var api_user_preference = TTAPI.APIUserPreference;
+				var api_current_user = TTAPI.APIAuthentication;
 
 				//Time ZOne
 				api_user_preference.getOptions( 'time_zone', {
@@ -682,7 +680,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				break;
 			case 3:
-				var api_pp_schedule = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
+				var api_pp_schedule = TTAPI.APIPayPeriodSchedule;
 				api_pp_schedule.getOptions( 'type', {
 					onResult: function( result ) {
 						var res_data = Global.buildRecordArray( result.getResult() );
@@ -792,9 +790,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 			$this.setStep3CellDatePickers( grid );
 
 		}
-	},
+	}
 
-	setStep3CellDatePickers: function( grid ) {
+	setStep3CellDatePickers( grid ) {
 		var inputs = grid.grid.find( 'div[custom_cell="true"]' );
 		var $this = this;
 		for ( var i = 0; i < inputs.length; i++ ) {
@@ -805,19 +803,18 @@ QuickStartWizardController = BaseWizardController.extend( {
 			} );
 
 		}
+	}
 
-	},
-
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		$( $this.el ).remove();
 		LocalCacheData.current_open_wizard_controller = null;
 
 		IndexViewController.goToView( 'Employee' );
-	},
+	}
 
-	insideEditorGetValue: function() {
+	insideEditorGetValue() {
 
 		var len = this.rows_widgets_array.length;
 
@@ -835,9 +832,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	onNextClick: function() {
+	onNextClick() {
 
 		var $this = this;
 
@@ -849,10 +846,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 				$this.initCurrentStep();
 			}
 		} );
+	}
 
-	},
-
-	onBackClick: function() {
+	onBackClick() {
 		var $this = this;
 
 		this.saveCurrentStep( 'back', function( result ) {
@@ -863,9 +859,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 				$this.initCurrentStep();
 			}
 		} );
-	},
+	}
 
-	saveCurrentStep: function( direction, callBack ) {
+	saveCurrentStep( direction, callBack ) {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -882,8 +878,8 @@ QuickStartWizardController = BaseWizardController.extend( {
 				current_step_data.start_week_day = current_step_ui.start_week_day.getValue();
 
 				if ( direction === 'forward' ) {
-					var api_current_user = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
-					var api_user_preference = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+					var api_current_user = TTAPI.APIAuthentication;
+					var api_user_preference = TTAPI.APIUserPreference;
 					api_current_user.getCurrentUserPreference( {
 						onResult: function( result ) {
 							var res_data = result.getResult();
@@ -916,7 +912,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				current_step_data.example_dates = current_step_ui.example_dates.getGridParam( 'data' );
 
 				if ( direction === 'forward' ) {
-					var api_pp_schedule = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
+					var api_pp_schedule = TTAPI.APIPayPeriodSchedule;
 
 					api_pp_schedule.detectPayPeriodScheduleSettings( current_step_data.type_id, current_step_data.example_dates, {
 						onResult: function( result ) {
@@ -964,7 +960,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				}
 
 				if ( direction === 'forward' ) {
-					var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+					var company_api = TTAPI.APISetupPresets;
 					company_api.createPresets( current_step_data.country, current_step_data.legal_entity_id, {
 						onResult: function( result ) {
 
@@ -984,7 +980,6 @@ QuickStartWizardController = BaseWizardController.extend( {
 				callBack( true );
 				break;
 		}
-
 	}
 
-} );
+}

@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -86,8 +86,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
 	}
 
 	function testUS_2007a_BiWeekly_Married_LowIncome() {
@@ -105,8 +105,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '56.15' ); //56.15
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '56.15', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //56.15
 	}
 
 
@@ -125,8 +125,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '30.00' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '30.00', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
 	}
 
 	function testUS_2007a_SemiMonthly_Single_LowIncome() {
@@ -144,8 +144,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '96.63' ); //96.63
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '96.63', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //96.63
 	}
 
 	function testUS_2007a_SemiMonthly_Married_LowIncome() {
@@ -165,8 +165,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '52.50' ); //52.50
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '52.50', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //52.50
 	}
 
 	function testUS_2007a_SemiMonthly_Single_MedIncome() {
@@ -184,8 +184,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 2000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '292.79' ); //292.72
+		$this->assertEquals( '2000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '292.79', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //292.72
 	}
 
 	function testUS_2007a_SemiMonthly_Single_HighIncome() {
@@ -203,8 +203,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 4000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
 	}
 
 	function testUS_2007a_SemiMonthly_Single_LowIncome_3Allowances() {
@@ -222,8 +222,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '54.13' ); //54.13
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '54.13', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //54.13
 	}
 
 	function testUS_2007a_SemiMonthly_Single_LowIncome_5Allowances() {
@@ -241,8 +241,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '18.13' ); //18.13
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '18.13', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //18.13
 	}
 
 	function testUS_2007a_SemiMonthly_Single_LowIncome_8AllowancesA() {
@@ -260,8 +260,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '0.00' ); //0.00
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '0.00', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //0.00
 	}
 
 	function testUS_2007a_SemiMonthly_Single_LowIncome_8AllowancesB() {
@@ -279,8 +279,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1300.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1300.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '5.63' ); //5.63
+		$this->assertEquals( '1300.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '5.63', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //5.63
 	}
 
 	//
@@ -304,9 +304,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '41.00' ); //41.00
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '41.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //41.00
 	}
 
 	function testOK_2007a_BiWeekly_Married_LowIncome() {
@@ -327,9 +327,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '25.00' ); //25.00
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '25.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //25.00
 	}
 
 	function testOK_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -352,9 +352,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '175.00' ); //175.00
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '175.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //175.00
 	}
 
 	//
@@ -380,9 +380,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '35.92' ); //35.92
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '35.92', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //35.92
 	}
 
 	function testNM_2007a_BiWeekly_Married_LowIncome() {
@@ -403,9 +403,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '14.22' ); //14.22
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '14.22', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //14.22
 	}
 
 	function testNM_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -428,9 +428,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '114.04' ); //114.04
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '114.04', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //114.04
 	}
 
 	//
@@ -439,72 +439,72 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 	/*
 		function testNE_2007a_BiWeekly_Single_LowIncome() {
 			Debug::text('US - BiWeekly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','NE');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 26 ); //Bi-Weekly
-	
+
 			$pd_obj->setFederalFilingStatus( 10 ); //Single
 			$pd_obj->setFederalAllowance( 1 );
-	
+
 			$pd_obj->setStateFilingStatus( 10 ); //Single
 			$pd_obj->setStateAllowance( 0 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 1000.00 );
-	
+
 			//var_dump($pd_obj->getArray());
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '38.97' ); //38.97
 		}
-	
+
 		function testNE_2007a_BiWeekly_Married_LowIncome() {
 			Debug::text('US - BiWeekly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','NE');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 26 ); //Bi-Weekly
-	
+
 			$pd_obj->setFederalFilingStatus( 10 ); //Single
 			$pd_obj->setFederalAllowance( 1 );
-	
+
 			$pd_obj->setStateFilingStatus( 20 ); //Married
 			$pd_obj->setStateAllowance( 1 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 1000.00 );
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '25.33' ); //25.33
 		}
-	
+
 		function testNE_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
 			Debug::text('US - SemiMonthly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','NE');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
-	
+
 			$pd_obj->setFederalFilingStatus( 10 ); //Single
 			$pd_obj->setFederalAllowance( 1 );
-	
+
 			$pd_obj->setStateFilingStatus( 20 ); //Married
 			$pd_obj->setStateAllowance( 8 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 4000.00 );
-	
+
 			//var_dump($pd_obj->getArray());
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '189.98' ); //189.98
@@ -533,9 +533,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '51.28' ); //51.28
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '51.28', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //51.28
 	}
 
 	function testMN_2007a_BiWeekly_Married_LowIncome() {
@@ -556,9 +556,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '31.48' ); //31.48
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '31.48', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //31.48
 	}
 
 	function testMN_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -581,9 +581,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '158.59' ); //158.59
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '158.59', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //158.59
 	}
 
 	//
@@ -609,9 +609,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '57.92' ); //57.92
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '57.92', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //57.92
 	}
 
 	function testHI_2007a_BiWeekly_Married_LowIncome() {
@@ -632,9 +632,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '42.99' ); //42.99
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '42.99', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //42.99
 	}
 
 	function testHI_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -657,9 +657,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '238.45' ); //238.45
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '238.45', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //238.45
 	}
 
 	//
@@ -685,9 +685,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '43.00' ); //42.92
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '43.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //42.92
 	}
 
 	function testCO_2007a_BiWeekly_Married_LowIncome() {
@@ -708,9 +708,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '27.00' ); //27.42
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '27.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //27.42
 	}
 
 	function testCO_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -733,9 +733,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '119.00' ); //118.84
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '119.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //118.84
 	}
 
 	//
@@ -758,9 +758,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '33.90' ); //33.90
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '33.90', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //33.90
 	}
 
 	function testMI_2007a_BiWeekly_LowIncomeB() {
@@ -782,9 +782,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '23.70' ); //23.70
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '23.70', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //23.70
 	}
 
 	//
@@ -808,9 +808,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '16.63' ); //16.63
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '16.63', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //16.63
 	}
 
 	function testCA_2007a_BiWeekly_Married_LowIncome() {
@@ -831,9 +831,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '8.78' ); //8.78
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '8.78', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );     //8.78
 	}
 
 	function testCA_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -856,9 +856,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '137.85' ); //137.85
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '137.85', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //137.85
 	}
 
 	//
@@ -883,8 +883,8 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '346.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '8.74' ); //8.74
+		$this->assertEquals( '346.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '8.74', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) ); //8.74
 	}
 
 	function testKY_2007a_BiWeekly_LowIncomeB() {
@@ -906,9 +906,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '46.35' ); //46.35
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '46.35', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //46.35
 	}
 
 	function testKY_2007a_SemiMonthly_HighIncome() {
@@ -930,9 +930,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '220.13' ); //220.13
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '220.13', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //220.13
 	}
 
 	//
@@ -956,9 +956,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '30.00' ); //30.00
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '30.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //30.00
 	}
 
 	function testMO_2007a_BiWeekly_Married_LowIncome() {
@@ -979,9 +979,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '56.15' ); //56.15
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '33.00' ); //33.00
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '56.15', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //56.15
+		$this->assertEquals( '33.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //33.00
 	}
 
 	function testMO_2007a_SemiMonthly_Married_HighIncome() {
@@ -1004,9 +1004,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '588.02' ); //588.02
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '202.00' ); //202.00
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '588.02', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //588.02
+		$this->assertEquals( '202.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //202.00
 	}
 
 	//
@@ -1032,9 +1032,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '50.00' ); //50.00
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '50.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //50.00
 	}
 
 	function testNC_2007a_BiWeekly_Married_LowIncome() {
@@ -1055,9 +1055,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '51.00' ); //51.00
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '51.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //51.00
 	}
 
 	function testNC_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -1080,9 +1080,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '229.00' ); //229.00
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '229.00', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //229.00
 	}
 
 	//
@@ -1108,9 +1108,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '18.09' ); //18.09
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '18.09', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //18.09
 	}
 
 	function testND_2007a_BiWeekly_Married_LowIncome() {
@@ -1131,9 +1131,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '11.15' ); //11.15
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '11.15', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //11.15
 	}
 
 	function testND_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -1156,9 +1156,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '59.02' ); //59.02
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '59.02', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //59.02
 	}
 
 	//
@@ -1184,9 +1184,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '66.79' ); //66.77
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '66.79', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //66.77
 	}
 
 	function testOR_2007a_BiWeekly_Single_LowIncomeB() {
@@ -1209,9 +1209,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '54.10' ); //54.08
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '54.10', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //54.08
 	}
 
 	function testOR_2007a_BiWeekly_Single_LowIncomeC() {
@@ -1234,9 +1234,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '40.04' ); //40.04
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '40.04', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //40.04
 	}
 
 	function testOR_2007a_BiWeekly_Married_LowIncome() {
@@ -1259,9 +1259,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '46.26' ); //46.26
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '46.26', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //46.26
 	}
 
 	function testOR_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -1284,9 +1284,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '253.68' ); //253.68
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '253.68', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //253.68
 	}
 
 	//
@@ -1312,9 +1312,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '33.68' ); //33.68
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '33.68', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //33.68
 	}
 
 	function testRI_2007a_BiWeekly_Single_LowIncomeB() {
@@ -1337,9 +1337,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '900.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '129.37' ); //129.37
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '30.99' ); //30.98
+		$this->assertEquals( '900.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '129.37', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //129.37
+		$this->assertEquals( '30.99', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //30.98
 	}
 
 	function testRI_2007a_BiWeekly_Married_LowIncome() {
@@ -1360,9 +1360,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '23.29' ); //23.58
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '23.29', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //23.58
 	}
 
 	function testRI_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -1385,9 +1385,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '111.10' ); //121.11
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '111.10', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //121.11
 	}
 
 	//
@@ -1413,9 +1413,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '32.33' ); //32.33
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '32.33', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //32.33
 	}
 
 	function testVT_2007a_BiWeekly_Married_LowIncome() {
@@ -1436,9 +1436,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.73' ); //100.73
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '20.22' ); //20.22
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '100.73', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //100.73
+		$this->assertEquals( '20.22', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );    //20.22
 	}
 
 	function testVT_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
@@ -1461,9 +1461,9 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '106.05' ); //106.05
+		$this->assertEquals( '4000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '812.20', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) ); //812.20
+		$this->assertEquals( '106.05', $this->mf( $pd_obj->getStatePayPeriodDeductions() ) );   //106.05
 	}
 
 	//
@@ -1472,139 +1472,139 @@ class USPayrollDeductionTest2007 extends PHPUnit_Framework_TestCase {
 	/*
 		function testAL_2007a_BiWeekly_Single_LowIncome() {
 			Debug::text('US - BiWeekly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','AL');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 26 ); //Bi-Weekly
-	
+
 			$pd_obj->setFederalFilingStatus( 10 ); //Single
 			$pd_obj->setFederalAllowance( 0 );
-	
+
 			$pd_obj->setStateFilingStatus( 10 ); // State "S"
 			$pd_obj->setUserValue2( 1 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 1000 );
-	
+
 			//var_dump($pd_obj->getArray());
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '120.35' ); //120.35
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '35.33' ); //34.37
 		}
-	
+
 		function testAL_2007a_BiWeekly_Single_MediumIncome() {
 			Debug::text('US - BiWeekly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','AL');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
 			$pd_obj->setFederalFilingStatus( 10 ); //Single
 			$pd_obj->setFederalAllowance( 0 );
-	
+
 			$pd_obj->setStateFilingStatus( 10 ); //Single
 			$pd_obj->setUserValue2( 0 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 2083 );
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2083.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '248.20' );
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '74.87' );
 		}
-	
+
 		function testAL_2007a_BiWeekly_Married_LowIncome() {
 			Debug::text('US - BiWeekly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','AL');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 26 ); //Bi-Weekly
-	
+
 			$pd_obj->setFederalFilingStatus( 10 ); //Single
 			$pd_obj->setFederalAllowance( 0 );
-	
+
 			$pd_obj->setStateFilingStatus( 20 ); //Married
 			$pd_obj->setUserValue2( 1 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 1000.00 );
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '120.35' ); //120.35
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '25.71' ); //23.79
 		}
-	
+
 		function testAL_2007a_BiWeekly_Married_MediumIncome() {
 			Debug::text('US - BiWeekly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','AL');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
 			$pd_obj->setFederalFilingStatus( 10 ); //Single
 			$pd_obj->setFederalAllowance( 0 );
-	
+
 			$pd_obj->setStateFilingStatus( 20 ); //Married
 			$pd_obj->setUserValue2( 0 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 2083 );
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2083.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '248.20' );
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '52.78' );
 		}
-	
+
 		function testAL_2007a_SemiMonthly_Married_HighIncome_8Allowances() {
 			Debug::text('US - SemiMonthly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','AL');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
-	
+
 			$pd_obj->setFederalFilingStatus( 10 ); //Single
 			$pd_obj->setFederalAllowance( 1 );
-	
+
 			$pd_obj->setStateFilingStatus( 20 ); //Married
 			$pd_obj->setUserValue2( 8 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 4000.00 );
-	
+
 			//var_dump($pd_obj->getArray());
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '4000.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '812.20' ); //812.20
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '135.22' ); //133.14
 		}
-	
+
 		function testAL_2007a_SemiMonthly_Married_HighIncome_2Allowances() {
 			Debug::text('US - SemiMonthly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
-	
+
 			$pd_obj = new PayrollDeduction('US','AL');
 			$pd_obj->setDate(strtotime('01-Jan-07'));
 			$pd_obj->setAnnualPayPeriods( 52 ); //Weekly
-	
+
 			$pd_obj->setFederalFilingStatus( 20 ); //Married
 			$pd_obj->setFederalAllowance( 2 );
-	
+
 			$pd_obj->setStateFilingStatus( 20 ); //Married
 			$pd_obj->setUserValue2( 2 );
-	
+
 			$pd_obj->setFederalTaxExempt( FALSE );
 			$pd_obj->setProvincialTaxExempt( FALSE );
-	
+
 			$pd_obj->setGrossPayPeriodIncome( 435.00 );
-	
+
 			$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '435.00' );
 			$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '15.04' ); //15.04
 			$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '10.37' ); //9.41

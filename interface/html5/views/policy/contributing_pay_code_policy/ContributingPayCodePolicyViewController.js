@@ -1,11 +1,16 @@
-ContributingPayCodePolicyViewController = BaseViewController.extend( {
-	el: '#contributing_pay_code_policy_view_container',
+class ContributingPayCodePolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#contributing_pay_code_policy_view_container',
 
-	_required_files: ['APIContributingPayCodePolicy', 'APIPayCode'],
+			sub_document_view_controller: null,
+			document_object_type_id: null
+		} );
 
-	sub_document_view_controller: null,
-	document_object_type_id: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'ContributingPayCodePolicyEditView.html';
 		this.permission_id = 'contributing_pay_code_policy';
@@ -14,17 +19,17 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'contributing_pay_code_policy';
 		this.context_menu_name = $.i18n._( 'Contributing Pay Code Policy' );
 		this.navigation_label = $.i18n._( 'Contributing Pay Code Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIContributingPayCodePolicy' ) )();
+		this.api = TTAPI.APIContributingPayCodePolicy;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'ContributingPayCodePolicy' );
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 		var $this = this;
 
 		var tab_model = {
@@ -34,7 +39,7 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingPayCodePolicy' ) ),
+			api_class: TTAPI.APIContributingPayCodePolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
@@ -72,7 +77,7 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 		// Pay Codes
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -80,11 +85,11 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 			field: 'pay_code'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Codes' ), form_item_input, tab_contributing_pay_code_policy_column1 );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -102,7 +107,7 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -114,7 +119,7 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -126,7 +131,7 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -135,4 +140,4 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

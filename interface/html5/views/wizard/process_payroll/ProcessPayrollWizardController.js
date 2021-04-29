@@ -1,22 +1,25 @@
-ProcessPayrollWizardController = BaseWizardController.extend( {
+class ProcessPayrollWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg',
 
-	el: '.wizard-bg',
+			all_columns: null,
+			pay_stub_transaction_columns: null,
 
-	_required_files: ['APIPayPeriod', 'APIPayStub', 'APIPayStubTransaction'],
+			api_pay_period: null,
+			api_pay_stub: null,
 
-	all_columns: null,
-	pay_stub_transaction_columns: null,
+			api_pay_stub_transaction: null,
 
-	api_pay_period: null,
-	api_pay_stub: null,
+			alert_message: $.i18n._( 'Please select one or more pay periods in the list above to enable icons.' ),
 
-	api_pay_stub_transaction: null,
+			transaction_source_data: null
+		} );
 
-	alert_message: $.i18n._( 'Please select one or more pay periods in the list above to enable icons.' ),
+		super( options );
+	}
 
-	transaction_source_data: null,
-
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Payroll Processing Wizard' );
@@ -24,21 +27,20 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 		this.current_step = 1;
 		this.script_name = 'wizard_process_payroll';
 		this.wizard_id = 'ProcessPayrollWizard';
-		this.api_pay_period = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
-		this.api_pay_stub = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
-		this.api_pay_stub_transaction = new ( APIFactory.getAPIClass( 'APIPayStubTransaction' ) )();
+		this.api_pay_period = TTAPI.APIPayPeriod;
+		this.api_pay_stub = TTAPI.APIPayStub;
+		this.api_pay_stub_transaction = TTAPI.APIPayStubTransaction;
 
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initUserGenericData();
+	}
 
-	},
-
-	setButtonsStatus: function() {
+	setButtonsStatus() {
 
 		Global.setWidgetEnabled( this.done_btn, false );
 		Global.setWidgetEnabled( this.close_btn, true );
@@ -60,10 +62,10 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 			Global.setWidgetEnabled( this.done_btn, true );
 			Global.setWidgetEnabled( this.next_btn, false );
 		}
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		var $this = this;
 		this.content_div.empty();
@@ -72,7 +74,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more pay periods to process payroll for' ) + ':' );
-				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriod' ) ), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -331,9 +333,25 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				break;
 
 		}
-	},
+	}
 
-	onDoneClick: function() {
+	onNextClick() {
+		this.saveCurrentStep();
+
+		if ( this.current_step === 1 ) {
+			var current_step_ui = this.stepsWidgetDic[this.current_step];
+			var pay_period_id = current_step_ui.pay_period_id.getValue();
+			if ( !pay_period_id || pay_period_id.length == 0 || ( pay_period_id == TTUUID.zero_id ) || ( pay_period_id.length == 1 && pay_period_id[0] == TTUUID.zero_id ) ) {
+				TAlertManager.showAlert( $.i18n._( 'Please choose a Pay Period' ) );
+				return;
+			}
+		}
+
+		this.current_step = this.current_step + 1;
+		this.initCurrentStep();
+	}
+
+	onDoneClick() {
 		this.cleanStepsData();
 		LocalCacheData.current_open_wizard_controller = null;
 		this.saveAllStepsToUserGenericData( function() {
@@ -349,9 +367,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 		$().TFeedback( {
 			source: this.wizard_id
 		} );
-	},
+	}
 
-	getGridColumns: function( gridId, callBack ) {
+	getGridColumns( gridId, callBack ) {
 
 		var $this = this;
 
@@ -429,7 +447,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 					break;
 				case 'exceptions':
 
-					for ( i = 0; i < len; i++ ) {
+					for ( var i = 0; i < len; i++ ) {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
@@ -478,7 +496,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 				case 'timesheet':
 
-					for ( i = 0; i < len; i++ ) {
+					for ( var i = 0; i < len; i++ ) {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
@@ -523,7 +541,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 					break;
 				case 'lock_pay_period':
-					for ( i = 0; i < len; i++ ) {
+					for ( var i = 0; i < len; i++ ) {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
@@ -549,7 +567,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 					break;
 				case 'pay_stub_amendments':
-					for ( i = 0; i < len; i++ ) {
+					for ( var i = 0; i < len; i++ ) {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
@@ -576,7 +594,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 					break;
 				case 'pay_stub_generate':
 				case 'pay_stub_transfer':
-					for ( i = 0; i < len; i++ ) {
+					for ( var i = 0; i < len; i++ ) {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'start_date' ||
@@ -600,7 +618,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 					break;
 				case 'pay_stub_close':
-					for ( i = 0; i < len; i++ ) {
+					for ( var i = 0; i < len; i++ ) {
 						column_data = $this.all_columns[i];
 
 						if ( column_data.value == 'status' ||
@@ -631,10 +649,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 			callBack( column_info_array );
 		}
+	}
 
-	},
-
-	setGridGroupColumns: function( gridId ) {
+	setGridGroupColumns( gridId ) {
 		//Short circuit this function if we aren't creating any spanning cells for exceptions/timesheets.
 		//  As having "group-column-tr" without anything in it causes jqGrid to trigger JS exception: Uncaught TypeError: Cannot read property 'style' of undefined
 		//  when running: $( '#contentContainer' ).trigger( 'resize' ) from the console.
@@ -695,9 +712,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 		new_tr.append( default_th );
 		table.find( 'thead' ).prepend( new_tr );
-	},
+	}
 
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 		var $this = this;
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var grid;
@@ -759,7 +776,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				grid = current_step_ui.lock_pay_period;
 				ids = grid.grid.jqGrid( 'getGridParam', 'selarrrow' );
 				data_array = [];
-				for ( i = 0; i < ids.length; i++ ) {
+				for ( var i = 0; i < ids.length; i++ ) {
 					data = {};
 					data.id = ids[i];
 					data.status_id = 10;
@@ -791,7 +808,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				grid = current_step_ui.pay_stub_generate;
 				ids = grid.grid.jqGrid( 'getGridParam', 'selarrrow' );
 				ProgressBar.showOverlay();
-				new ( APIFactory.getAPIClass( 'APIPayStub' ) )().generatePayStubs( ids, {
+				TTAPI.APIPayStub.generatePayStubs( ids, {
 					onResult: function( result ) {
 						if ( result.isValid() ) {
 							var user_generic_status_batch_id = result.getAttributeInAPIDetails( 'user_generic_status_batch_id' );
@@ -844,7 +861,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				grid = current_step_ui.pay_stub_close;
 				ids = grid.grid.jqGrid( 'getGridParam', 'selarrrow' );
 				data_array = [];
-				for ( i = 0; i < ids.length; i++ ) {
+				for ( var i = 0; i < ids.length; i++ ) {
 					data = {};
 					data.id = ids[i];
 					data.status_id = 20;
@@ -882,9 +899,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				this.onCloseClick();
 				break;
 		}
-	},
+	}
 
-	onGridSelectRow: function( e ) {
+	onGridSelectRow( e ) {
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var grid;
@@ -957,18 +974,17 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	setGridAutoHeight: function( grid, length ) {
+	setGridAutoHeight( grid, length ) {
 		if ( length > 0 && length < 10 ) {
 			grid.grid.setGridHeight( length * 23 );
 		} else if ( length > 10 ) {
 			grid.grid.setGridHeight( 230 );
 		}
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 
 		if ( !this.stepsDataDic[1] ) {
 			return;
@@ -1198,10 +1214,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				break;
 
 		}
+	}
 
-	},
-
-	setCurrentStepValues: function() {
+	setCurrentStepValues() {
 
 		if ( !this.stepsDataDic[this.current_step] ) {
 			return;
@@ -1221,18 +1236,18 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 			case 3:
 				break;
 		}
-	},
+	}
 
-	setGridSelection: function( grid, source_data ) {
+	setGridSelection( grid, source_data ) {
 		if ( source_data ) {
 			for ( var i = 0; i < source_data.length; i++ ) {
 				var content = source_data[i];
 				grid.grid.jqGrid( 'setSelection', content['id'], false );
 			}
 		}
-	},
+	}
 
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -1247,10 +1262,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 			case 2:
 				break;
 		}
+	}
 
-	},
-
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 
 		if ( !this.default_data ) {
 			return null;
@@ -1266,7 +1280,6 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 //		  if ( this.getDefaultData( 'pay_period_id' ) ) {
 //			  this.stepsDataDic[2].pay_period_id = this.getDefaultData( 'pay_period_id' );
 //		  }
-
 	}
 
-} );
+}

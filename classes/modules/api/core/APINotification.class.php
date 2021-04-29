@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -72,7 +72,7 @@ class APINotification extends APIFactory {
 				unset( $sslf );
 
 				//Check license validity
-				if ( ( ( DEPLOYMENT_ON_DEMAND == false && $this->getCurrentCompanyObject()->getId() == 1 ) || ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) && getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+				if ( ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) && getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					if ( !isset( $system_settings['license'] ) ) {
 						$system_settings['license'] = null;
 					}
@@ -139,6 +139,18 @@ class APINotification extends APIFactory {
 					unset( $message );
 				}
 
+				//Check to make sure hostname specified in .ini file matches the hostname used to login to TimeTrex.
+				if ( isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] != '' && isset( $config_vars['other']['hostname'] ) && $config_vars['other']['hostname'] != '' && $this->getPermissionObject()->getLevel() >= 80 ) {
+					if ( stripos( $_SERVER['HTTP_HOST'], $config_vars['other']['hostname'] ) === FALSE ) {
+						$retarr[] = [
+								'delay'       => -1, //0= Show until clicked, -1 = Show until next getNotifications call.
+								'bg_color'    => '#FF0000', //Red
+								'message'     => TTi18n::getText( 'WARNING: Hostname specified in %1 config file does not match the accessed URL. Please contact your %1 administrator immediately.', APPLICATION_NAME ),
+								'destination' => null,
+						];
+					}
+				}
+
 				//System Requirements not being met.
 				if ( isset( $system_settings['valid_install_requirements'] ) && DEPLOYMENT_ON_DEMAND == false && (int)$system_settings['valid_install_requirements'] == 0 ) {
 					$retarr[] = [
@@ -172,11 +184,11 @@ class APINotification extends APIFactory {
 
 				$application_version_date_days_old = TTDate::getDays( ( time() - (int)APPLICATION_VERSION_DATE ) );
 				if (
-					//After 1yr, show message only to primary company, supervisors or higher permissions.
-						( $application_version_date_days_old > 365 && $this->getPermissionObject()->getLevel() >= 40 && ( $this->getCurrentCompanyObject()->getId() == 1 || ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) )
+						//After 1yr, show message only to primary company, supervisors or higher permissions.
+						( $application_version_date_days_old > 365 && $this->getPermissionObject()->getLevel() >= 40 && ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) )
 
 						//After 1yr + 30 days, show message only to primary company, all employees.
-						|| ( $application_version_date_days_old > 395 && ( $this->getCurrentCompanyObject()->getId() == 1 || ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) )
+						|| ( $application_version_date_days_old > 395 && ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) )
 
 						//After 1yr + 60 days, show message only to all companies, supervisors or higher permissions.
 						|| ( $application_version_date_days_old > 425 && $this->getPermissionObject()->getLevel() >= 40 )
@@ -196,7 +208,8 @@ class APINotification extends APIFactory {
 				//New version available notification.
 				if ( DEMO_MODE == false
 						&& ( isset( $system_settings['new_version'] ) && $system_settings['new_version'] == 1 )
-						&& ( $this->getCurrentCompanyObject()->getId() == 1 || ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) ) {
+						&& ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] )
+						&& $this->getPermissionObject()->getLevel() >= 80 ) { //Payroll Admin
 
 					//Only display this every two weeks.
 					$new_version_available_notification_arr = UserSettingFactory::getUserSetting( $this->getCurrentUserObject()->getID(), 'new_version_available_notification' );
@@ -216,7 +229,7 @@ class APINotification extends APIFactory {
 				//Check for major new version.
 				$new_version_notification_arr = UserSettingFactory::getUserSetting( $this->getCurrentUserObject()->getID(), 'new_version_notification' );
 				if ( DEMO_MODE == false
-						&& ( !isset( $config_vars['branding']['application_name'] ) || ( $this->getCurrentCompanyObject()->getId() == 1 || ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) )
+						&& ( !isset( $config_vars['branding']['application_name'] ) || ( isset( $config_vars['other']['primary_company_id'] ) && $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) )
 						&& $this->getPermissionObject()->getLevel() >= 80 //Payroll Admin
 						&& $this->getCurrentUserObject()->getCreatedDate() <= APPLICATION_VERSION_DATE
 						&& ( !isset( $new_version_notification_arr['value'] ) || ( isset( $new_version_notification_arr['value'] ) && Misc::MajorVersionCompare( APPLICATION_VERSION, $new_version_notification_arr['value'], '>' ) ) ) ) {

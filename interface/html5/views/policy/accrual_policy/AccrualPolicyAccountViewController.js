@@ -1,9 +1,15 @@
-AccrualPolicyAccountViewController = BaseViewController.extend( {
-	el: '#wage_group_view_container',
+class AccrualPolicyAccountViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#wage_group_view_container',
 
-	_required_files: ['APIAccrualPolicyAccount'],
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'AccrualPolicyAccountEditView.html';
 		this.permission_id = 'accrual_policy';
@@ -12,28 +18,27 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 		this.table_name_key = 'accrual_policy_account';
 		this.context_menu_name = $.i18n._( 'Accrual Account' );
 		this.navigation_label = $.i18n._( 'Accrual Account' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) )();
+		this.api = TTAPI.APIAccrualPolicyAccount;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'AccrualPolicyAccount' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -44,7 +49,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
+			api_class: TTAPI.APIAccrualPolicyAccount,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
@@ -83,11 +88,11 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( { field: 'enable_pay_stub_balance_display' } );
 		this.addEditFieldToColumn( $.i18n._( 'Display Balance on Pay Stub' ), form_item_input, tab_accrual_account_column1 );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -104,7 +109,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -116,7 +121,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -125,4 +130,4 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

@@ -1,30 +1,35 @@
-InstallWizardController = BaseWizardController.extend( {
+class InstallWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.install-wizard',
 
-	el: '.install-wizard',
+			type_array: null,
 
-	type_array: null,
+			country_array: null,
 
-	country_array: null,
+			time_zone_array: null,
 
-	time_zone_array: null,
+			external_installer: null,
 
-	external_installer: null,
+			company_id: null,
 
-	company_id: null,
+			user_id: null,
 
-	user_id: null,
+			edit_view_error_ui_dic: {},
 
-	edit_view_error_ui_dic: {},
 
-	_required_files: ['APIInstall'],
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.title_1 = $( this.el ).find( '.title-1' );
 		this.steps = 5;
 		this.script_name = 'wizard_install';
 		this.wizard_id = 'InstallWizard';
-		this.api = new ( APIFactory.getAPIClass( 'APIInstall' ) )();
+		this.api = TTAPI.APIInstall;
 		ServiceCaller.extra_url = '&disable_db=1';
 		if ( _.size( LocalCacheData.all_url_args ) > 0 ) {
 			var url_args = LocalCacheData.all_url_args;
@@ -36,9 +41,9 @@ InstallWizardController = BaseWizardController.extend( {
 		}
 
 		this.render();
-	},
+	}
 
-	render: function() {
+	render() {
 		var $this = this;
 		var title = $( this.el ).find( '.title' );
 
@@ -49,9 +54,9 @@ InstallWizardController = BaseWizardController.extend( {
 		title.text( $.i18n._( 'Install Wizard' ) );
 
 		this.initCurrentStep();
-	},
+	}
 
-	initCurrentStep: function( step ) {
+	initCurrentStep( step ) {
 		var $this = this;
 
 		if ( step ) {
@@ -210,18 +215,17 @@ InstallWizardController = BaseWizardController.extend( {
 				} );
 				break;
 		}
+	}
 
-	},
-
-	_initCurrentStep: function( step ) {
+	_initCurrentStep( step ) {
 		var $this = this;
 		$this.setButtonsStatus(); // set button enabled or disabled
 		$this.buildCurrentStepUI();
 		$this.buildCurrentStepData();
 		$this.setCurrentStepValues();
-	},
+	}
 
-	setButtonsStatus: function() {
+	setButtonsStatus() {
 		if ( this.current_step === 'license' ) {
 			Global.setWidgetEnabled( this.back_btn, false );
 			Global.setWidgetEnabled( this.next_btn, false );
@@ -237,10 +241,10 @@ InstallWizardController = BaseWizardController.extend( {
 			Global.setWidgetEnabled( this.done_btn, true );
 			Global.setWidgetEnabled( this.next_btn, false );
 		}
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		var $this = this;
 		var step_title = this.content_div.find( '.step-title > .wizard-label' );
@@ -894,7 +898,7 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'postUpgrade':
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Upgrade Complete' ) );
-				postUpgrade.html( '<b>' + $.i18n._( 'Congratulations!' ) + '</b>'
+				postUpgrade.html( '<b>' + $.i18n._( 'Congratulations!' ) + '</b>' + ' '
 					+ $.i18n._( 'You have successfully upgraded' ) + ' '
 					+ $.i18n._( stepData.application_name ) + ' '
 					+ $.i18n._( 'to' ) + ' '
@@ -989,14 +993,14 @@ InstallWizardController = BaseWizardController.extend( {
 				break;
 
 		}
-	},
+	}
 
 	/**
 	 * tests database connection:
 	 * @param $this
 	 * @param deferred (optional)
 	 */
-	onTestDatabaseConnectionClick: function( $this, showTrue ) {
+	onTestDatabaseConnectionClick( $this, showTrue ) {
 		var $data = {};
 		for ( var key in $this.stepsWidgetDic[$this.current_step] ) {
 			var widget = $this.stepsWidgetDic[$this.current_step][key];
@@ -1053,16 +1057,14 @@ InstallWizardController = BaseWizardController.extend( {
 						+ $.i18n._( 'Please correct the user name/password and try again.' )
 						+ '</p>';
 
-					return false;
 					TAlertManager.showAlert( step_title_htm );
 				}
 			}
 
 		}
+	}
 
-	},
-
-	onFormItemChange: function( target ) {
+	onFormItemChange( target ) {
 		var widgets = this.stepsWidgetDic[this.current_step];
 
 		var key = target.getField();
@@ -1081,10 +1083,9 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'type':
 				break;
 		}
+	}
 
-	},
-
-	onBackClick: function() {
+	onBackClick() {
 		var $this = this;
 		this.saveCurrentStep();
 		switch ( this.current_step ) {
@@ -1117,9 +1118,9 @@ InstallWizardController = BaseWizardController.extend( {
 				this.initCurrentStep();
 				break;
 		}
-	},
+	}
 
-	onNextClick: function() {
+	onNextClick() {
 		var $data;
 
 		var $this = this;
@@ -1241,10 +1242,9 @@ InstallWizardController = BaseWizardController.extend( {
 				} );
 				break;
 		}
+	}
 
-	},
-
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 		var args = {};
 		var $this = this;
 		var stepData = this.stepsDataDic[this.current_step];
@@ -1698,10 +1698,9 @@ InstallWizardController = BaseWizardController.extend( {
 				break;
 
 		}
+	}
 
-	},
-
-	setErrorTips: function( result ) {
+	setErrorTips( result ) {
 		this.clearErrorTips();
 
 		var details = result.getDetails();
@@ -1729,10 +1728,9 @@ InstallWizardController = BaseWizardController.extend( {
 			this.edit_view_error_ui_dic[key] = this.stepsWidgetDic[this.current_step][key];
 
 		}
+	}
 
-	},
-
-	clearErrorTips: function() {
+	clearErrorTips() {
 
 		for ( var key in this.edit_view_error_ui_dic ) {
 
@@ -1745,9 +1743,9 @@ InstallWizardController = BaseWizardController.extend( {
 		}
 
 		this.edit_view_error_ui_dic = {};
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
 		this.cleanStepsData();
 
 //		if ( this.call_back ) {
@@ -1759,10 +1757,9 @@ InstallWizardController = BaseWizardController.extend( {
 		var currentURL = loc.protocol + '//' + loc.host + loc.pathname;
 		Global.setURLToBrowser( currentURL + '#!m=Login' );
 		$( this.el ).remove();
+	}
 
-	},
-
-	onCloseClick: function() {
+	onCloseClick() {
 		if ( this.script_name ) {
 			this.saveCurrentStep();
 		}
@@ -1770,11 +1767,11 @@ InstallWizardController = BaseWizardController.extend( {
 		var currentURL = loc.protocol + '//' + loc.host + loc.pathname;
 		Global.setURLToBrowser( currentURL + '#!m=Login' );
 		$( this.el ).remove();
-	},
+	}
 
-	cleanStepsData: function() {
+	cleanStepsData() {
 		this.stepsDataDic = {};
 		this.current_step = 'license';
 	}
 
-} );
+}

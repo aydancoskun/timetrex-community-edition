@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -813,7 +813,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		}
 
 		if ( $this->getDeleted() == false ) {
-			//Check to make sure an authorized/declined request is not set back to pending status.
+			//Check to make sure an authorized/declined timesheet is not set back to pending status.
 			$data_diff = $this->getDataDifferences();
 			if ( $this->isDataDifferent( 'status_id', $data_diff ) == true && in_array( $data_diff['status_id'], [ 50, 55 ] ) && $this->getStatus() < 50 ) {
 				$this->Validator->isTRUE( 'status_id',
@@ -843,6 +843,18 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 										  false,
 										  TTi18n::gettext( 'Unable to verify this timesheet when critical severity exceptions exist in the pay period' ) );
 			}
+
+			//Check to make sure no pending requests still exist in the pay period, as that will likely result in the timesheet changing.
+			if ( is_object( $this->getPayPeriodObject() ) ) {
+				$rlf = TTnew( 'RequestListFactory' ); /** @var RequestListFactory $rlf */
+				$rlf->getByCompanyIdAndUserIdAndStatusAndStartDateAndEndDate( $this->getUserObject()->getCompany(), $this->getUser(), 30, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), 1 );
+				if ( $rlf->getRecordCount() > 0 ) {
+					$this->Validator->isTrue( 'exception',
+											  false,
+											  TTi18n::gettext( 'Unable to verify this timesheet when pending requests exist in the pay period' ) );
+				}
+			}
+
 		}
 
 		return true;

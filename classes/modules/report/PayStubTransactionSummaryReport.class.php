@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -127,7 +127,7 @@ class PayStubTransactionSummaryReport extends Report {
 						'-2050-exclude_user_id'         => TTi18n::gettext( 'Employee Exclude' ),
 						'-2060-default_branch_id'       => TTi18n::gettext( 'Default Branch' ),
 						'-2070-default_department_id'   => TTi18n::gettext( 'Default Department' ),
-						'-2080-transaction_currency_id' => TTi18n::gettext( 'Currency' ),
+						'-2080-currency_id'             => TTi18n::gettext( 'Currency' ),
 						'-2100-custom_filter'           => TTi18n::gettext( 'Custom Filter' ),
 
 						'-2200-pay_stub_status_id' => TTi18n::gettext( 'Pay Stub Status' ),
@@ -136,7 +136,6 @@ class PayStubTransactionSummaryReport extends Report {
 
 						//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
-						'-4400-amount'     => TTi18n::gettext( 'Amount' ),
 						'-5000-columns'    => TTi18n::gettext( 'Display Columns' ),
 						'-5010-group'      => TTi18n::gettext( 'Group By' ),
 						'-5020-sub_total'  => TTi18n::gettext( 'SubTotal By' ),
@@ -211,6 +210,7 @@ class PayStubTransactionSummaryReport extends Report {
 					'-1000-destination_user_first_name' => TTi18n::gettext( 'First Name' ),
 					'-1002-destination_user_last_name'  => TTi18n::gettext( 'Last Name' ),
 
+					'-1004-transaction_status'  => TTi18n::gettext( 'Status' ),
 					'-1008-transaction_type' => TTi18n::gettext( 'Type' ),
 
 					'-1010-remittance_source_account'      => TTi18n::gettext( 'Source Account' ),
@@ -226,8 +226,8 @@ class PayStubTransactionSummaryReport extends Report {
 					'-1041-pay_stub_start_date' => TTi18n::gettext( 'Pay Stub Start Date' ),
 					'-1042-pay_stub_end_date'   => TTi18n::gettext( 'Pay Stub End Date' ),
 
-					'-1110-transaction_currency_id' => TTi18n::gettext( 'Currency' ),
-					'-1131-current_currency'        => TTi18n::gettext( 'Current Currency' ),
+					'-1110-currency'			=> TTi18n::gettext( 'Currency' ),
+					'-1131-current_currency'    => TTi18n::gettext( 'Current Currency' ),
 				];
 
 				$retval = array_merge( $retval, (array)$this->getOptions( 'date_columns' ), (array)$this->getOptions( 'custom_columns' ), (array)$this->getOptions( 'report_static_custom_column' ) );
@@ -446,14 +446,12 @@ class PayStubTransactionSummaryReport extends Report {
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
-		$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
-		/** @var RemittanceSourceAccountFactory $rsaf */ //For getOptions() below.
-		$psf = TTnew( 'PayStubFactory' );
-		/** @var PayStubFactory $psf */ //For getOptions() below.
+		$rsaf = TTnew( 'RemittanceSourceAccountFactory' ); /** @var RemittanceSourceAccountFactory $rsaf */ //For getOptions() below.
+		$psf = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $psf */ //For getOptions() below.
 
 		$pstlf = TTnew( 'PayStubTransactionListFactory' ); /** @var PayStubTransactionListFactory $pstlf */
 		$pstlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pstlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pstlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		Debug::Text( 'PayStubTransaction report records: ' . $pstlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $pstlf->getRecordCount() > 0 ) {
 			foreach ( $pstlf as $key => $pst_obj ) {
@@ -472,6 +470,7 @@ class PayStubTransactionSummaryReport extends Report {
 						'remittance_source_account_type_id' => $pst_obj->getColumn( 'remittance_source_account_type_id' ),
 						'transaction_type'                  => Option::getByKey( $pst_obj->getColumn( 'remittance_source_account_type_id' ), $rsaf->getOptions( 'type' ) ),
 						'transaction_type_id'               => $pst_obj->getType(),
+						'transaction_status'                => Option::getByKey( $pst_obj->getColumn( 'status_id' ), $pstlf->getOptions( 'status' ) ),
 						'transaction_status_id'             => $pst_obj->getStatus(),
 						'transaction_date'                  => $pst_obj->getTransactionDate(),
 
@@ -491,28 +490,30 @@ class PayStubTransactionSummaryReport extends Report {
 						'pay_stub_transaction_date' => TTDate::strtotime( $pst_obj->getColumn( 'pay_stub_transaction_date' ) ),
 
 						'currency_rate'           => $pst_obj->getColumn( 'currency_rate' ),
-						'transaction_currency_id' => Option::getByKey( $pst_obj->getColumn( 'transaction_currency_id' ), $currency_options ),
-						'current_currency'        => Option::getByKey( $pst_obj->getColumn( 'transaction_currency_id' ), $currency_options ),
-
 				];
+
+				$tmp_row['currency'] = $tmp_row['current_currency'] = Option::getByKey( $pst_obj->getColumn( 'currency_id' ), $currency_options );
 
 				if ( $currency_convert_to_base == true && is_object( $base_currency_obj ) ) {
 					$tmp_row['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
 				}
+
 				$this->tmp_data['pay_stub_transaction'][$user_id][] = $tmp_row;
 				unset( $tmp_row );
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-			}//foreach
+
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
+			}
 		}
 
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
+		unset( $filter_data['currency_id'] ); //Don't filter users based on currency_id, since the user currency_id may not match the transaction currency id, then nothing will be displayed.
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), [ 'hire_date' => true, 'termination_date' => true, 'birth_date' => true ] ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);foo
 		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -524,7 +525,7 @@ class PayStubTransactionSummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['pay_stub_transaction'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['pay_stub_transaction'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		//Merge time data with user data
 		$key = 0;
@@ -549,7 +550,7 @@ class PayStubTransactionSummaryReport extends Report {
 							//$hire_date_columns, $termination_date_columns, $birth_date_columns
 							$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $transaction_date_columns, $processed_data );
 
-							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+							$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 							$key++;
 						}
 					}

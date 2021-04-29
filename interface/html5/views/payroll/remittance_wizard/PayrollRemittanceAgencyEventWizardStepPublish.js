@@ -1,18 +1,24 @@
-PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend( {
-	name: 'publish',
-	api: null,
-	el: $( '.wizard.process_transactions_wizard' ),
+class PayrollRemittanceAgencyEventWizardStepPublish extends WizardStep {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			name: 'publish',
+			api: null,
+			el: $( '.wizard.process_transactions_wizard' )
+		} );
 
-	init: function() {
-		this.api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
+		super( options );
+	}
+
+	init() {
+		this.api = TTAPI.APIPayrollRemittanceAgencyEvent;
 		this.render();
-	},
+	}
 
-	getPreviousStepName: function() {
+	getPreviousStepName() {
 		return 'submit';
-	},
+	}
 
-	_render: function() {
+	_render() {
 		this.setTitle( $.i18n._( 'Publish Information for Employees' ) );
 		this.setInstructions( $.i18n._( 'Publish forms for employees to access online' ) + ': ' );
 
@@ -82,9 +88,9 @@ PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend( {
 
 			$this.getWizardObject().enableButtons();
 		} );
-	},
+	}
 
-	_onNavigationClick: function( icon ) {
+	_onNavigationClick( icon ) {
 		var $this = this;
 		switch ( this.getWizardObject().selected_remittance_agency_event.type_id ) {
 			//Canada
@@ -149,9 +155,9 @@ PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend( {
 				break;
 
 		}
-	},
+	}
 
-	publishReportToEmployee: function() {
+	publishReportToEmployee() {
 		this.api.getReportData( this.getWizardObject().selected_remittance_agency_event_id, 'pdf_form_publish_employee', {
 			onResult: function( result ) {
 				var retval = result.getResult();
@@ -165,11 +171,11 @@ PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	getPDFForm: function( scriptPath ) {
+	getPDFForm( scriptPath ) {
 		Global.loadScript( scriptPath, function() {
 			$this.getWizardObject().getReport( 'pdf_form' );
 		} );
 	}
-} );
+}

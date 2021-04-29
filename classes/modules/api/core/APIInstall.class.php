@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -108,7 +108,7 @@ class APIInstall extends APIFactory {
 //				Redirect::Page( URLBuilder::getURL( array('external_installer' => $external_installer, 'action:next' => 'next' ), $_SERVER['SCRIPT_NAME']) );
 				return $this->returnHandler( [ 'action' => 'next' ] );
 			} else {
-				$install_obj->setAMFMessageID( $this->getAMFMessageID() );
+				$install_obj->setAPIMessageID( $this->getAPIMessageID() );
 //				Return array with the text for each requirement check.
 				$retval['check_all_requirements'] = $check_all_requirements;
 				$retval['tt_product_edition'] = $install_obj->getTTProductEdition();
@@ -519,7 +519,7 @@ class APIInstall extends APIFactory {
 
 		if ( $install_obj->isInstallMode() == true ) {
 
-			$install_obj->setAMFMessageID( $this->getAMFMessageID() );
+			$install_obj->setAPIMessageID( $this->getAPIMessageID() );
 
 			$install_obj->setDatabaseConnection( $db ); //Default connection
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -184,6 +184,18 @@ class RemittanceSourceAccountFactory extends Factory {
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
 				$retval = [
 						'name',
+						'value1',
+						'value1_1',
+						'value1_2',
+						'value2',
+						'value3',
+						'value4',
+						'value5',
+						'value6',
+						'value7',
+						'value8',
+						'value9',
+						'value10',
 				];
 				break;
 		}
@@ -552,20 +564,26 @@ class RemittanceSourceAccountFactory extends Factory {
 			$account = $this->getValue3();
 		}
 
-		return Misc::censorString( $account, 'X', 1, 2, 1, 4 );
+		return Misc::censorString( $account, '*', 1, 2, 1, 4 );
 	}
 
 	/**
 	 * VALUE 3 is the account number. It needs to be encrypted.
+	 * @param null $value
 	 * @return bool|string
 	 */
-	function getValue3() {
-		$value = $this->getGenericDataValue( 'value3' );
-		if ( $value !== false ) {
-			$retval = Misc::decrypt( $value );
-			if ( is_numeric( $retval ) ) {
-				return $retval;
-			}
+	function getValue3( $value = null ) {
+		if ( $value == null ) {
+			$value = $this->getGenericDataValue( 'value3' );
+		}
+
+		$value = Misc::decrypt( $value );
+
+		//We must check is_numeric to ensure that the value properly decrypted.
+		if ( isset( $value ) && $this->Validator->isAlphaNumeric( null, $value ) == false ) {
+			Debug::Text( 'DECRYPTION FAILED: Your salt may have changed.', __FILE__, __LINE__, __METHOD__, 10 );
+		} else {
+			return $value;
 		}
 
 		return false;
@@ -580,11 +598,14 @@ class RemittanceSourceAccountFactory extends Factory {
 		//If X's are in the account number, skip setting it
 		// Also if a colon is in the account number, its likely an encrypted string, also skip.
 		//This allows them to change other data without seeing the account number.
-		if ( stripos( $value, 'X' ) !== false || stripos( $value, ':' ) !== false || ctype_digit( trim( $value ) ) == false ) { //Use ctype_digit to confirm bank account number is DIGITS only, so we don't accept scientific notation "5.18E+11".
+
+		//$value = $this->Validator->stripNonAlphaNumeric( trim( $value ) ); //Don't strip invalid characters to be a little more strict on ensuring what they input is correct.
+		$value = trim( $value );
+
+		if ( stripos( $value, '*' ) !== false || stripos( $value, ':' ) !== false ) {
 			return false;
 		}
 
-		$value = trim( $value );
 		if ( $value != '' ) { //Make sure we can clear out the value if needed. Misc::encypt() will return FALSE on a blank value.
 			$encrypted_value = Misc::encrypt( $value );
 			if ( $encrypted_value === false ) {
@@ -1018,7 +1039,7 @@ class RemittanceSourceAccountFactory extends Factory {
 			$account = $this->getValue28();
 		}
 
-		return Misc::censorString( $account, 'X', 1, 2, 1, 4 );
+		return Misc::censorString( $account, '*', 1, 2, 1, 4 );
 	}
 
 	/**
@@ -1046,7 +1067,7 @@ class RemittanceSourceAccountFactory extends Factory {
 		//If X's are in the account number, skip setting it
 		// Also if a colon is in the account number, its likely an encrypted string, also skip.
 		//This allows them to change other data without seeing the account number.
-		if ( stripos( $value, 'X' ) !== false || stripos( $value, ':' ) !== false ) {
+		if ( stripos( $value, '*' ) !== false || stripos( $value, ':' ) !== false ) {
 			return false;
 		}
 
@@ -1537,40 +1558,82 @@ class RemittanceSourceAccountFactory extends Factory {
 			}
 		}
 
-		if ( $this->getStatus() == 10 ) { //10=Enabled - Only validate when status is enabled, so records that are invalid but used in the past can always be disabled.
-			if ( $this->getType() == 2000 ) {
-				// when type is CHECK
-				if ( $this->getLastTransactionNumber() !== false ) {
-					$value = $this->Validator->stripNonNumeric( $this->getLastTransactionNumber() );
-					$this->Validator->isFloat(
-							'last_transaction_number',
-							$value,
-							TTi18n::gettext( 'Incorrect last check number' ) );
-				}
-			} else if ( $this->getType() == 3000 && $this->getCountry() == 'US' ) {
-				// when type is ACH
-				if ( $this->getLastTransactionNumber() !== false ) {
-					$value = $this->Validator->stripNonNumeric( $this->getLastTransactionNumber() );
-					$this->Validator->isFloat(
-							'last_transaction_number',
-							$value,
-							TTi18n::gettext( 'Incorrect last batch number' ) );
-				}
-				// Routing number
-				if ( $this->getValue2() !== false ) {
-					if ( strlen( $this->getValue2() ) != 9 ) {
-						$this->Validator->isTrue( 'value2',
-												  false,
-												  TTi18n::gettext( 'Invalid routing number length' ) );
-					} else {
-						$this->Validator->isDigits( 'value2',
-													$this->getValue2(),
-													TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
+		if ( $this->Validator->getValidateOnly() == false ) { //Make sure we can mass edit type/source account, so validating these has to be delayed.
+			if ( $this->getStatus() == 10 ) { //10=Enabled - Only validate when status is enabled, so records that are invalid but used in the past can always be disabled.
+				if ( $this->getType() == 2000 ) {
+					// when type is CHECK
+					if ( $this->getLastTransactionNumber() !== false ) {
+						$value = $this->Validator->stripNonNumeric( $this->getLastTransactionNumber() );
+						$this->Validator->isFloat(
+								'last_transaction_number',
+								$value,
+								TTi18n::gettext( 'Incorrect last check number' ) );
 					}
-				}
-				// Account number
-				if ( $this->getValue3() !== false ) {
-					if ( strlen( $this->getValue3() ) < 3 || strlen( $this->getValue3() ) > 17 ) {
+				} else if ( $this->getType() == 3000 && $this->getCountry() == 'US' ) {
+					// when type is ACH
+					if ( $this->getLastTransactionNumber() !== false ) {
+						$value = $this->Validator->stripNonNumeric( $this->getLastTransactionNumber() );
+						$this->Validator->isFloat(
+								'last_transaction_number',
+								$value,
+								TTi18n::gettext( 'Incorrect last batch number' ) );
+					}
+					// Routing number
+					if ( $this->getValue2() !== false ) {
+						if ( strlen( $this->getValue2() ) != 9 ) {
+							$this->Validator->isTrue( 'value2',
+													  false,
+													  TTi18n::gettext( 'Invalid routing number length' ) );
+						} else {
+							$this->Validator->isDigits( 'value2',
+														$this->getValue2(),
+														TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
+						}
+					}
+					// Account number
+					if ( $this->getValue3() !== false && ( strlen( $this->getValue3() ) < 3 || strlen( $this->getValue3() ) > 17 ) ) {
+						$this->Validator->isTrue( 'value3',
+												  false,
+												  TTi18n::gettext( 'Invalid account number length' ) );
+					} else {
+						$this->Validator->isAlphaNumeric( 'value3',
+														  $this->getValue3(),
+														  TTi18n::gettext( 'Invalid account number, must be alpha numeric only' ) );
+					}
+				} else if ( $this->getType() == 3000 && $this->getCountry() == 'CA' ) {
+					// when type is EFT
+					if ( $this->getLastTransactionNumber() !== false ) {
+						$this->Validator->isFloat(
+								'last_transaction_number',
+								$this->Validator->stripNonNumeric( $this->getLastTransactionNumber() ),
+								TTi18n::gettext( 'Incorrect last batch number' ) );
+					}
+					// Institution number
+					if ( $this->getValue1() !== false ) {
+						if ( strlen( $this->getValue1() ) != 3 ) {
+							$this->Validator->isTrue( 'value1',
+													  false,
+													  TTi18n::gettext( 'Invalid institution number length' ) );
+						} else {
+							$this->Validator->isDigits( 'value1',
+														$this->getValue1(),
+														TTi18n::gettext( 'Invalid institution number, must be digits only' ) );
+						}
+					}
+					// Transit number
+					if ( $this->getValue2() !== false ) {
+						if ( strlen( $this->getValue2() ) != 5 ) {
+							$this->Validator->isTrue( 'value2',
+													  false,
+													  TTi18n::gettext( 'Invalid transit number length' ) );
+						} else {
+							$this->Validator->isDigits( 'value2',
+														$this->getValue2(),
+														TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
+						}
+					}
+					// Account number
+					if ( $this->getValue3() !== false && ( strlen( $this->getValue3() ) < 3 || strlen( $this->getValue3() ) > 12 ) ) {
 						$this->Validator->isTrue( 'value3',
 												  false,
 												  TTi18n::gettext( 'Invalid account number length' ) );
@@ -1580,82 +1643,6 @@ class RemittanceSourceAccountFactory extends Factory {
 													TTi18n::gettext( 'Invalid account number, must be digits only' ) );
 					}
 				}
-
-				//Not all companies have this specified and it causes problems during upgrade.
-//			if ( $this->getValue4() == '' ) {
-//				$this->Validator->isTrue(		'value4',
-//												FALSE,
-//												TTi18n::gettext('Business Number not specified'));
-//			}
-//
-//			if ( $this->getValue5() == '' ) {
-//				$this->Validator->isTrue(		'value5',
-//												FALSE,
-//												TTi18n::gettext('Immediate origin not specified'));
-//			}
-//
-//			if ( $this->getValue7() == '' ) {
-//				$this->Validator->isTrue(		'value7',
-//												FALSE,
-//												TTi18n::gettext('Immediate destination not specified'));
-//			}
-			} else if ( $this->getType() == 3000 && $this->getCountry() == 'CA' ) {
-				// when type is EFT
-				if ( $this->getLastTransactionNumber() !== false ) {
-					$this->Validator->isFloat(
-							'last_transaction_number',
-							$this->Validator->stripNonNumeric( $this->getLastTransactionNumber() ),
-							TTi18n::gettext( 'Incorrect last batch number' ) );
-				}
-				// Institution number
-				if ( $this->getValue1() !== false ) {
-					if ( strlen( $this->getValue1() ) != 3 ) {
-						$this->Validator->isTrue( 'value1',
-												  false,
-												  TTi18n::gettext( 'Invalid institution number length' ) );
-					} else {
-						$this->Validator->isDigits( 'value1',
-													$this->getValue1(),
-													TTi18n::gettext( 'Invalid institution number, must be digits only' ) );
-					}
-				}
-				// Transit number
-				if ( $this->getValue2() !== false ) {
-					if ( strlen( $this->getValue2() ) != 5 ) {
-						$this->Validator->isTrue( 'value2',
-												  false,
-												  TTi18n::gettext( 'Invalid transit number length' ) );
-					} else {
-						$this->Validator->isDigits( 'value2',
-													$this->getValue2(),
-													TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
-					}
-				}
-				// Account number
-				if ( $this->getValue3() !== false ) {
-					if ( strlen( $this->getValue3() ) < 3 || strlen( $this->getValue3() ) > 12 ) {
-						$this->Validator->isTrue( 'value3',
-												  false,
-												  TTi18n::gettext( 'Invalid account number length' ) );
-					} else {
-						$this->Validator->isDigits( 'value3',
-													$this->getValue3(),
-													TTi18n::gettext( 'Invalid account number, must be digits only' ) );
-					}
-				}
-
-				//Not all companies have this specified and it causes problems during upgrade.
-//			if ( $this->getValue5() == '' ) {
-//				$this->Validator->isTrue(		'value5',
-//												FALSE,
-//												TTi18n::gettext('Originator ID not specified'));
-//			}
-//
-//			if ( $this->getValue7() == '' ) {
-//				$this->Validator->isTrue(		'value7',
-//												FALSE,
-//												TTi18n::gettext('Data center not specified'));
-//			}
 			}
 		}
 

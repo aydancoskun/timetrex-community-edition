@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -577,6 +577,32 @@ class EFT {
 	}
 
 	/**
+	 * @return string
+	 */
+	function getBatchDiscretionaryData() {
+		if ( isset( $this->header_data['batch_discretionary_data'] ) ) {
+			return $this->header_data['batch_discretionary_data'];
+		} else {
+			return '';
+		}
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setBatchDiscretionaryData( $value ) {
+		$value = strtoupper( trim( $value ) );
+		if ( $this->isAlphaNumeric( $value ) && strlen( $value ) <= 20 ) {
+			$this->header_data['batch_discretionary_data'] = $value;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * See similar function in EFT_Record class.
 	 * @param $key
 	 * @return bool
@@ -682,10 +708,10 @@ class EFT {
 
 			//Need this to handle switching transactions between batches with ACH record types.
 			if ( strtoupper( $this->getFileFormat() ) == 'ACH' ) {
-
 				$obj->setBusinessNumber( $this->getBatchBusinessNumber() );
 				$obj->setServiceCode( $this->getBatchServiceCode() );
 				$obj->setEntryDescription( $this->getBatchEntryDescription() );
+				$obj->setDiscretionaryData( $this->getBatchDiscretionaryData() );
 			}
 
 			$this->data[] = $obj;
@@ -1042,6 +1068,32 @@ class EFT_record extends EFT {
 		$value = strtoupper( trim( $value ) );
 		if ( $this->isAlphaNumeric( $value ) && strlen( $value ) <= 10 ) {
 			$this->record_data['entry_description'] = $value;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @return string
+	 */
+	function getDiscretionaryData() {
+		if ( isset( $this->record_data['discretionary_data'] ) ) {
+			return $this->record_data['discretionary_data'];
+		} else {
+			return '';
+		}
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDiscretionaryData( $value ) {
+		$value = strtoupper( trim( $value ) );
+		if ( $this->isAlphaNumeric( $value ) && strlen( $value ) <= 20 ) {
+			$this->record_data['discretionary_data'] = $value;
 
 			return true;
 		}
@@ -1783,8 +1835,6 @@ class EFT_File_Format_105 Extends EFT {
  */
 class EFT_File_Format_ACH Extends EFT {
 	/*
-	Validator Program: http://www.download.com/3001-2066_4-10344585.html
-	http://www.google.ca/url?sa=t&rct=j&q=ach%20file%20format%20immediate%20origin&source=web&cd=4&ved=0CEMQFjAD&url=http%3A%2F%2Fwww.commercebank.com%2FPDFs%2Fconnections%2FACH-fileformats.pdf&ei=mb0VT5tdo6OIAo3lqNwN&usg=AFQjCNEI0pnOfN65qRpVtCLYWTIM4inKtQ&cad=rja
 	Google: nacha 94 byte file format OR International ACH (IAT) NACHA File Formats
 
 		File Header Record
@@ -1865,10 +1915,11 @@ class EFT_File_Format_ACH Extends EFT {
 	 * @param $business_number
 	 * @param $service_code
 	 * @param $entry_description
+	 * @param $discretionary_data
 	 * @param int $due_date EPOCH
 	 * @return string
 	 */
-	private function compileBatchHeader( $type, $business_number, $service_code, $entry_description, $due_date ) {
+	private function compileBatchHeader( $type, $business_number, $service_code, $entry_description, $discretionary_data, $due_date ) {
 		$line[] = '5'; //5 Record
 
 		if ( $type == 'CD' ) {
@@ -1880,7 +1931,7 @@ class EFT_File_Format_ACH Extends EFT {
 		}
 
 		$line[] = $this->padRecord( strtoupper( $this->getOriginatorShortName() ), 16, 'AN' ); //Company Short Name
-		$line[] = $this->padRecord( '', 20, 'AN' );                                            //Discretionary Data
+		$line[] = $this->padRecord( $discretionary_data, 20, 'AN' );                                            //Discretionary Data
 		$line[] = $this->padRecord( $business_number, 10, 'N' );                               //Company Identification - Recommend IRS Federal Tax ID Number
 		$line[] = $this->padRecord( $service_code, 3, 'AN' );                                  //Standard Entry Class. (PPD, CCD, CTX, TEL, WEB)
 		$line[] = $this->padRecord( $entry_description, 10, 'AN' );                            //Entry Description
@@ -1957,8 +2008,7 @@ class EFT_File_Format_ACH Extends EFT {
 	 * @return array|bool
 	 */
 	private function compileRecords() {
-		//gets all Detail records.
-
+		//Gets all Detail records.
 		if ( count( $this->data ) == 0 ) {
 			Debug::Text( 'No data for D Record:', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -1983,7 +2033,6 @@ class EFT_File_Format_ACH Extends EFT {
 		unset( $prev_batch_key, $batch_id, $key, $record );
 
 		$i = 1;
-		//$max = count( $this->data );
 		foreach ( $batched_records as $batch_id => $batch_records ) {
 			$batch_debit_amount = 0;
 			$batch_credit_amount = 0;
@@ -1992,7 +2041,7 @@ class EFT_File_Format_ACH Extends EFT {
 
 			$batch_record_types = $this->getRecordTypes( $batch_records );
 
-			$retval[] = $this->compileBatchHeader( $batch_record_types, $batch_records[0]->getBusinessNumber(), $batch_records[0]->getServiceCode(), $batch_records[0]->getEntryDescription(), $batch_records[0]->getDueDate() );
+			$retval[] = $this->compileBatchHeader( $batch_record_types, $batch_records[0]->getBusinessNumber(), $batch_records[0]->getServiceCode(), $batch_records[0]->getEntryDescription(), $batch_records[0]->getDiscretionaryData(), $batch_records[0]->getDueDate() );
 
 			foreach ( $batch_records as $key => $record ) {
 				//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);

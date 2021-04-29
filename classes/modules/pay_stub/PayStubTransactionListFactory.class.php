@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -581,8 +581,6 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 				'remittance_destination_account',
 				'destination_user_first_name',
 				'destination_user_last_name',
-				'pay_stub_transaction_date',
-				'remittance_source_account_type_id',
 				'currency_id',
 				'currency',
 				'currency_rate',
@@ -592,11 +590,17 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 				'pay_period_end_date',
 				'pay_period_start_date',
 				'pay_stub_run_id',
+				'rsaf.type_id',
+				'psf.transaction_date',
+				'ppf.transaction_date',
 		];
 
 		$sort_column_aliases = [
-				'type'   => 'a.type_id',
-				'status' => 'a.status_id',
+				'type'                           => 'a.type_id',
+				'status'                         => 'a.status_id',
+				'remittance_source_account_type' => 'rsaf.type_id',
+				'pay_stub_transaction_date'      => 'psf.transaction_date',
+				'pay_period_transaction_date'    => 'ppf.transaction_date',
 		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
@@ -635,7 +639,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$cf = new CurrencyFactory();
 
 		$ph = [
-				'company_id' => TTUUID::castUUID( $company_id ),
+				'company_id'  => TTUUID::castUUID( $company_id ),
 				'company_id2' => TTUUID::castUUID( $company_id ),
 		];
 
@@ -691,7 +695,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 						LEFT JOIN ( 
 									SELECT pst_a.pay_stub_id as pay_stub_id, count(*) as total_transactions_processed
 									FROM ' . $this->getTable() . ' as pst_a
-									LEFT JOIN '.  $psf->getTable() .' as psf_b ON ( pst_a.pay_stub_id = psf_b.id )
+									LEFT JOIN ' . $psf->getTable() . ' as psf_b ON ( pst_a.pay_stub_id = psf_b.id )
 									LEFT JOIN ' . $rdaf->getTable() . ' as rdaf_b ON ( pst_a.remittance_destination_account_id = rdaf_b.id AND rdaf_b.deleted = 0 )
 									LEFT JOIN ' . $uf->getTable() . ' as uf_b ON ( rdaf_b.user_id = uf_b.id AND uf_b.deleted = 0 )
 									WHERE

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -136,6 +136,13 @@ class APIReport extends APIFactory {
 			if ( $validation_obj->isValid() == false ) {
 				return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), [ 0 => $validation_obj->getErrorsArray() ], [ 'total_records' => 1, 'valid_records' => 0 ] );
 			}
+		} else {
+			//Display permission denied error message to user.
+			$validator = new Validator();
+			$validator->isTrue( 'PERMISSION', false, TTi18n::getText( 'Permission Denied' ) );
+			return $this->returnHandler( false, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), [ 0 => $validator->getErrorsArray() ], [ 'total_records' => 1, 'valid_records' => 0 ] );
+
+			//return $this->getPermissionObject()->PermissionDenied(); //This won't display anything to the end-user, which should probably be fixed and used instead when we have more time.
 		}
 
 		return $this->returnHandler( true );
@@ -168,7 +175,7 @@ class APIReport extends APIFactory {
 		Debug::Text( 'Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getReportObject()->setConfig( $config ); //Set config first, so checkPermissions can check/modify data in the config for Printing timesheets for regular employees.
 		if ( $this->getReportObject()->checkPermissions() == true ) {
-			$this->getReportObject()->setAMFMessageID( $this->getAMFMessageID() ); //This must be set *after* the all constructor functions are called, as its primarily called from JSON.
+			$this->getReportObject()->setAPIMessageID( $this->getAPIMessageID() ); //This must be set *after* the all constructor functions are called, as its primarily called from JSON.
 
 			$validation_obj = $this->getReportObject()->validateConfig( $format );
 			if ( $validation_obj->isValid() == true ) {

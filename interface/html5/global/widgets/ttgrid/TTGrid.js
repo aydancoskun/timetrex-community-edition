@@ -580,7 +580,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 	};
 
 	//resize event.
-	$( '#contentContainer' ).off( 'resize' ).on( 'resize', Global.debounce( function( e ) {
+	$( '#contentContainer' ).off( 'resize' ).on( 'resize', Global.debounce( function TTGridResizeEvent( e ) {
 		e.stopPropagation();
 		Debug.Text( ' Window resize event hit by TTGrid. Target: ' + e.target, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 

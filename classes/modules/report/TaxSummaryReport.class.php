@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -887,7 +887,7 @@ class TaxSummaryReport extends Report {
 			//  For example, the same earnings records are likely to count towards many different Tax/Deduction records.
 			$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 			$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 			if ( $pself->getRecordCount() > 0 ) {
 				if ( is_array( $company_deduction_data ) && count( $company_deduction_data ) > 0 ) {
 					Debug::Text( 'Found Company Deductions: ' . $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -901,7 +901,7 @@ class TaxSummaryReport extends Report {
 
 							foreach ( $pself as $key => $pse_obj ) {
 								$this->addPayStubEntry( $cd_obj, $pse_obj, $user_deduction_data );
-								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+								$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 							}
 						}
 					}
@@ -953,32 +953,32 @@ class TaxSummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), [ 'province' => true, 'hire_date' => true, 'termination_date' => true, 'title_id' => true ] ) );
 			$this->tmp_data['user'][$u_obj->getId()]['total_user'] = 1;
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Get remittance agency data for joining.
 		$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $pralf */
 		$pralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pralf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pralf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $pralf as $key => $ra_obj ) {
 			$this->tmp_data['payroll_remittance_agency'][$ra_obj->getId()] = Misc::addKeyPrefix( 'payroll_remittance_agency_', (array)$ra_obj->getObjectAsArray( [ 'id' => true, 'name' => true ] ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Company Deduction data for joining...
 		$cdlf = TTnew( 'CompanyDeductionListFactory' ); /** @var CompanyDeductionListFactory $cdlf */
 		$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $company_deduction_filter_data );
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $cdlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $cdlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach ( $cdlf as $key => $cd_obj ) {
 				$this->tmp_data['company_deduction'][$cd_obj->getId()] = Misc::addKeyPrefix( 'company_deduction_', (array)$cd_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'payroll_remittance_agency_id' => true ] ) );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 		}
 
@@ -995,7 +995,7 @@ class TaxSummaryReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset( $this->tmp_data['pay_stub_entry'] ) ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 			//foreach( $this->tmp_data['pay_stub_entry'] as $date_stamp => $level_1 ) {
 			foreach ( $this->tmp_data['pay_stub_entry'] as $remittance_agency_id => $level_0 ) {
@@ -1038,7 +1038,7 @@ class TaxSummaryReport extends Report {
 
 									$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_company_deduction, $tmp_payroll_remittance_agency, $row, $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
 
-									$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+									$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 									$key++;
 								}
 							}

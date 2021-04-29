@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -555,7 +555,7 @@ class CompanyDeductionFactory extends Factory {
 						'-1060-calculation'               => TTi18n::gettext( 'Calculation' ),
 
 						'-1070-start_date'    => TTi18n::gettext( 'Start Date' ),
-						'-1080-end_Date_date' => TTi18n::gettext( 'End Date' ),
+						'-1080-end_date' => TTi18n::gettext( 'End Date' ),
 
 						'-1090-calculation_order' => TTi18n::gettext( 'Calculation Order' ),
 
@@ -2431,7 +2431,7 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	/**
-	 * @param string $ids UUID
+	 * @param string|string[] $ids UUID
 	 * @return bool
 	 */
 	function setIncludePayStubEntryAccount( $ids ) {
@@ -2536,7 +2536,7 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	/**
-	 * @param string $ids UUID
+	 * @param string|string[] $ids UUID
 	 * @return bool
 	 */
 	function setExcludePayStubEntryAccount( $ids ) {

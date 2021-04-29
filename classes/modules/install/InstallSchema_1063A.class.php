@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -75,7 +75,7 @@ class InstallSchema_1063A extends InstallSchema_Base {
 					//If there are more than two duplicate punches and no duplicate timestamps, delete ones with duplicate status_ids in timestamp order.
 					//Check for duplicate statuses not in a row too, ie: 10, 20, 10.
 					if ( $i == 0 ) {
-						$prev_status_id = false;
+						$prev_status_id = [];
 						foreach ( $plf as $p_obj ) {
 							if ( $prev_status_id !== false && in_array( $p_obj->getStatus(), $prev_status_id ) ) {
 								Debug::text( '    Found Duplicate Status: ' . $p_obj->getStatus() . '(' . $p_obj->getID() . ') Deleting...', __FILE__, __LINE__, __METHOD__, 9 );

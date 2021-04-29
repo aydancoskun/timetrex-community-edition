@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -431,6 +431,7 @@ class PayStubTransactionFactory extends Factory {
 	}
 
 	/**
+	 * Currency exchange rate to convert the amount back to the base currency. Rate=1 would usually only happen if the current currency is the base currency.
 	 * @param $value
 	 * @return bool
 	 */
@@ -532,12 +533,29 @@ class PayStubTransactionFactory extends Factory {
 	 * @return bool
 	 */
 	function preValidate() {
+		if ( $this->getType() == '' ) {
+			$this->setType( 10 ); //Valid
+		}
+
 		if ( $this->getStatus() == '' ) {
 			$this->setStatus( 10 ); //Pending
 		}
 
-		if ( $this->getType() == '' ) {
-			$this->setType( 10 ); //Valid
+		//Validation errors likely won't allow this to even execute, but leave it here just in case.
+		if ( $this->getRemittanceSourceAccount() == false && is_object( $this->getRemittanceDestinationAccountObject() ) ) {
+			$this->setRemittanceSourceAccount( $this->getRemittanceDestinationAccountObject()->getRemittanceSourceAccount() );
+		}
+
+		if ( $this->getCurrency() == false && is_object( $this->getPayStubObject() ) ) {
+			if ( is_object( $this->getRemittanceSourceAccountObject() ) ) {
+				$this->setCurrency( $this->getRemittanceSourceAccountObject()->getCurrency() );
+			} else {
+				$this->setCurrency( $this->getPayStubObject()->getCurrency() );
+			}
+		}
+
+		if ( $this->getCurrencyRate() == false && is_object( $this->getPayStubObject() ) ) {
+			$this->setCurrencyRate( $this->getCurrencyObject()->getConversionRate() ); //Must always get the conversion rate from the current currency to the base currency, so it can be converted to any other currency from that.
 		}
 
 		return true;
@@ -751,38 +769,6 @@ class PayStubTransactionFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function preSave() {
-		if ( $this->getType() == '' ) {
-			$this->setType( 10 ); //Valid
-		}
-
-		if ( $this->getStatus() == '' ) {
-			$this->setStatus( 10 ); //Pending
-		}
-
-		//Validation errors likely won't allow this to even execute, but leave it here just in case.
-		if ( $this->getRemittanceSourceAccount() == false && is_object( $this->getRemittanceDestinationAccountObject() ) ) {
-			$this->setRemittanceSourceAccount( $this->getRemittanceDestinationAccountObject()->getRemittanceSourceAccount() );
-		}
-
-		if ( $this->getCurrency() == false && is_object( $this->getPayStubObject() ) ) {
-			if ( is_object( $this->getRemittanceSourceAccountObject() ) ) {
-				$this->setCurrency( $this->getRemittanceSourceAccountObject()->getCurrency() );
-			} else {
-				$this->setCurrency( $this->getPayStubObject()->getCurrency() );
-			}
-		}
-
-		if ( $this->getCurrencyRate() == false && is_object( $this->getPayStubObject() ) ) {
-			$this->setCurrencyRate( $this->getPayStubObject()->getCurrencyRate() );
-		}
-
-		return true;
-	}
-
-	/**
-	 * @return bool
-	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
@@ -829,6 +815,7 @@ class PayStubTransactionFactory extends Factory {
 		$eft->setOriginatorID( $rs_obj->getValue5() );
 		$eft->setFileCreationNumber( $rs_obj->getNextTransactionNumber() );
 		$eft->setInitialEntryNumber( ( ( $rs_obj->getValue9() != '' ) ? $rs_obj->getValue9() : substr( $rs_obj->getValue5(), 0, 8 ) ) ); //ACH
+		$eft->setBatchDiscretionaryData( ( ( $rs_obj->getValue10() != '' ) ? $rs_obj->getValue10() : null ) ); //ACH
 		$eft->setDataCenter( $rs_obj->getValue7() );
 		$eft->setDataCenterName( $rs_obj->getValue8() ); //ACH
 

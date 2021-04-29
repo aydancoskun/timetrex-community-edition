@@ -1,7 +1,14 @@
-OtherFieldViewController = BaseViewController.extend( {
-	el: '#other_field_view_container',
-	type_array: null,
-	init: function( options ) {
+class OtherFieldViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#other_field_view_container',
+			type_array: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'OtherFieldEditView.html';
 		this.permission_id = 'other_field';
@@ -10,40 +17,38 @@ OtherFieldViewController = BaseViewController.extend( {
 		this.table_name_key = 'other_field';
 		this.context_menu_name = $.i18n._( 'Custom Field' );
 		this.navigation_label = $.i18n._( 'Custom Field' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIOtherField' ) )();
+		this.api = TTAPI.APIOtherField;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		this.initDropDownOption( 'type' );
-	},
+	}
 
-	searchDone: function( result ) {
+	searchDone( result ) {
 
-		this._super( 'searchDone' );
+		super.searchDone();
 		Global.clearCache( 'getOtherField' );
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -54,7 +59,7 @@ OtherFieldViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIOtherField' ) ),
+			api_class: TTAPI.APIOtherField,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.OTHER_FIELD,
@@ -141,25 +146,24 @@ OtherFieldViewController = BaseViewController.extend( {
 
 		form_item_input.TTextInput( { field: 'other_id10', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID10' ), form_item_input, tab_custom_field_column1, '', null, true );
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.hiddenOtherField();
-	},
+	}
 
-	hiddenOtherField: function() {
+	hiddenOtherField() {
 		this.detachElement( 'other_id6' );
 		this.detachElement( 'other_id7' );
 		this.detachElement( 'other_id8' );
 		this.detachElement( 'other_id9' );
 		this.detachElement( 'other_id10' );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -167,7 +171,7 @@ OtherFieldViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -179,7 +183,7 @@ OtherFieldViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -188,4 +192,4 @@ OtherFieldViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

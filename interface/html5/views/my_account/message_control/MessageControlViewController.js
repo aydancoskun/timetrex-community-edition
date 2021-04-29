@@ -1,25 +1,30 @@
-MessageControlViewController = BaseViewController.extend( {
-	el: '#message_control_view_container',
+class MessageControlViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#message_control_view_container',
 
-	_required_files: ['APIMessageControl', 'APIRequest'],
+			object_type_array: null,
 
-	object_type_array: null,
+			is_request: false,
+			is_message: false,
 
-	is_request: false,
-	is_message: false,
+			messages: null,
+			request_api: null,
 
-	messages: null,
-	request_api: null,
+			folder_id: null,
 
-	folder_id: null,
+			navigation_source_data: null,
 
-	navigation_source_data: null,
+			isReloadViewUI: false,
 
-	isReloadViewUI: false,
+			current_select_message_control_data: null, //current select message control data, set in onViewClick
 
-	current_select_message_control_data: null, //current select message control data, set in onViewClick
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'MessageControlEditView.html';
 		this.permission_id = 'message';
@@ -27,8 +32,8 @@ MessageControlViewController = BaseViewController.extend( {
 		this.script_name = 'MessageControlView';
 		this.table_name_key = 'message_control';
 		this.context_menu_name = $.i18n._( 'Message' );
-		this.api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
-		this.request_api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
+		this.api = TTAPI.APIMessageControl;
+		this.request_api = TTAPI.APIRequest;
 		this.folder_id = 10;
 
 		this.render();
@@ -36,19 +41,17 @@ MessageControlViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'MessageControl' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'object_type' );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 
 		var default_args = {};
 		default_args.permission_section = 'message';
@@ -60,7 +63,7 @@ MessageControlViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -93,7 +96,7 @@ MessageControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -105,16 +108,16 @@ MessageControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	getSubViewFilter: function( filter ) {
+	getSubViewFilter( filter ) {
 
 		if ( filter.length === 0 ) {
 			filter = {};
@@ -123,9 +126,9 @@ MessageControlViewController = BaseViewController.extend( {
 		filter['folder_id'] = this.folder_id;
 
 		return filter;
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				view: {
@@ -247,9 +250,9 @@ MessageControlViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -317,10 +320,9 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	onGridDblClickRow: function() {
+	onGridDblClickRow() {
 
 		var len = this.context_menu_array.length;
 
@@ -345,10 +347,9 @@ MessageControlViewController = BaseViewController.extend( {
 					break;
 			}
 		}
+	}
 
-	},
-
-	onCustomContextClick: function( id, context_btn ) {
+	onCustomContextClick( id, context_btn ) {
 		switch ( id ) {
 			case ContextMenuIconName.send:
 				this.onSaveClick();
@@ -366,9 +367,9 @@ MessageControlViewController = BaseViewController.extend( {
 				this.onSentClick();
 				break;
 		}
-	},
+	}
 
-	onCancelClick: function( iconName ) {
+	onCancelClick( iconName ) {
 		var $this = this;
 		$this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'cancel';
@@ -402,10 +403,9 @@ MessageControlViewController = BaseViewController.extend( {
 			TTPromise.resolve( 'base', 'onCancelClick' );
 
 		}
+	}
 
-	},
-
-	onSaveResult: function( result ) {
+	onSaveResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -439,19 +439,19 @@ MessageControlViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
+	}
 
-	onInboxClick: function() {
+	onInboxClick() {
 		this.folder_id = 10;
 		this.search();
-	},
+	}
 
-	onSentClick: function() {
+	onSentClick() {
 		this.folder_id = 20;
 		this.search();
-	},
+	}
 
-	setEditMenu: function() {
+	setEditMenu() {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		var pId = null;
@@ -509,10 +509,9 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setCurrentSelectedIcon: function( icon ) {
+	setCurrentSelectedIcon( icon ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'find' of null in /interface/html5/#!m=MessageControl line 543
 		if ( !icon ) {
@@ -525,93 +524,88 @@ MessageControlViewController = BaseViewController.extend( {
 			$( context_btn.find( '.ribbon-sub-menu-icon' ) ).removeClass( 'selected-menu' );
 		}
 		$( icon.find( '.ribbon-sub-menu-icon' ) ).addClass( 'selected-menu' );
-	},
+	}
 
-	setDefaultMenuDeleteAndNextIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDeleteAndNextIcon( context_btn, grid_selected_length, pId ) {
 
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuDeleteIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDeleteIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( grid_selected_length >= 1 ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuEditIcon: function( context_btn, grid_selected_length, pId ) {
-
-		if ( grid_selected_length === 1 ) {
-			context_btn.removeClass( 'disable-image' );
-		} else {
-			context_btn.addClass( 'disable-image' );
-		}
-	},
-
-	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( grid_selected_length === 1 ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuAddIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuViewIcon( context_btn, grid_selected_length, pId ) {
 
-	},
+		if ( grid_selected_length === 1 ) {
+			context_btn.removeClass( 'disable-image' );
+		} else {
+			context_btn.addClass( 'disable-image' );
+		}
+	}
 
-	setEditMenuCloseMiscIcon: function( context_btn, pId ) {
+	setDefaultMenuAddIcon( context_btn, grid_selected_length, pId ) {
+	}
 
-	},
+	setEditMenuCloseMiscIcon( context_btn, pId ) {
+	}
 
-	setEditMenuSendIcon: function( context_btn, pId ) {
+	setEditMenuSendIcon( context_btn, pId ) {
 
 		if ( this.is_edit || this.is_add ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	setEditMenuInboxIcon: function( context_btn, pId ) {
+	setEditMenuInboxIcon( context_btn, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setEditMenuSentIcon: function( context_btn, pId ) {
+	setEditMenuSentIcon( context_btn, pId ) {
 
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setEditMenuCancelIcon: function( context_btn, pId ) {
+	setEditMenuCancelIcon( context_btn, pId ) {
 
 		if ( this.is_viewing ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuCloseMiscIcon: function( context_btn, grid_selected_length, pId ) {
-
-		context_btn.addClass( 'disable-image' );
-	},
-
-	setDefaultMenuSendIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuCloseMiscIcon( context_btn, grid_selected_length, pId ) {
 
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuInboxIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuSendIcon( context_btn, grid_selected_length, pId ) {
 
-	},
+		context_btn.addClass( 'disable-image' );
+	}
 
-	setDefaultMenuSentIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuInboxIcon( context_btn, grid_selected_length, pId ) {
+	}
 
-	},
+	setDefaultMenuSentIcon( context_btn, grid_selected_length, pId ) {
+	}
 
-	setGridCellBackGround: function() {
+	setGridCellBackGround() {
 		var data = this.grid.getGridParam( 'data' );
 
 		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
@@ -628,9 +622,9 @@ MessageControlViewController = BaseViewController.extend( {
 				$( 'tr[id=\'' + item.id + '\'] td' ).css( 'font-weight', 'bold' );
 			}
 		}
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 
 		column_filter.id = true;
@@ -658,9 +652,9 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	initEditViewUI: function( view_id, edit_view_file_name ) {
+	initEditViewUI( view_id, edit_view_file_name ) {
 
 		var $this = this;
 
@@ -694,9 +688,9 @@ MessageControlViewController = BaseViewController.extend( {
 
 		this.buildEditViewUI();
 		this.setEditViewTabHeight();
-	},
+	}
 
-	getViewSelectedRecordId: function( record ) {
+	getViewSelectedRecordId( record ) {
 		// overriden from BaseVC due to the this.getRecordFromGridById call
 		var selected_item;
 		var selected_id;
@@ -724,9 +718,9 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 
 		return selected_item;
-	},
+	}
 
-	getCurrentSelectedRecord: function( return_object ) {
+	getCurrentSelectedRecord( return_object ) {
 		var selected_item = this.current_selected_record;
 		if ( !selected_item ) {
 			return false;
@@ -745,9 +739,9 @@ MessageControlViewController = BaseViewController.extend( {
 		} else {
 			return selected_id;
 		}
-	},
+	}
 
-	handleViewAPICallbackResult: function( result ) {
+	handleViewAPICallbackResult( result ) {
 		var result_data;
 		if ( result && result.getResult ) {
 			result_data = result.getResult();
@@ -761,10 +755,10 @@ MessageControlViewController = BaseViewController.extend( {
 			result_data = result;
 		}
 
-		return this._super( 'handleViewAPICallbackResult', result_data );
-	},
+		return super.handleViewAPICallbackResult( result_data );
+	}
 
-	doViewAPICall: function( filter ) {
+	doViewAPICall( filter ) {
 		var callback = { onResult: this.handleViewAPICallbackResult.bind( this ) };
 
 		if ( this.is_request ) {
@@ -772,9 +766,9 @@ MessageControlViewController = BaseViewController.extend( {
 		} else {
 			return this.api.getMessage( filter, callback );
 		}
-	},
+	}
 
-	doViewClickResult: function( result_data ) {
+	doViewClickResult( result_data ) {
 		// save current select grid data. Not this not work when access from url action. See autoOpenEditView function for why
 		this.current_select_message_control_data = this.getCurrentSelectedRecord( true );
 
@@ -788,13 +782,13 @@ MessageControlViewController = BaseViewController.extend( {
 			}
 
 		}
-		var retval = this._super( 'doViewClickResult', result_data );
+		var retval = super.doViewClickResult( result_data );
 		TTPromise.resolve( 'MessageControllViewController', 'onViewClick' );
 		// The promise must be resolved last, after everthing else, hence the specific order here with retval and the super.
 		return retval;
-	},
+	}
 
-	getAPIFilters: function() {
+	getAPIFilters() {
 		var record_id = this.getCurrentSelectedRecord();
 		var filter = {};
 
@@ -802,9 +796,9 @@ MessageControlViewController = BaseViewController.extend( {
 		filter.filter_data.id = record_id;
 
 		return filter;
-	},
+	}
 
-	onViewClick: function( next_selected_item, noRefreshUI ) {
+	onViewClick( next_selected_item, noRefreshUI ) {
 		TTPromise.add( 'MessageControllViewController', 'onViewClick' );
 		TTPromise.wait();
 		var $this = this;
@@ -823,10 +817,10 @@ MessageControlViewController = BaseViewController.extend( {
 		this.openEditView();
 
 		return this.doViewAPICall( filter );
-	},
+	}
 
 	/* jshint ignore:start */
-	setURL: function() {
+	setURL() {
 
 		if ( LocalCacheData.current_doing_context_action === 'edit' ) {
 			LocalCacheData.current_doing_context_action = '';
@@ -884,9 +878,10 @@ MessageControlViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
+
 	/* jshint ignore:end */
-	initEditViewData: function() {
+	initEditViewData() {
 		var $this = this;
 		if ( !this.edit_only_mode && this.navigation ) {
 
@@ -941,9 +936,9 @@ MessageControlViewController = BaseViewController.extend( {
 		//Init *Please save this record before modifying any related data* box
 		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( { related_view_controller: this } );
 		this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'none' );
-	},
+	}
 
-	setNavigation: function() {
+	setNavigation() {
 
 		var $this = this;
 
@@ -973,10 +968,9 @@ MessageControlViewController = BaseViewController.extend( {
 			$this.setNavigationArrowsEnabled();
 
 		} );
+	}
 
-	},
-
-	onEditClick: function( editId, noRefreshUI ) {
+	onEditClick( editId, noRefreshUI ) {
 		// edit click is clicking on Reply
 		this.setCurrentEditViewState( 'edit' );
 		this.is_request = false;
@@ -994,15 +988,14 @@ MessageControlViewController = BaseViewController.extend( {
 		this.current_edit_record = selected_item;
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 		this.initEditView();
+	}
 
-	},
-
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		// Builds the fields for Add and Edit, and partially for Requests. But fields for Messages and some of requests are done dynamically in setMessages (Both) and initEmbeddedMessageData (Request only)
 
 		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
 		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 		var $this = this;
 
 		// This is actually updated in switchMessageOrRequestWidgets depending on view type
@@ -1012,7 +1005,7 @@ MessageControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIMessageControl' ) ),
+			api_class: TTAPI.APIMessageControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.MESSAGE_USER,
@@ -1083,7 +1076,7 @@ MessageControlViewController = BaseViewController.extend( {
 		// Employee - 'New' view
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIMessageControl' ) ),
+			api_class: TTAPI.APIMessageControl,
 			column_option_key: 'user_columns',
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.MESSAGE_USER,
@@ -1112,13 +1105,14 @@ MessageControlViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 		form_item_input.TTextArea( { field: 'body', width: 600, height: 400 } );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, true, true );
-	},
+	}
 
-	setEditViewWidgetsMode: function() {
+	setEditViewWidgetsMode() {
 		this.switchMessageOrRequestWidgets();
-		this._super( 'setEditViewWidgetsMode' );
-	},
-	switchMessageOrRequestWidgets: function() {
+		super.setEditViewWidgetsMode();
+	}
+
+	switchMessageOrRequestWidgets() {
 		// UI field building is done from buildEditViewUI(), and setMessages() for Messages and Requests (Also initEmbeddedMessageData).
 		// This function shows/hides various fields depending on whether the view is displaying a message or request, to reduce re-building the form elements, instead simply hiding and showing the right ones.
 		var tab_label;
@@ -1177,23 +1171,22 @@ MessageControlViewController = BaseViewController.extend( {
 			'tab_message': { 'label': $.i18n._( tab_label ) }
 		};
 		this.setTabModel( tab_model );
+	}
 
-	},
-
-	refreshCurrentRecord: function() {
+	refreshCurrentRecord() {
 		var next_select_item = this.navigation.getItemByIndex( this.navigation.getSelectIndex() );
 		ProgressBar.showOverlay();
 		this.onViewClick( next_select_item ); //Dont refresh UI
 		this.setNavigationArrowsEnabled();
-	},
+	}
 
-	onRightOrLeftArrowClickCallBack: function( next_select_item ) {
+	onRightOrLeftArrowClickCallBack( next_select_item ) {
 		ProgressBar.showOverlay();
 		this.onViewClick( next_select_item ); //Dont refresh UI
 		this.setNavigationArrowsEnabled();
-	},
+	}
 
-	onAddClick: function() {
+	onAddClick() {
 
 		TTPromise.add( 'Message', 'add' );
 		TTPromise.wait();
@@ -1211,45 +1204,43 @@ MessageControlViewController = BaseViewController.extend( {
 
 		$this.current_edit_record = result_data;
 		$this.initEditView();
-	},
+	}
 
-	initEditView: function() {
-		this._super( 'initEditView' );
+	initEditView() {
+		super.initEditView();
 		TTPromise.resolve( 'Message', 'add' );
-	},
+	}
 
-	setEditMenuAddIcon: function( context_btn, pId ) {
+	setEditMenuAddIcon( context_btn, pId ) {
 
 		if ( this.is_add || this.is_changed ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	setEditMenuViewIcon: function( context_btn, pId ) {
+	setEditMenuViewIcon( context_btn, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setEditMenuEditIcon: function( context_btn, pId ) {
+	setEditMenuEditIcon( context_btn, pId ) {
 
 		if ( !this.is_viewing ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuDeleteIcon: function( context_btn, pId ) {
+	setEditMenuDeleteIcon( context_btn, pId ) {
 		if ( !this.current_select_message_control_data ||
 			this.is_edit ||
 			this.is_add ) {
 
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	setEditMenuDeleteAndNextIcon: function( context_btn, pId ) {
+	setEditMenuDeleteAndNextIcon( context_btn, pId ) {
 
 		if ( !this.current_select_message_control_data ||
 			this.is_edit ||
@@ -1257,9 +1248,9 @@ MessageControlViewController = BaseViewController.extend( {
 
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	validate: function() {
+	validate() {
 
 		var $this = this;
 
@@ -1280,9 +1271,9 @@ MessageControlViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick( ignoreWarning ) {
 		LocalCacheData.current_doing_context_action = 'save';
 		this.collectUIDataToCurrentEditRecord();
 		var record = this.current_edit_record;
@@ -1299,9 +1290,9 @@ MessageControlViewController = BaseViewController.extend( {
 		record = this.uniformVariable( record );
 
 		this.doSaveAPICall( record, ignoreWarning );
-	},
+	}
 
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 		var reply_data = {};
 
 		if ( this.is_edit ) {
@@ -1338,9 +1329,10 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 
 		return records;
-	},
+	}
+
 	/* jshint ignore:start */
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		var $this = this;
 		// If the current_edit_record is an array, then handle them in setEditViewDataDone function.
 		// if ( Global.isArray( this.current_edit_record ) ) { // Commenting out to trial whether single messages can go through this too.
@@ -1402,9 +1394,10 @@ MessageControlViewController = BaseViewController.extend( {
 			this.collectUIDataToCurrentEditRecord(); // #2775 If Messages then, we do not want to store any ui fields to current_edit_record. Its view only, and we dont have references to each generated message anyway, as they generate on the fly.
 		}
 		this.setEditViewDataDone(); // 2775 notes: also trigger more data/widget handling for request (SINGLE+MULTIPLE)
-	},
+	}
+
 	/* jshint ignore:end */
-	autoOpenEditViewIfNecessary: function() {
+	autoOpenEditViewIfNecessary() {
 		//Auto open edit view. Should set in IndexController
 
 		switch ( LocalCacheData.current_doing_context_action ) {
@@ -1426,10 +1419,9 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 
 		this.autoOpenEditOnlyViewIfNecessary();
+	}
 
-	},
-
-	getDeleteSelectedRecordId: function() {
+	getDeleteSelectedRecordId() {
 		var retval = [];
 		if ( this.edit_view ) {
 			if ( !this.current_select_message_control_data ) {
@@ -1438,12 +1430,12 @@ MessageControlViewController = BaseViewController.extend( {
 			}
 			retval.push( this.current_select_message_control_data.id );
 		} else {
-			retval = this._super( 'getDeleteSelectedRecordId' );
+			retval = super.getDeleteSelectedRecordId();
 		}
 		return retval;
-	},
+	}
 
-	doDeleteAPICall: function( remove_ids, _callback ) {
+	doDeleteAPICall( remove_ids, _callback ) {
 		var callback = _callback || {
 			onResult: function( result ) {
 				this.isReloadViewUI = false;
@@ -1451,12 +1443,12 @@ MessageControlViewController = BaseViewController.extend( {
 			}.bind( this )
 		};
 		return this.api['delete' + this.api.key_name]( remove_ids, this.folder_id, callback );
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		// TODO: Refactor this to move into setCurrentEditRecordData, as this is not code that is classed as Data Load Done, its still data loading.
 		var $this = this;
-		this._super( 'setEditViewDataDone' );
+		super.setEditViewDataDone();
 
 		if ( this.is_viewing ) {
 
@@ -1470,10 +1462,9 @@ MessageControlViewController = BaseViewController.extend( {
 				$this.messages = null;
 			}
 		}
+	}
 
-	},
-
-	setMessages: function( message_data ) {
+	setMessages( message_data ) {
 		// This function handles message thread generation for both the message and request types.
 		var read_ids = [];
 
@@ -1542,9 +1533,9 @@ MessageControlViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	addMessageRow: function( message_container, label, field, value, set_resize_event ) {
+	addMessageRow( message_container, label, field, value, set_resize_event ) {
 		// Note: Take extra care with this function, as we are building widgets outside of the normal init flow, so compare to the standard flow of buildEditViewUI if anything odd happens.
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
@@ -1559,9 +1550,9 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// remove the field reference from this.edit_view_ui_dic as we wont track the on-the-fly built fields.
 		delete this.edit_view_ui_dic[field];
-	},
+	}
 
-	initEmbeddedMessageData: function() {
+	initEmbeddedMessageData() {
 		// Used to generate the message threads for a Request type
 		var $this = this;
 		var args = {};
@@ -1580,14 +1571,15 @@ MessageControlViewController = BaseViewController.extend( {
 				$this.setMessages( data );
 			}
 		} );
-	},
+	}
+
 	// #2775 Commenting out to fix an issue where Delete&Next does not go to the next record. Not 100% certain why this is here, but annotations show something to do with flashing, which does not seem an issue atm.
 	// /* jshint ignore:start */
 	// search: function( set_default_menu, page_action, page_number, callBack ) {
 	// 	this.refresh_id = null;
-	// 	this._super( 'search', set_default_menu, page_action, page_number, callBack );
+	// 	super.search( set_default_menu, page_action, page_number, callBack );
 	// }
 	//
 	// /* jshint ignore:end */
 
-} );
+}

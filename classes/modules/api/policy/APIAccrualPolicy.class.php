@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -447,7 +447,7 @@ class APIAccrualPolicy extends APIFactory {
 			$aplf = TTnew( 'AccrualPolicyListFactory' ); /** @var AccrualPolicyListFactory $aplf */
 			$aplf->getByIdAndCompanyId( (array)$accrual_policy_ids, $this->getCurrentCompanyObject()->getId() );
 			if ( $aplf->getRecordCount() > 0 ) {
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $aplf->getRecordCount(), null, TTi18n::getText( 'ReCalculating...' ) );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $aplf->getRecordCount(), null, TTi18n::getText( 'ReCalculating...' ) );
 
 				foreach ( $aplf as $ap_obj ) {
 					if ( Misc::isSystemLoadValid() == false ) { //Check system load as the user could ask to calculate decades worth at a time.
@@ -470,7 +470,7 @@ class APIAccrualPolicy extends APIFactory {
 						Debug::Text( 'Recalculating Accruals for Date: ' . TTDate::getDate( 'DATE+TIME', TTDate::getBeginDayEpoch( $i ) ), __FILE__, __LINE__, __METHOD__, 10 );
 						$ap_obj->addAccrualPolicyTime( TTDate::getBeginDayEpoch( $i ), 79200, $user_ids ); //Use default offset.
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $x );
 
 						$x++;
 					}
@@ -479,7 +479,7 @@ class APIAccrualPolicy extends APIFactory {
 					$aplf->CommitTransaction();
 				}
 
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 			} else {
 				Debug::Text( 'No accrual policies to recalculate...', __FILE__, __LINE__, __METHOD__, 10 );
 			}

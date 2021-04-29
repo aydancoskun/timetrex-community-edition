@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedFunctionInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -49,7 +49,7 @@ class Install {
 			'system_version' => APPLICATION_VERSION,
 	];
 	protected $progress_bar_obj = null;
-	protected $AMF_message_id = null;
+	protected $api_message_id = null;
 
 	protected $critical_disabled_functions = [];
 
@@ -106,12 +106,12 @@ class Install {
 	}
 
 	/**
-	 * Returns the AMF messageID for each individual call.
+	 * Returns the API messageID for each individual call.
 	 * @return bool|null
 	 */
-	function getAMFMessageID() {
-		if ( $this->AMF_message_id != null ) {
-			return $this->AMF_message_id;
+	function getAPIMessageID() {
+		if ( $this->api_message_id != null ) {
+			return $this->api_message_id;
 		}
 
 		return false;
@@ -121,10 +121,10 @@ class Install {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setAMFMessageID( $id ) {
-		Debug::Text( 'AMF Message ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+	function setAPIMessageID( $id ) {
+		Debug::Text(  'API Message ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $id != '' ) {
-			$this->AMF_message_id = $id;
+			$this->api_message_id = $id;
 
 			return true;
 		}
@@ -731,7 +731,7 @@ class Install {
 			}
 
 			if ( PHP_SAPI != 'cli' ) { //Don't bother updating progress bar when being run from the CLI.
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_schema_versions, null, $msg );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_schema_versions, null, $msg );
 			}
 
 			//Sequences are no longer used after the change to UUID in v11.
@@ -751,7 +751,7 @@ class Install {
 					$create_schema_result = $this->createSchema( $schema_version );
 
 					if ( PHP_SAPI != 'cli' ) {
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $x );
 					}
 
 					if ( $create_schema_result === false ) {
@@ -773,7 +773,7 @@ class Install {
 			}
 
 			if ( PHP_SAPI != 'cli' ) {
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 			}
 
 			//Sequences are no longer used after the change to UUID in v11.
@@ -1043,6 +1043,7 @@ class Install {
 	}
 
 	/**
+	 * @param $setting_name
 	 * @return mixed|null
 	 */
 	function getPHPINISize( $setting_name ) {
@@ -1181,7 +1182,7 @@ class Install {
 		}
 
 		if ( PHP_SAPI != 'cli' ) { //Don't bother updating progress bar when being run from the CLI.
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), 10000, null, TTi18n::getText( 'Check File Permission...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), 10000, null, TTi18n::getText( 'Check File Permission...' ) );
 		}
 
 		$i = 0;
@@ -1254,7 +1255,7 @@ class Install {
 						if ( $i > 0 && ( $i % 1000 ) == 0 ) {
 							Debug::Text( '  Batch Completed: ' . $i . ' Current File: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
 							if ( PHP_SAPI != 'cli' ) {
-								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+								$this->getProgressBarObject()->set( $this->getAPIMessageID(), $i );
 							}
 						}
 
@@ -1280,9 +1281,9 @@ class Install {
 		}
 
 		if ( PHP_SAPI != 'cli' ) {
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), 10000 );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), 10000 );
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 		}
 
 		Debug::Text( 'All Files/Directories (' . $i . ') are readable/writable! Files Checked: ' . $files_checked . '/' . $i . '(' . round( ( ( $files_checked / $i ) * 100 ) ) . '%) in: ' . ( time() - $start_time ) . 's', __FILE__, __LINE__, __METHOD__, 10 );
@@ -1315,7 +1316,7 @@ class Install {
 			if ( is_array( $checksums ) ) {
 
 				if ( PHP_SAPI != 'cli' ) { //Don't bother updating progress bar when being run from the CLI.
-					$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $checksums ), null, TTi18n::getText( 'Check File Checksums...' ) );
+					$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $checksums ), null, TTi18n::getText( 'Check File Checksums...' ) );
 				}
 
 				$i = 0;
@@ -1328,7 +1329,7 @@ class Install {
 							if ( version_compare( APPLICATION_VERSION, $checksum_version[0], '=' ) ) {
 								Debug::Text( 'Checksum version matches!', __FILE__, __LINE__, __METHOD__, 10 );
 							} else {
-								Debug::Text( 'Checksum version DOES NOT match! Version: ' . APPLICATION_VERSION . ' Checksum Version: ' . $checksum_version[0], __FILE__, __LINE__, __METHOD__, 10 );
+								Debug::Text( 'ERROR: Checksum version DOES NOT match! Version: ' . APPLICATION_VERSION . ' Checksum Version: ' . $checksum_version[0], __FILE__, __LINE__, __METHOD__, 10 );
 								$this->setExtendedErrorMessage( 'checkFileChecksums', 'Application version does not match checksum version: ' . $checksum_version[0] );
 
 								return 1;
@@ -1365,14 +1366,14 @@ class Install {
 					}
 
 					if ( PHP_SAPI != 'cli' && ( $i % 100 ) == 0 ) {
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $i );
 					}
 
 					$i++;
 				}
 
 				if ( PHP_SAPI != 'cli' ) {
-					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+					$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 				}
 
 				return 0; //OK

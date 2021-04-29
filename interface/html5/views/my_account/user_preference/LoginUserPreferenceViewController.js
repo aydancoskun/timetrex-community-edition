@@ -1,27 +1,31 @@
-LoginUserPreferenceViewController = BaseViewController.extend( {
+class LoginUserPreferenceViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIUserPreference', 'APIDate', 'APICurrentUser', 'APIUserPreference'],
+			language_array: null,
+			date_format_array: null,
 
-	language_array: null,
-	date_format_array: null,
+			time_format_array: null,
 
-	time_format_array: null,
+			time_unit_format_array: null,
 
-	time_unit_format_array: null,
+			distance_format_array: null,
 
-	distance_format_array: null,
+			time_zone_array: null,
+			start_week_day_array: null,
 
-	time_zone_array: null,
-	start_week_day_array: null,
+			schedule_icalendar_type_array: null,
 
-	schedule_icalendar_type_array: null,
+			date_api: null,
+			currentUser_api: null,
 
-	date_api: null,
-	currentUser_api: null,
+			user_preference_api: null
+		} );
 
-	user_preference_api: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 
 		//this._super('initialize', options );
 
@@ -30,22 +34,21 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		this.script_name = 'LoginUserPreferenceView';
 		this.table_name_key = 'user_preference';
 		this.context_menu_name = $.i18n._( 'Preferences' );
-		this.api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-		this.currentUser_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
-		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+		this.api = TTAPI.APIUserPreference;
+		this.date_api = TTAPI.APITTDate;
+		this.currentUser_api = TTAPI.APIAuthentication;
+		this.user_preference_api = TTAPI.APIUserPreference;
 
 		this.render();
 
 		this.initData();
+	}
 
-	},
+	render() {
+		super.render();
+	}
 
-	render: function() {
-		this._super( 'render' );
-	},
-
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var options = [
 			{ option_name: 'language', field_name: null, api: this.api },
@@ -65,10 +68,27 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 				callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
 			}
 		} );
+	}
 
-	},
+	detectTimeZone() {
+		if ( Intl ) {
+			var detected_tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-	getCustomContextMenuModel: function() {
+			if ( detected_tz && detected_tz.length > 0 ) {
+				Debug.Text( 'Detected TimeZone: ' + detected_tz, 'UserPreferenceViewController.js', 'UserPreferenceViewController', 'detectTimeZone', 10 );
+				this.current_edit_record['time_zone'] = detected_tz;
+
+				var widget = this.edit_view_ui_dic['time_zone'];
+				widget.setValue( this.current_edit_record['time_zone'] );
+				widget.trigger( 'formItemChange', [widget] );
+				TAlertManager.showAlert( $.i18n._( 'Time Zone detected as' ) + ' ' + detected_tz );
+			} else {
+				TAlertManager.showAlert( $.i18n._( 'Unable to determine time zone' ) );
+			}
+		}
+	}
+
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -78,9 +98,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	getUserPreferenceData: function( callBack ) {
+	getUserPreferenceData( callBack ) {
 		var $this = this;
 		var filter = {};
 		filter.filter_data = {};
@@ -105,9 +125,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		//Set current edit record data to all widgets
 
@@ -128,15 +148,14 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onStatusChange();
-	},
+	}
 
-	openEditView: function() {
+	openEditView() {
 		var $this = this;
 
 		if ( $this.edit_only_mode ) {
@@ -167,10 +186,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 			} );
 
 		}
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -185,9 +203,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	onStatusChange: function() {
+	onStatusChange() {
 
 		if ( this.current_edit_record.schedule_icalendar_type_id == 0 ) {
 			this.detachElement( 'calendar_url' );
@@ -216,9 +234,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	setCalendarURL: function( widget ) {
+	setCalendarURL( widget ) {
 
 		if ( !Global.isSet( widget ) ) {
 			widget = this.edit_view_ui_dic['calendar_url'];
@@ -236,10 +254,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	initSubScheduleSynchronizationView: function() {
+	initSubScheduleSynchronizationView() {
 		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_schedule_synchronization' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
@@ -250,9 +267,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
-	},
+	}
 
-	onSaveDone: function( result ) {
+	onSaveDone( result ) {
 		if ( result.isValid() ) {
 
 			Global.setLanguageCookie( this.current_edit_record.language );
@@ -268,13 +285,12 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		} else {
 			return false;
 		}
-	},
+	}
 
-	setEditMenuSaveIcon: function( context_btn, pId ) {
+	setEditMenuSaveIcon( context_btn, pId ) {
+	}
 
-	},
-
-	setErrorMenu: function() {
+	setErrorMenu() {
 
 		var len = this.context_menu_array.length;
 
@@ -292,11 +308,11 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_preferences': { 'label': $.i18n._( 'Preferences' ) },
@@ -306,6 +322,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 			},
 		};
 		this.setTabModel( tab_model );
+
+		var form_item_input;
+		var widgetContainer;
 
 		//Tab 0 start
 
@@ -319,8 +338,12 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0].push( tab_preferences_column1 );
 		this.edit_view_tabs[0].push( tab_preference_column2 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		// Employee
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'full_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_preferences_column1, '' );
 
@@ -356,9 +379,18 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( { field: 'time_zone' } );
+		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Time Zone' ), form_item_input, tab_preferences_column1 );
+
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var autodetect_tz_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px; height: 25px;\' type=\'button\' value=\'' + $.i18n._( 'Auto-Detect' ) + '\'></input>' );
+		autodetect_tz_btn.click( function() {
+			$this.detectTimeZone();
+		} );
+
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( autodetect_tz_btn );
+		this.addEditFieldToColumn( $.i18n._( 'Time Zone' ), form_item_input, tab_preferences_column1, '', widgetContainer );
 
 		// Start Weeks on
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -450,8 +482,8 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'schedule_icalendar_alarm1_working', width: 90, need_parser_sec: true } );
 
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -534,4 +566,4 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
 	}
 
-} );
+}

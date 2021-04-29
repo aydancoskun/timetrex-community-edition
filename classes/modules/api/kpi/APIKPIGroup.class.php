@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -113,7 +113,7 @@ class APIKPIGroup extends APIFactory {
 			Debug::Text( 'Record Count: ' . $qglf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 
 			if ( $qglf->getRecordCount() > 0 ) {
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $qglf->getRecordCount() );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $qglf->getRecordCount() );
 
 				$this->setPagerObject( $qglf );
 
@@ -121,10 +121,10 @@ class APIKPIGroup extends APIFactory {
 				foreach ( $qglf as $ug_obj ) {
 					$retarr[] = $ug_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $qglf->getCurrentRow() );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $qglf->getCurrentRow() );
 				}
 
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 				return $this->returnHandler( $retarr );
 			}

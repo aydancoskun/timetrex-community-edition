@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -355,7 +355,7 @@ class TTDate {
 			global $db;
 			if ( isset( $db ) && is_object( $db ) ) {
 				//PostgreSQL 9.2+ defaults to GMT in many cases, which causes problems with strtotime() and parsing date column types.
-				//Since date columns return times like: 2014-01-01 00:00:00+00, if the timezone in PHP is PST8PDT it parses to 31-Dec-13 4:00 PM
+				//Since date columns return times like: 2014-01-01 00:00:00+00, if the timezone in PHP is 'America/Vancouver' it parses to 31-Dec-13 4:00 PM
 
 				//$execute_sql_now is used in database.inc.php to help delay making a SQL query if not needed. Specifically when calling into APIProgress.
 				if ( $db instanceOf ADOdbLoadBalancer ) {
@@ -1323,7 +1323,7 @@ class TTDate {
 	public static function incrementDate( $epoch, $amount, $unit ) {
 		//Debug::text('Epoch: '. $epoch .' ('.TTDate::getDate('DATE+TIME', $epoch).') Amount: '. $amount .' unit: '. $unit, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( $epoch == '' ) {
+		if ( $epoch == '' OR !is_int( $epoch ) ) {
 			return false;
 		}
 
@@ -2739,8 +2739,8 @@ class TTDate {
 
 		/*
 			  |-----------------------| <-- Date Pair 1
-				1. |-------| <-- Date Pair2
-					2.	 |-------------------------|
+		1. |-------| <-- Date Pair2
+		2.	 |-------------------------|
 		3. |-----------------------|
 		4. |------------------------------------------|
 		*/
@@ -2790,15 +2790,28 @@ class TTDate {
 		//Debug::text(' Checking if Start Date: '. TTDate::getDate('DATE+TIME', $start_date1 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date1 ), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('	  Overlap Start Date: '. TTDate::getDate('DATE+TIME', $start_date2 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date2 ), __FILE__, __LINE__, __METHOD__, 10);
 
+		//Shifts can't match exactly, but they can overlap on either end so they run back-to-back.
 		/*
-			  |-----------------------|
-				1. |-------|
-					2.	 |-------------------------|
+ 			  |-----------------------|
+		1.         |-------|
+		2.            |-------------------------|
 		3. |-----------------------|
 		4. |------------------------------------------|
-		5.	  |-----------------------| (match exactly)
-
+		5.    |-----------------------| (match exactly)
 		*/
+
+
+		//This won't work, since there are too many special corner cases baked into other code (some of which is unit tested and will fail)
+		//if ( $include_exact == true ) {
+		//	if ( $start_date1 <= $end_date2 && $start_date2 <= $end_date1 ) { //All cases
+		//		return true;
+		//	}
+		//} else {
+		//	if ( $start_date1 < $end_date2 && $start_date2 < $end_date1 ) { //All cases
+		//		return true;
+		//	}
+		//}
+
 		if ( ( $start_date2 >= $start_date1 && $end_date2 <= $end_date1 ) ) { //Case #1
 			//Debug::text(' Overlap on Case #1: ', __FILE__, __LINE__, __METHOD__, 10);
 

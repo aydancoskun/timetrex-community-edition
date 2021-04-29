@@ -1,46 +1,52 @@
-BaseWizardController = BaseWindowController.extend( {
+class BaseWizardController extends BaseWindowController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			_required_files: null,
+			steps: 0,
+			title: 'Wizard',
+			current_step: 1,
 
-	_required_files: null,
-	steps: 0,
-	title: 'Wizard',
-	current_step: 1,
+			content_div: null,
 
-	content_div: null,
+			next_btn: null,
+			back_btn: null,
+			done_btn: null,
+			cancel_btn: null,
+			progress: null,
+			progress_label: null,
 
-	next_btn: null,
-	back_btn: null,
-	done_btn: null,
-	cancel_btn: null,
-	progress: null,
-	progress_label: null,
+			stepsWidgetDic: null,
+			stepsDataDic: null,
 
-	stepsWidgetDic: null,
-	stepsDataDic: null,
+			default_data: null,
 
-	default_data: null,
+			call_back: null,
 
-	call_back: null,
+			saved_user_generic_data: null,
 
-	saved_user_generic_data: null,
+			script_name: null,
 
-	script_name: null,
+			user_generic_data_api: null,
 
-	user_generic_data_api: null,
+			wizard_id: null,
 
-	wizard_id: null,
+			edit_view_ui_dic: {},
 
-	edit_view_ui_dic: {},
+			edit_view_form_item_dic: {},
 
-	edit_view_form_item_dic: {},
+			events: {
+				'click .close-btn': 'onCloseClick',
+				'click .close-icon': 'onCloseClick',
+				'click .wizard-overlay.onclick-close': 'onCloseClick',
+				'click .forward-btn': 'onNextClick',
+				'click .back-btn': 'onBackClick',
+				'click .done-btn': 'onDoneClick'
+			}
 
-	events: {
-		'click .close-btn': 'onCloseClick',
-		'click .close-icon': 'onCloseClick',
-		'click .wizard-overlay.onclick-close': 'onCloseClick',
-		'click .forward-btn': 'onNextClick',
-		'click .back-btn': 'onBackClick',
-		'click .done-btn': 'onDoneClick'
-	},
+		} );
+
+		super( options );
+	}
 
 	/**
 	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
@@ -48,7 +54,7 @@ BaseWizardController = BaseWindowController.extend( {
 	 *
 	 * @returns {Array}
 	 */
-	filterRequiredFiles: function() {
+	filterRequiredFiles() {
 		var retval = [];
 
 		if ( this._required_files && this._required_files[0] ) {
@@ -63,44 +69,47 @@ BaseWizardController = BaseWindowController.extend( {
 
 		Debug.Arr( retval, 'RETVAL', 'BaseWizardController.js', 'BaseWizardController', 'filterRequiredFiles', 10 );
 		return retval;
-	},
+	}
 
-	initialize: function( options ) {
+	initialize( options ) {
+		super.initialize( options );
+
 		this.content_div = $( this.el ).find( '.content' );
 		this.stepsWidgetDic = {};
 		this.stepsDataDic = {};
 
-		this.default_data = BaseWizardController.default_data;
-		this.call_back = BaseWizardController.call_back;
+		//This is already done in BaseWindowController->initialize() which is called before this. Therefore is this is called again, BaseWizardController.default_data will always be null, and it will break HTML reports.
+		// this.default_data = BaseWizardController.default_data;
+		// this.call_back = BaseWizardController.call_back;
+		//
+		// BaseWizardController.call_back = null;
+		// BaseWizardController.default_data = null;
 
-		BaseWizardController.call_back = null;
-		BaseWizardController.default_data = null;
-
-		this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
+		this.user_generic_data_api = TTAPI.APIUserGenericData;
 
 		LocalCacheData.current_open_wizard_controller = this;
-		var $this = this;
-		require( this.filterRequiredFiles(), function() {
-			$this.setDefaultDataToSteps();
-			$this.init();
-			TTPromise.resolve( 'BaseViewController', 'initialize' );
-		} );
-	},
+		// #2804 The below has been consolidated into BaseWindowController. FindAvailableWizard created two grids because the init function is triggered twice due to the require here and in BaseWindowController.
+		// var $this = this;
+		// require( this.filterRequiredFiles(), function() {
+		// 	$this.setDefaultDataToSteps();
+		// 	$this.init( options );
+		// 	TTPromise.resolve( 'BaseViewController', 'initialize' );
+		// } );
+	}
 
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
+	}
 
-	},
-
-	getDefaultData: function( key ) {
+	getDefaultData( key ) {
 
 		if ( !this.default_data ) {
 			return null;
 		}
 
 		return this.default_data[key];
-	},
+	}
 
-	render: function() {
+	render() {
 		var title = $( this.el ).find( '.title' );
 		var title_1 = $( this.el ).find( '.title-1' );
 		this.progress = $( this.el ).find( '.progress' );
@@ -122,9 +131,9 @@ BaseWizardController = BaseWindowController.extend( {
 		title.text( this.title );
 		title_1.text( this.title );
 		TTPromise.resolve( 'init', 'init' );
-	},
+	}
 
-	setButtonsStatus: function() {
+	setButtonsStatus() {
 
 		Global.setWidgetEnabled( this.done_btn, false );
 		Global.setWidgetEnabled( this.close_btn, true );
@@ -142,30 +151,29 @@ BaseWizardController = BaseWindowController.extend( {
 			Global.setWidgetEnabled( this.done_btn, true );
 			Global.setWidgetEnabled( this.next_btn, false );
 		}
-	},
+	}
 
-	onNextClick: function() {
+	onNextClick() {
 		this.saveCurrentStep();
 		this.current_step = this.current_step + 1;
 		this.initCurrentStep();
-	},
+	}
 
-	onBackClick: function() {
+	onBackClick() {
 		this.saveCurrentStep();
 		this.current_step = this.current_step - 1;
 		this.initCurrentStep();
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
+	}
 
-	},
-
-	cleanStepsData: function() {
+	cleanStepsData() {
 		this.stepsDataDic = {};
 		this.current_step = 1;
-	},
+	}
 
-	onCloseClick: function() {
+	onCloseClick() {
 		if ( this.script_name ) {
 			this.saveCurrentStep();
 
@@ -175,14 +183,12 @@ BaseWizardController = BaseWindowController.extend( {
 		}
 		LocalCacheData.current_open_wizard_controller = null;
 		$( this.el ).remove();
+	}
 
-	},
+	saveCurrentStep( direction, callBack ) {
+	}
 
-	saveCurrentStep: function( direction, callBack ) {
-
-	},
-
-	saveAllStepsToUserGenericData: function( callBack ) {
+	saveAllStepsToUserGenericData( callBack ) {
 
 		// Function called stacks: TypeError: Unable to set property 'data' of undefined or null reference
 		if ( this.script_name && this.saved_user_generic_data ) {
@@ -197,10 +203,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} else {
 			callBack( true );
 		}
+	}
 
-	},
-
-	addEditFieldToColumn: function( label, widgets, column, firstOrLastRecord, widgetContainer, saveFormItemDiv, setResizeEvent, saveFormItemDivKey, hasKeyEvent, customLabelWidget ) {
+	addEditFieldToColumn( label, widgets, column, firstOrLastRecord, widgetContainer, saveFormItemDiv, setResizeEvent, saveFormItemDivKey, hasKeyEvent, customLabelWidget ) {
 		var $this = this;
 		var form_item = $( Global.loadWidgetByName( WidgetNamesDic.EDIT_VIEW_FORM_ITEM ) );
 		var form_item_label_div = form_item.find( '.edit-view-form-item-label-div' );
@@ -286,7 +291,7 @@ BaseWizardController = BaseWindowController.extend( {
 		}
 		if ( Global.isArray( widgets ) ) {
 
-			for ( i = 0; i < widgets.length; i++ ) {
+			for ( var i = 0; i < widgets.length; i++ ) {
 				widget = widgets[i];
 				this.stepsWidgetDic[this.current_step][widget.getField()] = widget;
 
@@ -323,10 +328,9 @@ BaseWizardController = BaseWindowController.extend( {
 		}
 
 		return form_item;
+	}
 
-	},
-
-	initUserGenericData: function() {
+	initUserGenericData() {
 		var $this = this;
 		var args = {};
 
@@ -362,10 +366,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} else {
 			$this.initCurrentStep();
 		}
+	}
 
-	},
-
-	initCurrentStep: function() {
+	initCurrentStep() {
 
 		var $this = this;
 		$this.progress_label.text( 'Step ' + $this.current_step + ' of ' + $this.steps );
@@ -376,43 +379,39 @@ BaseWizardController = BaseWindowController.extend( {
 		$this.buildCurrentStepData();
 		$this.setCurrentStepValues();
 		$this.setButtonsStatus(); // set button enabled or disabled
+	}
 
-	},
+	buildCurrentStepUI() {
+	}
 
-	buildCurrentStepUI: function() {
-
-	},
-
-	buildCurrentStepData: function() {
-
-	},
+	buildCurrentStepData() {
+	}
 
 	//Don't use this any more. Use BuildCurrentStepData to set values too
-	setCurrentStepValues: function() {
+	setCurrentStepValues() {
+	}
 
-	},
-
-	getLabel: function() {
+	getLabel() {
 		var label = $( '<span class=\'wizard-label clear-both-div\'></span>' );
 		return label;
-	},
+	}
 
-	getCheckBox: function( field ) {
+	getCheckBox( field ) {
 		var check_box = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		check_box.TCheckbox( { field: field } );
 
 		return check_box;
-	},
+	}
 
-	getDatePicker: function( field ) {
+	getDatePicker( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		widget.TDatePicker( { field: field } );
 
 		return widget;
-	},
+	}
 
-	getPasswordInput: function( field ) {
+	getPasswordInput( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 
 		widget = widget.TPasswordInput( {
@@ -420,9 +419,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getTextInput: function( field, width ) {
+	getTextInput( field, width ) {
 		var widget = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		if ( width ) {
@@ -436,17 +435,17 @@ BaseWizardController = BaseWindowController.extend( {
 			} );
 		}
 		return widget;
-	},
+	}
 
-	getText: function() {
+	getText() {
 		var widget = Global.loadWidgetByName( FormItemType.TEXT );
 
 		widget = widget.TText( {} );
 
 		return widget;
-	},
+	}
 
-	getTextArea: function( field, width, height ) {
+	getTextArea( field, width, height ) {
 
 		if ( !width ) {
 			width = 300;
@@ -464,9 +463,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getComboBox: function( field, set_empty ) {
+	getComboBox( field, set_empty ) {
 		var widget = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		widget = widget.TComboBox( {
@@ -475,9 +474,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getImageCutArea: function( field ) {
+	getImageCutArea( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.IMAGE_CUT );
 
 		widget = widget.TImageCutArea( {
@@ -485,9 +484,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getCameraBrowser: function( field ) {
+	getCameraBrowser( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.CAMERA_BROWSER );
 
 		widget = widget.CameraBrowser( {
@@ -495,9 +494,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getFileBrowser: function( field, accept_filter, width, height ) {
+	getFileBrowser( field, accept_filter, width, height ) {
 		var widget = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
 
 		widget = widget.TImageBrowser( {
@@ -508,9 +507,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getAComboBox: function( apiClass, allow_multiple, layoutName, field, set_all, key ) {
+	getAComboBox( apiClass, allow_multiple, layoutName, field, set_all, key ) {
 		var a_combobox = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		if ( !key ) {
@@ -529,10 +528,9 @@ BaseWizardController = BaseWindowController.extend( {
 		} );
 
 		return a_combobox;
+	}
 
-	},
-
-	getSimpleTComboBox: function( field, allowMultiple ) {
+	getSimpleTComboBox( field, allowMultiple ) {
 
 		if ( !Global.isSet( allowMultiple ) ) {
 			allowMultiple = true;
@@ -549,18 +547,15 @@ BaseWizardController = BaseWindowController.extend( {
 		} );
 
 		return widget;
+	}
 
-	},
+	onGridSelectRow( e ) {
+	}
 
-	onGridSelectRow: function( e ) {
+	onGridDblClickRow( e ) {
+	}
 
-	},
-
-	onGridDblClickRow: function( e ) {
-
-	},
-
-	setGrid: function( gridId, grid_div, allMultipleSelection ) {
+	setGrid( gridId, grid_div, allMultipleSelection ) {
 
 		if ( !allMultipleSelection ) {
 			allMultipleSelection = false;
@@ -601,37 +596,35 @@ BaseWizardController = BaseWindowController.extend( {
 
 		} );
 		return grid; //allowing chaining off this method.
-	},
+	}
 
-	setGridGroupColumns: function( gridId ) {
+	setGridGroupColumns( gridId ) {
+	}
 
-	},
-
-	setGridSize: function( grid ) {
+	setGridSize( grid ) {
 		grid.grid.setGridWidth( $( this.content_div.find( '.grid-div' ) ).width() - 11 );
 		grid.grid.setGridHeight( this.content_div.height() - 150 ); //During merge, this wasn't in MASTER branch.
-	},
+	}
 
-	getGridColumns: function( gridId, callBack ) {
+	getGridColumns( gridId, callBack ) {
+	}
 
-	},
-
-	getRibbonButtonBox: function() {
+	getRibbonButtonBox() {
 		var div = $( '<div class="menu ribbon-button-bar"></div>' );
 		var ul = $( '<ul></ul>' );
 
 		div.append( ul );
 
 		return div;
-	},
+	}
 
-	getRibbonButton: function( id, icon, label ) {
+	getRibbonButton( id, icon, label ) {
 		var button = $( '<li><div class="ribbon-sub-menu-icon" id="' + id + '"><img src="' + icon + '" >' + label + '</div></li>' );
 
 		return button;
-	},
+	}
 
-	showNoResultCover: function( grid_div ) {
+	showNoResultCover( grid_div ) {
 		if ( grid_div && grid_div instanceof jQuery ) {
 			this.removeNoResultCover( grid_div );
 			var no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
@@ -640,15 +633,15 @@ BaseWizardController = BaseWindowController.extend( {
 
 			grid_div.append( no_result_box );
 		}
-	},
+	}
 
-	removeNoResultCover: function( grid_div ) {
+	removeNoResultCover( grid_div ) {
 		if ( grid_div && grid_div instanceof jQuery ) {
 			grid_div.find( '.no-result-div' ).remove();
 		}
 	}
 
-} );
+}
 
 BaseWizardController.default_data = null;
 BaseWizardController.callBack = null;

@@ -282,9 +282,7 @@ var ProgressBar = ( function() {
 		}
 
 		if ( current_process_id && $.type( 'current_process_id' ) === 'string' ) {
-			var progress_api = new APIProgressBar();
-
-			progress_api.getProgressBar( current_process_id, {
+			TTAPI.APIProgressBar.getProgressBar( current_process_id, {
 				onResult: function( result ) {
 					var res_data = result.getResult();
 

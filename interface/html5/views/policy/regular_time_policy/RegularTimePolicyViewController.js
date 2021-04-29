@@ -1,28 +1,30 @@
-RegularTimePolicyViewController = BaseViewController.extend( {
-	el: '#regular_time_policy_view_container',
+class RegularTimePolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#regular_time_policy_view_container',
 
-	_required_files: {
-		10: ['APIRegularTimePolicy', 'APIPayCode', 'APIPayFormulaPolicy', 'APIContributingShiftPolicy', 'APIBranch', 'APIDepartment'],
-		20: ['APIJob', 'APIJobItem', 'APIJobGroup', 'APIJobItemGroup']
-	},
-	type_array: null,
+			type_array: null,
 
-	branch_selection_type_array: null,
-	department_selection_type_array: null,
+			branch_selection_type_array: null,
+			department_selection_type_array: null,
 
-	job_group_selection_type_array: null,
-	job_selection_type_array: null,
+			job_group_selection_type_array: null,
+			job_selection_type_array: null,
 
-	job_group_array: null,
-	job_item_group_array: null,
+			job_group_array: null,
+			job_item_group_array: null,
 
-	job_item_group_selection_type_array: null,
-	job_item_selection_type_array: null,
+			job_item_group_selection_type_array: null,
+			job_item_selection_type_array: null,
 
-	job_group_api: null,
-	job_item_group_api: null,
+			job_group_api: null,
+			job_item_group_api: null
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'RegularTimePolicyEditView.html';
 		this.permission_id = 'regular_time_policy';
@@ -31,11 +33,11 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'regular_time_policy';
 		this.context_menu_name = $.i18n._( 'Regular Time Policy' );
 		this.navigation_label = $.i18n._( 'Regular Time Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIRegularTimePolicy' ) )();
+		this.api = TTAPI.APIRegularTimePolicy;
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_group_api = new ( APIFactory.getAPIClass( 'APIJobGroup' ) )();
-			this.job_item_group_api = new ( APIFactory.getAPIClass( 'APIJobItemGroup' ) )();
+			this.job_group_api = TTAPI.APIJobGroup;
+			this.job_item_group_api = TTAPI.APIJobItemGroup;
 		}
 
 		this.render();
@@ -43,10 +45,9 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'RegularTimePolicy' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'branch_selection_type' );
@@ -73,12 +74,11 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -93,7 +93,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRegularTimePolicy' ) ),
+			api_class: TTAPI.APIRegularTimePolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
@@ -131,7 +131,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
+			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -143,7 +143,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -155,7 +155,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -202,7 +202,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -242,7 +242,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -316,7 +316,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+				api_class: TTAPI.APIJob,
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -383,7 +383,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -402,9 +402,9 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 			this.addEditFieldToColumn( $.i18n._( 'Tasks' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 		}
-	},
+	}
 
-	onFormItemChange: function( target ) {
+	onFormItemChange( target ) {
 		this.is_changed = true;
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -431,9 +431,9 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			this.onJobItemSelectionTypeChange();
 		}
 		this.validate();
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
@@ -466,26 +466,25 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.collectUIDataToCurrentEditRecord();
 
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	onBranchSelectionTypeChange: function() {
+	onBranchSelectionTypeChange() {
 		if ( this.current_edit_record['branch_selection_type_id'] == 10 ) {
 			this.edit_view_ui_dic['branch'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['branch'].setEnabled( true );
 		}
-	},
+	}
 
-	onDepartmentSelectionTypeChange: function() {
+	onDepartmentSelectionTypeChange() {
 		if ( this.current_edit_record['department_selection_type_id'] == 10 ) {
 			this.edit_view_ui_dic['department'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['department'].setEnabled( true );
 		}
-	},
+	}
 
-	onJobGroupSelectionTypeChange: function() {
+	onJobGroupSelectionTypeChange() {
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 
@@ -495,9 +494,9 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['job_group'].setEnabled( true );
 			}
 		}
-	},
+	}
 
-	onJobSelectionTypeChange: function() {
+	onJobSelectionTypeChange() {
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job'].setEnabled( false );
@@ -505,9 +504,9 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['job'].setEnabled( true );
 			}
 		}
-	},
+	}
 
-	onJobItemGroupSelectionTypeChange: function() {
+	onJobItemGroupSelectionTypeChange() {
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_item_group_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( false );
@@ -515,9 +514,9 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( true );
 			}
 		}
-	},
+	}
 
-	onJobItemSelectionTypeChange: function() {
+	onJobItemSelectionTypeChange() {
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_item_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item'].setEnabled( false );
@@ -525,11 +524,11 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['job_item'].setEnabled( true );
 			}
 		}
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -547,7 +546,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -559,7 +558,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -571,7 +570,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -583,16 +582,16 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	initSubDifferentialCriteriaView: function() {
+	initSubDifferentialCriteriaView() {
 		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
@@ -603,5 +602,5 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
-	},
-} );
+	}
+}

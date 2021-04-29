@@ -1,12 +1,17 @@
-PayPeriodsViewController = BaseViewController.extend( {
-	el: '#pay_periods_view_container',
+class PayPeriodsViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#pay_periods_view_container',
 
-	_required_files: ['APIPayPeriod', 'APIPayPeriodSchedule'],
+			status_array: null,
+			type_array: null,
+			pay_period_schedule_api: null
+		} );
 
-	status_array: null,
-	type_array: null,
-	pay_period_schedule_api: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayPeriodsEditView.html';
@@ -16,8 +21,8 @@ PayPeriodsViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_period';
 		this.context_menu_name = $.i18n._( 'Pay Period' );
 		this.navigation_label = $.i18n._( 'Pay Period' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
-		this.pay_period_schedule_api = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
+		this.api = TTAPI.APIPayPeriod;
+		this.pay_period_schedule_api = TTAPI.APIPayPeriodSchedule;
 
 		this.render();
 
@@ -36,20 +41,19 @@ PayPeriodsViewController = BaseViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary();
 
 		IndexViewController.setNotificationBar( 'pay_period' );
+	}
 
-	},
+	removeEditView( is_cancel ) {
 
-	removeEditView: function( is_cancel ) {
-
-		this._super( 'removeEditView' );
+		super.removeEditView();
 
 		if ( this.parent_view_controller &&
 			( this.parent_view_controller.viewId === 'TimeSheet' || this.parent_view_controller.viewId === 'PayStub' ) ) {
 			this.parent_view_controller.onSubViewRemoved( is_cancel );
 		}
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 		var $this = this;
 
 		var options = [
@@ -64,10 +68,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 			}
 
 		} );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: [
@@ -92,9 +95,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 		}
 
 		return context_menu_model;
-	},
+	}
 
-	openEditView: function( id ) {
+	openEditView( id ) {
 
 		var $this = this;
 
@@ -107,7 +110,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				}
 
 				$this.getPayPeriodData( id, function( result ) {
-					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+					// Waiting for the TTAPI.API returns data to set the current edit record.
 					$this.current_edit_record = result;
 
 					$this.initEditView();
@@ -122,10 +125,10 @@ PayPeriodsViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
 	/* jshint ignore:start */
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -208,10 +211,10 @@ PayPeriodsViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
 	/* jshint ignore:end */
-	setDefaultMenuImportIcon: function( context_btn, grid_selected_length ) {
+	setDefaultMenuImportIcon( context_btn, grid_selected_length ) {
 
 		if ( !this.importValidate() ) {
 			context_btn.addClass( 'invisible-image' );
@@ -222,9 +225,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	importValidate: function( selected_item ) {
+	importValidate( selected_item ) {
 		var p_id = this.permission_id;
 
 		if ( !Global.isSet( selected_item ) ) {
@@ -240,9 +243,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 		}
 
 		return false;
-	},
+	}
 
-	setDefaultMenuDeleteDataIcon: function( context_btn, grid_selected_length ) {
+	setDefaultMenuDeleteDataIcon( context_btn, grid_selected_length ) {
 
 		if ( !this.importValidate() ) {
 			context_btn.addClass( 'invisible-image' );
@@ -253,9 +256,10 @@ PayPeriodsViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
+
 	/* jshint ignore:start */
-	setEditMenu: function() {
+	setEditMenu() {
 
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
@@ -322,6 +326,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				case ContextMenuIconName.import_icon:
 				case ContextMenuIconName.delete_data:
 					this.setEditMenuImportIcon( context_btn );
+					break;
 				case ContextMenuIconName.export_excel:
 					this.setDefaultMenuExportIcon( context_btn );
 					break;
@@ -330,17 +335,17 @@ PayPeriodsViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
 	/* jshint ignore:end */
-	setEditMenuImportIcon: function( context_btn, pId ) {
+	setEditMenuImportIcon( context_btn, pId ) {
 		if ( !this.importValidate() ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	onCustomContextClick: function( context_btn ) {
+	onCustomContextClick( context_btn ) {
 		var $this = this;
 
 		var grid_selected_id_array;
@@ -410,9 +415,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	getPayPeriodData: function( id, callBack ) {
+	getPayPeriodData( id, callBack ) {
 		var filter = {};
 		filter.filter_data = {};
 		filter.filter_data.id = [id];
@@ -430,17 +435,17 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	buildSearchFields: function() {
-		this._super( 'buildSearchFields' );
+	buildSearchFields() {
+		super.buildSearchFields();
 		this.search_fields = [
 			new SearchField( {
 				label: $.i18n._( 'Pay Period Schedule' ),
 				in_column: 1,
 				field: 'pay_period_schedule_id',
 				layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
-				api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
+				api_class: TTAPI.APIPayPeriodSchedule,
 				multiple: true,
 				basic_search: true,
 				script_name: 'PayPeriodScheduleView',
@@ -469,7 +474,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -480,7 +485,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -488,11 +493,11 @@ PayPeriodsViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -505,7 +510,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
 				id: this.script_name + '_navigation',
-				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
+				api_class: TTAPI.APIPayPeriod,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.PAY_PERIOD,
 				navigation_mode: true,
@@ -539,7 +544,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
+			api_class: TTAPI.APIPayPeriodSchedule,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 			show_search_inputs: true,
@@ -565,10 +570,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 		form_item_input.TDatePicker( { field: 'transaction_date', mode: 'date_time' } );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Date' ), form_item_input, tab_pay_period_column1, '', null, true );
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -588,10 +592,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	setDateColumnStatus: function( value, disabled ) {
+	setDateColumnStatus( value, disabled ) {
 		if ( this.edit_view_ui_dic[value] ) {
 			if ( disabled ) {
 				this.edit_view_ui_dic[value].find( 'input' ).attr( 'disabled', 'disabled' );
@@ -601,9 +604,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic[value].find( 'img' ).bind( 'click' );
 			}
 		}
-	},
+	}
 
-	onStatusChange: function() {
+	onStatusChange() {
 		//TypeError: Cannot read property 'status_id' of undefined
 		if ( this.current_edit_record && this.current_edit_record['status_id'] == 20 ) {
 			this.setDateColumnStatus( 'start_date', true );
@@ -614,9 +617,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 			this.setDateColumnStatus( 'end_date', false );
 			this.setDateColumnStatus( 'transaction_date', false );
 		}
-	},
+	}
 
-	isEditChange: function() {
+	isEditChange() {
 		if ( this.current_edit_record && this.current_edit_record.id ) {
 			this.attachElement( 'pay_period_schedule' );
 			this.detachElement( 'pay_period_schedule_id' );
@@ -630,15 +633,15 @@ PayPeriodsViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onStatusChange();
 		this.isEditChange();
 	}
 
-} );
+}
 
 PayPeriodsViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 

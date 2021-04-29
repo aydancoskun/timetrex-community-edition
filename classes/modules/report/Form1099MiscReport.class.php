@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -583,7 +583,7 @@ class Form1099MiscReport extends Report {
 
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach ( $pself as $key => $pse_obj ) {
 				$legal_entity_id = $pse_obj->getColumn( 'legal_entity_id' );
@@ -607,7 +607,7 @@ class Form1099MiscReport extends Report {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn( 'amount' );
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 			unset( $legal_entity_id, $user_id, $date_stamp, $pay_stub_entry_name_id );
 
@@ -695,19 +695,19 @@ class Form1099MiscReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
 			$this->tmp_data['user'][$u_obj->getId()]['legal_entity_id'] = $u_obj->getLegalEntity();
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Get legal entity data for joining.
 		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Legal Entity Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
 		if ( $lelf->getRecordCount() > 0 ) {
 			foreach ( $lelf as $key => $le_obj ) {
 				if ( $format == 'html' || $format == 'pdf' ) {
@@ -716,7 +716,7 @@ class Form1099MiscReport extends Report {
 				} else {
 					$this->form_data['legal_entity'][$le_obj->getId()] = $le_obj;
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 		}
 
@@ -726,7 +726,7 @@ class Form1099MiscReport extends Report {
 		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
 		if ( $ralf->getRecordCount() > 0 ) {
 			foreach ( $ralf as $key => $ra_obj ) {
 				if ( $ra_obj->parseAgencyID( null, 'id' ) == 10 ) {
@@ -737,7 +737,7 @@ class Form1099MiscReport extends Report {
 
 					$this->form_data['remittance_agency_obj'][$ra_obj->getId()] = $ra_obj;
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 			unset( $province_id );
 		}
@@ -754,7 +754,7 @@ class Form1099MiscReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset( $this->tmp_data['pay_stub_entry'] ) && isset( $this->tmp_data['user'] ) ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 			$sort_columns = $this->getSortConfig();
 
@@ -770,7 +770,7 @@ class Form1099MiscReport extends Report {
 						}
 						$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $tmp_legal_array );
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 						$key++;
 					}
 				}
@@ -852,7 +852,7 @@ class Form1099MiscReport extends Report {
 				}
 
 				$x = 0; //Progress bar only.
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $user_rows ), null, TTi18n::getText( 'Generating Forms...' ) );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $user_rows ), null, TTi18n::getText( 'Generating Forms...' ) );
 
 				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 
@@ -949,7 +949,7 @@ class Form1099MiscReport extends Report {
 							$i++;
 						}
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $x );
 						$x++;
 					}
 				}

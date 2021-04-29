@@ -36,6 +36,8 @@ TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 	if ( TopMenuManager.isCurrentView( subMenuId ) && force_refresh ) {
 		IndexViewController.instance.router.reloadView( subMenuId );
 	} else {
+		deleteCookie( 'OverrideUserPreference' ); //TimeSheet view has ability to override user preferences for using the employees timezone, make sure we clear this everytime we go to another view.
+
 		//#2157 - needed for selenium screenshot test to prevent hanging on
 		//various combinations of ribbon and topmenu clicks that are not a change to the hash
 		//  Check that we aren't trying to redirect back to the login screen, causing an infinite loop on logout in some cases.

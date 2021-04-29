@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -252,94 +252,7 @@ class Misc {
 	 * @return array|bool|null
 	 */
 	static function arrayColumn( $input = null, $columnKey = null, $indexKey = null ) {
-		if ( function_exists( 'array_column' ) ) {
-			return array_column( (array)$input, $columnKey, $indexKey );
-		} else {
-			// Using func_get_args() in order to check for proper number of
-			// parameters and trigger errors exactly as the built-in array_column()
-			// does in PHP 5.5.
-			$argc = func_num_args();
-			$params = func_get_args();
-
-			$params[0] = (array)$params[0];
-
-			if ( $argc < 2 ) {
-				trigger_error( 'array_column() expects at least 2 parameters, ' . $argc . ' given', E_USER_WARNING );
-
-				return null;
-			}
-
-			if ( !is_array( $params[0] ) ) {
-				trigger_error( 'array_column() expects parameter 1 to be array, ' . gettype( $params[0] ) . ' given', E_USER_WARNING );
-
-				return null;
-			}
-
-			if ( !is_int( $params[1] )
-					&& !is_float( $params[1] )
-					&& !is_string( $params[1] )
-					&& $params[1] !== null
-					&& !( is_object( $params[1] ) && method_exists( $params[1], '__toString' ) )
-			) {
-				trigger_error( 'array_column(): The column key should be either a string or an integer', E_USER_WARNING );
-
-				return false;
-			}
-
-			if ( isset( $params[2] )
-					&& !is_int( $params[2] )
-					&& !is_float( $params[2] )
-					&& !is_string( $params[2] )
-					&& !( is_object( $params[2] ) && method_exists( $params[2], '__toString' ) )
-			) {
-				trigger_error( 'array_column(): The index key should be either a string or an integer', E_USER_WARNING );
-
-				return false;
-			}
-
-			$paramsInput = $params[0];
-			$paramsColumnKey = ( $params[1] !== null ) ? (string)$params[1] : null;
-
-			$paramsIndexKey = null;
-			if ( isset( $params[2] ) ) {
-				if ( is_float( $params[2] ) || is_int( $params[2] ) ) {
-					$paramsIndexKey = (int)$params[2];
-				} else {
-					$paramsIndexKey = (string)$params[2];
-				}
-			}
-
-			$resultArray = [];
-
-			foreach ( $paramsInput as $row ) {
-
-				$key = $value = null;
-				$keySet = $valueSet = false;
-
-				if ( $paramsIndexKey !== null && array_key_exists( $paramsIndexKey, $row ) ) {
-					$keySet = true;
-					$key = (string)$row[$paramsIndexKey];
-				}
-
-				if ( $paramsColumnKey === null ) {
-					$valueSet = true;
-					$value = $row;
-				} else if ( is_array( $row ) && array_key_exists( $paramsColumnKey, $row ) ) {
-					$valueSet = true;
-					$value = $row[$paramsColumnKey];
-				}
-
-				if ( $valueSet ) {
-					if ( $keySet ) {
-						$resultArray[$key] = $value;
-					} else {
-						$resultArray[] = $value;
-					}
-				}
-			}
-
-			return $resultArray;
-		}
+		return array_column( (array)$input, $columnKey, $indexKey );
 	}
 
 	/**
@@ -875,6 +788,19 @@ class Misc {
 		return $retval;
 	}
 
+	/**
+	 * @param $value
+	 * @param int $decimals
+	 * @param null $currency_obj
+	 * @return string
+	 */
+	static function MoneyRoundDifference( $value, $decimals = 2, $currency_obj = null ) {
+		$rounded_value = Misc::MoneyRound( $value, $decimals, $currency_obj );
+		$rounding_diff = bcsub( $rounded_value, $value );
+
+		Debug::Text( 'Input Value: ' . $value .' Rounded Value: '. $rounding_diff .' Diff: '. $rounding_diff, __FILE__, __LINE__, __METHOD__, 10 );
+		return $rounding_diff;
+	}
 
 	/**
 	 * Removes vowels from the string always keeping the first and last letter.
@@ -1816,7 +1742,7 @@ class Misc {
 	 * @param int|null $max_last_chunk_size
 	 * @return bool|string
 	 */
-	static function censorString( $str, $censor_char = 'X', $min_first_chunk_size = null, $max_first_chunk_size = null, $min_last_chunk_size = null, $max_last_chunk_size = null ) {
+	static function censorString( $str, $censor_char = '*', $min_first_chunk_size = null, $max_first_chunk_size = null, $min_last_chunk_size = null, $max_last_chunk_size = null ) {
 		$length = strlen( $str );
 		if ( $length == 0 ) {
 			return $str;
@@ -3358,34 +3284,43 @@ class Misc {
 			return false;
 		}
 
-		//This is for the full web interface
+		//This is for the full web interface - Need full ES6 support: https://caniuse.com/#feat=es6
 		//IE (All Versions))
-		//Edge < 14 - https://en.wikipedia.org/wiki/Microsoft_Edge
-		//Firefox < 52 (52 is latest version on Windows XP)
-		//Chrome < 49 (49 is latest version on Windows XP)
-		//Safari < 9 - https://en.wikipedia.org/wiki/Safari_version_history
-		//Opera < 33 (Chrome v46) - https://help.opera.com/en/opera-version-history/
+		//Edge < 15 - https://en.wikipedia.org/wiki/Microsoft_Edge
+		//Firefox < 54 (52 is latest version on Windows XP)
+		//Chrome < 51 (49 is latest version on Windows XP)
+		//Safari < 10 - https://en.wikipedia.org/wiki/Safari_version_history
+		//Opera < 38 (Chrome v46) - https://help.opera.com/en/opera-version-history/
 		if ( $browser->getBrowser() == Browser::BROWSER_IE ) { //All versions of IE.
 			$retval = true;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_EDGE && version_compare( $browser->getVersion(), 14, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_EDGE && version_compare( $browser->getVersion(), 15, '<' ) ) {
 			$retval = true;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_FIREFOX && version_compare( $browser->getVersion(), 52, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_FIREFOX && version_compare( $browser->getVersion(), 54, '<' ) ) {
 			$retval = true;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_CHROME && version_compare( $browser->getVersion(), 49, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_CHROME && version_compare( $browser->getVersion(), 51, '<' ) ) {
 			$retval = true;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_SAFARI && version_compare( $browser->getVersion(), 9, '<' ) ) {
+		if ( $browser->getBrowser() == Browser::BROWSER_SAFARI && version_compare( $browser->getVersion(), 10, '<' ) ) {
 			$retval = true;
 		}
 
-		if ( $browser->getBrowser() == Browser::BROWSER_OPERA && version_compare( $browser->getVersion(), 53, '<' ) ) {
+		//Example user agent strings that we can't get a version from:
+		//  Mozilla/5.0 (iPad; CPU OS 9_3_5 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/13G36
+		//  Mozilla/5.0 (iPad; CPU OS 9_3_5 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G36 Safari/601.1
+		if ( ( $browser->getBrowser() == Browser::BROWSER_IPAD || $browser->getBrowser() == Browser::BROWSER_IPHONE || $browser->getBrowser() == Browser::BROWSER_IPOD ) ) {
+			if ( $browser->getVersion() == 'unknown' || version_compare( $browser->getVersion(), 10, '<' ) ) {
+				$retval = true;
+			}
+		}
+
+		if ( $browser->getBrowser() == Browser::BROWSER_OPERA && version_compare( $browser->getVersion(), 38, '<' ) ) {
 			$retval = true;
 		}
 
@@ -3550,9 +3485,7 @@ class Misc {
 				return array_map( 'strtoupper', $input );
 				break;
 			default:
-				trigger_error( 'Case is not valid, CASE_LOWER or CASE_UPPER only', E_USER_ERROR );
-
-				return false;
+				trigger_error( 'Case is not valid, CASE_LOWER or CASE_UPPER only', E_USER_ERROR ); //E_USER_ERROR stops execution.
 		}
 	}
 
@@ -3607,6 +3540,19 @@ class Misc {
 			if ( strpos( $useragent, 'TimeTrex Mobile App' ) !== false ) {
 				return true;
 			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @return false|mixed|string
+	 */
+	static function getMobileAppClientVersion() {
+		if ( isset( $_GET['v'] ) && $_GET['v'] != '' ) { //Is v=X the API version or the User Agent (App) version? This does not appear to be used on recent production app versions.
+			return $_GET['v'];
+		} else if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && $_SERVER['HTTP_USER_AGENT'] != '' ) {
+			return substr( $_SERVER['HTTP_USER_AGENT'], ( stripos( $_SERVER['HTTP_USER_AGENT'], 'App: v' ) + 6 ) );
 		}
 
 		return false;
@@ -3968,6 +3914,31 @@ class Misc {
 
 
 	/**
+	 * Returns an adjusted current amount, and the amount under a limit and over a limit.
+	 *    Ideal for calculating wages up to a maximum limit and increasing the YTD amount in a loop. For example social security wage limits.
+	 * @param $current_amount   float Current amount
+	 * @param $ytd_amount       float Running balance leading up to maximum limit
+	 * @param $ytd_amount_limit float Overall maximum limit
+	 * @return array|int[]
+	 */
+	static function getAmountAroundLimit( $current_amount, $ytd_amount, $ytd_amount_limit ) {
+		if ( $ytd_amount < $ytd_amount_limit ) {
+			$ytd_amount_over_ytd_amount_limit = bcadd( $current_amount, $ytd_amount );
+			if ( $ytd_amount_over_ytd_amount_limit > $ytd_amount_limit ) {
+				$retarr = [ 'adjusted_amount' => bcsub( $ytd_amount_limit, $ytd_amount ), 'under_limit' => 0, 'over_limit' => bcsub( bcadd( $ytd_amount, $current_amount ), $ytd_amount_limit ) ];
+			} else {
+				$retarr = [ 'adjusted_amount' => $current_amount, 'under_limit' => bcsub( $ytd_amount_limit, bcadd( $ytd_amount, $current_amount ) ), 'over_limit' => 0 ];
+			}
+		} elseif ( $ytd_amount == $ytd_amount_limit ) {
+			$retarr = array( 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => $current_amount );
+		} elseif ( $ytd_amount > $ytd_amount_limit ) {
+			$retarr = array( 'adjusted_amount' => 0, 'under_limit' => 0, 'over_limit' => bcsub( $ytd_amount, $ytd_amount_limit ) );
+		}
+
+		return $retarr;
+	}
+
+	/**
 	 * This is can be used to handle YTD amounts.
 	 * @param $amount
 	 * @param $limit
@@ -3997,6 +3968,7 @@ class Misc {
 	 * @param $function Closure
 	 * @param int $retry_max_attempts
 	 * @param int $retry_sleep
+	 * @param bool $continue_on_error
 	 * @return mixed
 	 * @throws Exception
 	 */

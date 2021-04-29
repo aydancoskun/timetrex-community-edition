@@ -1,8 +1,13 @@
-GeneratePayStubWizardController = BaseWizardController.extend( {
+class GeneratePayStubWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg'
+		} );
 
-	el: '.wizard-bg',
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Generate Pay Stub Wizard' );
@@ -10,16 +15,15 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		this.current_step = 1;
 
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initCurrentStep();
+	}
 
-	},
-
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 		var $this = this;
 		this.content_div.empty();
 
@@ -41,7 +45,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				var form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
 				var form_item_label = form_item.find( '.form-item-label' );
 				var form_item_input_div = form_item.find( '.form-item-input-div' );
-				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriod' ) ), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 				a_combobox.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 					$this.saveCurrentStep();
 					$this.onPayPeriodChange( true );
@@ -115,7 +119,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) );
 
-				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIUser' ) ), true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( TTAPI.APIUser, true, ALayoutIDs.USER, 'user_id', true );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -126,10 +130,10 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				this.content_div.append( div );
 				break;
 		}
-	},
+	}
 
-	setPayRun: function( pay_period_id ) {
-		var api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+	setPayRun( pay_period_id ) {
+		var api = TTAPI.APIPayStub;
 		var step_2_ui = this.stepsWidgetDic[2];
 		api.getCurrentPayRun( pay_period_id, {
 			onResult: function( result ) {
@@ -137,9 +141,9 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				step_2_ui.run_id.setValue( data );
 			}
 		} );
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 		var $this = this;
 
 		var current_step_data = this.stepsDataDic[this.current_step];
@@ -168,11 +172,11 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 					break;
 			}
 		}
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 
 		// Function called stacks: TypeError: Cannot read property 'pay_period_id' of undefined
@@ -181,7 +185,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 			$this.onCloseClick();
 		}
 
-		var api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+		var api = TTAPI.APIPayStub;
 		var pay_period_ids = this.stepsDataDic[2].pay_period_id;
 		var user_ids = this.stepsDataDic[3].user_id;
 		var type_id = this.stepsDataDic[2].type_id;
@@ -223,9 +227,9 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		}
 
 		$this.onCloseClick();
-	},
+	}
 
-	onPayrollTypeChange: function( refresh ) {
+	onPayrollTypeChange( refresh ) {
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var current_step_data = this.stepsDataDic[this.current_step];
 		//Error: Uncaught TypeError: Cannot read property 'hide' of undefined in /interface/html5/index.php#!m=PayStub line 221
@@ -261,18 +265,18 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				current_step_ui['carry_forward_to_date'].setValue( new Date().format() );
 			}
 		}
-	},
+	}
 
-	buildPayPeriodStatusIdArray: function( pay_periods ) {
+	buildPayPeriodStatusIdArray( pay_periods ) {
 		var result = [];
 		for ( var i = 0; i < pay_periods.length; i++ ) {
 			var item = pay_periods[i];
 			result.push( item.status_id );
 		}
 		return result;
-	},
+	}
 
-	getNewestPayPeriod: function( pay_periods ) {
+	getNewestPayPeriod( pay_periods ) {
 		var result;
 		for ( var i = 0; i < pay_periods.length; i++ ) {
 			var item = pay_periods[i];
@@ -282,14 +286,14 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 			}
 		}
 		return result;
-	},
+	}
 
-	onPayPeriodChange: function( refresh ) {
+	onPayPeriodChange( refresh ) {
 		var $this = this;
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var current_step_data = this.stepsDataDic[this.current_step];
-		var api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
-		var api_pay_period = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
+		var api = TTAPI.APIPayStub;
+		var api_pay_period = TTAPI.APIPayPeriod;
 		var args = {};
 		args.filter_data = {};
 		args.filter_data.id = current_step_data.pay_period_id;
@@ -319,10 +323,9 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				} );
 			}
 		} );
+	}
 
-	},
-
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -340,10 +343,9 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				current_step_data.user_id = current_step_ui.user_id.getValue();
 				break;
 		}
+	}
 
-	},
-
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 
 		if ( !this.default_data ) {
 			return null;
@@ -359,7 +361,6 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		if ( this.getDefaultData( 'pay_period_id' ) ) {
 			this.stepsDataDic[2].pay_period_id = this.getDefaultData( 'pay_period_id' );
 		}
-
 	}
 
-} );
+}

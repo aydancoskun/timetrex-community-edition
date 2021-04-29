@@ -111,7 +111,7 @@ RibbonViewController = Backbone.View.extend( {
 				var ribbon_menu_group = ribbon_menu_group_array[x];
 				var ribbon_sub_menu_array = ribbon_menu_group.get( 'sub_menus' );
 				var sub_menu_ui_nodes = $( '<ul></ul>' );
-				var ribbon_menu_group_ui = $( '<div class="menu top-ribbon-menu"/>' );
+				var ribbon_menu_group_ui = $( '<div class="menu top-ribbon-menu"></div>' );
 
 				var len2 = ribbon_sub_menu_array.length;
 				for ( var y = 0; y < len2; y++ ) {
@@ -134,19 +134,14 @@ RibbonViewController = Backbone.View.extend( {
 						}
 
 					} else {
-
 						sub_menu_ui_nodes.append( sub_menu_ui_node );
 
-						sub_menu_ui_node.click( function( e ) {
+						//Debounce to help prevent double clicks.
+						sub_menu_ui_node.click( Global.debounce( function RibbonMenuSubMenuClickEvent( e ) {
 							var id = $( this ).find( '.ribbon-sub-menu-icon' ).attr( 'id' );
 							$this.onSubMenuClick( id );
-						} );
+						}, 500, true ) );
 					}
-
-//					  sub_menu_ui_node.click( function( e ) {
-//						  var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-//						  $this.onSubMenuClick( id );
-//					  } );
 				}
 
 				//If there is any menu
@@ -409,7 +404,7 @@ RibbonViewController = Backbone.View.extend( {
 
 	doLogout: function() {
 		//Don't wait for result of logout in case of slow or disconnected internet. Just clear local cookies and move on.
-		var current_user_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
+		var current_user_api = TTAPI.APIAuthentication;
 		if ( typeof current_user_api.Logout !== 'undefined' ) { //Fix JS exception: Uncaught TypeError: current_user_api.Logout is not a function -- Which can occur when offline and clicking Logout.
 			current_user_api.Logout( {
 				onResult: function() {

@@ -1,20 +1,24 @@
-PayPeriodScheduleViewController = BaseViewController.extend( {
-	el: '#pay_period_schedule_view_container', //Must set el here and can only set string, so events can work
+class PayPeriodScheduleViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#pay_period_schedule_view_container', //Must set el here and can only set string, so events can work
 
-	_required_files: ['APIPayPeriodSchedule', 'APIUserPreference'],
+			user_preference_api: null,
+			type_array: null,
+			pay_period_starts_on_array: null,
+			start_week_day_array: null,
+			transaction_date_array: null,
+			transaction_date_business_day_array: null,
+			time_zone_array: null,
+			shift_assigned_day_array: null,
+			timesheet_verify_type_array: null,
+			sub_pay_periods_view_controller: null
+		} );
 
-	user_preference_api: null,
-	type_array: null,
-	pay_period_starts_on_array: null,
-	start_week_day_array: null,
-	transaction_date_array: null,
-	transaction_date_business_day_array: null,
-	time_zone_array: null,
-	shift_assigned_day_array: null,
-	timesheet_verify_type_array: null,
-	sub_pay_periods_view_controller: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayPeriodScheduleEditView.html';
@@ -24,27 +28,26 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_period_schedule';
 		this.context_menu_name = $.i18n._( 'Pay Period Schedule' );
 		this.navigation_label = $.i18n._( 'Pay Period Schedule' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
-		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+		this.api = TTAPI.APIPayPeriodSchedule;
+		this.user_preference_api = TTAPI.APIUserPreference;
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
 
 		this.setSelectRibbonMenuIfNecessary( 'PayPeriodSchedule' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy, ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	openEditView: function( id ) {
+	openEditView( id ) {
 		Global.setUINotready();
 		TTPromise.add( 'init', 'init' );
 		TTPromise.wait();
@@ -60,7 +63,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 				}
 
 				$this.getPayPeriodScheduleData( id, function( result ) {
-					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+					// Waiting for the TTAPI.API returns data to set the current edit record.
 					$this.current_edit_record = result;
 
 					$this.initEditView();
@@ -75,10 +78,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	getPayPeriodScheduleData: function( id, callBack ) {
+	getPayPeriodScheduleData( id, callBack ) {
 		var filter = {};
 		filter.filter_data = {};
 		filter.filter_data.id = [id];
@@ -96,9 +98,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 		var $this = this;
 
 		var options = [
@@ -127,10 +129,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			} );
 
 		} );
+	}
 
-	},
-
-	initSubPayPeriodsView: function() {
+	initSubPayPeriodsView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -171,9 +172,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			$this.sub_pay_periods_view_controller.parent_view_controller = $this;
 			$this.sub_pay_periods_view_controller.initData(); //Init data in this parent view
 		}
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -194,16 +195,15 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	removeEditView: function() {
+	removeEditView() {
 
-		this._super( 'removeEditView' );
+		super.removeEditView();
 		this.sub_pay_periods_view_controller = null;
+	}
 
-	},
-
-	onVerifyTypeChange: function() {
+	onVerifyTypeChange() {
 		if ( this.current_edit_record.timesheet_verify_type_id == 10 ) {
 			this.detachElement( 'timesheet_verify_before_end_date' );
 			this.detachElement( 'timesheet_verify_before_transaction_date' );
@@ -213,9 +213,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	onTypeChange: function() {
+	onTypeChange() {
 
 		if ( this.current_edit_record.type_id == 5 ) {
 			this.detachElement( 'anchor_date' );
@@ -278,9 +278,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -297,11 +297,11 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		this.onVerifyTypeChange();
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -320,7 +320,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
 				id: this.script_name + '_navigation',
-				api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
+				api_class: TTAPI.APIPayPeriodSchedule,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 				navigation_mode: true,
@@ -339,8 +339,12 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_pay_period_schedule_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		//Name
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_pay_period_schedule_column1, '' );
 
@@ -375,8 +379,8 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( { field: 'primary_day_of_month' } );
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'at 00:00' ) + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'at 00:00' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -461,7 +465,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		// employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -547,12 +551,11 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Verification Window Ends' ), form_item_input, tab_advanced_column1, '', widgetContainer, true );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 
 		this.search_fields = [
 
@@ -584,7 +587,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -595,7 +598,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -606,4 +609,4 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 	}
 
-} );
+}

@@ -1,19 +1,24 @@
-TimeSheetAuthorizationViewController = BaseViewController.extend( {
-	el: '#timesheet_authorization_view_container',
+class TimeSheetAuthorizationViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#timesheet_authorization_view_container',
 
-	_required_files: ['APIPayPeriodTimeSheetVerify', 'APIPayPeriod', 'APITimeSheet', 'APIException', 'APIRequest', 'APIMessageControl', 'APIAuthorization'],
+			type_array: null,
+			hierarchy_level_array: null,
 
-	type_array: null,
-	hierarchy_level_array: null,
+			messages: null,
 
-	messages: null,
+			message_control_api: null,
 
-	message_control_api: null,
+			authorization_api: null,
 
-	authorization_api: null,
+			request_api: null
+		} );
 
-	request_api: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'TimeSheetAuthorizationEditView.html';
 		this.permission_id = 'punch';
@@ -22,10 +27,10 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_period_time_sheet_verify';
 		this.context_menu_name = $.i18n._( 'TimeSheet (Authorizations)' );
 		this.navigation_label = $.i18n._( 'TimeSheet' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' ) )();
-		this.request_api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
-		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
-		this.authorization_api = new ( APIFactory.getAPIClass( 'APIAuthorization' ) )();
+		this.api = TTAPI.APIPayPeriodTimeSheetVerify;
+		this.request_api = TTAPI.APIRequest;
+		this.message_control_api = TTAPI.APIMessageControl;
+		this.authorization_api = TTAPI.APIAuthorization;
 
 		this.render();
 		this.buildContextMenu( true );
@@ -34,9 +39,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary();
 
 		this.hierarchy_type_id = 90;
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		var res = this.request_api.getHierarchyLevelOptions( [-1], { async: false } );
 		var data = res.getResult();
@@ -44,15 +49,14 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		if ( Global.isSet( $this.basic_search_field_ui_dic['hierarchy_level'] ) ) {
 			$this.basic_search_field_ui_dic['hierarchy_level'].setSourceData( Global.buildRecordArray( data ) );
 		}
+	}
 
-	},
-
-	search: function( set_default_menu, page_action, page_number, callBack ) {
+	search( set_default_menu, page_action, page_number, callBack ) {
 		this.refresh_id = null;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack );
-	},
+		super.search( set_default_menu, page_action, page_number, callBack );
+	}
 
-	processResultData: function( result_data ) {
+	processResultData( result_data ) {
 		var len = result_data.length;
 		for ( var i = 0; i < len; i++ ) {
 			var item = result_data[i];
@@ -62,9 +66,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		return result_data;
-	},
+	}
 
-	parseToRecordId: function( id, index ) {
+	parseToRecordId( id, index ) {
 		if ( !id ) {
 			return false;
 		}
@@ -77,9 +81,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		} else {
 			return id;
 		}
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				action: {
@@ -179,9 +183,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuViewIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.viewPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -191,9 +195,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuEditIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -203,18 +207,18 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuEditIcon: function( context_btn, pId ) {
+	setEditMenuEditIcon( context_btn, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 		if ( !this.is_viewing || !this.editOwnerOrChildPermissionValidate( pId ) || this.parseToRecordId( this.current_edit_record.id ) === TTUUID.not_exist_id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		// Error: Unable to get property 'getGridParam' of undefined or null reference
 		var display_columns = [];
 		if ( this.grid ) {
@@ -243,16 +247,16 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	setDefaultMenuAuthorizationExpenseIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAuthorizationExpenseIcon( context_btn, grid_selected_length, pId ) {
 		if ( !( Global.getProductEdition() >= 25 ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 		context_btn.removeClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -328,10 +332,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setEditMenu: function() {
+	setEditMenu() {
 
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
@@ -390,18 +393,17 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setEditMenuAuthorizationExpenseIcon: function( context_btn, pId ) {
+	setEditMenuAuthorizationExpenseIcon( context_btn, pId ) {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.send:
 				this.onSaveClick();
@@ -430,13 +432,13 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				this.onNavigationClick( id );
 				break;
 		}
-	},
+	}
 
-	onAuthorizationExpenseClick: function() {
+	onAuthorizationExpenseClick() {
 		IndexViewController.goToView( 'ExpenseAuthorization' );
-	},
+	}
 
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 
 		var $this = this;
 
@@ -494,10 +496,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				this.onExportClick( 'export' + this.api.key_name );
 				break;
 		}
+	}
 
-	},
-
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick( ignoreWarning ) {
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
@@ -519,10 +520,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	onSaveResult: function( result ) {
+	onSaveResult( result ) {
 		var $this = this;
 		var current_edit_record_id;
 
@@ -537,9 +537,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
+	}
 
-	validate: function() {
+	validate() {
 
 		var $this = this;
 
@@ -553,9 +553,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	onAuthorizationClick: function() {
+	onAuthorizationClick() {
 		var $this = this;
 		var filter = {};
 		filter.authorized = true;
@@ -582,10 +582,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				}
 			}
 		} );
+	}
 
-	},
-
-	onPassClick: function() {
+	onPassClick() {
 		var $this = this;
 		this.onRightArrowClick( function() {
 			$this.search();
@@ -593,16 +592,16 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				source: 'Pass'
 			} );
 		} );
-	},
+	}
 
-	onAuthorizationRequestClick: function() {
+	onAuthorizationRequestClick() {
 		IndexViewController.goToView( 'RequestAuthorization' );
-	},
+	}
 
-	onCancelClick: function( force_no_confirm, cancel_all, callback ) {
+	onCancelClick( force_no_confirm, cancel_all, callback ) {
 		//Refresh grid on cancel as its not done during authorize/decline anymore.
 		var $this = this;
-		this._super( 'onCancelClick', force_no_confirm, cancel_all, function() {
+		super.onCancelClick( force_no_confirm, cancel_all, function() {
 			//Since we are overriding the callback function to call this.search(), make sure the original callback is still called.
 			if ( callback ) {
 				callback();
@@ -610,9 +609,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 			$this.search();
 		} );
-	},
+	}
 
-	onDeclineClick: function() {
+	onDeclineClick() {
 
 		var $this = this;
 		var filter = {};
@@ -641,13 +640,13 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	onAuthorizationTimesheetClick: function() {
+	onAuthorizationTimesheetClick() {
 		this.search( false );
-	},
+	}
 
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 
 		var msg = {};
 
@@ -666,9 +665,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 		records.id = this.parseToRecordId( records.id );
 		return records;
-	},
+	}
 
-	getAPIFilters: function() {
+	getAPIFilters() {
 		// override this function if view requires more filters
 		var record_id = this.getCurrentSelectedRecord();
 		var filter = {};
@@ -682,9 +681,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		return filter;
-	},
+	}
 
-	handleViewAPICallbackResult: function( result ) {
+	handleViewAPICallbackResult( result ) {
 		var result_data = result.getResult();
 		var record_id = this.getCurrentSelectedRecord();
 
@@ -694,93 +693,92 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		result_data = result_data[0];
-		return this._super( 'handleViewAPICallbackResult', result_data );
-	},
+		return super.handleViewAPICallbackResult( result_data );
+	}
 
-	doViewClickResult: function( result_data ) {
-		this._super( 'doViewClickResult', result_data );
+	doViewClickResult( result_data ) {
+		super.doViewClickResult( result_data );
 		AuthorizationHistory.init( this );
-	},
+	}
 
-	onGridDblClickRow: function() {
+	onGridDblClickRow() {
 
 		ProgressBar.showOverlay();
 		this.onViewClick();
+	}
 
-	},
-
-	setEditMenuViewIcon: function( context_btn, pId ) {
+	setEditMenuViewIcon( context_btn, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setEditMenuAuthorizationIcon: function( context_btn, pId ) {
+	setEditMenuAuthorizationIcon( context_btn, pId ) {
 		if ( this.is_edit ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuPassIcon: function( context_btn, pId ) {
+	setEditMenuPassIcon( context_btn, pId ) {
 		if ( this.is_edit ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuDeclineIcon: function( context_btn, pId ) {
+	setEditMenuDeclineIcon( context_btn, pId ) {
 		if ( this.is_edit ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuAuthorizationRequestIcon: function( context_btn, pId ) {
+	setEditMenuAuthorizationRequestIcon( context_btn, pId ) {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuAuthorizationTimesheetIcon: function( context_btn, pId ) {
+	setEditMenuAuthorizationTimesheetIcon( context_btn, pId ) {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuSaveIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuSaveIcon( context_btn, grid_selected_length, pId ) {
 
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuAuthorizationIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAuthorizationIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuPassIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPassIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuDeclineIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDeclineIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuAuthorizationRequestIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAuthorizationRequestIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.removeClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuAuthorizationTimesheetIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAuthorizationTimesheetIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.removeClass( 'disable-image' );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -788,7 +786,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -800,7 +798,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
+				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -824,7 +822,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -836,16 +834,16 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	onEditClick: function( editId, noRefreshUI ) {
+	onEditClick( editId, noRefreshUI ) {
 
 		var $this = this;
 		this.is_viewing = false;
@@ -855,10 +853,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		$this.openEditView();
 
 		$this.initEditView();
+	}
 
-	},
-
-	getSubViewFilter: function( filter ) {
+	getSubViewFilter( filter ) {
 
 		if ( filter.length === 0 ) {
 			filter = {};
@@ -874,10 +871,10 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		return filter;
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_timesheet_verification': { 'label': $.i18n._( 'Message' ) },
@@ -904,21 +901,20 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		form_item_input.TTextArea( { field: 'body', width: 600, height: 400 } );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_timesheet_verification_column1, '', null, null, true );
 		tab_timesheet_verification_column2.css( 'display', 'none' );
+	}
 
-	},
-
-	needShowNavigation: function() {
+	needShowNavigation() {
 		if ( this.is_viewing && this.current_edit_record && Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
 			return true;
 		} else {
 			return false;
 		}
-	},
+	}
 
-	buildViewUI: function() {
+	buildViewUI() {
 		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
 		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -928,7 +924,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' ) ),
+			api_class: TTAPI.APIPayPeriodTimeSheetVerify,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_PERIOD,
@@ -1002,10 +998,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		// Tab 0 second column end
 
 		tab_timesheet_verification_column2.css( 'display', 'none' );
+	}
 
-	},
-
-	initEditViewUI: function( view_id, edit_view_file_name ) {
+	initEditViewUI( view_id, edit_view_file_name ) {
 		Global.setUINotready();
 		TTPromise.add( 'init', 'init' );
 		TTPromise.wait();
@@ -1046,9 +1041,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		$this.setEditViewTabHeight();
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -1085,12 +1080,11 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		var $this = this;
-		this._super( 'setEditViewDataDone' );
+		super.setEditViewDataDone();
 
 		if ( this.is_viewing ) {
 			this.initTimeSheetSummary();
@@ -1101,9 +1095,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				$this.messages = null;
 			}
 		}
-	},
+	}
 
-	buildExceptionDisplayColumns: function( apiDisplayColumnsArray ) {
+	buildExceptionDisplayColumns( apiDisplayColumnsArray ) {
 		var len = this.all_exception_columns.length;
 		var len1 = apiDisplayColumnsArray ? apiDisplayColumnsArray.length : 0;
 		var display_columns = [];
@@ -1115,13 +1109,13 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			}
 		}
 		return display_columns;
-	},
+	}
 
-	initExceptionSummary: function() {
+	initExceptionSummary() {
 
 		var $this = this;
 		if ( !this.api_exception ) {
-			this.api_exception = new ( APIFactory.getAPIClass( 'APIException' ) )();
+			this.api_exception = TTAPI.APIException;
 		}
 
 		$this.buildExceptionGrid();
@@ -1191,9 +1185,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				} );
 			}
 		} );
-	},
+	}
 
-	buildExceptionGrid: function( column_info_array ) {
+	buildExceptionGrid( column_info_array ) {
 		var $this = this;
 
 		if ( typeof column_info_array == 'undefined' ) {
@@ -1219,9 +1213,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			sortable: false,
 			height: 160
 		}, column_info_array );
-	},
+	}
 
-	showExceptionGridNoResultCover: function() {
+	showExceptionGridNoResultCover() {
 		this.removeExceptionGridNoResultCover();
 		this.exception_grid_no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
 		this.exception_grid_no_result_box.NoResultBox( { related_view_controller: this, is_new: false } );
@@ -1232,22 +1226,22 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.exception_grid_no_result_box.css( 'height', parseInt( grid_div.height() ) + 'px' );
 
 		grid_div.append( this.exception_grid_no_result_box );
-	},
+	}
 
-	removeExceptionGridNoResultCover: function() {
+	removeExceptionGridNoResultCover() {
 		if ( this.exception_grid_no_result_box && this.exception_grid_no_result_box.length > 0 ) {
 			this.exception_grid_no_result_box.remove();
 		}
 		this.exception_grid_no_result_box = null;
-	},
+	}
 
-	setEditViewTabSize: function() {
-		this._super( 'setEditViewTabSize' );
+	setEditViewTabSize() {
+		super.setEditViewTabSize();
 		this.setExceptionGridSize();
 		this.setTimeSheetSummaryGridSize();
-	},
+	}
 
-	setGridCellBackGround: function() {
+	setGridCellBackGround() {
 		var data;
 		var len;
 		var i;
@@ -1261,7 +1255,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			return;
 		}
 		len = data.length;
-		for ( i = 0; i < len; i++ ) {
+		for ( var i = 0; i < len; i++ ) {
 			item = data[i];
 			if ( item.exception_background_color ) {
 				var severity = this.edit_view.find( 'tr[id=\'' + item.id + '\']' ).find( 'td[aria-describedby="exception_grid_severity"]' );
@@ -1274,10 +1268,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				code.css( 'font-weight', 'bold' );
 			}
 		}
+	}
 
-	},
-
-	initTimeSheetSummary: function() {
+	initTimeSheetSummary() {
 		var $this = this;
 
 		if ( Global.isSet( this.current_edit_record ) == false ) {
@@ -1286,7 +1279,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 		this.accumulated_total_grid_source_map = {};
 		if ( !this.api_timesheet ) {
-			this.api_timesheet = new ( APIFactory.getAPIClass( 'APITimeSheet' ) )();
+			this.api_timesheet = TTAPI.APITimeSheet;
 		}
 
 		$this.buildAccumulatedTotalGrid();
@@ -1341,9 +1334,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				$( '.button-rotate' ).removeClass( 'button-rotate' );
 			}
 		} );
-	},
+	}
 
-	buildAccmulatedOrderMap: function( total ) {
+	buildAccmulatedOrderMap( total ) {
 		if ( !total ) {
 			return;
 		}
@@ -1352,10 +1345,10 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				this.accmulated_order_map[key1] = total[key][key1].order;
 			}
 		}
-	},
+	}
 
 	//This function is copied from TimeSheetViewController.js
-	buildSubGridsData: function( array, date_string, map, result_array, parent_key ) {
+	buildSubGridsData( array, date_string, map, result_array, parent_key ) {
 		var row;
 		var marked_regular_row = false; //Only mark the first regular time row, as thats where the bold top-line is going to go.
 		for ( var key in array ) {
@@ -1428,9 +1421,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	buildAccumulatedTotalData: function() {
+	buildAccumulatedTotalData() {
 		this.accmulated_order_map = {};
 		this.accumulated_total_grid_source = [];
 		var accumulated_user_date_total_data = this.full_timesheet_data.accumulated_user_date_total_data;
@@ -1482,14 +1475,14 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.timesheet_authorization_summary_grid.setData( this.accumulated_total_grid_source );
 
 		$( '.timesheet-authorization-summary-title' ).text( $.i18n._( 'TimeSheet Summary' ) );
-	},
+	}
 
-	sortAccumulatedTotalData: function() {
+	sortAccumulatedTotalData() {
 		var sort_fields = ['order', 'punch_info'];
 		this.accumulated_total_grid_source.sort( Global.m_sort_by( sort_fields ) );
-	},
+	}
 
-	getAccumulatedTotalGridPayperiodHeader: function() {
+	getAccumulatedTotalGridPayperiodHeader() {
 		this.pay_period_header = $.i18n._( 'No Pay Period' );
 		var pay_period_id = this.timesheet_verify_data.pay_period_id;
 		if ( pay_period_id && this.pay_period_data ) {
@@ -1503,9 +1496,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	buildAccumulatedTotalGrid: function( columns ) {
+	buildAccumulatedTotalGrid( columns ) {
 		var $this = this;
 		var grid;
 		if ( typeof columns == 'undefined' ) {
@@ -1529,17 +1522,17 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			}
 		}, columns );
 		this.setTimeSheetSummaryGridSize();
-	},
+	}
 
-	onTimeSheetGridDblClickRow: function() {
+	onTimeSheetGridDblClickRow() {
 		var filter = { filter_data: {} };
 		filter.user_id = this.current_edit_record.user_id;
 		filter.base_date = Global.strToDateTime( this.current_edit_record.start_date ).format();
 		Global.addViewTab( this.viewId, $.i18n._( 'TimeSheet (Authorizations)' ), window.location.href );
 		IndexViewController.goToView( 'TimeSheet', filter );
-	},
+	}
 
-	onExceptionGridDblClickRow: function( row_id ) {
+	onExceptionGridDblClickRow( row_id ) {
 		var date_stamp = this.exception_grid.grid.jqGrid( 'getCell', row_id, 'date_stamp' );
 
 		if ( !date_stamp ) {
@@ -1551,9 +1544,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		filter.base_date = date_stamp;
 		Global.addViewTab( this.viewId, $.i18n._( 'TimeSheet (Authorizations)' ), window.location.href );
 		IndexViewController.goToView( 'TimeSheet', filter );
-	},
+	}
 
-	onCellFormat: function( cell_value, related_data, row ) {
+	onCellFormat( cell_value, related_data, row ) {
 		cell_value = Global.decodeCellValue( cell_value );
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowid;
@@ -1653,9 +1646,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			content_div.prepend( time_span );
 		}
 		return content_div.get( 0 ).outerHTML;
-	},
+	}
 
-	setExceptionGridSize: function() {
+	setExceptionGridSize() {
 		if ( this.exception_grid ) {
 			this.exception_grid.grid.setGridWidth( $( '.exception-grid-div' ).width() + 1 );
 
@@ -1668,9 +1661,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 			this.exception_grid.setGridHeight( size );
 		}
-	},
+	}
 
-	setTimeSheetSummaryGridSize: function() {
+	setTimeSheetSummaryGridSize() {
 		if ( this.timesheet_authorization_summary_grid ) {
 			this.timesheet_authorization_summary_grid.grid.setGridWidth( $( '.timesheet-authorization-grid-div' ).width() );
 
@@ -1685,7 +1678,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 	}
 
-} );
+}
 
 TimeSheetAuthorizationViewController.TOTAL_ROW = 4;
 TimeSheetAuthorizationViewController.REGULAR_ROW = 5;

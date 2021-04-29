@@ -283,7 +283,7 @@
 
 			var save_btn = $( this ).find( '#save_btn' );
 
-			user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
+			user_generic_data_api = TTAPI.APIUserGenericData;
 
 			parent_awesome_box = o.parent_awesome_box;
 

@@ -1,38 +1,44 @@
-UserPreferenceViewController = BaseViewController.extend( {
-	el: '#user_preference_view_container',
+class UserPreferenceViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_preference_view_container',
 
-	_required_files: ['APIUserPreference', 'APIUserGroup', 'APIBranch', 'APIDepartment', 'APIUserTitle'],
 
-	date_format_array: null,
-	other_date_format_array: null,
-	js_date_format_array: null,
-	flex_date_format_array: null,
-	jquery_date_format_array: null,
-	time_format_array: null,
-	js_time_format_array: null,
-	flex_time_format_array: null,
-	date_time_format_array: null,
-	time_unit_format_array: null,
-	distance_format_array: null,
-	time_zone_array: null,
-	location_timezone_array: null,
-	area_code_timezone_array: null,
-	timesheet_view_array: null,
-	start_week_day_array: null,
-	schedule_icalendar_type_array: null,
-	language_array: null,
-	user_group_array: null,
-	country_array: null,
-	province_array: null,
 
-	e_province_array: null,
-	user_api: null,
-	user_group_api: null,
-	company_api: null,
+			date_format_array: null,
+			other_date_format_array: null,
+			js_date_format_array: null,
+			flex_date_format_array: null,
+			jquery_date_format_array: null,
+			time_format_array: null,
+			js_time_format_array: null,
+			flex_time_format_array: null,
+			date_time_format_array: null,
+			time_unit_format_array: null,
+			distance_format_array: null,
+			time_zone_array: null,
+			location_timezone_array: null,
+			area_code_timezone_array: null,
+			timesheet_view_array: null,
+			start_week_day_array: null,
+			schedule_icalendar_type_array: null,
+			language_array: null,
+			user_group_array: null,
+			country_array: null,
+			province_array: null,
 
-	api_date: null,
+			e_province_array: null,
+			user_api: null,
+			user_group_api: null,
+			company_api: null,
 
-	init: function( options ) {
+			api_date: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserPreferenceEditView.html';
@@ -42,11 +48,11 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_preference';
 		this.context_menu_name = $.i18n._( 'Preference' );
 		this.navigation_label = $.i18n._( 'Employees' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
-		this.api_date = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.api = TTAPI.APIUserPreference;
+		this.api_date = TTAPI.APITTDate;
+		this.user_api = TTAPI.APIUser;
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.company_api = TTAPI.APICompany;
 
 		this.render();
 
@@ -57,10 +63,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.initData();
 
 		//this.setSelectRibbonMenuIfNecessary( 'UserContact' )
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [
 				ContextMenuIconName.add,
@@ -75,9 +80,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 
 		var $this = this;
 		this.initDropDownOption( 'status', '', this.user_api );
@@ -103,10 +108,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === '-1' || val === '0' ) {
@@ -126,9 +130,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	eSetProvince: function( val, refresh ) {
+	eSetProvince( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -154,19 +158,18 @@ UserPreferenceViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	onSetSearchFilterFinished: function() {
+	onSetSearchFilterFinished() {
 
 		if ( this.search_panel.getSelectTabIndex() === 1 ) {
 			var combo = this.adv_search_field_ui_dic['country'];
 			var select_value = combo.getValue();
 			this.setProvince( select_value );
 		}
+	}
 
-	},
-
-	onBuildAdvUIFinished: function() {
+	onBuildAdvUIFinished() {
 
 		this.adv_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.adv_search_field_ui_dic['country'];
@@ -177,9 +180,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 			this.adv_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
 		this.search_fields = [
 			new SearchField( {
@@ -190,7 +193,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -243,7 +246,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -254,7 +257,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -266,7 +269,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -294,9 +297,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -311,10 +314,10 @@ UserPreferenceViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -330,7 +333,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 		this.navigation.AComboBox( {
 			id: this.script_name + '_navigation',
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			navigation_mode: true,
@@ -351,9 +354,12 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0].push( tab_preference_column1 );
 		this.edit_view_tabs[0].push( tab_preference_column2 );
 
-		// Employee
+		var form_item_input;
+		var widgetContainer;
+		var label;
 
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		// Employee
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'full_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_preference_column1, '' );
 
@@ -480,8 +486,8 @@ UserPreferenceViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'schedule_icalendar_alarm1_working', width: 90, need_parser_sec: true } );
 
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -562,10 +568,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 		widgetContainer.append( label );
 
 		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_sync_column1, '', widgetContainer, true );
+	}
 
-	},
-
-	onMassEditClick: function() {
+	onMassEditClick() {
 
 		var $this = this;
 		$this.is_add = false;
@@ -601,10 +606,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	onStatusChange: function() {
+	onStatusChange() {
 
 		if ( this.current_edit_record.schedule_icalendar_type_id == 0 ) {
 			//this.edit_view_form_item_dic['calendar_url'].css( 'display', 'none' );
@@ -633,9 +637,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		//Set current edit record data to all widgets
 
@@ -666,14 +670,14 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.collectUIDataToCurrentEditRecord();
 
 		this.setEditViewDataDone();
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onStatusChange();
-	},
+	}
 
-	setCalendarURL: function( widget ) {
+	setCalendarURL( widget ) {
 
 		if ( !Global.isSet( widget ) ) {
 			widget = this.edit_view_ui_dic['calendar_url'];
@@ -697,10 +701,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	initSubScheduleSyncView: function() {
+	initSubScheduleSyncView() {
 		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_schedule_sync' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
@@ -711,9 +714,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
-	},
+	}
 
-	onSaveDone: function( result ) {
+	onSaveDone( result ) {
 		// #2224 - Don't use current_edit_record here, use getSelectedItem() instead, or it causes:
 		// Uncaught Error From: UserPreferenceView Error: Unable to get property 'id' of undefined or null reference
 		var user_id = this.getSelectedItem().id;
@@ -721,17 +724,17 @@ UserPreferenceViewController = BaseViewController.extend( {
 		if ( user_id === LocalCacheData.getLoginUser().id ) {
 			Global.updateUserPreference();
 		}
-	},
+	}
 
-	onSaveAndContinueDone: function( result ) {
+	onSaveAndContinueDone( result ) {
 		this.onSaveDone( result );
-	},
+	}
 
-	onSaveAndNextDone: function( result ) {
+	onSaveAndNextDone( result ) {
 		this.onSaveDone( result );
-	},
+	}
 
-	validate: function() {
+	validate() {
 		var $this = this;
 
 		var record = {};
@@ -761,7 +764,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 		} );
 	}
 
-} );
+}
 
 UserPreferenceViewController.loadView = function() {
 	Global.loadViewSource( 'UserPreference', 'UserPreferenceView.html', function( result ) {

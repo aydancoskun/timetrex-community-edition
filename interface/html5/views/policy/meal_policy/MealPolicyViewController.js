@@ -1,13 +1,18 @@
-MealPolicyViewController = BaseViewController.extend( {
-	el: '#meal_policy_view_container',
+class MealPolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#meal_policy_view_container',
 
-	_required_files: ['APIMealPolicy', 'APIPayCode', 'APIPayFormulaPolicy'],
+			type_array: null,
+			auto_detect_type_array: null,
 
-	type_array: null,
-	auto_detect_type_array: null,
+			date_api: null
+		} );
 
-	date_api: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'MealPolicyEditView.html';
 		this.permission_id = 'meal_policy';
@@ -16,25 +21,24 @@ MealPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'meal_policy';
 		this.context_menu_name = $.i18n._( 'Meal Policy' );
 		this.navigation_label = $.i18n._( 'Meal Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIMealPolicy' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.api = TTAPI.APIMealPolicy;
+		this.date_api = TTAPI.APITTDate;
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'MealPolicy' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'auto_detect_type' );
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -45,7 +49,7 @@ MealPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIMealPolicy' ) ),
+			api_class: TTAPI.APIMealPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.MEAL_POLICY,
@@ -143,7 +147,7 @@ MealPolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -155,7 +159,7 @@ MealPolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -167,12 +171,11 @@ MealPolicyViewController = BaseViewController.extend( {
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_meal_policy_column1 );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -201,7 +204,7 @@ MealPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -213,7 +216,7 @@ MealPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -225,7 +228,7 @@ MealPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -237,16 +240,16 @@ MealPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -277,20 +280,19 @@ MealPolicyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 
-		this._super( 'setEditViewDataDone' );
+		super.setEditViewDataDone();
 		this.onTypeChange();
 
 		this.onAutoDetectTypeChange();
 
 		this.editFieldResize( 0 );
+	}
 
-	},
-
-	onTypeChange: function() {
+	onTypeChange() {
 
 		if ( this.current_edit_record['type_id'] == 10 || this.current_edit_record['type_id'] == 15 ) {
 
@@ -306,10 +308,9 @@ MealPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
+	}
 
-	},
-
-	onAutoDetectTypeChange: function() {
+	onAutoDetectTypeChange() {
 
 		if ( this.current_edit_record['auto_detect_type_id'] == 10 ) {
 			this.attachElement( 'start_window' );
@@ -334,4 +335,4 @@ MealPolicyViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	}
 
-} );
+}

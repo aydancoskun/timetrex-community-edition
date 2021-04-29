@@ -89,7 +89,7 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( ' <div class="mass-edit-checkbox-wrapper tag-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper tag-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox"></input>' +
 					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
@@ -360,9 +360,9 @@
 				object_type_id = o.object_type_id;
 			}
 
-			add_tag_input = $( '<input class=\'add-tag-input\' autocomplete=\'On\' />' );
+			add_tag_input = $( '<input class=\'add-tag-input\' autocomplete=\'On\'></input>' );
 
-			api_tag = new ( APIFactory.getAPIClass( 'APICompanyGenericTag' ) )();
+			api_tag = TTAPI.APICompanyGenericTag;
 
 			add_tag_input.autocomplete( {
 				source: [],

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -339,7 +339,7 @@ class UserDateTotalFactory extends Factory {
 
 	/**
 	 * @param bool $raw
-	 * @return bool
+	 * @return bool|int
 	 */
 	function getDateStamp( $raw = false ) {
 		$value = $this->getGenericDataValue( 'date_stamp' );
@@ -441,9 +441,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setObjectType( $value ) {
-		$value = trim( $value );
-
-		return $this->setGenericDataValue( 'object_type_id', $value );
+		return $this->setGenericDataValue( 'object_type_id', (int)$value );
 	}
 
 	/**
@@ -968,6 +966,7 @@ class UserDateTotalFactory extends Factory {
 	}
 
 	/**
+	 * Currency exchange rate to convert the amount back to the base currency. Rate=1 would usually only happen if the current currency is the base currency.
 	 * @param $value
 	 * @return bool
 	 */
@@ -1840,26 +1839,7 @@ class UserDateTotalFactory extends Factory {
 
 				//Allow employee to have multiple entries on the same day as long as the branch, department, job, task are all different.
 				if ( $this->getDateStamp() != false && $this->getUser() != false ) {
-					$filter_data = [
-							'user_id'        => TTUUID::castUUID( $this->getUser() ),
-							'date_stamp'     => $this->getDateStamp(),
-							'object_type_id' => (int)$this->getObjectType(),
-
-							//Restrict based on src_object_id when entering absences as well.
-							//This allows multiple absence policies to point to the same pay code
-							//and still have multiple entries on the same day with the same branch/department/job/task.
-							//Some customers have 5-10 UNPAID absence policies all going to the same UNPAID pay code.
-							//This is required to allow more than one to be used on the same day.
-							'src_object_id'  => TTUUID::castUUID( $this->getSourceObject() ),
-							'pay_code_id'    => TTUUID::castUUID( $this->getPayCode() ),
-
-							'branch_id'     => TTUUID::castUUID( $this->getBranch() ),
-							'department_id' => TTUUID::castUUID( $this->getDepartment() ),
-							'job_id'        => TTUUID::castUUID( $this->getJob() ),
-							'job_item_id'   => TTUUID::castUUID( $this->getJobItem() ),
-							'override'      => true, //To allow multiple holiday policies to be calculated on the same day, we need to only check for conflicts when override=TRUE
-					];
-					$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+					$udtlf->getByUserIdAndDateStampAndObjectTypeAndSrcObjectAndPayCodeAndBranchAndDepartmentAndJobAndJobItemOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getSourceObject(), $this->getPayCode(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), true );
 				}
 			}
 
@@ -2371,9 +2351,9 @@ class UserDateTotalFactory extends Factory {
 	function addLog( $log_action ) {
 		if ( $this->getOverride() == true && $this->getDateStamp() != false ) {
 			if ( $this->getObjectType() == 50 ) { //Absence
-				return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Absence' ) . ' - ' . TTi18n::getText( 'Date' ) . ': ' . TTDate::getDate( 'DATE', $this->getDateStamp() ) . ' ' . TTi18n::getText( 'Total Time' ) . ': ' . TTDate::getTimeUnit( $this->getTotalTime() ), null, $this->getTable(), $this );
+				return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Absence - Employee ' ) . ' : '. UserListFactory::getFullNameById( $this->getUser() ) .' ' . TTi18n::getText( 'Date' ) . ': ' . TTDate::getDate( 'DATE', $this->getDateStamp() ) . ' ' . TTi18n::getText( 'Total Time' ) . ': ' . TTDate::getTimeUnit( $this->getTotalTime() ), null, $this->getTable(), $this );
 			} else {
-				return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Accumulated Time' ) . ' - ' . TTi18n::getText( 'Date' ) . ': ' . TTDate::getDate( 'DATE', $this->getDateStamp() ) . ' ' . TTi18n::getText( 'Total Time' ) . ': ' . TTDate::getTimeUnit( $this->getTotalTime() ), null, $this->getTable(), $this );
+				return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText( 'Accumulated Time - Employee' ) . ': '. UserListFactory::getFullNameById( $this->getUser() ) .' ' . TTi18n::getText( 'Date' ) . ': ' . TTDate::getDate( 'DATE', $this->getDateStamp() ) . ' ' . TTi18n::getText( 'Total Time' ) . ': ' . TTDate::getTimeUnit( $this->getTotalTime() ), null, $this->getTable(), $this );
 			}
 		}
 

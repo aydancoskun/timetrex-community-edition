@@ -90,7 +90,8 @@ Global.sendErrorReport = function() {
 	RateLimit.setTimeFrame( 7200 ); //2hrs
 
 	if ( RateLimit.check() ) {
-		var api_authentication = new APIAuthentication();
+		//var api_authentication = new APIAuthentication();
+		var api_authentication = TTAPI.APIAuthentication;
 		var login_user = LocalCacheData.getLoginUser();
 
 		/*
@@ -100,6 +101,7 @@ Global.sendErrorReport = function() {
 			error_string.indexOf( 'Unspecified error' ) >= 0 || //From IE: Unspecified error. in N/A line 1
 			error_string.indexOf( 'TypeError: \'null\' is not an object' ) >= 0 ||
 			error_string.indexOf( '_avast_submit' ) >= 0 || //Errors from anti-virus extension
+			error_string.indexOf( 'ResizeObserver loop limit exceeded' ) >= 0 ||
 			error_string.indexOf( 'googletag' ) >= 0 || //Errors from google tag extension -- Uncaught TypeError: Cannot redefine property: googletag
 			error_string.indexOf( 'NS_ERROR_' ) >= 0 ||
 			error_string.indexOf( 'NS_ERROR_OUT_OF_MEMORY' ) >= 0 ||
@@ -274,7 +276,6 @@ Global.getUpgradeMessage = function() {
 };
 
 Global.doPingIfNecessary = function() {
-	var api = new ( APIFactory.getAPIClass( 'APIMisc' ) )();
 	if ( Global.idle_time < Math.min( 15, APIGlobal.pre_login_data.session_idle_timeout / 60 ) ) { //idle_time is minutes, session_idle_timeout is seconds.
 		Global.idle_time = 0;
 		return;
@@ -286,17 +287,16 @@ Global.doPingIfNecessary = function() {
 	if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
 		return;
 	}
-	//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
-	if ( !api || ( typeof api.isLoggedIn ) !== 'function' ) {
-		return;
-	}
 
+	var api = TTAPI.APIAuthentication;
 	api.isLoggedIn( false, {
 		onResult: function( result ) {
 			var res_data = result.getResult();
 
 			if ( res_data !== true ) {
 				//Don't do Logout here, as we need to display a "Session Expired" message to the user, which is triggered from the ServiceCaller.
+				//  In order to trigger that though, we need to make an *Authenticated* API call to APIMisc.Ping(), rather than UnAuthenticated call to APIAuthentication.Ping()
+				var api = TTAPI.APIMisc;
 				api.ping( {
 					onResult: function() {
 					}
@@ -308,12 +308,12 @@ Global.doPingIfNecessary = function() {
 
 Global.setupPing = function() {
 	Global.idle_time = 0;
-	$( 'body' ).mousemove( function( e ) {
+	$( 'body' ).mousemove( Global.debounce( function setupPingMouseMoveEvent( e ) {
 		Global.doPingIfNecessary();
-	} );
-	$( 'body' ).keypress( function( e ) {
+	}, 1000 ) );
+	$( 'body' ).keypress( Global.debounce( function setupPingKeyPressEvent( e ) {
 		Global.doPingIfNecessary();
-	} );
+	}, 1000 ) );
 
 	setInterval( timerIncrement, 60000 ); // 1 minute
 	function timerIncrement() {
@@ -338,8 +338,9 @@ Global.getHost = function( host ) {
 	}
 
 	//Make sure its not an IPv4 address, and if its a domain has more than 1 dot in it before parsing off the sub-domain part.
-	// So both IPv4 addresses and domains like: mycompany.com should not be modified at all. Only: sub.mycompany.com, sub.sub2.mycompany.com
-	if ( /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test( host ) == false && host.match(/\./g).length > 1 ) {
+	// So both IPv4 addresses and domains like: localhost (no dot at all), mycompany.com should not be modified at all. Only: sub.mycompany.com, sub.sub2.mycompany.com
+	is_sub_domain = host.match( /\./g );
+	if ( /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test( host ) == false && is_sub_domain && is_sub_domain.length > 1 ) {
 		host = host.substring( ( host.indexOf( '.' ) + 1 ) );
 	}
 
@@ -526,8 +527,8 @@ Global.convertTojQueryFormat = function( date_format ) {
 };
 
 Global.updateUserPreference = function( callBack, message ) {
-	var user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
-	var current_user_aou = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
+	var user_preference_api = TTAPI.APIUserPreference;
+	var current_user_aou = TTAPI.APIAuthentication;
 
 	if ( message ) {
 		ProgressBar.changeProgressBarMessage( message );
@@ -631,7 +632,7 @@ Global.roundTime = function( epoch, round_value, round_type ) {
 		var thousands_separator = ',';
 		var decimal_separator = '.';
 
-		time_unit = time_unit.replace( new RegExp( thousands_separator, 'g'), '' ).replace( new RegExp( ' ', 'g'), '' ).replace( new RegExp( '"', 'g'), '' ); //Need to use regex to replace all instances.
+		time_unit = time_unit.replace( new RegExp( thousands_separator, 'g' ), '' ).replace( new RegExp( ' ', 'g' ), '' ).replace( new RegExp( '"', 'g' ), '' ); //Need to use regex to replace all instances.
 
 		switch ( format ) {
 			case 10: //hh:mm
@@ -838,15 +839,12 @@ Global.getRandomNum = function() {
 
 Global.getScriptNameByAPI = function( api_class ) {
 
-	if ( !api_class ) {
+	if ( !api_class || !api_class.className ) {
 		return null;
 	}
 
 	var script_name = '';
-
-	var api_instance = new api_class();
-
-	switch ( api_instance.className ) {
+	switch ( api_class.className ) {
 		case 'APIUser':
 			script_name = 'EmployeeView';
 			break;
@@ -1149,7 +1147,6 @@ Global.getScriptNameByAPI = function( api_class ) {
 		case 'APIInstall':
 			script_name = 'InstallView';
 			break;
-
 	}
 
 	return script_name;
@@ -1566,14 +1563,28 @@ Global.bodyHeight = function() {
 	return $( window ).height();
 };
 
-Global.hasRequireLoaded = function( scriptPath ) {
-	var scriptPath = scriptPath.split( '/' );
-	var id = scriptPath[scriptPath.length - 1];
+Global.hasRequireLoaded = function( script_path ) {
+	var split_script_path = script_path.split( '/' );
+
+	var id = split_script_path[split_script_path.length - 1];
 	id = id.replace( '.js', '' );
 
-	if ( typeof require === 'function' && typeof require.specified === 'function' && require.specified( id ) ) {
+	//Check alternative script names (ie: with/without the .js) when a full path is specified to see if it was loaded in different ways with requireJS and make sure its not loaded twice.
+	if ( script_path.indexOf( '.js' ) == -1 ) {
+		var alternative_script_path = script_path + '.js';
+	} else {
+		var alternative_script_path = script_path.replace( '.js', '' );
+	}
+
+	//Make sure the function is both specified and defined. This helps cases where the user is on a Slow 3G network and double clicks Attendance -> In/Out.
+	//  In this case the same InOutViewController.js file is in the process of being loaded, then is cancelled,
+	//  and another one tries to load and the success callback where the class is instantiated is called before it can be instantiated, causing a JS exception (ReferenceError: InOutViewController is not defined).
+	//  Better double-click prevention would also help.
+	//if ( typeof require === 'function' && typeof require.specified === 'function' && ( require.specified( id ) || require.specified( script_path ) || require.specified( alternative_script_path ) ) ) {
+	if ( typeof require === 'function' && typeof require.defined === 'function' && ( require.defined( id ) || require.defined( script_path ) || require.defined( alternative_script_path ) ) ) {
 		return true;
 	}
+
 	return false;
 };
 
@@ -1613,7 +1624,7 @@ Global.loadScript = function( scriptPath, onResult ) {
 	var realPath = scriptPath;
 
 	if ( Global.url_offset ) {
-		realPath = Global.getBaseURL() + Global.url_offset + realPath;
+		realPath = Global.getBaseURL( Global.url_offset + realPath );
 	}
 
 	if ( async ) {
@@ -1639,8 +1650,7 @@ Global.loadScript = function( scriptPath, onResult ) {
 		if ( !window.badScripts ) {
 			window.badScripts = [];
 		}
-		window.badScripts.push( id );
-		//when the page is done loading punch "badScripts into the console to see a nice array of all the scripts that were not loaded async.
+		window.badScripts.push( id ); //When the page is done loading punch "badScripts into the console to see a nice array of all the scripts that were not loaded async.
 
 		/**
 		 * this seems to work, but causes the script erro at line 0 problem.
@@ -1953,6 +1963,7 @@ Global.convertColumnsTojGridFormat = function( columns, layout_name, setWidthCal
 Global.loadWidgetByName = function( widgetName, raw_text ) {
 	var input = false;
 	var widget_path = false;
+	var widget_constructor = false;
 	var raw_text = false;
 	switch ( widgetName ) {
 		case FormItemType.COLOR_PICKER:
@@ -2019,6 +2030,7 @@ Global.loadWidgetByName = function( widgetName, raw_text ) {
 			break;
 		case FormItemType.IMAGE_AVD_BROWSER:
 			widget_path = 'global/widgets/filebrowser/TImageAdvBrowser.html';
+			widget_constructor = 'TImageAdvBrowser';
 			break;
 		case FormItemType.CAMERA_BROWSER:
 			widget_path = 'global/widgets/filebrowser/CameraBrowser.html';
@@ -2072,13 +2084,17 @@ Global.loadWidgetByName = function( widgetName, raw_text ) {
 		if ( input && input.indexOf( '<' ) != -1 ) {
 			if ( !raw_text ) {
 				input = $( input );
+
+				if ( widget_constructor && !input[widget_constructor] ) {
+					var error_string = $.i18n._( 'Class could not be found for' ) + ': ' + widgetName + '. ' + $.i18n._( 'Check that class is properly required.' );
+					throw( new Error( error_string ) );
+				}
 			}
 		} else {
 			//See comment in Global.loadWidget() regarding return null return values.
 			var error_string = $.i18n._( 'Network error, failed to load' ) + ': ' + widgetName + ' ' + $.i18n._( 'Result' ) + ': "' + input + '"';
 			TAlertManager.showNetworkErrorAlert( { status: 999 }, error_string, null ); //Show the user an error popoup.
 			throw( new Error( error_string ) ); //Halt execution and ensure that the email has a good error message because of failure of web server to provide the requested file.
-			input = false;
 		}
 
 		return input;
@@ -2817,14 +2833,20 @@ Global.loadPage = function( url, onResult ) {
 
 };
 
-Global.getBaseURL = function() {
-	// #2349 - This breaks the recruitment portal if index.php is in the URL.
-	var url = location.href;  // entire url including querystring - also: window.location.href;
-	// if ( url.indexOf( '#!' ) !== -1 ) {
-	// 	url = url.substring( 0, url.indexOf( '#!' ) );
-	// }
-	url = url.substring( 0, url.indexOf( '#!' ) ) || url.substring( 0, url.indexOf( '#' ) );
-	return url;
+Global.getBaseURL = function( url_relative_path ) {
+	//Rather than parse the URL ourselves, lets use the URL API and build it back up from its components.
+	var url_obj = new URL( location.href );
+	var retval = url_obj.protocol +'//'+ url_obj.host + url_obj.pathname;
+
+	//Resolve any specified relative path here, so we can append the search component of the URL after.
+	//  This is needed for the recruitment portal to work if Facebook or some other 3rd party appends search components on the URL, ie: ?test=1#!m=PortalJobVacancyDetail&id=05a45d0b-b982-2a1f-2003-21ea65522bf3&company_id=ABC
+	if ( url_relative_path ) {
+		retval = new URL( url_relative_path, retval ).href;
+	}
+
+	retval += url_obj.search;
+
+	return retval;
 
 };
 
@@ -3175,7 +3197,7 @@ Backbone.View.prototype.__super = function( funcName ) {
  * MIT license
  *
  * Includes enhancements by Scott Trenda <scott.trenda.net>
- * and Kris Kowal <cixar.com/~kris.kowal/>
+ * and Kris Kowal <cixar.com/~kris.kowal>
  *
  * Accepts a date, a mask, or a date and a mask.
  * Returns a formatted version of the given date.
@@ -3327,7 +3349,7 @@ RightClickMenuType.VIEW_ICON = '5';
  * @returns {*|jQuery}
  */
 Global.htmlDecode = function( str ) {
-	return $( '<textarea />' ).html( str ).text();
+	return $( '<textarea></textarea>' ).html( str ).text();
 };
 
 Global.htmlEncode = function( str ) {
@@ -3523,7 +3545,7 @@ Global.sendAnalyticsEvent = function( event_category, event_action, event_label 
 	};
 
 	if ( typeof ( ga ) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
-		//Debug.Arr( fieldsObject, 'Sending analytics event payload. Event: ' + event_category + ', Action: ' + event_action + ', Label: ' + event_label, 'Global.js', 'Global', 'sendAnalyticsEvent', 10 );
+		//Debug.Arr( fieldsObject, 'Sending analytics event payload. Event: ' + event_category + ', Action: ' + event_action + ', Label: ' + event_label, 'Global.js', 'Global', 'sendAnalyticsEvent', 11 );
 		try {
 			ga( 'send', 'event', fieldsObject );
 		} catch ( e ) {
@@ -4130,7 +4152,7 @@ Global.styleSandbox = function() {
 //#2351 - Used for logging in as employee/client or switching to sandbox mode.
 Global.NewSession = function( user_id, client_id ) {
 
-	var api_auth = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
+	var api_auth = TTAPI.APIAuthentication;
 	var $this = this;
 
 	api_auth.newSession( user_id, client_id, {
@@ -4181,19 +4203,21 @@ Global.isNumeric = function( value ) {
 
 // Returns a function, that, as long as it continues to be invoked, will not be triggered. The function will be called after it stops being called for N milliseconds.
 // If `immediate` is passed, trigger the function on the leading edge, instead of the trailing.
-Global.debounce = function( func, wait, immediate ) {
+Global.debounce = function( callback, wait, immediate ) {
 	var timeout;
 
 	return function() {
 		var context = this, args = arguments;
 
+		var callback_name = ( callback.name ) ? callback.name : 'N/A';
+
 		var later = function() {
 			timeout = null;
 			if ( !immediate ) {
-				Debug.Text( 'Calling after debounce wait: ' + func.name, 'Global.js', 'Global', 'debounce', 10 );
-				func.apply( context, args );
+				Debug.Text( 'Calling after debounce wait: ' + callback_name, 'Global.js', 'Global', 'debounce', 10 );
+				callback.apply( context, args );
 			} else {
-				Debug.Text( 'Skipping due to debounce: ' + func.name, 'Global.js', 'Global', 'debounce', 11 );
+				Debug.Text( 'Skipping due to debounce: ' + callback_name, 'Global.js', 'Global', 'debounce', 11 );
 			}
 		};
 
@@ -4204,10 +4228,10 @@ Global.debounce = function( func, wait, immediate ) {
 		timeout = setTimeout( later, wait );
 
 		if ( callNow ) {
-			Debug.Text( 'Calling immediate debounce: ' + func.name, 'Global.js', 'Global', 'debounce', 10 );
-			func.apply( context, args );
+			Debug.Text( 'Calling immediate debounce: ' + callback_name, 'Global.js', 'Global', 'debounce', 10 );
+			callback.apply( context, args );
 		} else {
-			Debug.Text( 'Skipping due to debounce: ' + func.name, 'Global.js', 'Global', 'debounce', 11 );
+			Debug.Text( 'Skipping due to debounce: ' + callback_name, 'Global.js', 'Global', 'debounce', 11 );
 		}
 	};
 };
@@ -4303,3 +4327,23 @@ Global.Logout = function() {
 	return true;
 };
 
+Global.glowAnimation = {
+	start: function( element, color ) {
+		if ( !element ) {
+			return false;
+		}
+		if ( !color ) {
+			// Set default color to green. Remember this affects the text color of the element too. Might want to disable this default in future if we want to set color separately or use inherited/existing.
+			color = '#00ff00';
+		}
+		return element
+			.css( 'color', color ) // sets the font color of the element. The glow then uses this value via 'currentColor'
+			.addClass( 'animate-glow' );
+	},
+	stop: function( element ) {
+		if ( !element ) {
+			return false;
+		}
+		return element.removeClass( 'animate-glow' );
+	}
+};

@@ -1,15 +1,20 @@
-HolidayPolicyViewController = BaseViewController.extend( {
-	el: '#holiday_policy_view_container',
+class HolidayPolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#holiday_policy_view_container',
 
-	_required_files: ['APIHolidayPolicy', 'APIRecurringHoliday', 'APIContributingShiftPolicy', 'APIRoundIntervalPolicy', 'APIAbsencePolicy'],
+			type_array: null,
+			default_schedule_status_array: null,
+			shift_on_holiday_type_array: null,
+			worked_scheduled_days_array: null,
+			date_api: null,
+			sub_holiday_view_controller: null
+		} );
 
-	type_array: null,
-	default_schedule_status_array: null,
-	shift_on_holiday_type_array: null,
-	worked_scheduled_days_array: null,
-	date_api: null,
-	sub_holiday_view_controller: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'HolidayPolicyEditView.html';
 		this.permission_id = 'holiday_policy';
@@ -18,17 +23,17 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'holiday_policy';
 		this.context_menu_name = $.i18n._( 'Holiday Policy' );
 		this.navigation_label = $.i18n._( 'Holiday Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIHolidayPolicy' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.api = TTAPI.APIHolidayPolicy;
+		this.date_api = TTAPI.APITTDate;
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'HolidayPolicy' );
+	}
 
-	},
 	/* jshint ignore:start */
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'average_time_frequency_type' );
@@ -38,12 +43,12 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			res = res.getResult();
 			$this.worked_scheduled_days_array = $.extend( {}, res ); //	 Convert Array to Object
 		} );
-	},
+	}
 
 	/* jshint ignore:end */
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -61,7 +66,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIHolidayPolicy' ) ),
+			api_class: TTAPI.APIHolidayPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HOLIDAY_POLICY,
@@ -118,7 +123,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Recurring Holidays
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRecurringHoliday' ) ),
+			api_class: TTAPI.APIRecurringHoliday,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.RECURRING_HOLIDAY,
 			show_search_inputs: true,
@@ -153,7 +158,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		form_item_worked_scheduled_days_combobox.TComboBox( { field: 'worked_scheduled_days' } );
 		form_item_worked_scheduled_days_combobox.setSourceData( Global.addFirstItemToArray( $this.worked_scheduled_days_array ) );
 
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 		var label_1 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'of the' ) + ' </span>' );
 		var label_2 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'prior to the holiday' ) + ' </span>' );
@@ -206,7 +211,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Eligible Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
+			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -232,7 +237,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		form_item_average_time_frequency_combobox.TComboBox( { field: 'average_time_frequency_type_id' } );
 		form_item_average_time_frequency_combobox.setSourceData( Global.addFirstItemToArray( $this.average_time_frequency_type_array ) );
 
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( form_item_average_time_frequency_combobox );
@@ -265,7 +270,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
+			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -301,7 +306,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Rounding Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRoundIntervalPolicy' ) ),
+			api_class: TTAPI.APIRoundIntervalPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
 			show_search_inputs: true,
@@ -313,7 +318,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
+			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
@@ -321,10 +326,9 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			field: 'absence_policy_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Absence Policy' ), form_item_input, tab_holiday_time_column1, '' );
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -343,16 +347,15 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onTypeChange();
 		this.onWorkedDaysChange();
-	},
+	}
 
-	onWorkedDaysChange: function() {
+	onWorkedDaysChange() {
 		if ( this.current_edit_record.average_time_worked_days === true ) {
 			this.average_days_widgets[0].hide();
 			this.average_days_widgets[1].hide();
@@ -362,9 +365,9 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			this.average_days_widgets[1].show();
 			this.average_days_widgets[2].show();
 		}
-	},
+	}
 
-	onTypeChange: function() {
+	onTypeChange() {
 		if ( this.current_edit_record['type_id'] == 10 ) {
 			this.detachElement( 'minimum_worked_days' );
 			this.detachElement( 'shift_on_holiday_type_id' );
@@ -412,11 +415,11 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -445,7 +448,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -457,16 +460,16 @@ HolidayPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	initSubHolidayView: function() {
+	initSubHolidayView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -505,11 +508,10 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			$this.sub_holiday_view_controller.parent_view_controller = $this;
 			$this.sub_holiday_view_controller.initData();
 		}
+	}
 
-	},
-
-	removeEditView: function() {
-		this._super( 'removeEditView' );
+	removeEditView() {
+		super.removeEditView();
 		this.sub_holiday_view_controller = null;
 	}
-} );
+}

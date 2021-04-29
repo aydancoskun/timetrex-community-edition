@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -661,7 +661,7 @@ class TimesheetSummaryReport extends Report {
 		$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 		$udtlf->getTimesheetSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Total Rows: ' . $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udtlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $udtlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		$include_no_data_rows_arr = [];
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach ( $udtlf as $key => $udt_obj ) {
@@ -759,7 +759,7 @@ class TimesheetSummaryReport extends Report {
 					}
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 		}
 		//Debug::Arr($this->tmp_data['user_date_total'], 'User Date Total Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -802,7 +802,7 @@ class TimesheetSummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), [ 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
 
@@ -823,7 +823,7 @@ class TimesheetSummaryReport extends Report {
 				unset( $tmp_pay_period_id, $tmp_date_stamps, $tmp_date_stamp, $tmp_pay_period_data );
 			}
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		unset( $include_no_data_rows_arr );
 
@@ -832,22 +832,22 @@ class TimesheetSummaryReport extends Report {
 		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text( ' Branch Total Rows: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $blf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $blf as $key => $b_obj ) {
 			$this->tmp_data['default_branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'default_branch_', (array)$b_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
 			$this->tmp_data['branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'branch_', (array)$b_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$dlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text( ' Department Total Rows: ' . $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $dlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $dlf as $key => $d_obj ) {
 			$this->tmp_data['default_department'][$d_obj->getId()] = Misc::addKeyPrefix( 'default_department_', (array)$d_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
 			$this->tmp_data['department'][$d_obj->getId()] = Misc::addKeyPrefix( 'department_', (array)$d_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['default_department'], 'Default Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data['department'], 'Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -877,7 +877,7 @@ class TimesheetSummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['user_date_total'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['user_date_total'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		//Merge time data with user data
 		$key = 0;
@@ -947,7 +947,7 @@ class TimesheetSummaryReport extends Report {
 
 								$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $row, $date_columns, $processed_data );
 
-								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+								$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 								$key++;
 							}
 						}

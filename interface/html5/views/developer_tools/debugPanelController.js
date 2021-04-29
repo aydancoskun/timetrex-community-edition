@@ -25,7 +25,6 @@ $( document ).on( 'click', '#trigger_js_exception_button', function( e ) {
 			return Global.loadScript( script_path, function( result ) {
 				Debug.Arr( result, 'no error happened.' );
 			} );
-			break;
 		case 'js_load_script_404_error':
 			Global.loadScript( 'nonexistantscript.js', function( result ) {
 				Debug.Arr( result, 'no error happened.' );

@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedConstantInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -73,7 +73,6 @@ class TTPDF extends tcpdf {
 	 * @param string $format
 	 * @param string $encoding
 	 * @param bool $diskcache
-	 * @noinspection PhpMethodParametersCountMismatchInspection
 	 */
 	function __construct( $orientation = 'P', $unit = 'mm', $format = 'LETTER', $encoding = 'UTF-8', $diskcache = false ) {
 		if ( TTi18n::getPDFDefaultFont() != 'freeserif' && $encoding == 'ISO-8859-1' ) {

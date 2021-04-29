@@ -1,20 +1,24 @@
-T4SummaryReportViewController = ReportBaseViewController.extend( {
+class T4SummaryReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIT4SummaryReport', 'APIPayStubEntryAccount'],
+			type_array: null
+		} );
 
-	type_array: null,
+		super( options );
+	}
 
-	initReport: function( options ) {
+	initReport( options ) {
 		this.script_name = 'T4SummaryReport';
 		this.viewId = 'T4SummaryReport';
 		this.context_menu_name = $.i18n._( 'T4 Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'T4SummaryReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIT4SummaryReport' ) )();
+		this.api = TTAPI.APIT4SummaryReport;
 		this.include_form_setup = true;
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				form: {
@@ -69,9 +73,9 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		context_menu_model.include.unshift( view_print );
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 		var $this = this;
 		var options = [
 			{ option_name: 'page_orientation' },
@@ -85,10 +89,8 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		];
 
 		this.initDropDownOptions( options, function( result ) {
-
-			new ( APIFactory.getAPIClass( 'APICompany' ) )().getOptions( 'province', 'CA', {
+			TTAPI.APICompany.getOptions( 'province', 'CA', {
 				onResult: function( provinceResult ) {
-
 					$this.province_array = Global.buildRecordArray( provinceResult.getResult() );
 
 					callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
@@ -96,10 +98,9 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 			} );
 
 		} );
+	}
 
-	},
-
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.e_file_xml: //All report view
 				this.onViewClick( 'efile_xml' );
@@ -109,13 +110,13 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		}
 
 		return true;
-	},
+	}
 
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 		this.onViewClick( id );
-	},
+	}
 
-	buildFormSetupUI: function() {
+	buildFormSetupUI() {
 
 		var $this = this;
 
@@ -140,7 +141,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -157,7 +158,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -169,7 +170,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		this.addEditFieldToColumn( $.i18n._( 'Employment Income (Box 14)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Employment Income (Box 14)' ) + '\n*' + $.i18n._( 'Must Match Remittance \nSummary Gross Payroll' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Tax Income (Box 22)
 		v_box = $( '<div class=\'v-box\'></div>' );
@@ -177,7 +178,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -194,7 +195,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -214,7 +215,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -231,7 +232,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -251,7 +252,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -268,7 +269,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -288,7 +289,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -305,7 +306,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -325,7 +326,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -342,7 +343,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -362,7 +363,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -379,7 +380,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -399,7 +400,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -416,7 +417,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -436,7 +437,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -453,7 +454,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -473,7 +474,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -490,7 +491,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -510,7 +511,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -527,7 +528,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -547,7 +548,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -564,7 +565,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -591,7 +592,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -608,7 +609,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -645,7 +646,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -662,7 +663,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -699,7 +700,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -716,7 +717,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -753,7 +754,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -770,7 +771,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -807,7 +808,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -824,7 +825,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -861,7 +862,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -878,7 +879,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -913,9 +914,9 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 		form_item_input.TTextInput( { field: 'remittances_paid', width: 120 } );
 		this.addEditFieldToColumn( $.i18n._( 'Remittances Paid in Year' ), form_item_input, tab3_column1 );
-	},
+	}
 
-	getFormSetupData: function() {
+	getFormSetupData() {
 		var other = {};
 		other.income = {
 			include_pay_stub_entry_account: this.current_edit_record.income_include_pay_stub_entry_account,
@@ -1021,9 +1022,10 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		other.remittances_paid = this.current_edit_record.remittances_paid;
 
 		return other;
-	},
+	}
+
 	/* jshint ignore:start */
-	setFormSetupData: function( res_Data ) {
+	setFormSetupData( res_Data ) {
 
 		if ( !res_Data ) {
 			this.show_empty_message = true;
@@ -1218,5 +1220,6 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 		}
 	}
+
 	/* jshint ignore:end */
-} );
+}

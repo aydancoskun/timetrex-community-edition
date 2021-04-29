@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -50,8 +50,8 @@ if ( ini_get( 'max_execution_time' ) < 1800 ) {
 	ini_set( 'max_execution_time', 1800 );
 }
 
-define( 'APPLICATION_VERSION', '12.1.3' );
-define( 'APPLICATION_VERSION_DATE', 1587538800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("22-Apr-2020")."\n\n";'
+define( 'APPLICATION_VERSION', '12.3.0' );
+define( 'APPLICATION_VERSION_DATE', 1596610800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("05-Aug-2020")."\n\n";'
 
 if ( strtoupper( substr( PHP_OS, 0, 3 ) ) == 'WIN' ) {
 	define( 'OPERATING_SYSTEM', 'WIN' );
@@ -303,21 +303,8 @@ function forceNoCacheHeaders() {
 	//Turn caching off.
 	header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' );
 	header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s' ) . ' GMT' );
-	//Can Break IE with downloading PDFs over SSL.
-	// IE gets: "file could not be written to cache"
-	// It works on some IE installs though.
-	header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0' );
-	//Don't bother with Pragma: token now that IE will be discontinued soon and it seems to function correctly with IE11 at least anyways.
-//	if ( isset($_SERVER['HTTP_USER_AGENT']) AND stripos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE ) {
-//		//header('Pragma: token'); //If set to no-cache it breaks IE downloading reports, with error that the site is not available.
-//		header('Pragma: no-cache');
-//		//20-Jan-16: Re-enable keepalive requests on IE to see if the issue persists after we have (mostly) fixed the duplicate request issue when users double-click icons.
-//		//if ( preg_match('/(?i)MSIE [5-9]/i', $_SERVER['HTTP_USER_AGENT'] ) ) {
-//		//	header('Connection: close'); //ie6-9 may send empty POST requests causing API errors due to poor keepalive handling, so force all connections to close instead.
-//		//}
-//	} else {
-	header( 'Pragma: no-cache' );
-//	}
+	header( 'Cache-Control: no-store' );
+	header( 'Vary: *' ); //Required for Safari to not cache APIGlobal.js.php during a refresh (after logged in). Without this, a refresh would redirect the user to the login screen even if they were logged in.
 
 	//Only when force_ssl is enabled and the user is using SSL, include the STS header.
 	global $config_vars;
@@ -440,7 +427,7 @@ set_error_handler( [ 'Debug', 'ErrorHandler' ] );
 
 Debug::Text( 'URI: ' . ( isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : 'N/A' ) . ' IP Address: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
 Debug::Text( 'USER-AGENT: ' . ( isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10 );
-Debug::Text( 'Version: ' . APPLICATION_VERSION . ' (PHP: v' . phpversion() . ') Edition: ' . getTTProductEdition() . ' Production: ' . (int)PRODUCTION . ' Server: ' . ( isset( $_SERVER['SERVER_ADDR'] ) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) . ' OS: ' . OPERATING_SYSTEM . ' Database: Type: ' . ( isset( $config_vars['database']['type'] ) ? $config_vars['database']['type'] : 'N/A' ) . ' Name: ' . ( isset( $config_vars['database']['database_name'] ) ? $config_vars['database']['database_name'] : 'N/A' ) . ' Config: ' . CONFIG_FILE . ' Demo Mode: ' . (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10 );
+Debug::Text( 'Version: ' . APPLICATION_VERSION . ' (PHP: v' . phpversion() . ' ['. PHP_INT_SIZE .']) Edition: ' . getTTProductEdition() . ' Production: ' . (int)PRODUCTION . ' Server: ' . ( isset( $_SERVER['SERVER_ADDR'] ) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) . ' OS: ' . OPERATING_SYSTEM . ' Database: Type: ' . ( isset( $config_vars['database']['type'] ) ? $config_vars['database']['type'] : 'N/A' ) . ' Name: ' . ( isset( $config_vars['database']['database_name'] ) ? $config_vars['database']['database_name'] : 'N/A' ) . ' Config: ' . CONFIG_FILE . ' Demo Mode: ' . (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10 );
 
 if ( function_exists( 'bcscale' ) ) {
 	bcscale( 10 );

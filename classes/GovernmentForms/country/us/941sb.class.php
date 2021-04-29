@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -89,6 +89,22 @@ class GovernmentForms_US_941SB extends GovernmentForms_US {
 					],
 					'font'          => [
 							'size' => 7,
+					],
+			],
+			[
+					'value'         => 'Total must equal line 12 on Form 941 or Form 941-SS',
+					'on_background' => true,
+					'coordinates'   => [
+							'x'          => 25,
+							'y'          => 762,
+							'h'          => 12,
+							'w'          => 400,
+							'halign'     => 'R',
+							'fill_color' => [ 255, 255, 255 ],
+					],
+					'font'          => [
+							'type' => 'B',
+							'size' => 8,
 					],
 			],
 			//Finish initializing page 1.

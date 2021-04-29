@@ -1,11 +1,22 @@
-QuickPunchBaseViewController = Backbone.View.extend( {
+class QuickPunchBaseViewController extends TTBackboneView {
+	constructor( options = {} ) {
+		_.defaults( options, {} );
+
+		super( options );
+	}
+
+	getRequiredFiles() {
+		//override in child class
+		return [];
+	}
+
 	/**
 	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
 	 * BaseViewController, HomeViewController, BaseWizardController, QuickPunchBaseViewControler
 	 *
 	 * @returns {Array}
 	 */
-	filterRequiredFiles: function() {
+	filterRequiredFiles() {
 		var retval = [];
 		var required_files;
 
@@ -28,4 +39,4 @@ QuickPunchBaseViewController = Backbone.View.extend( {
 		Debug.Arr( retval, 'RETVAL', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 10 );
 		return retval;
 	}
-} );
+}

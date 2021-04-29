@@ -1,12 +1,17 @@
-PayCodeViewController = BaseViewController.extend( {
-	el: '#pay_code_view_container',
+class PayCodeViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#pay_code_view_container',
 
-	_required_files: ['APIPayCode', 'APIPayFormulaPolicy', 'APIPayStubEntryAccount'],
+			type_array: null,
+			//pay_type_array: null,
+			//wage_source_type_array: null,
+		} );
 
-	type_array: null,
-	//pay_type_array: null,
-	//wage_source_type_array: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayCodeEditView.html';
 		this.permission_id = 'pay_code';
@@ -15,24 +20,23 @@ PayCodeViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_code';
 		this.context_menu_name = $.i18n._( 'Pay Code' );
 		this.navigation_label = $.i18n._( 'Pay Code' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayCode' ) )();
+		this.api = TTAPI.APIPayCode;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'PayCode' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		//this.initDropDownOption( 'pay_type' );
 		//this.initDropDownOption( 'wage_source_type' );
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [],
 			include: [
@@ -46,11 +50,11 @@ PayCodeViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -61,7 +65,7 @@ PayCodeViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+			api_class: TTAPI.APIPayCode,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
@@ -122,7 +126,7 @@ PayCodeViewController = BaseViewController.extend( {
 		 //Wage Source Contributing Shift
 		 form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		 form_item_input.AComboBox( {
-		 api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+		 api_class: TTAPI.APIContributingShiftPolicy,
 		 allow_multiple_selection: false,
 		 layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 		 show_search_inputs: true,
@@ -133,7 +137,7 @@ PayCodeViewController = BaseViewController.extend( {
 		 //Time Source Contributing Shift
 		 form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		 form_item_input.AComboBox( {
-		 api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+		 api_class: TTAPI.APIContributingShiftPolicy,
 		 allow_multiple_selection: false,
 		 layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 		 show_search_inputs: true,
@@ -144,7 +148,7 @@ PayCodeViewController = BaseViewController.extend( {
 		 // Wage Group
 		 form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		 form_item_input.AComboBox( {
-		 api_class: (APIFactory.getAPIClass( 'APIWageGroup' )),
+		 api_class: TTAPI.APIWageGroup,
 		 allow_multiple_selection: false,
 		 layout_name: ALayoutIDs.WAGE_GROUP,
 		 show_search_inputs: true,
@@ -160,7 +164,7 @@ PayCodeViewController = BaseViewController.extend( {
 		 // Deposit Accrual Policy
 		 form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		 form_item_input.AComboBox( {
-		 api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
+		 api_class: TTAPI.APIAccrualPolicy,
 		 allow_multiple_selection: false,
 		 layout_name: ALayoutIDs.ACCRUAL_POLICY,
 		 show_search_inputs: true,
@@ -171,7 +175,7 @@ PayCodeViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -187,7 +191,7 @@ PayCodeViewController = BaseViewController.extend( {
 		// Pay Stub Account
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -195,11 +199,11 @@ PayCodeViewController = BaseViewController.extend( {
 			field: 'pay_stub_entry_account_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab_pay_code_column1 );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -228,7 +232,7 @@ PayCodeViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -240,7 +244,7 @@ PayCodeViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'pay_stub_entry_account_id',
 				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-				api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+				api_class: TTAPI.APIPayStubEntryAccount,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -252,7 +256,7 @@ PayCodeViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -264,16 +268,16 @@ PayCodeViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.migrate_pay_codes:
 				ProgressBar.showOverlay();
@@ -281,18 +285,18 @@ PayCodeViewController = BaseViewController.extend( {
 				break;
 
 		}
-	},
+	}
 
-	onSaveClick: function( ignoreWarning ) {
-		this._super( 'onSaveClick', ignoreWarning );
+	onSaveClick( ignoreWarning ) {
+		super.onSaveClick( ignoreWarning );
 		Global.clearCache( 'getOptions_columns' ); //Needs to clear cache so if they add a pay code it will immediately appear on all reports in the Display Columns.
-	},
+	}
 
-	onWizardClick: function() {
+	onWizardClick() {
 		var $this = this;
 		IndexViewController.openWizard( 'PayCodeWizard', null, function() {
 //			$this.search();
 		} );
 	}
 
-} );
+}

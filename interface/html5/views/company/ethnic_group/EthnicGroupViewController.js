@@ -1,9 +1,15 @@
-EthnicGroupViewController = BaseViewController.extend( {
-	el: '#ethnic_group_view_container',
+class EthnicGroupViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#ethnic_group_view_container',
 
-	_required_files: ['APIEthnicGroup'],
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'EthnicGroupEditView.html';
 		this.permission_id = 'user';
@@ -12,28 +18,27 @@ EthnicGroupViewController = BaseViewController.extend( {
 		this.table_name_key = 'ethnic_group';
 		this.context_menu_name = $.i18n._( 'Ethnic Groups' );
 		this.navigation_label = $.i18n._( 'Ethnic Group' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIEthnicGroup' ) )();
+		this.api = TTAPI.APIEthnicGroup;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'EthnicGroup' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -44,7 +49,7 @@ EthnicGroupViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIEthnicGroup' ) ),
+			api_class: TTAPI.APIEthnicGroup,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ETHNIC_GROUP,
@@ -71,12 +76,11 @@ EthnicGroupViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_ethnic_group_column1, 'first_last' );
 
 		form_item_input.parent().width( '45%' );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -93,7 +97,7 @@ EthnicGroupViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -105,7 +109,7 @@ EthnicGroupViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -114,4 +118,4 @@ EthnicGroupViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

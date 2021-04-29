@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -86,9 +86,6 @@ class PunchFactory extends Factory {
 						'-1160-branch'             => TTi18n::gettext( 'Branch' ),
 						'-1170-department'         => TTi18n::gettext( 'Department' ),
 
-						'-1180-job'      => TTi18n::gettext( 'Job' ),
-						'-1190-job_item' => TTi18n::gettext( 'Task' ),
-
 						'-1200-type'              => TTi18n::gettext( 'Type' ),
 						'-1202-status'            => TTi18n::gettext( 'Status' ),
 						'-1210-date_stamp'        => TTi18n::gettext( 'Date' ),
@@ -108,6 +105,16 @@ class PunchFactory extends Factory {
 						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
 						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
 				];
+
+				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$retval = array_merge( [
+												   '-1180-job'      => TTi18n::gettext( 'Job' ),
+												   '-1190-job_item' => TTi18n::gettext( 'Task' ),
+										   ],
+										   $retval
+					);
+					ksort( $retval );
+				}
 				break;
 			case 'list_columns':
 				$retval = Misc::arrayIntersectByKey( $this->getOptions( 'default_display_columns' ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );

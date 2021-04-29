@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -612,7 +612,7 @@ class ActiveShiftReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $columns );
 			unset( $this->tmp_data['user'][$u_obj->getId()]['status'], $this->tmp_data['user'][$u_obj->getId()]['status_id'] ); //Status field conflicts with punch status.
@@ -621,7 +621,7 @@ class ActiveShiftReport extends Report {
 
 			$this->tmp_data['user'][$u_obj->getId()]['total_user'] = 1;
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 
@@ -629,10 +629,10 @@ class ActiveShiftReport extends Report {
 		$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 		$uplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Preference Rows: ' . $uplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uplf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $uplf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $uplf as $key => $up_obj ) {
 			$this->tmp_data['user_preference'][$up_obj->getUser()] = (array)$up_obj->getObjectAsArray( $this->getColumnDataConfig() );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user_preference'], 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -640,7 +640,7 @@ class ActiveShiftReport extends Report {
 		$plf = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $plf */
 		$plf->getAPIActiveShiftReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Active Shift Rows: ' . $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $plf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $plf as $key => $p_obj ) {
 			$this->tmp_data['punch'][$p_obj->getUser()] = (array)$p_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->tmp_data['punch'][$p_obj->getUser()]['time_stamp'] = $p_obj->getTimeStamp();
@@ -653,7 +653,7 @@ class ActiveShiftReport extends Report {
 				$this->tmp_data['punch'][$p_obj->getUser()]['_bgcolor'] = [ 255, 225, 225 ];
 				//$this->tmp_data['punch'][$p_obj->getUser()]['_fontcolor'] = array(225, 25, 25); //Red
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Debug::Arr($this->tmp_data['punch'], 'TMP Data (punch): ', __FILE__, __LINE__, __METHOD__, 10);
@@ -666,7 +666,7 @@ class ActiveShiftReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['punch'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['punch'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		//Use the punch data is the primary dataset and merge user/user preference data to it. This will make it
 		//so the report only shows employees with punches within the time period specified.
@@ -686,7 +686,7 @@ class ActiveShiftReport extends Report {
 
 				$this->data[] = array_merge( $row, $processed_data );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				$key++;
 			}
 			unset( $this->tmp_data, $row, $user_id, $processed_data );

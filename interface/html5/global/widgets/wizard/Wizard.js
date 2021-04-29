@@ -4,20 +4,35 @@
  * CRITICAL: ALL WIZARDS MUST HAVE A HOME STEP SO THAT THEY HAVE SOMEWHERE TO START.
  **/
 
-Wizard = Backbone.View.extend( {
+class Wizard extends TTBackboneView {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			current_step: false,
+			wizard_id: 'generic_wizard',
+			wizard_name: $.i18n._( 'Wizard' ),
+			step_history: {},
+			step_objects: {},
+			el: $( '.wizard' ),
+			previous_wizard: null,
+			_step_map: null,
+			do_not_initialize_onload: false, //when this flag is set, initialize will not be run automagically.
+			external_data: null,
+			events: {
+				'click .close-btn': 'onCloseClick',
+				'click .close-icon': 'onCloseClick',
+				'click .wizard-overlay.onclick-close': 'onCloseClick',
+				'click .forward-btn': 'onNextClick',
+				'click .back-btn': 'onPrevClick',
+				'click .done-btn': 'onDone'
+			}
+		} );
 
-	current_step: false,
-	wizard_id: 'generic_wizard',
-	wizard_name: $.i18n._( 'Wizard' ),
-	step_history: {},
-	step_objects: {},
-	el: $( '.wizard' ),
-	previous_wizard: null,
-	_step_map: null,
-	do_not_initialize_onload: false, //when this flag is set, initialize will not be run automagically.
-	external_data: null,
+		super( options );
+	}
 
-	initialize: function( options ) {
+	initialize( options ) {
+		super.initialize( options );
+
 		if ( options && options.external_data ) {
 			this.setExternalData( options.external_data );
 		}
@@ -40,31 +55,22 @@ Wizard = Backbone.View.extend( {
 				LocalCacheData.current_open_wizard_controller = $this;
 			} );
 		}
-	},
+	}
 
 	//always override
-	init: function() {
+	init() {
 		return;
-	},
+	}
 
-	setExternalData: function( data ) {
+	setExternalData( data ) {
 		this.external_data = data;
-	},
+	}
 
-	getExternalData: function() {
+	getExternalData() {
 		return this.external_data;
-	},
+	}
 
-	events: {
-		'click .close-btn': 'onCloseClick',
-		'click .close-icon': 'onCloseClick',
-		'click .wizard-overlay.onclick-close': 'onCloseClick',
-		'click .forward-btn': 'onNextClick',
-		'click .back-btn': 'onPrevClick',
-		'click .done-btn': 'onDone'
-	},
-
-	onNextClick: function( e ) {
+	onNextClick( e ) {
 		if ( this.button_click_procesing == true ) {
 			return false;
 		}
@@ -80,9 +86,9 @@ Wizard = Backbone.View.extend( {
 				//$this.enableButtons(); //This should be done at the end of each _render() function to avoid race conditions and hammer clicking right arrow causing JS exceptions.
 			} );
 		}
-	},
+	}
 
-	onPrevClick: function( e ) {
+	onPrevClick( e ) {
 		if ( this.button_click_procesing == true ) {
 			return false;
 		}
@@ -100,9 +106,9 @@ Wizard = Backbone.View.extend( {
 				//$this.enableButtons(); //This should be done at the end of each _render() function to avoid race conditions and hammer clicking right arrow causing JS exceptions.
 			} );
 		}
-	},
+	}
 
-	onCloseClick: function( e ) {
+	onCloseClick( e ) {
 		if ( !e || $( e.target ).hasClass( 'disable-image' ) == false ) {
 			var $this = this;
 
@@ -130,9 +136,9 @@ Wizard = Backbone.View.extend( {
 				$this.cleanUp();
 			}
 		}
-	},
+	}
 
-	onDone: function( e ) {
+	onDone( e ) {
 		if ( !e || $( e.target ).hasClass( 'disable-image' ) == false ) {
 			var $this = this;
 
@@ -146,20 +152,20 @@ Wizard = Backbone.View.extend( {
 				$this.onDoneComplete();
 			}
 		}
-	},
+	}
 
 	//Override this function to perform other actions when the user clicks the green checkmark to complete the wizard.
-	onDoneComplete: function( e ) {
+	onDoneComplete( e ) {
 		$this.cleanUp();
-	},
+	}
 
-	addStepObject: function( name, obj ) {
+	addStepObject( name, obj ) {
 		//always override.
 		this.step_objects[name] = obj;
 		return this.step_objects[name]; //returned for chaining.
-	},
+	}
 
-	getStepObject: function( name ) {
+	getStepObject( name ) {
 		if ( typeof name == 'undefined' ) {
 			name = this.getCurrentStepName();
 		}
@@ -168,24 +174,24 @@ Wizard = Backbone.View.extend( {
 			return this.step_objects[name];
 		}
 		return this.step_objects['home'];
-	},
+	}
 
-	getCurrentStepName: function() {
+	getCurrentStepName() {
 		return this.current_step;
-	},
+	}
 
-	setCurrentStepName: function( val ) {
+	setCurrentStepName( val ) {
 		this.current_step = val;
-	},
+	}
 
 	//Stub to stop backbone from complaining that it's missing, Wizard really doesn't render itself as such, it just displays its template.
-	render: function() {
-	},
+	render() {
+	}
 
 	/*
 	 * Clean up the markup.
 	 */
-	cleanUp: function() {
+	cleanUp() {
 		$( this.el ).remove();
 		for ( var n in this.step_objects ) {
 			if ( this.step_objects[n] ) {
@@ -198,7 +204,7 @@ Wizard = Backbone.View.extend( {
 		$().TFeedback( {
 			source: this.wizard_id
 		} );
-	},
+	}
 
 	/**
 	 * setup a step object
@@ -206,7 +212,7 @@ Wizard = Backbone.View.extend( {
 	 * @param name
 	 * @param callback
 	 */
-	initStepObject: function( name, callback ) {
+	initStepObject( name, callback ) {
 		if ( this._step_map.hasOwnProperty( name ) ) {
 			if ( this.step_objects[name] == null || typeof this.step_objects[name] != 'object' ) {
 				var $this = this;
@@ -214,7 +220,8 @@ Wizard = Backbone.View.extend( {
 					$this.setCurrentStepName( name );
 					$( $this.el ).find( '.content' ).html( '' );
 
-					var obj = new window[$this._step_map[name].object_name]( $this );
+					//var obj = new window[$this._step_map[name].object_name]( $this );
+					var obj = eval( 'new ' + $this._step_map[name].object_name + '( $this );' );
 					obj.reload = false;
 					$this.addStepObject( name, obj );
 
@@ -230,7 +237,8 @@ Wizard = Backbone.View.extend( {
 					var obj = this.step_objects[name];
 
 					$( this.el ).find( '.content' ).html( '' );
-					obj = new window[this._step_map[name].object_name]( this );
+					//obj = new window[this._step_map[name].object_name]( this );
+					var obj = eval( 'new ' + this._step_map[name].object_name + '( this );' );
 
 					//reopening a step that has been opened in a previously closed wizard.
 					if ( this.step_objects[name].reload == true ) {
@@ -245,22 +253,22 @@ Wizard = Backbone.View.extend( {
 				return;
 			}
 		}
-	},
+	}
 
-	disableButtons: function() {
+	disableButtons() {
 		this.button_click_procesing = true;
 
 		//Changing the button images causes flashing and isn't required for just disabling the buttons while the view loads.
 		// $( this.el ).find( '.forward-btn' ).addClass( 'disable-image' );
 		// $( this.el ).find( '.back-btn' ).addClass( 'disable-image' );
-	},
+	}
 
 	/**
 	 * Enables the next/prev buttons
 	 * the step object for the first step should return false instead fo a previous step name to disable the previous button
 	 * the step object for the last step should return false instead of a next step name to disable the next button and enable the done button.
 	 */
-	enableButtons: function() {
+	enableButtons() {
 		var step = this.getStepObject();
 
 		if ( typeof step.getNextStepName() != 'string' ) {
@@ -284,29 +292,29 @@ Wizard = Backbone.View.extend( {
 		this._enableButtons();
 
 		this.button_click_procesing = false;
-	},
+	}
 
 	//override me.
-	_enableButtons: function() {
-	},
+	_enableButtons() {
+	}
 
 	/**
 	 * minimize the wiazrd to a min_tab
 	 */
-	minimize: function() {
+	minimize() {
 		LocalCacheData.PayrollRemittanceAgencyEventWizard = this;
 		Global.addViewTab( this.wizard_id, this.wizard_name, window.location.href );
 		this.delegateEvents();
 		$( this.el ).remove();
-	},
+	}
 
-	reload: function() {
+	reload() {
 		for ( var i in this.step_objects ) {
 			this.step_objects[i].reload = true;
 		}
-	},
+	}
 
-	disableForCommunity: function( callback ) {
+	disableForCommunity( callback ) {
 		if ( Global.getProductEdition() <= 10 ) {
 			TAlertManager.showAlert( Global.getUpgradeMessage(), $.i18n._( 'Denied' ) );
 		} else {
@@ -317,4 +325,4 @@ Wizard = Backbone.View.extend( {
 
 	}
 
-} );
+}

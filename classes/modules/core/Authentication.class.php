@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -94,6 +94,7 @@ class Authentication {
 				610 => 'SessionID-PC', //ClientPC
 
 				700 => 'SessionID',
+				705 => 'SessionID',
 				710 => 'SessionID',
 				800 => 'SessionID',
 				810 => 'SessionID',
@@ -166,8 +167,10 @@ class Authentication {
 			'phone_id'             => 605, //This used to have to be 800 otherwise the Desktop PC app and touch-tone AGI scripts would fail, however that should be resolved now with changes to soap/server.php
 			'client_pc'            => 610,
 
-			//SSO or alternitive methods
-			'http_auth'            => 700,
+			'api_key'              => 700, //API key created after user_name/password authentication. This should be below any methods that use user_name/password to authenticate each time they login.
+
+			//SSO or alternative methods
+			'http_auth'            => 705,
 			'sso'                  => 710,
 
 			//Username/Passwords including two factor.
@@ -441,25 +444,74 @@ class Authentication {
 	}
 
 	/**
+	 * Register permanent API key Session ID to be used for all subsequent API calls without needing a username/password.
+	 * @param string $user_name
+	 * @param string $password
+	 * @return bool|string
+	 * @throws DBError
+	 */
+	function registerAPIKey( $user_name, $password ) {
+		$login_result = $this->Login( $user_name, $password, 'USER_NAME' ); //Make sure login succeeds before generating API key.
+		if ( $login_result === true ) {
+			Debug::text( 'Creating API Key session for User ID: ' . $this->getObjectID() . ' Original SessionID: ' . $this->getSessionID(), __FILE__, __LINE__, __METHOD__, 10 );
+			$authentication = new Authentication();
+			$authentication->setType( 700 ); //API Key
+			$authentication->setSessionID( 'API'. $this->genSessionID() );
+			$authentication->setIPAddress();
+
+			if ( $this->getEndPointID() == 'json/api' || $this->getEndPointID() == 'soap/api' ) {
+				$authentication->setEndPointID( $this->getEndPointID() ); //json/api, soap/api
+			}
+			$authentication->setClientID( 'api' );
+			$authentication->setUserAgent( 'API KEY' ); //Force the same user agent for all API keys, as its very likely could change across time as these are long-lived keys.
+			$authentication->setIdleTimeout( ( 90 * 86400 ) ); //90 Days of inactivity.
+			$authentication->setCreatedDate();
+			$authentication->setUpdatedDate();
+			$authentication->setObjectID( $this->getObjectID() );
+
+			//Write data to db.
+			$authentication->Write();
+
+			TTLog::addEntry( $this->getObjectID(), 10, TTi18n::getText( 'Registered API Key' ) . ': ' .  $authentication->getSecureSessionID() . ' ' . TTi18n::getText( 'End Point' ) . ': ' . $authentication->getEndPointID(), $this->getObjectID(), 'authentication' ); //Add
+
+			return $authentication->getSessionID();
+		}
+
+		Debug::text( 'Password match failed, unable to create API Key session for User ID: ' . $this->getObjectID() . ' Original SessionID: ' . $this->getSessionID(), __FILE__, __LINE__, __METHOD__, 10 );
+		return false;
+	}
+
+	/**
 	 * Duplicates existing session with a new SessionID. Useful for multiple logins with the same or different users.
 	 * @param string $object_id UUID
 	 * @param string $ip_address
 	 * @param string $user_agent
 	 * @param string $client_id UUID
 	 * @param string $end_point_id
+	 * @param null $type_id
 	 * @return null
 	 * @throws DBError
 	 */
-	function newSession( $object_id = null, $ip_address = null, $user_agent = null, $client_id = null, $end_point_id = null ) {
+	function newSession( $object_id = null, $ip_address = null, $user_agent = null, $client_id = null, $end_point_id = null, $type_id = null ) {
 		if ( $object_id == '' && $this->getObjectID() != '' ) {
 			$object_id = $this->getObjectID();
 		}
 
+		if ( $type_id == null ) {
+			$type_id = $this->getType();
+		}
+
+		//Allow switching from type_id=700 (API Key) to 800 (username/password) so we can impersonate across API key to browser.
+		if ( !( ( $this->getType() == 700 || $this->getType() == 800 ) && ( $type_id == 700 || $type_id == 800 ) ) ) {
+			Debug::text( ' ERROR: Invalid from/to Type IDs! From Type: ' . $this->getType() . ' To Type: '. $type_id, __FILE__, __LINE__, __METHOD__, 10 );
+			return false;
+		}
+
 		$new_session_id = $this->genSessionID();
-		Debug::text( 'Duplicating session to User ID: ' . $object_id . ' Original SessionID: ' . $this->getSessionID() . ' New Session ID: ' . $new_session_id . ' IP Address: ' . $ip_address . ' Type: ' . $this->getType() . ' End Point: ' . $end_point_id . ' Client ID: ' . $client_id, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Duplicating session to User ID: ' . $object_id . ' Original SessionID: ' . $this->getSessionID() . ' New Session ID: ' . $new_session_id . ' IP Address: ' . $ip_address . ' Type: ' . $type_id . ' End Point: ' . $end_point_id . ' Client ID: ' . $client_id . ' DB: ' . $this->encryptSessionID( $new_session_id ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		$authentication = new Authentication();
-		$authentication->setType( $this->getType() );
+		$authentication->setType( $type_id );
 		$authentication->setSessionID( $new_session_id );
 		$authentication->setIPAddress( $ip_address );
 		$authentication->setEndPointID( $end_point_id );
@@ -587,7 +639,7 @@ class Authentication {
 	 * @return mixed
 	 */
 	function getSecureSessionID() {
-		return substr_replace( $this->getSessionID(), '...', (int)( strlen( $this->getSessionID() ) / 3 ), (int)( strlen( $this->getSessionID() ) / 3 ) );
+		return substr_replace( $this->getSessionID(), '...', 7, (int)( strlen( $this->getSessionID() ) - 11 ) );
 	}
 
 	/**
@@ -604,7 +656,7 @@ class Authentication {
 	}
 
 	/**
-	 * @return null
+	 * @return string|null
 	 */
 	function getSessionID() {
 		return $this->session_id;
@@ -796,9 +848,10 @@ class Authentication {
 				}
 			}
 
-			if ( $result['user_agent'] != $this->getUserAgent() ) {
+			//Only check user agent if we know its a web-browser, and definitely not when its an API or Mobile App, as the user agent may change between SOAP/REST libraries or App versions.
+			if ( $result['client_id'] == 'browser-timetrex' && $result['user_agent'] != $this->getUserAgent() ) {
 				Debug::text( 'WARNING: User Agent changed! Original: ' . $result['user_agent'] . ' Current: ' . $this->getUserAgent(), __FILE__, __LINE__, __METHOD__, 10 );
-				//return FALSE; //Disable USER AGENT checking until v12 is fully released, and end-user have a chance to update their APIs to handle passing the user agent if using switchUser() or newSession()
+				return FALSE; //Disable USER AGENT checking until v12 is fully released, and end-user have a chance to update their APIs to handle passing the user agent if using switchUser() or newSession()
 			}
 
 			$this->setType( $result['type_id'] );
@@ -1056,17 +1109,14 @@ class Authentication {
 	function getCurrentSessionID( $type ) {
 		$session_name = $this->getName( $type );
 
-		//There appears to be a bug with Flex when uploading files (upload_file.php) that sometimes the browser sends an out-dated sessionID in the cookie
-		//that differs from the sessionID sent in the POST variable. This causes a Flex I/O error because TimeTrex thinks the user isn't authenticated.
-		//To fix this check to see if BOTH a COOKIE and POST variable contain SessionIDs, and if so use the POST one.
-		if ( ( isset( $_COOKIE[$session_name] ) && $_COOKIE[$session_name] != '' ) && ( isset( $_POST[$session_name] ) && $_POST[$session_name] != '' ) ) {
-			$session_id = $_POST[$session_name];
-		} else if ( isset( $_COOKIE[$session_name] ) && $_COOKIE[$session_name] != '' ) {
-			$session_id = $_COOKIE[$session_name];
+		if ( isset( $_COOKIE[$session_name] ) && $_COOKIE[$session_name] != '' ) {
+			$session_id = (string)$_COOKIE[$session_name];
+		} else if ( isset( $_SERVER[$session_name] ) && $_SERVER[$session_name] != '' ) {
+			$session_id = (string)$_SERVER[$session_name];
 		} else if ( isset( $_POST[$session_name] ) && $_POST[$session_name] != '' ) {
-			$session_id = $_POST[$session_name];
+			$session_id = (string)$_POST[$session_name];
 		} else if ( isset( $_GET[$session_name] ) && $_GET[$session_name] != '' ) {
-			$session_id = $_GET[$session_name];
+			$session_id = (string)$_GET[$session_name];
 		} else {
 			$session_id = false;
 		}
@@ -1077,17 +1127,31 @@ class Authentication {
 	}
 
 	/**
+	 * @param $session_id
+	 * @return bool
+	 */
+	function isSessionIDAPIKey( $session_id ) {
+		if ( $session_id != '' && substr( $session_id, 0, 3 ) == 'API' ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * @param string $session_id UUID
 	 * @param string $type
 	 * @param bool $touch_updated_date
 	 * @return bool
 	 * @throws DBError
 	 */
-	function Check( $session_id = null, $type = 'USER_NAME', $touch_updated_date = true ) {
+	function Check( $session_id = null, $type = null, $touch_updated_date = true ) {
 		global $profiler;
 		$profiler->startTimer( "Authentication::Check()" );
 
-		//Debug::text('Session Name: '. $this->getName(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $type == '' ) {
+			$type = 'USER_NAME';
+		}
 
 		//Support session_ids passed by cookie, post, and get.
 		if ( $session_id == '' ) {

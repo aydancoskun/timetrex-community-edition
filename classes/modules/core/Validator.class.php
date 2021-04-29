@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -229,6 +229,24 @@ class Validator {
 
 		//if ( preg_match('/^[-0-9]+$/', $value) ) {
 		if ( is_numeric( $value ) == true ) {
+			return true;
+		}
+
+		$this->Error( $label, $msg, $value );
+
+		return false;
+	}
+
+	/**
+	 * @param $label
+	 * @param $value
+	 * @param null $msg
+	 * @return bool
+	 */
+	function isAlphaNumeric( $label, $value, $msg = null ) {
+		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+
+		if ( preg_match('/^[A-Za-z0-9]+$/', $value) ) {
 			return true;
 		}
 

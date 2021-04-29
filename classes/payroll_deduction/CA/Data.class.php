@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -49,6 +49,22 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Claim Code Basic Amounts
 	*/
 	var $basic_claim_code_options = [
+			20200701 => [ //01-Jul-2020:
+						  'CA' => [ 'min' => 12298, 'max' => 13229, 'phase_out_start' => 150473, 'phase_out_end' => 214368 ], //Federal - This is now phased out if net income is ~$150K or less, see Federal Basic Personal Amount (BPAF)
+						  'BC' => 10949,
+						  'AB' => 19369,
+						  'SK' => 16065,
+						  'MB' => 9838,
+						  'QC' => 0,
+						  'ON' => 10783,
+						  'NL' => 9498,
+						  'NB' => 10459,
+						  'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
+						  'PE' => 10000,
+						  'NT' => 15093,
+						  'YT' => [ 'min' => 12298, 'max' => 14160, 'phase_out_start' => 150473, 'phase_out_end' => 214368 ], //YT - This is now phased out if net income is ~$150K or less, see Yukon Basic Personal Amount (BPAYT)
+						  'NU' => 16304,
+			],
 			20200101 => [ //01-Jan-2020:
 						  'CA' => [ 'min' => 12298, 'max' => 13229, 'phase_out_start' => 150473, 'phase_out_end' => 214368 ], //Federal - This is now phased out if net income is ~$150K or less, see Federal Basic Personal Amount (BPAF)
 						  'BC' => 10949,
@@ -833,7 +849,14 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		$data = $this->getBasicClaimCodeData( $date );
 
 		if ( isset( $data[$this->getProvince()] ) ) {
-			return $data[$this->getProvince()];
+			//After 01-Jul-2020, BPAYT variable was introduced, so see if the data is returned as an array or not.
+			if ( is_array( $data[$this->getProvince()] ) ) {
+				$retval = $data[$this->getProvince()]['max'];
+			} else {
+				$retval = $data[$this->getProvince()];
+			}
+
+			return $retval;
 		}
 
 		return false;

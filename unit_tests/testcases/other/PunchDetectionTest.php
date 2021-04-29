@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,7 +46,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -187,7 +188,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( $new_shift_trigger_time );
@@ -220,6 +221,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					$end_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) );
@@ -474,32 +476,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 1:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -549,32 +551,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp2 . ' 12:30AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp2 . ' 5:00AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -630,24 +632,24 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 4:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -703,40 +705,40 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 4:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 4:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 3, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 3, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -783,32 +785,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 20 ); //Lunch
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 20, $punch_type_id );   //Lunch
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 1:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 20 ); //Lunch
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 20, $punch_type_id );   //Lunch
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -855,32 +857,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Lunch
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Lunch
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 11:30AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Lunch
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Lunch
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -927,32 +929,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Lunch
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Lunch
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 4:30PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Lunch
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Lunch
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -999,32 +1001,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal - Because when using punch time it can't be detected on the first out punch.
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal - Because when using punch time it can't be detected on the first out punch.
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 1:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 20 ); //Lunch
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 20, $punch_type_id );   //Lunch
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1071,32 +1073,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal - Because when using punch time it can't be detected on the first out punch.
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal - Because when using punch time it can't be detected on the first out punch.
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 1:30PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1145,32 +1147,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 30 ); //Break
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 30, $punch_type_id );   //Break
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 9:45AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 30 ); //Break
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 30, $punch_type_id );   //Break
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1219,32 +1221,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 8:45AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1294,32 +1296,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 3:45PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1367,32 +1369,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal - Because when using punch time it can't be detected on the first out punch.
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal - Because when using punch time it can't be detected on the first out punch.
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 10:15AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 30 ); //Break
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 30, $punch_type_id );   //Break
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1440,32 +1442,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal - Because when using punch time it can't be detected on the first out punch.
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal - Because when using punch time it can't be detected on the first out punch.
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 10:45AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1513,32 +1515,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal - Because when using punch time it can't be detected on the first out punch.
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal - Because when using punch time it can't be detected on the first out punch.
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 10:03AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1586,48 +1588,48 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal - Because when using punch time it can't be detected on the first out punch.
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal - Because when using punch time it can't be detected on the first out punch.
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 10:15AM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 30 ); //Break
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 30, $punch_type_id );   //Break
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 2:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal - Because when using punch time it can't be detected on the first out punch.
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal - Because when using punch time it can't be detected on the first out punch.
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 2:15PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 30 ); //Break
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 30, $punch_type_id );   //Break
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 3, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 3, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 6, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 6, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1680,32 +1682,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 20 ); //Lunch
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 20, $punch_type_id );   //Lunch
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 1:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 20 ); //Lunch
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 20, $punch_type_id );   //Lunch
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 
@@ -1752,32 +1754,32 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal - Because when using punch time it can't be detected on the first out punch.
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal - Because when using punch time it can't be detected on the first out punch.
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 1:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 20 ); //Lunch
-		$this->assertEquals( $punch_status_id, 10 ); //In
+		$this->assertEquals( 20, $punch_type_id );   //Lunch
+		$this->assertEquals( 10, $punch_status_id ); //In
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_time = strtotime( $date_stamp . ' 5:00PM' );
 		$punch_data = $this->getDefaultPunchSettings( $punch_time );
 		$punch_type_id = $punch_data['type_id'];
 		$punch_status_id = $punch_data['status_id'];
-		$this->assertEquals( $punch_type_id, 10 ); //Normal
-		$this->assertEquals( $punch_status_id, 20 ); //Out
+		$this->assertEquals( 10, $punch_type_id );   //Normal
+		$this->assertEquals( 20, $punch_status_id ); //Out
 		$dd->createPunch( $this->user_id, $punch_type_id, $punch_status_id, $punch_time, [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['type_id'] );
 		$this->assertEquals( 10, $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['status_id'] );
 

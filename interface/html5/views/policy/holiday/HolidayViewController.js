@@ -1,8 +1,14 @@
-HolidayViewController = BaseViewController.extend( {
-	el: '#holiday_view_container',
-	_required_files: ['APIHoliday'],
+class HolidayViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#holiday_view_container',
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'HolidayEditView.html';
 		this.permission_id = 'holiday_policy';
@@ -11,7 +17,7 @@ HolidayViewController = BaseViewController.extend( {
 		this.table_name_key = 'holidays';
 		this.context_menu_name = $.i18n._( 'Holiday' );
 		this.navigation_label = $.i18n._( 'Holiday' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIHoliday' ) )();
+		this.api = TTAPI.APIHoliday;
 
 		this.render();
 
@@ -27,21 +33,20 @@ HolidayViewController = BaseViewController.extend( {
 		}
 
 		//this.setSelectRibbonMenuIfNecessary( 'UserContact' )
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -52,7 +57,7 @@ HolidayViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIHoliday' ) ),
+			api_class: TTAPI.APIHoliday,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HOLIDAY,
@@ -88,7 +93,7 @@ HolidayViewController = BaseViewController.extend( {
 
 	}
 
-} );
+}
 
 HolidayViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 

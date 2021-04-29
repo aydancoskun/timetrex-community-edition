@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -90,6 +90,7 @@ switch ( $action ) {
 			Debug::Text( 'bDID NOT FIND email validation key!', __FILE__, __LINE__, __METHOD__, 10 );
 			$email_confirmed = false;
 		}
+		break;
 	default:
 		//Make sure we don't allow malicious users to use some long email address like:
 		//"This is the FBI, you have been fired if you don't..."

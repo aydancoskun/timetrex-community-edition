@@ -1,21 +1,24 @@
-AuditTrailReportViewController = ReportBaseViewController.extend( {
+class AuditTrailReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {} );
 
-	_required_files: ['APIAuditTrailReport'],
+		super( options );
+	}
 
-	initReport: function( options ) {
+	initReport( options ) {
 		this.script_name = 'AuditTrailReport';
 		this.viewId = 'AuditTrailReport';
 		this.context_menu_name = $.i18n._( 'Audit Trail' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'AuditTrailReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIAuditTrailReport' ) )();
-	},
+		this.api = TTAPI.APIAuditTrailReport;
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		return {
 			exclude: [],
 			include: ['default']
 		};
 	}
 
-} );
+}

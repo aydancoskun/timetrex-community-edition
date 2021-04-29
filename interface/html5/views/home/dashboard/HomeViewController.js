@@ -1,17 +1,23 @@
-HomeViewController = Backbone.View.extend( {
+class HomeViewController extends TTBackboneView {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.home-view',
 
-	el: '.home-view',
+			_required_files: ['jquery.masonry', 'jquery-bridget'],
+			user_generic_data_api: null,
+			context_menu_array: null,
+			viewId: null,
+			dashletControllerArray: null,
+			initMasonryDone: false,
+			dashboard_container: false,
+			order_data: false,
+			current_scroll_position: false,
+			current_mouse_position: null
 
-	_required_files: ['jquery.masonry', 'jquery-bridget', 'APIDashboard', 'APIRequest', 'APITimesheetSummaryReport', 'APIMessageControl', 'APIException', 'APISchedule', 'APIActiveShiftReport'],
-	user_generic_data_api: null,
-	context_menu_array: null,
-	viewId: null,
-	dashletControllerArray: null,
-	initMasonryDone: false,
-	dashboard_container: false,
-	order_data: false,
-	current_scroll_position: false,
-	current_mouse_position: null,
+		} );
+
+		super( options );
+	}
 
 	/**
 	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
@@ -19,7 +25,7 @@ HomeViewController = Backbone.View.extend( {
 	 *
 	 * @returns {Array}
 	 */
-	filterRequiredFiles: function() {
+	filterRequiredFiles() {
 		var retval = [];
 		var required_files = this._required_files;
 
@@ -35,20 +41,23 @@ HomeViewController = Backbone.View.extend( {
 
 		Debug.Arr( retval, 'RETVAL', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 10 );
 		return retval;
-	},
+	}
 
-	initialize: function( options ) {
+	initialize( options ) {
 		Global.setUINotready();
 		TTPromise.add( 'init', 'init' );
 		TTPromise.wait();
 		var $this = this;
+
+		super.initialize( options );
+
 		require( this.filterRequiredFiles(), function( Masonry, jQueryBridget ) {
 
 			$this.viewId = 'Home';
 			TopMenuManager.selected_menu_id = 'Home';
 			LocalCacheData.current_open_primary_controller = $this;
-			$this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
-			$this.api_dashboard = new ( APIFactory.getAPIClass( 'APIDashboard' ) )();
+			$this.user_generic_data_api = TTAPI.APIUserGenericData;
+			$this.api_dashboard = TTAPI.APIDashboard;
 
 			jQueryBridget( 'masonry', Masonry, $ );
 			$this.dashboard_container = $( '.dashboard-container:visible' );
@@ -60,9 +69,9 @@ HomeViewController = Backbone.View.extend( {
 
 			TTPromise.resolve( 'BaseViewController', 'initialize' );
 		} );
-	},
+	}
 
-	autoOpenEditOnlyViewIfNecessary: function() {
+	autoOpenEditOnlyViewIfNecessary() {
 		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.sm && !LocalCacheData.current_open_edit_only_controller ) {
 			if ( LocalCacheData.all_url_args.sm.indexOf( 'Report' ) < 0 ) {
 				IndexViewController.openEditView( this, LocalCacheData.all_url_args.sm, LocalCacheData.all_url_args.sid );
@@ -73,18 +82,18 @@ HomeViewController = Backbone.View.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	initContextMenu: function() {
+	initContextMenu() {
 		var $this = this;
 		this.buildContextMenu();
 		this.setDefaultMenu();
 		$( this.el ).unbind( 'click' ).bind( 'click', function() {
 			$this.setDefaultMenu();
 		} );
-	},
+	}
 
-	buildContextMenu: function() {
+	buildContextMenu() {
 		var $this = this;
 		LocalCacheData.current_open_sub_controller = null;
 		this.context_menu_array = [];
@@ -113,7 +122,7 @@ HomeViewController = Backbone.View.extend( {
 				var ribbon_menu_group = ribbon_menu_group_array[x];
 				var ribbon_sub_menu_array = ribbon_menu_group.get( 'sub_menus' );
 				var sub_menu_ui_nodes = $( '<ul></ul>' );
-				var ribbon_menu_group_ui = $( '<div class="menu top-ribbon-menu" />' );
+				var ribbon_menu_group_ui = $( '<div class="menu top-ribbon-menu"></div>' );
 				var len2 = ribbon_sub_menu_array.length;
 				for ( var y = 0; y < len2; y++ ) {
 					var ribbon_sub_menu = ribbon_sub_menu_array[y];
@@ -150,10 +159,9 @@ HomeViewController = Backbone.View.extend( {
 		}
 
 		$( '#ribbon_view_container' ).tabs( 'refresh' );
+	}
 
-	},
-
-	onContextMenuClick: function( context_btn ) {
+	onContextMenuClick( context_btn ) {
 		var $this = this;
 		context_btn = $( context_btn );
 		var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
@@ -230,9 +238,9 @@ HomeViewController = Backbone.View.extend( {
 				break;
 		}
 		Global.triggerAnalyticsContextMenuClick( context_btn );
-	},
+	}
 
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 		switch ( iconName ) {
 			case ContextMenuIconName.in_out:
 				IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, 'InOut' );
@@ -250,9 +258,9 @@ HomeViewController = Backbone.View.extend( {
 				IndexViewController.goToView( 'PayStub' );
 				break;
 		}
-	},
+	}
 
-	selectContextMenu: function() {
+	selectContextMenu() {
 		//This code is also in BaseViewController
 		//Error: Uncaught TypeError: Cannot read property 'el' of null in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-113526 line 1880
 
@@ -269,27 +277,26 @@ HomeViewController = Backbone.View.extend( {
 				Debug.Text( '#' + this.viewId + 'ContextMenu visible', 'HomeViewController', 'HomeViewController', 'selectContextMenu', 10 );
 			}
 		}
-	},
+	}
 
 	//Call this when select grid row
 	//Call this when setLayout
-	setDefaultMenu: function() {
+	setDefaultMenu() {
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Client line 308
 		if ( !this.context_menu_array ) {
 			return;
 		}
 		this.selectContextMenu();
+	}
 
-	},
-
-	onAddClick: function() {
+	onAddClick() {
 		var $this = this;
 		IndexViewController.openWizard( 'DashletWizard', null, function() {
 			$this.initDashBoard();
 		} );
-	},
+	}
 
-	removeContentMenuByName: function( name ) {
+	removeContentMenuByName( name ) {
 		if ( !LocalCacheData.current_open_primary_controller ) {
 			return;
 		}
@@ -309,9 +316,9 @@ HomeViewController = Backbone.View.extend( {
 		if ( index >= 0 ) {
 			$( '#ribbon_view_container' ).tabs( 'refresh' );
 		}
-	},
+	}
 
-	buildContextMenuModels: function() {
+	buildContextMenuModels() {
 
 		//Context Menu
 		var menu = new RibbonMenu( {
@@ -418,10 +425,9 @@ HomeViewController = Backbone.View.extend( {
 		} );
 
 		return [menu];
+	}
 
-	},
-
-	unLoadCurrentDashlets: function() {
+	unLoadCurrentDashlets() {
 		//Error: TypeError: this.dashletControllerArray is null in interface/html5/framework/jquery.min.js?v=9.0.2-20151106-092147 line 2 > eval line 368
 		if ( this.dashletControllerArray ) {
 			for ( var i = 0; i < this.dashletControllerArray.length; i++ ) {
@@ -430,9 +436,9 @@ HomeViewController = Backbone.View.extend( {
 			}
 		}
 		this.dashletControllerArray = [];
-	},
+	}
 
-	initDashBoard: function( auto_arrange ) {
+	initDashBoard( auto_arrange ) {
 		var $this = this;
 		var i = 0;
 		if ( !this.dashletControllerArray ) {
@@ -596,9 +602,9 @@ HomeViewController = Backbone.View.extend( {
 		if ( Global.detectMobileBrowser() ) {
 			this.dashboard_container.sortable( { disabled: true } );
 		}
-	},
+	}
 
-	showNoResultCover: function() {
+	showNoResultCover() {
 		this.removeNoResultCover();
 		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
 		this.no_result_box.NoResultBox( {
@@ -609,16 +615,16 @@ HomeViewController = Backbone.View.extend( {
 		} );
 		this.no_result_box.attr( 'id', '#dashboard_' + this.viewId + '_no_result_box' );
 		$( this.el ).find( '.container' ).append( this.no_result_box );
-	},
+	}
 
-	removeNoResultCover: function() {
+	removeNoResultCover() {
 		if ( this.no_result_box && this.no_result_box.length > 0 ) {
 			this.no_result_box.remove();
 		}
 		this.no_result_box = null;
-	},
+	}
 
-	addMissedDashLetToOrder: function( dashlet_list ) {
+	addMissedDashLetToOrder( dashlet_list ) {
 		var $this = this;
 		//Error: Uncaught TypeError: $this.order_data.data.push is not a function in interface/html5/#!m=Home line 546
 		if ( !$this.order_data || !$this.order_data.data ) {
@@ -642,9 +648,9 @@ HomeViewController = Backbone.View.extend( {
 			}
 
 		}
-	},
+	}
 
-	updateLayout: function() {
+	updateLayout() {
 		var $this = this;
 
 		this.saveScrollPosition();
@@ -732,9 +738,9 @@ HomeViewController = Backbone.View.extend( {
 		this.recoverCurrentScrollPosition();
 
 		TTPromise.resolve( 'init', 'init' );
-	},
+	}
 
-	saveNewOrder: function( callBack ) {
+	saveNewOrder( callBack ) {
 		var $this = this;
 		var dashlets = $( this.el ).find( '.dashlet-container:not(.ui-sortable-placeholder)' );
 		var new_order = [];
@@ -770,20 +776,20 @@ HomeViewController = Backbone.View.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	cleanWhenUnloadView: function() {
+	cleanWhenUnloadView() {
 		this.unLoadCurrentDashlets();
-	},
+	}
 
-	modifyDashlet: function( id ) {
+	modifyDashlet( id ) {
 		var $this = this;
 		IndexViewController.openWizard( 'DashletWizard', { saved_dashlet_id: id }, function() {
 			$this.initDashBoard();
 		} );
-	},
+	}
 
-	deleteDashlet: function( id, target ) {
+	deleteDashlet( id, target ) {
 		var $this = this;
 		TAlertManager.showConfirmAlert( Global.delete_dashlet_confirm_message, null, function( result ) {
 			if ( result ) {
@@ -805,33 +811,33 @@ HomeViewController = Backbone.View.extend( {
 				ProgressBar.closeOverlay();
 			}
 		} );
-	},
+	}
 
-	removeDeletedDashletsData: function( id ) {
+	removeDeletedDashletsData( id ) {
 		for ( var i = 0, ii = this.dashlet_list.length; i < ii; i++ ) {
 			if ( this.dashlet_list[i].id.toString() === id ) {
 				this.dashlet_list.splice( i, 1 );
 				break;
 			}
 		}
-	},
+	}
 
-	setViewHeight: function() {
+	setViewHeight() {
 		var $this = this;
 		$( this.el ).find( '.container' ).height( $( this.el ).height() - 35 );
 		$( window ).resize( function() {
 			$( $this.el ).find( '.container' ).height( $( $this.el ).height() - 35 );
 		} );
-	},
+	}
 
-	saveScrollPosition: function() {
+	saveScrollPosition() {
 		this.current_scroll_position = this.dashboard_container.parent().scrollTop();
-	},
+	}
 
-	recoverCurrentScrollPosition: function() {
+	recoverCurrentScrollPosition() {
 		if ( this.current_scroll_position > 0 ) {
 			this.dashboard_container.parent().scrollTop( this.current_scroll_position );
 		}
 	}
 
-} );
+}

@@ -37,7 +37,7 @@ AuthorizationHistory = {
 		host.addEditFieldToColumn( null, form_item_input, separate_box );
 
 		this.host_view_controller = host;
-		this.authorization_api = new ( APIFactory.getAPIClass( 'APIAuthorization' ) )();
+		this.authorization_api = TTAPI.APIAuthorization;
 
 		var $this = this;
 		this.getAuthorizationHistoryColumns( function() {

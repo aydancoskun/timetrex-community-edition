@@ -1,18 +1,23 @@
-TaxSummaryReportViewController = ReportBaseViewController.extend( {
+class TaxSummaryReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APITaxSummaryReport', 'APICompanyDeduction'],
+		} );
 
-	initReport: function( options ) {
+		super( options );
+	}
+
+	initReport( options ) {
 		this.script_name = 'TaxSummaryReport';
 		this.viewId = 'TaxSummaryReport';
 		this.context_menu_name = $.i18n._( 'Tax Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'TaxSummaryReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APITaxSummaryReport' ) )();
-	},
+		this.api = TTAPI.APITaxSummaryReport;
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		return { include: ['default'] };
 	}
 
-} );
+}

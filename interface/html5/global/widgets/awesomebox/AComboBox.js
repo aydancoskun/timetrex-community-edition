@@ -13,7 +13,7 @@
 
 		var api_class = null;
 
-		var api = null; //Related (APIFactory.getAPIClass( 'API' )) instance, use to get data
+		var api = null; //Related TTAPI.API instance, use to get data
 
 		var default_columns = null;	 //Default coluns when no layout saved
 
@@ -132,7 +132,7 @@
 
 		var column_option_key = 'columns';
 
-		// set this when close, don't allow awesomebox open until 0.3 sec, this prevent awesomebox close in mousedonw, and open in click.
+		// set this when close, don't allow awesomebox open until 0.3 sec, this prevent awesomebox close in mousedown, and open in click.
 		var dontOpenTimer = null;
 
 		var dontOpen = false;
@@ -286,7 +286,7 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox"></input>' +
 					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
@@ -1042,7 +1042,7 @@
 
 			//Error: TypeError: user_generic_api is null in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=9.0.0-20150822-090205 line 987
 			if ( !user_generic_api ) {
-				user_generic_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
+				user_generic_api = TTAPI.APIUserGenericData;
 			}
 			user_generic_api.setUserGenericData( filter, {
 				onResult: function( res ) {
@@ -1075,7 +1075,7 @@
 		//Set columns, display columns will be used when open AwesomeBox. If no layout saved. Display columns are the default ones set in this.each
 		this.initColumns = function() {
 
-			user_generic_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
+			user_generic_api = TTAPI.APIUserGenericData;
 
 			//Error: TypeError: 'undefined' is not a function (evaluating 'user_generic_api.getUserGenericData') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-095711 line 1044
 			if ( !user_generic_api || !user_generic_api.getUserGenericData || typeof ( user_generic_api.getUserGenericData ) !== 'function' ) {
@@ -1334,20 +1334,28 @@
 				Debug.Text( 'ERROR: Unable to close AComboBox check to make sure it wasn\'t instantiated twice.', 'ACombobox.js', 'ACombobox', 'onClose', 10 );
 			}
 
-			if ( allow_multiple_selection ) {
-				//Re load source_data if select items
-				var select_items = a_dropdown.getSelectItems();
-				$this.setValue( select_items );
-			} else {
-				var select_item = a_dropdown.getSelectItem();
-				if ( select_item ) { // #2593 - null is not an object (evaluating 'select_item._id_')
-					if ( !tree_mode ) {
-						$this.setValue( select_item );
-					} else if ( select_item._id_ ) {
-						$this.setValue( select_item._id_ );
+			//In the case where a user double clicks a drop-down box to expand it, that can cause it to open the close again immediately, and show a "-- NONE --" even though something was previously selected.
+			//  Therefore if the 'init' promise is still pending because the data is still loading, simply don't close it yet.
+			var pending_promise = TTPromise.isPendingPromises( 'AComboBox', 'init' );
+			if ( pending_promise == false ) {
+				if ( allow_multiple_selection ) {
+					//Re load source_data if select items
+					var select_items = a_dropdown.getSelectItems();
+					$this.setValue( select_items );
+				} else {
+					var select_item = a_dropdown.getSelectItem();
+					if ( select_item ) { // #2593 - null is not an object (evaluating 'select_item._id_')
+						if ( !tree_mode ) {
+							$this.setValue( select_item );
+						} else if ( select_item._id_ ) {
+							$this.setValue( select_item._id_ );
+						}
 					}
 				}
+			} else {
+				Debug.Text( 'WARNING: AComboBox::Init promise still pending, cant call setValue()...', 'ACombobox.js', 'ACombobox', 'onClose', 10 );
 			}
+
 			a_dropdown_div.remove();
 			is_mouse_over = false; //When close from esc, this maybe true
 			LocalCacheData.openAwesomeBox = null;
@@ -1360,7 +1368,7 @@
 			dontOpen = true;
 			dontOpenTimer = setTimeout( function() {
 				dontOpen = false;
-			}, 100 );
+			}, 200 );
 			$this.find( '.focus-input' ).focus();
 		};
 
@@ -2228,7 +2236,7 @@
 
 			if ( o.api_class ) {
 				api_class = o.api_class;
-				api = new api_class();
+				api = o.api_class;
 			}
 
 			if ( o.custom_key_name ) {
@@ -2420,10 +2428,10 @@
 			}
 
 			function openADropDown() {
-
 				if ( !enabled ) {
 					return;
 				}
+
 				if ( LocalCacheData.openAwesomeBox ) {
 					if ( LocalCacheData.openAwesomeBox.getId() === id ) {
 						LocalCacheData.openAwesomeBox.onClose();
@@ -2440,9 +2448,7 @@
 				a_dropdown = $( a_dropdown );
 
 				var display_show_all = false;
-
 				if ( $this.shouldInitColumns() && !navigation_mode ) {
-
 					display_show_all = true;
 				}
 
@@ -2616,7 +2622,6 @@
 
 					api['get' + custom_key_name]( args, {
 						onResult: function( result ) {
-
 							var result_data = result.getResult();
 
 							if ( !Global.isArray( result_data ) ) {
@@ -2627,7 +2632,6 @@
 
 							//set this outside, to add more data to source_data
 							if ( addition_source_function ) {
-
 								source_data = addition_source_function( $this, source_data );
 							}
 
@@ -2638,57 +2642,60 @@
 							}
 
 							if ( allow_multiple_selection ) {
-
 								if ( set_all ) {
 									$this.createFirstItem();
 								}
 
-								// for select items which only contains ids, like all awesomeboxes in edit view
+								// For select items which only contains ids, like all awesomeboxes in edit view
+								// Similar code is also below in the } else { clause of this IF statement.
 								if ( get_real_data_when_open ) {
 									get_real_data_when_open = false;
-									var args = {};
-									args.filter_data = { id: select_items };
-									args.filter_columns = $this.getColumnFilter();
-									args.filter_items_per_page = 10000;
-									var local_data = false;
 
-									//Error: TypeError: null is not an object (evaluating 'select_items.length') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-113526 line 2441
-									//if select items contains data like 0, for example Employee in Recurring Schedule edit view
-									if ( select_items && select_items.length > 0 && select_items[0] == TTUUID.zero_id ) {
-										local_data = $this.getLocalSelectItem( select_items[0] );
-									}
-
-									api['get' + custom_key_name]( args, {
-										onResult: function( result ) {
-											select_items = result.getResult();
-
-											a_dropdown.setUnselectedGridData( source_data );
-
-											if ( local_data ) {
-												select_items.unshift( local_data );
-											}
-
-//									a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
-											setADropDownSelectValues( select_items );
-											TTPromise.resolve( 'AComboBox', 'init' );
-										}
-									} );
-								} else {
-									TTPromise.resolve( 'AComboBox', 'init' );
 									a_dropdown.setUnselectedGridData( source_data );
-//								a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
+
+									if ( !select_items || ( select_items && select_items.length == 1 && ( select_items[0] == TTUUID.zero_id || select_items[0] == TTUUID.not_exist_id ) ) ) {
+										TTPromise.resolve( 'AComboBox', 'init' );
+									} else {
+										var args = {};
+										args.filter_data = { id: select_items };
+										args.filter_columns = $this.getColumnFilter();
+										args.filter_items_per_page = 10000;
+
+										//Error: TypeError: null is not an object (evaluating 'select_items.length') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-113526 line 2441
+										//if select items contains data like 0, for example Employee in Recurring Schedule edit view
+										var local_data = false;
+										if ( select_items && select_items.length > 0 && ( select_items[0] == TTUUID.zero_id || select_items[0] == TTUUID.not_exist_id ) ) {
+											local_data = $this.getLocalSelectItem( select_items[0] );
+										}
+
+										api['get' + custom_key_name]( args, {
+											onResult: function( result ) {
+												select_items = result.getResult();
+
+												if ( local_data ) {
+													select_items.unshift( local_data );
+												}
+
+												//a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
+												setADropDownSelectValues( select_items );
+												TTPromise.resolve( 'AComboBox', 'init' );
+											}
+										} );
+									}
+								} else {
+									a_dropdown.setUnselectedGridData( source_data );
+									//a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
 									setADropDownSelectValues( select_items );
+									TTPromise.resolve( 'AComboBox', 'init' );
 								}
 							} else {
-								TTPromise.resolve( 'AComboBox', 'init' );
-
 								if ( set_empty || set_any || set_default || set_open || set_special_empty ) {
 									$this.createFirstItem();
 								}
 
 								a_dropdown.setUnselectedGridData( source_data );
-
 								a_dropdown.setSelectItem( select_item );
+								TTPromise.resolve( 'AComboBox', 'init' );
 							}
 
 							pager_data = result.getPagerData();
@@ -2718,39 +2725,46 @@
 							select_items = buildSortBySelectColumns( select_items );
 						}
 
+						// Similar code is also below in the above TRUE IF statement clause.
 						if ( get_real_data_when_open ) {
 							get_real_data_when_open = false;
-							var args = {};
-							args.filter_data = { id: select_items };
-							args.filter_columns = $this.getColumnFilter();
-							args.filter_items_per_page = 10000;
-							var local_data = false;
 
-							//if select items contains data like 0, for example Employee in Recurring Schedule edit view
-							if ( select_items.length > 0 && select_items[0] == 0 ) {
-								local_data = $this.getLocalSelectItem( select_items[0] );
-							}
+							a_dropdown.setUnselectedGridData( source_data );
 
-							api['get' + custom_key_name]( args, {
-								onResult: function( result ) {
-									select_items = result.getResult();
+							if ( !select_items || ( select_items && select_items.length == 1 && ( select_items[0] == TTUUID.zero_id || select_items[0] == TTUUID.not_exist_id ) ) ) {
+								TTPromise.resolve( 'AComboBox', 'init' );
+							} else {
+								var args = {};
+								args.filter_data = { id: select_items };
+								args.filter_columns = $this.getColumnFilter();
+								args.filter_items_per_page = 10000;
 
-									a_dropdown.setUnselectedGridData( source_data );
-
-									if ( local_data ) {
-										select_items.unshift( local_data );
-									}
-
-									a_dropdown.setUnselectedGridData( source_data );
-//								a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
-									setADropDownSelectValues( select_items );
-									TTPromise.resolve( 'AComboBox', 'init' );
-
+								//Error: TypeError: null is not an object (evaluating 'select_items.length') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-113526 line 2441
+								//if select items contains data like 0, for example Employee in Recurring Schedule edit view
+								var local_data = false;
+								if ( select_items && select_items.length > 0 && ( select_items[0] == TTUUID.zero_id || select_items[0] == TTUUID.not_exist_id ) ) {
+									local_data = $this.getLocalSelectItem( select_items[0] );
 								}
-							} );
+
+								api['get' + custom_key_name]( args, {
+									onResult: function( result ) {
+										select_items = result.getResult();
+
+										if ( local_data ) {
+											select_items.unshift( local_data );
+										}
+
+										a_dropdown.setUnselectedGridData( source_data );
+										//a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
+										setADropDownSelectValues( select_items );
+										TTPromise.resolve( 'AComboBox', 'init' );
+
+									}
+								} );
+							}
 						} else {
 							a_dropdown.setUnselectedGridData( source_data );
-//							a_dropdown.setSelectGridData( select_items );
+							//a_dropdown.setSelectGridData( select_items );
 							setADropDownSelectValues( select_items );
 							TTPromise.resolve( 'AComboBox', 'init' );
 						}

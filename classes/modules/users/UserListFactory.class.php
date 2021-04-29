@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -282,12 +282,12 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	}
 
 	/**
-	 * @param string|string[] $id         UUID
-	 * @param string $company_id UUID
-	 * @param int $limit         Limit the number of records returned
-	 * @param int $page          Page number of records to return for pagination
-	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param string|string[] $id UUID
+	 * @param string $company_id  UUID
+	 * @param int $limit          Limit the number of records returned
+	 * @param int $page           Page number of records to return for pagination
+	 * @param array $where        Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order        Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserListFactory
 	 */
 	function getByIdAndCompanyId( $id, $company_id, $limit = null, $page = null, $where = null, $order = null ) {
@@ -1604,7 +1604,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	 * Return user records based on advanced filter criteria.
 	 *
 	 * @param int $company_id    Company ID
-	 * @param array $filter_data Filter criteria in array('id' => array(1, 2), 'last_name' => 'smith' ) format, with possible top level array keys as follows: id, exclude_id, status_id, user_group_id, default_branch_id, default_department_id, title_id, currency_id, permission_control_id, pay_period_schedule_id, policy_group_id, sex_id, first_name, last_name, home_phone, work_phone, country, province, city, address1, address2, postal_code, employee_number, user_name, sin, work_email, home_email, tag, last_login_date, created_by, created_date, updated_by, updated_date
+	 * @param array $filter_data Filter criteria in array('id' => array( 'UUID1', 'UUID2'), 'last_name' => 'smith' ) format, with possible top level array keys as follows: id, exclude_id, status_id, user_group_id, default_branch_id, default_department_id, title_id, currency_id, permission_control_id, pay_period_schedule_id, policy_group_id, sex_id, first_name, last_name, home_phone, work_phone, any_phone, country, province, city, address1, address2, postal_code, employee_number, user_name, sin, email, work_email, home_email, tag, employed_start_date, employed_end_date, partial_employed_start_date, partial_employed_end_date, hire_start_date, hire_end_date, termination_start_date, termination_end_date, birth_start_date, birth_end_date, password_start_date, password_end_date, last_login_start_date, last_login_date, created_by, created_date, updated_by, updated_date
 	 * @param int $limit         Optional. Restrict the number of records returned
 	 * @param int $page          Optional. Specify the page of records to return
 	 * @param array $where       Optional. Additional WHERE clauses in array( 'column' => 'value', 'column' => 'value' ) format.
@@ -1655,12 +1655,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			$filter_data['tag'] = $filter_data['user_tag'];
 		}
 
-		//$additional_order_fields = array('b.name', 'c.name', 'd.name', 'e.name');
 		$additional_order_fields = [
 				'default_branch',
 				'default_department',
-				'default_job',
-				'default_job_item',
 				'sex',
 				'user_group',
 				'title',
@@ -1669,6 +1666,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 				'terminated_permission_control',
 				'pay_period_schedule',
 				'policy_group',
+				'compf.name',
+				'lef.legal_name',
+				'a.last_name',
 		];
 
 		if ( $include_last_punch_time == true ) {
@@ -1676,11 +1676,32 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$sort_column_aliases = [
-				'type'      => 'type_id',
-				'status'    => 'status_id',
-				'sex'       => 'sex_id',
-				'full_name' => 'last_name',
+				'type'                      => 'type_id',
+				'status'                    => 'status_id',
+				'sex'                       => 'sex_id',
+				'full_name'                 => 'a.last_name',
+				'company'                   => 'compf.name',
+				'legal_name'                => 'lef.legal_name',
+				'ethnic_group'              => 'a.ethnic_group_id',
+				'birth_date_age'            => false,
+				'hire_date_age'             => false,
+				'hierarchy_control_display' => false,
+				'hierarchy_level_display'   => false,
+				'max_punch_time_stamp'      => false,
 		];
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$additional_order_fields = array_merge( [
+															'jf.name',
+															'jif.name',
+													], $additional_order_fields );
+
+			$sort_column_aliases = array_merge( [
+
+														'default_job'      => 'jf.name',
+														'default_job_item' => 'jif.name',
+												], $sort_column_aliases );
+		}
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == null ) {

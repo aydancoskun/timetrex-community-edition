@@ -1,33 +1,34 @@
-PremiumPolicyViewController = BaseViewController.extend( {
-	el: '#premium_policy_view_container',
+class PremiumPolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#premium_policy_view_container',
 
-	_required_files: {
-		10: ['APIPremiumPolicy', 'APIPayCode', 'APIPayFormulaPolicy', 'APIContributingShiftPolicy', 'APIBranch', 'APIDepartment'],
-		20: ['APIJob', 'APIJobItem', 'APIJobGroup', 'APIJobItemGroup']
-	},
+			type_array: null,
+			min_max_time_type_array: null,
 
-	type_array: null,
-	min_max_time_type_array: null,
+			include_holiday_type_array: null,
 
-	include_holiday_type_array: null,
+			branch_selection_type_array: null,
+			department_selection_type_array: null,
 
-	branch_selection_type_array: null,
-	department_selection_type_array: null,
+			job_group_selection_type_array: null,
+			job_selection_type_array: null,
 
-	job_group_selection_type_array: null,
-	job_selection_type_array: null,
+			job_group_array: null,
+			job_item_group_array: null,
 
-	job_group_array: null,
-	job_item_group_array: null,
+			job_item_group_selection_type_array: null,
+			job_item_selection_type_array: null,
 
-	job_item_group_selection_type_array: null,
-	job_item_selection_type_array: null,
+			job_group_api: null,
+			job_item_group_api: null,
+			date_api: null
+		} );
 
-	job_group_api: null,
-	job_item_group_api: null,
-	date_api: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PremiumPolicyEditView.html';
 		this.permission_id = 'premium_policy';
@@ -36,23 +37,22 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'premium_policy';
 		this.context_menu_name = $.i18n._( 'Premium Policy' );
 		this.navigation_label = $.i18n._( 'Premium Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPremiumPolicy' ) )();
+		this.api = TTAPI.APIPremiumPolicy;
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_group_api = new ( APIFactory.getAPIClass( 'APIJobGroup' ) )();
-			this.job_item_group_api = new ( APIFactory.getAPIClass( 'APIJobItemGroup' ) )();
+			this.job_group_api = TTAPI.APIJobGroup;
+			this.job_item_group_api = TTAPI.APIJobItemGroup;
 		}
 
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.date_api = TTAPI.APITTDate;
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'min_max_time_type' );
@@ -85,12 +85,11 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -106,7 +105,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPremiumPolicy' ) ),
+			api_class: TTAPI.APIPremiumPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PREMIUM_POLICY,
@@ -126,8 +125,12 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_premium_policy_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		//Name
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_premium_policy_column1, '' );
@@ -157,8 +160,8 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'minimum_time', mode: 'time_unit', need_parser_sec: true } );
 
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Use 0 for no minimum)' ) + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Use 0 for no minimum)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -189,7 +192,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
+			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -202,7 +205,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -215,7 +218,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -406,7 +409,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -447,7 +450,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -521,7 +524,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+				api_class: TTAPI.APIJob,
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -586,7 +589,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input_1.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -681,10 +684,9 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Time-Off Between Shifts' ), form_item_input, tab_minimum_shift_time_criteria_column1, '', null );
+	}
 
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
@@ -759,25 +761,25 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		this.collectUIDataToCurrentEditRecord();
 
 		this.setEditViewDataDone();
-	},
+	}
 
-	onBranchSelectionTypeChange: function() {
+	onBranchSelectionTypeChange() {
 		if ( this.current_edit_record['branch_selection_type_id'] == 10 || this.is_viewing ) {
 			this.edit_view_ui_dic['branch'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['branch'].setEnabled( true );
 		}
-	},
+	}
 
-	onDepartmentSelectionTypeChange: function() {
+	onDepartmentSelectionTypeChange() {
 		if ( this.current_edit_record['department_selection_type_id'] == 10 || this.is_viewing ) {
 			this.edit_view_ui_dic['department'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['department'].setEnabled( true );
 		}
-	},
+	}
 
-	onJobGroupSelectionTypeChange: function() {
+	onJobGroupSelectionTypeChange() {
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 
@@ -787,9 +789,9 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['job_group'].setEnabled( true );
 			}
 		}
-	},
+	}
 
-	onJobSelectionTypeChange: function() {
+	onJobSelectionTypeChange() {
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job'].setEnabled( false );
@@ -797,9 +799,9 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['job'].setEnabled( true );
 			}
 		}
-	},
+	}
 
-	onJobItemGroupSelectionTypeChange: function() {
+	onJobItemGroupSelectionTypeChange() {
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_item_group_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( false );
@@ -807,9 +809,9 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['job_item_group'].setEnabled( true );
 			}
 		}
-	},
+	}
 
-	onJobItemSelectionTypeChange: function() {
+	onJobItemSelectionTypeChange() {
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 			if ( this.current_edit_record['job_item_selection_type_id'] == 10 || this.is_viewing ) {
 				this.edit_view_ui_dic['job_item'].setEnabled( false );
@@ -817,9 +819,9 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic['job_item'].setEnabled( true );
 			}
 		}
-	},
+	}
 
-	onPayTypeChange: function() {
+	onPayTypeChange() {
 		if ( this.current_edit_record['pay_type_id'] == 10 || this.current_edit_record['pay_type_id'] == 42 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ': ' );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')' );
@@ -837,9 +839,9 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	onTypeChange: function() {
+	onTypeChange() {
 
 		$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
 		$( this.edit_view_tab.find( 'ul li' )[3] ).hide();
@@ -906,10 +908,10 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
+	}
 
-	},
 	/* jshint ignore:start */
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -979,18 +981,18 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
 	/* jshint ignore:end */
 
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 
 		return records;
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -1019,7 +1021,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1031,7 +1033,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1043,7 +1045,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1055,7 +1057,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1064,4 +1066,4 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

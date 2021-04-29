@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,7 +43,6 @@
 class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 
 	private $default_wait_timeout = 4000;//100000;
-	private $default_wait_interval = 50;
 
 	public $width = 1440;
 	public $height = 900;
@@ -115,12 +114,9 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		Debug::text( 'Logout...', __FILE__, __LINE__, __METHOD__, 10 );
 	}
 
-	function waitUntilById( $id, $timeout = null, $sleep_interval = null ) {
+	function waitUntilById( $id, $timeout = null ) {
 		if ( $timeout == null ) {
 			$timeout = $this->default_wait_timeout;
-		}
-		if ( $sleep_interval == null ) {
-			$sleep_interval = $this->default_wait_interval;
 		}
 
 		$this->waitUntil( function () use ( $id ) {
@@ -131,15 +127,12 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 			}
 
 			return null;
-		}, $timeout, $sleep_interval );
+		}, $timeout );
 	}
 
-	function waitUntilByCssSelector( $selector, $timeout = null, $sleep_interval = null ) {
+	function waitUntilByCssSelector( $selector, $timeout = null ) {
 		if ( $timeout == null ) {
 			$timeout = $this->default_wait_timeout;
-		}
-		if ( $sleep_interval == null ) {
-			$sleep_interval = $this->default_wait_interval;
 		}
 
 		$this->waitUntil( function () use ( $selector ) {
@@ -149,7 +142,7 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 			}
 
 			return null;
-		}, $timeout, $sleep_interval );
+		}, $timeout );
 	}
 
 	function takeScreenshot( $screenshot_file_name, $create_dir = true ) {
@@ -180,6 +173,8 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 
 			return $user['name'];
 		}
+
+		return false;
 	}
 
 	function goToDashboard() {
@@ -214,7 +209,7 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 
 				return null;
 			}
-		}, 60000, 500 ); //Wait for up to 60 seconds.
+		}, 60000 ); //Wait for up to 60 seconds.
 	}
 
 	function setUnitTestMode( $username ) {
@@ -249,11 +244,9 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		$javascript = [ 'script' => 'Global.setUnitTestMode();', 'args' => [] ];
 		$this->execute( $javascript );
 
-		$path = Environment::getCookieBaseURL();
-		//enable detailed logging
-
+		//$path = Environment::getCookieBaseURL();
 		//set the same sessionid for all tests
-		$javascript = [ 'script' => "$.cookie( 'StationID', 'UNITTESTS', {expires: 30, path: '$path'} );", 'args' => [] ];
+		//$javascript = [ 'script' => "$.cookie( 'StationID', 'UNITTESTS', {expires: 30, path: '$path'} );", 'args' => [] ];
 		$javascript = [ 'script' => "Global.setStationID('UNITTEST')", 'args' => [] ];
 		$this->execute( $javascript );
 	}

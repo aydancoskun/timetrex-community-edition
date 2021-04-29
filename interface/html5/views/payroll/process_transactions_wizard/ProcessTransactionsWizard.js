@@ -1,34 +1,40 @@
-ProcessTransactionsWizard = Wizard.extend( {
-	el: $( '.process_transactions_wizard' ),
-	current_step: false,
-	wizard_name: $.i18n._( 'Process Transactions' ),
+class ProcessTransactionsWizard extends Wizard {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: $( '.process_transactions_wizard' ),
+			current_step: false,
+			wizard_name: $.i18n._( 'Process Transactions' ),
 
-	selected_transaction_ids: [],
+			selected_transaction_ids: [],
 
-	wizard_id: 'ProcessTransactionsWizard',
-	_step_map: {
-		'home': {
-			script_path: 'views/payroll/process_transactions_wizard/ProcessTransactionsWizardStepHome.js',
-			object_name: 'ProcessTransactionsWizardStepHome'
-		}
+			wizard_id: 'ProcessTransactionsWizard',
+			_step_map: {
+				'home': {
+					script_path: 'views/payroll/process_transactions_wizard/ProcessTransactionsWizardStepHome.js',
+					object_name: 'ProcessTransactionsWizardStepHome'
+				}
 
-	},
-	api: null,
-	_required_files: ['APIPayrollRemittanceAgencyEvent'],
+			},
+			api: null,
 
-	setTransactionIds: function( data ) {
+		} );
+
+		super( options );
+	}
+
+	setTransactionIds( data ) {
 		this.selected_transaction_ids = data;
 		if ( this.selected_transaction_ids.length > 0 ) {
 			$( '.process_transactions_wizard .done-btn' ).removeClass( 'disable-image' );
 		} else {
 			$( '.process_transactions_wizard .done-btn' ).addClass( 'disable-image' );
 		}
-	},
+	}
 
 	/**
 	 * @param e
 	 */
-	onDone: function( e ) {
+	onDone( e ) {
 		if ( e && $( e.target ).hasClass( 'disable-image' ) == false ) {
 			var $this = LocalCacheData.current_open_wizard_controller; //required to bring the object back into scope from the event.
 
@@ -68,16 +74,16 @@ ProcessTransactionsWizard = Wizard.extend( {
 			if ( data.filter_data.remittance_source_account_id.length > 0 ) {
 				$( e.target ).addClass( 'disable-image' );
 				var post_data = { 0: data, 1: true, 2: 'export_transactions' };
-				var api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+				var api = TTAPI.APIPayStub;
 				Global.APIFileDownload( api.className, 'getPayStub', post_data );
 			} else {
 				Debug.Text( 'No source accounts selected', 'ProcessTransactionsWizard.js', 'ProcessTransactionsWizard', 'onDone', 10 );
 			}
 			$this.onCloseClick( true );
 		}
-	},
+	}
 
-	onCloseClick: function( e ) {
+	onCloseClick( e ) {
 		if ( e === true || ( e && $( e.target ).hasClass( 'disable-image' ) == false ) ) {
 			//if process payroll wizard is minimized, click it.
 			if ( $( '#min_tab_ProcessPayrollWizard' )[0] ) {
@@ -86,4 +92,4 @@ ProcessTransactionsWizard = Wizard.extend( {
 			this.cleanUp();
 		}
 	}
-} );
+}

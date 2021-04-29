@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1147,7 +1147,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function recalculateRecurringSchedules( $user_id, $start_date, $end_date ) {
-		//global $amf_message_id;
+		//global $api_message_id;
 
 		//Used in UserFactory->postSave() to update recurring schedules immediately after employees are terminated/re-hired.
 
@@ -1190,7 +1190,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function clearRecurringSchedulesFromRecurringScheduleControl( $id, $start_date, $end_date ) {
-		//global $amf_message_id;
+		//global $api_message_id;
 		$start_date = TTDate::getBeginDayEpoch( $start_date );
 		$end_date = TTDate::getEndDayEpoch( $end_date );
 
@@ -1223,7 +1223,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function addRecurringSchedulesFromRecurringScheduleControl( $company_id, $id, $start_date, $end_date ) {
-		global $amf_message_id, $profiler;
+		global $api_message_id, $profiler;
 		$current_epoch = time();
 		$start_date = TTDate::getBeginDayEpoch( $start_date );
 		$end_date = TTDate::getEndDayEpoch( $end_date );
@@ -1253,7 +1253,7 @@ class RecurringScheduleFactory extends Factory {
 		if ( $rsclf->getRecordCount() > 0 ) {
 			Debug::text( 'Recurring Schedule Control List Record Count: ' . $rsclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 			foreach ( $rsclf as $rsc_obj ) {
-				//Since cron jobs run in system timezone (ie: PST8PDT) and date_stamp and start_date/end_date (timestamptz) columns being different data types
+				//Since cron jobs run in system timezone (ie: 'America/Vancouver') and date_stamp and start_date/end_date (timestamptz) columns being different data types
 				//we need to try to switch into a timezone at least within the same day as the final timezone before we get the recurring schedules.
 				//Once we do something with the date_stamp column or store timezones, we can remove this, as its not a 100% fix.
 				$rstc_obj = $rsc_obj->getRecurringScheduleTemplateControlObject();
@@ -1293,15 +1293,15 @@ class RecurringScheduleFactory extends Factory {
 				$rstlf = TTnew( 'RecurringScheduleTemplateListFactory' ); /** @var RecurringScheduleTemplateListFactory $rstlf */
 				$rstlf->getByRecurringScheduleControlIdAndStartDateAndEndDate( $rsc_obj->getId(), $start_date, $end_date );
 				if ( $rstlf->getRecordCount() > 0 ) {
-					$this->getProgressBarObject()->start( $amf_message_id, $rstlf->getRecordCount(), null, TTi18n::getText( 'ReCalculating Templates...' ) );
+					$this->getProgressBarObject()->start( $api_message_id, $rstlf->getRecordCount(), null, TTi18n::getText( 'ReCalculating Templates...' ) );
 
 					Debug::Text( 'Total Templates: ' . $rstlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					foreach ( $rstlf as $rst_obj ) {
 						$rst_obj->getShifts( $start_date, $end_date, $holiday_data, $max_i, $schedule_shifts, $schedule_shifts_index, $open_shift_conflict_index );
-						$this->getProgressBarObject()->set( $amf_message_id, $rstlf->getCurrentRow() );
+						$this->getProgressBarObject()->set( $api_message_id, $rstlf->getCurrentRow() );
 					}
 
-					$this->getProgressBarObject()->stop( $amf_message_id );
+					$this->getProgressBarObject()->stop( $api_message_id );
 				}
 				ksort( $schedule_shifts ); //Sort the shifts so they are always created in chronological order.
 				//Debug::Arr($schedule_shifts, 'Recurring Schedule Shifts', __FILE__, __LINE__, __METHOD__, 10);
@@ -1309,7 +1309,7 @@ class RecurringScheduleFactory extends Factory {
 				if ( is_array( $schedule_shifts ) && count( $schedule_shifts ) > 0 ) {
 					$i = 0;
 					$key = 0;
-					$this->getProgressBarObject()->start( $amf_message_id, count( $schedule_shifts ), null, TTi18n::getText( 'ReCalculating Shifts...' ) );
+					$this->getProgressBarObject()->start( $api_message_id, count( $schedule_shifts ), null, TTi18n::getText( 'ReCalculating Shifts...' ) );
 
 					foreach ( $schedule_shifts as $date_stamp => $recurring_schedule_shifts ) {
 						Debug::text( 'Recurring Schedule Shift Date Stamp: ' . $date_stamp . ' Total Shifts: ' . count( $recurring_schedule_shifts ), __FILE__, __LINE__, __METHOD__, 10 );
@@ -1410,12 +1410,12 @@ class RecurringScheduleFactory extends Factory {
 							$i++;
 						}
 
-						$this->getProgressBarObject()->set( $amf_message_id, $key );
+						$this->getProgressBarObject()->set( $api_message_id, $key );
 						$key++;
 					}
 					Debug::text( 'Total Recurring Shifts added: ' . $i, __FILE__, __LINE__, __METHOD__, 10 );
 
-					$this->getProgressBarObject()->stop( $amf_message_id );
+					$this->getProgressBarObject()->stop( $api_message_id );
 				} else {
 					Debug::text( 'No Recurring Schedule Days To Add!', __FILE__, __LINE__, __METHOD__, 10 );
 				}

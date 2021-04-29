@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpPossiblePolymorphicInvocationInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -82,51 +82,51 @@ class APIImport extends APIFactory {
 		$retarr = [];
 
 		if ( $this->getPermissionObject()->Check( 'user', 'add' ) && ( $this->getPermissionObject()->Check( 'user', 'edit' ) || $this->getPermissionObject()->Check( 'user', 'edit_child' ) ) ) {
-			$retarr['-1010-user'] = TTi18n::getText( 'Employees' );
+			$retarr['-1010-User'] = TTi18n::getText( 'Employees' );
 		}
 		if ( $this->getPermissionObject()->Check( 'remittance_destination_account', 'edit' ) || $this->getPermissionObject()->Check( 'remittance_destination_account', 'edit_child' ) ) {
-			$retarr['-1015-remittance_destination_account'] = TTi18n::getText( 'Employee Pay Methods' );
+			$retarr['-1015-RemittanceDestinationAccount'] = TTi18n::getText( 'Employee Pay Methods' );
 		}
 		if ( $this->getPermissionObject()->Check( 'branch', 'add' ) && $this->getPermissionObject()->Check( 'branch', 'edit' ) ) {
-			$retarr['-1020-branch'] = TTi18n::getText( 'Branches' );
+			$retarr['-1020-Branch'] = TTi18n::getText( 'Branches' );
 		}
 		if ( $this->getPermissionObject()->Check( 'department', 'add' ) && $this->getPermissionObject()->Check( 'department', 'edit' ) ) {
-			$retarr['-1030-department'] = TTi18n::getText( 'Departments' );
+			$retarr['-1030-Department'] = TTi18n::getText( 'Departments' );
 		}
 		if ( $this->getPermissionObject()->Check( 'wage', 'add' ) && ( $this->getPermissionObject()->Check( 'wage', 'edit' ) || $this->getPermissionObject()->Check( 'wage', 'edit_child' ) ) ) {
-			$retarr['-1050-userwage'] = TTi18n::getText( 'Employee Wages' );
+			$retarr['-1050-UserWage'] = TTi18n::getText( 'Employee Wages' );
 		}
 		if ( $this->getPermissionObject()->Check( 'pay_period_schedule', 'add' ) && $this->getPermissionObject()->Check( 'pay_period_schedule', 'edit' ) ) {
-			$retarr['-1060-payperiod'] = TTi18n::getText( 'Pay Periods' );
+			$retarr['-1060-PayPeriod'] = TTi18n::getText( 'Pay Periods' );
 		}
 		if ( $this->getPermissionObject()->Check( 'pay_stub_amendment', 'add' ) && $this->getPermissionObject()->Check( 'pay_stub_amendment', 'edit' ) ) {
-			$retarr['-1200-paystubamendment'] = TTi18n::getText( 'Pay Stub Amendments' );
+			$retarr['-1200-PayStubAmendment'] = TTi18n::getText( 'Pay Stub Amendments' );
 		}
 		if ( $this->getPermissionObject()->Check( 'accrual', 'add' ) && ( $this->getPermissionObject()->Check( 'accrual', 'edit' ) || $this->getPermissionObject()->Check( 'accrual', 'edit_child' ) ) ) {
-			$retarr['-1300-accrual'] = TTi18n::getText( 'Accruals' );
+			$retarr['-1300-Accrual'] = TTi18n::getText( 'Accruals' );
 		}
 
 		if ( $this->getCurrentCompanyObject()->getProductEdition() >= 15 ) {
 			if ( $this->getPermissionObject()->Check( 'punch', 'add' ) && ( $this->getPermissionObject()->Check( 'punch', 'edit' ) || $this->getPermissionObject()->Check( 'punch', 'edit_child' ) ) ) {
-				$retarr['-1100-punch'] = TTi18n::getText( 'Punches' );
+				$retarr['-1100-Punch'] = TTi18n::getText( 'Punches' );
 			}
 			if ( $this->getPermissionObject()->Check( 'punch', 'add' ) && ( $this->getPermissionObject()->Check( 'punch', 'edit' ) || $this->getPermissionObject()->Check( 'punch', 'edit_child' ) ) ) {
-				$retarr['-1110-userdatetotal'] = TTi18n::getText( 'Manual TimeSheet' );
+				$retarr['-1110-UserDateTotal'] = TTi18n::getText( 'Manual TimeSheet' );
 			}
 			if ( $this->getPermissionObject()->Check( 'schedule', 'add' ) && ( $this->getPermissionObject()->Check( 'schedule', 'edit' ) || $this->getPermissionObject()->Check( 'schedule', 'edit_child' ) ) ) {
-				$retarr['-1150-schedule'] = TTi18n::getText( 'Scheduled Shifts' );
+				$retarr['-1150-Schedule'] = TTi18n::getText( 'Scheduled Shifts' );
 			}
 		}
 
 		if ( $this->getCurrentCompanyObject()->getProductEdition() >= 20 ) {
 			if ( $this->getPermissionObject()->Check( 'client', 'add' ) && $this->getPermissionObject()->Check( 'client', 'edit' ) ) {
-				$retarr['-1500-client'] = TTi18n::getText( 'Clients' );
+				$retarr['-1500-Client'] = TTi18n::getText( 'Clients' );
 			}
 			if ( $this->getPermissionObject()->Check( 'job', 'add' ) && $this->getPermissionObject()->Check( 'job', 'edit' ) ) {
-				$retarr['-1600-job'] = TTi18n::getText( 'Jobs' );
+				$retarr['-1600-Job'] = TTi18n::getText( 'Jobs' );
 			}
 			if ( $this->getPermissionObject()->Check( 'job_item', 'add' ) && $this->getPermissionObject()->Check( 'job_item', 'edit' ) ) {
-				$retarr['-1605-jobitem'] = TTi18n::getText( 'Tasks' );
+				$retarr['-1605-JobItem'] = TTi18n::getText( 'Tasks' );
 			}
 		}
 
@@ -280,7 +280,7 @@ class APIImport extends APIFactory {
 
 		//Force this while testing.
 		//$validate_only = TRUE;
-		$this->getImportObject()->setAMFMessageId( $this->getAMFMessageID() ); //This must be set *after* the all constructor functions are called.
+		$this->getImportObject()->setAPIMessageID( $this->getAPIMessageID() ); //This must be set *after* the all constructor functions are called.
 
 		return $this->getImportObject()->Process( $validate_only ); //Don't need return handler here as a API function is called anyways.
 	}

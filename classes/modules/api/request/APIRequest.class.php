@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -168,7 +168,7 @@ class APIRequest extends APIFactory {
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $blf->getRecordCount() );
 
 			$this->setPagerObject( $blf );
 
@@ -176,10 +176,10 @@ class APIRequest extends APIFactory {
 			foreach ( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $blf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -252,7 +252,7 @@ class APIRequest extends APIFactory {
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		$validator = $save_result = $key = false;
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
 				//Put this above permission checks.
@@ -368,10 +368,10 @@ class APIRequest extends APIFactory {
 
 				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -398,6 +398,9 @@ class APIRequest extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
+		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
+		$permission_children_ids = $this->getPermissionChildren();
+
 		Debug::Text( 'Received data for: ' . count( $data ) . ' Requests', __FILE__, __LINE__, __METHOD__, 10 );
 		Debug::Arr( $data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -405,7 +408,7 @@ class APIRequest extends APIFactory {
 		$validator = $save_result = $key = false;
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -418,7 +421,8 @@ class APIRequest extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check( 'request', 'delete' )
-								|| ( $this->getPermissionObject()->Check( 'request', 'delete_own' ) && $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === true ) ) {
+								|| ( $this->getPermissionObject()->Check( 'request', 'delete_own' ) && $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === true )
+								|| ( $this->getPermissionObject()->Check( 'request', 'delete_child' ) && $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === true ) ) {
 							Debug::Text( 'Record Exists, deleting record ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 							$lf = $lf->getCurrent();
 						} else {
@@ -457,10 +461,10 @@ class APIRequest extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}

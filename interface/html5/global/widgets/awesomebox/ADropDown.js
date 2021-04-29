@@ -1221,7 +1221,7 @@
 
 			}
 
-			var close_btn = $( '<button class="close-btn"><img src="' + Global.getRealImagePath( 'images/close.png' ) + '"/></button>' );
+			var close_btn = $( '<button class="close-btn"><img src="' + Global.getRealImagePath( 'images/close.png' ) + '"></img></button>' );
 
 			//close_btn.width( unselect_grid_header_array[0].getWidth() + 2 );
 			//close_btn.width( 22 );
@@ -1412,7 +1412,7 @@
 
 			}
 
-			var close_btn = $( '<button class="close-btn"><img src="' + Global.getRealImagePath( 'images/close.png' ) + '"/></button>' );
+			var close_btn = $( '<button class="close-btn"><img src="' + Global.getRealImagePath( 'images/close.png' ) + '"></img></button>' );
 
 			if ( allow_multiple_selection ) {
 				//close_btn.width( 22 )

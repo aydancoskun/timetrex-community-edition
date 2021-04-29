@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,7 +46,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -103,7 +104,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setSecondaryTransactionDayOfMonth( 5 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
@@ -140,6 +141,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					$end_date = $start_date;
@@ -880,7 +882,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					}
 
 					break;
-				case 60:
 				case 70:
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
@@ -1387,7 +1388,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+7 years', $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 4038000 );
+		$this->assertEquals( 4038000, $accrual_balance );
 	}
 
 	/**
@@ -1415,7 +1416,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+5 years', $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 144000 );
+		$this->assertEquals( 144000, $accrual_balance );
 	}
 
 	/**
@@ -1444,7 +1445,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
 		//$this->assertEquals( $accrual_balance, 434733 ); //Was this value before we added pro-rating/opening balance. The only difference was the first entry.
-		$this->assertEquals( $accrual_balance, 431964 );
+		$this->assertEquals( 431964, $accrual_balance );
 	}
 
 
@@ -1473,7 +1474,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+2 years', $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 431964 );
+		$this->assertEquals( 431964, $accrual_balance );
 	}
 
 
@@ -1502,7 +1503,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+2 years', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 432000 ); //Was this value before we added pro-rating/opening balance. The only difference was the first entry.
+		$this->assertEquals( 432000, $accrual_balance ); //Was this value before we added pro-rating/opening balance. The only difference was the first entry.
 		//$this->assertEquals( $accrual_balance, 420000 );
 	}
 
@@ -1531,7 +1532,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+2 years', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 432000 );
+		$this->assertEquals( 432000, $accrual_balance );
 	}
 
 	/**
@@ -1559,7 +1560,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+2 years', $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 432000 );
+		$this->assertEquals( 432000, $accrual_balance );
 	}
 
 
@@ -1588,7 +1589,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+2 years', $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 432000 );
+		$this->assertEquals( 432000, $accrual_balance );
 	}
 
 	/**
@@ -1616,7 +1617,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+2 years', $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 432000 );
+		$this->assertEquals( 432000, $accrual_balance );
 	}
 
 	/**
@@ -1644,7 +1645,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+2 years', $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 432000 );
+		$this->assertEquals( 432000, $accrual_balance );
 	}
 
 	/**
@@ -1672,7 +1673,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+5 years', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 1296000 );
+		$this->assertEquals( 1296000, $accrual_balance );
 	}
 
 	/**
@@ -1700,7 +1701,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+5 years', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 1296000 );
+		$this->assertEquals( 1296000, $accrual_balance );
 	}
 
 	/**
@@ -1728,7 +1729,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+5 years', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 1296000 );
+		$this->assertEquals( 1296000, $accrual_balance );
 	}
 
 	/**
@@ -1756,7 +1757,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+13 months', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 81600 );
+		$this->assertEquals( 81600, $accrual_balance );
 	}
 
 	/**
@@ -1784,11 +1785,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+26 months', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 105600 );
+		$this->assertEquals( 105600, $accrual_balance );
 	}
 
 	/**
 	 * @group AccrualPolicy_testMonthlyCalendarAccrualwithRolloverC2
+	 * @noinspection PhpInconsistentReturnPointsInspection
 	 */
 	function testMonthlyCalendarAccrualwithRolloverC2() {
 		global $dd;
@@ -1819,11 +1821,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+37 months', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 129600 );
+		$this->assertEquals( 129600, $accrual_balance );
 	}
 
 	/**
 	 * @group AccrualPolicy_testMonthlyCalendarAccrualwithRolloverC3
+	 * @noinspection PhpInconsistentReturnPointsInspection
 	 */
 	function testMonthlyCalendarAccrualwithRolloverC3() {
 		global $dd;
@@ -1854,7 +1857,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime( '+37 months', $current_epoch ), 1 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 201600 );
+		$this->assertEquals( 201600, $accrual_balance );
 	}
 
 	/**
@@ -2422,11 +2425,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		);
 
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		//Make sure balance starts at 0
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, 0 );
+		$this->assertEquals( 0, $accrual_balance );
 
 		//Day 1
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
@@ -2435,104 +2437,78 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Day 2
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 1, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 2 * -3600 ) );
 
 		//Day 3
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 2, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 3 * -3600 ) );
 
 		//Day 4
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 3, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 4 * -3600 ) );
 
 		//Day 5
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 4, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 5 * -3600 ) );
 
 		//Day 6
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 5, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 6 * -3600 ) );
 
 		//Day 7
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 6, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 7 * -3600 ) );
 
 		//Day 8
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 7, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 8 * -3600 ) );
 
 		//Day 9
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 8, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 9 * -3600 ) );
 
 		//Day 10
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 9, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 10 * -3600 ) );
 
 		//Day 11
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 10, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 11 * -3600 ) );
 
 		//Day 12
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 11, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 12 * -3600 ) );
 
 		//Day 13
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 12, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 13 * -3600 ) );
 
 		//Day 14
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginWeekEpoch( time() ), 13, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
-
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 1 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 14 * -3600 ) );
@@ -2560,7 +2536,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$policy_ids['regular'][10] = $dd->createRegularTimePolicy( $this->company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
 
-		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$this->getUserObject( $this->user_id )->getHireDate();
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1000, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
@@ -2618,7 +2594,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Add batch of punches
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 		$this->createPunches( $date_epoch, TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 9, 'day' ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 110 * 3600 ) );
@@ -2661,6 +2636,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * @group AccrualPolicy_testHourAccrualB
+	 * @noinspection PhpInconsistentReturnPointsInspection
 	 */
 	function testHourAccrualB() {
 		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
@@ -2741,7 +2717,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Add batch of punches
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 		$this->createPunches( $date_epoch, TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 9, 'day' ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 220 * 3600 ) );
@@ -2804,7 +2779,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$policy_ids['regular'][10] = $dd->createRegularTimePolicy( $this->company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
 		$policy_ids['absence_policy'][10] = $dd->createAbsencePolicy( $this->company_id, 10, $policy_ids['pay_code'][910] );
 
-		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$this->getUserObject( $this->user_id )->getHireDate();
 
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1010, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
 		$dd->createPolicyGroup( $this->company_id,
@@ -2859,7 +2834,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Add batch of punches
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 		$this->createPunches( $date_epoch, TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 9, 'day' ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 110 * 3600 ) );
@@ -2901,7 +2875,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 12, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 5 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 113 * 3600 ) ); //Reduce maximum balance, so we can hit again below.
@@ -3145,7 +3118,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Make sure the proper accrual records exist that reduce the accrual, then accrue more on the last three days.
 		$accrual_arr = $this->getAccrualArray( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( count( $accrual_arr ), 13 ); //13 total days.
+		$this->assertCount( 13, $accrual_arr ); //13 total days.
 
 		$date_epoch = TTDate::getMiddleDayEpoch( strtotime( '27-Mar-01' ) );
 		$this->assertArrayHasKey( $date_epoch, $accrual_arr );
@@ -3246,7 +3219,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Add batch of punches
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) ), 1, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 		$this->createPunches( $date_epoch, TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 9, 'day' ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 110 * 3600 ) );
@@ -3288,7 +3260,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		$date_epoch = TTDate::incrementDate( TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) ), 12, 'day' );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 		$dd->createAbsence( $this->user_id, $date_epoch, ( 5 * 3600 ), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, ( 107 * 3600 ) ); //Reduce maximum balance, so we can hit again below.
@@ -3445,7 +3416,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testInApplyFrequencyWindowA() {
 		global $config_vars;
-		//Test InApplyFrequency when the system timezone is EST5EDT, but some users are MST5MDT.
+		//Test InApplyFrequency when the system timezone is 'America/New_York', but some users are 'America/Denver'.
 		$user_obj = $this->getUserObject( $this->user_id );
 
 		$ap_obj = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $ap_obj */
@@ -3458,37 +3429,37 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$offset = 79200;
 
 		$current_epoch = strtotime( '14-Aug-2016 1:30AM EDT' );
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
 
 		$pay_period_dates = [ 'start_date' => strtotime( '31-Jul-2016 12:00AM' ), 'end_date' => strtotime( '13-Aug-2016 11:59:59PM' ) ];
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), true );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ) );
 
 
-		TTDate::setTimeZone( 'MST7MDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Denver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$pay_period_dates = [ 'start_date' => strtotime( '31-Jul-2016 12:00AM' ), 'end_date' => strtotime( '13-Aug-2016 11:59:59PM' ) ];
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '13-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '13-Aug-2016 11:59PM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 12:00AM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:30PM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:59:58PM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:59:59PM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:00PM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:01PM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:30PM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 11:59PM MDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 12:00AM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 12:01AM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 7:59PM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 8:00PM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 8:01PM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '16-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '17-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '13-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '13-Aug-2016 11:59PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 12:00AM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:30PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:59:58PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:59:59PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:00PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:01PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:30PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 11:59PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 12:00AM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 12:01AM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 7:59PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 8:00PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 8:01PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '16-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '17-Aug-2016 11:30PM MDT' ), $offset, $pay_period_dates, $user_obj ) );
 	}
 
 	/**
@@ -3496,7 +3467,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testInApplyFrequencyWindowB() {
 		global $config_vars;
-		//Test InApplyFrequency when the system timezone is MST5MDT, but some users are EST5EDT.
+		//Test InApplyFrequency when the system timezone is 'America/Denver', but some users are 'America/New_York'.
 		$user_obj = $this->getUserObject( $this->user_id );
 
 		$ap_obj = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $ap_obj */
@@ -3509,36 +3480,36 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$offset = 79200;
 
 		$current_epoch = strtotime( '14-Aug-2016 1:30AM MDT' );
-		TTDate::setTimeZone( 'MST7MDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Denver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
 
 		$pay_period_dates = [ 'start_date' => strtotime( '31-Jul-2016 12:00AM' ), 'end_date' => strtotime( '13-Aug-2016 11:59:59PM' ) ];
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), true );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ) );
 
 
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$pay_period_dates = [ 'start_date' => strtotime( '31-Jul-2016 12:00AM' ), 'end_date' => strtotime( '13-Aug-2016 11:59:59PM' ) ];
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '13-Aug-2016 11:30PM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '13-Aug-2016 11:59PM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 12:00AM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:30PM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:59:58PM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:59:59PM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:00PM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:01PM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:30PM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 11:30PM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 11:59PM EDT' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 12:00AM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 12:01AM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 7:59PM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 8:00PM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 8:01PM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 11:30PM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '16-Aug-2016 11:30PM EDT' ), $offset, $pay_period_dates, $user_obj ), false );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '13-Aug-2016 11:30PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '13-Aug-2016 11:59PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 12:00AM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:30PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:59:58PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 9:59:59PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:00PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:01PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 10:30PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 11:30PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '14-Aug-2016 11:59PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 12:00AM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 12:01AM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 7:59PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 8:00PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 8:01PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '15-Aug-2016 11:30PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '16-Aug-2016 11:30PM EDT' ), $offset, $pay_period_dates, $user_obj ) );
 	}
 
 	/**
@@ -3546,7 +3517,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testInApplyFrequencyWindowC() {
 		global $config_vars;
-		//Test InApplyFrequency when the system timezone is EST5EDT, but some users are MST5MDT.
+		//Test InApplyFrequency when the system timezone is 'America/New_York', but some users are 'America/Denver'.
 		$user_obj = $this->getUserObject( $this->user_id );
 
 		$ap_obj = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $ap_obj */
@@ -3559,34 +3530,34 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$offset = 79200;
 
 		$current_epoch = strtotime( '02-Jan-20 1:31 AM EST' ); //Was: 14-Aug-2016 1:30AM EDT
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
 
 		$pay_period_dates = [ 'start_date' => strtotime( '16-Jan-2020 12:00AM' ), 'end_date' => strtotime( '01-Jan-2020 11:59:59PM' ) ];
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), true );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ) );
 
 
 		TTDate::setTimeZone( 'US/Pacific', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$pay_period_dates = [ 'start_date' => strtotime( '16-Jan-2020 12:00AM' ), 'end_date' => strtotime( '01-Jan-2020 11:59:59PM' ) ];
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 11:30PM PST' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 11:59PM PST' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 8:30PM PST' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 8:59:58PM PST' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 8:59:59PM PST' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 9:00PM PST' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 9:01PM PST' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 9:30PM PST' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM PST' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:59PM PST' ), $offset, $pay_period_dates, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 11:00AM PST' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 11:01AM PST' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 6:59PM PST' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 7:00PM PST' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 7:01PM PST' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM PST' ), $offset, $pay_period_dates, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '04-Jan-2020 10:30PM PST' ), $offset, $pay_period_dates, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 11:30PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 11:59PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 8:30PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 8:59:58PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 8:59:59PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 9:00PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 9:01PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 9:30PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:59PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 11:00AM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 11:01AM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 6:59PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 7:00PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 7:01PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM PST' ), $offset, $pay_period_dates, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '04-Jan-2020 10:30PM PST' ), $offset, $pay_period_dates, $user_obj ) );
 	}
 
 	/**
@@ -3594,7 +3565,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testInApplyFrequencyWindowESTA() {
 		global $config_vars;
-		//Test InApplyFrequency when the system timezone is EST5EDT, but some users are MST5MDT.
+		//Test InApplyFrequency when the system timezone is 'America/New_York', but some users are 'America/Denver'.
 		$user_obj = $this->getUserObject( $this->user_id );
 
 		$ap_obj = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $ap_obj */
@@ -3608,16 +3579,16 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$offset = 79200;
 
 		$current_epoch = strtotime( '01-Jan-20 1:30 AM EST' );
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, null, $user_obj ), true );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, null, $user_obj ) );
 
 
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 1:30AM EST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ), false );
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 1:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ) );
 	}
 
 	/**
@@ -3625,7 +3596,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testInApplyFrequencyWindowESTB() {
 		global $config_vars;
-		//Test InApplyFrequency when the system timezone is EST5EDT, but some users are MST5MDT.
+		//Test InApplyFrequency when the system timezone is 'America/New_York', but some users are 'America/Denver'.
 		$user_obj = $this->getUserObject( $this->user_id );
 
 		$ap_obj = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $ap_obj */
@@ -3639,26 +3610,26 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$offset = 86400;
 
 		$current_epoch = strtotime( '01-Jan-20 1:30 AM EST' );
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, null, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, null, $user_obj ) );
 
 
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 10:30PM EST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 10:30PM EST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM EST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM EST' ), $offset, null, $user_obj ), false );
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 10:30PM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 10:30PM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM EST' ), $offset, null, $user_obj ) );
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 1:30AM EST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 1:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 1:30AM EST' ), $offset, null, $user_obj ) );
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 4:30AM EST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 4:30AM EST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 4:30AM EST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 4:30AM EST' ), $offset, null, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 4:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 4:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 4:30AM EST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 4:30AM EST' ), $offset, null, $user_obj ) );
 	}
 
 	/**
@@ -3666,7 +3637,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testInApplyFrequencyWindowPSTA() {
 		global $config_vars;
-		//Test InApplyFrequency when the system timezone is EST5EDT, but some users are MST5MDT.
+		//Test InApplyFrequency when the system timezone is 'America/New_York', but some users are 'America/Denver'.
 		$user_obj = $this->getUserObject( $this->user_id );
 
 		$ap_obj = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $ap_obj */
@@ -3680,26 +3651,26 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$offset = 79200;
 
 		$current_epoch = strtotime( '01-Jan-20 1:30 AM PST' );
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, null, $user_obj ), true );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, null, $user_obj ) );
 
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 10:30PM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), false );
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 1:30AM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 1:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ) );
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 4:30AM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 4:30AM PST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 4:30AM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 4:30AM PST' ), $offset, null, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 4:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 4:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 4:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 4:30AM PST' ), $offset, null, $user_obj ) );
 	}
 
 	/**
@@ -3707,7 +3678,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testInApplyFrequencyWindowPSTB() {
 		global $config_vars;
-		//Test InApplyFrequency when the system timezone is EST5EDT, but some users are MST5MDT.
+		//Test InApplyFrequency when the system timezone is 'America/New_York', but some users are 'America/Denver'.
 		$user_obj = $this->getUserObject( $this->user_id );
 
 		$ap_obj = TTnew( 'AccrualPolicyFactory' ); /** @var AccrualPolicyFactory $ap_obj */
@@ -3721,27 +3692,27 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$offset = 86400;
 
 		$current_epoch = strtotime( '01-Jan-20 1:30 AM PST' );
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, null, $user_obj ), true );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, null, $user_obj ) );
 
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 10:30PM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), false );
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 1:30AM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 1:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 1:30AM PST' ), $offset, null, $user_obj ) );
 
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '30-Dec-2019 10:30PM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 10:30PM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), true );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), false );
-		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ), false );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '30-Dec-2019 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '31-Dec-2019 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( true, $ap_obj->inApplyFrequencyWindow( strtotime( '01-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '02-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
+		$this->assertEquals( false, $ap_obj->inApplyFrequencyWindow( strtotime( '03-Jan-2020 10:30PM PST' ), $offset, null, $user_obj ) );
 	}
 
 	/**

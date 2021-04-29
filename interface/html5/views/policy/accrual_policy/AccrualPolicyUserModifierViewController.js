@@ -1,14 +1,19 @@
-AccrualPolicyUserModifierViewController = BaseViewController.extend( {
+class AccrualPolicyUserModifierViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#accrual_policy_user_modifier_view_container', //Must set el here and can only set string, so events can work
 
-	el: '#accrual_policy_user_modifier_view_container', //Must set el here and can only set string, so events can work
+			user_api: null,
 
-	user_api: null,
+			parent_view: null,
 
-	parent_view: null,
+			result_details: null
+		} );
 
-	result_details: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		if ( this.parent_view === 'employee' ) {
 			this.context_menu_name = $.i18n._( 'Accruals' );
@@ -23,8 +28,8 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		this.viewId = 'AccrualPolicyUserModifier';
 		this.table_name_key = 'accrual_policy_user_modifier';
 
-		this.api = new ( APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.api = TTAPI.APIAccrualPolicyUserModifier;
+		this.user_api = TTAPI.APIUser;
 
 		this.render();
 		if ( this.sub_view_mode ) {
@@ -39,19 +44,18 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		}
 
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.add, ContextMenuIconName.copy],
 			include: ['default']
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setSubLogViewFilter: function() {
+	setSubLogViewFilter() {
 		if ( !this.sub_log_view_controller ) {
 			return false;
 		}
@@ -65,9 +69,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		};
 
 		return true;
-	},
+	}
 
-	onAddClick: function() {
+	onAddClick() {
 		var $this = this;
 		this.setCurrentEditViewState( 'new' );
 		$this.openEditView();
@@ -93,10 +97,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	setSelectLayout: function( column_start_from ) {
+	setSelectLayout( column_start_from ) {
 		var $this = this;
 		var grid;
 		if ( !Global.isSet( this.grid ) ) {
@@ -301,14 +304,12 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		}
 
 		this.showGridBorders();
+	}
 
-	},
-
-	setGridSetup: function() {
+	setGridSetup() {
 		var $this = this;
 		return {
 			height: 200,
-			container_selector: '.grid-div',
 			onResizeGrid: true,
 			sub_grid_mode: this.sub_view_mode,
 			container_selector: container,
@@ -333,9 +334,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 				}
 			}
 		};
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		// Error: Unable to get property 'getGridParam' of undefined or null reference
 		var display_columns = [];
 		if ( this.grid ) {
@@ -363,12 +364,12 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	doEditAPICall: function( filter, api_args, _callback ) {
+	doEditAPICall( filter, api_args, _callback ) {
 		var record_id = this.getCurrentSelectedRecord();
 		if ( TTUUID.isUUID( record_id ) && record_id != TTUUID.not_exist_id && record_id != TTUUID.zero_id ) {
-			return this._super( 'doEditAPICall', filter, api_args, _callback );
+			return super.doEditAPICall( filter, api_args, _callback );
 		} else {
 			var result_data = this.getRecordFromGridById( record_id );
 
@@ -377,9 +378,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			}
 			return this.handleEditAPICallbackResult( result_data );
 		}
-	},
+	}
 
-	onSaveResult: function( result ) {
+	onSaveResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 
@@ -409,9 +410,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
+	}
 
-	search: function( set_default_menu, page_action, page_number, callBack ) {
+	search( set_default_menu, page_action, page_number, callBack ) {
 		if ( !Global.isSet( set_default_menu ) ) {
 			set_default_menu = true;
 		}
@@ -622,12 +623,11 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -638,7 +638,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ) ),
+			api_class: TTAPI.APIAccrualPolicyUserModifier,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.WAGE,
@@ -664,7 +664,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -683,7 +683,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) ),
+			api_class: TTAPI.APIAccrualPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY,
 			show_search_inputs: true,
@@ -757,10 +757,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'rollover_time' } );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Maximum Rollover' ), form_item_input, tab_employee_accrual_modifier_column1, '', null, true );
+	}
 
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
@@ -789,10 +788,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		this.getAccrualPolicyDataFromUserModifier();
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		var $this = this;
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -831,10 +829,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 				this.getAccrualPolicyDataFromUserModifier();
 				break;
 		}
+	}
 
-	},
-
-	getAccrualPolicyDataFromUserModifier: function() {
+	getAccrualPolicyDataFromUserModifier() {
 		var $this = this;
 
 		var record = {};
@@ -867,15 +864,21 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 				$this.setAccrualPolicyDataFromUserModifier( result_data );
 			}
 		} );
+	}
 
-	},
-
-	setAccrualPolicyDataFromUserModifier: function( result_data ) {
+	setAccrualPolicyDataFromUserModifier( result_data ) {
 		var $this = this;
 		if ( Global.isSet( result_data ) && !Global.isFalseOrNull( result_data ) ) {
 
+			var accrual_rate = 0;
+			if ( result_data && result_data.accrual_policy_type_id && result_data.accrual_policy_type_id == 20 ) { //Calendar
+				accrual_rate = Global.getTimeUnit( result_data.accrual_rate )
+			} else { //Hourly
+				accrual_rate = result_data.accrual_rate;
+			}
+
 			$this.edit_view_form_item_dic['separated_2'].find( '.label' ).text( $.i18n._( 'Current Milestone' ) + ': ' + result_data.milestone_number );
-			$this.edit_view_ui_dic['accrual_rate'].setValue( Global.getTimeUnit( result_data.accrual_rate ) );
+			$this.edit_view_ui_dic['accrual_rate'].setValue( accrual_rate );
 			$this.edit_view_ui_dic['maximum_time'].setValue( Global.getTimeUnit( result_data.maximum_time ) );
 			$this.edit_view_ui_dic['rollover_time'].setValue( Global.getTimeUnit( result_data.rollover_time ) );
 
@@ -895,30 +898,29 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	removeEditView: function() {
-		this._super( 'removeEditView' );
+	removeEditView() {
+		super.removeEditView();
 
 		if ( this.parent_view === 'accrual_policy' ) {
 
 			this.context_menu_name = $.i18n._( 'Employee Settings' );
 			$( '.ribbonTabLabel' ).find( 'a[ref=' + this.viewId + 'ContextMenu' + ']' ).text( $.i18n._( 'Employee Settings' ) );
 		}
+	}
 
-	},
-
-	getAPIFilters: function() {
-		var filter = this._super( 'getAPIFilters' );
+	getAPIFilters() {
+		var filter = super.getAPIFilters();
 
 		if ( this.sub_view_mode && this.parent_key ) {
 			filter.filter_data[this.parent_key] = this.parent_value;
 		}
 
 		return filter;
-	},
+	}
 
-	onMassEditClick: function() {
+	onMassEditClick() {
 
 		var $this = this;
 		$this.is_add = false;
@@ -970,10 +972,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	validate: function() {
+	validate() {
 		var $this = this;
 
 		var record;
@@ -1049,9 +1050,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick( ignoreWarning ) {
 		var $this = this;
 		var record;
 		if ( !Global.isSet( ignoreWarning ) ) {
@@ -1108,9 +1109,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setDefaultMenuDeleteIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDeleteIcon( context_btn, grid_selected_length, pId ) {
 		if ( ( !this.addPermissionValidate( pId ) && !this.editPermissionValidate( pId ) ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -1127,14 +1128,14 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		if ( !enabled ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	searchDone: function() {
-		this.__super( 'searchDone' );
+	searchDone() {
+		super.searchDone();
 		TTPromise.resolve( 'AccrualView', 'init' );
 	}
 
-} );
+}
 
 AccrualPolicyUserModifierViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 

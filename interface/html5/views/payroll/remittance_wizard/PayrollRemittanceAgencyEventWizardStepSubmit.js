@@ -1,62 +1,71 @@
-PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
-	name: 'summary',
-	api: null,
-	el: $( '.wizard.process_transactions_wizard' ),
+class PayrollRemittanceAgencyEventWizardStepSubmit extends WizardStep {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			name: 'summary',
+			api: null,
+			el: $( '.wizard.process_transactions_wizard' ),
 
-	report_paths: {
-		'FormW2ReportViewController': 'views/reports/formw2/FormW2ReportViewController'
-	},
+			report_paths: {
+				'FormW2ReportViewController': 'views/reports/formw2/FormW2ReportViewController'
+			}
 
-	init: function() {
+		} );
+
+		super( options );
+	}
+
+	init() {
 		this.render();
 
-		this.api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
+		this.api = TTAPI.APIPayrollRemittanceAgencyEvent;
+	}
 
-	},
-
-	getPreviousStepName: function() {
+	getPreviousStepName() {
 		return 'review';
-	},
+	}
 
-	getNextStepName: function() {
+	getNextStepName() {
+		var retval = false;
 		switch ( this.getWizardObject().selected_remittance_agency_event.type_id ) {
 			//Canada
 			case 'T4':
 			case 'T4A':
-				return 'publish';
+				retval = 'publish';
 				break;
 
 			//US
 			case 'FW2':
 				//Only have a publish step when its a federal W2, since it includes copies of the W2s for State/Local.
 				if ( this.getWizardObject().selected_remittance_agency_event.payroll_remittance_agency_obj.type_id == 10 ) { //10=Federal
-					return 'publish';
+					retval = 'publish';
 				} else {
-					return false;
+					retval = false;
 				}
 
 				break;
 
 			case 'F1099MISC':
-				return 'publish';
+				retval = 'publish';
 				break;
 
 			default:
-				return false;
+				retval = false;
 				break;
 		}
-	},
 
-	isRequiredButtonsClicked: function() {
+		return retval;
+	}
+
+	isRequiredButtonsClicked() {
 		//Check to see if every button on this step has been clicked.
 		if ( Object.keys( this.clicked_buttons ).length >= Object.keys( this.buttons ).length ) {
 			return true;
 		}
 
 		return false;
-	},
+	}
 
-	_render: function() {
+	_render() {
 		this.setTitle( $.i18n._( 'Submit Verified Information' ) );
 		this.setInstructions( $.i18n._( 'Submit verified information to the agency' ) + ': ' );
 
@@ -236,9 +245,9 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 
 			$this.getWizardObject().enableButtons();
 		} );
-	},
+	}
 
-	_onNavigationClick: function( icon ) {
+	_onNavigationClick( icon ) {
 		//When navigating away, link the wizard.
 		var $this = this;
 		if ( $this.getWizardObject().selected_remittance_agency_event.status_id == 15 ) { //15=Full Service
@@ -405,6 +414,5 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend( {
 					break;
 			}
 		}
-
 	}
-} );
+}

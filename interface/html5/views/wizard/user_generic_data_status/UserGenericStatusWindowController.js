@@ -1,28 +1,24 @@
-UserGenericStatusWindowController = BaseViewController.extend( {
+class UserGenericStatusWindowController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			// el: '.user-generic-data-status',
+			el: '', // el is set to the DOM id which is set in UserGenericStatusWindowController.open()
 
-	// el: '.user-generic-data-status',
-	el: '', // el is set to the DOM id which is set in UserGenericStatusWindowController.open()
+			batch_id: '',
+			user_id: '',
 
-	batch_id: '',
-	user_id: '',
+			callback: null,
 
-	callback: null,
+			events: {
+				'click .done-btn': 'onCloseClick'
+			},
 
-	events: {
-		'click .done-btn': 'onCloseClick'
-	},
+		} );
 
-	onCloseClick: function() {
-		// UserGenericStatusWindowController.instance = null;
-		$( this.el ).remove();
+		super( options );
+	}
 
-		if ( this.callback ) {
-			this.callback();
-		}
-
-	},
-
-	init: function( options ) {
+	init( options ) {
 		this.options = options;
 		this.content_div = $( this.el ).find( '.content' );
 		this.batch_id = this.options.batch_id;
@@ -32,41 +28,50 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 			this.callback = this.options.callback;
 		}
 
-		this.api = new ( APIFactory.getAPIClass( 'APIUserGenericStatus' ) )();
+		this.api = TTAPI.APIUserGenericStatus;
 		this.render();
 		this.initData();
 
-	},
+	}
 
 	//Don't initOptions if edit_only_mode. Do it in sub views
-	initData: function() {
+	initData() {
 		var $this = this;
 		ProgressBar.showOverlay();
 		this.getAllColumns( function() {
 			$this.initLayout();
 		} );
-	},
+	}
 
-	initLayout: function() {
+	initLayout() {
 		var $this = this;
 		$this.getDefaultDisplayColumns( function() {
 			$this.setSelectLayout();
 			$this.search();
 
 		} );
-	},
+	}
 
-	render: function() {
+	onCloseClick() {
+		// UserGenericStatusWindowController.instance = null;
+		$( this.el ).remove();
+
+		if ( this.callback ) {
+			this.callback();
+		}
+	}
+
+	render() {
 		var title = $( this.el ).find( '.title' );
 		title.text( $.i18n._( 'Status Report' ) );
 
-	},
+	}
 
-	getAllColumns: function( callBack ) {
+	getAllColumns( callBack ) {
 
 		var $this = this;
 		this.api.getOptions( 'columns', {
-			onResult: function( columns_result ) {
+			onResult( columns_result ) {
 				var columns_result_data = columns_result.getResult();
 				$this.all_columns = Global.buildColumnArray( columns_result_data );
 
@@ -77,9 +82,9 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 			}
 		} );
 
-	},
+	}
 
-	search: function( set_default_menu ) {
+	search( set_default_menu ) {
 
 		if ( !Global.isSet( set_default_menu ) ) {
 			set_default_menu = true;
@@ -129,13 +134,13 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 			}
 		} );
 
-	},
+	}
 
-	setGridSize: function() {
+	setGridSize() {
 
-	},
+	}
 
-	setSelectLayout: function( column_start_from ) {
+	setSelectLayout( column_start_from ) {
 
 		var $this = this;
 		var column_info_array = [];
@@ -235,7 +240,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		this.filter_data = this.select_layout.data.filter_data;
 	}
 
-} );
+}
 
 // UserGenericStatusWindowController.instance = null;
 

@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -70,20 +70,20 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 		$result = $deptree->_buildTree();
 
-		$should_match = [
-				0 => 'A-1',
-				1 => 'A-2',
-				2 => 'A-3',
-		];
+		//$should_match = [
+		//		0 => 'A-1',
+		//		1 => 'A-2',
+		//		2 => 'A-3',
+		//];
 
 		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'A-2', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'A-2', $result ) < $this->indexOf( 'A-3', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test3 = $this->indexOf( 'A-3', $result ) == 2 ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 	}
 
 	function testModerate_1() {
@@ -100,25 +100,25 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$result = $deptree->_buildTree();
 
 		//var_dump($result);
-		$should_match = [
-				0 => 'A-1',
-				1 => 'A-2',
-				2 => 'A-3',
-				3 => 'B-1',
-				4 => 'B-2',
-		];
+		//$should_match = [
+		//		0 => 'A-1',
+		//		1 => 'A-2',
+		//		2 => 'A-3',
+		//		3 => 'B-1',
+		//		4 => 'B-2',
+		//];
 
 		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'A-2', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'A-2', $result ) < $this->indexOf( 'A-3', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test3 = $this->indexOf( 'B-1', $result ) < $this->indexOf( 'B-2', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 
 		$test4 = $this->indexOf( 'B-1', $result ) > $this->indexOf( 'A-2', $result ) ? true : false;
-		$this->assertEquals( $test4, true );
+		$this->assertEquals( true, $test4 );
 	}
 
 	function testCircularDependency_1() {
@@ -131,13 +131,13 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 		$result = $deptree->_buildTree();
 
-		$should_match = [
-				0 => 'B',
-				1 => 'A',
-		];
+		//$should_match = [
+		//		0 => 'B',
+		//		1 => 'A',
+		//];
 
 		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 	}
 
 	function testCircularDependency_1B() {
@@ -150,14 +150,13 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 		$result = $deptree->_buildTree();
 
-		$should_match = [
-				0 => 'A',
-				1 => 'B',
-
-		];
+		//$should_match = [
+		//		0 => 'A',
+		//		1 => 'B',
+		//];
 
 		$test1 = $this->indexOf( 'A', $result ) < $this->indexOf( 'B', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 	}
 
 	function testCircularDependency_2() {
@@ -170,13 +169,13 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 		$result = $deptree->_buildTree();
 
-		$should_match = [
-				0 => 'B',
-				1 => 'A',
-		];
+		//$should_match = [
+		//		0 => 'B',
+		//		1 => 'A',
+		//];
 
 		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 	}
 
 	function testCircularDependency_3() {
@@ -189,13 +188,13 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 		$result = $deptree->_buildTree();
 
-		$should_match = [
-				0 => 'B',
-				1 => 'A',
-		];
+		//$should_match = [
+		//		0 => 'B',
+		//		1 => 'A',
+		//];
 
 		$test1 = $this->indexOf( 'B', $result ) < $this->indexOf( 'A', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 	}
 
 	function testCircularDependency_4() {
@@ -209,20 +208,20 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 		$result = $deptree->_buildTree();
 
-		$should_match = [
-				0 => 'HSA',
-				1 => 'SS-EE',
-				2 => 'SS-ER',
-		];
+		//$should_match = [
+		//		0 => 'HSA',
+		//		1 => 'SS-EE',
+		//		2 => 'SS-ER',
+		//];
 
 		$test1 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-EE', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-ER', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test3 = $this->indexOf( 'SS-EE', $result ) < $this->indexOf( 'SS-ER', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 	}
 
 	function testCircularDependency_4b() {
@@ -237,24 +236,24 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 		$result = $deptree->_buildTree();
 
-		$should_match = [
-				0 => 'HSA2',
-				1 => 'HSA',
-				2 => 'SS-EE',
-				3 => 'SS-ER',
-		];
+		//$should_match = [
+		//		0 => 'HSA2',
+		//		1 => 'HSA',
+		//		2 => 'SS-EE',
+		//		3 => 'SS-ER',
+		//];
 
 		$test1 = $this->indexOf( 'HSA2', $result ) < $this->indexOf( 'HSA', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-EE', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test3 = $this->indexOf( 'HSA', $result ) < $this->indexOf( 'SS-ER', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 
 		$test4 = $this->indexOf( 'SS-EE', $result ) < $this->indexOf( 'SS-ER', $result ) ? true : false;
-		$this->assertEquals( $test4, true );
+		$this->assertEquals( true, $test4 );
 	}
 
 	function testHard_1() {
@@ -267,20 +266,20 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 		$result = $deptree->_buildTree();
 
-		$should_match = [
-				0 => 'A-1',
-				1 => 'B-1',
-				2 => 'A-2',
-		];
+		//$should_match = [
+		//		0 => 'A-1',
+		//		1 => 'B-1',
+		//		2 => 'A-2',
+		//];
 
 		$test1 = $this->indexOf( 'A-1', $result ) < $this->indexOf( 'B-1', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'B-1', $result ) < $this->indexOf( 'A-2', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test3 = $this->indexOf( 'A-2', $result ) == 2 ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 	}
 
 	function testHard_2() {
@@ -297,28 +296,28 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = [
-				0 => 'Test1',
-				1 => 'Test3',
-				2 => 'VacAccrual',
-				3 => 'VacRelease',
-				4 => ' Test2',
-		];
+		//$should_match = [
+		//		0 => 'Test1',
+		//		1 => 'Test3',
+		//		2 => 'VacAccrual',
+		//		3 => 'VacRelease',
+		//		4 => ' Test2',
+		//];
 
 		$test1 = $this->indexOf( 'Test1', $result ) < $this->indexOf( 'Test3', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'Test3', $result ) < $this->indexOf( 'VacAccrual', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test2b = $this->indexOf( ' Test2', $result ) < $this->indexOf( 'VacAccrual', $result ) ? true : false;
-		$this->assertEquals( $test2b, true );
+		$this->assertEquals( true, $test2b );
 
 		$test3 = $this->indexOf( 'VacAccrual', $result ) < $this->indexOf( 'VacRelease', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 
 		$test4 = $this->indexOf( 'VacRelease', $result ) == 4 ? true : false;
-		$this->assertEquals( $test4, true );
+		$this->assertEquals( true, $test4 );
 	}
 
 	function testHard_3() {
@@ -339,38 +338,38 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = [
-				0 => 'Test1',
-				1 => 'Test3',
-				2 => 'VacAccrual',
-				3 => 'VacRelease',
-				4 => ' Test2',
-				5 => 'Test4',
-				6 => 'Test5',
-		];
+		//$should_match = [
+		//		0 => 'Test1',
+		//		1 => 'Test3',
+		//		2 => 'VacAccrual',
+		//		3 => 'VacRelease',
+		//		4 => ' Test2',
+		//		5 => 'Test4',
+		//		6 => 'Test5',
+		//];
 
 		$test1 = $this->indexOf( 'Test1', $result ) < $this->indexOf( 'Test3', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'Test3', $result ) < $this->indexOf( 'VacAccrual', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test2b = $this->indexOf( ' Test2', $result ) < $this->indexOf( 'Test4', $result ) ? true : false;
-		$this->assertEquals( $test2b, true );
+		$this->assertEquals( true, $test2b );
 
 		$test2c = $this->indexOf( ' Test4', $result ) < $this->indexOf( 'VacAccrual', $result ) ? true : false;
-		$this->assertEquals( $test2b, true );
+		$this->assertEquals( true, $test2c );
 
 		$test3 = $this->indexOf( 'VacAccrual', $result ) < $this->indexOf( 'VacRelease', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 
 		$test4 = $this->indexOf( 'Test5', $result ) > $this->indexOf( 'Test4', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test4 );
 		$test4b = $this->indexOf( 'Test5', $result ) > $this->indexOf( 'VacAccrual', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test4b );
 
 		$test5 = $this->indexOf( 'Test5', $result ) == 6 ? true : false;
-		$this->assertEquals( $test5, true );
+		$this->assertEquals( true, $test5 );
 	}
 
 	function testPerf_1() {
@@ -392,48 +391,48 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = [
-				0 => 'P2265',
-				1 => 'P2458',
-				2 => 'U1294',
-				3 => 'U1287',
-				4 => 'U1288',
-				5 => 'U1289',
-				6 => 'U1290',
-				7 => 'U1291',
-				8 => 'U1292',
-				9 => 'U1293',
-		];
+		//$should_match = [
+		//		0 => 'P2265',
+		//		1 => 'P2458',
+		//		2 => 'U1294',
+		//		3 => 'U1287',
+		//		4 => 'U1288',
+		//		5 => 'U1289',
+		//		6 => 'U1290',
+		//		7 => 'U1291',
+		//		8 => 'U1292',
+		//		9 => 'U1293',
+		//];
 
 		$test1 = $this->indexOf( 'P2265', $result ) < $this->indexOf( 'P2458', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'P2458', $result ) < $this->indexOf( 'U1287', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test3 = $this->indexOf( 'U1287', $result ) < $this->indexOf( 'U1289', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 
 		$test4 = $this->indexOf( 'U1289', $result ) < $this->indexOf( 'U1292', $result ) ? true : false;
-		$this->assertEquals( $test4, true );
+		$this->assertEquals( true, $test4 );
 
 		$test5 = $this->indexOf( 'U1292', $result ) < $this->indexOf( 'U1293', $result ) ? true : false;
-		$this->assertEquals( $test5, true );
+		$this->assertEquals( true, $test5 );
 
 		$test6 = $this->indexOf( 'U1293', $result ) < $this->indexOf( 'U1294', $result ) ? true : false;
-		$this->assertEquals( $test6, true );
+		$this->assertEquals( true, $test6 );
 
 		$test7 = $this->indexOf( 'U1294', $result ) < $this->indexOf( 'U1291', $result ) ? true : false;
-		$this->assertEquals( $test7, true );
+		$this->assertEquals( true, $test7 );
 
 		$test8 = $this->indexOf( 'U1291', $result ) < $this->indexOf( 'U1288', $result ) ? true : false;
-		$this->assertEquals( $test8, true );
+		$this->assertEquals( true, $test8 );
 
 		$test9 = $this->indexOf( 'U1288', $result ) < $this->indexOf( 'U1290', $result ) ? true : false;
-		$this->assertEquals( $test9, true );
+		$this->assertEquals( true, $test9 );
 
 		$test10 = $this->indexOf( 'U1290', $result ) == 9 ? true : false;
-		$this->assertEquals( $test10, true );
+		$this->assertEquals( true, $test10 );
 	}
 
 	function testHard_4() {
@@ -455,32 +454,32 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = [
-				0 => 'P3072',
-				1 => 'U2022',
-				2 => 'P3071',
-				3 => 'U2129',
-				4 => 'U2130',
-				5 => 'P3073',
-		];
+		//$should_match = [
+		//		0 => 'P3072',
+		//		1 => 'U2022',
+		//		2 => 'P3071',
+		//		3 => 'U2129',
+		//		4 => 'U2130',
+		//		5 => 'P3073',
+		//];
 
 		$test1 = $this->indexOf( 'P3072', $result ) < $this->indexOf( 'P3073', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test2 = $this->indexOf( 'P3073', $result ) < $this->indexOf( 'U2022', $result ) ? true : false;
-		$this->assertEquals( $test2, true );
+		$this->assertEquals( true, $test2 );
 
 		$test3 = $this->indexOf( 'U2022', $result ) < $this->indexOf( 'P3071', $result ) ? true : false;
-		$this->assertEquals( $test3, true );
+		$this->assertEquals( true, $test3 );
 
 		$test4 = $this->indexOf( 'P3071', $result ) < $this->indexOf( 'U2129', $result ) ? true : false;
-		$this->assertEquals( $test4, true );
+		$this->assertEquals( true, $test4 );
 
 		$test5 = $this->indexOf( 'U2129', $result ) < $this->indexOf( 'U2130', $result ) ? true : false;
-		$this->assertEquals( $test5, true );
+		$this->assertEquals( true, $test5 );
 
 		$test10 = $this->indexOf( 'U2130', $result ) == 5 ? true : false;
-		$this->assertEquals( $test10, true );
+		$this->assertEquals( true, $test10 );
 	}
 
 	function testHard_5() {
@@ -809,60 +808,60 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		//var_dump($result);
 
 		//THIS MAY NOT BE CORRECT...
-		$should_match = [
-				0  => 'P3217',
-				1  => 'P3290',
-				2  => 'P3294',
-				3  => 'U2029',
-				4  => 'U2060',
-				5  => 'U2061',
-				6  => 'U2062',
-				7  => 'U2063',
-				8  => 'U2064',
-				9  => 'U2065',
-				10 => 'U2066',
-				11 => 'U2068',
-				12 => 'U2067',
-		];
+		//$should_match = [
+		//		0  => 'P3217',
+		//		1  => 'P3290',
+		//		2  => 'P3294',
+		//		3  => 'U2029',
+		//		4  => 'U2060',
+		//		5  => 'U2061',
+		//		6  => 'U2062',
+		//		7  => 'U2063',
+		//		8  => 'U2064',
+		//		9  => 'U2065',
+		//		10 => 'U2066',
+		//		11 => 'U2068',
+		//		12 => 'U2067',
+		//];
 
 		$test1 = $this->indexOf( 'P3217', $result ) < $this->indexOf( 'P3290', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'P3290', $result ) < $this->indexOf( 'P3294', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'P3294', $result ) < $this->indexOf( 'U2067', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2067', $result ) < $this->indexOf( 'U2029', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2029', $result ) < $this->indexOf( 'U2060', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2060', $result ) < $this->indexOf( 'U2062', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2062', $result ) < $this->indexOf( 'U2065', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2065', $result ) < $this->indexOf( 'U2064', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2064', $result ) < $this->indexOf( 'U2066', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2066', $result ) < $this->indexOf( 'U2068', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2068', $result ) < $this->indexOf( 'U2061', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U2061', $result ) < $this->indexOf( 'U2063', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test10 = $this->indexOf( 'U2063', $result ) == 12 ? true : false;
-		$this->assertEquals( $test10, true );
+		$this->assertEquals( true, $test10 );
 	}
 
 	function testHard_6() {
@@ -1038,29 +1037,29 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = [
-				0 => 'U156',
-				1 => 'U4452',
-				2 => 'U149',
-				3 => 'U153',
-				4 => 'U998',
-		];
+		//$should_match = [
+		//		0 => 'U156',
+		//		1 => 'U4452',
+		//		2 => 'U149',
+		//		3 => 'U153',
+		//		4 => 'U998',
+		//];
 
 
 		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test5 = $this->indexOf( 'U149', $result ) == 4 ? true : false;
-		$this->assertEquals( $test5, true );
+		$this->assertEquals( true, $test5 );
 	}
 
 	function testTwoTrees_1() {
@@ -1089,46 +1088,46 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = [
-				0 => 'U156',
-				1 => 'U4452',
-				2 => 'U149',
-				3 => 'U153',
-				4 => 'U998',
-		];
+		//$should_match = [
+		//		0 => 'U156',
+		//		1 => 'U4452',
+		//		2 => 'U149',
+		//		3 => 'U153',
+		//		4 => 'U998',
+		//];
 
 
 		//Tree 1
 		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test5 = $this->indexOf( 'U149', $result ) == 4 ? true : false;
-		$this->assertEquals( $test5, true );
+		$this->assertEquals( true, $test5 );
 
 		//Tree 2
 		$test1 = $this->indexOf( 'Z156', $result ) < $this->indexOf( 'Z998', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'Z998', $result ) < $this->indexOf( 'Z153', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'Z153', $result ) < $this->indexOf( 'Z4452', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'Z4452', $result ) < $this->indexOf( 'Z149', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test5 = $this->indexOf( 'Z149', $result ) == 9 ? true : false;
-		$this->assertEquals( $test5, true );
+		$this->assertEquals( true, $test5 );
 	}
 
 	function testTwoTrees_2() {
@@ -1157,53 +1156,53 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 		$result = $deptree->_buildTree();
 		//var_dump($result);
 
-		$should_match = [
-				0 => 'U156',
-				1 => 'U4452',
-				2 => 'U149',
-				3 => 'U153',
-				4 => 'U998',
-		];
+		//$should_match = [
+		//		0 => 'U156',
+		//		1 => 'U4452',
+		//		2 => 'U149',
+		//		3 => 'U153',
+		//		4 => 'U998',
+		//];
 
 
 		//Tree 1
 		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'U998', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'U153', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'U4452', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'U149', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		//Tree 2
 		$test1 = $this->indexOf( 'Z156', $result ) < $this->indexOf( 'Z998', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'Z998', $result ) < $this->indexOf( 'Z153', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'Z153', $result ) < $this->indexOf( 'Z4452', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'Z4452', $result ) < $this->indexOf( 'Z149', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		//Combined Trees
 		$test1 = $this->indexOf( 'U156', $result ) < $this->indexOf( 'Z156', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U998', $result ) < $this->indexOf( 'Z153', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U153', $result ) < $this->indexOf( 'Z4452', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 
 		$test1 = $this->indexOf( 'U4452', $result ) < $this->indexOf( 'Z149', $result ) ? true : false;
-		$this->assertEquals( $test1, true );
+		$this->assertEquals( true, $test1 );
 	}
 	/*
 	$deptree->addNode('P17', 	array(), 			array(124), 6000380 );

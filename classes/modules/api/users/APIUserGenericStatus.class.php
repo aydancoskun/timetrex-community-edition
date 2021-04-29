@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -74,7 +74,7 @@ class APIUserGenericStatus extends APIFactory {
 			if ( $ugslf->getRecordCount() > 0 ) {
 				//$status_count_arr = $ugslf->getStatusCountArrayByUserIdAndBatchId( $user_id, $batch_id );
 
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ugslf->getRecordCount() );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ugslf->getRecordCount() );
 				$this->setPagerObject( $ugslf );
 
 				$rows = [];
@@ -90,10 +90,10 @@ class APIUserGenericStatus extends APIFactory {
 							'link'        => $ugs_obj->getLink(),
 							'deleted'     => $ugs_obj->getDeleted(),
 					];
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $ugslf->getCurrentRow() );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $ugslf->getCurrentRow() );
 				}
 
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 				return $this->returnHandler( $rows );
 			} else {
@@ -125,7 +125,7 @@ class APIUserGenericStatus extends APIFactory {
 		$validator = $save_result = $key = false;
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -177,10 +177,10 @@ class APIUserGenericStatus extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}

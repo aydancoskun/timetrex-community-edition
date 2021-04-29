@@ -1,10 +1,15 @@
-UserDateTotalViewController = BaseViewController.extend( {
+class UserDateTotalViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_date_total_view_container', //Must set el here and can only set string, so events can work
 
-	el: '#user_date_total_view_container', //Must set el here and can only set string, so events can work
 
-	_required_files: ['APIUserDateTotal', 'APICurrency'],
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserDateTotalEditView.html';
 		this.permission_id = 'user_date_total';
@@ -13,8 +18,8 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_date_total';
 		this.context_menu_name = $.i18n._( 'Accumulated Time' );
 		this.navigation_label = $.i18n._( 'Accumulated Time' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserDateTotal' ) )();
-		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
+		this.api = TTAPI.APIUserDateTotal;
+		this.currency_api = TTAPI.APICurrency;
 
 		if ( PermissionManager.validate( this.permission_id, 'add' ) || PermissionManager.validate( this.permission_id, 'edit' ) ) {
 			$( this.el ).find( '.warning-message' ).text( $.i18n._( 'WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative.' ) );
@@ -37,20 +42,19 @@ UserDateTotalViewController = BaseViewController.extend( {
 		}
 
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	setGridSize: function() {
+	setGridSize() {
 		// if ( ( !this.grid || !this.grid.grid.is( ':visible' ) ) ) {
 		// 	return;
 		// }
 		//this.grid.grid.setGridWidth( $( this.el ).parent().width() - 2 );
 
-		message_offset = ( $( this.el ).find( '.warning-message' ).outerHeight() * 2 ) + 27;
+		var message_offset = ( $( this.el ).find( '.warning-message' ).outerHeight() * 2 ) + 27;
 		this.grid.grid.setGridHeight( $( this.el ).parents( '#tab_user_date_total_parent' ).height() - message_offset );
-	},
+	}
 
-	setGridCellBackGround: function() {
+	setGridCellBackGround() {
 
 		var data = this.grid.getGridParam( 'data' );
 
@@ -68,25 +72,24 @@ UserDateTotalViewController = BaseViewController.extend( {
 				$( 'tr[id=\'' + item.id + '\']' ).addClass( 'user-data-total-override' );
 			}
 		}
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'object_type' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy, ContextMenuIconName.export_excel],
 			include: ['default']
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -135,15 +138,14 @@ UserDateTotalViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	calculateAmount: function() {
+	calculateAmount() {
 		this.current_edit_record.total_time_amount = ( this.current_edit_record.total_time / 3600 ) * parseFloat( this.current_edit_record.hourly_rate );
 		this.edit_view_ui_dic.total_time_amount.setValue( this.current_edit_record.total_time_amount.toFixed( 4 ) );
-	},
+	}
 
-	onAddClick: function() {
+	onAddClick() {
 		var $this = this;
 		this.setCurrentEditViewState( 'new' );
 		$this.openEditView();
@@ -158,10 +160,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 					}
 				} );
 		}
+	}
 
-	},
-
-	onAddResult: function( result ) {
+	onAddResult( result ) {
 		var $this = this;
 		var result_data = result.getResult();
 
@@ -181,10 +182,10 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		$this.current_edit_record = result_data;
 		$this.initEditView();
-	},
+	}
 
 	/* jshint ignore:start */
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=UserDateTotal line 282
 		if ( !this.context_menu_array ) {
@@ -257,13 +258,12 @@ UserDateTotalViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
-
-	},
+	}
 
 	/* jshint ignore:end */
 
-	initPermission: function() {
-		this._super( 'initPermission' );
+	initPermission() {
+		super.initPermission();
 
 		if ( this.jobUIValidate() ) {
 			this.show_job_ui = true;
@@ -306,10 +306,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 		} else {
 			this.show_note_ui = false;
 		}
+	}
 
-	},
-
-	noteUIValidate: function( p_id ) {
+	noteUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -319,9 +318,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	branchUIValidate: function( p_id ) {
+	branchUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -331,9 +330,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	departmentUIValidate: function( p_id ) {
+	departmentUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -343,9 +342,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	jobUIValidate: function( p_id ) {
+	jobUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -356,9 +355,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	jobItemUIValidate: function( p_id ) {
+	jobItemUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -368,9 +367,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	goodQuantityUIValidate: function( p_id ) {
+	goodQuantityUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -380,9 +379,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	badQuantityUIValidate: function( p_id ) {
+	badQuantityUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -393,9 +392,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	setCurrency: function() {
+	setCurrency() {
 		var $this = this;
 		if ( Global.isSet( this.current_edit_record.user_id ) ) {
 			var filter = {};
@@ -413,9 +412,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		this.setCurrency();
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -427,7 +426,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			switch ( key ) {
 				case 'user_id':
 					var current_widget = this.edit_view_ui_dic['first_last_name'];
-					new ( APIFactory.getAPIClass( 'APIUser' ) )().getUser( { filter_data: { id: this.current_edit_record[key] } }, {
+					TTAPI.APIUser.getUser( { filter_data: { id: this.current_edit_record[key] } }, {
 						onResult: function( result ) {
 
 							if ( result.isValid() ) {
@@ -458,16 +457,15 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		var $this = this;
-		this._super( 'setEditViewDataDone' );
+		super.setEditViewDataDone();
 		this.onTypeChange();
-	},
+	}
 
-	onTypeChange: function( reset ) {
+	onTypeChange( reset ) {
 		this.detachElement( 'regular_policy_id' );
 		this.detachElement( 'absence_policy_id' );
 		this.detachElement( 'overtime_policy_id' );
@@ -505,9 +503,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 			this.current_edit_record.src_object_id = false;
 		}
 		this.editFieldResize();
-	},
+	}
 
-	onSrcObjectChange: function( key ) {
+	onSrcObjectChange( key ) {
 		var full_value = this.edit_view_ui_dic[key].getValue( true );
 		if ( full_value && full_value.pay_code_id ) {
 			this.edit_view_ui_dic['pay_code_id'].setEnabled( false );
@@ -518,15 +516,14 @@ UserDateTotalViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic['pay_code_id'].setValue( '' );
 			this.current_edit_record.pay_code_id = false;
 		}
+	}
 
-	},
-
-	search: function( set_default_menu, page_action, page_number, callBack ) {
+	search( set_default_menu, page_action, page_number, callBack ) {
 		this.refresh_id = null;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack );
-	},
+		super.search( set_default_menu, page_action, page_number, callBack );
+	}
 
-	getProperObjectType: function() {
+	getProperObjectType() {
 		var array = [];
 
 		for ( var i = 0; i < this.object_type_array.length; i++ ) {
@@ -544,11 +541,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 		}
 
 		return array;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -559,7 +556,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserDateTotal' ) ),
+			api_class: TTAPI.APIUserDateTotal,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.WAGE,
@@ -569,8 +566,10 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		this.setNavigation();
 
-		//Tab 0 start
+		var form_item_input;
+		var widgetContainer;
 
+		//Tab 0 start
 		var tab_user_date_total = this.edit_view_tab.find( '#tab_user_date_total' );
 
 		var tab_user_date_total_column1 = tab_user_date_total.find( '.first-column' );
@@ -578,7 +577,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		//Employee
 
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'first_last_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_user_date_total_column1, '' );
 
@@ -604,7 +603,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Regular Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRegularTimePolicy' ) ),
+			api_class: TTAPI.APIRegularTimePolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
 			show_search_inputs: true,
@@ -617,7 +616,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
+			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
@@ -630,7 +629,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Overtime Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIOvertimePolicy' ) ),
+			api_class: TTAPI.APIOverTimePolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.OVER_TIME_POLICY,
 			show_search_inputs: true,
@@ -643,7 +642,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Premium Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPremiumPolicy' ) ),
+			api_class: TTAPI.APIPremiumPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PREMIUM_POLICY,
 			show_search_inputs: true,
@@ -656,7 +655,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Meal Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIMealPolicy' ) ),
+			api_class: TTAPI.APIMealPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.MEAL_POLICY,
 			show_search_inputs: true,
@@ -669,7 +668,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Break Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBreakPolicy' ) ),
+			api_class: TTAPI.APIBreakPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BREAK_POLICY,
 			show_search_inputs: true,
@@ -682,7 +681,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -695,7 +694,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -712,7 +711,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -731,7 +730,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -763,7 +762,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -806,7 +805,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			show_search_inputs: true,
@@ -867,7 +866,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 			var bad_label = $( '<span class=\'widget-right-label\'>/ ' + $.i18n._( 'Bad' ) + ': </span>' );
 
-			var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			widgetContainer.append( good_label );
 			widgetContainer.append( good );
@@ -904,17 +903,16 @@ UserDateTotalViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( { field: 'override' } );
 		this.addEditFieldToColumn( $.i18n._( 'Override' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
+	}
 
-	},
-
-	cleanWhenUnloadView: function( callBack ) {
+	cleanWhenUnloadView( callBack ) {
 
 		$( '#user_date_total_view_container' ).remove();
-		this._super( 'cleanWhenUnloadView', callBack );
+		super.cleanWhenUnloadView( callBack );
 
 	}
 
-} );
+}
 
 UserDateTotalViewController.loadView = function( container ) {
 

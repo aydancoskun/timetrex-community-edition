@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -68,7 +68,7 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 	// January 2017
 	//
 	function testCSVFile() {
-		$this->assertEquals( file_exists( $this->tax_table_file ), true );
+		$this->assertEquals( true, file_exists( $this->tax_table_file ) );
 
 		$test_rows = Misc::parseCSV( $this->tax_table_file, true );
 
@@ -123,7 +123,7 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 	//Test that the tax changes from one year to the next are without a specified threshold.
 	function testCompareWithLastYearCSVFile() {
-		$this->assertEquals( file_exists( $this->tax_table_file ), true );
+		$this->assertEquals( true, file_exists( $this->tax_table_file ) );
 
 		$test_rows = Misc::parseCSV( $this->tax_table_file, true );
 
@@ -223,9 +223,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1100 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1100' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '78.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '67.52' );
+		$this->assertEquals( '1100', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '78.00', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '67.52', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_Example1() {
@@ -251,9 +251,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1800 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1800' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '94.24' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '13.85' );
+		$this->assertEquals( '1800', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '94.24', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '13.85', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_Example2() {
@@ -279,9 +279,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 2300 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2300' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '280.85' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '145.04' );
+		$this->assertEquals( '2300', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '280.85', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '145.04', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_Example3() {
@@ -307,9 +307,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 2500 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2500' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '457.54' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '208.81' );
+		$this->assertEquals( '2500', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '457.54', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '208.81', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_Example4() {
@@ -335,9 +335,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1560 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1560' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '145.68' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '55.90' );
+		$this->assertEquals( '1560', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '145.68', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '55.90', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_GovExample1() {
@@ -363,9 +363,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1030 ); //Take Gross income minus RPP and Union Dues.
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1030' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '116.07' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '60.68' );
+		$this->assertEquals( '1030', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '116.07', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '60.68', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_GovExample2() {
@@ -391,9 +391,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1030 ); //Take Gross income minus RPP and Union Dues.
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1030' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '116.07' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '46.40' );
+		$this->assertEquals( '1030', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '116.07', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '46.40', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_GovExample3() {
@@ -419,9 +419,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1030 ); //Take Gross income minus RPP and Union Dues.
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1030' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '116.07' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '59.42' );
+		$this->assertEquals( '1030', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '116.07', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '59.42', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_GovExample4() {
@@ -447,9 +447,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1030 ); //Take Gross income minus RPP and Union Dues.
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1030' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '116.07' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '96.22' );
+		$this->assertEquals( '1030', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '116.07', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '96.22', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	//
@@ -478,9 +478,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 585.32 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '585.32' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '22.31' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '22.31' );
+		$this->assertEquals( '585.32', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '22.31', $this->mf( $pd_obj->getEmployeeCPP() ) );
+		$this->assertEquals( '22.31', $this->mf( $pd_obj->getEmployerCPP() ) );
 	}
 
 	function testCA_2017a_SemiMonthly_CPP_LowIncome() {
@@ -506,9 +506,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 585.23 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '585.23' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '21.75' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '21.75' );
+		$this->assertEquals( '585.23', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '21.75', $this->mf( $pd_obj->getEmployeeCPP() ) );
+		$this->assertEquals( '21.75', $this->mf( $pd_obj->getEmployerCPP() ) );
 	}
 
 	function testCA_2017a_SemiMonthly_MAXCPP_LowIncome() {
@@ -536,9 +536,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '587.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '1.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '1.00' );
+		$this->assertEquals( '587.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getEmployeeCPP() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getEmployerCPP() ) );
 	}
 
 	function testCA_2017a_EI_LowIncome() {
@@ -566,9 +566,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '587.76' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '9.58' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '13.41' );
+		$this->assertEquals( '587.76', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9.58', $this->mf( $pd_obj->getEmployeeEI() ) );
+		$this->assertEquals( '13.41', $this->mf( $pd_obj->getEmployerEI() ) );
 	}
 
 	function testCA_2017a_MAXEI_LowIncome() {
@@ -596,9 +596,9 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '587.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '1.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '1.40' );
+		$this->assertEquals( '587.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getEmployeeEI() ) );
+		$this->assertEquals( '1.40', $this->mf( $pd_obj->getEmployerEI() ) );
 	}
 
 
@@ -627,13 +627,13 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2569.21' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '120.51' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '120.51' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '41.88' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '58.63' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '336.03' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '131.85' );
+		$this->assertEquals( '2569.21', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '120.51', $this->mf( $pd_obj->getEmployeeCPP() ) );
+		$this->assertEquals( '120.51', $this->mf( $pd_obj->getEmployerCPP() ) );
+		$this->assertEquals( '41.88', $this->mf( $pd_obj->getEmployeeEI() ) );
+		$this->assertEquals( '58.63', $this->mf( $pd_obj->getEmployerEI() ) );
+		$this->assertEquals( '336.03', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '131.85', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_MAXEI_MAXCPPb() {
@@ -661,13 +661,13 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2569.21' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '20.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '20.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '20.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '28.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '336.03' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '131.85' );
+		$this->assertEquals( '2569.21', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '20.00', $this->mf( $pd_obj->getEmployeeCPP() ) );
+		$this->assertEquals( '20.00', $this->mf( $pd_obj->getEmployerCPP() ) );
+		$this->assertEquals( '20.00', $this->mf( $pd_obj->getEmployeeEI() ) );
+		$this->assertEquals( '28.00', $this->mf( $pd_obj->getEmployerEI() ) );
+		$this->assertEquals( '336.03', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '131.85', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_MAXEI_MAXCPPc() {
@@ -695,13 +695,13 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2569.21' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '1.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '1.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '1.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '1.40' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '336.03' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '131.85' );
+		$this->assertEquals( '2569.21', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getEmployeeCPP() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getEmployerCPP() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getEmployeeEI() ) );
+		$this->assertEquals( '1.40', $this->mf( $pd_obj->getEmployerEI() ) );
+		$this->assertEquals( '336.03', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '131.85', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_MAXEI_MAXCPPd() {
@@ -729,13 +729,13 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1900.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '87.39' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '87.39' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '30.97' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '43.36' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '200.71' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '80.94' );
+		$this->assertEquals( '1900.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '87.39', $this->mf( $pd_obj->getEmployeeCPP() ) );
+		$this->assertEquals( '87.39', $this->mf( $pd_obj->getEmployerCPP() ) );
+		$this->assertEquals( '30.97', $this->mf( $pd_obj->getEmployeeEI() ) );
+		$this->assertEquals( '43.36', $this->mf( $pd_obj->getEmployerEI() ) );
+		$this->assertEquals( '200.71', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '80.94', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 
 	function testCA_2017a_RRSP() {
@@ -766,11 +766,11 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setEmployeeCPPForPayPeriod( 72.54 ); //Force CPP amount based on $1600 gross
 		$pd_obj->setEmployeeEIForPayPeriod( 26.08 ); //Force EI amount based on $1600 gross
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1568' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '72.54' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '26.08' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '146.49' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '71.76' );
+		$this->assertEquals( '1568', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '72.54', $this->mf( $pd_obj->getEmployeeCPP() ) );
+		$this->assertEquals( '26.08', $this->mf( $pd_obj->getEmployeeEI() ) );
+		$this->assertEquals( '146.49', $this->mf( $pd_obj->getFederalPayPeriodDeductions() ) );
+		$this->assertEquals( '71.76', $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ) );
 	}
 }
 

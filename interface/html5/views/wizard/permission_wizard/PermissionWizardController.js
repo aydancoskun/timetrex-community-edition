@@ -1,9 +1,14 @@
-PermissionWizardController = BaseWizardController.extend( {
+class PermissionWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg',
+			api_permission: null
+		} );
 
-	el: '.wizard-bg',
-	api_permission: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Permission Wizard' );
@@ -11,17 +16,16 @@ PermissionWizardController = BaseWizardController.extend( {
 		this.current_step = 1;
 
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
-		this.api_permission = new ( APIFactory.getAPIClass( 'APIPermission' ) )();
+	render() {
+		super.render();
+		this.api_permission = TTAPI.APIPermission;
 		this.initCurrentStep();
-
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 		var $this = this;
 		this.content_div.empty();
 
@@ -124,10 +128,9 @@ PermissionWizardController = BaseWizardController.extend( {
 				break;
 
 		}
+	}
 
-	},
-
-	setSection: function( section_group_id, select_all ) {
+	setSection( section_group_id, select_all ) {
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 
 		this.api_permission.getSectionBySectionGroup( section_group_id, {
@@ -140,9 +143,9 @@ PermissionWizardController = BaseWizardController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 		var $this = this;
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -231,12 +234,11 @@ PermissionWizardController = BaseWizardController.extend( {
 				break;
 
 		}
+	}
 
-	},
-
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 
 		var preset = this.stepsDataDic[1].role;
@@ -259,16 +261,15 @@ PermissionWizardController = BaseWizardController.extend( {
 				}
 			}
 		} );
+	}
 
-	},
-
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		switch ( this.current_step ) {
 			case 3:
-				for ( key in current_step_ui ) {
+				for ( var key in current_step_ui ) {
 					if ( !current_step_ui.hasOwnProperty( key ) ) {
 						continue;
 					}
@@ -291,15 +292,13 @@ PermissionWizardController = BaseWizardController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
-
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 
 		if ( !this.default_data ) {
 			return null;
 		}
-
 	}
 
-} );
+}

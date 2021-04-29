@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -372,7 +372,7 @@ class UserWageFactory extends Factory {
 
 	/**
 	 * @param bool $raw
-	 * @return bool|int
+	 * @return bool
 	 */
 	function getEffectiveDate( $raw = false ) {
 		$value = $this->getGenericDataValue( 'effective_date' );
@@ -380,7 +380,12 @@ class UserWageFactory extends Factory {
 			if ( $raw === true ) {
 				return $value;
 			} else {
-				return TTDate::strtotime( $value );
+				if ( !is_numeric( $value ) ) {                                         //Optimization to avoid converting it when run in CalculatePolicy's loops
+					$value = TTDate::strtotime( $value ); //Make sure we use middle day epoch when pulling the value from the DB the first time, to match setDateStamp() below. Otherwise setting the datestamp then getting it again before save won't match the same value after its saved to the DB.
+					$this->setGenericDataValue( 'effective_date', $value );
+				}
+
+				return $value;
 			}
 		}
 

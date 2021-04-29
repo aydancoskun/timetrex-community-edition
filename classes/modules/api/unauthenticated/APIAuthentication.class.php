@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -281,21 +281,44 @@ class APIAuthentication extends APIFactory {
 	}
 
 	/**
+	 * Register permanent API key Session ID to be used for all subsequent API calls without needing a username/password.
+	 * @param string $user_name
+	 * @param string $password
+	 * @return bool|string
+	 */
+	function registerAPIKey( $user_name, $password ) {
+		//Always require UserName/Password when registering an API key, as from a security stand-point this is similar to changing passwords.
+		//  If its a master administrator, only need to register an API key for the master administrator employee, then they can switchUser() to any other user as needed with that same key.
+		if ( $user_name != '' && $password != '' ) {
+			$authentication = new Authentication();
+			$api_key = $authentication->registerAPIKey( $user_name, $password );
+			Debug::text( 'User Name: ' . $user_name .' Registered API Key: '. $api_key, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return $api_key; //Don't wrap in return handler.
+		}
+
+		return false;
+	}
+
+	/**
 	 * @param string $user_id                   UUID
 	 * @param string $invoice_invoice_client_id UUID
 	 * @param string $ip_address
 	 * @param string $user_agent
 	 * @param string $client_id                 UUID
 	 * @param string $end_point_id
+	 * @param null $type_id
 	 * @return array|bool
+	 * @throws DBError
+	 * @throws ReflectionException
 	 */
-	function newSession( $user_id, $invoice_invoice_client_id = null, $ip_address = null, $user_agent = null, $client_id = null, $end_point_id = null ) {
+	function newSession( $user_id, $invoice_invoice_client_id = null, $ip_address = null, $user_agent = null, $client_id = null, $end_point_id = null, $type_id = null ) {
 		global $authentication;
 
 		if ( is_object( $authentication ) && $authentication->getSessionID() != '' ) {
 			Debug::text( 'Session ID: ' . $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10 );
 
-			if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
+			if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=API Key
 				return $this->getPermissionObject()->AuthenticationTypeDenied();
 			}
 
@@ -315,7 +338,7 @@ class APIAuthentication extends APIFactory {
 					$new_session_user_obj = $ulf->getCurrent();
 
 					if ( $client_id == '' ) {
-						$client_id = 'Browser-TimeTrex';
+						$client_id = 'browser-timetrex';
 					}
 
 					if ( $end_point_id == '' ) {
@@ -326,8 +349,8 @@ class APIAuthentication extends APIFactory {
 						$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : null;
 					}
 
-					Debug::Text( 'Login as different user: ' . $user_id . ' IP Address: ' . $ip_address . ' Client ID: ' . $client_id . ' End Point ID: ' . $end_point_id . ' User Agent: ' . $user_agent, __FILE__, __LINE__, __METHOD__, 10 );
-					$new_session_id = $authentication->newSession( $user_id, $ip_address, $user_agent, $client_id, $end_point_id );
+					Debug::Text( 'Login as different user: ' . $user_id . ' IP Address: ' . $ip_address . ' Client ID: ' . $client_id . ' End Point ID: ' . $end_point_id . ' Type ID: '. $type_id .' User Agent: ' . $user_agent, __FILE__, __LINE__, __METHOD__, 10 );
+					$new_session_id = $authentication->newSession( $user_id, $ip_address, $user_agent, $client_id, $end_point_id, $type_id );
 
 					$retarr = [
 							'session_id'      => $new_session_id,
@@ -363,7 +386,7 @@ class APIAuthentication extends APIFactory {
 		if ( is_object( $authentication ) && $authentication->getSessionID() != '' ) {
 			Debug::text( 'Session ID: ' . $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10 );
 
-			if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=HTTP Auth with username/password
+			if ( $this->getPermissionObject()->checkAuthenticationType( 700 ) == false ) { //700=API Key
 				return $this->getPermissionObject()->AuthenticationTypeDenied();
 			}
 

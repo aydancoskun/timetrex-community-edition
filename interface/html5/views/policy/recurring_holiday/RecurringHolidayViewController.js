@@ -1,19 +1,24 @@
-RecurringHolidayViewController = BaseViewController.extend( {
-	el: '#recurring_holiday_view_container',
+class RecurringHolidayViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#recurring_holiday_view_container',
 
-	_required_files: ['APIRecurringHoliday'],
+			special_day_array: null,
+			type_array: null,
+			day_of_month_array: null,
+			day_of_week_array: null,
+			month_of_year_array: null,
 
-	special_day_array: null,
-	type_array: null,
-	day_of_month_array: null,
-	day_of_week_array: null,
-	month_of_year_array: null,
+			always_week_day_array: null,
+			week_interval_array: null,
+			pivot_day_direction_array: null,
+			date_api: null
+		} );
 
-	always_week_day_array: null,
-	week_interval_array: null,
-	pivot_day_direction_array: null,
-	date_api: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'RecurringHolidayEditView.html';
 		this.permission_id = 'holiday_policy';
@@ -22,17 +27,16 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		this.table_name_key = 'recurring_holiday';
 		this.context_menu_name = $.i18n._( 'Recurring Holiday' );
 		this.navigation_label = $.i18n._( 'Recurring Holiday' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIRecurringHoliday' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.api = TTAPI.APIRecurringHoliday;
+		this.date_api = TTAPI.APITTDate;
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'RecurringHoliday' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'special_day', 'special_day' );
 		this.initDropDownOption( 'week_interval', 'week_interval' );
@@ -58,11 +62,11 @@ RecurringHolidayViewController = BaseViewController.extend( {
 				$this.day_of_week_array = res;
 			}
 		} );
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -73,7 +77,7 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRecurringHoliday' ) ),
+			api_class: TTAPI.APIRecurringHoliday,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.RECURRING_HOLIDAY,
@@ -156,10 +160,9 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( { field: 'always_week_day_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.always_week_day_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Always On Week Day' ), form_item_input, tab_recurring_holiday_column1, '' );
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -178,15 +181,15 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onSpecialDayChange();
 		this.onTypeChange();
-	},
+	}
 
-	onSpecialDayChange: function() {
+	onSpecialDayChange() {
 
 		this.detachElement( 'type_id' );
 		this.detachElement( 'week_interval' );
@@ -211,10 +214,9 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
+	}
 
-	},
-
-	onTypeChange: function() {
+	onTypeChange() {
 
 		if ( parseInt( this.current_edit_record['special_day'] ) === 0 ) {
 
@@ -241,11 +243,11 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -262,7 +264,7 @@ RecurringHolidayViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -274,7 +276,7 @@ RecurringHolidayViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -283,4 +285,4 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

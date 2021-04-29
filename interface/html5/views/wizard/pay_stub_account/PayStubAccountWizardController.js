@@ -1,24 +1,28 @@
-PayStubAccountWizardController = BaseWizardController.extend( {
+class PayStubAccountWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg'
+		} );
 
-	el: '.wizard-bg',
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.title = $.i18n._( 'Migrate PS Accounts' );
 		this.steps = 2;
 		this.current_step = 1;
 		$( this.el ).width( 1010 );
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 		this.initCurrentStep();
-
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 		this.content_div.empty();
 		this.stepsWidgetDic[this.current_step] = {};
 
@@ -34,7 +38,7 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 				form_item.css( 'margin-top', '15px' );
 				var form_item_label = form_item.find( '.form-item-label' );
 				var form_item_input_div = form_item.find( '.form-item-input-div' );
-				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ), true, ALayoutIDs.PAY_STUB_ACCOUNT, 'src_ids' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayStubEntryAccount, true, ALayoutIDs.PAY_STUB_ACCOUNT, 'src_ids' );
 				form_item_label.text( $.i18n._( 'Source Pay Stub Account(s)' ) + ': ' );
 				form_item_input_div.append( a_combobox );
 				this.content_div.append( form_item );
@@ -44,7 +48,7 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 				form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
-				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ), false, ALayoutIDs.PAY_STUB_ACCOUNT, 'dst_id' );
+				a_combobox = this.getAComboBox( TTAPI.APIPayStubEntryAccount, false, ALayoutIDs.PAY_STUB_ACCOUNT, 'dst_id' );
 				form_item_label.text( $.i18n._( 'Destination Pay Stub Account' ) + ': ' );
 				form_item_input_div.append( a_combobox );
 				this.content_div.append( form_item );
@@ -62,9 +66,9 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 
 				break;
 		}
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 		var $this = this;
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -77,16 +81,16 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 				}
 				break;
 		}
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 		var src_ids = this.stepsDataDic[2].src_ids;
 		var dst_id = this.stepsDataDic[2].dst_id;
 		var effective_date = this.stepsDataDic[2].effective_date;
-		var ps_api = new ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) )();
+		var ps_api = TTAPI.APIPayStubEntryAccount;
 		ps_api.migratePayStubEntryAccount( src_ids, dst_id, effective_date, {
 			onResult: function( result ) {
 				var result_data = result.getResult();
@@ -100,9 +104,9 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	setCurrentStepValues: function() {
+	setCurrentStepValues() {
 
 		if ( !this.stepsDataDic[this.current_step] ) {
 			return;
@@ -126,9 +130,9 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 				}
 				break;
 		}
-	},
+	}
 
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -143,4 +147,4 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 		}
 	}
 
-} );
+}

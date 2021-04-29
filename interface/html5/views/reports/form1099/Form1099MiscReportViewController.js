@@ -1,24 +1,28 @@
-Form1099MiscReportViewController = ReportBaseViewController.extend( {
+class Form1099MiscReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIForm1099MiscReport', 'APIPayStubEntryAccount'],
+			province_array: null,
 
-	province_array: null,
+			state_field_array: null,
 
-	state_field_array: null,
+			schedule_deposit_array: null
+		} );
 
-	schedule_deposit_array: null,
+		super( options );
+	}
 
-	initReport: function( options ) {
+	initReport( options ) {
 		this.script_name = 'Form1099MiscReport';
 		this.viewId = 'Form1099MiscReport';
 		this.context_menu_name = $.i18n._( 'Form 1099-Misc' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'Form1099MiscReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIForm1099MiscReport' ) )();
+		this.api = TTAPI.APIForm1099MiscReport;
 		this.include_form_setup = true;
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 		var $this = this;
 		var options = [
 			{ option_name: 'page_orientation' },
@@ -31,10 +35,8 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		];
 
 		this.initDropDownOptions( options, function( result ) {
-
-			new ( APIFactory.getAPIClass( 'APICompany' ) )().getOptions( 'province', 'US', {
+			TTAPI.APICompany.getOptions( 'province', 'US', {
 				onResult: function( provinceResult ) {
-
 					$this.province_array = Global.buildRecordArray( provinceResult.getResult() );
 
 					callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
@@ -42,14 +44,13 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 			} );
 
 		} );
+	}
 
-	},
-
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 		this.onViewClick( id );
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				form: {
@@ -97,9 +98,9 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		context_menu_model['include'].unshift( view_print );
 
 		return context_menu_model;
-	},
+	}
 
-	buildFormSetupUI: function() {
+	buildFormSetupUI() {
 
 		var $this = this;
 
@@ -117,7 +118,7 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -134,7 +135,7 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -154,7 +155,7 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -171,7 +172,7 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -191,7 +192,7 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -208,7 +209,7 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -221,9 +222,9 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		v_box.append( form_item );
 
 		this.addEditFieldToColumn( $.i18n._( 'Nonemployee compensation (Box 7)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
-	},
+	}
 
-	getFormSetupData: function() {
+	getFormSetupData() {
 		var other = {};
 		other.l4 = {
 			include_pay_stub_entry_account: this.current_edit_record.l4_include_pay_stub_entry_account,
@@ -241,9 +242,10 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		};
 
 		return other;
-	},
+	}
+
 	/* jshint ignore:start */
-	setFormSetupData: function( res_Data ) {
+	setFormSetupData( res_Data ) {
 
 		if ( !res_Data ) {
 			this.show_empty_message = true;
@@ -276,5 +278,6 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 			}
 		}
 	}
+
 	/* jshint ignore:end */
-} );
+}

@@ -1,44 +1,48 @@
-ImportCSVWizardController = BaseWizardController.extend( {
+class ImportCSVWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg',
 
-	el: '.wizard-bg',
+			api_import: null,
 
-	api_import: null,
+			parse_hint_source: null,
 
-	parse_hint_source: null,
+			field_source: null,
 
-	field_source: null,
+			select_grid_last_row: null,
 
-	select_grid_last_row: null,
+			last_id: 0, // Last grid id
 
-	last_id: 0, // Last grid id
+			saved_layout_array: null,
 
-	saved_layout_array: null,
+			column_map_data: null, //Used to build grid data
 
-	column_map_data: null, //Used to build grid data
+			_required_files: ['TImageBrowser']
+		} );
 
-	_required_files: ['TImageBrowser', 'APIImport'],
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Import Wizard' );
 		this.steps = 6;
 		this.current_step = 1;
 		this.wizard_id = 'ProcessPayrollWizard';
-		this.api_import = new ( APIFactory.getAPIClass( 'APIImport' ) )();
+		this.api_import = TTAPI.APIImport;
 
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initCurrentStep();
-
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		var $this = this;
 		this.content_div.empty();
@@ -61,7 +65,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				example_label.unbind( 'click' ).bind( 'click', function() {
 
 					var current_step_ui = $this.stepsWidgetDic[$this.current_step];
-					var current_value = current_step_ui.import_class.getValue();
+					var current_value = current_step_ui.import_class.getValue().toLowerCase();
 					var url = ServiceCaller.import_csv_emample + 'import_' + current_value + '_example.csv';
 					window.open( url, '_blank' );
 				} );
@@ -116,7 +120,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				var save_mapping_input = Global.loadWidget( 'global/widgets/text_input/TTextInput.html' );
 				save_mapping_input = $( save_mapping_input ).TTextInput();
 
-				var save_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Save' ) + '\' />' );
+				var save_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Save' ) + '\'></input>' );
 
 				saved_layout_div.append( save_mapping_input );
 				saved_layout_div.append( save_btn );
@@ -128,8 +132,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				previous_saved_layout_selector.setValueKey( 'id' );
 				previous_saved_layout_selector.setLabelKey( 'name' );
 
-				var update_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Update' ) + '\' />' );
-				var del_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Delete' ) + '\' />' );
+				var update_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Update' ) + '\'></input>' );
+				var del_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Delete' ) + '\'></input>' );
 
 				save_btn.unbind( 'click' ).bind( 'click', function() {
 					var name = save_mapping_input.getValue();
@@ -196,9 +200,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			case 5:
 
 		}
-	},
+	}
 
-	onSavedLayoutChange: function( value ) {
+	onSavedLayoutChange( value ) {
 		var grid = this.stepsWidgetDic[this.current_step].import_data;
 
 		var len = this.saved_layout_array.length;
@@ -216,7 +220,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			}
 		}
 
-		for ( i = 0; i < select_data.length; i++ ) {
+		for ( var i = 0; i < select_data.length; i++ ) {
 			var item = select_data[i];
 			item.id = 'csv' + id;
 			item.field = item.field ? item.field : TTUUID.zero_id; //Make sure any blank fields are converted to zero_ids to prevent "undefined" from appearing in place of the dropdown box.
@@ -231,9 +235,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		grid.setData( select_data );
 
 		this.bindGridRenderEvents( grid );
-	},
+	}
 
-	setSampleRowBaseOnImportFile: function( grid_data ) {
+	setSampleRowBaseOnImportFile( grid_data ) {
 		if ( !this.import_data || !grid_data ) {
 			return;
 		}
@@ -255,16 +259,16 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 		return grid_data;
-	},
+	}
 
-	getSavedMapping: function( select_layout_id ) {
+	getSavedMapping( select_layout_id ) {
 		var $this = this;
 		var args = {};
 		var filter_data = {};
 		filter_data.script = 'import_wizard' + this.stepsDataDic[1].import_class;
 		filter_data.deleted = false;
 		args.filter_data = filter_data;
-		new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )().getUserGenericData( args, {
+		TTAPI.APIUserGenericData.getUserGenericData( args, {
 			onResult: function( result ) {
 				var res_data = result.getResult();
 				if ( $.type( res_data ) !== 'array' ) {
@@ -297,9 +301,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	getLayoutById: function( select_id ) {
+	getLayoutById( select_id ) {
 		var len = this.saved_layout_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
@@ -309,9 +313,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				return layout;
 			}
 		}
-	},
+	}
 
-	deleteSelectMapping: function( select_id ) {
+	deleteSelectMapping( select_id ) {
 		var $this = this;
 		var select_layout = this.getLayoutById( select_id );
 
@@ -322,7 +326,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		TAlertManager.showConfirmAlert( $.i18n._( 'Are you sure you wish to continue?' ), null, function( flag ) {
 			if ( flag ) {
-				new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )().deleteUserGenericData( select_id, {
+				TTAPI.APIUserGenericData.deleteUserGenericData( select_id, {
 					onResult: function( result ) {
 						$this.onSavedLayoutChange( $this.saved_layout_array[0].id );
 						$this.getSavedMapping();
@@ -330,10 +334,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				} );
 			}
 		} );
+	}
 
-	},
-
-	updateSelectMapping: function( select_id ) {
+	updateSelectMapping( select_id ) {
 		var $this = this;
 
 		this.saveCurrentStep();
@@ -341,16 +344,16 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		select_layout.data = this.stepsDataDic[this.current_step].import_data_for_layout;
 
-		new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )().setUserGenericData( select_layout, {
+		TTAPI.APIUserGenericData.setUserGenericData( select_layout, {
 			onResult: function( result ) {
 				//Refresh saved mapping data once it has been saved on the server.
 				// This makes it so if the user clicks the UPDATE button, then switches to another saved mapping, then switches back, they will see their most recent settings.
 				$this.getSavedMapping( select_id );
 			}
 		} );
-	},
+	}
 
-	saveNewMapping: function( name, is_default ) {
+	saveNewMapping( name, is_default ) {
 		this.saveCurrentStep();
 
 		var $this = this;
@@ -360,7 +363,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		args.is_default = ( is_default && is_default == true ? true : false );
 		args.data = this.stepsDataDic[this.current_step].import_data_for_layout;
 
-		new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )().setUserGenericData( args, {
+		TTAPI.APIUserGenericData.setUserGenericData( args, {
 			onResult: function( result ) {
 				if ( !result.isValid() ) {
 					TAlertManager.showErrorAlert( result );
@@ -370,9 +373,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setSavedMappingOptions: function( array, select_layout_id ) {
+	setSavedMappingOptions( array, select_layout_id ) {
 		var $this = this;
 
 		if ( Global.isSet( $this.stepsWidgetDic[$this.current_step]['saved_mapping'] ) == true ) {
@@ -383,31 +386,11 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			if ( select_layout_id ) {
 				selector.setValue( select_layout_id );
 			}
-			//		selector.empty();
-			//		var len = array.length;
-			//		for ( var i = 0; i < len; i++ ) {
-			//			var item = array[i];
-			//			selector.append( '<option value="' + item.id + '">' + item.name + '</option>' );
-			//		}
-			//
-			//		if ( select_layout_id ) {
-			//			$( selector.find( 'option' ) ).filter(function() {
-			//
-			//				if ( !select_layout_id ) {
-			//					return false;
-			//				}
-			//
-			//				return $( this ).attr( 'value' ) === select_layout_id.toString();
-			//			} ).attr( 'selected', true );
-			//		} else {
-			//			$( selector.find( 'option' )[0] ).attr( 'selected', true );
-			//		}
-
 		}
 		$this.saved_layout_array = array;
-	},
+	}
 
-	addRow: function() {
+	addRow() {
 		var grid = this.stepsWidgetDic[this.current_step].import_data;
 		var all_data = grid.getData();
 
@@ -428,9 +411,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		grid.grid.jqGrid( 'setSelection', data.id );
 
 		this.bindGridRenderEvents( grid );
-	},
+	}
 
-	minusRow: function() {
+	minusRow() {
 
 		var grid = this.stepsWidgetDic[this.current_step].import_data;
 		var sel_id = grid.getGridParam( 'selrow' );
@@ -452,9 +435,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		grid.setData( all_data, false );
 
 		grid.grid.jqGrid( 'setSelection', all_data[all_data.length - 1].id );
-	},
+	}
 
-	getGridColumns: function( gridId, callBack ) {
+	getGridColumns( gridId, callBack ) {
 		var column_info_array = [];
 		var $this = this;
 
@@ -528,10 +511,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 		callBack( column_info_array );
+	}
 
-	},
-
-	onParseHintRender: function( cell_value, related_data, row ) {
+	onParseHintRender( cell_value, related_data, row ) {
 		var widget;
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowId;
@@ -567,9 +549,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 		return widget.get( 0 ).outerHTML;
-	},
+	}
 
-	onFieldRender: function( cell_value, related_data, row ) {
+	onFieldRender( cell_value, related_data, row ) {
 		if ( !cell_value ) {
 			return;
 		}
@@ -590,17 +572,17 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		$( acombobox[0] ).find( '[value=' + cell_value + ']' ).attr( 'selected', true );
 
 		return acombobox.get( 0 ).outerHTML;
-	},
+	}
 
-	onTextInputRender: function( cell_value, related_data, row ) {
+	onTextInputRender( cell_value, related_data, row ) {
 
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowId;
 
 		return '<input custom_cell="true" render_type="text" id="' + row_id + '_' + col_model.name + '" value="' + cell_value + '" type="text" class="t-text-input" style="width: 97%">';
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 
 		var grid;
 		var $this = this;
@@ -794,10 +776,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				break;
 
 		}
+	}
 
-	},
-
-	showErrorGrid: function( top_des, data_grid_error_source, bottom_des, records_details ) {
+	showErrorGrid( top_des, data_grid_error_source, bottom_des, records_details ) {
 		var label = $( '<span class=\'top-des clear-both-div\'></span>' );
 		label.text( top_des );
 
@@ -866,9 +847,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}, columns );
 		grid.setData( data_grid_error_source );
 		grid.setGridColumnsWidth( null, { max_grid_width: ( this.content_div.width() - 2 ) } );
-	},
+	}
 
-	createErrorSource: function( error_array ) {
+	createErrorSource( error_array ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'import_data' of undefined in /interface/html5/#!m=TimeSheet&date=00070609&user_id=14372 line 773
 		if ( !this.stepsDataDic || !this.stepsDataDic[3] ) {
@@ -907,9 +888,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	bindGridRenderEvents: function( grid ) {
+	bindGridRenderEvents( grid ) {
 		var $this = this;
 		var inputs = grid.grid.find( 'input[custom_cell="true"]' );
 		var select = grid.grid.find( 'select[custom_cell="true"]' );
@@ -929,9 +910,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		select.unbind( 'focusin' ).bind( 'focusin', function( e ) {
 			$this.onCellFocusIn( e );
 		} );
-	},
+	}
 
-	onCellFocusIn: function( e ) {
+	onCellFocusIn( e ) {
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var grid = current_step_ui['import_data'];
 		var target = $( e.target );
@@ -939,9 +920,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		var row_id = target_id.split( '_' )[0];
 
 		grid.grid.jqGrid( 'setSelection', row_id );
-	},
+	}
 
-	onCellInputChange: function( e ) {
+	onCellInputChange( e ) {
 		var $this = this;
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var grid = current_step_ui['import_data'];
@@ -1011,9 +992,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			} );
 
 		}
-	},
+	}
 
-	setImportGrid: function( gridId, grid_div, allMultipleSelection ) {
+	setImportGrid( gridId, grid_div, allMultipleSelection ) {
 
 		if ( !allMultipleSelection ) {
 			allMultipleSelection = false;
@@ -1038,10 +1019,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			$this.setGridGroupColumns( gridId );
 
 		} );
+	}
 
-	},
-
-	buildMappingGridDataArray: function( mappingData ) {
+	buildMappingGridDataArray( mappingData ) {
 
 		var result = [];
 		var id = 1;
@@ -1067,9 +1047,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		this.last_id = id;
 
 		return result;
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
 		this.cleanStepsData();
 		LocalCacheData.current_open_wizard_controller = null;
 		this.saveAllStepsToUserGenericData( function() {
@@ -1081,9 +1061,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 		$( this.el ).remove();
-	},
+	}
 
-	initCurrentStep: function() {
+	initCurrentStep() {
 
 		var $this = this;
 		$this.progress_label.text( 'Step ' + $this.current_step + ' of ' + $this.steps );
@@ -1093,10 +1073,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		$this.buildCurrentStepUI();
 		$this.buildCurrentStepData();
 		$this.setCurrentStepValues();
+	}
 
-	},
-
-	onNextClick: function() {
+	onNextClick() {
 		var $this = this;
 		this.saveCurrentStep();
 		var current_step_data = this.stepsDataDic[this.current_step];
@@ -1129,10 +1108,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			this.current_step = this.current_step + 1;
 			this.initCurrentStep();
 		}
+	}
 
-	},
-
-	buildImportMapping: function( array ) {
+	buildImportMapping( array ) {
 
 		var result = {};
 		var content;
@@ -1152,9 +1130,10 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 		return result;
-	},
+	}
+
 	/* jshint ignore:start */
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -1162,64 +1141,10 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			case 1:
 				current_step_data.import_class = current_step_ui.import_class.getValue();
 
-				switch ( current_step_data.import_class ) {
-					case 'user':
-						this.api_import.className = 'APIImportUser';
-						this.api_import.key_name = 'ImportUser';
-						break;
-					case 'branch':
-						this.api_import.className = 'APIImportBranch';
-						this.api_import.key_name = 'ImportBranch';
-						break;
-					case 'client':
-						this.api_import.className = 'APIImportClient';
-						this.api_import.key_name = 'ImportClient';
-						break;
-					case 'job':
-						this.api_import.className = 'APIImportJob';
-						this.api_import.key_name = 'ImportJob';
-						break;
-					case 'jobitem':
-						this.api_import.className = 'APIImportJobItem';
-						this.api_import.key_name = 'ImportJobItem';
-						break;
-					case 'userwage':
-						this.api_import.className = 'APIImportUserWage';
-						this.api_import.key_name = 'ImportUserWage';
-						break;
-					case 'payperiod':
-						this.api_import.className = 'APIImportPayPeriod';
-						this.api_import.key_name = 'ImportPayPeriod';
-						break;
-					case 'punch':
-						this.api_import.className = 'APIImportPunch';
-						this.api_import.key_name = 'ImportPunch';
-						break;
-					case 'userdatetotal':
-						this.api_import.className = 'APIImportUserDateTotal';
-						this.api_import.key_name = 'ImportUserDateTotal';
-						break;
-					case 'schedule':
-						this.api_import.className = 'APIImportSchedule';
-						this.api_import.key_name = 'ImportSchedule';
-						break;
-					case 'paystubamendment':
-						this.api_import.className = 'APIImportPayStubAmendment';
-						this.api_import.key_name = 'ImportPayStubAmendment';
-						break;
-					case 'accrual':
-						this.api_import.className = 'APIImportAccrual';
-						this.api_import.key_name = 'ImportAccrual';
-						break;
-					case 'remittance_destination_account':
-						this.api_import.className = 'APIImportRemittanceDestinationAccount';
-						this.api_import.key_name = 'ImportRemittanceDestinationAccount';
-						break;
-					case 'department':
-						this.api_import.className = 'APIImportDepartment';
-						this.api_import.key_name = 'ImportDepartment';
-						break;
-				}
+				var formatted_import_class = current_step_data.import_class.charAt( 0 ).toUpperCase() + current_step_data.import_class.slice( 1 );
+
+				this.api_import.className = 'APIImport' + formatted_import_class;
+				this.api_import.key_name = 'Import' + formatted_import_class;
 
 				break;
 			case 2:
@@ -1241,15 +1166,14 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
 	/* jshint ignore:end */
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 
 		if ( !this.default_data ) {
 			return null;
 		}
-
 	}
 
-} );
+}

@@ -22,7 +22,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 	reloadView: function( view_id ) {
 		//error: Uncaught ReferenceError: XXXXViewController is not defined ininterface/html5/#!m=TimeSheet line 3
 		// Happens when quickly click on context menu and network is slow.
-		if ( window[view_id + 'ViewController'] &&
+		if ( eval( 'typeof '+ view_id + 'ViewController' ) === 'function' && //Was ES5: window[view_id + 'ViewController'] &&
 			LocalCacheData.current_open_primary_controller &&
 			LocalCacheData.current_open_primary_controller.viewId === view_id ) {
 			LocalCacheData.current_open_primary_controller.setSelectLayout();
@@ -478,7 +478,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 		var $this = this;
 		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js', function() {
 			// Error: 'RibbonViewController' is undefined
-			if ( RibbonViewController ) {
+			if ( typeof RibbonViewController !== 'undefined' ) { //For some reason if ( RibbonViewController ) is not enough here and can still trigger a "is not defined" JS exception in some cases.
 				// #2235 - ReferenceError: RibbonViewController is not defined
 				//Error: ReferenceError: Can't find variable: RibbonViewController
 				RibbonViewController.loadView();
@@ -580,7 +580,6 @@ IndexViewController.goToViewByViewLabel = function( view_label ) {
 		case 'Contact Information':
 			IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, 'LoginUserContact' );
 			return;
-			break;
 		default:
 			var reg = /\s/g;
 			view_name = view_label.replace( reg, '' );
@@ -821,14 +820,14 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 
 IndexViewController.setNotificationBar = function( target ) {
 
-	var api = new ( APIFactory.getAPIClass( 'APINotification' ) )();
+	var api = TTAPI.APINotification;
 
 	//Error: TypeError: api.getNotification is not a function in /interface/html5/IndexController.js?v=8.0.0-20141117-095711 line 529
 	if ( !api || !api.getNotification || typeof ( api.getNotification ) !== 'function' ) {
 		return;
 	}
 
-	api.getNotification( target, {
+	api.getNotifications( target, {
 		onResult: function( result ) {
 			var result_data = result.getResult();
 

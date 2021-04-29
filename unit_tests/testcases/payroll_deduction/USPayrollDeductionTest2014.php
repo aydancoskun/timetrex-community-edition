@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -82,7 +82,7 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 	// January 2014
 	//
 	function testCSVFile() {
-		$this->assertEquals( file_exists( $this->tax_table_file ), true );
+		$this->assertEquals( true, file_exists( $this->tax_table_file ) );
 
 		$test_rows = Misc::parseCSV( $this->tax_table_file, true );
 
@@ -191,9 +191,9 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeSocialSecurity() ), '62.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerSocialSecurity() ), '62.00' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '62.00', $this->mf( $pd_obj->getEmployeeSocialSecurity() ) );
+		$this->assertEquals( '62.00', $this->mf( $pd_obj->getEmployerSocialSecurity() ) );
 	}
 
 	function testUS_2014a_SocialSecurity_Max() {
@@ -213,9 +213,9 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeSocialSecurity() ), '1.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerSocialSecurity() ), '1.00' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getEmployeeSocialSecurity() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getEmployerSocialSecurity() ) );
 	}
 
 	function testUS_2014a_Medicare() {
@@ -235,9 +235,9 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '14.50' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '14.50', $this->mf( $pd_obj->getEmployeeMedicare() ) );
+		$this->assertEquals( '14.50', $this->mf( $pd_obj->getEmployerMedicare() ) );
 	}
 
 	function testUS_2014a_Additional_MedicareA() {
@@ -259,9 +259,9 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateGrossIncome( 199000.00 );
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '14.50' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '14.50', $this->mf( $pd_obj->getEmployeeMedicare() ) );
+		$this->assertEquals( '14.50', $this->mf( $pd_obj->getEmployerMedicare() ) );
 	}
 
 	function testUS_2014a_Additional_MedicareB() {
@@ -283,9 +283,9 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateGrossIncome( 199500.00 );
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '19.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '19.00', $this->mf( $pd_obj->getEmployeeMedicare() ) );
+		$this->assertEquals( '14.50', $this->mf( $pd_obj->getEmployerMedicare() ) );
 	}
 
 	function testUS_2014a_Additional_MedicareC() {
@@ -307,9 +307,9 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateGrossIncome( 500000.00 );
 		$pd_obj->setGrossPayPeriodIncome( 1000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '23.50' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '23.50', $this->mf( $pd_obj->getEmployeeMedicare() ) );
+		$this->assertEquals( '14.50', $this->mf( $pd_obj->getEmployerMedicare() ) );
 	}
 
 	function testUS_2014a_Additional_MedicareD() {
@@ -331,9 +331,9 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateGrossIncome( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 500000.00 );
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '500000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployeeMedicare() ), '9950.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '7250.00' );
+		$this->assertEquals( '500000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '9950.00', $this->mf( $pd_obj->getEmployeeMedicare() ) );
+		$this->assertEquals( '7250.00', $this->mf( $pd_obj->getEmployerMedicare() ) );
 	}
 
 	function testUS_2014a_FederalUI_NoState() {
@@ -356,8 +356,8 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalEmployerUI() ), '60.00' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '60.00', $this->mf( $pd_obj->getFederalEmployerUI() ) );
 	}
 
 	function testUS_2014a_FederalUI_NoState_Max() {
@@ -384,8 +384,8 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalEmployerUI() ), '1.00' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getFederalEmployerUI() ) );
 	}
 
 	function testUS_2014a_FederalUI_State_Max() {
@@ -412,8 +412,8 @@ class USPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 
 		//var_dump($pd_obj->getArray());
 
-		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalEmployerUI() ), '1.00' );
+		$this->assertEquals( '1000.00', $this->mf( $pd_obj->getGrossPayPeriodIncome() ) );
+		$this->assertEquals( '1.00', $this->mf( $pd_obj->getFederalEmployerUI() ) );
 	}
 
 }

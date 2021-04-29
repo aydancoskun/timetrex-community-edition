@@ -1,8 +1,13 @@
-ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
+class ReCalculateTimeSheetWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg'
+		} );
 
-	el: '.wizard-bg',
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'TimeSheet ReCalculation Wizard' );
@@ -10,17 +15,16 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 		this.current_step = 1;
 
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initCurrentStep();
-
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		this.content_div.empty();
 		switch ( this.current_step ) {
@@ -34,7 +38,7 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more pay periods' ) );
 
-				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriod' ) ), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayPeriod, true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -49,7 +53,7 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) + ':' );
 
-				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIUser' ) ), true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( TTAPI.APIUser, true, ALayoutIDs.USER, 'user_id', true );
 				div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -60,21 +64,20 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 				this.content_div.append( div );
 				break;
 		}
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
+	}
 
-	},
-
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 		if ( this.stepsDataDic && this.stepsDataDic[2] && this.stepsDataDic[3] ) {
 			var pay_period_ids = this.stepsDataDic[2].pay_period_id;
 			var user_ids = this.stepsDataDic[3].user_id;
 
-			var timesheet_api = new ( APIFactory.getAPIClass( 'APITimeSheet' ) )();
+			var timesheet_api = TTAPI.APITimeSheet;
 
 			//this is outside the callback to prevent hammer-clicking which was causing problems.
 			this.onCloseClick();
@@ -88,9 +91,9 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	setCurrentStepValues: function() {
+	setCurrentStepValues() {
 
 		if ( !this.stepsDataDic[this.current_step] ) {
 			return;
@@ -115,9 +118,9 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 
 				break;
 		}
-	},
+	}
 
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -131,10 +134,9 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 				current_step_data.user_id = current_step_ui.user_id.getValue();
 				break;
 		}
+	}
 
-	},
-
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 
 		if ( !this.default_data ) {
 			return null;
@@ -150,7 +152,6 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 		if ( this.getDefaultData( 'pay_period_id' ) ) {
 			this.stepsDataDic[2].pay_period_id = this.getDefaultData( 'pay_period_id' );
 		}
-
 	}
 
-} );
+}

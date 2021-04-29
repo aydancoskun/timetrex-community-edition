@@ -5,7 +5,7 @@ As Of Date      Name	                        Path	                              
 16-Nov-2019     underscore	                    interface/html5/framework/backbone/underscore-min.js	                    1.9.1	    1.9.1	        MIT	    http://underscorejs.org/
 
 16-Nov-2019     bootstrap	                    interface/html5/framework/bootstrap/js/bootstrap.bundle.js                  4.3.1	    4.3.1      	    MIT	    http://getbootstrap.com
-16-Nov-2019     bootstrap-select	            interface/html5/framework/bootstrap-select/dist/js/bootstrap-select.js	    1.13.9	    1.13.9	        MIT	    https://silviomoreto.github.io/bootstrap-select/
+16-Jun-2020     bootstrap-select	            interface/html5/framework/bootstrap-select/dist/js/bootstrap-select.js	    1.13.15	    1.13.15	        MIT	    https://silviomoreto.github.io/bootstrap-select/
 16-Nov-2019     bootstrap-toolkit	            interface/html5/framework/bootstrap-toolkit.min.js	                        2.6.3	    2.6.3	        MIT	    https://github.com/maciej-gurban/responsive-bootstrap-toolkit
 
 12-Sep-2018     leaflet	                        interface/html5/framework/leaflet/leaflet.js                                1.3.4   	1.3.4	        BSD 	http://leafletjs.com/download.html  **We override leaflet and leaflet-routing-machine, so can't use minified code.
@@ -23,7 +23,7 @@ As Of Date      Name	                        Path	                              
 16-Nov-2019     html2canvas.js	                interface/html5/framework/html2canvas.js	                                1.0.0-rc5 	1.0.0-rc5       MIT     https://github.com/niklasvh/html2canvas/releases
 
 16-Nov-2019     html5shiv	                    interface/html5/framework/html5shiv.min.js	                                3.7.3	    3.7.3	        MIT     https://github.com/aFarkas/html5shiv
-16-Nov-2019     interact.min.js	                interface/html5/framework/interact.min.js	                                1.7.1	    1.7.1	        ASIS	interactjs.io
+16-Nov-2019     interact.min.js	                interface/html5/framework/interact.min.js	                                1.7.1	    1.7.1	        ASIS	interactjs.io (Don't think this is being used anymore)
 16-Nov-2019     masonry	                        interface/html5/framework/masonry.min.js	                                4.2.2	    4.2.2	        MIT	    http://masonry.desandro.com
 13-Apr-2018     measurement	                    interface/html5/framework/measurement.js	                                0.1	        0.1	            ??	    https://github.com/Philzen/measurement.js
 16-Nov-2019     moment	                        interface/html5/framework/moment.min.js	                                    2.24.0	    2.24.0	        MIT	    https://momentjs.com/
@@ -39,7 +39,7 @@ As Of Date      Name	                        Path	                              
 16-Nov-2019     jquery.jqgrid.winmultiselect    interface/html5/framework/widgets/jqgrid/jquery.jqgrid.winmultiselect.js    30-Oct-2017                 MIT     https://github.com/OlegKi/jqGrid-plugins
 16-Nov-2019     grid.locale-en.js	            interface/html5/framework/widgets/jqgrid/grid.locale-en.js	                ??	        ??	            ??	        ?
 
-16-Nov-2019     jquery	                        interface/html5/framework/jquery.min.js	                                    3.4.1	    3.4.1           ASIS    https://github.com/jquery/jquery
+19-Jun-2020     jquery	                        interface/html5/framework/jquery.min.js	                                    3.5.1	    3.5.1           ASIS    https://github.com/jquery/jquery
 16-Nov-2019     jqueryui	                    interface/html5/framework/jqueryui/js/jquery-ui.custom.min.js	            1.12.1	    1.12.1	        MIT	    http://jqueryui.com/download/
 
 16-Nov-2019     jquery.qtip	                    interface/html5/framework/jquery.qtip.min.js	                            3.0.3   	3.0.3	        MIT     https://github.com/Craga89/qTip1  http://qtip2.com/

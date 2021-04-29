@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -753,10 +753,14 @@ class CurrencyFactory extends Factory {
 	 * @return float
 	 */
 	static function convert( $src_rate, $dst_rate, $amount, $round_decimal_places = 2 ) {
-		$base_amount = bcmul( bcdiv( 1, $src_rate ), $amount );
-		$retval = round( bcmul( $dst_rate, $base_amount ), (int)$round_decimal_places );
+		if ( $src_rate == $dst_rate ) {
+			return round( $amount, (int)$round_decimal_places );
+		} else {
+			$base_amount = bcmul( bcdiv( 1, $src_rate ), $amount );
+			$retval = round( bcmul( $dst_rate, $base_amount ), (int)$round_decimal_places );
 
-		return $retval;
+			return $retval;
+		}
 	}
 
 	/**
@@ -892,7 +896,7 @@ class CurrencyFactory extends Factory {
 						$currency_rates = $ttsc->getCurrencyExchangeRatesByDate( $company_id, [ $active_currency_iso_code ], $base_currency, $latest_currency_rate_date, ( TTDate::getMiddleDayEpoch( time() ) - 86400 ) );
 						//Debug::Arr($currency_rates, 'Currency Rates for: '. $active_currency_iso_code, __FILE__, __LINE__, __METHOD__, 10);
 
-						if ( is_array( $currency_rates[$active_currency_iso_code] ) ) {
+						if ( is_array( $currency_rates ) && isset($currency_rates[$active_currency_iso_code]) && is_array( $currency_rates[$active_currency_iso_code] ) ) {
 							Debug::Text( 'Currency Rates for: ' . $active_currency_iso_code . ' Total: ' . count( $currency_rates ), __FILE__, __LINE__, __METHOD__, 10 );
 							foreach ( $currency_rates[$active_currency_iso_code] as $date_stamp => $conversion_rate ) {
 								$crf = TTnew( 'CurrencyRateFactory' ); /** @var CurrencyRateFactory $crf */
@@ -904,6 +908,8 @@ class CurrencyFactory extends Factory {
 									$crf->Save();
 								}
 							}
+						} else {
+							Debug::Arr($currency_rates, 'No currency rates returned for: '. $active_currency_iso_code, __FILE__, __LINE__, __METHOD__, 10);
 						}
 					} else {
 						Debug::Text( '  Rates not older than 24hrs, no need to backfill...', __FILE__, __LINE__, __METHOD__, 10 );

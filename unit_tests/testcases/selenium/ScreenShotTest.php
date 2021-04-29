@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -260,7 +260,6 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 						$this->clickCancel( $id . 'ContextMenu' );
 						break;
 					case 'companybankaccount':
-					case 'invoiceconfig':
 						$this->processTabs( $submenu_screenshot_path, $root_id, $sub_el->attribute( 'id' ) );
 						$this->processEditScreen( $submenu_screenshot_path, $root_el, $sub_el, false );
 
@@ -385,7 +384,7 @@ class UIScreenShotTest extends TTSeleniumGlobal {
 			}
 
 			return null;
-		}, 2000, 50 );
+		}, 2000 );
 
 		//get the current view id from js
 		$this->waitUntilByCssSelector( '#ribbon .context-menu a' );

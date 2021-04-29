@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -114,7 +114,7 @@ class ROEFactory extends Factory {
 						'-1000-status'                     => TTi18n::gettext( 'Status' ),
 						'-1010-first_name'                 => TTi18n::gettext( 'First Name' ),
 						'-1020-last_name'                  => TTi18n::gettext( 'Last Name' ),
-						'-1025-insurable_absence_policies' => TTi18n::gettext( 'Insurable Absence Policies' ),
+						//'-1025-insurable_absence_policies' => TTi18n::gettext( 'Insurable Absence Policies' ),
 						'-1030-insurable_earnings'         => TTi18n::gettext( 'Insurable Earnings (Box 15B)' ),
 						'-1040-vacation_pay'               => TTi18n::gettext( 'Vacation Pay (Box 17A)' ),
 						'-1050-code'                       => TTi18n::gettext( 'Reason' ),
@@ -125,8 +125,8 @@ class ROEFactory extends Factory {
 						'-1120-recall_date'                => TTi18n::gettext( 'Expected Date of Recall' ),
 						'-1150-serial'                     => TTi18n::gettext( 'Serial No' ),
 						'-1170-comments'                   => TTi18n::gettext( 'Comments' ),
-						'-1200-release_accruals'           => TTi18n::gettext( 'Release All Accruals' ),
-						'-1220-generate_pay_stub'          => TTi18n::gettext( 'Generate Final Pay Stub' ),
+						//'-1200-release_accruals'           => TTi18n::gettext( 'Release All Accruals' ),
+						//'-1220-generate_pay_stub'          => TTi18n::gettext( 'Generate Final Pay Stub' ),
 						'-1230-insurable_hours'            => TTi18n::gettext( 'Insurable Hours' ),
 
 						'-2000-created_by'   => TTi18n::gettext( 'Created By' ),
@@ -691,26 +691,30 @@ class ROEFactory extends Factory {
 			$first_date = $user_obj->getHireDate();
 		}
 
-		//Find first pay stub after this date, to ensure they actually did get paid and have insurable earnings. Essentially the first pay period can't be $0.00.
-		$pslf = TTnew( 'PayStubListFactory' );
-		$pslf->getFirstPayStubByUserIdAndStartDate( $user_id, $first_date, 1 );
-		if ( $pslf->getRecordCount() > 0 ) {
-			if ( $pslf->getCurrent()->getStartDate() > $first_date ) {
-				$first_date = $pslf->getCurrent()->getStartDate();
+		if ( $first_date != '' ) {
+			//Find first pay stub after this date, to ensure they actually did get paid and have insurable earnings. Essentially the first pay period can't be $0.00.
+			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf->getFirstPayStubByUserIdAndStartDate( $user_id, $first_date, 1 );
+			if ( $pslf->getRecordCount() > 0 ) {
+				if ( $pslf->getCurrent()->getStartDate() > $first_date ) {
+					$first_date = $pslf->getCurrent()->getStartDate();
+				}
 			}
+
+			$udlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udlf */
+			$udlf->getNextByUserIdAndObjectTypeAndEpoch( $user_id, [ 10 ], $first_date ); //10=Worked time only. This needs to include punches and manual timesheet entries. FIXME: Should probably include insurable absence policies too like calculateLastDate()
+			if ( $udlf->getRecordCount() > 0 ) {
+				if ( $udlf->getCurrent()->getDateStamp() > $first_date ) {
+					$first_date = $udlf->getCurrent()->getDateStamp();
+				}
+			}
+
+			Debug::Text( 'First Date: ' . TTDate::getDate( 'DATE+TIME', $first_date ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			return $first_date;
 		}
 
-		$udlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udlf */
-		$udlf->getNextByUserIdAndObjectTypeAndEpoch( $user_id, [ 10 ], $first_date ); //10=Worked time only. This needs to include punches and manual timesheet entries. FIXME: Should probably include insurable absence policies too like calculateLastDate()
-		if ( $udlf->getRecordCount() > 0 ) {
-			if ( $udlf->getCurrent()->getDateStamp() > $first_date ) {
-				$first_date = $udlf->getCurrent()->getDateStamp();
-			}
-		}
-
-		Debug::Text( 'First Date: ' . TTDate::getDate( 'DATE+TIME', $first_date ), __FILE__, __LINE__, __METHOD__, 10 );
-
-		return $first_date;
+		return false;
 	}
 
 	/**
@@ -887,26 +891,27 @@ class ROEFactory extends Factory {
 	function getSetupData() {
 		//FIXME: Alert the user if they don't have enough information in TimeTrex to get accurate values.
 		//Get insurable hours, earnings, and vacation pay now that the final pay stub is generated
-		$ugdlf = TTnew( 'UserGenericDataListFactory' ); /** @var UserGenericDataListFactory $ugdlf */
-		$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getUserObject()->getCompany(), $this->getTable() );
-		if ( $ugdlf->getRecordCount() > 0 ) {
-			Debug::Text( 'Found Company Form Setup!', __FILE__, __LINE__, __METHOD__, 10 );
-			$ugd_obj = $ugdlf->getCurrent();
-			$setup_data = $ugd_obj->getData();
-		}
-		unset( $ugd_obj );
-
-		if ( isset( $setup_data ) ) {
-			//var_dump($setup_data);
-			if ( !isset( $setup_data['insurable_earnings_psea_ids'] ) ) {
-				$setup_data['insurable_earnings_psea_ids'] = $this->getPayStubEntryAccountLinkObject()->getTotalGross();
+		if ( is_object( $this->getUserObject() ) ) {
+			$ugdlf = TTnew( 'UserGenericDataListFactory' ); /** @var UserGenericDataListFactory $ugdlf */
+			$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getUserObject()->getCompany(), $this->getTable() );
+			if ( $ugdlf->getRecordCount() > 0 ) {
+				Debug::Text( 'Found Company Form Setup!', __FILE__, __LINE__, __METHOD__, 10 );
+				$ugd_obj = $ugdlf->getCurrent();
+				$setup_data = $ugd_obj->getData();
 			}
+			unset( $ugd_obj );
 
-			if ( !isset( $setup_data['absence_policy_ids'] ) ) {
-				$setup_data['absence_policy_ids'] = [];
+			if ( isset( $setup_data ) ) {
+				if ( !isset( $setup_data['insurable_earnings_psea_ids'] ) ) {
+					$setup_data['insurable_earnings_psea_ids'] = $this->getPayStubEntryAccountLinkObject()->getTotalGross();
+				}
+
+				if ( !isset( $setup_data['absence_policy_ids'] ) ) {
+					$setup_data['absence_policy_ids'] = [];
+				}
+
+				return $setup_data;
 			}
-
-			return $setup_data;
 		}
 
 		return false;

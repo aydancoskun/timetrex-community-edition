@@ -18,7 +18,7 @@
 		};
 
 		this.setSortStyle = function( sort_type, index ) {
-			var sortIcon = $( '<img class=\'t-grid-header-sort-icon\' />' );
+			var sortIcon = $( '<img class=\'t-grid-header-sort-icon\'></img>' );
 
 			if ( sort_type === 'asc' ) {
 

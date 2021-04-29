@@ -1,46 +1,52 @@
-WizardStep = Backbone.View.extend( {
-	name: null,
-	previous_step_name: null,
-	next_step_name: null,
-	buttons: null,
-	reload: null,
-	wizard_obj: null, //rename to wizard_obj
+class WizardStep extends TTBackboneView {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			previous_step_name: null,
+			next_step_name: null,
+			buttons: null,
+			wizard_obj: null, //rename to wizard_obj
 
-	clicked_buttons: {},
-	reload: false,
+			clicked_buttons: {},
+			reload: false,
 
-	api: null,
+			api: null,
 
-	//override in children
-	name: 'undefined',
-	title: $.i18n._( 'Undefined Step' ),
-	instructions: $.i18n._( 'Undefined step data' ),
+			//override in children
+			name: 'undefined',
+			title: $.i18n._( 'Undefined Step' ),
+			instructions: $.i18n._( 'Undefined step data' )
+		} );
 
-	initialize: function( wizard_obj ) {
+		super( options );
+	}
+
+	initialize( wizard_obj ) {
+		super.initialize( wizard_obj );
+
 		this.buttons = {};
 		this.reload = false;
 		this.setWizardObject( wizard_obj );
 		var $this = this;
 		this.init();
-	},
+	}
 
 	//Children must always call render()
-	init: function() {
+	init() {
 		this.render();
-	},
+	}
 
-	initCardsBlock: function() {
+	initCardsBlock() {
 		$( this.wizard_obj.el ).find( '#cards' ).html( '' );
-	},
+	}
 
-	setTitle: function( title ) {
+	setTitle( title ) {
 		$( this.wizard_obj.el ).find( '.title-1' ).html( title );
-	},
+	}
 
-	setInstructions: function( instructions, callback ) {
+	setInstructions( instructions, callback ) {
 
 		if ( $( this.el ).find( '.instructions' ).length == 0 ) {
-			$( this.el ).find( '.progress-bar' ).append( '<p class="instructions"/>' );
+			$( this.el ).find( '.progress-bar' ).append( '<p class="instructions"></p>' );
 		}
 
 		$( this.el ).find( '.progress-bar .instructions' ).html( instructions );
@@ -48,51 +54,52 @@ WizardStep = Backbone.View.extend( {
 		if ( typeof callback == 'function' ) {
 			callback();
 		}
-	},
+	}
 
-	setWizardObject: function( val ) {
+	setWizardObject( val ) {
 		this.wizard_obj = val;
 		this.el = this.wizard_obj.el;
-	},
-	getWizardObject: function() {
+	}
+
+	getWizardObject() {
 		return this.wizard_obj;
-	},
+	}
 
-	setNextStepName: function( val ) {
+	setNextStepName( val ) {
 		this.next_step_name = val;
-	},
+	}
 
-	getNextStepName: function() {
+	getNextStepName() {
 		return false;
-	},
+	}
 
-	setPreviousStepName: function( val ) {
+	setPreviousStepName( val ) {
 		this.previous_step_name = val;
-	},
+	}
 
-	getPreviousStepName: function() {
+	getPreviousStepName() {
 		return false;
-	},
+	}
 
-	render: function() {
+	render() {
 		this.initCardsBlock();
 		return this._render();
-	},
+	}
 
-	_render: function() {
+	_render() {
 		return;
 		//always overrirde
-	},
+	}
 
-	append: function( content ) {
+	append( content ) {
 		$( this.wizard_obj.el ).find( '.content' ).append( content );
-	},
+	}
 
-	appendButton: function( button ) {
+	appendButton( button ) {
 		$( this.wizard_obj.el ).find( '#cards' ).append( button );
-	},
+	}
 
-	setGrid: function( gridId, grid_div, allMultipleSelection ) {
+	setGrid( gridId, grid_div, allMultipleSelection ) {
 
 		if ( !allMultipleSelection ) {
 			allMultipleSelection = false;
@@ -128,33 +135,33 @@ WizardStep = Backbone.View.extend( {
 		this.setGridGroupColumns( gridId );
 
 		return grid; //allowing chaining off this method.
-	},
+	}
 
-	getGridColumns: function( gridId, callBack ) {
+	getGridColumns( gridId, callBack ) {
 		//override if step object needs a grid.
-	},
+	}
 
-	setGridAutoHeight: function( grid, length ) {
+	setGridAutoHeight( grid, length ) {
 		if ( length > 0 && length < 10 ) {
 			grid.grid.setGridHeight( length * 23 );
 		} else if ( length > 10 ) {
 			grid.grid.setGridHeight( 400 );
 		}
-	},
+	}
 
-	setGridSize: function( grid ) {
+	setGridSize( grid ) {
 		grid.grid.setGridWidth( $( this.wizard_obj.el ).find( '.content .grid-div' ).width() - 11 );
 		grid.grid.setGridHeight( $( this.wizard_obj.el ).find( '.content' ).height() - 150 ); //During merge, this wasn't in MASTER branch.
-	},
+	}
 
-	getRibbonButtonBox: function() {
+	getRibbonButtonBox() {
 		var div = $( '<div class="menu ribbon-button-bar"></div>' );
 		var ul = $( '<ul></ul>' );
 
 		div.append( ul );
 
 		return div;
-	},
+	}
 
 	/**
 	 * to get old-style icons, don't provide desc
@@ -167,25 +174,25 @@ WizardStep = Backbone.View.extend( {
 	 * @param desc
 	 * @returns {*|jQuery|HTMLElement}
 	 */
-	getRibbonButton: function( id, icon, label, desc ) {
+	getRibbonButton( id, icon, label, desc ) {
 		//prelaod imgages to reduce the appearance of phantom flashing
-		$( '<img/>' )[0].src = icon;
+		$( '<img></img>' )[0].src = icon;
 
 		if ( typeof desc == 'undefined' ) {
 			var button = $( '<li><div class="ribbon-sub-menu-icon" id="' + id + '"><img src="' + icon + '" >' + label + '</div></li>' );
 			return button;
 		}
 
-		var container = $( '<div class="wizard_icon_card" id="' + id + '"/>' );
+		var container = $( '<div class="wizard_icon_card" id="' + id + '"></div>' );
 
-		var img = $( '<img src="' + icon + '" />' );
+		var img = $( '<img src="' + icon + '"></img>' );
 
-		var right_container = $( '<div class="right_container"/>' );
+		var right_container = $( '<div class="right_container"></div>' );
 
-		var title = $( '<h3 class="button_title"/>' );
+		var title = $( '<h3 class="button_title"></h3>' );
 		title.html( label ? label : '' );
 
-		var description = $( '<div class="description"/>' );
+		var description = $( '<div class="description"></div>' );
 		description.html( desc ? desc : '' );
 
 		container.append( img );
@@ -194,21 +201,21 @@ WizardStep = Backbone.View.extend( {
 		container.append( right_container );
 
 		return container;
-	},
+	}
 
 	//
 	//stubs that should be overrideen
 	//
 
-	onGridSelectRow: function( selected_id ) {
+	onGridSelectRow( selected_id ) {
 		//
-	},
+	}
 
-	onGridDblClickRow: function( selected_id ) {
+	onGridDblClickRow( selected_id ) {
 		//
-	},
+	}
 
-	onNavigationClick: function( e, icon ) {
+	onNavigationClick( e, icon ) {
 		if ( e ) {
 			this.addButtonClick( e, icon );
 		}
@@ -230,18 +237,18 @@ WizardStep = Backbone.View.extend( {
 		}
 
 		this._onNavigationClick( icon );
-	},
+	}
 
 	//Overridden in each Wizard step.
-	_onNavigationClick: function( icon ) {
-	},
+	_onNavigationClick( icon ) {
+	}
 
 	//Overridden in each Wizard step that needs to determine if required buttons are clicked or not.
-	isRequiredButtonsClicked: function() {
+	isRequiredButtonsClicked() {
 		return true;
-	},
+	}
 
-	addButtonClick: function( e, icon ) {
+	addButtonClick( e, icon ) {
 		// $(e.target).addClass('clicked_wizard_icon');
 		// $(e.target).find('img').addClass('disable-image');
 		var element = $( e.target );
@@ -252,16 +259,16 @@ WizardStep = Backbone.View.extend( {
 		element.addClass( 'disable-image' );
 
 		this.clicked_buttons[icon] = true;
-	},
+	}
 
-	isButtonClicked: function( icon ) {
+	isButtonClicked( icon ) {
 		if ( this.clicked_buttons.hasOwnProperty( icon ) && typeof this.clicked_buttons[icon] != 'undefined' ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	addButton: function( context_name, icon_name, title, description, button_name ) {
+	addButton( context_name, icon_name, title, description, button_name ) {
 		if ( typeof button_name == 'undefined' ) {
 			button_name = context_name;
 		}
@@ -283,22 +290,22 @@ WizardStep = Backbone.View.extend( {
 		this.appendButton( button );
 
 		return button;
-	},
+	}
 
-	setGridGroupColumns: function( gridId ) {
+	setGridGroupColumns( gridId ) {
 
-	},
+	}
 
-	urlClick: function( action_id ) {
+	urlClick( action_id ) {
 		this.api.getMakePaymentData( this.getWizardObject().selected_remittance_agency_event_id, action_id, {
 			onResult: function( result ) {
 				var url = result.getResult();
 				window.open( url );
 			}
 		} );
-	},
+	}
 
-	paymentServicesClick: function( action_id ) {
+	paymentServicesClick( action_id ) {
 		this.api.getFileAndPayWithPaymentServicesData( this.getWizardObject().selected_remittance_agency_event_id, action_id, {
 			onResult: function( result ) {
 				var retval = result.getResult();
@@ -314,4 +321,4 @@ WizardStep = Backbone.View.extend( {
 		} );
 	}
 
-} );
+}

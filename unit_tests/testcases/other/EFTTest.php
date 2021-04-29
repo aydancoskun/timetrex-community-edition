@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -88,6 +88,57 @@ class EFTTest extends PHPUnit_Framework_TestCase {
 		$expected_eft_data_file = '101 000005566 12345678920040100000094101DATACENTER             SHORTCOMPANYNAME       1001    
 5225SHORTCOMPANYNAME                    0123456789PPDPAYROLL   200401200401   1878787870000001
 62777777777088888888         0000012409               EmployeeName            0878787870000001
+822500000100777777770000000124090000000000000123456789                         878787870000001
+9000001000001000000010077777777000000012409000000000000                                       
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999';
+
+		$this->assertEquals($eft_data, $expected_eft_data_file );
+
+		return true;
+	}
+
+	function testSingleDebitOnlyACHB() {
+		//Setup file level settings.
+		$eft = new EFT();
+		$eft->setFileFormat( 'ACH' );
+		$eft->setBusinessNumber( '123456789' ); //ACH
+		$eft->setOriginatorID( '123456789' );
+		$eft->setFileCreationDate( strtotime('2020-04-01') );
+		$eft->setFileCreationNumber( '1001' );
+		$eft->setInitialEntryNumber( '87878787' ); //ACH
+		$eft->setDataCenter( '5566' );
+		$eft->setDataCenterName( 'DataCenter' ); //ACH
+
+		$eft->setOtherData( 'originator_long_name', 'LongCompanyName' );                  //Originator Long name based on company name. It will be trimmed automatically in EFT class.
+		$eft->setOriginatorShortName( 'ShortCompanyName' );
+		$eft->setCurrencyISOCode( 'USD' );
+
+		//Add records
+		$record = new EFT_Record();
+		$record->setType( 'D' );
+		$record->setCPACode( 200 );
+		$record->setAmount( '124.09' );
+		$record->setDueDate( strtotime('2020-04-01') );
+		$record->setInstitution( '555' );
+		$record->setTransit( '77777777' );
+		$record->setAccount( '88888888X9' ); //Test with alpha numeric values.
+		$record->setName( 'EmployeeName' );
+		$record->setOriginatorShortName( 'ShortCompanyName' );
+		$record->setOriginatorLongName( 'LongCompanyName' );
+		$eft->setRecord( $record );
+
+
+		$eft->compile();
+		$eft_data = str_replace("\r\n", "\n", $eft->getCompiledData() ); //Convert line ending to UNIX so we can compare against lines saved in this file using UNIX endings.
+		//var_dump($eft_data);
+
+		$expected_eft_data_file = '101 000005566 12345678920040100000094101DATACENTER             SHORTCOMPANYNAME       1001    
+5225SHORTCOMPANYNAME                    0123456789PPDPAYROLL   200401200401   1878787870000001
+62777777777088888888X9       0000012409               EmployeeName            0878787870000001
 822500000100777777770000000124090000000000000123456789                         878787870000001
 9000001000001000000010077777777000000012409000000000000                                       
 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -214,6 +265,58 @@ class EFTTest extends PHPUnit_Framework_TestCase {
 
 		$expected_eft_data_file = '101 000005566 12345678920040100000094101DATACENTER             SHORTCOMPANYNAME       1001    
 5220SHORTCOMPANYNAME                    0123456789PPDPAYROLL   200401200401   1878787870000001
+65577777777088888888         0000012409               EmployeeName            0878787870000001
+822000000100777777770000000000000000000124090123456789                         878787870000001
+9000001000001000000010077777777000000000000000000012409                                       
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999';
+
+		$this->assertEquals($eft_data, $expected_eft_data_file );
+
+		return true;
+	}
+
+	function testSingleCreditOnlyACHWithDiscretionaryData() {
+		//Setup file level settings.
+		$eft = new EFT();
+		$eft->setFileFormat( 'ACH' );
+		$eft->setBusinessNumber( '123456789' ); //ACH
+		$eft->setOriginatorID( '123456789' );
+		$eft->setFileCreationDate( strtotime('2020-04-01') );
+		$eft->setFileCreationNumber( '1001' );
+		$eft->setInitialEntryNumber( '87878787' ); //ACH
+		$eft->setBatchDiscretionaryData( '00112233445566778899' ); //ACH
+		$eft->setDataCenter( '5566' );
+		$eft->setDataCenterName( 'DataCenter' ); //ACH
+
+		$eft->setOtherData( 'originator_long_name', 'LongCompanyName' );                  //Originator Long name based on company name. It will be trimmed automatically in EFT class.
+		$eft->setOriginatorShortName( 'ShortCompanyName' );
+		$eft->setCurrencyISOCode( 'USD' );
+
+		//Add records
+		$record = new EFT_Record();
+		$record->setType( 'C' );
+		$record->setCPACode( 200 );
+		$record->setAmount( '124.09' );
+		$record->setDueDate( strtotime('2020-04-01') );
+		$record->setInstitution( '555' );
+		$record->setTransit( '77777777' );
+		$record->setAccount( '88888888' );
+		$record->setName( 'EmployeeName' );
+		$record->setOriginatorShortName( 'ShortCompanyName' );
+		$record->setOriginatorLongName( 'LongCompanyName' );
+		$eft->setRecord( $record );
+
+
+		$eft->compile();
+		$eft_data = str_replace("\r\n", "\n", $eft->getCompiledData() ); //Convert line ending to UNIX so we can compare against lines saved in this file using UNIX endings.
+		//var_dump($eft_data);
+
+		$expected_eft_data_file = '101 000005566 12345678920040100000094101DATACENTER             SHORTCOMPANYNAME       1001    
+5220SHORTCOMPANYNAME001122334455667788990123456789PPDPAYROLL   200401200401   1878787870000001
 65577777777088888888         0000012409               EmployeeName            0878787870000001
 822000000100777777770000000000000000000124090123456789                         878787870000001
 9000001000001000000010077777777000000000000000000012409                                       

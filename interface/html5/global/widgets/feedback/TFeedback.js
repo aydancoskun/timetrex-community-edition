@@ -18,7 +18,7 @@
 		var positive_page = feedback_container.find( '.feedback-page.positive' );
 		var negative_page = feedback_container.find( '.feedback-page.negative' );
 
-		var api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		var api = TTAPI.APIUser;
 
 		var feedback = {
 			POSITIVE: 'postitive',
@@ -213,7 +213,7 @@
 		}
 
 		function getUserContactDetails() {
-			var current_user_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
+			var current_user_api = TTAPI.APIAuthentication;
 			var user = current_user_api.getCurrentUser( { async: false } );
 			user = user.getResult();
 			var user_email;

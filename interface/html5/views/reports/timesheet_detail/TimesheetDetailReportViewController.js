@@ -1,20 +1,20 @@
-TimesheetDetailReportViewController = ReportBaseViewController.extend( {
+class TimesheetDetailReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {} );
 
-	_required_files: {
-		10: ['APITimesheetDetailReport', 'APICurrency'],
-		20: ['APIJob', 'APIJobItem']
-	},
+		super( options );
+	}
 
-	initReport: function( options ) {
+	initReport( options ) {
 		this.script_name = 'TimesheetDetailReport';
 		this.viewId = 'TimesheetDetailReport';
 		this.context_menu_name = $.i18n._( 'TimeSheet Detail' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'TimesheetDetailReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APITimesheetDetailReport' ) )();
-	},
+		this.api = TTAPI.APITimesheetDetailReport;
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				timesheet: {
@@ -47,11 +47,11 @@ TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 
 		this.onViewClick( id );
 	}
 
-} );
+}

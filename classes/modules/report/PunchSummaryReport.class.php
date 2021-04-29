@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -812,7 +812,7 @@ class PunchSummaryReport extends Report {
 
 		$plf->getPunchSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, $memory_based_row_limit );
 		Debug::Text( ' Total Rows: ' . $plf->getRecordCount() . ' Memory Row Limit: ' . $memory_based_row_limit . ' Memory Limit: ' . $this->maximum_memory_limit, __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $plf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		if ( $plf->getRecordCount() > 0 ) {
 			foreach ( $plf as $key => $p_obj ) {
 				$pay_period_ids[$p_obj->getColumn( 'pay_period_id' )] = true;
@@ -972,7 +972,7 @@ class PunchSummaryReport extends Report {
 
 				unset( $hourly_rate, $actual_time_diff );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 		}
 		//Debug::Arr($this->tmp_data['punch'], 'Punch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -982,11 +982,11 @@ class PunchSummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1013,7 +1013,7 @@ class PunchSummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['punch'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['punch'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		//Merge time data with user data
 		$key = 0;
@@ -1045,7 +1045,7 @@ class PunchSummaryReport extends Report {
 
 						$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 						$key++;
 					}
 				}

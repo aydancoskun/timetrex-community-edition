@@ -1,22 +1,27 @@
-UserDefaultViewController = BaseViewController.extend( {
+class UserDefaultViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIUserDefault', 'APIUserPreference', 'APILegalEntity', 'APIPayPeriodSchedule', 'APIPolicyGroup', 'APICurrency', 'APIUserTitle', 'APIBranch', 'APIDepartment', 'APICompanyDeduction', 'APILog'],
-	company_api: null,
-	user_preference_api: null,
+			company_api: null,
+			user_preference_api: null,
 
-	country_array: null,
-	province_array: null,
+			country_array: null,
+			province_array: null,
 
-	e_province_array: null,
-	language_array: null,
-	date_format_array: null,
-	time_format_array: null,
-	time_unit_format_array: null,
-	distance_format_array: null,
-	time_zone_array: null,
-	start_week_day_array: null,
+			e_province_array: null,
+			language_array: null,
+			date_format_array: null,
+			time_format_array: null,
+			time_unit_format_array: null,
+			distance_format_array: null,
+			time_zone_array: null,
+			start_week_day_array: null
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 
@@ -25,22 +30,21 @@ UserDefaultViewController = BaseViewController.extend( {
 		this.script_name = 'UserDefaultView';
 		this.table_name_key = 'user_default';
 		this.context_menu_name = $.i18n._( 'New Hire Defaults' );
-		this.api = new ( APIFactory.getAPIClass( 'APIUserDefault' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
-		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+		this.api = TTAPI.APIUserDefault;
+		this.company_api = TTAPI.APICompany;
+		this.user_preference_api = TTAPI.APIUserPreference;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
+	}
 
-	},
+	render() {
+		super.render();
+	}
 
-	render: function() {
-		this._super( 'render' );
-	},
-
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var options = [
 			{ option_name: 'language', field_name: 'language', api: this.user_preference_api },
@@ -58,10 +62,9 @@ UserDefaultViewController = BaseViewController.extend( {
 				callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
 			}
 		} );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -71,12 +74,12 @@ UserDefaultViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	getUserDefaultData: function( callBack ) {
+	getUserDefaultData( callBack ) {
 		var $this = this;
 
-		// First to get current company's user default data, if no have any data to get the default data which has been set up in (APIFactory.getAPIClass( 'APIUserDefault.' ))
+		// First to get current company's user default data, if no have any data to get the default data which has been set up in TTAPI.APIUserDefault.
 
 		$this.api['get' + $this.api.key_name]( {
 			onResult: function( result ) {
@@ -94,9 +97,9 @@ UserDefaultViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	openEditView: function() {
+	openEditView() {
 
 		var $this = this;
 
@@ -109,7 +112,7 @@ UserDefaultViewController = BaseViewController.extend( {
 				}
 
 				$this.getUserDefaultData( function( result ) {
-					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+					// Waiting for the TTAPI.API returns data to set the current edit record.
 					$this.current_edit_record = result;
 
 					$this.initEditView();
@@ -124,10 +127,9 @@ UserDefaultViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -151,10 +153,9 @@ UserDefaultViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	setErrorMenu: function() {
+	setErrorMenu() {
 
 		var len = this.context_menu_array.length;
 
@@ -172,9 +173,9 @@ UserDefaultViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === '-1' || val === '0' ) {
@@ -194,9 +195,9 @@ UserDefaultViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	eSetProvince: function( val, refresh ) {
+	eSetProvince( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -221,11 +222,11 @@ UserDefaultViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_employee_id': { 'label': $.i18n._( 'Employee Identification' ) },
@@ -251,7 +252,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		//Legal Entity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			show_search_inputs: true,
@@ -264,7 +265,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPermissionControl' ) ),
+			api_class: TTAPI.APIPermissionControl,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PERMISSION_CONTROL,
 			set_empty: true,
@@ -276,7 +277,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		//Terminated Permission Group
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPermissionControl' ) ),
+			api_class: TTAPI.APIPermissionControl,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PERMISSION_CONTROL,
 			set_empty: true,
@@ -288,7 +289,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		// Pay Period Schedule
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
+			api_class: TTAPI.APIPayPeriodSchedule,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 			show_search_inputs: true,
@@ -300,7 +301,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		//Policy Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPolicyGroup' ) ),
+			api_class: TTAPI.APIPolicyGroup,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.POLICY_GROUP,
 			show_search_inputs: true,
@@ -313,7 +314,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			show_search_inputs: true,
@@ -327,7 +328,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+			api_class: TTAPI.APIUserTitle,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.JOB_TITLE,
 			show_search_inputs: true,
@@ -352,7 +353,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -365,7 +366,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -529,7 +530,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		form_item_input.AComboBox( {
 			field: 'company_deduction',
 			layout_name: ALayoutIDs.COMPANY_DEDUCTION,
-			api_class: ( APIFactory.getAPIClass( 'APICompanyDeduction' ) ),
+			api_class: TTAPI.APICompanyDeduction,
 			allow_multiple_selection: true,
 			set_empty: true
 		} );
@@ -537,4 +538,4 @@ UserDefaultViewController = BaseViewController.extend( {
 
 	}
 
-} );
+}

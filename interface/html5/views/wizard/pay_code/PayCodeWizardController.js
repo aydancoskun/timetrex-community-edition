@@ -1,8 +1,13 @@
-PayCodeWizardController = BaseWizardController.extend( {
+class PayCodeWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg'
+		} );
 
-	el: '.wizard-bg',
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Migrate Pay Codes' );
@@ -11,17 +16,16 @@ PayCodeWizardController = BaseWizardController.extend( {
 		$( this.el ).width( 1010 );
 
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initCurrentStep();
-
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		this.content_div.empty();
 		switch ( this.current_step ) {
@@ -44,7 +48,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 				var first_hr = content_clone.find( '.first-hr' );
 				first_hr.find( '.wizard-item-label > span' ).text( $.i18n._( 'Select Source Pay Codes' ) + ': ' );
-				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayCode' ) ), true, ALayoutIDs.PAY_CODE, 'source_pay_code_ids' );
+				var a_combobox = this.getAComboBox( TTAPI.APIPayCode, true, ALayoutIDs.PAY_CODE, 'source_pay_code_ids' );
 				first_hr.find( '.wizard-item-widget' ).append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step][a_combobox.getField()] = a_combobox;
@@ -53,7 +57,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 				var second_hr = content_clone.find( '.second-hr' );
 				second_hr.find( '.wizard-item-label > span' ).text( $.i18n._( 'Select Destination Pay Code' ) + ': ' );
-				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayCode' ) ), false, ALayoutIDs.PAY_CODE, 'dest_pay_code_id' );
+				a_combobox = this.getAComboBox( TTAPI.APIPayCode, false, ALayoutIDs.PAY_CODE, 'dest_pay_code_id' );
 				second_hr.find( '.wizard-item-widget' ).append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step][a_combobox.getField()] = a_combobox;
@@ -62,20 +66,19 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 				break;
 		}
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
+	}
 
-	},
-
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 		var source_pay_code_ids = this.stepsDataDic[2].source_pay_code_ids;
 		var dest_pay_code_id = this.stepsDataDic[2].dest_pay_code_id;
 
-		var pay_code_api = new ( APIFactory.getAPIClass( 'APIPayCode' ) )();
+		var pay_code_api = TTAPI.APIPayCode;
 
 		pay_code_api.migratePayCode( source_pay_code_ids, dest_pay_code_id, {
 			onResult: function( result ) {
@@ -92,9 +95,9 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setCurrentStepValues: function() {
+	setCurrentStepValues() {
 
 		if ( !this.stepsDataDic[this.current_step] ) {
 			return;
@@ -115,9 +118,9 @@ PayCodeWizardController = BaseWizardController.extend( {
 				}
 				break;
 		}
-	},
+	}
 
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -129,10 +132,9 @@ PayCodeWizardController = BaseWizardController.extend( {
 				current_step_data.dest_pay_code_id = current_step_ui.dest_pay_code_id.getValue();
 				break;
 		}
+	}
 
-	},
-
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 
 		if ( !this.default_data ) {
 			return null;
@@ -147,7 +149,6 @@ PayCodeWizardController = BaseWizardController.extend( {
 		if ( this.getDefaultData( 'dest_pay_code_id' ) ) {
 			this.stepsDataDic[2].dest_pay_code_id = this.getDefaultData( 'dest_pay_code_id' );
 		}
-
 	}
 
-} );
+}

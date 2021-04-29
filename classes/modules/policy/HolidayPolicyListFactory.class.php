@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -342,10 +342,11 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 			}
 		}
 
-		$additional_order_fields = [ 'type_id', 'in_use' ];
+		$additional_order_fields = [ 'type_id', 'default_schedule_status_id', 'in_use' ];
 
 		$sort_column_aliases = [
-				'type' => 'type_id',
+				'type'                    => 'type_id',
+				'default_schedule_status' => 'default_schedule_status_id',
 		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );

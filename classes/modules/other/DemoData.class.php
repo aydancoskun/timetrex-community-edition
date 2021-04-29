@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -658,6 +658,16 @@ class DemoData {
 				$cf->setISOCode( 'EUR' );
 
 				$cf->setConversionRate( '1.300000000' );
+				$cf->setAutoUpdate( true );
+				$cf->setBase( false );
+				$cf->setDefault( false );
+				$cf->setRoundDecimalPlaces( 4 );
+				break;
+			case 40: //Pesos
+				$cf->setName( 'Pesos' );
+				$cf->setISOCode( 'MXN' );
+
+				$cf->setConversionRate( '9755' ); //Some really large exchange rate.
 				$cf->setAutoUpdate( true );
 				$cf->setBase( false );
 				$cf->setDefault( false );
@@ -3713,11 +3723,14 @@ class DemoData {
 	 * @param string $ethnic_group_ids UUID
 	 * @param null $remittance_source_account_ids
 	 * @param null $coordinates
+	 * @param null $default_job_id
+	 * @param null $default_job_item_id
 	 * @return bool
 	 * @throws DBError
 	 * @throws GeneralError
+	 * @throws ReflectionException
 	 */
-	function createUser( $company_id, $legal_entity_id, $type, $policy_group_id = null, $default_branch_id = null, $default_department_id = null, $default_currency_id = null, $user_group_id = null, $user_title_id = null, $ethnic_group_ids = null, $remittance_source_account_ids = null, $coordinates = null ) {
+	function createUser( $company_id, $legal_entity_id, $type, $policy_group_id = null, $default_branch_id = null, $default_department_id = null, $default_currency_id = null, $user_group_id = null, $user_title_id = null, $ethnic_group_ids = null, $remittance_source_account_ids = null, $coordinates = null, $default_job_id = null, $default_job_item_id = null ) {
 		//if ( $policy_group_id === null ) {
 		//	$policy_group_id = TTUUID::getZeroID();
 		//}
@@ -3728,6 +3741,14 @@ class DemoData {
 
 		if ( $default_department_id === null ) {
 			$default_department_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_job_id === null ) {
+			$default_job_id = TTUUID::getZeroID();
+		}
+
+		if ( $default_job_item_id === null ) {
+			$default_job_item_id = TTUUID::getZeroID();
 		}
 
 		if ( $default_currency_id === null ) {
@@ -4196,6 +4217,8 @@ class DemoData {
 
 		$uf->setDefaultBranch( $default_branch_id );
 		$uf->setDefaultDepartment( $default_department_id );
+		$uf->setDefaultJob( $default_job_id );
+		$uf->setDefaultJobItem( $default_job_item_id );
 		$uf->setCurrency( $default_currency_id );
 		$uf->setGroup( $user_group_id );
 		$uf->setTitle( $user_title_id );
@@ -4590,7 +4613,7 @@ class DemoData {
 		$upf->setDateFormat( 'd-M-y' );
 		$upf->setTimeFormat( 'g:i A' );
 		$upf->setTimeUnitFormat( 10 );
-		$upf->setTimeZone( 'PST8PDT' );
+		$upf->setTimeZone( 'America/Vancouver' );
 		$upf->setStartWeekDay( 0 );
 		$upf->setItemsPerPage( 50 );
 
@@ -4638,7 +4661,7 @@ class DemoData {
 		$udf->setTimeFormat( 'g:i A' );
 		$udf->setTimeUnitFormat( 10 );
 		$udf->setStartWeekDay( 0 );
-		$udf->setTimeZone( 'PST8PDT' );
+		$udf->setTimeZone( 'America/Vancouver' );
 		$udf->setDistanceFormat( 10 );
 
 		//Get Pay Period Schedule
@@ -6793,9 +6816,13 @@ class DemoData {
 	 * @param string $company_id         UUID
 	 * @param $type
 	 * @param string $schedule_policy_id UUID
+	 * @param int $open_shift_multiplier
 	 * @return bool
+	 * @throws DBError
+	 * @throws GeneralError
+	 * @throws ReflectionException
 	 */
-	function createRecurringScheduleTemplate( $company_id, $type, $schedule_policy_id = null ) {
+	function createRecurringScheduleTemplate( $company_id, $type, $schedule_policy_id = null, $open_shift_multiplier = 1 ) {
 		$rstcf = TTnew( 'RecurringScheduleTemplateControlFactory' ); /** @var RecurringScheduleTemplateControlFactory $rstcf */
 		$rstcf->setCompany( $company_id );
 
@@ -6830,6 +6857,7 @@ class DemoData {
 					$rstf->setDepartment( TTUUID::getNotExistID() ); //Default
 					$rstf->setJob( TTUUID::getNotExistID() );        //Default
 					$rstf->setJobItem( TTUUID::getNotExistID() );    //Default
+					$rstf->setOpenShiftMultiplier( $open_shift_multiplier );
 
 					if ( $rstf->isValid() ) {
 						Debug::Text( 'Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -8059,6 +8087,20 @@ class DemoData {
 				$rsaf->setValue5( rand( 100, 999 ) );
 				$rsaf->setValue7( rand( 100, 999 ) );
 				break;
+			case 100:
+			case 110:
+			case 120:
+				$rsaf->setType( 2000 ); //Check
+				$rsaf->setCountry( 'US' );
+				$rsaf->setName( 'Checks' . ' - ' . $rsaf->getLegalEntityObject()->getLegalName() .' ['. $type .']' );
+				$rsaf->setDescription( '' );
+				$rsaf->setDataFormat( 10 );
+				$rsaf->setValue1( rand( 100, 999 ) );
+				$rsaf->setValue2( rand( 100, 999 ) . rand( 100, 999 ) . rand( 100, 999 ) );
+				$rsaf->setValue3( rand( 100, 999 ) . rand( 100, 999 ) . rand( 100, 999 ) );
+				$rsaf->setValue4( '' );
+				$rsaf->setValue5( '' );
+				break;
 		}
 
 		if ( $rsaf->isValid() ) {
@@ -8079,9 +8121,13 @@ class DemoData {
 	 * @param string $legal_entity_id              UUID
 	 * @param string $remittance_source_account_id UUID
 	 * @param int $type_id
+	 * @param null $percent_amount
 	 * @return bool|int|string
+	 * @throws DBError
+	 * @throws GeneralError
+	 * @throws ReflectionException
 	 */
-	function createRemittanceDestinationAccount( $user_id, $currency_id, $legal_entity_id, $remittance_source_account_id, $type_id ) {
+	function createRemittanceDestinationAccount( $user_id, $currency_id, $legal_entity_id, $remittance_source_account_id, $type_id, $percent_amount = null ) {
 		$rdaf = TTnew( 'RemittanceDestinationAccountFactory' ); /** @var RemittanceDestinationAccountFactory $rdaf */
 
 		Debug::Text( 'Creating remittance destination account.', __FILE__, __LINE__, __METHOD__, 10 );
@@ -8090,26 +8136,23 @@ class DemoData {
 		$rdaf->setStatus( 10 ); //Enabled
 		$rdaf->setRemittanceSourceAccount( $remittance_source_account_id );
 
-		$amount_type_id = array_rand( $rdaf->getOptions( 'amount_type' ) ); //10 or 20
+		srand( $this->getDate() . $type_id );
+		$amount_type_id = array_rand( $rdaf->getOptions( 'amount_type' ) ); //10=Percent or 20=Fixed
+
+		$rdaf->setAmountType( $amount_type_id );
 		if ( $amount_type_id == 10 ) {
-			$amount_type_id = 20;
-			$rdaf->setAmountType( $amount_type_id );
-			$rdaf->setAmount( rand( 1, 100 ) );
-			$rdaf->setPercentAmount( 0 );
-			$rdaf->setPriority( rand( 1, 5 ) );
-		} else {
-			if ( $amount_type_id == 20 ) {
-				$amount_type_id = 10;
-				$rdaf->setAmountType( $amount_type_id );
-				if ( isset( $percent_amount ) ) {
-					$rdaf->setPercentAmount( 100 - $percent_amount );
-				} else {
-					$percent_amount = rand( 10, 89 );
-					$rdaf->setPercentAmount( $percent_amount );
-				}
-				$rdaf->setAmount( 0 );
-				$rdaf->setPriority( rand( 6, 10 ) );
+			if ( isset( $percent_amount ) && is_numeric( $percent_amount ) ) {
+				$rdaf->setPercentAmount( 100 - $percent_amount );
+			} else {
+				$percent_amount = rand( 10, 89 );
+				$rdaf->setPercentAmount( $percent_amount );
 			}
+			$rdaf->setAmount( 0 );
+			$rdaf->setPriority( rand( 6, 10 ) );
+		} else {
+			$rdaf->setAmount( rand( 10, 200 ) );
+			$rdaf->setPercentAmount( 0 );
+			$rdaf->setPriority( rand( 2, 5 ) );
 		}
 
 		Debug::Text( 'Type ID: ' . $type_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -8140,6 +8183,16 @@ class DemoData {
 				}
 				$rdaf->setValue3( rand( 100, 999 ) . rand( 100, 999 ) . rand( 100, 999 ) );
 				break;
+			case 100:
+			case 110:
+			case 120:
+			case 130:
+				$rdaf->setType( 2000 );
+				$rdaf->setPriority( 1 );
+				$rdaf->setAmountType( 10 ); //10=Percent
+				$rdaf->setPercentAmount( $percent_amount );
+				$rdaf->setName( 'Checking Account ['. $type_id .']' );
+				break;
 		}
 
 		if ( $rdaf->isValid() ) {
@@ -8160,7 +8213,7 @@ class DemoData {
 	function generateData() {
 		global $current_company, $current_user;
 
-		TTDate::setTimeZone( 'PST8PDT' );
+		TTDate::setTimeZone( 'America/Vancouver' );
 		TTi18n::setLocale( 'en_US' );
 
 		$current_epoch = $this->getDate();

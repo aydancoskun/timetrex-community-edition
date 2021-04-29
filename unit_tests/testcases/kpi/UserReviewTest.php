@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -274,9 +274,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 1 );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 10 );
+		$this->assertEquals( 10, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( 1, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( 10, $kpi_arr[0]['maximum_rate'] );
 
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 10 );
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 11 );
@@ -297,9 +297,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 1 );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 10 );
+		$this->assertEquals( 10, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( 1, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( 10, $kpi_arr[0]['maximum_rate'] );
 		if ( $kpi_arr[0]['rating'] < 10 && $kpi_arr[0]['rating'] > 1 ) {
 			$this->assertTrue( true );
 		} else {
@@ -315,15 +315,15 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_ids[0] );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 10 );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 100 );
+		$this->assertEquals( 10, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( 10, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( 100, $kpi_arr[0]['maximum_rate'] );
 
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_ids[1] );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 10 );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 100 );
+		$this->assertEquals( 10, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( 10, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( 100, $kpi_arr[0]['maximum_rate'] );
 
 		unset( $kpi_id, $kpi_arr, $kpi_group_ids );
 
@@ -354,9 +354,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 20 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		$this->assertEquals( 20, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( false, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['maximum_rate'] );
 		if ( (int)$kpi_arr[0]['rating'] == 0 || (int)$kpi_arr[0]['rating'] == 1 ) {
 			$this->assertTrue( true );
 		} else {
@@ -376,9 +376,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 20 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		$this->assertEquals( 20, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( false, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['maximum_rate'] );
 		if ( (int)$kpi_arr[0]['rating'] == 0 || (int)$kpi_arr[0]['rating'] == 1 ) {
 			$this->assertTrue( true );
 		} else {
@@ -398,9 +398,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		$this->assertEquals( 30, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( false, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['maximum_rate'] );
 
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 17 );
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 19 );
@@ -411,16 +411,16 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			if ( $urf->isValid() ) {
-				$user_review_id = $urf->Save();
+				$urf->Save();
 			}
 		}
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['rating'], false );
+		$this->assertEquals( 30, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( false, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['maximum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['rating'] );
 
 		return true;
 	}
@@ -432,9 +432,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		$this->assertEquals( 30, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( false, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['maximum_rate'] );
 
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 12 );
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 13 );
@@ -446,16 +446,16 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			$urf->setUserReviewControl( $user_review_control_id );
 			$urf->setKPI( $kpi_id );
 			if ( $urf->isValid() ) {
-				$user_review_id = $urf->Save();
+				$urf->Save();
 			}
 		}
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['rating'], false );
+		$this->assertEquals( 30, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( false, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['maximum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['rating'] );
 
 		unset( $kpi_arr, $user_ids, $user_review_control_id, $urf );
 
@@ -470,9 +470,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		}
 
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_id );
-		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 10 );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 100 );
+		$this->assertEquals( 10, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( 10, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( 100, $kpi_arr[0]['maximum_rate'] );
 
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 14 );
 		$user_ids[] = $dd->createUser( $this->company_id, $this->legal_entity_id, 16 );
@@ -493,9 +493,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_id );
 
-		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 10 );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 100 );
+		$this->assertEquals( 10, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( 10, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( 100, $kpi_arr[0]['maximum_rate'] );
 		if ( $kpi_arr[0]['rating'] < 100 && $kpi_arr[0]['rating'] > 10 ) {
 			$this->assertTrue( true );
 		} else {
@@ -559,18 +559,18 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_ids[0] );
-		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 1 );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 10 );
+		$this->assertEquals( 10, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( 1, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( 10, $kpi_arr[0]['maximum_rate'] );
 		$this->assertEquals( $kpi_arr[0]['group_id'][0], $kpi_group_ids[0] );
-		$this->assertEquals( $kpi_arr[0]['rating'], 7 );
+		$this->assertEquals( 7, $kpi_arr[0]['rating'] );
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_ids[1] );
-		$this->assertEquals( $kpi_arr[0]['type_id'], 30 );
-		$this->assertEquals( $kpi_arr[0]['minimum_rate'], false );
-		$this->assertEquals( $kpi_arr[0]['maximum_rate'], false );
+		$this->assertEquals( 30, $kpi_arr[0]['type_id'] );
+		$this->assertEquals( false, $kpi_arr[0]['minimum_rate'] );
+		$this->assertEquals( false, $kpi_arr[0]['maximum_rate'] );
 		$this->assertEquals( $kpi_arr[0]['group_id'][0], $kpi_group_ids[1] );
-		$this->assertEquals( $kpi_arr[0]['rating'], false );
+		$this->assertEquals( false, $kpi_arr[0]['rating'] );
 
 
 		// Delete reviews first and then delete KPIs
@@ -599,10 +599,10 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_ids[0] );
-		$this->assertEquals( $kpi_arr, false );
+		$this->assertEquals( false, $kpi_arr );
 
 		$kpi_arr = $this->getKPIArrayByControlId( $user_review_control_ids[1] );
-		$this->assertEquals( $kpi_arr, false );
+		$this->assertEquals( false, $kpi_arr );
 
 		return true;
 	}

@@ -1,35 +1,42 @@
-DashletController = Backbone.View.extend( {
-	data: null,
-	api_dashboard: null,
-	api_user_report: null,
-	user_generic_data_api: null,
-	all_columns: null,
-	grid: null,
-	dashboard_data: null,
-	refresh_timer: null,
-	iframe_data: null,
-	initComplete: false,
-	iframe: null,
-	homeViewController: null,
-	initTimesheetGridComplete: null,
-	accumulated_total_grid_source_map: null,
-	accmulated_order_map: null,
+class DashletController extends TTBackboneView {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			data: null,
+			api_dashboard: null,
+			api_user_report: null,
+			user_generic_data_api: null,
+			all_columns: null,
+			grid: null,
+			dashboard_data: null,
+			refresh_timer: null,
+			iframe_data: null,
+			initComplete: false,
+			iframe: null,
+			homeViewController: null,
+			initTimesheetGridComplete: null,
+			accumulated_total_grid_source_map: null,
+			accmulated_order_map: null
+		} );
 
-	initialize: function( options ) {
-		this.api_dashboard = new ( APIFactory.getAPIClass( 'APIDashboard' ) )();
-		this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
-	},
+		super( options );
+	}
 
-	refreshIfNecessary: function() {
+	initialize( options ) {
+		super.initialize( options );
+		this.api_dashboard = TTAPI.APIDashboard;
+		this.user_generic_data_api = TTAPI.APIUserGenericData;
+	}
+
+	refreshIfNecessary() {
 		if ( this.data && this.data.data.dashlet_type == 'custom_report' || this.data.data.dashlet_type === 'news' ) {
 			if ( this.iframe_data ) {
 				this.addIframeBack();
 				this.setIframeData();
 			}
 		}
-	},
+	}
 
-	initContent: function() {
+	initContent() {
 		var $this = this;
 		this.setTitle();
 		this.initComplete = false;
@@ -130,9 +137,9 @@ DashletController = Backbone.View.extend( {
 			}
 			$this.initComplete = true;
 		}//if not android
-	},
+	}
 
-	onViewClick: function() {
+	onViewClick() {
 		var target_view = '';
 		var open_reoprt = false;
 		if ( this.data.data.dashlet_type == 'custom_list' ) {
@@ -194,10 +201,9 @@ DashletController = Backbone.View.extend( {
 		} else {
 			IndexViewController.goToView( target_view );
 		}
+	}
 
-	},
-
-	onCellFormat: function( cell_value, related_data, row ) {
+	onCellFormat( cell_value, related_data, row ) {
 		cell_value = Global.decodeCellValue( cell_value );
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowid;
@@ -298,9 +304,9 @@ DashletController = Backbone.View.extend( {
 			content_div.prepend( time_span );
 		}
 		return content_div.get( 0 ).outerHTML;
-	},
+	}
 
-	initNewsContent: function() {
+	initNewsContent() {
 		var $this = this;
 		$( this.el ).find( '#grid' ).remove();
 		$( this.el ).find( '.view-btn' ).remove();
@@ -310,9 +316,9 @@ DashletController = Backbone.View.extend( {
 		} );
 		this.initNewsData();
 		this.startRefresh();
-	},
+	}
 
-	initNewsData: function() {
+	initNewsData() {
 		var $this = this;
 		this.api_dashboard.getDashletData( this.data.data.dashlet_type, {}, {
 			onResult: function( result ) {
@@ -328,18 +334,18 @@ DashletController = Backbone.View.extend( {
 				$( '.button-rotate' ).removeClass( 'button-rotate' );
 			}
 		} );
-	},
+	}
 
 	//Error: Uncaught TypeError: Cannot read property 'contentDocument' of undefined in/interface/html5/#!m=MessageControl line 359
-	setIframeData: function( iframe_data ) {
+	setIframeData( iframe_data ) {
 		if ( $( this.el ).find( '#iframe' ).length > 0 && $( this.el ).find( '#iframe' )[0].contentWindow.document ) {
 			$( this.el ).find( '#iframe' )[0].contentWindow.document.open();
 			$( this.el ).find( '#iframe' )[0].contentWindow.document.writeln( this.iframe_data );
 			$( this.el ).find( '#iframe' )[0].contentWindow.document.close();
 		}
-	},
+	}
 
-	initTimesheetContent: function( view_name ) {
+	initTimesheetContent( view_name ) {
 		$( this.el ).find( '#iframe' ).remove();
 		var $this = this;
 		this.api = this.getAPIByViewName( view_name );
@@ -361,10 +367,9 @@ DashletController = Backbone.View.extend( {
 		// start load grid data
 		this.initDefaultTimesheetData();
 		this.startRefresh();
+	}
 
-	},
-
-	initDefaultTimesheetData: function() {
+	initDefaultTimesheetData() {
 		var $this = this;
 		this.accumulated_total_grid_source_map = {};
 		this.api.getTimeSheetData( LocalCacheData.getLoginUser().id, new Date().format(), {
@@ -393,9 +398,9 @@ DashletController = Backbone.View.extend( {
 				$( '.button-rotate' ).removeClass( 'button-rotate' );
 			}
 		} );
-	},
+	}
 
-	buildAccmulatedOrderMap: function( total ) {
+	buildAccmulatedOrderMap( total ) {
 		if ( !total ) {
 			return;
 		}
@@ -404,9 +409,9 @@ DashletController = Backbone.View.extend( {
 				this.accmulated_order_map[key1] = total[key][key1].order;
 			}
 		}
-	},
+	}
 
-	buildAccumulatedTotalData: function() {
+	buildAccumulatedTotalData() {
 		// There will be no grid when no start date and end date when calling getTimeSheetData
 		if ( !this.grid ) {
 			return;
@@ -460,14 +465,14 @@ DashletController = Backbone.View.extend( {
 		}
 		this.sortAccumulatedTotalData();
 		this.grid.setData( this.accumulated_total_grid_source );
-	},
+	}
 
-	sortAccumulatedTotalData: function() {
+	sortAccumulatedTotalData() {
 		var sort_fields = ['order', 'punch_info'];
 		this.accumulated_total_grid_source.sort( Global.m_sort_by( sort_fields ) );
-	},
+	}
 
-	buildSubGridsData: function( array, date_string, map, result_array, parent_key ) {
+	buildSubGridsData( array, date_string, map, result_array, parent_key ) {
 		var row;
 		var marked_regular_row = false; //Only mark the first regular time row, as thats where the bold top-line is going to go.
 		for ( var key in array ) {
@@ -546,9 +551,9 @@ DashletController = Backbone.View.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	getAccumulatedTotalGridPayperiodHeader: function() {
+	getAccumulatedTotalGridPayperiodHeader() {
 		this.pay_period_header = $.i18n._( 'No Pay Period' );
 		var pay_period_id = this.timesheet_verify_data.pay_period_id;
 		if ( pay_period_id && this.pay_period_data ) {
@@ -562,9 +567,9 @@ DashletController = Backbone.View.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	buildAccumulatedTotalGrid: function() {
+	buildAccumulatedTotalGrid() {
 		var $this = this;
 		var columns = [];
 		var grid_id;
@@ -625,9 +630,9 @@ DashletController = Backbone.View.extend( {
 		this.grid = new TTGrid( grid_id, grid_data, columns );
 
 		$this.setGridSize();
-	},
+	}
 
-	initDefaultDashletContent: function( view_name ) {
+	initDefaultDashletContent( view_name ) {
 		$( this.el ).find( '#iframe' ).remove();
 		var $this = this;
 		this.api = this.getAPIByViewName( view_name );
@@ -655,9 +660,9 @@ DashletController = Backbone.View.extend( {
 		// start load grid data
 		this.initDefaultDashletData();
 		this.startRefresh();
-	},
+	}
 
-	initDefaultDashletData: function() {
+	initDefaultDashletData() {
 		var $this = this;
 		$this.getDefaultDashletData( function() {
 			$this.getAllColumns( function() {
@@ -676,9 +681,9 @@ DashletController = Backbone.View.extend( {
 				$this.setGridCellBackGround();
 			} );
 		} );
-	},
+	}
 
-	processId: function( data ) {
+	processId( data ) {
 		var start_id = -2;
 		// Add a random id to make sure each row has different id when the item don't have id itself (Scheudle summary)
 		data = _.map( data, function( item ) {
@@ -690,24 +695,24 @@ DashletController = Backbone.View.extend( {
 		} );
 
 		return data;
-	},
+	}
 
-	addIframeBack: function() {
+	addIframeBack() {
 		var $this = this;
 		if ( $this.iframe ) {
 			$( $this.el ).find( '.content' ).append( $this.iframe );
 			$this.setIframeData();
 			$this.iframe = null;
 		}
-	},
+	}
 
-	removeIframe: function() {
+	removeIframe() {
 		var $this = this;
 		$this.iframe = $( $this.el ).find( '#iframe' );
 		$( $this.el ).find( '#iframe' ).remove();
-	},
+	}
 
-	saveSize: function( h, w ) {
+	saveSize( h, w ) {
 		this.data.data.width = Math.floor( w / $( '.dashboard-container' ).width() * 100 ); //needs a percentage
 		this.data.data.height = h;
 		console.log( this.data.data );
@@ -715,17 +720,17 @@ DashletController = Backbone.View.extend( {
 			onResult: function( result ) {
 			}
 		} );
-	},
+	}
 
-	setGridSize: function() {
+	setGridSize() {
 		if ( ( !this.grid || !this.grid.grid || !this.grid.grid.is( ':visible' ) ) ) {
 			return;
 		}
 		this.grid.grid.setGridWidth( $( this.el ).find( '.content' ).width() );
 		this.grid.grid.setGridHeight( $( this.el ).find( '.content' ).height() - 28 );
-	},
+	}
 
-	initReportContent: function() {
+	initReportContent() {
 		var $this = this;
 		$( this.el ).find( '#grid' ).remove();
 		$( this.el ).find( '.view-btn' ).remove();
@@ -733,19 +738,19 @@ DashletController = Backbone.View.extend( {
 			$( e.target ).addClass( 'button-rotate' );
 			$this.initReportData();
 		} );
-		this.api_user_report = new ( APIFactory.getAPIClass( 'APIUserReportData' ) )();
+		this.api_user_report = TTAPI.APIUserReportData;
 		this.api = this.getAPIByViewName( this.data.data.report );
 		this.initReportData();
 		this.startRefresh();
-	},
+	}
 
-	cleanWhenUnloadView: function() {
+	cleanWhenUnloadView() {
 		if ( this.refresh_timer ) {
 			clearInterval( this.refresh_timer );
 		}
-	},
+	}
 
-	initReportData: function() {
+	initReportData() {
 		var $this = this;
 		if ( $this.data.data.template !== 'saved_report' ) {
 			var report_api = this.getAPIByViewName( this.data.data.report );
@@ -802,10 +807,9 @@ DashletController = Backbone.View.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	startRefresh: function() {
+	startRefresh() {
 		var $this = this;
 		var auto_refresh = this.data.data.auto_refresh;
 		if ( auto_refresh > 0 ) {
@@ -837,9 +841,9 @@ DashletController = Backbone.View.extend( {
 
 			}, ( auto_refresh * 1000 ) );
 		}
-	},
+	}
 
-	initCustomViewContent: function() {
+	initCustomViewContent() {
 		$( this.el ).find( '#iframe' ).remove();
 		var $this = this;
 		this.api = this.getAPIByViewName( this.data.data.view_name );
@@ -867,10 +871,9 @@ DashletController = Backbone.View.extend( {
 		// start load grid data
 		this.initCustomViewData();
 		this.startRefresh();
+	}
 
-	},
-
-	setGridCellBackGround: function() {
+	setGridCellBackGround() {
 		var data = this.grid.getData();
 		var len;
 		var i;
@@ -882,7 +885,7 @@ DashletController = Backbone.View.extend( {
 				return;
 			}
 			len = data.length;
-			for ( i = 0; i < len; i++ ) {
+			for ( var i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.exception_background_color ) {
 					var severity = $( this.el ).find( 'tr[id=\'' + item.id + '\']' ).find( 'td[aria-describedby="dashlet_' + this.data.id + '_grid_severity"]' );
@@ -901,7 +904,7 @@ DashletController = Backbone.View.extend( {
 				return;
 			}
 			len = data.length;
-			for ( i = 0; i < len; i++ ) {
+			for ( var i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.status_id == 10 ) {
 					$( this.el ).find( 'tr[id=\'' + item.id + '\'] td' ).css( 'font-weight', 'bold' );
@@ -913,7 +916,7 @@ DashletController = Backbone.View.extend( {
 				return;
 			}
 			len = data.length;
-			for ( i = 0; i < len; i++ ) {
+			for ( var i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.status_id == 30 ) {
 					$( this.el ).find( 'tr[id=\'' + item.id + '\']' ).addClass( 'bolder-request' );
@@ -925,7 +928,7 @@ DashletController = Backbone.View.extend( {
 				return;
 			}
 			len = data.length;
-			for ( i = 0; i < len; i++ ) {
+			for ( var i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item._status_id == 10 ) {
 					$( this.el ).find( 'tr[id=\'' + item.id + '\']' ).addClass( 'light-green' );
@@ -940,17 +943,16 @@ DashletController = Backbone.View.extend( {
 				return;
 			}
 			len = data.length;
-			for ( i = 0; i < len; i++ ) {
+			for ( var i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.status_id == 20 ) {
 					$( this.el ).find( 'tr[id=\'' + item.id + '\']' ).addClass( 'red-absence' ); //Do not use ids or coloring gets broken by recurring schedules without ids
 				}
 			}
 		}
+	}
 
-	},
-
-	startCustomViewAutoRefresh: function() {
+	startCustomViewAutoRefresh() {
 		var $this = this;
 		var auto_refresh = this.data.data.auto_refresh;
 		if ( auto_refresh > 0 ) {
@@ -961,9 +963,9 @@ DashletController = Backbone.View.extend( {
 				$this.initCustomViewData();
 			}, ( auto_refresh * 1000 ) );
 		}
-	},
+	}
 
-	initCustomViewData: function() {
+	initCustomViewData() {
 		var $this = this;
 		$this.getCustomListDashboardData( function() {
 			$this.getAllColumns( function() {
@@ -980,9 +982,9 @@ DashletController = Backbone.View.extend( {
 				} );
 			} );
 		} );
-	},
+	}
 
-	getCustomListDashboardData: function( callback ) {
+	getCustomListDashboardData( callback ) {
 		var $this = this;
 		if ( !this.data.data.rows_per_page ) {
 			this.data.data.rows_per_page = 0;
@@ -998,9 +1000,9 @@ DashletController = Backbone.View.extend( {
 				callback();
 			}
 		} );
-	},
+	}
 
-	getDefaultDashletData: function( callback ) {
+	getDefaultDashletData( callback ) {
 		var $this = this;
 		if ( !this.data.data.rows_per_page ) {
 			this.data.data.rows_per_page = 0;
@@ -1014,9 +1016,9 @@ DashletController = Backbone.View.extend( {
 				callback();
 			}
 		} );
-	},
+	}
 
-	buildDisplayColumns: function( apiDisplayColumnsArray ) {
+	buildDisplayColumns( apiDisplayColumnsArray ) {
 		var len = this.all_columns.length;
 		var len1 = apiDisplayColumnsArray ? apiDisplayColumnsArray.length : 0;
 		var display_columns = [];
@@ -1028,14 +1030,13 @@ DashletController = Backbone.View.extend( {
 			}
 		}
 		return display_columns;
+	}
 
-	},
-
-	onGridDblClickRow: function() {
+	onGridDblClickRow() {
 		this.onViewClick();
-	},
+	}
 
-	setSelectLayout: function() {
+	setSelectLayout() {
 		var $this = this;
 		var grid_id;
 		if ( !Global.isSet( this.grid ) ) {
@@ -1080,9 +1081,9 @@ DashletController = Backbone.View.extend( {
 			this.grid = new TTGrid( grid_id, grid_data, column_info_array );
 		}
 		$this.setGridSize();
-	},
+	}
 
-	showNoResultCover: function() {
+	showNoResultCover() {
 		this.removeNoResultCover();
 		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
 		if ( this.no_result_box ) {
@@ -1096,9 +1097,9 @@ DashletController = Backbone.View.extend( {
 			var grid_div = $( this.el ).find( '.content' );
 			grid_div.append( this.no_result_box );
 		}
+	}
 
-	},
-	getNoResultMessage: function() {
+	getNoResultMessage() {
 		//Show result message base on different dashlet type
 		var result = $.i18n._( 'No Results Found' );
 		switch ( this.data.data.dashlet_type ) {
@@ -1142,16 +1143,16 @@ DashletController = Backbone.View.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	removeNoResultCover: function() {
+	removeNoResultCover() {
 		if ( this.no_result_box && this.no_result_box.length > 0 ) {
 			this.no_result_box.remove();
 		}
 		this.no_result_box = null;
-	},
+	}
 
-	getAllColumns: function( callBack ) {
+	getAllColumns( callBack ) {
 		var $this = this;
 
 		if ( this.api ) { // #2571 - Cannot read property 'getOptions' of null
@@ -1166,9 +1167,9 @@ DashletController = Backbone.View.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	getDefaultDisplayColumns: function( callBack ) {
+	getDefaultDisplayColumns( callBack ) {
 		var $this = this;
 		this.api.getOptions( 'default_display_columns', {
 			onResult: function( columns_result ) {
@@ -1180,180 +1181,180 @@ DashletController = Backbone.View.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setTitle: function() {
+	setTitle() {
 		$( this.el ).find( '.title' ).text( this.data.name );
-	},
+	}
 
-	getAPIByViewName: function( view_name ) {
+	getAPIByViewName( view_name ) {
 		var api = null;
-		switch ( view_name ) {
+		switch ( view_name.toLowerCase() ) { //Lower case the view_name to avoid case sensitivity mismatches.
 			case 'message_summary':
-				api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
+				api = TTAPI.APIMessageControl;
 				break;
 			case 'schedule_summary':
 			case 'schedule_summary_child':
-			case 'Schedule':
-				api = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
+			case 'schedule':
+				api = TTAPI.APISchedule;
 				break;
-			case 'Exception':
+			case 'exception':
 			case 'exception_summary':
 			case 'exception_summary_child':
-				api = new ( APIFactory.getAPIClass( 'APIException' ) )();
+				api = TTAPI.APIException;
 				break;
-			case 'Invoice':
-				api = new ( APIFactory.getAPIClass( 'APIInvoice' ) )();
+			case 'invoice':
+				api = TTAPI.APIInvoice;
 				break;
-			case 'User':
-				api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+			case 'user':
+				api = TTAPI.APIUser;
 				break;
 			case 'request_summary':
-			case 'Request':
-			case 'Request-Authorization':
+			case 'request':
+			case 'request-authorization':
 			case 'request_authorize_summary':
-				api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
+				api = TTAPI.APIRequest;
 				break;
 			case 'accrual_balance_summary':
-				api = new ( APIFactory.getAPIClass( 'APIAccrualBalance' ) )();
+				api = TTAPI.APIAccrualBalance;
 				break;
 			case 'timesheet_verification_summary':
 			case 'timesheet_verification_summary_child':
-				api = new ( APIFactory.getAPIClass( 'APITimesheetSummaryReport' ) )();
+				api = TTAPI.APITimesheetSummaryReport;
 				break;
 			case 'timesheet_summary':
-				api = new ( APIFactory.getAPIClass( 'APITimeSheet' ) )();
+				api = TTAPI.APITimeSheet;
 				break;
 			case 'user_active_shift_summary':
-				api = new ( APIFactory.getAPIClass( 'APIActiveShiftReport' ) )();
+				api = TTAPI.APIActiveShiftReport;
 				break;
-			case 'PayPeriodTimeSheetVerify':
-				api = new ( APIFactory.getAPIClass( 'APIPayPeriodTimeSheetVerify' ) )();
+			case 'payperiodtimesheetverify':
+				api = TTAPI.APIPayPeriodTimeSheetVerify;
 				break;
-			case 'UserExpense':
-			case 'UserExpense-Authorization':
-				api = new ( APIFactory.getAPIClass( 'APIUserExpense' ) )();
+			case 'userexpense':
+			case 'userexpense-authorization':
+				api = TTAPI.APIUserExpense;
 				break;
-			case 'TimeSheetSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APITimesheetSummaryReport' ) )();
+			case 'timesheetsummaryreport':
+				api = TTAPI.APITimesheetSummaryReport;
 				break;
-			case 'TimeSheetDetailReport':
-				api = new ( APIFactory.getAPIClass( 'APITimesheetDetailReport' ) )();
+			case 'timesheetdetailreport':
+				api = TTAPI.APITimesheetDetailReport;
 				break;
-			case 'AccrualBalance':
-				api = new ( APIFactory.getAPIClass( 'APIAccrualBalance' ) )();
+			case 'accrualbalance':
+				api = TTAPI.APIAccrualBalance;
 				break;
-			case 'Accrual':
-				api = new ( APIFactory.getAPIClass( 'APIAccrual' ) )();
+			case 'accrual':
+				api = TTAPI.APIAccrual;
 				break;
-			case 'RecurringScheduleControl':
-				api = new ( APIFactory.getAPIClass( 'APIRecurringScheduleControl' ) )();
+			case 'recurringschedulecontrol':
+				api = TTAPI.APIRecurringScheduleControl;
 				break;
-			case 'RecurringScheduleTemplateControl':
-				api = new ( APIFactory.getAPIClass( 'APIRecurringScheduleTemplateControl' ) )();
+			case 'recurringscheduletemplatecontrol':
+				api = TTAPI.APIRecurringScheduleTemplateControl;
 				break;
-			case 'Job':
-				api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			case 'job':
+				api = TTAPI.APIJob;
 				break;
-			case 'JobItem':
-				api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+			case 'jobitem':
+				api = TTAPI.APIJobItem;
 				break;
-			case 'UserContact':
-				api = new ( APIFactory.getAPIClass( 'APIUserContact' ) )();
+			case 'usercontact':
+				api = TTAPI.APIUserContact;
 				break;
-			case 'UserWage':
-				api = new ( APIFactory.getAPIClass( 'APIUserWage' ) )();
+			case 'userwage':
+				api = TTAPI.APIUserWage;
 				break;
-			case 'PayStub':
-				api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+			case 'paystub':
+				api = TTAPI.APIPayStub;
 				break;
-			case 'PayPeriod':
-				api = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
+			case 'payperiod':
+				api = TTAPI.APIPayPeriod;
 				break;
-			case 'PayStubAmendment':
-				api = new ( APIFactory.getAPIClass( 'APIPayStubAmendment' ) )();
+			case 'paystubamendment':
+				api = TTAPI.APIPayStubAmendment;
 				break;
-			case 'Client':
-				api = new ( APIFactory.getAPIClass( 'APIClient' ) )();
+			case 'client':
+				api = TTAPI.APIClient;
 				break;
-			case 'ClientContact':
-				api = new ( APIFactory.getAPIClass( 'APIClientContact' ) )();
+			case 'clientcontact':
+				api = TTAPI.APIClientContact;
 				break;
-			case 'Transaction':
-				api = new ( APIFactory.getAPIClass( 'APITransaction' ) )();
+			case 'transaction':
+				api = TTAPI.APITransaction;
 				break;
-			case 'UserReviewControl':
-				api = new ( APIFactory.getAPIClass( 'APIUserReviewControl' ) )();
+			case 'userreviewcontrol':
+				api = TTAPI.APIUserReviewControl;
 				break;
-			case 'JobVacancy':
-				api = new ( APIFactory.getAPIClass( 'APIJobVacancy' ) )();
+			case 'jobvacancy':
+				api = TTAPI.APIJobVacancy;
 				break;
-			case 'JobApplicant':
-				api = new ( APIFactory.getAPIClass( 'APIJobApplicant' ) )();
+			case 'jobapplicant':
+				api = TTAPI.APIJobApplicant;
 				break;
-			case 'JobApplication':
-				api = new ( APIFactory.getAPIClass( 'APIJobApplication' ) )();
+			case 'jobapplication':
+				api = TTAPI.APIJobApplication;
 				break;
-			case 'AccrualBalanceSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APIAccrualBalanceSummaryReport' ) )();
+			case 'accrualbalancesummaryreport':
+				api = TTAPI.APIAccrualBalanceSummaryReport;
 				break;
-			case 'UserSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APIUserSummaryReport' ) )();
+			case 'usersummaryreport':
+				api = TTAPI.APIUserSummaryReport;
 				break;
-			case 'ActiveShiftReport':
-				api = new ( APIFactory.getAPIClass( 'APIActiveShiftReport' ) )();
+			case 'activeshiftreport':
+				api = TTAPI.APIActiveShiftReport;
 				break;
-			case 'AuditTrailReport':
-				api = new ( APIFactory.getAPIClass( 'APIAuditTrailReport' ) )();
+			case 'audittrailreport':
+				api = TTAPI.APIAuditTrailReport;
 				break;
-			case 'ScheduleSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APIScheduleSummaryReport' ) )();
+			case 'schedulesummaryreport':
+				api = TTAPI.APIScheduleSummaryReport;
 				break;
-			case 'PunchSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APIPunchSummaryReport' ) )();
+			case 'punchsummaryreport':
+				api = TTAPI.APIPunchSummaryReport;
 				break;
-			case 'ExceptionReport':
-				api = new ( APIFactory.getAPIClass( 'APIExceptionSummaryReport' ) )();
+			case 'exceptionreport':
+				api = TTAPI.APIExceptionReport;
 				break;
-			case 'PayStubSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APIPayStubSummaryReport' ) )();
+			case 'paystubsummaryreport':
+				api = TTAPI.APIPayStubSummaryReport;
 				break;
-			case 'UserExpenseReport':
-				api = new ( APIFactory.getAPIClass( 'APIUserExpenseReport' ) )();
+			case 'userexpensereport':
+				api = TTAPI.APIUserExpenseReport;
 				break;
-			case 'JobSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APIJobSummaryReport' ) )();
+			case 'jobsummaryreport':
+				api = TTAPI.APIJobSummaryReport;
 				break;
-			case 'JobDetailReport':
-				api = new ( APIFactory.getAPIClass( 'APIJobDetailReport' ) )();
+			case 'jobdetailreport':
+				api = TTAPI.APIJobDetailReport;
 				break;
-			case 'JobInformationReport':
-				api = new ( APIFactory.getAPIClass( 'APIJobInformationReport' ) )();
+			case 'jobinformationreport':
+				api = TTAPI.APIJobInformationReport;
 				break;
-			case 'JobItemInformationReport':
-				api = new ( APIFactory.getAPIClass( 'APIJobItemInformationReport' ) )();
+			case 'jobiteminformationreport':
+				api = TTAPI.APIJobItemInformationReport;
 				break;
-			case 'InvoiceTransactionSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APIInvoiceTransactionSummaryReport' ) )();
+			case 'invoicetransactionsummaryreport':
+				api = TTAPI.APIInvoiceTransactionSummaryReport;
 				break;
-			case 'UserQualificationReport':
-				api = new ( APIFactory.getAPIClass( 'APIUserQualificationReport' ) )();
+			case 'userqualificationreport':
+				api = TTAPI.APIUserQualificationReport;
 				break;
-			case 'KPIReport':
-				api = new ( APIFactory.getAPIClass( 'APIKPIReport' ) )();
+			case 'kpireport':
+				api = TTAPI.APIKPIReport;
 				break;
-			case 'UserRecruitmentSummaryReport':
-				api = new ( APIFactory.getAPIClass( 'APIUserRecruitmentSummaryReport' ) )();
+			case 'userrecruitmentsummaryreport':
+				api = TTAPI.APIUserRecruitmentSummaryReport;
 				break;
-			case 'UserRecruitmentDetailReport':
-				api = new ( APIFactory.getAPIClass( 'APIUserRecruitmentDetailReport' ) )();
+			case 'userrecruitmentdetailreport':
+				api = TTAPI.APIUserRecruitmentDetailReport;
 				break;
 		}
 
 		return api;
-	},
+	}
 
-	setGridColumnsWidth: function() {
+	setGridColumnsWidth() {
 		var col_model = this.grid.getGridParam( 'colModel' );
 		var grid_data = this.grid.getGridParam( 'data' );
 		this.grid_total_width = 0;
@@ -1385,7 +1386,7 @@ DashletController = Backbone.View.extend( {
 
 			}
 			if ( longest_words ) {
-				var width_test = $( '<span id="width_test" />' );
+				var width_test = $( '<span id="width_test"></span>' );
 				width_test.css( 'font-size', '11' );
 				width_test.css( 'font-weight', 'normal' );
 				$( 'body' ).append( width_test );
@@ -1403,10 +1404,9 @@ DashletController = Backbone.View.extend( {
 		}
 		var gw = this.grid.getGridParam( 'width' );
 		this.grid.setGridWidth( gw );
-
 	}
 
-} );
+}
 
 DashletController.TOTAL_ROW = 4;
 DashletController.REGULAR_ROW = 5;

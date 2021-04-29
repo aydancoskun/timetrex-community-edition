@@ -1,10 +1,15 @@
-RequestViewCommonController = BaseViewController.extend( {
+class RequestViewCommonController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			authorization_history: null,
+			selected_absence_policy_record: null,
+			enable_edit_view_ui: false
+		} );
 
-	authorization_history: null,
-	selected_absence_policy_record: null,
-	enable_edit_view_ui: false,
+		super( options );
+	}
 
-	setGridCellBackGround: function() {
+	setGridCellBackGround() {
 		//Error: Unable to get property 'getGridParam' of undefined or null reference
 		if ( !this.grid ) {
 			return;
@@ -24,9 +29,9 @@ RequestViewCommonController = BaseViewController.extend( {
 				$( 'tr#' + item.id ).addClass( 'bolder-request' );
 			}
 		}
-	},
+	}
 
-	onCancelClick: function( force, cancel_all, callback ) {
+	onCancelClick( force, cancel_all, callback ) {
 		TTPromise.add( 'base', 'onCancelClick' );
 		var $this = this;
 
@@ -77,13 +82,13 @@ RequestViewCommonController = BaseViewController.extend( {
 
 		}
 
-	},
+	}
 
-	onCloseIconClick: function() {
+	onCloseIconClick() {
 		this.onCancelClick();
-	},
+	}
 
-	buildDataForAPI: function( data ) {
+	buildDataForAPI( data ) {
 		if ( this.viewId == 'RequestAuthorization' && ( !data.request_schedule_id || data.request_schedule_id <= 0 ) ) {
 			return data;
 		}
@@ -124,9 +129,9 @@ RequestViewCommonController = BaseViewController.extend( {
 			data_for_api.request_schedule = { 0: request_schedule };
 		}
 		return data_for_api;
-	},
+	}
 
-	buildDataFromAPI: function( data ) {
+	buildDataFromAPI( data ) {
 		if ( Global.isSet( data ) && Global.isSet( data.request_schedule ) ) {
 			for ( var key in data.request_schedule ) {
 				if ( key == 'id' ) {
@@ -148,9 +153,9 @@ RequestViewCommonController = BaseViewController.extend( {
 
 		var retval = $.extend( this.current_edit_record, data );
 		return retval;
-	},
+	}
 
-	showAdvancedFields: function( update_schedule_total_time ) {
+	showAdvancedFields( update_schedule_total_time ) {
 		if (
 			Global.getProductEdition() >= 15 &&
 			( PermissionManager.validate( 'request', 'add_advanced' )
@@ -207,9 +212,9 @@ RequestViewCommonController = BaseViewController.extend( {
 			}
 			this.hideAdvancedFields();
 		}
-	},
+	}
 
-	hideAdvancedFields: function() {
+	hideAdvancedFields() {
 		var advanced_field_names = this.getAdvancedFieldNames();
 		if ( this.edit_view_ui_dic ) {
 			for ( var i = 0; i < advanced_field_names.length; i++ ) {
@@ -221,9 +226,9 @@ RequestViewCommonController = BaseViewController.extend( {
 				this.edit_view_ui_dic.date.parents( '.edit-view-form-item-div' ).show();
 			}
 		}
-	},
+	}
 
-	getAdvancedFieldNames: function() {
+	getAdvancedFieldNames() {
 		return [
 			'request_id',
 			'request_schedule_status_id',
@@ -258,9 +263,9 @@ RequestViewCommonController = BaseViewController.extend( {
 			'job_item',
 			'available_balance'
 		];
-	},
+	}
 
-	getScheduleTotalTime: function() {
+	getScheduleTotalTime() {
 		if ( Global.getProductEdition() >= 15
 			&& ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 )
 			&& ( this.edit_view_ui_dic && this.edit_view_ui_dic['total_time'] )
@@ -284,7 +289,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			}
 
 			if ( start_time && end_time ) {
-				var schedule_api = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
+				var schedule_api = TTAPI.APISchedule;
 				var result = schedule_api.getScheduleTotalTime( start_time, end_time, schedulePolicyId, user_id, { async: false } );
 				if ( result.isValid() ) {
 					this.total_time = result.getResult();
@@ -308,18 +313,18 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		this.onAvailableBalanceChange();
-	},
+	}
 
-	onWorkingStatusChanged: function() {
+	onWorkingStatusChanged() {
 		if ( Global.getProductEdition() >= 15 ) {
 			if ( this.edit_view_ui_dic.request_schedule_status_id && this.edit_view_ui_dic.absence_policy_id ) {
 				var type_id = this.edit_view_ui_dic.type_id ? this.edit_view_ui_dic.type_id.getValue() : this.current_edit_record.type_id;
 				this.showAbsencePolicyField( type_id, this.edit_view_ui_dic.request_schedule_status_id.getValue(), this.edit_view_ui_dic.absence_policy_id );
 			}
 		}
-	},
+	}
 
-	showAbsencePolicyField: function( type_id, request_schedule_status_id, ui_field ) {
+	showAbsencePolicyField( type_id, request_schedule_status_id, ui_field ) {
 		if ( request_schedule_status_id == 20 && ( type_id == 30 || type_id == 40 ) ) {
 			ui_field.parents( '.edit-view-form-item-div' ).show();
 			if ( ( this.viewId == 'Request' && this.is_viewing ) == false ) {
@@ -329,21 +334,21 @@ RequestViewCommonController = BaseViewController.extend( {
 			ui_field.parents( '.edit-view-form-item-div' ).hide();
 			this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).hide();
 		}
-	},
+	}
 
-	onDateStampChanged: function() {
+	onDateStampChanged() {
 		if ( Global.getProductEdition() >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
 			this.edit_view_ui_dic.start_date.setValue( this.current_edit_record.date_stamp );
 			this.current_edit_record.start_date = this.current_edit_record.date_stamp;
 		}
-	},
+	}
 
-	onStartDateChanged: function() {
+	onStartDateChanged() {
 		this.edit_view_ui_dic.date_stamp.setValue( this.current_edit_record.start_date );
 		this.current_edit_record.date_stamp = this.current_edit_record.start_date;
-	},
+	}
 
-	getAvailableBalance: function() {
+	getAvailableBalance() {
 		if ( ( this.is_viewing && this.viewId == 'Request' ) || Global.isSet( this.current_edit_record ) == false ) {
 			return;
 		}
@@ -393,9 +398,9 @@ RequestViewCommonController = BaseViewController.extend( {
 				this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).hide();
 			}
 		}
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function( authorization_history ) {
+	getFilterColumnsFromDisplayColumns( authorization_history ) {
 		// Error: Unable to get property 'getGridParam' of undefined or null reference
 		var display_columns = [];
 		if ( authorization_history ) {
@@ -427,49 +432,49 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	jobUIValidate: function() {
+	jobUIValidate() {
 		//use punch permission section rather than schedule permission section as that's what they can see when they're creating punches
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 			PermissionManager.validate( 'punch', 'edit_job' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	jobItemUIValidate: function() {
+	jobItemUIValidate() {
 		//use punch permission section rather than schedule permission section as that's what they can see when they're creating punches
 		if ( PermissionManager.validate( 'punch', 'edit_job_item' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	branchUIValidate: function() {
+	branchUIValidate() {
 		//use punch permission section rather than schedule permission section as that's what they can see when they're creating punches
 		if ( PermissionManager.validate( 'punch', 'edit_branch' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	departmentUIValidate: function() {
+	departmentUIValidate() {
 		//use punch permission section rather than schedule permission section as that's what they can see when they're creating punches
 		if ( PermissionManager.validate( 'punch', 'edit_department' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	processAPICallbackResult: function( result_data ) {
+	processAPICallbackResult( result_data ) {
 		this.current_edit_record = this.buildDataFromAPI( result_data[0] );
 		this.current_edit_record.total_time = Global.getTimeUnit( this.current_edit_record.total_time );
 
 		return result_data;
-	},
+	}
 
-	doViewClickResult: function( result_data ) {
+	doViewClickResult( result_data ) {
 		if ( Global.isSet( this.current_edit_record.start_date ) && this.edit_view_tab ) {
 			this.edit_view_tab.find( '#tab_request' ).find( '.third-column' ).show();
 		}
@@ -485,17 +490,16 @@ RequestViewCommonController = BaseViewController.extend( {
 			$this.authorization_history = AuthorizationHistory.init( $this );
 		} );
 		return this.clearCurrentSelectedRecord();
-	},
+	}
 
-	onViewClick: function( edit_record, clear_edit_view ) {
-		this.real_this = this.constructor.__super__; // this seems first entry point. needed where view controller is extended twice, Base->Tree-View, used with onViewClick _super
+	onViewClick( edit_record, clear_edit_view ) {
 		if ( clear_edit_view ) {
 			this.clearEditView();
 		}
-		this._super( 'onViewClick', edit_record );
-	},
+		super.onViewClick( edit_record );
+	}
 
-	setSubLogViewFilter: function() {
+	setSubLogViewFilter() {
 		if ( !this.sub_log_view_controller ) {
 			return false;
 		}
@@ -510,17 +514,17 @@ RequestViewCommonController = BaseViewController.extend( {
 		};
 
 		return true;
-	},
+	}
 
 	/**
 	 * This function exists because the edit form is not actually an edit mode form, so we need to do some
 	 * stuff differently in view mode than in edit mode.
 	 */
-	initViewingView: function() {
+	initViewingView() {
 		this.showAdvancedFields();
-	},
+	}
 
-	initEditViewUI: function( view_id, edit_view_file_name ) {
+	initEditViewUI( view_id, edit_view_file_name ) {
 		Global.setUINotready();
 		TTPromise.add( 'init', 'init' );
 		TTPromise.wait();
@@ -560,9 +564,9 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		$this.setEditViewTabHeight();
-	},
+	}
 
-	onEditClick: function( editId, noRefreshUI ) {
+	onEditClick( editId, noRefreshUI ) {
 		this.setCurrentEditViewState( 'edit' );
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 		this.initEditView();
@@ -570,10 +574,10 @@ RequestViewCommonController = BaseViewController.extend( {
 		this.edit_view_ui_dic.body.setValue( '' );
 		//ensure send button is available
 		this.setEditMenu();
-	},
+	}
 
-	buildViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -584,7 +588,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRequest' ) ),
+			api_class: TTAPI.APIRequest,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REQUEST,
@@ -594,6 +598,9 @@ RequestViewCommonController = BaseViewController.extend( {
 
 		this.setNavigation();
 
+		var form_item_input;
+		var widgetContainer;
+
 		//Tab 0 first column start
 		var tab_request = this.edit_view_tab.find( '#tab_request' );
 		var tab_request_column1 = tab_request.find( '.first-column' );
@@ -601,7 +608,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		this.edit_view_tabs[0].push( tab_request_column1 );
 
 		// Employee
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'full_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1 );
 
@@ -658,7 +665,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			var form_item_sat_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
 			form_item_sat_checkbox.TCheckbox( { field: 'sat' } );
 
-			var widgetContainer = $( '<div/>' );
+			widgetContainer = $( '<div></div>' );
 
 			var sun = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Sun' ) + ' <br> ' + ' </span>' );
 			var mon = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Mon' ) + ' <br> ' + ' </span>' );
@@ -705,7 +712,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			//Schedule Policy
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APISchedulePolicy' ) ),
+				api_class: TTAPI.APISchedulePolicy,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
 				show_search_inputs: true,
@@ -717,7 +724,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			//Absence Policy
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
+				api_class: TTAPI.APIAbsencePolicy,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
 				set_empty: true,
@@ -745,7 +752,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			//branch
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.BRANCH,
 				show_search_inputs: true,
@@ -760,7 +767,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			//Dept
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.DEPARTMENT,
 				show_search_inputs: true,
@@ -777,7 +784,7 @@ RequestViewCommonController = BaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+					api_class: TTAPI.APIJob,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB,
 					show_search_inputs: true,
@@ -813,7 +820,7 @@ RequestViewCommonController = BaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+					api_class: TTAPI.APIJobItem,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB_ITEM,
 					show_search_inputs: true,
@@ -848,9 +855,9 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		EmbeddedMessage.initUI( this, tab_request );
-	},
+	}
 
-	setAbsencePolicyFilter: function( filter ) {
+	setAbsencePolicyFilter( filter ) {
 		if ( !filter.filter_data ) {
 			filter.filter_data = {};
 		}
@@ -860,25 +867,17 @@ RequestViewCommonController = BaseViewController.extend( {
 			filter.filter_columns.absence_policy = true;
 		}
 		return filter;
-	},
+	}
 
-	needShowNavigation: function() {
+	needShowNavigation() {
 		if ( this.is_viewing && this.current_edit_record && Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
 			return true;
 		} else {
 			return false;
 		}
-	},
+	}
 
-	// needShowNavigation: function() {
-	// 	if ( this.is_viewing ) {
-	// 		return this._super( 'needShowNavigation', [] );
-	// 	} else {
-	// 		return false;
-	// 	}
-	// },
-
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 
 		var $this = this;
 		var filter;
@@ -1022,11 +1021,9 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		/* jshint ignore:end */
-	},
+	}
 
-	initPermission: function() {
-		// this._super( 'initPermission' );
-
+	initPermission() {
 		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
 			this.show_search_tab = true;
 		} else {
@@ -1058,7 +1055,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
-		var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		var company_api = TTAPI.APICompany;
 		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
 			var result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } ).getResult();
 		}
@@ -1086,9 +1083,9 @@ RequestViewCommonController = BaseViewController.extend( {
 			}
 		}
 
-	},
+	}
 
-	setEditMenuEditIcon: function( context_btn, pId ) {
+	setEditMenuEditIcon( context_btn, pId ) {
 		if ( !this.editPermissionValidate( pId ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -1103,10 +1100,10 @@ RequestViewCommonController = BaseViewController.extend( {
 		if ( !this.editOwnerOrChildPermissionValidate( pId ) || this.is_add || this.is_edit ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
 	// Creates the record shipped to the API at setMesssage
-	uniformMessageVariable: function( records ) {
+	uniformMessageVariable( records ) {
 		var msg = {};
 
 		msg.subject = this.edit_view_ui_dic['subject'].getValue();
@@ -1117,4 +1114,4 @@ RequestViewCommonController = BaseViewController.extend( {
 		return msg;
 	}
 
-} );
+}

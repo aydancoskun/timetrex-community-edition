@@ -1,6 +1,13 @@
-BaseWindowController = Backbone.View.extend( {
+class BaseWindowController extends TTBackboneView {
+	constructor( options = {} ) {
+		_.defaults( options, {} );
 
-	initialize: function( options ) {
+		super( options );
+	}
+
+	initialize( options ) {
+		super.initialize( options );
+
 		this.content_div = $( this.el ).find( '.content' );
 		this.stepsWidgetDic = {};
 		this.stepsDataDic = {};
@@ -11,25 +18,25 @@ BaseWindowController = Backbone.View.extend( {
 		BaseWizardController.default_data = null;
 		BaseWizardController.call_back = null;
 
-		//FIXME: pull this out when all wizards are refactored to the new way #1187
-		if ( typeof this.setDefaultDataToSteps == 'function' ) {
-			this.setDefaultDataToSteps();
-		}
-
 		var $this = this;
 		var required_files = this.filterRequiredFiles();
 		require( required_files, function() {
 			if ( typeof $this.init == 'function' ) {
+				// #2804 Moved into the require callback to match what BaseWizardController had, which was newer code.
+				//FIXME: pull this out when all wizards are refactored to the new way #1187
+				if ( typeof $this.setDefaultDataToSteps == 'function' ) {
+					$this.setDefaultDataToSteps();
+				}
 				$this.init( options );
+				TTPromise.resolve( 'BaseViewController', 'initialize' );
 			}
 		} );
-	},
+	}
 
-	render: function() {
+	render() {
+	}
 
-	},
-
-	filterRequiredFiles: function() {
+	filterRequiredFiles() {
 		var retval = [];
 		var required_files;
 
@@ -51,10 +58,10 @@ BaseWindowController = Backbone.View.extend( {
 
 		Debug.Arr( retval, 'RETVAL', 'BaseWindowController.js', 'BaseWindowController', 'filterRequiredFiles', 10 );
 		return retval;
-	},
+	}
 
-	preInit: function() {
+	preInit() {
 		//override in child class
 	}
 
-} );
+}

@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedVariableInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -37,10 +37,14 @@
 require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'pear' . DIRECTORY_SEPARATOR . 'Cache' . DIRECTORY_SEPARATOR . 'Lite.php' );
 
 //If caching is disabled, still do memory caching, otherwise permission checks cause the page to take 2+ seconds to load.
-if ( $config_vars['cache']['enable'] == false ) {
+if ( !isset( $config_vars['cache']['enable'] ) || $config_vars['cache']['enable'] == false ) {
 	$config_vars['cache']['only_memory_cache_enable'] = true;
 } else {
 	$config_vars['cache']['only_memory_cache_enable'] = false;
+}
+
+if ( !isset( $config_vars['cache']['dir'] ) ) {
+	$config_vars['cache']['dir'] = null;
 }
 
 $cache_options = [

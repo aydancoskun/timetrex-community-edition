@@ -1,19 +1,25 @@
-UserContactViewController = BaseViewController.extend( {
-	el: '#user_contact_view_container',
+class UserContactViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_contact_view_container',
 
-	_required_files: ['APIUserContact', 'APIEthnicGroup', 'APICompanyGenericTag'],
 
-	user_api: null,
-	company_api: null,
-	ethnic_group_api: null,
-	status_array: null,
-	type_array: null,
-	sex_array: null,
-	country_array: null,
-	province_array: null,
-	e_province_array: null,
 
-	init: function( options ) {
+			user_api: null,
+			company_api: null,
+			ethnic_group_api: null,
+			status_array: null,
+			type_array: null,
+			sex_array: null,
+			country_array: null,
+			province_array: null,
+			e_province_array: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserContactEditView.html';
 		this.permission_id = 'user_contact';
@@ -22,10 +28,10 @@ UserContactViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_contact';
 		this.context_menu_name = $.i18n._( 'Employee Contacts' );
 		this.navigation_label = $.i18n._( 'Employee Contact' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserContact' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
-		this.ethnic_group_api = new ( APIFactory.getAPIClass( 'APIEthnicGroup' ) )();
+		this.api = TTAPI.APIUserContact;
+		this.user_api = TTAPI.APIUser;
+		this.company_api = TTAPI.APICompany;
+		this.ethnic_group_api = TTAPI.APIEthnicGroup;
 		this.document_object_type_id = 115;
 
 		this.render();
@@ -42,27 +48,26 @@ UserContactViewController = BaseViewController.extend( {
 		}
 
 		//this.setSelectRibbonMenuIfNecessary( 'UserContact' )
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'sex' );
 		this.initDropDownOption( 'country', 'country', this.company_api );
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -83,19 +88,18 @@ UserContactViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	setSelectLayout: function() {
+	setSelectLayout() {
 		if ( this.sub_view_mode ) {
-			this._super( 'setSelectLayout', ['employee_first_name', 'employee_last_name', 'title', 'user_group', 'default_branch', 'default_department'] );
+			super.setSelectLayout( ['employee_first_name', 'employee_last_name', 'title', 'user_group', 'default_branch', 'default_department'] );
 		} else {
-			this._super( 'setSelectLayout' );
+			super.setSelectLayout();
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -107,7 +111,7 @@ UserContactViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserContact' ) ),
+			api_class: TTAPI.APIUserContact,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_CONTACT,
@@ -131,7 +135,7 @@ UserContactViewController = BaseViewController.extend( {
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -203,7 +207,7 @@ UserContactViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIEthnicGroup' ) ),
+			api_class: TTAPI.APIEthnicGroup,
 			field: 'ethnic_group_id',
 			set_empty: true,
 			allow_multiple_selection: false,
@@ -349,11 +353,10 @@ UserContactViewController = BaseViewController.extend( {
 			object_type_id: 230
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_employee_contact_column2, '', null, null, true );
+	}
 
-	},
-
-	buildSearchFields: function() {
-		//this._super( 'buildSearchFields' );
+	buildSearchFields() {
+		//super.buildSearchFields();
 
 		var default_args = {};
 		default_args.permission_section = 'user_contact';
@@ -368,7 +371,7 @@ UserContactViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -481,9 +484,9 @@ UserContactViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
+	}
 
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === '-1' || val === '0' ) {
@@ -504,9 +507,9 @@ UserContactViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	eSetProvince: function( val, refresh ) {
+	eSetProvince( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -532,19 +535,18 @@ UserContactViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	onSetSearchFilterFinished: function() {
+	onSetSearchFilterFinished() {
 
 		if ( this.search_panel.getSelectTabIndex() === 1 ) {
 			var combo = this.adv_search_field_ui_dic['country'];
 			var select_value = combo.getValue();
 			this.setProvince( select_value );
 		}
+	}
 
-	},
-
-	onBuildAdvUIFinished: function() {
+	onBuildAdvUIFinished() {
 
 		this.adv_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.adv_search_field_ui_dic['country'];
@@ -555,13 +557,13 @@ UserContactViewController = BaseViewController.extend( {
 			this.adv_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	searchDone: function() {
-		this._super( 'searchDone' );
+	searchDone() {
+		super.searchDone();
 		TTPromise.resolve( 'ContactView', 'init' );
 	}
-} );
+}
 
 UserContactViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 

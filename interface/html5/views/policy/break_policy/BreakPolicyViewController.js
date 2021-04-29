@@ -1,13 +1,18 @@
-BreakPolicyViewController = BaseViewController.extend( {
-	el: '#break_policy_view_container',
+class BreakPolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#break_policy_view_container',
 
-	_required_files: ['APIBreakPolicy', 'APIPayCode', 'APIPayFormulaPolicy'],
+			type_array: null,
+			auto_detect_type_array: null,
 
-	type_array: null,
-	auto_detect_type_array: null,
+			date_api: null
+		} );
 
-	date_api: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'BreakPolicyEditView.html';
 		this.permission_id = 'break_policy';
@@ -16,25 +21,24 @@ BreakPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'break_policy';
 		this.context_menu_name = $.i18n._( 'Break Policy' );
 		this.navigation_label = $.i18n._( 'Break Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIBreakPolicy' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.api = TTAPI.APIBreakPolicy;
+		this.date_api = TTAPI.APITTDate;
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'BreakPolicy' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'auto_detect_type' );
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -45,7 +49,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBreakPolicy' ) ),
+			api_class: TTAPI.APIBreakPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BREAK_POLICY,
@@ -148,7 +152,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+			api_class: TTAPI.APIPayCode,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
@@ -160,7 +164,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+			api_class: TTAPI.APIPayFormulaPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
@@ -172,12 +176,11 @@ BreakPolicyViewController = BaseViewController.extend( {
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_break_policy_column1 );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -206,7 +209,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
-				api_class: ( APIFactory.getAPIClass( 'APIPayCode' ) ),
+				api_class: TTAPI.APIPayCode,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -218,7 +221,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
-				api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+				api_class: TTAPI.APIPayFormulaPolicy,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -230,7 +233,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -242,16 +245,16 @@ BreakPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -282,16 +285,16 @@ BreakPolicyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onTypeChange();
 		this.onAutoDetectTypeChange();
 		this.editFieldResize( 0 );
-	},
+	}
 
-	onTypeChange: function() {
+	onTypeChange() {
 
 		if ( this.current_edit_record['type_id'] == 10 || this.current_edit_record['type_id'] == 15 ) {
 
@@ -306,10 +309,9 @@ BreakPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
+	}
 
-	},
-
-	onAutoDetectTypeChange: function() {
+	onAutoDetectTypeChange() {
 
 		if ( this.current_edit_record['auto_detect_type_id'] == 10 ) {
 			this.attachElement( 'start_window' );
@@ -328,4 +330,4 @@ BreakPolicyViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	}
 
-} );
+}

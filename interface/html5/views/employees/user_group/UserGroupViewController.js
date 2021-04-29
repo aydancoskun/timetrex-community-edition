@@ -1,13 +1,19 @@
-UserGroupViewController = BaseTreeViewController.extend( {
-	el: '#user_group_view_container',
+class UserGroupViewController extends BaseTreeViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_group_view_container',
 
-	_required_files: ['APIUserGroup'],
 
-	tree_mode: null,
-	grid_table_name: null,
-	grid_select_id_array: null,
 
-	init: function( options ) {
+			tree_mode: null,
+			grid_table_name: null,
+			grid_select_id_array: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserGroupEditView.html';
 		this.permission_id = 'user';
@@ -22,16 +28,16 @@ UserGroupViewController = BaseTreeViewController.extend( {
 		this.primary_tab_label = $.i18n._( 'Employee Group' );
 		this.primary_tab_key = 'tab_employee_group';
 
-		this.api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.api = TTAPI.APIUserGroup;
 		this.grid_select_id_array = [];
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [
 				ContextMenuIconName.copy,
@@ -45,6 +51,6 @@ UserGroupViewController = BaseTreeViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-} );
+}

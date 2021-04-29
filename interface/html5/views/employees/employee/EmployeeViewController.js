@@ -1,52 +1,53 @@
-EmployeeViewController = BaseViewController.extend( {
-	el: '#employee_view_container', //Must set el here and can only set string, so events can work
+class EmployeeViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#employee_view_container', //Must set el here and can only set string, so events can work
 
-	_required_files: {
-		10: [
-			'APIUserGroup', 'APIHierarchyControl', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APICompanyGenericTag', 'TImage', 'APILegalEntity',
-			'APIPayPeriodSchedule', 'APIPolicyGroup', 'APICurrency', 'APIEthnicGroup', 'APIUserSkill', 'APIQualification', 'APIQualificationGroup',
-			'APIUserEducation', 'APIUserMembership', 'APIUserLicense', 'APIUserLanguage', 'APIRemittanceDestinationAccount', 'APIUserDefault', 'APIRemittanceSourceAccount', 'APIAccrualPolicyUserModifier',
-			'APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI', 'TImageAdvBrowser'
-		],
-		15: ['leaflet', 'leaflet-timetrex'],
-		20: ['APIJob', 'APIJobItem']
-	},
+			_required_files: {
+				10: ['TImage', 'TImageAdvBrowser'],
+				15: ['leaflet', 'leaflet-timetrex'],
+			},
 
-	user_api: null,
-	user_group_api: null,
-	company_api: null,
-	hierarchyControlAPI: null,
-	status_array: null,
-	sex_array: null,
-	user_group_array: null,
-	country_array: null,
-	province_array: null,
-	e_province_array: null,
+			user_api: null,
+			user_group_api: null,
+			company_api: null,
+			hierarchyControlAPI: null,
+			status_array: null,
+			sex_array: null,
+			user_group_array: null,
+			country_array: null,
+			province_array: null,
+			e_province_array: null,
 
-	sub_wage_view_controller: null,
-	sub_user_contact_view_controller: null,
-	sub_accrual_policy_user_modifier_view_controller: null,
-	sub_log_view_controller: null,
-	sub_company_tax_view_controller: null,
-	sub_job_application_view_controller: null,
-	sub_user_skill_view_controller: null,
-	sub_user_education_view_controller: null,
-	sub_user_membership_view_controller: null,
-	sub_user_license_view_controller: null,
-	sub_user_language_view_controller: null,
-	sub_user_review_control_view_controller: null,
+			sub_wage_view_controller: null,
+			sub_user_contact_view_controller: null,
+			sub_accrual_policy_user_modifier_view_controller: null,
+			sub_log_view_controller: null,
+			sub_company_tax_view_controller: null,
+			sub_job_application_view_controller: null,
+			sub_user_skill_view_controller: null,
+			sub_user_education_view_controller: null,
+			sub_user_membership_view_controller: null,
+			sub_user_license_view_controller: null,
+			sub_user_language_view_controller: null,
+			sub_user_review_control_view_controller: null,
 
-	sub_payment_methods_view_controller: null,
+			sub_payment_methods_view_controller: null,
 
-	hierarchy_options_dic: null,
-	hierarchy_ui_model: null,
-	show_hierarchy: false,
-	select_company_id: null,
+			hierarchy_options_dic: null,
+			hierarchy_ui_model: null,
+			show_hierarchy: false,
+			select_company_id: null,
 
-	sub_view_grid_autosize: true,
+			sub_view_grid_autosize: true,
+			events: {}
+		} );
 
-	init: function( options ) {
-		//this._super( 'initialize', options );
+		super( options );
+	}
+
+	init( options ) {
+		//super.initialize( options );
 
 		this.edit_view_tpl = 'EmployeeEditView.html';
 		this.permission_id = 'user';
@@ -56,27 +57,27 @@ EmployeeViewController = BaseViewController.extend( {
 		this.document_object_type_id = 100;
 		this.context_menu_name = $.i18n._( 'Employees' );
 		this.navigation_label = $.i18n._( 'Employee' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.api = TTAPI.APIUser;
 		this.select_company_id = LocalCacheData.getCurrentCompany().id;
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 
-			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
-			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+			this.job_api = TTAPI.APIJob;
+			this.job_item_api = TTAPI.APIJobItem;
 
 		}
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
-		this.hierarchyControlAPI = new ( APIFactory.getAPIClass( 'APIHierarchyControl' ) )();
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.company_api = TTAPI.APICompany;
+		this.hierarchyControlAPI = TTAPI.APIHierarchyControl;
 
 		this.render();
 
 		this.buildContextMenu();
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-	},
+	}
 
-	jobUIValidate: function() {
+	jobUIValidate() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 			( PermissionManager.validate( 'job', 'view' ) ||
 				PermissionManager.validate( 'job', 'view_child' ) ||
@@ -84,9 +85,9 @@ EmployeeViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	jobItemUIValidate: function() {
+	jobItemUIValidate() {
 
 		if ( PermissionManager.validate( 'job_item', 'enabled' ) &&
 			( PermissionManager.validate( 'job_item', 'view' ) ||
@@ -95,11 +96,11 @@ EmployeeViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
 	//Speical permission check for views, need override
-	initPermission: function() {
-		this._super( 'initPermission' );
+	initPermission() {
+		super.initPermission();
 
 		if ( this.jobUIValidate() ) {
 			this.show_job_ui = true;
@@ -112,9 +113,9 @@ EmployeeViewController = BaseViewController.extend( {
 		} else {
 			this.show_job_item_ui = false;
 		}
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			'exclude': [ContextMenuIconName.copy],
 			'include': [
@@ -176,9 +177,9 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		return context_menu_model;
-	},
+	}
 
-	openEditView: function( id ) {
+	openEditView( id ) {
 		if ( this.edit_only_mode ) {
 			var $this_obj = this;
 			this.initOptions( function( result ) {
@@ -205,7 +206,7 @@ EmployeeViewController = BaseViewController.extend( {
 					TAlertManager.showAlert( $.i18n._( 'Invalid employee id' ) );
 					$this_obj.onCancelClick();
 				} else {
-					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+					// Waiting for the TTAPI.API returns data to set the current edit record.
 					$this_obj.current_edit_record = result;
 					$this_obj.initEditView();
 				}
@@ -215,23 +216,23 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		this.showCurrentPasswordField();
-		this._super( 'setEditViewDataDone' );
-	},
+		super.setEditViewDataDone();
+	}
 
-	showCurrentPasswordField: function() {
+	showCurrentPasswordField() {
 		//Only show this field if they are editing the currently logged in user record.
 		if ( ( this.is_edit == true || this.edit_only_mode ) && LocalCacheData.loginUser && LocalCacheData.loginUser.id && this.current_edit_record && this.current_edit_record.id && LocalCacheData.loginUser.id == this.current_edit_record.id ) {
 			this.attachElement( 'current_password' );
 		} else {
 			this.detachElement( 'current_password' );
 		}
-	},
+	}
 
-	getEmployeeData: function( id, callBack ) {
+	getEmployeeData( id, callBack ) {
 		if ( typeof id === 'object' ) {
 
 			id.id = '';
@@ -257,10 +258,9 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var options = [
 			{ option_name: 'status' },
@@ -275,10 +275,9 @@ EmployeeViewController = BaseViewController.extend( {
 			}
 
 		} );
+	}
 
-	},
-
-	initDropDownOptions: function( options, callBack ) {
+	initDropDownOptions( options, callBack ) {
 		var $this = this;
 		var len = options.length + 2;
 		var complete_count = 0;
@@ -354,10 +353,10 @@ EmployeeViewController = BaseViewController.extend( {
 				callBack( option_result );
 			}
 		}
-	},
+	}
 
 	/* jshint ignore:start */
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -455,12 +454,11 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
-
-	},
+	}
 
 	/* jshint ignore:end */
 
-	setDefaultMenuPayStubIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPayStubIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( !PermissionManager.checkTopLevelPermission( 'PayStub' ) ) {
 			context_btn.addClass( 'invisible-image' );
@@ -471,9 +469,9 @@ EmployeeViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	initSubQualificationView: function() {
+	initSubQualificationView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -599,9 +597,9 @@ EmployeeViewController = BaseViewController.extend( {
 		} );
 
 		TTPromise.resolve( 'Employee_Qualifications_Tab', 'initSubQualificationView' );
-	},
+	}
 
-	initSubCompanyTaxView: function() {
+	initSubCompanyTaxView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -644,9 +642,9 @@ EmployeeViewController = BaseViewController.extend( {
 				$this.sub_company_tax_view_controller.initData();
 			} );
 		}
-	},
+	}
 
-	initSubUserReviewControlView: function() {
+	initSubUserReviewControlView() {
 		;
 		var $this = this;
 
@@ -691,10 +689,9 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_review_control_view_controller.parent_view_controller = $this;
 			$this.sub_user_review_control_view_controller.initData();
 		}
+	}
 
-	},
-
-	initSubPaymentMethodsView: function() {
+	initSubPaymentMethodsView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -741,10 +738,9 @@ EmployeeViewController = BaseViewController.extend( {
 				$this.sub_payment_methods_view_controller.initData();
 			} );
 		}
+	}
 
-	},
-
-	initSubJobApplicationView: function() {
+	initSubJobApplicationView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -789,9 +785,9 @@ EmployeeViewController = BaseViewController.extend( {
 				$this.sub_job_application_view_controller.initData();
 			} );
 		}
-	},
+	}
 
-	initSubUserContactView: function() {
+	initSubUserContactView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -836,9 +832,9 @@ EmployeeViewController = BaseViewController.extend( {
 				$this.sub_user_contact_view_controller.initData();
 			} );
 		}
-	},
+	}
 
-	initSubWageView: function() {
+	initSubWageView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -887,9 +883,9 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	initSubAccrualPolicyUserModifier: function() {
+	initSubAccrualPolicyUserModifier() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -947,9 +943,9 @@ EmployeeViewController = BaseViewController.extend( {
 				$this.sub_accrual_policy_user_modifier_view_controller.initData(); //Init data in this parent view
 			} );
 		}
-	},
+	}
 
-	setDefaultUserName: function() {
+	setDefaultUserName() {
 		if ( this.is_add == true ) {
 			var first_name_widget = this.edit_view_ui_dic['first_name'];
 			var last_name_widget = this.edit_view_ui_dic['last_name'];
@@ -958,9 +954,9 @@ EmployeeViewController = BaseViewController.extend( {
 			user_name_widget.setValue( first_name_widget.getValue().toLowerCase() + '.' + last_name_widget.getValue().toLowerCase() );
 			this.current_edit_record.user_name = user_name_widget.getValue();
 		}
-	},
+	}
 
-	// setDefaultQuickPunch: function() {
+	// setDefaultQuickPunch() {
 	// 	if ( this.is_add == true ) {
 	// 		var home_phone_widget = this.edit_view_ui_dic['home_phone'];
 	// 		clean_home_phone = home_phone_widget.getValue().replace(/\D/g,'');
@@ -975,7 +971,7 @@ EmployeeViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		var $this = this;
 
 		this.setIsChanged( target );
@@ -1068,10 +1064,9 @@ EmployeeViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	hierarchyPermissionValidate: function( p_id, selected_item ) {
+	hierarchyPermissionValidate( p_id, selected_item ) {
 
 		if ( PermissionManager.validate( 'hierarchy', 'edit' ) ||
 			PermissionManager.validate( 'user', 'edit_hierarchy' ) ) {
@@ -1080,10 +1075,9 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		return false;
+	}
 
-	},
-
-	checkTabPermissions: function( tab ) {
+	checkTabPermissions( tab ) {
 		var retval = false;
 
 		switch ( tab ) {
@@ -1135,15 +1129,15 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 				break;
 			default:
-				retval = this._super( 'checkTabPermissions', tab );
+				retval = super.checkTabPermissions( tab );
 				break;
 		}
 
 		return retval;
-	},
+	}
 
 	/* jshint ignore:start */
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		var dont_set_dic = {};
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -1228,11 +1222,11 @@ EmployeeViewController = BaseViewController.extend( {
 		this.setEmailIcon();
 
 		this.setEditViewDataDone();
+	}
 
-	},
 	/* jshint ignore:end */
 
-	setEmailIcon: function() {
+	setEmailIcon() {
 		var $this = this;
 		$( '.employee-email-icon' ).remove();
 		var work_email = $( '<img title="' + $.i18n._( 'ReValidate Email Address' ) + '" class="employee-email-icon work-email" src="theme/default/images/email16x16.png">' );
@@ -1264,21 +1258,21 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	onSaveDone: function( result ) {
+	onSaveDone( result ) {
 		if ( this.edit_only_mode && LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
 			LocalCacheData.current_open_primary_controller.updateSelectUserAndRefresh( this.current_edit_record );
 		}
-	},
+	}
 
-	getCopyAsNewFilter: function( filter ) {
+	getCopyAsNewFilter( filter ) {
 		// overriding BaseViewController for _continueDoCopyAsNew()
 		filter.filter_data.company_id = this.select_company_id;
 		return filter;
-	},
+	}
 
-	onAddClick: function() {
+	onAddClick() {
 		var $this = this;
 		this.setCurrentEditViewState( 'new' );
 		$this.openEditView();
@@ -1289,10 +1283,9 @@ EmployeeViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	onMassEditClick: function() {
+	onMassEditClick() {
 
 		var $this = this;
 		$this.is_add = false;
@@ -1343,17 +1336,16 @@ EmployeeViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	getAPIFilters: function() {
-		var filter = this._super( 'getAPIFilters' );
+	getAPIFilters() {
+		var filter = super.getAPIFilters();
 		filter.filter_data.company_id = this.select_company_id;
 
 		return filter;
-	},
+	}
 
-	search: function( set_default_menu, page_action, page_number, callBack ) {
+	search( set_default_menu, page_action, page_number, callBack ) {
 		if ( !Global.isSet( set_default_menu ) ) {
 			set_default_menu = true;
 		}
@@ -1560,10 +1552,9 @@ EmployeeViewController = BaseViewController.extend( {
 		} else {
 			this.select_company_id = LocalCacheData.getCurrentCompany().id;
 		}
+	}
 
-	},
-
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
 				this.onImportClick();
@@ -1575,9 +1566,9 @@ EmployeeViewController = BaseViewController.extend( {
 				this.onNavigationClick( id );
 				break;
 		}
-	},
+	}
 
-	onMapClick: function() {
+	onMapClick() {
 		// only trigger map load in specific product editions.
 		if ( ( Global.getProductEdition() >= 15 ) ) {
 			this.is_viewing = false;
@@ -1618,17 +1609,17 @@ EmployeeViewController = BaseViewController.extend( {
 				IndexViewController.openEditView( this, 'Map', processed_data_for_map );
 			}
 		}
-	},
+	}
 
-	onImportClick: function() {
+	onImportClick() {
 
 		var $this = this;
-		IndexViewController.openWizard( 'ImportCSVWizard', 'user', function() {
+		IndexViewController.openWizard( 'ImportCSVWizard', 'User', function() {
 			$this.search();
 		} );
-	},
+	}
 
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 
 		var $this = this;
 
@@ -1684,12 +1675,11 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
+	removeEditView() {
 
-	removeEditView: function() {
-
-		this._super( 'removeEditView' );
+		super.removeEditView();
 		this.sub_user_contact_view_controller = null;
 		this.sub_wage_view_controller = null;
 		this.sub_company_tax_view_controller = null;
@@ -1706,10 +1696,10 @@ EmployeeViewController = BaseViewController.extend( {
 		this.sub_user_language_view_controller = null;
 
 		this.sub_payment_methods_view_controller = null;
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -1766,7 +1756,7 @@ EmployeeViewController = BaseViewController.extend( {
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
 				id: this.script_name + '_navigation',
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.USER,
 				navigation_mode: true,
@@ -1788,7 +1778,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Company
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICompany' ) ),
+			api_class: TTAPI.APICompany,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.COMPANY,
 			show_search_inputs: true,
@@ -1801,7 +1791,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Legal Entity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			show_search_inputs: true,
@@ -1837,7 +1827,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Permission Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPermissionControl' ) ),
+			api_class: TTAPI.APIPermissionControl,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PERMISSION_CONTROL,
 			show_search_inputs: true,
@@ -1852,7 +1842,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Pay Period Schedule
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
+			api_class: TTAPI.APIPayPeriodSchedule,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 			show_search_inputs: true,
@@ -1867,7 +1857,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Policy Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPolicyGroup' ) ),
+			api_class: TTAPI.APIPolicyGroup,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.POLICY_GROUP,
 			customSearchFilter: ( function( args ) {
@@ -1882,7 +1872,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Title
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+			api_class: TTAPI.APIUserTitle,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.JOB_TITLE,
 			customSearchFilter: ( function( args ) {
@@ -1899,7 +1889,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			customSearchFilter: ( function( args ) {
@@ -1914,7 +1904,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Default Branch
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
 			customSearchFilter: ( function( args ) {
 				return $this.setCompanyIdFilter( args );
@@ -1929,7 +1919,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Department
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			customSearchFilter: ( function( args ) {
@@ -1947,7 +1937,7 @@ EmployeeViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				customSearchFilter: ( function( args ) {
@@ -1982,7 +1972,7 @@ EmployeeViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				customSearchFilter: ( function( args ) {
@@ -2028,7 +2018,7 @@ EmployeeViewController = BaseViewController.extend( {
 		// Ethnicity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIEthnicGroup' ) ),
+			api_class: TTAPI.APIEthnicGroup,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ETHNIC_GROUP,
 			customSearchFilter: ( function( args ) {
@@ -2339,7 +2329,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Terminated Permission Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPermissionControl' ) ),
+			api_class: TTAPI.APIPermissionControl,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PERMISSION_CONTROL,
 			show_search_inputs: true,
@@ -2352,14 +2342,9 @@ EmployeeViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Terminated Permission Group' ), form_item_input, tab_login_column2 );
 
 		TTPromise.resolve( 'employeeEditView', 'openEditView' );
+	}
 
-	},
-
-	initCountryList: function() {
-
-	},
-
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === '-1' || val === '0' ) {
@@ -2380,9 +2365,9 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	eSetProvince: function( val, refresh ) {
+	eSetProvince( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -2409,23 +2394,22 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	onSetSearchFilterFinished: function() {
+	onSetSearchFilterFinished() {
 
 		if ( this.search_panel.getSelectTabIndex() === 1 ) {
 			var combo = this.adv_search_field_ui_dic['country'];
 			var select_value = combo.getValue();
 			this.setProvince( select_value );
 		}
+	}
 
-	},
-
-	onBuildBasicUIFinished: function() {
+	onBuildBasicUIFinished() {
 		var basicSearchTabPanel = this.search_panel.find( 'div #basic_search' );
-	},
+	}
 
-	onBuildAdvUIFinished: function() {
+	onBuildAdvUIFinished() {
 
 		this.adv_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.adv_search_field_ui_dic['country'];
@@ -2436,13 +2420,11 @@ EmployeeViewController = BaseViewController.extend( {
 			this.adv_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	events: {},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 
 		var $this = this;
 		this.search_fields = [
@@ -2451,7 +2433,7 @@ EmployeeViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'company_id',
 				layout_name: ALayoutIDs.COMPANY,
-				api_class: ( APIFactory.getAPIClass( 'APICompany' ) ),
+				api_class: TTAPI.APICompany,
 				multiple: false,
 				custom_first_label: Global.default_item,
 				basic_search: PermissionManager.checkTopLevelPermission( 'Companies' ) ? true : false,
@@ -2463,7 +2445,7 @@ EmployeeViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'legal_entity_id',
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
-				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				custom_first_label: Global.any_item,
 				basic_search: PermissionManager.checkTopLevelPermission( 'LegalEntity' ) ? true : false,
@@ -2557,7 +2539,7 @@ EmployeeViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -2571,7 +2553,7 @@ EmployeeViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -2585,7 +2567,7 @@ EmployeeViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 3,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -2631,10 +2613,9 @@ EmployeeViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.TEXT_INPUT
 			} )
 		];
+	}
 
-	},
-
-	setCompanyIdFilter: function( args ) {
+	setCompanyIdFilter( args ) {
 
 		if ( !args ) {
 			args = { filter_data: { company_id: this.select_company_id } };
@@ -2648,17 +2629,15 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		return args;
+	}
 
-	},
-
-	cleanWhenUnloadView: function( callBack ) {
+	cleanWhenUnloadView( callBack ) {
 
 		$( '#employee_view_container' ).remove();
-		this._super( 'cleanWhenUnloadView', callBack );
+		super.cleanWhenUnloadView( callBack );
+	}
 
-	},
-
-	getFilterColumnsFromDisplayColumns: function( column_filter, enable_system_columns ) {
+	getFilterColumnsFromDisplayColumns( column_filter, enable_system_columns ) {
 		if ( column_filter == undefined ) {
 			column_filter = {};
 		}
@@ -2666,6 +2645,6 @@ EmployeeViewController = BaseViewController.extend( {
 		column_filter.latitude = true;
 		column_filter.longitude = true;
 		return this._getFilterColumnsFromDisplayColumns( column_filter, enable_system_columns );
-	},
+	}
 
-} );
+}

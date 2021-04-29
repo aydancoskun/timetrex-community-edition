@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -748,7 +748,7 @@ class CalculatePayStub extends PayStubFactory {
 					//Allow negative amounts so flat rate premium policies can reduce an employees wage if need be.
 					//  Add entries even if amount = 0 if total_time != 0, so Tax/Deduction records that depend on just units can still be calculated.
 					if ( $udt_arr['amount'] != 0 || $udt_arr['total_time'] != 0 ) {
-						Debug::text( '  Adding Pay Stub Entry: ' . $udt_arr['pay_stub_entry'] . ' Amount: ' . $udt_arr['amount'] . ' Total Time: ' . $udt_arr['total_time'], __FILE__, __LINE__, __METHOD__, 10 );
+						Debug::text( '  Adding Pay Stub Entry: ' . $udt_arr['pay_stub_entry'] . ' Amount: ' . $udt_arr['amount'] . ' Units: ' . TTDate::getHours( $udt_arr['total_time'] ) .'('. $udt_arr['total_time'] .') Rate: '. $udt_arr['rate'], __FILE__, __LINE__, __METHOD__, 10 );
 						$pay_stub->addEntry( $udt_arr['pay_stub_entry'], $udt_arr['amount'], TTDate::getHours( $udt_arr['total_time'] ), $udt_arr['rate'], $udt_arr['description'] );
 					} else {
 						Debug::text( '  NOT Adding ($0 amount) Pay Stub Entry: ' . $udt_arr['pay_stub_entry'] . ' Amount: ' . $udt_arr['amount'], __FILE__, __LINE__, __METHOD__, 10 );

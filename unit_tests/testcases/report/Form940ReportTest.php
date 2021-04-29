@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,7 +46,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -180,7 +181,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
@@ -212,6 +213,7 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					$end_date = TTDate::getEndDayEpoch( strtotime( '23-Dec-2018' ) );
@@ -461,21 +463,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 6125.67 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 61.89 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 61.89 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 6063.78 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 230.42 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 266.80 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 266.80 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, null );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 6125.67, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 61.89, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 61.89, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 6063.78, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 230.42, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 266.80, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 266.80, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 266.81, $form_objs->objs[0]->l16a );
+		$this->assertEquals( null, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 2nd Quarter
@@ -562,20 +564,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 13271.26 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 133.81 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 6137.45 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 6271.26 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, null );
+		$this->assertEquals( 13271.26, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 133.81, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 6137.45, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 6271.26, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 378.74, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 378.74, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 41.19, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( null, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 3rd Quarter
@@ -663,20 +665,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 19395.63 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 195.44 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 12200.19 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 12395.63 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 19395.63, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 195.44, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 12200.19, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 12395.63, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 378.74, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 378.74, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 5.62, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 4th Quarter
@@ -764,20 +766,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 26540.31, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 267.36, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 19272.95, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 19540.31, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 378.74, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 378.74, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 5.62, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for entire year with Line 10
@@ -963,20 +965,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 478.77 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 478.77 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 26540.31, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 267.36, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 19272.95, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 19540.31, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 100.03, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 478.77, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 478.77, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 266.81, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 41.19, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for entire year *without* Line 10
@@ -1162,20 +1164,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 378.74 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 266.81 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 41.19 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 26540.31, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 267.36, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 19272.95, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 19540.31, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 378.74, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 378.74, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 266.81, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 41.19, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 		return true;
 	}
@@ -1340,21 +1342,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 6125.67 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 61.89 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 61.89 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 6063.78 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, null );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 6125.67, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 61.89, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 61.89, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 6063.78, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( null, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 2nd Quarter
@@ -1441,20 +1443,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 13271.26 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 133.81 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 6137.45 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 6271.26 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, null );
+		$this->assertEquals( 13271.26, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 133.81, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 6137.45, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 6271.26, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 5.62, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( null, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 3rd Quarter
@@ -1542,20 +1544,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 19395.63 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 195.44 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 12200.19 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 12395.63 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 19395.63, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 195.44, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 12200.19, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 12395.63, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 5.62, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 4th Quarter
@@ -1643,20 +1645,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 26540.31, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 267.36, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 19272.95, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 19540.31, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 5.62, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for entire year with Line 10
@@ -1842,20 +1844,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 142.03 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 142.03 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 26540.31, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 267.36, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 19272.95, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 19540.31, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 100.03, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 142.03, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 142.03, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 5.62, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for entire year *without* Line 10
@@ -2041,20 +2043,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 26540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 267.36 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 19272.95 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 19540.31 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 7000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 42.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 36.38 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 5.62 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 26540.31, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 267.36, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 19272.95, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 19540.31, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 7000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 42.00, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 36.38, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 5.62, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 		return true;
 	}
@@ -2217,21 +2219,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 79633.71 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 804.57 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 804.57 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 78829.14 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 2995.51 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 3468.48 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 3468.48 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, null );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 79633.71, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 804.57, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 804.57, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 78829.14, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 2995.51, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 3468.48, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 3468.48, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 3468.48, $form_objs->objs[0]->l16a );
+		$this->assertEquals( null, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 2nd Quarter
@@ -2318,20 +2320,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 172526.38 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 1739.53 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 79786.85 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 81526.38 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 3915.08 );
+		$this->assertEquals( 172526.38, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 1739.53, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 79786.85, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 81526.38, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 4923.57, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 4923.57, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 535.52, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 3915.08, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 3rd Quarter
@@ -2419,20 +2421,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 252143.19 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 2540.72 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 158602.47 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 161143.19 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 4377.57 );
+		$this->assertEquals( 252143.19, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 2540.72, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 158602.47, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 161143.19, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 4923.57, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 4923.57, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 73.03, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 4377.57, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 4th Quarter
@@ -2520,20 +2522,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 4377.57 );
+		$this->assertEquals( 345024.03, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 3475.68, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 250548.35, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 254024.03, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 4923.57, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 4923.57, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 73.03, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 4377.57, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for entire year with Line 10.
@@ -2719,20 +2721,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 5023.60 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 5023.60 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 1019.60 );
+		$this->assertEquals( 345024.03, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 3475.68, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 250548.35, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 254024.03, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 100.03, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 5023.60, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 5023.60, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 3468.48, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 535.52, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 1019.60, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for entire year with Line 10 *without line 10*
@@ -2918,20 +2920,20 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 4923.57 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 3468.48 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 535.52 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 919.57 );
+		$this->assertEquals( 345024.03, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 3475.68, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 250548.35, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 254024.03, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 4923.57, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 4923.57, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 3468.48, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 535.52, $form_objs->objs[0]->l16b );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 919.57, $form_objs->objs[0]->l16d );
 
 		return true;
 	}
@@ -3094,21 +3096,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 79633.71 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 804.57 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 804.57 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 78829.14 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, null );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 79633.71, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 804.57, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 804.57, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 78829.14, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( null, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 2nd Quarter
@@ -3195,21 +3197,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 172526.38 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 1739.53 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 79786.85 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 81526.38 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 172526.38, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 1739.53, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 79786.85, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 81526.38, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 73.03, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 3rd Quarter
@@ -3297,21 +3299,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 252143.19 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 2540.72 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 158602.47 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 161143.19 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 252143.19, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 2540.72, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 158602.47, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 161143.19, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 73.03, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for 4th Quarter
@@ -3399,21 +3401,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 345024.03, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 3475.68, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 250548.35, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 254024.03, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 73.03, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 
 		//Generate Report for entire year with Line 10.
@@ -3599,21 +3601,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 100.03 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 646.03 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 646.03 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 100.03 );
+		$this->assertEquals( 345024.03, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 3475.68, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 250548.35, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 254024.03, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 100.03, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 646.03, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 646.03, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 73.03, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 100.03, $form_objs->objs[0]->l16d );
 
 		//Generate Report for entire year with Line 10 *without line 10*
 		$report_obj = new Form940Report();
@@ -3798,21 +3800,21 @@ class Form940ReportTest extends PHPUnit_Framework_TestCase {
 		//***NOTE: When unit testing is enabled Form940ReportTest forces credit reduction rates for some states, so if testing through the UI you must force unit test mode enabled to get the same results.
 		//         Also don't forget to setup the Exempt Payments in the UI.
 		//
-		$this->assertEquals( $form_objs->objs[0]->l3, 345024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l4, 3475.68 );
-		$this->assertEquals( $form_objs->objs[0]->l5, 250548.35 );
-		$this->assertEquals( $form_objs->objs[0]->l6, 254024.03 );
-		$this->assertEquals( $form_objs->objs[0]->l7, 91000.00 );
-		$this->assertEquals( $form_objs->objs[0]->l8, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l10, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l11, 0.00 );
-		$this->assertEquals( $form_objs->objs[0]->l12, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l13, 546.00 );
-		$this->assertEquals( $form_objs->objs[0]->l14, null );
-		$this->assertEquals( $form_objs->objs[0]->l16a, 472.97 );
-		$this->assertEquals( $form_objs->objs[0]->l16b, 73.03 );
-		$this->assertEquals( $form_objs->objs[0]->l16c, null );
-		$this->assertEquals( $form_objs->objs[0]->l16d, 0.00 );
+		$this->assertEquals( 345024.03, $form_objs->objs[0]->l3 );
+		$this->assertEquals( 3475.68, $form_objs->objs[0]->l4 );
+		$this->assertEquals( 250548.35, $form_objs->objs[0]->l5 );
+		$this->assertEquals( 254024.03, $form_objs->objs[0]->l6 );
+		$this->assertEquals( 91000.00, $form_objs->objs[0]->l7 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l8 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l10 );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l11 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l12 );
+		$this->assertEquals( 546.00, $form_objs->objs[0]->l13 );
+		$this->assertEquals( null, $form_objs->objs[0]->l14 );
+		$this->assertEquals( 472.97, $form_objs->objs[0]->l16a );
+		$this->assertEquals( 73.03, $form_objs->objs[0]->l16b );
+		$this->assertEquals( null, $form_objs->objs[0]->l16c );
+		$this->assertEquals( 0.00, $form_objs->objs[0]->l16d );
 
 		return true;
 	}

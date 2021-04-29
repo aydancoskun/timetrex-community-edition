@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -628,7 +628,7 @@ class UserQualificationReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			//We used to just get return the entire $u_obj->data array, but this wouldn't include tags and other columns that required some additional processing.
 			//Not sure why this was done that way... I think because we had problems with the multiple date fields (Hire Date/Termination Date/Birth Date, etc...)
@@ -638,7 +638,7 @@ class UserQualificationReport extends Report {
 			//$this->tmp_data['user'][$u_obj->getId()]['status'] = Option::getByKey( $u_obj->getStatus(), $u_obj->getOptions( 'status' ) );
 			$this->tmp_data['user_preference'][$u_obj->getId()] = [];
 			$this->tmp_data['user_wage'][$u_obj->getId()] = [];
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'TMP User Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -646,10 +646,10 @@ class UserQualificationReport extends Report {
 		$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 		$uplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Preference Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uplf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $uplf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $uplf as $key => $up_obj ) {
 			$this->tmp_data['user_preference'][$up_obj->getUser()] = Misc::addKeyPrefix( 'user_preference.', (array)$up_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_preference.', $columns ) ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		unset( $filter_data['permission_children_ids'] );
@@ -659,80 +659,80 @@ class UserQualificationReport extends Report {
 		$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Wage Rows: ' . $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = Misc::addKeyPrefix( 'user_wage.', (array)$uw_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_wage.', $columns ) ) );
 				$this->tmp_data['user_wage'][$uw_obj->getUser()]['wage'] = $uw_obj->getWage();              //Get raw unformatted value as columnFormatter() will format it later on.
 				$this->tmp_data['user_wage'][$uw_obj->getUser()]['hourly_rate'] = $uw_obj->getHourlyRate(); //Get raw unformatted value as columnFormatter() will format it later on.
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		$qlf = TTnew( 'QualificationListFactory' ); /** @var QualificationListFactory $qlf */
 		$qlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Qualification Rows: ' . $qlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $qlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $qlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $qlf as $key => $q_obj ) {
 			$this->tmp_data['qualification'][$q_obj->getId()] = Misc::addKeyPrefix( 'qualification.', (array)$q_obj->getObjectAsArray( Misc::removeKeyPrefix( 'qualification.', $columns ) ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		$uslf = TTnew( 'UserSkillListFactory' ); /** @var UserSkillListFactory $uslf */
 		$uslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Skill Rows: ' . $uslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uslf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $uslf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $uslf as $key => $us_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $us_obj->getUser(), $user_skill_permission_children_ids ) ) {
 				$this->tmp_data['user_skill'][$us_obj->getQualification()][$us_obj->getUser()][] = Misc::addKeyPrefix( 'user_skill.', (array)$us_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_skill.', $columns ) ), [ 'qualification' ] );
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		$uelf = TTnew( 'UserEducationListFactory' ); /** @var UserEducationListFactory $uelf */
 		$uelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Education Rows: ' . $uelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $uelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $uelf as $key => $ue_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $ue_obj->getUser(), $user_education_permission_children_ids ) ) {
 				$this->tmp_data['user_education'][$ue_obj->getQualification()][$ue_obj->getUser()][] = Misc::addKeyPrefix( 'user_education.', (array)$ue_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_education.', $columns ) ), [ 'qualification' ] );
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		$ullf = TTnew( 'UserLicenseListFactory' ); /** @var UserLicenseListFactory $ullf */
 		$ullf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User License Rows: ' . $ullf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ullf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ullf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ullf as $key => $ul_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $ul_obj->getUser(), $user_license_permission_children_ids ) ) {
 				$this->tmp_data['user_license'][$ul_obj->getQualification()][$ul_obj->getUser()][] = Misc::addKeyPrefix( 'user_license.', (array)$ul_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_license.', $columns ) ), [ 'qualification' ] );
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 
 		$ullf = TTnew( 'UserLanguageListFactory' ); /** @var UserLanguageListFactory $ullf */
 		$ullf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Language Rows: ' . $ullf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ullf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ullf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ullf as $key => $ul_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $ul_obj->getUser(), $user_language_permission_children_ids ) ) {
 				$this->tmp_data['user_language'][$ul_obj->getQualification()][$ul_obj->getUser()][] = Misc::addKeyPrefix( 'user_language.', (array)$ul_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_language.', $columns ) ), [ 'qualification' ] );
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 
 		$umlf = TTnew( 'UserMembershipListFactory' ); /** @var UserMembershipListFactory $umlf */
 		$umlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Membership Rows: ' . $umlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $umlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $umlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $umlf as $key => $um_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $um_obj->getUser(), $user_membership_permission_children_ids ) ) {
 				$this->tmp_data['user_membership'][$um_obj->getQualification()][$um_obj->getUser()][] = Misc::addKeyPrefix( 'user_membership.', (array)$um_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_membership.', $columns ) ), [ 'qualification' ] );
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Debug::Arr($this->tmp_data['user_preference'], 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -744,7 +744,7 @@ class UserQualificationReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['qualification'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['qualification'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 		if ( isset( $this->tmp_data['qualification'] ) ) {
 			$column_keys = array_keys( $this->getColumnDataConfig() );
 
@@ -840,7 +840,7 @@ class UserQualificationReport extends Report {
 					}
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				$key++;
 			}
 			unset( $this->tmp_data, $row, $processed_data );

@@ -1,21 +1,26 @@
-PayStubSummaryReportViewController = ReportBaseViewController.extend( {
+class PayStubSummaryReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIPayStubSummaryReport', 'APIPayStub', 'APIPayrollRemittanceAgency', 'APICurrency'],
+		} );
 
-	initReport: function( options ) {
+		super( options );
+	}
+
+	initReport( options ) {
 		this.script_name = 'PayStubSummaryReport';
 		this.viewId = 'PayStubSummaryReport';
 		this.context_menu_name = $.i18n._( 'Pay Stub Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'PayStubSummaryReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayStubSummaryReport' ) )();
-	},
+		this.api = TTAPI.APIPayStubSummaryReport;
+	}
 
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 		this.processTransactions( id );
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				pay_stub: {
@@ -52,28 +57,28 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
 	// Overriding empty ReportBaseViewController.processFilterField() called from base.openEditView to provide view specific logic.
-	processFilterField: function() {
+	processFilterField() {
 		for ( var i = 0; i < this.setup_fields_array.length; i++ ) {
 			var item = this.setup_fields_array[i];
 			if ( item.value === 'status_id' ) {
 				item.value = 'filter';
 			}
 		}
-	},
+	}
 
-	onFormItemChangeProcessFilterField: function( target, key ) {
+	onFormItemChangeProcessFilterField( target, key ) {
 		var filter = target.getValue();
 		this.visible_report_values[key] = { status_id: filter };
-	},
+	}
 
-	setFilterValue: function( widget, value ) {
+	setFilterValue( widget, value ) {
 		widget.setValue( value.status_id );
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.employee_pay_stubs: //All report view
 				this.onViewClick( 'pdf_employee_pay_stub' );
@@ -90,4 +95,4 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 				break;
 		}
 	}
-} );
+}

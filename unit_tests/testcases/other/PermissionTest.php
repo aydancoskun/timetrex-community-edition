@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,7 +46,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -101,7 +102,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( $new_shift_trigger_time );
@@ -134,6 +135,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					if ( $initial_date !== false ) {
@@ -207,8 +209,6 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	 * @group Permission_testBasicPermissionFunctions
 	 */
 	function testBasicPermissionFunctions() {
-		global $dd;
-
 		$permission = TTnew( 'Permission' ); /** @var Permission $permission */
 		$permission_arr = $permission->getPermissions( $this->user_id, $this->company_id );
 		$this->assertGreaterThan( 40, count( $permission_arr ) ); //Needs to be low enough for community edtion.
@@ -585,7 +585,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertCount( 7, $output_data );
 		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
 		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[0] );
 		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[1] );
@@ -652,7 +652,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertCount( 7, $output_data );
 		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
 		$this->assertArrayHasKey( 'hourly_rate', $output_data[0] );
 		//$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
@@ -722,7 +722,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertCount( 7, $output_data );
 		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
 		$this->assertArrayNotHasKey( 'hourly_rate', $output_data[0] );
 
@@ -801,7 +801,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertCount( 7, $output_data );
 		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
 		$this->assertArrayHasKey( 'hourly_rate', $output_data[0] );
 		//$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
@@ -881,7 +881,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$report_obj->setConfig( (array)$config );
 		$output_data = $report_obj->getOutput( 'raw' );
 
-		$this->assertEquals( 7, count( $output_data ) );
+		$this->assertCount( 7, $output_data );
 		$this->assertArrayHasKey( 'employee_number', $output_data[0] );
 		$this->assertArrayHasKey( 'hourly_rate', $output_data[0] );
 		$this->assertGreaterThan( 10.00, $output_data[0]['hourly_rate'] );

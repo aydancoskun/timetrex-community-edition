@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,7 +48,7 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -98,7 +98,7 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
@@ -131,6 +131,7 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					if ( $initial_date !== false ) {
@@ -195,8 +196,8 @@ class SystemLogTest extends PHPUnit_Framework_TestCase {
 			foreach ( $llf as $l_obj ) {
 				$this->assertEquals( $l_obj->getUser(), $this->user_id );
 				$this->assertEquals( $l_obj->getObject(), $user_id );
-				$this->assertEquals( $l_obj->getAction(), 10 );
-				$this->assertEquals( $l_obj->getTableName(), 'users' );
+				$this->assertEquals( 10, $l_obj->getAction() );
+				$this->assertEquals( 'users', $l_obj->getTableName() );
 				$this->assertNotEmpty( $l_obj->getDescription() );
 			}
 

@@ -1,9 +1,15 @@
-CurrencyRateViewController = BaseViewController.extend( {
+class CurrencyRateViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APICurrencyRate'],
-	el: '#currency_rate_view_container', //Must set el here and can only set string, so events can work
+			el: '#currency_rate_view_container', //Must set el here and can only set string, so events can work
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'CurrencyRateEditView.html';
@@ -13,7 +19,7 @@ CurrencyRateViewController = BaseViewController.extend( {
 		this.table_name_key = 'currency_rate';
 		this.context_menu_name = $.i18n._( 'Rates' );
 		this.navigation_label = $.i18n._( 'Rate' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APICurrencyRate' ) )();
+		this.api = TTAPI.APICurrencyRate;
 
 		this.render();
 
@@ -29,21 +35,20 @@ CurrencyRateViewController = BaseViewController.extend( {
 		}
 
 		this.setSelectRibbonMenuIfNecessary( 'CurrencyRate' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 		var $this = this;
 
 		var tab_model = {
@@ -53,9 +58,10 @@ CurrencyRateViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		var form_item_input;
+		var widgetContainer;
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICurrencyRate' ) ),
+			api_class: TTAPI.APICurrencyRate,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY_RATE,
@@ -78,7 +84,7 @@ CurrencyRateViewController = BaseViewController.extend( {
 		// Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			field: 'currency_id',
@@ -97,15 +103,14 @@ CurrencyRateViewController = BaseViewController.extend( {
 		// Conversion Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'conversion_rate', width: 114 } );
-		var widgetContainer = $( '<div class=\'\'></div>' );
+		widgetContainer = $( '<div class=\'\'></div>' );
 		var conversion_rate_clarification_box = $( '<span id=\'rate_conversion_rate_clarification_box\'></span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( conversion_rate_clarification_box );
 		this.addEditFieldToColumn( $.i18n._( 'Conversion Rate' ), [form_item_input], tab_currency_rate_column1, '', widgetContainer, false, true );
+	}
 
-	},
-
-	onMassEditClick: function() {
+	onMassEditClick() {
 
 		var $this = this;
 		$this.is_add = false;
@@ -150,22 +155,21 @@ CurrencyRateViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		if ( target.getField() == 'conversion_rate' ) {
 			this.setConversionRateExampleText( target.getValue(), null, this.edit_view_ui_dic.currency_id.getValue() );
 		}
-		this._super( 'onFormItemChange', target, doNotValidate );
-	},
+		super.onFormItemChange( target, doNotValidate );
+	}
 
-	initEditView: function( editId, noRefreshUI ) {
-		this._super( 'initEditView' );
+	initEditView( editId, noRefreshUI ) {
+		super.initEditView();
 		this.setConversionRateExampleText( this.edit_view_ui_dic.conversion_rate.getValue(), null, this.edit_view_ui_dic.currency_id.getValue() );
 	}
 
-} );
+}
 
 CurrencyRateViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 

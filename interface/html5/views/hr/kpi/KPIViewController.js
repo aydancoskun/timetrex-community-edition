@@ -1,18 +1,25 @@
-KPIViewController = BaseViewController.extend( {
-	el: '#kpi_view_container',
+class KPIViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#kpi_view_container',
 
-	_required_files: ['APIKPI', 'APIKPIGroup', 'APICompanyGenericTag'],
 
-	type_array: null,
-	status_array: null,
 
-	kpi_group_array: null,
-	kpi_group_api: null,
+			type_array: null,
+			status_array: null,
 
-	sub_document_view_controller: null,
+			kpi_group_array: null,
+			kpi_group_api: null,
 
-	document_object_type_id: null,
-	init: function( options ) {
+			sub_document_view_controller: null,
+
+			document_object_type_id: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'KPIEditView.html';
 		this.permission_id = 'kpi';
@@ -21,8 +28,8 @@ KPIViewController = BaseViewController.extend( {
 		this.table_name_key = 'kpi';
 		this.context_menu_name = $.i18n._( 'KPI' );
 		this.navigation_label = $.i18n._( 'KPI' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIKPI' ) )();
-		this.kpi_group_api = new ( APIFactory.getAPIClass( 'APIKPIGroup' ) )();
+		this.api = TTAPI.APIKPI;
+		this.kpi_group_api = TTAPI.APIKPIGroup;
 
 		this.document_object_type_id = 210;
 		this.render();
@@ -30,10 +37,9 @@ KPIViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
@@ -63,12 +69,11 @@ KPIViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -80,7 +85,7 @@ KPIViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIKPI' ) ),
+			api_class: TTAPI.APIKPI,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.KPI,
@@ -157,12 +162,11 @@ KPIViewController = BaseViewController.extend( {
 
 		form_item_input.TTagInput( { field: 'tag', object_type_id: 310 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_key_performance_indicator_column1, '', null, null, true );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -234,7 +238,7 @@ KPIViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -246,16 +250,16 @@ KPIViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
@@ -277,15 +281,14 @@ KPIViewController = BaseViewController.extend( {
 		this.collectUIDataToCurrentEditRecord();
 
 		this.setEditViewDataDone();
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onTypeChange();
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -300,10 +303,9 @@ KPIViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	onTypeChange: function() {
+	onTypeChange() {
 		if ( this.current_edit_record.type_id == 10 ) {
 			this.attachElement( 'minimum_rate' );
 			this.attachElement( 'maximum_rate' );
@@ -314,5 +316,5 @@ KPIViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
-} );
+	}
+}

@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,14 +46,10 @@
  */
 class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestCase {
 	private $default_wait_timeout = 4000;//100000;
-	private $default_wait_interval = 50;
 
-	function waitUntilByXPath( $xpath, $timeout = null, $sleep_interval = null ) {
+	function waitUntilByXPath( $xpath, $timeout = null ) {
 		if ( $timeout == null ) {
 			$timeout = $this->default_wait_timeout;
-		}
-		if ( $sleep_interval == null ) {
-			$sleep_interval = $this->default_wait_interval;
 		}
 
 		$this->waitUntil( function () use ( $xpath ) {
@@ -67,7 +63,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 			}
 
 			return null;
-		}, $timeout, $sleep_interval );
+		}, $timeout );
 	}
 
 	public function setUp() {
@@ -327,10 +323,10 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 	}
 
 	function testCRAToCSVFile() {
-		$this->assertEquals( file_exists( $this->tax_table_file ), true );
+		$this->assertEquals( true, file_exists( $this->tax_table_file ) );
 
 		if ( file_exists( $this->cra_deduction_test_csv_file ) ) {
-			$file = new \SplFileObject( $this->cra_deduction_test_csv_file, 'r' );
+			$file = new SplFileObject( $this->cra_deduction_test_csv_file, 'r' );
 			$file->seek( PHP_INT_MAX );
 
 			$total_compare_lines = $file->key() + 1;
@@ -409,7 +405,7 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 	}
 
 	function testCRAFromCSVFile() {
-		$this->assertEquals( file_exists( $this->cra_deduction_test_csv_file ), true );
+		$this->assertEquals( true, file_exists( $this->cra_deduction_test_csv_file ) );
 
 		$test_rows = Misc::parseCSV( $this->cra_deduction_test_csv_file, true );
 

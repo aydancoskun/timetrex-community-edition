@@ -1,14 +1,17 @@
-DepartmentViewController = BaseViewController.extend( {
-	el: '#department_view_container',
+class DepartmentViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#department_view_container',
 
-	_required_files: {
-		10: ['APIDepartment', 'APICompanyGenericTag'],
-		20: ['APIGEOFence']
-	},
 
-	status_array: null,
 
-	init: function( options ) {
+			status_array: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'DepartmentEditView.html';
 		this.permission_id = 'department';
@@ -17,7 +20,7 @@ DepartmentViewController = BaseViewController.extend( {
 		this.table_name_key = 'department';
 		this.context_menu_name = $.i18n._( 'Departments' );
 		this.navigation_label = $.i18n._( 'Department' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIDepartment' ) )();
+		this.api = TTAPI.APIDepartment;
 
 		this.render();
 
@@ -25,18 +28,16 @@ DepartmentViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'Department' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'status' );
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -47,7 +48,7 @@ DepartmentViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
@@ -92,7 +93,7 @@ DepartmentViewController = BaseViewController.extend( {
 		if ( Global.getProductEdition() >= 20 ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIGEOFence' ) ),
+				api_class: TTAPI.APIGEOFence,
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.GEO_FENCE,
 				show_search_inputs: true,
@@ -107,12 +108,11 @@ DepartmentViewController = BaseViewController.extend( {
 
 		form_item_input.TTagInput( { field: 'tag', object_type_id: 120 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_department_column1, '', null, null, true );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -153,7 +153,7 @@ DepartmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -165,16 +165,16 @@ DepartmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [],
 			include: [
@@ -190,21 +190,21 @@ DepartmentViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
 				this.onImportClick();
 				break;
 		}
-	},
+	}
 
-	onImportClick: function() {
+	onImportClick() {
 		var $this = this;
 
-		IndexViewController.openWizard( 'ImportCSVWizard', 'department', function() {
+		IndexViewController.openWizard( 'ImportCSVWizard', 'Department', function() {
 			$this.search();
 		} );
 	}
-} );
+}

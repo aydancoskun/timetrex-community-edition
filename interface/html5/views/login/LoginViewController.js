@@ -1,32 +1,47 @@
-LoginViewController = BaseViewController.extend( {
+class LoginViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#loginViewContainer', //Must set el here and can only set string, so events can work
 
-	el: '#loginViewContainer', //Must set el here and can only set string, so events can work
+			authentication_api: null,
+			currentUser_api: null,
+			currency_api: null,
+			user_preference_api: null,
+			user_locale: 'en_US',
+			is_login: true,
+			date_api: null,
+			permission_api: null,
 
-	_required_files: ['APICurrentUser', 'APICurrency', 'APIUserPreference', 'APIPermission', 'APIDate', 'APIAuthentication'],
+			doing_login: false,
 
-	authentication_api: null,
-	currentUser_api: null,
-	currency_api: null,
-	user_preference_api: null,
-	user_locale: 'en_US',
-	is_login: true,
-	date_api: null,
-	permission_api: null,
+			lan_selector: null,
 
-	doing_login: false,
+			default: {
+				is_login: false
+			},
 
-	lan_selector: null,
+			events: {
+				'click #quick_punch': 'onQuickPunchClick',
+				'click #forgot_password': 'forgotPasswordClick',
+				'click #appTypeLogo': 'onAppTypeClick',
+				'click #companyLogo': 'onAppTypeClick',
+				'click #powered_by': 'onAppTypeClick'
+			}
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		var $this = this;
 		Global.setVirtualDeviceViewport( 'mobile' ); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
-		this.authentication_api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
-		this.currentUser_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
-		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
-		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-		this.permission_api = new ( APIFactory.getAPIClass( 'APIPermission' ) )();
+		this.authentication_api = TTAPI.APIAuthentication;
+		this.currentUser_api = TTAPI.APIAuthentication;
+		this.currency_api = TTAPI.APICurrency;
+		this.user_preference_api = TTAPI.APIUserPreference;
+		this.date_api = TTAPI.APITTDate;
+		this.permission_api = TTAPI.APIPermission;
 		this.viewId = 'LoginView';
 		Global.topContainer().css( 'display', 'none' );
 		Global.bottomContainer().css( 'display', 'none' );
@@ -72,29 +87,17 @@ LoginViewController = BaseViewController.extend( {
 		}
 
 		//Global.setAnalyticDimensions(); // #2140 - handled in main.js main thread instead.
-	},
+	}
 
-	default: {
-		is_login: false
-	},
-
-	events: {
-		'click #quick_punch': 'onQuickPunchClick',
-		'click #forgot_password': 'forgotPasswordClick',
-		'click #appTypeLogo': 'onAppTypeClick',
-		'click #companyLogo': 'onAppTypeClick',
-		'click #powered_by': 'onAppTypeClick'
-	},
-
-	onAppTypeClick: function() {
+	onAppTypeClick() {
 		window.open( 'https://' + LocalCacheData.loginData.organization_url );
-	},
+	}
 
-	onQuickPunchClick: function() {
+	onQuickPunchClick() {
 		window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'html5/quick_punch' );
-	},
+	}
 
-	onLoginBtnClick: function( e ) {
+	onLoginBtnClick( e ) {
 		e.preventDefault(); //Prevent login form from being submitted, as Chrome will append a "?" to the end of a URL and cancel the XHR login request. This is also affecting the enter key press binding in render()
 
 		var user_name = $( '#user_name' ).val();
@@ -151,10 +154,9 @@ LoginViewController = BaseViewController.extend( {
 				delegate: this
 			} );
 		}
+	}
 
-	},
-
-	onLoginSuccess: function( e, session_id ) {
+	onLoginSuccess( e, session_id ) {
 		var result;
 		var $this = this;
 
@@ -174,7 +176,7 @@ LoginViewController = BaseViewController.extend( {
 
 			Global.clearSessionCookie();
 
-			if ( e.getDetails()[0].hasOwnProperty( 'password' ) ) {
+			if ( e.getDetails()[0] && e.getDetails()[0].hasOwnProperty( 'password' ) ) {
 				IndexViewController.openWizard( 'ResetPasswordWizard', {
 					user_name: user_name.val(),
 					message: e.getDetailsAsString()
@@ -207,9 +209,9 @@ LoginViewController = BaseViewController.extend( {
 
 			$this.initializeLoginData();
 		}
-	},
+	}
 
-	initializeLoginData: function() {
+	initializeLoginData() {
 		var $this = this;
 
 		TTPromise.add( 'login', 'init' );
@@ -231,7 +233,7 @@ LoginViewController = BaseViewController.extend( {
 		} );
 
 		TTPromise.add( 'login', 'getPermission' );
-		$this.permission_api.getPermission( {
+		$this.permission_api.getPermissions( {
 			onResult: function( permissionRes ) {
 				var permission_result = permissionRes.getResult();
 
@@ -296,9 +298,9 @@ LoginViewController = BaseViewController.extend( {
 		} );
 
 		TTPromise.resolve( 'login', 'init' );
-	},
+	}
 
-	onGetCurrentUser: function( e ) {
+	onGetCurrentUser( e ) {
 		LocalCacheData.setLoginUser( e.getResult() );
 
 		var filter = {};
@@ -320,9 +322,9 @@ LoginViewController = BaseViewController.extend( {
 		} );
 
 		TTPromise.resolve( 'login', 'getCurrentUser' );
-	},
+	}
 
-	onGetCurrentUserPreference: function( e ) {
+	onGetCurrentUserPreference( e ) {
 		var result = e.getResult();
 		var login_view_this = e.get( 'delegate' );
 
@@ -376,9 +378,9 @@ LoginViewController = BaseViewController.extend( {
 				TTPromise.resolve( 'login', 'getCurrentUserPreference' );
 			} );
 		}
-	},
+	}
 
-	onGetCurrentUserLocale: function( e ) {
+	onGetCurrentUserLocale( e ) {
 		var login_view_this = e.get( 'delegate' );
 		var result = e.getResult();
 		if ( result ) {
@@ -386,9 +388,9 @@ LoginViewController = BaseViewController.extend( {
 		}
 
 		TTPromise.resolve( 'login', 'getCurrentUserLocale' );
-	},
+	}
 
-	goToView: function() {
+	goToView() {
 		this.doing_login = false;
 		TopMenuManager.ribbon_view_controller = null;
 		TopMenuManager.ribbon_menus = null;
@@ -441,16 +443,16 @@ LoginViewController = BaseViewController.extend( {
 		if ( LocalCacheData && current_company && LocalCacheData.getLoginUser() ) {
 			Global.setAnalyticDimensions( LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name );
 		}
-	},
+	}
 
-	forgotPasswordClick: function() {
+	forgotPasswordClick() {
 		//window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'ForgotPassword.php' );
 		IndexViewController.openWizard( 'ForgotPasswordWizard', null, function() {
 			TAlertManager.showAlert( $.i18n._( 'An email has been sent to you with instructions on how to change your password.' ) );
 		} );
-	},
+	}
 
-	autoLogin: function() {
+	autoLogin() {
 		// Error: TypeError: e is null in interface/html5/framework/jquery.min.js?v=9.0.5-20151222-094938 line 2 > eval line 154
 		var session_cookie = getCookie( Global.getSessionIDKey() );
 		if ( session_cookie && session_cookie.length >= 40 ) {
@@ -460,9 +462,9 @@ LoginViewController = BaseViewController.extend( {
 			$( this.el ).visible();
 			this.render();
 		}
-	},
+	}
 
-	render: function() {
+	render() {
 
 		var $this = this;
 		var message_id = TTUUID.generateUUID();
@@ -505,9 +507,6 @@ LoginViewController = BaseViewController.extend( {
 
 		$( '#appTypeLogo' ).css( 'opacity', 0 );
 
-		//community edition
-		var is_seo = false;
-
 		var url = 'theme/' + Global.theme;
 
 		if ( Global.url_offset ) {
@@ -524,7 +523,6 @@ LoginViewController = BaseViewController.extend( {
 			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/eeo.png' + '?v=' + APIGlobal.pre_login_data.application_build );
 		} else {
 			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/seo.png' + '?v=' + APIGlobal.pre_login_data.application_build );
-			is_seo = true;
 		}
 
 		var quick_punch_link = $( this.el ).find( '#quick_punch' );
@@ -545,9 +543,6 @@ LoginViewController = BaseViewController.extend( {
 		$( '#companyLogo' ).attr( 'src', ServiceCaller.mainCompanyLogo );
 
 		$( '#companyLogo' ).on( 'load', function() {
-
-			var ratio = 78 / $( this ).height();
-
 			if ( $( this ).height() > 78 ) {
 				$( this ).css( 'height', 78 );
 
@@ -635,16 +630,15 @@ LoginViewController = BaseViewController.extend( {
 
 		Global.moveCookiesToNewPath();
 		Global.setUIInitComplete();
+	}
 
-	},
-
-	cleanWhenUnloadView: function( callBack ) {
+	cleanWhenUnloadView( callBack ) {
 		$( '#loginViewContainer' ).remove();
 		Global.setVirtualDeviceViewport( 'desktop' ); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
-		this._super( 'cleanWhenUnloadView', callBack );
-	},
+		super.cleanWhenUnloadView( callBack );
+	}
 
-	renderAnimalsForBackground: function() {
+	renderAnimalsForBackground() {
 		var station_id = Global.getStationID();
 		//week of year and numeric digits of station_id.
 		if ( station_id.length > 0 ) {
@@ -658,4 +652,4 @@ LoginViewController = BaseViewController.extend( {
 		$( '#login-bg_animal' ).css( 'background-image', 'url(\'theme/default/images/login_animals_' + random_image_number + '.png\')' );
 	}
 
-} );
+}

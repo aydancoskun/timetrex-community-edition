@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -313,9 +313,10 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		$additional_order_fields = [ 'type_id', 'source_type_id', 'group' ];
 
 		$sort_column_aliases = [
-				'type'        => 'type_id',
-				'source_type' => 'source_type_id',
-				'group'       => 'd.name',
+				'type'            => 'type_id',
+				'source_type'     => 'source_type_id',
+				'group'           => 'd.name',
+				'visibility_type' => 'visibility_type_id',
 		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );

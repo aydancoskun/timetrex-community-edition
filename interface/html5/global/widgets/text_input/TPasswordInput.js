@@ -62,7 +62,7 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox"></input>' +
 					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
@@ -157,37 +157,11 @@
 				$this.width( o.width );
 			}
 
-			$( this ).keydown( function( e ) {
-
-				if ( hasKeyEvent ) {
-
-					$this.trigger( 'formItemKeyDown', [$this] );
-				}
-
-				//don't clean event when click tab
-				if ( e.keyCode !== 9 && validate_timer ) {
-					clearTimeout( validate_timer );
-					validate_timer = null;
-				}
-
-			} );
-
-			$( this ).keyup( function() {
-
-				if ( hasKeyEvent ) {
-					$this.trigger( 'formItemKeyUp', [$this] );
-				}
-
-				validate_timer = setTimeout( function() {
-
-					if ( check_box ) {
-						$this.setCheckBox( true );
-					}
-
-					$this.trigger( 'formItemChange', [$this] );
-
-				}, 500 );
-
+			//NOTE: Do not add keyup/down events, as type-as-you-go validation should not be active on password fields.
+			//  Specifically because they must match exactly and the timer causes one character to be missed it could give an incorrect validation failure.
+			//  Also if they type slow enough it cause many password failures and they could be locked out before they finish typing their password.
+			$( this ).change( function() {
+				$this.trigger( 'formItemChange', [$this] );
 			} );
 
 			$( this ).mouseover( function() {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -156,7 +156,7 @@ class APIUserDateTotal extends APIFactory {
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $blf->getRecordCount() );
 
 			$this->setPagerObject( $blf );
 
@@ -164,10 +164,10 @@ class APIUserDateTotal extends APIFactory {
 			foreach ( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $blf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -230,7 +230,7 @@ class APIUserDateTotal extends APIFactory {
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		$validator = $save_result = $key = false;
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			$transaction_function = function () use ( $data, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
 				$lf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $lf */
@@ -372,7 +372,7 @@ class APIUserDateTotal extends APIFactory {
 					}
 					//$lf->CommitTransaction();
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				}
 
 				if ( $is_valid == true && $validate_only == false ) {
@@ -402,7 +402,7 @@ class APIUserDateTotal extends APIFactory {
 				return [ $validator, $validator_stats, $key, $save_result ];
 			};
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			if ( $total_records > 100 ) { //When importing, or mass adding punches, don't retry as the transaction will be much too large.
 				$retry_max_attempts = 1;
@@ -451,7 +451,7 @@ class APIUserDateTotal extends APIFactory {
 		$validator = $save_result = $key = false;
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			$transaction_function = function () use ( $data, $validator_stats, $validator, $save_result, $permission_children_ids ) {
 				$lf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $lf */
@@ -542,7 +542,7 @@ class APIUserDateTotal extends APIFactory {
 
 					//$lf->CommitTransaction();
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				}
 
 				if ( $is_valid == true ) {
@@ -572,7 +572,7 @@ class APIUserDateTotal extends APIFactory {
 				return [ $validator, $validator_stats, $key, $save_result ];
 			};
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 

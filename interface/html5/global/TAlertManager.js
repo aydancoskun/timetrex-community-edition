@@ -41,7 +41,7 @@ var TAlertManager = ( function() {
 	var showPreSessionAlert = function() {
 		var result = $( '<div class="session-alert"> ' +
 			'<span class="close-icon">X</span>' +
-			'<span class="content"/>' +
+			'<span class="content"></span>' +
 			'</div>' );
 		setTimeout( function() {
 			$( 'body' ).append( result );
@@ -156,8 +156,8 @@ var TAlertManager = ( function() {
 		}
 
 		var result = $( '<div class="t-alert">' +
-			'<div class="content-div"><span class="content"/></div>' +
-			'<span class="title"/>' +
+			'<div class="content-div"><span class="content"></span></div>' +
+			'<span class="title"></span>' +
 			'<div class="bottom-bar">' +
 			'<button class="t-button">Close</button>' +
 			'</div>' +
@@ -226,7 +226,7 @@ var TAlertManager = ( function() {
 			remove();
 		}
 		var result = $( '<div class="confirm-alert"> ' +
-			'<div class="content-div"><span class="content"/></div>' +
+			'<div class="content-div"><span class="content"></span></div>' +
 			'<span class="title"></span>' +
 			'<div class="bottom-bar">' +
 			'<button id="yesBtn" class="t-button bottom-bar-yes-btn"></button>' +

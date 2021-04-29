@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -186,9 +186,12 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 			}
 		}
 
-		$additional_order_fields = [];
+		$additional_order_fields = [ 'd.name', 'c.name' ];
 
-		$sort_column_aliases = [];
+		$sort_column_aliases = [
+				'full_shift_absence_policy'    => 'd.name',
+				'partial_shift_absence_policy' => 'c.name',
+		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 

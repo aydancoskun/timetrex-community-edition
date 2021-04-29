@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -468,8 +468,8 @@ class GeneralLedgerSummaryReport extends Report {
 	}
 
 	/**
-	 * @param int $user_date_total_arr EPOCH
-	 * @param $pay_period_total_arr
+	 * @param array $user_date_total_arr
+	 * @param array $pay_period_total_arr
 	 * @return array|bool
 	 */
 	function calculatePercentDistribution( $user_date_total_arr, $pay_period_total_arr ) {
@@ -562,7 +562,7 @@ class GeneralLedgerSummaryReport extends Report {
 			$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 			$udtlf->getGeneralLedgerReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			Debug::Text( ' User Date Total Rows: ' . $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udtlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Punch Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $udtlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Punch Data...' ) );
 			$pay_period_ids = [];
 			if ( $udtlf->getRecordCount() > 0 ) {
 				foreach ( $udtlf as $key => $udt_obj ) {
@@ -595,7 +595,7 @@ class GeneralLedgerSummaryReport extends Report {
 						}
 					}
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				}
 			}
 			$this->tmp_data['pay_period_distribution'] = $this->calculatePercentDistribution( $this->tmp_data['user_date_total'], $this->tmp_data['pay_period_total'] );
@@ -605,7 +605,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIGeneralLedgerReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		Debug::Text( ' PSE Total Rows: ' . $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach ( $pself as $key => $pse_obj ) {
@@ -709,7 +709,7 @@ class GeneralLedgerSummaryReport extends Report {
 				} else {
 					Debug::Text( 'No Pay Stub Entry Account Matches!', __FILE__, __LINE__, __METHOD__, 10 );
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 		}
 
@@ -717,7 +717,7 @@ class GeneralLedgerSummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( [
 																											 'default_branch_id'     => true,
@@ -733,7 +733,7 @@ class GeneralLedgerSummaryReport extends Report {
 																											 'other_id5'             => true,
 																									 ],
 																									 (array)$this->getColumnDataConfig() ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -749,7 +749,7 @@ class GeneralLedgerSummaryReport extends Report {
 			return true;
 		}
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		//Get Branch ID to Branch Code mapping
@@ -925,7 +925,7 @@ class GeneralLedgerSummaryReport extends Report {
 								unset( $psen_ids );
 							}
 
-							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+							$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 							$key++;
 						}
 					}

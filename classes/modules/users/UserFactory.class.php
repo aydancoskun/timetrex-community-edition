@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -107,8 +107,6 @@ class UserFactory extends Factory {
 						'-1100-ethnic_group'       => TTi18n::gettext( 'Ethnicity' ),
 						'-1102-default_branch'     => TTi18n::gettext( 'Branch' ),
 						'-1103-default_department' => TTi18n::gettext( 'Department' ),
-						'-1104-default_job'        => TTi18n::gettext( 'Job' ),
-						'-1105-default_job_item'   => TTi18n::gettext( 'Task' ),
 						'-1106-currency'           => TTi18n::gettext( 'Currency' ),
 
 						'-1108-permission_control'  => TTi18n::gettext( 'Permission Group' ),
@@ -153,6 +151,16 @@ class UserFactory extends Factory {
 						'-2020-updated_by'   => TTi18n::gettext( 'Updated By' ),
 						'-2030-updated_date' => TTi18n::gettext( 'Updated Date' ),
 				];
+
+				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$retval = array_merge( [
+												   '-1104-default_job'      => TTi18n::gettext( 'Job' ),
+												   '-1105-default_job_item' => TTi18n::gettext( 'Task' ),
+										   ],
+										   $retval
+					);
+					ksort( $retval );
+				}
 				break;
 			case 'user_secure_columns': //Regular employee secure columns (Used in MessageFactory)
 				$retval = [
@@ -305,7 +313,7 @@ class UserFactory extends Factory {
 				'enable_login'                     => 'EnableLogin',
 				'login_expire_date'                => 'LoginExpireDate',
 				'terminated_permission_control_id' => 'TerminatedPermissionControl',
-				'terminated_permission_control' => false,
+				'terminated_permission_control'    => false,
 
 				'current_password'      => 'CurrentPassword', //Must go near the end, so we can validate based on other info.
 				'password'              => 'Password', //Must go near the end, so we can validate based on other info.
@@ -2211,7 +2219,7 @@ class UserFactory extends Factory {
 		}
 
 		if ( $sin != '' ) {
-			return Misc::censorString( $sin, 'X', null, 1, 4, 4 );
+			return Misc::censorString( $sin, '*', null, 1, 4, 4 );
 		}
 
 		return false;
@@ -2231,7 +2239,7 @@ class UserFactory extends Factory {
 	function setSIN( $value ) {
 		//If *'s are in the SIN number, skip setting it
 		//This allows them to change other data without seeing the SIN number.
-		if ( stripos( $value, 'X' ) !== false ) {
+		if ( stripos( $value, '*' ) !== false ) {
 			return false;
 		}
 
@@ -3066,7 +3074,7 @@ class UserFactory extends Factory {
 									  TTi18n::gettext( 'Quick Punch password must be different then Quick Punch ID' ) );
 
 			$this->Validator->isTrue( 'phone_password',
-					( ( DEMO_MODE == false && ( $this->is_new == true || $this->isDataDifferent( 'phone_password', $data_diff ) || $this->getCreatedDate() >= strtotime( '2019-07-01' ) ) && ( in_array( $this->getPhonePassword(), array( '1234', '12345', '123456', '1234567', '12345678', '123456789', '987654321', '87654321', '7654321', '654321', '54321', '4321' ) ) || strrev( $this->getPhoneId() ) == $this->getPhonePassword() || strlen( count_chars( $this->getPhonePassword(), 3 ) ) == 1 ) ) ? false : true ),
+					( ( DEMO_MODE == false && ( $this->is_new == true || $this->isDataDifferent( 'phone_password', $data_diff ) || $this->getCreatedDate() >= strtotime( '2019-07-01' ) ) && ( in_array( $this->getPhonePassword(), [ '1234', '12345', '123456', '1234567', '12345678', '123456789', '987654321', '87654321', '7654321', '654321', '54321', '4321' ] ) || strrev( $this->getPhoneId() ) == $this->getPhonePassword() || strlen( count_chars( $this->getPhonePassword(), 3 ) ) == 1 ) ) ? false : true ),
 									  TTi18n::gettext( 'Quick Punch password is too weak, please try something more secure' ) );
 		}
 
@@ -3773,10 +3781,12 @@ class UserFactory extends Factory {
 
 				if ( $this->is_new == false ) {
 					//Check to see if worked/absence time exist after termination
+					//  Case to handled here are where the user may have vacation scheduled way off in the future. These would need to be manually deleted.
+					//      Or they may have holiday absence time a few days in the future. TimeSheet would need to be recalculated in this case.
 					$udtlf = TTnew( 'UserDateTotalListFactory' ); /** @var UserDateTotalListFactory $udtlf */
 					$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->getCompany(), $this->getID(), [ 10, 50 ], ( $this->getTerminationDate() + 86400 ), ( time() + ( 86400 * 365 ) ) );
 					if ( $udtlf->getRecordCount() > 0 ) {
-						$this->Validator->Warning( 'termination_date', TTi18n::gettext( 'Employee has time on their timesheet after their termination date that may be ignored (%1)', [ TTDate::getDate( 'DATE', $udtlf->getCurrent()->getDateStamp() ) ] ) );
+						$this->Validator->Warning( 'termination_date', TTi18n::gettext( 'Employee has time on their timesheet after their termination date that may be ignored or may no longer be correct (%1)', [ TTDate::getDate( 'DATE', $udtlf->getCurrent()->getDateStamp() ) ] ) );
 					}
 					unset( $udtlf );
 

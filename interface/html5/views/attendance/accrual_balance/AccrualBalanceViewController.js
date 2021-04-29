@@ -1,13 +1,20 @@
-AccrualBalanceViewController = BaseViewController.extend( {
-	el: '#accrual_balance_view_container',
-	_required_files: ['APIAccrualBalance', 'APIAccrual', 'APIUserGroup', 'APIUser', 'APIAccrualPolicyAccount', 'APIBranch', 'APIDepartment', 'views/attendance/accrual/AccrualViewController'],
-	user_group_api: null,
-	user_group_array: null,
+class AccrualBalanceViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#accrual_balance_view_container',
 
-	sub_accrual_view_controller: null,
+			user_group_api: null,
+			user_group_array: null,
 
-	log_object_ids: null,
-	init: function( options ) {
+			sub_accrual_view_controller: null,
+
+			log_object_ids: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'AccrualBalanceEditView.html';
 		this.permission_id = 'accrual';
@@ -16,10 +23,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		this.table_name_key = 'accrual';
 		this.context_menu_name = $.i18n._( 'Accrual Balances' );
 		this.navigation_label = $.i18n._( 'Accrual Balance' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIAccrualBalance' ) )();
-		this.accrual_api = new ( APIFactory.getAPIClass( 'APIAccrual' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.api = TTAPI.APIAccrualBalance;
+		this.accrual_api = TTAPI.APIAccrual;
+		this.user_api = TTAPI.APIUser;
+		this.user_group_api = TTAPI.APIUserGroup;
 
 		this.initPermission();
 		this.render();
@@ -27,22 +34,20 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
+	initPermission() {
 
-	initPermission: function() {
-
-		this._super( 'initPermission' );
+		super.initPermission();
 
 		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
 			this.show_search_tab = true;
 		} else {
 			this.show_search_tab = false;
 		}
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'status', 'user_status_id', this.user_api, null, 'user_status_array' );
@@ -60,11 +65,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -79,7 +83,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAccrualBalance' ) ),
+			api_class: TTAPI.APIAccrualBalance,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_BALANCE,
@@ -91,10 +95,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -105,10 +108,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildSearchFields: function() {
-		this._super( 'buildSearchFields' );
+	buildSearchFields() {
+		super.buildSearchFields();
 
 		var default_args = {};
 		default_args.permission_section = 'accrual';
@@ -121,7 +124,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				default_args: default_args,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -144,7 +147,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'accrual_policy_account_id',
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
-				api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
+				api_class: TTAPI.APIAccrualPolicyAccount,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -156,7 +159,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -168,7 +171,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -187,16 +190,16 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 		column_filter.user_id = true;
 		column_filter.accrual_policy_account_id = true;
 		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
-	},
+	}
 
-	__createRowId: function( data ) {
+	__createRowId( data ) {
 		if ( Array.isArray( data ) ) {
 			for ( var i = 0; i < data.length; i++ ) {
 				data[i].id = data[i]['user_id'] + '_' + data[i]['accrual_policy_account_id'];
@@ -207,9 +210,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			Debug.Text( 'ERROR: Data format is invalid.', 'AccrualBalanceViewController.js', 'AccrualBalanceViewController', '__createRowId', 1 );
 		}
 		return data;
-	},
+	}
 
-//	saveLogIds: function( data ) {
+//	saveLogIds( data ) {
 //		this.parent_view_controller.log_object_ids = [];
 //		for ( var i = 0; i < data.length; i++ ) {
 //			this.parent_view_controller.log_object_ids.push( data[i]['id'] );
@@ -218,11 +221,11 @@ AccrualBalanceViewController = BaseViewController.extend( {
 //		return data;
 //	},
 
-	setDefaultMenuAddIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAddIcon( context_btn, grid_selected_length, pId ) {
 		this.setDefaultMenuEditIcon( context_btn, grid_selected_length, pId );
-	},
+	}
 
-	onAddClick: function() {
+	onAddClick() {
 		var $this = this;
 		this.setCurrentEditViewState( 'view' );
 		this.add_accrual = true;
@@ -286,10 +289,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	parseToUserId: function( id ) {
+	parseToUserId( id ) {
 		if ( !id ) {
 			return false;
 		}
@@ -301,9 +303,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		}
 
 		return id;
-	},
+	}
 
-	parseToAccrualPolicyAccountId: function( id ) {
+	parseToAccrualPolicyAccountId( id ) {
 		if ( !id ) {
 			return false;
 		}
@@ -315,9 +317,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		}
 
 		return id;
-	},
+	}
 
-	getAPIFilters: function() {
+	getAPIFilters() {
 		var composite_id = this.getCurrentSelectedRecord();
 
 		var filter = {};
@@ -327,9 +329,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		filter.filter_data.accrual_policy_account_id = this.parseToAccrualPolicyAccountId( composite_id );
 
 		return filter;
-	},
+	}
 
-	doViewClickResult: function( result_data ) {
+	doViewClickResult( result_data ) {
 		var $this = this;
 		var filter = {};
 		filter.filter_data = {};
@@ -354,16 +356,16 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setEditViewData: function() {
+	setEditViewData() {
 		this.is_changed = false;
 		this.initEditViewData();
 		this.switchToProperTab();
 		this.initTabData();
-	},
+	}
 
-	initEditViewData: function() {
+	initEditViewData() {
 		var $this = this;
 		if ( !this.edit_only_mode && this.navigation ) {
 			var grid_current_page_items = this.grid.getGridParam( 'data' );
@@ -399,9 +401,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		//Init *Please save this record before modifying any related data* box
 		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( { related_view_controller: this } );
 		this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'none' );
-	},
+	}
 
-	initSubAccrualView: function() {
+	initSubAccrualView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -445,10 +447,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			$this.sub_accrual_view_controller.initData();
 			$this.add_accrual = false;
 		}
+	}
 
-	},
-
-	setSubLogViewFilter: function() {
+	setSubLogViewFilter() {
 		if ( !this.sub_log_view_controller ) {
 			return false;
 		}
@@ -458,15 +459,14 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		this.sub_log_view_controller.table_name_key = this.table_name_key;
 
 		return true;
-	},
+	}
 
-	removeEditView: function() {
-		this._super( 'removeEditView' );
+	removeEditView() {
+		super.removeEditView();
 		this.sub_accrual_view_controller = null;
+	}
 
-	},
-
-	setNavigation: function() {
+	setNavigation() {
 
 		var $this = this;
 		this.navigation.setPossibleDisplayColumns( this.buildDisplayColumnsByColumnModel( this.grid.getGridParam( 'colModel' ) ),
@@ -492,4 +492,4 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 	}
 
-} );
+}

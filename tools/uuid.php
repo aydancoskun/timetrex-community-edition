@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -57,62 +57,75 @@ if ( $argc < 2 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$end_time = microtime( true );
 
 		$unique_uuid_arr = array_unique( $uuid_arr );
-		if ( true OR count( $uuid_arr ) != count( $unique_uuid_arr ) ) {
-			echo "ERROR: Duplicate UUID generation detected!\n";
-			echo "  Raw UUIDs: " . count( $uuid_arr ) . " Unique UUIDs: " . count( $unique_uuid_arr ) . "\n\n";
-			unset( $uuid_arr, $unique_uuid_arr );
-			flush();
-			ob_flush();
+		echo "  Raw UUIDs: " . count( $uuid_arr ) . " Unique UUIDs: " . count( $unique_uuid_arr ) . "\n\n";
+		flush();
+		ob_flush();
 
-			//Test large timestamps.
-			$start_time = microtime( true );
-			for ( $i = 0; $i < $max; $i++ ) {
-				$timestamps_arr[] = microtime( true ) * 10000000 + 0x01b21dd213814000;
-			}
-			$end_time = microtime( true );
-			$unique_timestamps_arr = array_unique( $timestamps_arr );
-			echo "  Raw Large TimeStamps: " . count( $timestamps_arr ) . " Unique Large TimeStamps: " . count( $unique_timestamps_arr ) . " Time: " . ( $end_time - $start_time ) . "s\n";
-			unset( $timestamps_arr, $unique_timestamps_arr );
-
-			//Test large timestamps.
-			for ( $i = 0; $i < $max; $i++ ) {
-				$timestamps_arr[] = microtime( true ) * 10000000 + 0x01b21dd213814000 + $i;
-			}
-			$unique_timestamps_arr = array_unique( $timestamps_arr );
-			echo "  Raw Counter TimeStamps: " . count( $timestamps_arr ) . " Unique Counter TimeStamps: " . count( $unique_timestamps_arr ) . "\n";
-			unset( $timestamps_arr, $unique_timestamps_arr );
-
-			//Test regular timestamps.
-			for ( $i = 0; $i < $max; $i++ ) {
-				$timestamps_arr[] = microtime( true );
-			}
-			$unique_timestamps_arr = array_unique( $timestamps_arr );
-			echo "  Raw TimeStamps: " . count( $timestamps_arr ) . " Unique TimeStamps: " . count( $unique_timestamps_arr ) . "\n";
-			unset( $timestamps_arr, $unique_timestamps_arr );
-
-			//Test random bytes.
-			$strong_crypto = false;
-			for ( $i = 0; $i < $max; $i++ ) {
-				$random_bytes_arr[] = bin2hex( openssl_random_pseudo_bytes( 2, $strong_crypto ) );
-				if ( $strong_crypto == false ) {
-					echo "ERROR: openssl not using string crypto!\n";
-					exit;
-				}
-			}
-			$unique_random_bytes_arr = array_unique( $random_bytes_arr );
-			echo "  Raw Random Bytes: " . count( $random_bytes_arr ) . " Unique Random Bytes: " . count( $unique_random_bytes_arr ) . "\n";
-			unset( $random_bytes_arr, $unique_random_bytes_arr );
-
-			//Test timestamps + random bytes.
-			for ( $i = 0; $i < $max; $i++ ) {
-				$pseudo_uuid_arr[] = microtime( true ) * 10000000 + 0x01b21dd213814000 . bin2hex( openssl_random_pseudo_bytes( 2 ) );
-			}
-			$unique_pseudo_uuid_arr = array_unique( $pseudo_uuid_arr );
-			echo "  Raw Psuedo UUIDs: " . count( $pseudo_uuid_arr ) . " Unique Psuedo UUID: " . count( $unique_pseudo_uuid_arr ) . "\n";
-			unset( $pseudo_uuid_arr, $unique_pseudo_uuid_arr );
+		//Test large timestamps.
+		$start_time = microtime( true );
+		for ( $i = 0; $i < $max; $i++ ) {
+			$timestamps_arr[] = microtime( true ) * 10000000 + 0x01b21dd213814000;
 		}
+		$end_time = microtime( true );
+		$unique_timestamps_arr = array_unique( $timestamps_arr );
+		echo "  Raw Large TimeStamps: " . count( $timestamps_arr ) . " Unique Large TimeStamps: " . count( $unique_timestamps_arr ) . " Time: " . ( $end_time - $start_time ) . "s\n";
+		unset( $timestamps_arr, $unique_timestamps_arr );
+
+		//Test large timestamps with counter
+		for ( $i = 0; $i < $max; $i++ ) {
+			$timestamps_arr[] = microtime( true ) * 10000000 + 0x01b21dd213814000 + $i;
+		}
+		$unique_timestamps_arr = array_unique( $timestamps_arr );
+		echo "  Raw Counter TimeStamps: " . count( $timestamps_arr ) . " Unique Counter TimeStamps: " . count( $unique_timestamps_arr ) . "\n";
+		unset( $timestamps_arr, $unique_timestamps_arr );
+
+		//Test regular timestamps.
+		for ( $i = 0; $i < $max; $i++ ) {
+			$timestamps_arr[] = microtime( true );
+		}
+		$unique_timestamps_arr = array_unique( $timestamps_arr );
+		echo "  Raw TimeStamps: " . count( $timestamps_arr ) . " Unique TimeStamps: " . count( $unique_timestamps_arr ) . "\n";
+		unset( $timestamps_arr, $unique_timestamps_arr );
+
+		//Test random bytes.
+		$strong_crypto = false;
+		for ( $i = 0; $i < $max; $i++ ) {
+			$random_bytes_arr[] = bin2hex( openssl_random_pseudo_bytes( 3, $strong_crypto ) );
+			if ( $strong_crypto == false ) {
+				echo "ERROR: openssl not using strong crypto!\n";
+				exit;
+			}
+		}
+		$unique_random_bytes_arr = array_unique( $random_bytes_arr );
+		echo "  Raw Random Bytes: " . count( $random_bytes_arr ) . " Unique Random Bytes: " . count( $unique_random_bytes_arr ) . "\n";
+		unset( $random_bytes_arr, $unique_random_bytes_arr );
+
+		//Test timestamps + random bytes.
+		for ( $i = 0; $i < $max; $i++ ) {
+			$pseudo_uuid_arr[] = microtime( true ) * 10000000 + 0x01b21dd213814000 . bin2hex( openssl_random_pseudo_bytes( 3 ) );
+		}
+		$unique_pseudo_uuid_arr = array_unique( $pseudo_uuid_arr );
+		echo "  Raw Psuedo UUIDs: " . count( $pseudo_uuid_arr ) . " Unique Psuedo UUID: " . count( $unique_pseudo_uuid_arr ) . "\n";
+		unset( $pseudo_uuid_arr, $unique_pseudo_uuid_arr );
+
+
+		$strong_crypto = false;
+		$random_bytes = bin2hex( openssl_random_pseudo_bytes( 3, $strong_crypto ) );
+		if ( $strong_crypto == true ) {
+			echo "  SUCCESS: Strong crypto algorithm is being used!\n";
+		} else {
+			echo "  WARNING: Weak crypto algorithm is being used!\n";
+		}
+		unset( $strong_crypto, $random_bytes );
 
 		echo "Total Time for " . $max . " UUIDs: " . ( $end_time - $start_time ) . "s\n";
+
+		if ( count( $uuid_arr ) == count( $unique_uuid_arr ) ) {
+			echo "SUCCESS: No Duplicate UUIDs detected!\n";
+		} else {
+			echo "ERROR: Duplicate UUID generation detected!\n";
+		}
+		unset( $uuid_arr, $unique_uuid_arr );
 	} else {
 		if ( isset( $argv[ $last_arg ] ) AND $argv[ $last_arg ] != '' ) {
 			$integer = $argv[ $last_arg ];

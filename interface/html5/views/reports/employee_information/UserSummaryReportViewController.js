@@ -1,18 +1,22 @@
-UserSummaryReportViewController = ReportBaseViewController.extend( {
+class UserSummaryReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIUserSummaryReport', 'APICurrency'],
+		} );
 
-	initReport: function( options ) {
+		super( options );
+	}
+
+	initReport( options ) {
 		this.script_name = 'UserSummaryReport';
 		this.viewId = 'UserSummaryReport';
 		this.context_menu_name = $.i18n._( 'Employee Information' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'UserSummaryReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserSummaryReport' ) )();
-	},
+		this.api = TTAPI.APIUserSummaryReport;
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		return { include: ['default'] };
 	}
-	,
-} );
+}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -2227,8 +2227,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			}
 		}
 
-		//$additional_order_fields = array('b.name', 'c.name', 'd.name', 'e.name');
-		$additional_order_fields = [ 'first_name', 'last_name', 'date_stamp', 'time_stamp', 'type_id', 'status_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title', 'actual_time_diff' ];
+		$additional_order_fields = [ 'first_name', 'last_name', 'date_stamp', 'time_stamp', 'type_id', 'status_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title', 'actual_time_diff', 'tainted', 'l.source', 'l.description' ];
 
 		$sort_column_aliases = [
 				'status'              => 'a.status_id',
@@ -2242,8 +2241,16 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 				'station_description' => 'l.description',
 		];
 
-		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) { //Needed for unit tests to pass when doing pure edition tests.
+			$additional_order_fields = array_merge( [ 'r.name', 's.name' ], $additional_order_fields );
 
+			$sort_column_aliases = array_merge( [
+														'job'      => 'r.name',
+														'job_item' => 's.name',
+												], $sort_column_aliases );
+		}
+
+		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == null ) {
 			$order = [ 'a.time_stamp' => 'desc', 'd.last_name' => 'asc', 'd.first_name' => 'asc', 'b.user_id' => 'asc', 'a.status_id' => 'asc' ];
 

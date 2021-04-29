@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -66,7 +67,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -206,7 +207,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( $new_shift_trigger_time );
@@ -239,6 +240,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					if ( $initial_date !== false ) {
@@ -297,14 +299,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		if ( $epcf->isValid() ) {
 			$epc_id = $epcf->Save();
-
-			Debug::Text( 'aException Policy Control ID: ' . $epc_id, __FILE__, __LINE__, __METHOD__, 10 );
-
-			if ( $epc_id === true ) {
-				$epc_id = $data['id'];
-			}
-
-			Debug::Text( 'bException Policy Control ID: ' . $epc_id, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'Exception Policy Control ID: ' . $epc_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 			switch ( strtoupper( $type ) ) {
 				case 'M1': //Missing In
@@ -764,7 +759,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M1', $exception_arr );
-		$this->assertEquals( $exception_arr['M1'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['M1'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -813,7 +808,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$this->calculateExceptions( $date_epoch );
 		$exception_arr = $this->getExceptions( $date_epoch );
 		$this->assertArrayHasKey( 'M2', $exception_arr );
-		$this->assertEquals( $exception_arr['M2'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['M2'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -861,7 +856,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$this->calculateExceptions( $date_epoch );
 		$exception_arr = $this->getExceptions( $date_epoch );
 		$this->assertArrayHasKey( 'M2', $exception_arr );
-		$this->assertEquals( $exception_arr['M2'][0]['type_id'], 5 ); //PreMature
+		$this->assertEquals( 5, $exception_arr['M2'][0]['type_id'] ); //PreMature
 
 		return true;
 	}
@@ -911,7 +906,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M3', $exception_arr );
-		$this->assertEquals( $exception_arr['M3'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['M3'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -972,7 +967,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M3', $exception_arr );
-		$this->assertEquals( $exception_arr['M3'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['M3'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -999,7 +994,6 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 								[ $this->user_id ] );
 
 		$date_epoch = ( time() - ( 3600 * 5 ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$dd->createPunchPair( $this->user_id,
 							  $date_epoch, //Real-time
@@ -1021,7 +1015,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M3', $exception_arr );
-		$this->assertEquals( $exception_arr['M3'][0]['type_id'], 5 ); //PreMature
+		$this->assertEquals( 5, $exception_arr['M3'][0]['type_id'] ); //PreMature
 
 		return true;
 	}
@@ -1082,7 +1076,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M3', $exception_arr );
-		$this->assertEquals( $exception_arr['M3'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['M3'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -1132,7 +1126,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M4', $exception_arr );
-		$this->assertEquals( $exception_arr['M4'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['M4'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -1193,7 +1187,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M4', $exception_arr );
-		$this->assertEquals( $exception_arr['M4'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['M4'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -1220,7 +1214,6 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 								[ $this->user_id ] );
 
 		$date_epoch = ( time() - ( 3600 * 5 ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$dd->createPunchPair( $this->user_id,
 							  $date_epoch, //Real-time
@@ -1242,7 +1235,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M4', $exception_arr );
-		$this->assertEquals( $exception_arr['M4'][0]['type_id'], 5 ); //PreMature
+		$this->assertEquals( 5, $exception_arr['M4'][0]['type_id'] ); //PreMature
 
 		return true;
 	}
@@ -1303,7 +1296,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$exception_arr = $this->getExceptions( $date_epoch );
 		//print_r($exception_arr);
 		$this->assertArrayHasKey( 'M4', $exception_arr );
-		$this->assertEquals( $exception_arr['M4'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['M4'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -1358,7 +1351,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
@@ -1377,7 +1370,6 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
 		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, [
 				'schedule_policy_id' => $schedule_policy_id,
@@ -1387,14 +1379,14 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count( $punch_arr ) );
+		$this->assertCount( 0, $punch_arr );
 		$this->assertEquals( true, $this->checkCalcQuickExceptions( $this->user_id, TTDate::incrementDate( $date_epoch, -1, 'day' ), TTDate::incrementDate( $date_epoch, 1, 'day' ), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
 		$this->calculateExceptions( $date_epoch );
 		$exception_arr = $this->getExceptions( $date_epoch );
 		$this->assertArrayHasKey( 'S4', $exception_arr );
-		$this->assertEquals( $exception_arr['S4'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['S4'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -1452,7 +1444,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:20AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
@@ -1465,7 +1457,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$exception_arr = $this->getExceptions( $date_epoch );
 		$this->assertArrayHasKey( 'S4', $exception_arr );
-		$this->assertEquals( $exception_arr['S4'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['S4'][0]['type_id'] ); //ACTIVE
 
 
 		//
@@ -1475,7 +1467,6 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
 		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, [
 				'schedule_policy_id' => $schedule_policy_id,
@@ -1485,14 +1476,14 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count( $punch_arr ) );
+		$this->assertCount( 0, $punch_arr );
 		$this->assertEquals( true, $this->checkCalcQuickExceptions( $this->user_id, TTDate::incrementDate( $date_epoch, -1, 'day' ), TTDate::incrementDate( $date_epoch, 1, 'day' ), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
 		$this->calculateExceptions( $date_epoch );
 		$exception_arr = $this->getExceptions( $date_epoch );
 		$this->assertArrayHasKey( 'S4', $exception_arr );
-		$this->assertEquals( $exception_arr['S4'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['S4'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -1546,7 +1537,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
@@ -1590,14 +1581,14 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( false, $this->checkCalcQuickExceptions( $this->user_id, TTDate::incrementDate( $date_epoch, -1, 'day' ), TTDate::incrementDate( $date_epoch, 1, 'day' ), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
 		$this->calculateExceptions( $date_epoch );
 		$exception_arr = $this->getExceptions( $date_epoch );
 		$this->assertArrayHasKey( 'S4', $exception_arr );
-		$this->assertEquals( $exception_arr['S4'][0]['type_id'], 50 ); //ACTIVE
+		$this->assertEquals( 50, $exception_arr['S4'][0]['type_id'] ); //ACTIVE
 
 		return true;
 	}
@@ -1651,7 +1642,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
@@ -1695,7 +1686,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( false, $this->checkCalcQuickExceptions( $this->user_id, TTDate::incrementDate( $date_epoch, -1, 'day' ), TTDate::incrementDate( $date_epoch, 1, 'day' ), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
@@ -1755,7 +1746,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
@@ -1799,7 +1790,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( false, $this->checkCalcQuickExceptions( $this->user_id, TTDate::incrementDate( $date_epoch, -1, 'day' ), TTDate::incrementDate( $date_epoch, 1, 'day' ), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
@@ -1860,7 +1851,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
@@ -1879,7 +1870,6 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
 		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, [
 				'schedule_policy_id' => $schedule_policy_id,
@@ -1889,7 +1879,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count( $punch_arr ) );
+		$this->assertCount( 0, $punch_arr );
 		$this->assertEquals( false, $this->checkCalcQuickExceptions( $this->user_id, TTDate::incrementDate( $date_epoch, -1, 'day' ), TTDate::incrementDate( $date_epoch, 1, 'day' ), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
@@ -1949,7 +1939,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
@@ -1967,7 +1957,6 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
 		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - ( 3600 * 8 ) ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, [
 				'schedule_policy_id' => $schedule_policy_id,
@@ -1980,9 +1969,9 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		//If this is run before 8AM, the In punch is on the previous day.
 		if ( TTDate::getBeginDayEpoch( time() ) > $date_epoch ) {
-			$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+			$this->assertCount( 1, $punch_arr[$date_epoch] );
 		} else {
-			$this->assertEquals( 0, count( $punch_arr ) );
+			$this->assertCount( 0, $punch_arr );
 		}
 		$this->assertEquals( true, $this->checkCalcQuickExceptions( $this->user_id, TTDate::incrementDate( $date_epoch, -1, 'day' ), TTDate::incrementDate( $date_epoch, 1, 'day' ), $date_epoch ) );
 
@@ -2043,7 +2032,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:00PM' ) );
@@ -2089,9 +2078,9 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		//print_r($punch_arr);
 		//If this is run before 8AM, the In punch is on the previous day.
 		if ( TTDate::getBeginDayEpoch( time() ) > $date_epoch ) {
-			$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+			$this->assertCount( 2, $punch_arr[$date_epoch] );
 		} else {
-			$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+			$this->assertCount( 1, $punch_arr[$date_epoch] );
 		}
 		$this->assertEquals( true, $this->checkCalcQuickExceptions( $this->user_id, TTDate::incrementDate( $date_epoch, -1, 'day' ), TTDate::incrementDate( $date_epoch, 1, 'day' ), $date_epoch ) );
 

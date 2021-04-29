@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -751,7 +751,7 @@ class PayStubSummaryReport extends Report {
 
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pself->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach ( $pself as $key => $pse_obj ) {
 				$user_id = $pse_obj->getColumn( 'user_id' );
@@ -807,7 +807,7 @@ class PayStubSummaryReport extends Report {
 				if ( $currency_convert_to_base == true && is_object( $base_currency_obj ) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 		}
 
@@ -815,11 +815,11 @@ class PayStubSummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), [ 'hire_date' => true, 'termination_date' => true, 'birth_date' => true ] ) );
 			$this->tmp_data['user'][$u_obj->getId()]['total_pay_stub'] = 1;
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -834,7 +834,7 @@ class PayStubSummaryReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset( $this->tmp_data['pay_stub_entry'] ) ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 			$column_keys = array_keys( $this->getColumnDataConfig() );
 
@@ -870,7 +870,7 @@ class PayStubSummaryReport extends Report {
 							//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
 							$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );
 
-							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+							$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 							$key++;
 						}
 					}
@@ -904,8 +904,8 @@ class PayStubSummaryReport extends Report {
 		$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( 'Record Count: ' . $pslf->getRecordCount() . ' Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $pslf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
+			$this->getProgressBarObject()->setDefaultKey( $this->getAPIMessageID() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pslf->getRecordCount() );
 			$pslf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
 
 			$filter_data['hide_employer_rows'] = true;

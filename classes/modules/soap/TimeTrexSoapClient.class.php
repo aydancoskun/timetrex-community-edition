@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -63,7 +63,7 @@ class TTSoapClient extends SoapClient {
 			}
 
 			if ( is_soap_fault( $result ) && ( $result->faultstring == 'Could not connect to host' || $result->faultstring == 'Error Fetching http headers' || $result->faultstring == 'Failed Sending HTTP SOAP request' ) ) {
-				Debug::Text( 'SOAP connection failed, retrying...', __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( 'SOAP connection failed: '. $result->faultstring .'  retrying...', __FILE__, __LINE__, __METHOD__, 10 );
 				sleep( 2 );
 				$retry_count++;
 			} else {

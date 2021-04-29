@@ -82,13 +82,16 @@ class Config_Container_IniCommented {
             } elseif (preg_match('/^\s*$/', $line)) {
                 // a blank line
                 $currentSection->createBlank();
-            } elseif (preg_match('/^\s*([a-zA-Z0-9_\-\.\s:]*)\s*=\s*(.*)\s*$/', $line, $match)) {
+			} elseif (preg_match('/^\s*\[\s*(.*)\s*\]\s*$/', $line, $match)) {  //Do this before the below directive, so it matches sections first.
+				// a section
+				$currentSection =& $obj->container->createSection($match[1]);
+            } elseif (preg_match('/^\s*([a-zA-Z0-9_\-\.\s:\[\]]*)\s*=\s*(.*)\s*$/', $line, $match)) { //Must support [] (square brackets) in directives ie: myval[subarray] = blah
                 // a directive
                 $values = $this->_quoteAndCommaParser($match[2]);
                 if (PEAR::isError($values)) {
                     return PEAR::raiseError($values);
                 }
-                
+
                 if (count($values)) {
                     foreach($values as $value) {
                         if ($value[0] == 'normal') {
@@ -99,9 +102,6 @@ class Config_Container_IniCommented {
                         }
                     }
                 }
-            } elseif (preg_match('/^\s*\[\s*(.*)\s*\]\s*$/', $line, $match)) {
-                // a section
-                $currentSection =& $obj->container->createSection($match[1]);
             } else {
                 return PEAR::raiseError("Syntax error in '$datasrc' at line $n.", null, PEAR_ERROR_RETURN);
             }

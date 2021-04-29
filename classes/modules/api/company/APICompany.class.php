@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -127,7 +127,7 @@ class APICompany extends APIFactory {
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $blf->getRecordCount() );
 
 			$this->setPagerObject( $blf );
 
@@ -135,10 +135,10 @@ class APICompany extends APIFactory {
 			foreach ( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $blf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -211,7 +211,7 @@ class APICompany extends APIFactory {
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		$validator = $save_result = $key = false;
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
 				$primary_validator = new Validator();
@@ -309,10 +309,10 @@ class APICompany extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -350,7 +350,7 @@ class APICompany extends APIFactory {
 		$validator = $save_result = $key = false;
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -406,10 +406,10 @@ class APICompany extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -487,7 +487,7 @@ class APICompany extends APIFactory {
 		$cuclf->getMinAvgMaxByCompanyIdsAndStartDateAndEndDate( $data['filter_data']['company_id'], $data['filter_data']['start_date'], $data['filter_data']['end_date'] );
 		Debug::Text( 'Record Count: ' . $cuclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $cuclf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $cuclf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $cuclf->getRecordCount() );
 
 			$this->setPagerObject( $cuclf );
 
@@ -509,10 +509,10 @@ class APICompany extends APIFactory {
 					'max_deleted_users' => $cuc_obj->getColumn( 'max_deleted_users' ),
 				];
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $cuclf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $cuclf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -557,7 +557,7 @@ class APICompany extends APIFactory {
 		$ulf->getAPIEmailAddressDataByArrayCriteria( $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $ulf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount() );
 
 			$this->setPagerObject( $ulf );
 
@@ -565,10 +565,10 @@ class APICompany extends APIFactory {
 			foreach ( $ulf as $u_obj ) {
 				$retarr[] = $u_obj->data;
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $ulf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $ulf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -613,7 +613,7 @@ class APICompany extends APIFactory {
 		$llf->getByPhonePunchDataByCompanyIdAndStartDateAndEndDate( $data['filter_data']['company_id'], $data['filter_data']['start_date'], $data['filter_data']['end_date'] );
 		Debug::Text( 'Record Count: ' . $llf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $llf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $llf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $llf->getRecordCount() );
 
 			$this->setPagerObject( $llf );
 
@@ -628,10 +628,10 @@ class APICompany extends APIFactory {
 						'unique_users'     => $l_obj->getColumn( 'unique_users' ),
 				];
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $llf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $llf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -675,7 +675,7 @@ class APICompany extends APIFactory {
 		$llf->getCountByCompanyIdAndTypeId( $data['filter_data']['company_id'], $data['filter_data']['type_id'] );
 		Debug::Text( 'Record Count: ' . $llf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $llf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $llf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $llf->getRecordCount() );
 
 			$this->setPagerObject( $llf );
 
@@ -687,10 +687,10 @@ class APICompany extends APIFactory {
 						'total'      => $l_obj->getColumn( 'total' ),
 				];
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $llf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $llf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -735,17 +735,17 @@ class APICompany extends APIFactory {
 		$llf->getAPITimeClockStationsByArrayCriteria( $data['filter_data'] );
 		Debug::Text( 'Record Count: ' . $llf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $llf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $llf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $llf->getRecordCount() );
 
 			$this->setPagerObject( $llf );
 
 			$retarr = [];
 			foreach ( $llf as $l_obj ) {
 				$retarr[] = $l_obj->getObjectAsArray( $data['filter_columns'] );
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $llf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $llf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}

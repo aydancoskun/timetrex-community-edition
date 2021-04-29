@@ -72,9 +72,6 @@ var ServiceCaller = Backbone.Model.extend( {
 	},
 
 	uploadFile: function( form_data, paramaters, responseObj ) {
-
-//		var data = {filedata: form_data, SessionID: LocalCacheData.getSessionID()};
-//
 		var message_id = TTUUID.generateUUID();
 		ProgressBar.showProgressBar( message_id );
 
@@ -396,9 +393,18 @@ var ServiceCaller = Backbone.Model.extend( {
 					apiReturnHandler.set( 'function_name', function_name );
 					apiReturnHandler.set( 'args', apiArgs );
 
-					if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'EXCEPTION' ) {
-						//Debug.Text('API returned exception: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
-						TAlertManager.showAlert( apiReturnHandler.getDescription(), 'Error' );
+					if ( !apiReturnHandler.isValid() && ( apiReturnHandler.getCode() === 'EXCEPTION' || apiReturnHandler.getCode() === 'EXCEPTION_CSRF' ) ) {
+						Debug.Text( 'api-exception: Code: ' + apiReturnHandler.getCode() + ' Error: ' + apiReturnHandler.getDescription() +' Message ID: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
+						if ( apiReturnHandler.getCode() === 'EXCEPTION_CSRF' ) { //Don't bother recording CSRF exceptions.
+							Global.sendAnalyticsEvent( 'service-caller', 'error:api-exception', 'api-exception: Code: ' + apiReturnHandler.getCode() + ' Error: ' + apiReturnHandler.getDescription() );
+							TAlertManager.showAlert( apiReturnHandler.getDescription(), 'Error', function() {
+								window.location.reload();
+							} );
+						} else {
+							Global.sendErrorReport( 'api-exception: Code: ' + apiReturnHandler.getCode() + ' Error: ' + apiReturnHandler.getDescription(), 'ServiceCaller.js' );
+							TAlertManager.showAlert( $.i18n._( 'API Exception' ) + ': ' + apiReturnHandler.getDescription(), 'Error' );
+						}
+
 						//Error: Uncaught ReferenceError: promise_key is not defined
 						if ( typeof promise_key != 'undefined' ) {
 							TTPromise.reject( 'ServiceCaller', message_id );
@@ -433,6 +439,8 @@ var ServiceCaller = Backbone.Model.extend( {
 						TTPromise.resolve( 'ServiceCaller', message_id );
 						return;
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'DOWN_FOR_MAINTENANCE' ) {
+						Global.sendAnalyticsEvent( 'service-caller', 'error:down-for-maintenance', 'error:down-for-maintenance: Code: ' + apiReturnHandler.getCode() + ' Error: ' + apiReturnHandler.getDescription() );
+
 						//Before the location.replace because after that point we can't be sure of execution.
 						TTPromise.resolve( 'ServiceCaller', message_id );
 						//replace instead of assignment to ensure that the DOWN_FOR_MAINTENANCE page does not end up in the back button history.

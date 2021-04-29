@@ -1,12 +1,17 @@
-PayFormulaPolicyViewController = BaseViewController.extend( {
-	el: '#pay_formula_policy_view_container',
+class PayFormulaPolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#pay_formula_policy_view_container',
 
-	_required_files: ['APIPayFormulaPolicy', 'APIAccrualPolicyAccount', 'APIContributingShiftPolicy', 'APIWageGroup'],
+			type_array: null,
+			pay_type_array: null,
+			wage_source_type_array: null
+		} );
 
-	type_array: null,
-	pay_type_array: null,
-	wage_source_type_array: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayFormulaPolicyEditView.html';
 		this.permission_id = 'pay_formula_policy';
@@ -15,25 +20,24 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_formula_policy';
 		this.context_menu_name = $.i18n._( 'Pay Formula Policy' );
 		this.navigation_label = $.i18n._( 'Pay Formula Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) )();
+		this.api = TTAPI.APIPayFormulaPolicy;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'PayFormulaPolicy' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'pay_type' );
 		this.initDropDownOption( 'wage_source_type' );
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -44,7 +48,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayFormulaPolicy' ) ),
+			api_class: TTAPI.APIPayFormulaPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
@@ -98,7 +102,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		//Wage Source Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
+			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -110,7 +114,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		//Time Source Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
+			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -135,7 +139,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		// Wage Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIWageGroup' ) ),
+			api_class: TTAPI.APIWageGroup,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.WAGE_GROUP,
 			show_search_inputs: true,
@@ -147,7 +151,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		// Deposit Accrual Policy Account
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
+			api_class: TTAPI.APIAccrualPolicyAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
 			show_search_inputs: true,
@@ -160,9 +164,9 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'accrual_rate', width: 100 } );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Rate' ), form_item_input, tab_pay_formula_policy_column1, '', null, true );
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
@@ -194,10 +198,9 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		this.onAccrualAccountChange();
 
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	onPayTypeChange: function() {
+	onPayTypeChange() {
 		if ( this.current_edit_record['pay_type_id'] == 10 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ': ' );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')' );
@@ -235,18 +238,18 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	onAccrualAccountChange: function() {
+	onAccrualAccountChange() {
 		if ( this.current_edit_record['accrual_policy_account_id'] === false || typeof this.current_edit_record['accrual_policy_account_id'] == 'undefined' || this.current_edit_record['accrual_policy_account_id'] == TTUUID.zero_id ) {
 			this.detachElement( 'accrual_rate' );
 		} else {
 			this.attachElement( 'accrual_rate' );
 		}
 		this.editFieldResize();
-	},
+	}
 
-	onWageSourceTypeChange: function() {
+	onWageSourceTypeChange() {
 		if ( this.current_edit_record['wage_source_type_id'] == 10 ) {
 			this.detachElement( 'wage_source_contributing_shift_policy_id' );
 			this.detachElement( 'time_source_contributing_shift_policy_id' );
@@ -269,10 +272,9 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			this.detachElement( 'wage_group_id' );
 		}
 		this.editFieldResize();
+	}
 
-	},
-
-	onFormItemChange: function( target ) {
+	onFormItemChange( target ) {
 		this.is_changed = true;
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -294,11 +296,11 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.validate();
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -327,7 +329,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'accrual_policy_account_id',
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
-				api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
+				api_class: TTAPI.APIAccrualPolicyAccount,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -338,7 +340,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 //				in_column: 1,
 //				field: 'pay_stub_entry_account_id',
 //				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-//				api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+//				api_class: TTAPI.APIPayStubEntryAccount,
 //				multiple: true,
 //				basic_search: true,
 //				adv_search: false,
@@ -349,7 +351,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -361,7 +363,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -370,4 +372,4 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

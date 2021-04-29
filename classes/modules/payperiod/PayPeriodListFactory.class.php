@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -124,9 +124,9 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	/**
-	 * @param string|string[] $ids  UUID
-	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param string|string[] $ids UUID
+	 * @param array $where         Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order         Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @param bool $enable_names
 	 * @return array|bool
 	 */
@@ -398,10 +398,10 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	/**
-	 * @param string|string[] $id         UUID
-	 * @param string $company_id UUID
-	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param string|string[] $id UUID
+	 * @param string $company_id  UUID
+	 * @param array $where        Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order        Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayPeriodListFactory
 	 */
 	function getByIdAndCompanyId( $id, $company_id, $where = null, $order = null ) {
@@ -1744,6 +1744,38 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	/**
+	 * Gets the maximum date range to cover the start/end date of the specified pay period IDs.
+	 * @param string $company_id UUID
+	 * @param string $pay_period_id UUID
+	 * @return array|bool
+	 */
+	function getStartAndEndDateRangeFromCompanyIdAndPayPeriodId( $company_id, $pay_period_id ) {
+		$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
+		$pplf->getByIdAndCompanyId( $pay_period_id, TTUUID::castUUID( $company_id ) );
+		if ( $pplf->getRecordCount() > 0 ) {
+			$filter_start_date = false;
+			$filter_end_date = false;
+			foreach ( $pplf as $pp_obj ) {
+				if ( $filter_start_date == false || $pp_obj->getStartDate() < $filter_start_date ) {
+					$filter_start_date = $pp_obj->getStartDate();
+				}
+				if ( $filter_end_date == false || $pp_obj->getEndDate() > $filter_end_date ) {
+					$filter_end_date = $pp_obj->getEndDate();
+				}
+			}
+			Debug::text( ' Found Pay Periods: ' . $pplf->getRecordCount() . ' Start Date: ' . TTDate::getDate( 'DATE', $filter_start_date ) . ' End Date: ' . TTDate::getDate( 'DATE', $filter_end_date ), __FILE__, __LINE__, __METHOD__, 10 );
+
+			$retval = [ 'start_date' => $filter_start_date, 'end_date' => $filter_end_date ];
+		} else {
+			Debug::text( 'WARNING: No pay period found...', __FILE__, __LINE__, __METHOD__, 10 );
+			$retval = false;
+		}
+		unset( $pplf, $pp_obj );
+
+		return $retval;
+	}
+
+	/**
 	 * Get last 6mths worth of pay periods and prepare a JS array so they can be highlighted in the calendar.
 	 * @param bool $include_all_pay_period_schedules
 	 * @return bool|mixed
@@ -1817,8 +1849,22 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$additional_order_fields = [ 'status_id', 'type_id', 'pay_period_schedule' ];
 
 		$sort_column_aliases = [
-				'status' => 'status_id',
-				'type'   => 'type_id',
+				'status'                  => 'status_id',
+				'type'                    => 'type_id',
+				'total_punches'           => false, //Don't sort by this.
+				'total_manual_timesheets' => false,
+				'total_absences'          => false,
+				'pending_requests'        => false,
+				'exceptions_critical'     => false,
+				'exceptions_high'         => false,
+				'exceptions_medium'       => false,
+				'exceptions_low'          => false,
+				'verified_timesheets'     => false,
+				'pending_timesheets'      => false,
+				'total_timesheets'        => false,
+				'ps_amendments'           => false,
+				'pay_stubs'               => false,
+				'pay_stubs_open'          => false,
 		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );

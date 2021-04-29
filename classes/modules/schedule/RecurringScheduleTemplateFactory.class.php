@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -137,6 +137,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 				'thu'                                    => 'Thu',
 				'fri'                                    => 'Fri',
 				'sat'                                    => 'Sat',
+				'date_stamp'                             => false,
 				'start_time'                             => 'StartTime',
 				'end_time'                               => 'EndTime',
 				'total_time'                             => 'TotalTime',
@@ -866,12 +867,12 @@ class RecurringScheduleTemplateFactory extends Factory {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
 							break;
+						case 'date_stamp':
+							$data[$variable] = TTDate::getAPIDate( 'DATE', TTDate::strtotime( $this->getStartTime() ) ); //Needed to prepend start/end time so they can be properly parsed when 24hr integer format is used (ie: 0600) The date itself doesn't actually matter.
+							break;
 						case 'start_time':
 						case 'end_time':
-							//$data[$variable] = ( defined('TIMETREX_API') ) ? TTDate::getAPIDate( 'TIME', TTDate::strtotime( $this->$function() ) ) : $this->$function();
 							$data[$variable] = ( defined( 'TIMETREX_API' ) ) ? TTDate::getAPIDate( 'TIME', TTDate::strtotime( $this->$function() ) ) : $this->$function();
-							//Need to include the raw_start_time, raw_end_time columns that are in EPOCH format so getShiftsByStartDateAndEndDate() can convert them as needed.
-							$data['raw_' . $variable] = $this->$function();
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

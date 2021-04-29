@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,7 +44,7 @@ abstract class APIFactory {
 
 	protected $main_class_obj = null;
 
-	protected $AMF_message_id = null;
+	protected $api_message_id = null;
 
 	protected $pager_obj = null;
 
@@ -83,12 +83,12 @@ abstract class APIFactory {
 	}
 
 	/**
-	 * Returns the AMF messageID for each individual call.
+	 * Returns the API messageID for each individual call.
 	 * @return bool|null
 	 */
-	function getAMFMessageID() {
-		if ( $this->AMF_message_id != null ) {
-			return $this->AMF_message_id;
+	function getAPIMessageID() {
+		if ( $this->api_message_id != null ) {
+			return $this->api_message_id;
 		}
 
 		return false;
@@ -98,10 +98,10 @@ abstract class APIFactory {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setAMFMessageID( $id ) {
+	function setAPIMessageID( $id ) {
 		if ( $id != '' ) {
-			global $amf_message_id; //Make this global so Debug() class can reference it on Shutdown()
-			$this->AMF_message_id = $amf_message_id = $id;
+			global $api_message_id; //Make this global so Debug() class can reference it on Shutdown()
+			$this->api_message_id = $api_message_id = $id;
 
 			return true;
 		}
@@ -346,7 +346,7 @@ abstract class APIFactory {
 				$output = Misc::Array2CSV( $result, $columns, false );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 			if ( $output !== false ) {
 				Misc::APIFileDownload( $file_name . '.' . $file_extension, $mime_type, $output );
 			} else {
@@ -455,9 +455,9 @@ abstract class APIFactory {
 						$description .= "<br>\n<br>\n" . $validator->getTextErrors( true, $details[0] );
 						unset( $validator );
 					}
-					$this->getProgressBarObject()->error( $this->getAMFMessageID(), $description );
+					$this->getProgressBarObject()->error( $this->getAPIMessageID(), $description );
 				} else {
-					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+					$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 				}
 
 				return $retarr;
@@ -514,9 +514,9 @@ abstract class APIFactory {
 					$description .= "<br>\n<br>\n" . $validator->getTextErrors( true, $details[0] );
 					unset( $validator );
 				}
-				$this->getProgressBarObject()->error( $this->getAMFMessageID(), $description );
+				$this->getProgressBarObject()->error( $this->getAPIMessageID(), $description );
 			} else {
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 			}
 
 			//Debug::Arr($retarr, 'returnHandler: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);

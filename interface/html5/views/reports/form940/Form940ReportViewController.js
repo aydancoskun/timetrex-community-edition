@@ -1,23 +1,27 @@
-Form940ReportViewController = ReportBaseViewController.extend( {
+class Form940ReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIForm940Report', 'APIPayStubEntryAccount'],
+			return_type_array: null,
+			exempt_payment_array: null,
+			state_array: null,
+			province_array: null
+		} );
 
-	return_type_array: null,
-	exempt_payment_array: null,
-	state_array: null,
-	province_array: null,
+		super( options );
+	}
 
-	initReport: function( options ) {
+	initReport( options ) {
 		this.script_name = 'Form940Report';
 		this.viewId = 'Form940Report';
 		this.context_menu_name = $.i18n._( 'Form 940' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'Form940ReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIForm940Report' ) )();
+		this.api = TTAPI.APIForm940Report;
 		this.include_form_setup = true;
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 		var $this = this;
 		var options = [
 			{ option_name: 'page_orientation' },
@@ -33,10 +37,8 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		];
 
 		this.initDropDownOptions( options, function( result ) {
-
-			new ( APIFactory.getAPIClass( 'APICompany' ) )().getOptions( 'province', 'US', {
+			TTAPI.APICompany.getOptions( 'province', 'US', {
 				onResult: function( provinceResult ) {
-
 					$this.province_array = Global.buildRecordArray( provinceResult.getResult() );
 
 					callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
@@ -44,10 +46,9 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 			} );
 
 		} );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				form: {
@@ -73,9 +74,9 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildFormSetupUI: function() {
+	buildFormSetupUI() {
 
 		var $this = this;
 
@@ -124,7 +125,7 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		// //Selection Type
 		// form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		// form_item_input.AComboBox( {
-		// 	api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+		// 	api_class: TTAPI.APIPayStubEntryAccount,
 		// 	allow_multiple_selection: true,
 		// 	layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 		// 	show_search_inputs: true,
@@ -141,7 +142,7 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		// var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		//
 		// form_item_input_1.AComboBox( {
-		// 	api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+		// 	api_class: TTAPI.APIPayStubEntryAccount,
 		// 	allow_multiple_selection: true,
 		// 	layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 		// 	show_search_inputs: true,
@@ -161,7 +162,7 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -178,7 +179,7 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -215,9 +216,9 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		form_item_input.TTextInput( { field: 'tax_deposited' } );
 		this.addEditFieldToColumn( $.i18n._( 'FUTA Tax Deposited For The Year (Line 13)' ), form_item_input, tab3_column1 );
-	},
+	}
 
-	getFormSetupData: function() {
+	getFormSetupData() {
 		var other = {};
 
 		//other.total_payments = {include_pay_stub_entry_account: this.current_edit_record.total_payments_include_pay_stub_entry_account, exclude_pay_stub_entry_account: this.current_edit_record.total_payments_exclude_pay_stub_entry_account};
@@ -234,9 +235,10 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		other.tax_deposited = this.current_edit_record.tax_deposited;
 
 		return other;
-	},
+	}
+
 	/* jshint ignore:start */
-	setFormSetupData: function( res_Data ) {
+	setFormSetupData( res_Data ) {
 
 		if ( !res_Data ) {
 			this.show_empty_message = true;
@@ -296,5 +298,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 			}
 		}
 	}
+
 	/* jshint ignore:end */
-} );
+}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -152,7 +152,7 @@ class APIStation extends APIFactory {
 		$slf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $slf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $slf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $slf->getRecordCount() );
 
 			$this->setPagerObject( $slf );
 
@@ -160,10 +160,10 @@ class APIStation extends APIFactory {
 			foreach ( $slf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $slf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $slf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			//Debug::Arr($retarr, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -239,7 +239,7 @@ class APIStation extends APIFactory {
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		$validator = $save_result = $key = false;
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
 				$primary_validator = new Validator();
@@ -317,10 +317,10 @@ class APIStation extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -354,7 +354,7 @@ class APIStation extends APIFactory {
 		$validator = $save_result = $key = false;
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -406,10 +406,10 @@ class APIStation extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}

@@ -1,14 +1,18 @@
-CurrencyViewController = BaseViewController.extend( {
-	el: '#currency_view_container',
+class CurrencyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#currency_view_container',
 
-	_required_files: ['APICurrency'],
+			status_array: null,
+			iso_codes_array: null,
+			round_decimal_places_array: null,
+			sub_currency_rate_view_controller: null
+		} );
 
-	status_array: null,
-	iso_codes_array: null,
-	round_decimal_places_array: null,
-	sub_currency_rate_view_controller: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'CurrencyEditView.html';
 		this.permission_id = 'currency';
@@ -17,17 +21,16 @@ CurrencyViewController = BaseViewController.extend( {
 		this.table_name_key = 'currency';
 		this.context_menu_name = $.i18n._( 'Currencies' );
 		this.navigation_label = $.i18n._( 'Currency' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
+		this.api = TTAPI.APICurrency;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'Currency' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'status' );
@@ -41,12 +44,11 @@ CurrencyViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -62,7 +64,7 @@ CurrencyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+			api_class: TTAPI.APICurrency,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
@@ -82,9 +84,12 @@ CurrencyViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_currency_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+
 		//Status
 
-		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_currency_column1, '' );
@@ -113,7 +118,7 @@ CurrencyViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'conversion_rate', width: 114 } );
 
-		var widgetContainer = $( '<div class=\'\'></div>' );
+		widgetContainer = $( '<div class=\'\'></div>' );
 		var conversion_rate_clarification_box = $( '<span id=\'conversion_rate_clarification_box\'></span>' );
 
 		widgetContainer.append( form_item_input );
@@ -135,16 +140,15 @@ CurrencyViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( { field: 'round_decimal_places' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.round_decimal_places_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Decimal Places' ), form_item_input, tab_currency_column1, '' );
+	}
 
-	},
-
-	removeEditView: function() {
-		this._super( 'removeEditView' );
+	removeEditView() {
+		super.removeEditView();
 
 		this.sub_currency_rate_view_controller = null;
-	},
+	}
 
-	initSubCurrencyRateView: function() {
+	initSubCurrencyRateView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -182,11 +186,11 @@ CurrencyViewController = BaseViewController.extend( {
 			$this.sub_currency_rate_view_controller.initData();
 
 		}
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -221,7 +225,7 @@ CurrencyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -233,24 +237,24 @@ CurrencyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		if ( target.getField() == 'conversion_rate' ) {
 			this.setConversionRateExampleText( target.getValue(), this.edit_view_ui_dic.iso_code.getValue() );
 		}
-		this._super( 'onFormItemChange', target, doNotValidate );
-	},
+		super.onFormItemChange( target, doNotValidate );
+	}
 
-	initEditView: function( editId, noRefreshUI ) {
-		this._super( 'initEditView' );
+	initEditView( editId, noRefreshUI ) {
+		super.initEditView();
 		this.setConversionRateExampleText( this.edit_view_ui_dic.conversion_rate.getValue(), this.edit_view_ui_dic.iso_code.getValue() );
 	}
-} );
+}

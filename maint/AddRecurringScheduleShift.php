@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -92,7 +92,7 @@ if ( $clf->getRecordCount() > 0 ) {
 				foreach ( $rsclf as $rsc_obj ) {
 					$rsclf->StartTransaction(); // Wrap each individual schedule in its own transaction instead.
 
-					//Since cron jobs run in system timezone (ie: PST8PDT) and date_stamp and start_date/end_date (timestamptz) columns being different data types
+					//Since cron jobs run in system timezone (ie: 'America/Vancouver') and date_stamp and start_date/end_date (timestamptz) columns being different data types
 					//we need to try to switch into a timezone at least within the same day as the final timezone before we get the recurring schedules.
 					//Once we do something with the date_stamp column or store timezones, we can remove this, as its not a 100% fix.
 					$rstc_obj = $rsc_obj->getRecurringScheduleTemplateControlObject();

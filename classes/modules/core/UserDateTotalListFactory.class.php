@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -474,6 +474,75 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.date_stamp = ?
 						AND a.object_type_id = ?
 						AND a.pay_code_id = ?
+						AND a.override = ?
+						AND a.deleted = 0
+					';
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->rs = $this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $user_id     UUID
+	 * @param int $date_stamp     EPOCH
+	 * @param $object_type
+	 * @param string $src_object_id UUID
+	 * @param string $pay_code_id UUID
+	 * @param string $branch_id UUID
+	 * @param string $department_id UUID
+	 * @param string $job_id UUID
+	 * @param string $job_item_id UUID
+	 * @param bool $override
+	 * @param array $order        Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|UserDateTotalListFactory
+	 */
+	function getByUserIdAndDateStampAndObjectTypeAndSrcObjectAndPayCodeAndBranchAndDepartmentAndJobAndJobItemOverride( $user_id, $date_stamp, $object_type, $src_object_id, $pay_code_id, $branch_id, $department_id, $job_id, $job_item_id, $override = false, $order = null ) {
+		if ( $user_id == '' ) {
+			return false;
+		}
+
+		if ( $date_stamp == '' ) {
+			return false;
+		}
+
+		if ( $object_type == '' ) {
+			return false;
+		}
+
+		if ( $order == null ) {
+			//$order = array( 'c.time_stamp' => 'asc', 'a.start_time_stamp' => 'asc' );
+			$strict = false;
+		} else {
+			$strict = true;
+		}
+
+		$ph = [
+				'user_id'     => TTUUID::castUUID( $user_id ),
+				'date_stamp'  => $this->db->BindDate( $date_stamp ),
+				'object_type' => (int)$object_type,
+				'src_object_id' => TTUUID::castUUID( $src_object_id ),
+				'pay_code_id' => TTUUID::castUUID( $pay_code_id ),
+				'branch_id' => TTUUID::castUUID( $branch_id ),
+				'department_id' => TTUUID::castUUID( $department_id ),
+				'job_id' => TTUUID::castUUID( $job_id ),
+				'job_item_id' => TTUUID::castUUID( $job_item_id ),
+				'override'    => $this->toBool( $override ),
+		];
+
+		$query = '
+					select	a.*
+					from	' . $this->getTable() . ' as a
+					where	a.user_id = ?
+						AND a.date_stamp = ?
+						AND a.object_type_id = ?
+						AND a.src_object_id = ?
+						AND a.pay_code_id = ?
+						AND a.branch_id = ?
+						AND a.department_id = ?
+						AND a.job_id = ?
+						AND a.job_item_id = ?						
 						AND a.override = ?
 						AND a.deleted = 0
 					';
@@ -1791,10 +1860,10 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	}
 
 	/**
-	 * @param int $start_date EPOCH
-	 * @param int $end_date   EPOCH
+	 * @param int $start_date          EPOCH
+	 * @param int $end_date            EPOCH
 	 * @param string|string[] $job_ids UUID
-	 * @param array $order    Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param array $order             Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDateTotalListFactory
 	 */
 	function getReportByStartDateAndEndDateAndJobList( $start_date, $end_date, $job_ids, $order = null ) {
@@ -2607,7 +2676,16 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		if ( isset( $filter_data['user_date_total_type_id'] ) ) {
 			$filter_data['type_id'] = $filter_data['user_date_total_type_id'];
 		}
-		$additional_order_fields = [ 'first_name', 'last_name', 'date_stamp', 'time_stamp', 'object_type_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title' ];
+
+		$additional_order_fields = [ 'd.status_id', 'policy_name', 'first_name', 'last_name', 'date_stamp', 'time_stamp', 'object_type_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title', 'job', 'job_item' ];
+
+		$sort_column_aliases = [
+				'user_status' => 'd.status_id',
+				'object_type' => 'a.object_type_id',
+				'name'        => 'policy_name',
+		];
+
+		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == null ) {
 			$order = [ 'a.date_stamp' => 'asc', 'a.object_type_id' => 'asc', 'a.total_time' => 'asc' ];
 			$strict = false;

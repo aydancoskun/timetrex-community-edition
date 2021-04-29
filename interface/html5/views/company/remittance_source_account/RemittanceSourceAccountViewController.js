@@ -1,15 +1,21 @@
-RemittanceSourceAccountViewController = BaseViewController.extend( {
-	el: '#remittance_source_account_view_container',
+class RemittanceSourceAccountViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#remittance_source_account_view_container',
 
-	_required_files: ['APIRemittanceSourceAccount', 'APILegalEntity', 'APICurrency', 'APILog', 'TImage', 'TImageAdvBrowser'],
+			_required_files: ['TImage', 'TImageAdvBrowser'],
 
-	status_array: null,
-	type_array: null,
-	country_array: null,
-	data_format_array: null,
-	company_api: null,
+			status_array: null,
+			type_array: null,
+			country_array: null,
+			data_format_array: null,
+			company_api: null
+		} );
 
-	init: function() {
+		super( options );
+	}
+
+	init() {
 		//this._super('initialize' );
 		this.edit_view_tpl = 'RemittanceSourceAccountEditView.html';
 		this.permission_id = 'remittance_source_account';
@@ -18,8 +24,8 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		this.table_name_key = 'remittance_source_account';
 		this.context_menu_name = $.i18n._( 'Remittance Source Accounts' );
 		this.navigation_label = $.i18n._( 'Remittance Source Account' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.api = TTAPI.APIRemittanceSourceAccount;
+		this.company_api = TTAPI.APICompany;
 
 		this.render();
 		this.buildContextMenu();
@@ -29,37 +35,31 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 
 		$( '#tab_advanced_content_div .edit-view-form-item-div .edit-view-form-item-label-div' ).css( 'border-top-left-radius', '0px' );
 		$( '#tab_advanced_content_div .edit-view-form-item-div:first .edit-view-form-item-label-div' ).css( 'border-top-left-radius', '5px' );
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'type' );
 //		this.initDropDownOption( 'data_format' );
 		this.initDropDownOption( 'country', 'country', this.company_api );
-	},
+	}
 
-	getSignatureUrl: function() {
+	getSignatureUrl() {
 		var url = false;
 		if ( this.current_edit_record.id ) {
 			url = Global.getBaseURL() + '../send_file.php?api=1&object_type=remittance_source_account&object_id=' + this.current_edit_record.id;
 		}
 		Debug.Text( url, 'RemittanceSourceAccountViewController.js', 'RemittanceSourceAccountViewController', 'getSignatureUrl', 10 );
 		return url;
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.file_browser.setImage( this.getSignatureUrl() );
-	},
+	}
 
-	setAdvancedTabVisible: function() {
-		var tabs = $( '.edit-view-tab-bar .ui-tabs-nav li' );
-
-		$( tabs[1] ).show();
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.export_excel],
 			include: [{
@@ -71,10 +71,10 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
-		this._super( 'setDefaultMenu' );
+	setDefaultMenu( doNotSetFocus ) {
+		super.setDefaultMenu();
 		var len = this.context_menu_array.length;
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var grid_selected_length = grid_selected_id_array.length;
@@ -90,9 +90,10 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 					break;
 			}
 		}
-	},
-	setEditMenu: function( doNotSetFocus ) {
-		this._super( 'setEditMenu' );
+	}
+
+	setEditMenu( doNotSetFocus ) {
+		super.setEditMenu();
 		var len = this.context_menu_array.length;
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var grid_selected_length = grid_selected_id_array.length;
@@ -108,9 +109,9 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 					break;
 			}
 		}
-	},
+	}
 
-	setMenuExportIcon: function( context_btn, grid_selected_length ) {
+	setMenuExportIcon( context_btn, grid_selected_length ) {
 		//do not show for edit screens or non-grid screens.
 		if ( this.getSelectedItems().length > 0 ) {
 			context_btn.removeClass( 'disable-image' );
@@ -119,14 +120,14 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	onExportClick: function() {
+	onExportClick() {
 		var post_data = { 0: this.getGridSelectIdArray() };
 		Global.APIFileDownload( this.api.className, 'testExport', post_data );
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -164,23 +165,22 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.export_export:
 				this.onExportClick();
 				break;
 		}
-	},
+	}
 
-	onSaveClick: function( ignoreWarning ) {
-		this._super( 'onSaveClick', ignoreWarning );
+	onSaveClick( ignoreWarning ) {
+		super.onSaveClick( ignoreWarning );
 		Global.clearCache( 'getOptions_type' ); //Needs to clear cache so if they add a source account of a new type, it will immediately appear in the Type dropdown for Payment Methods.
-	},
+	}
 
-	attachElement: function( key ) {
+	attachElement( key ) {
 		//Error: Uncaught TypeError: Cannot read property 'insertBefore' of undefined in interface/html5/views/BaseViewController.js?v=9.0.0-20150822-210544 line 6439
 		if ( !this.edit_view_form_item_dic || !this.edit_view_form_item_dic[key] ) {
 			return;
@@ -191,9 +191,9 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		place_holder.remove();
 
 		return $( this.edit_view_form_item_dic[key].find( '.edit-view-form-item-label' ) );
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
@@ -222,10 +222,9 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	onDataFormatChange: function() {
+	onDataFormatChange() {
 		var $this = this;
 		var type_id = this.edit_view_ui_dic.type_id.getValue();
 		var data_format_id = this.edit_view_ui_dic.data_format_id.getValue();
@@ -277,9 +276,9 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		}
 
 		if ( type_id == 2000 ) {
-			$( this.edit_view_tab.find( 'ul li' )[1] ).show(); //Show Advanced Tab
-
 			if ( Global.getProductEdition() >= 15 ) { //All cheque formats.
+				$( this.edit_view_tab.find( 'ul li' )[1] ).show(); //Show Advanced Tab
+
 				this.attachElement( 'value5' ).text( $.i18n._( 'Vertical Alignment' ) + ':' );
 				this.attachElement( 'value6' ).text( $.i18n._( 'Horizontal Alignment' ) + ':' );
 				this.attachElement( 'signature' );
@@ -288,8 +287,12 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 				this.edit_view_ui_dic.value6.parent().append( '<span class="mm_field_unit_text">&nbsp;mm</span>' );
 
 				TTPromise.wait( null, null, function() {
-					$this.edit_view_ui_dic.value5.setWidth( 42 );
-					$this.edit_view_ui_dic.value6.setWidth( 42 );
+					if ( $this.edit_view_ui_dic && $this.edit_view_ui_dic.value5 ) {
+						$this.edit_view_ui_dic.value5.setWidth( 42 );
+					}
+					if ( $this.edit_view_ui_dic && $this.edit_view_ui_dic.value6 ) {
+						$this.edit_view_ui_dic.value6.setWidth( 42 );
+					}
 				} );
 			}
 		} else if ( type_id == 3000 ) {
@@ -305,6 +308,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 				this.attachElement( 'value7' ).text( $.i18n._( 'Immediate Dest.' ) + ':' );
 				this.attachElement( 'value8' ).text( $.i18n._( 'Immediate Dest. Name' ) + ':' );
 				this.attachElement( 'value9' ).text( $.i18n._( 'Trace Number' ) + ':' );
+				this.attachElement( 'value10' ).text( $.i18n._( 'Discretionary Data' ) + ':' );
 
 				this.attachElement( 'value24' ).text( $.i18n._( 'Offset Transaction' ) + ':' );
 				if ( this.current_edit_record.value24 == 1 ) {
@@ -330,15 +334,14 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 				this.attachElement( 'value30' ).text( $.i18n._( 'File Trailer Line' ) + ':' );
 			}
 		}
+	}
 
-	},
-
-	onTypeChange: function() {
+	onTypeChange() {
 		var $this = this;
 		var type_id = this.edit_view_ui_dic.type_id.getValue();
 		var country = ( this.edit_view_ui_dic.country.getValue() && this.edit_view_ui_dic.country.getValue() != TTUUID.zero_id ) ? this.edit_view_ui_dic.country.getValue() : this.current_edit_record.country; //sometimes it's false for no reason.
 
-		this.setAdvancedTabVisible();
+		$( this.edit_view_tab.find( 'ul li' )[1] ).show(); //Show Advanced tab
 
 		this.detachElement( 'data_format_id' );
 		this.detachElement( 'last_transaction_number' );
@@ -355,20 +358,22 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		} else if ( type_id == 3000 ) {
 			this.attachElement( 'last_transaction_number' ).text( $.i18n._( 'Last Batch Number' ) + ':' );
 
-			if ( country == 'US' ) { //ACH
-				this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
-				this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
-			} else if ( country == 'CA' ) { //Canadian EFT
-				this.attachElement( 'value1' ).text( $.i18n._( 'Institution' ) + ':' );
-				this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
-				this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
-			} else if ( $.inArray( country, ['AG', 'BS', 'BB', 'BZ', 'DO', 'GY', 'HT', 'JM', 'DM', 'GD', 'KN', 'LC', 'VC', 'SR', 'TT'] ) != -1 ) { //Carribbean countries.
-				this.attachElement( 'value1' ).text( $.i18n._( 'Institution' ) + ':' );
-				this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
-				this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
-			} else {
-				this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
-				this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+			if ( !this.is_mass_editing && country != null ) {
+				if ( country == 'US' ) { //ACH
+					this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
+					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+				} else if ( country == 'CA' ) { //Canadian EFT
+					this.attachElement( 'value1' ).text( $.i18n._( 'Institution' ) + ':' );
+					this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
+					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+				} else if ( $.inArray( country, ['AG', 'BS', 'BB', 'BZ', 'DO', 'GY', 'HT', 'JM', 'DM', 'GD', 'KN', 'LC', 'VC', 'SR', 'TT'] ) != -1 ) { //Carribbean countries.
+					this.attachElement( 'value1' ).text( $.i18n._( 'Institution' ) + ':' );
+					this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
+					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+				} else {
+					this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
+					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+				}
 			}
 		}
 
@@ -404,11 +409,11 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		} );
 
 		this.editFieldResize();
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 		var $this = this;
 
 		var tab_model = {
@@ -419,7 +424,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) ),
+			api_class: TTAPI.APIRemittanceSourceAccount,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
@@ -444,7 +449,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		// Legal Entity
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			field: 'legal_entity_id',
@@ -488,7 +493,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		// Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			field: 'currency_id',
@@ -594,18 +599,18 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		}
 
 		this.addEditFieldToColumn( $.i18n._( 'Signature' ), this.file_browser, tab_advanced_column1, '', null, true, true );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 			new SearchField( {
 				label: $.i18n._( 'Legal Entity' ),
 				in_column: 1,
 				field: 'legal_entity_id',
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
-				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -636,7 +641,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -649,7 +654,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -658,5 +663,5 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
-} );
+	}
+}

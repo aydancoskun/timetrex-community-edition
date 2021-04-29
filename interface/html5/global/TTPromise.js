@@ -1,6 +1,3 @@
-/*
- * $License$
- */
 TTPromise = {
 	promises: {},
 

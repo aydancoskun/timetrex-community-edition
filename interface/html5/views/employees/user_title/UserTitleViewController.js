@@ -1,9 +1,11 @@
-UserTitleViewController = BaseViewController.extend( {
-	el: '#user_title_view_container',
+class UserTitleViewController extends BaseViewController {
+	constructor() {
+		super();
+		this.el = '#user_title_view_container';
+		this._required_files = [];
+	}
 
-	_required_files: ['APIUserTitle'],
-
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserTitleEditView.html';
 		this.permission_id = 'user';
@@ -12,39 +14,38 @@ UserTitleViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_title';
 		this.context_menu_name = $.i18n._( 'Job Titles' );
 		this.navigation_label = $.i18n._( 'Job Title' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserTitle' ) )();
+		this.api = TTAPI.APIUserTitle;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'UserTitle' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
 		var tab_model = {
 			'tab_job_title': { 'label': $.i18n._( 'Job Title' ) },
-			'tab_audit': true,
+			'tab_audit': true
 		};
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+			api_class: TTAPI.APIUserTitle,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_TITLE,
@@ -72,11 +73,11 @@ UserTitleViewController = BaseViewController.extend( {
 
 		form_item_input.parent().width( '45%' );
 
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -93,7 +94,7 @@ UserTitleViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -105,7 +106,7 @@ UserTitleViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -114,4 +115,4 @@ UserTitleViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

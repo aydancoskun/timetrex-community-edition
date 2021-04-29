@@ -1,12 +1,17 @@
-LoginUserContactViewController = BaseViewController.extend( {
+class LoginUserContactViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			sex_array: null,
 
-	sex_array: null,
+			company_api: null,
 
-	company_api: null,
 
-	_required_files: ['APIUser', 'APICompany'],
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 
@@ -15,21 +20,20 @@ LoginUserContactViewController = BaseViewController.extend( {
 		this.script_name = 'LoginUserContactView';
 		this.table_name_key = 'bank_account';
 		this.context_menu_name = $.i18n._( 'Contact Information' );
-		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.api = TTAPI.APIUser;
+		this.company_api = TTAPI.APICompany;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
+	}
 
-	},
+	render() {
+		super.render();
+	}
 
-	render: function() {
-		this._super( 'render' );
-	},
-
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var options = [
 			{ option_name: 'sex', field_name: 'sex_id', api: this.api }
@@ -40,10 +44,9 @@ LoginUserContactViewController = BaseViewController.extend( {
 				callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
 			}
 		} );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -53,9 +56,9 @@ LoginUserContactViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	getUserContactData: function( callBack ) {
+	getUserContactData( callBack ) {
 		var $this = this;
 		var filter = {};
 		filter.filter_data = {};
@@ -70,9 +73,9 @@ LoginUserContactViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	openEditView: function() {
+	openEditView() {
 		var $this = this;
 
 		if ( $this.edit_only_mode ) {
@@ -93,10 +96,9 @@ LoginUserContactViewController = BaseViewController.extend( {
 			} );
 
 		}
+	}
 
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
@@ -128,15 +130,14 @@ LoginUserContactViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick( ignoreWarning ) {
 		ignoreWarning = true; //When login user is saving their own contact information, always ignore warnings because in most cases there isn't much they can do anyways.
-		this._super( 'onSaveClick', ignoreWarning );
-	},
+		super.onSaveClick( ignoreWarning );
+	}
 
-	setErrorMenu: function() {
+	setErrorMenu() {
 
 		var len = this.context_menu_array.length;
 
@@ -154,11 +155,11 @@ LoginUserContactViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_contact_information': { 'label': $.i18n._( 'Contact Information' ) },
@@ -297,4 +298,4 @@ LoginUserContactViewController = BaseViewController.extend( {
 
 	}
 
-} );
+}

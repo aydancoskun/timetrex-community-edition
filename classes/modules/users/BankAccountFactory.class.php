@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -250,7 +250,7 @@ class BankAccountFactory extends Factory {
 		$replace_length = ( ( strlen( $value ) - 4 ) >= 4 ) ? ( strlen( $value ) - 4 ) : 3;
 		$start_digit = ( strlen( $value ) >= 7 ) ? 2 : 1;
 
-		$account = str_replace( substr( $value, $start_digit, $replace_length ), str_repeat( 'X', $replace_length ), $value );
+		$account = str_replace( substr( $value, $start_digit, $replace_length ), str_repeat( '*', $replace_length ), $value );
 
 		return $account;
 	}
@@ -269,7 +269,7 @@ class BankAccountFactory extends Factory {
 	function setAccount( $value ) {
 		//If *'s are in the account number, skip setting it
 		//This allows them to change other data without seeing the account number.
-		if ( stripos( $value, 'X' ) !== false ) {
+		if ( stripos( $value, '*' ) !== false ) {
 			return false;
 		}
 		$value = $this->Validator->stripNonNumeric( trim( $value ) );

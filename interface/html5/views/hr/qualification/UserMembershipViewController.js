@@ -1,20 +1,26 @@
-UserMembershipViewController = BaseViewController.extend( {
-	el: '#user_membership_view_container',
+class UserMembershipViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_membership_view_container',
 
-	_required_files: ['APIUserMembership', 'APIQualification', 'APIQualificationGroup', 'APICurrency', 'APICompanyGenericTag'],
 
-	document_object_type_id: null,
 
-	qualification_group_array: null,
-	source_type_array: null,
-	ownership_array: null,
+			document_object_type_id: null,
 
-	qualification_group_api: null,
-	qualification_api: null,
+			qualification_group_array: null,
+			source_type_array: null,
+			ownership_array: null,
 
-	sub_view_grid_autosize: true,
+			qualification_group_api: null,
+			qualification_api: null,
 
-	init: function( options ) {
+			sub_view_grid_autosize: true
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserMembershipEditView.html';
 		this.permission_id = 'user_membership';
@@ -23,9 +29,9 @@ UserMembershipViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_membership';
 		this.context_menu_name = $.i18n._( 'Memberships' );
 		this.navigation_label = $.i18n._( 'Membership' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserMembership' ) )();
-		this.qualification_api = new ( APIFactory.getAPIClass( 'APIQualification' ) )();
-		this.qualification_group_api = new ( APIFactory.getAPIClass( 'APIQualificationGroup' ) )();
+		this.api = TTAPI.APIUserMembership;
+		this.qualification_api = TTAPI.APIQualification;
+		this.qualification_group_api = TTAPI.APIQualificationGroup;
 
 		this.document_object_type_id = 130;
 		this.render();
@@ -36,10 +42,9 @@ UserMembershipViewController = BaseViewController.extend( {
 			this.initData();
 			this.setSelectRibbonMenuIfNecessary();
 		}
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'ownership' );
@@ -73,13 +78,13 @@ UserMembershipViewController = BaseViewController.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	showNoResultCover: function( show_new_btn ) {
-		this._super( 'showNoResultCover', ( this.sub_view_mode ) ? true : false );
-	},
+	showNoResultCover( show_new_btn ) {
+		super.showNoResultCover( ( this.sub_view_mode ) ? true : false );
+	}
 
-	onGridSelectRow: function() {
+	onGridSelectRow() {
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
 			this.cancelOtherSubViewSelectedStatus();
@@ -87,17 +92,17 @@ UserMembershipViewController = BaseViewController.extend( {
 			this.buildContextMenu();
 		}
 		this.setDefaultMenu();
-	},
+	}
 
-	onGridSelectAll: function() {
+	onGridSelectAll() {
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
 			this.cancelOtherSubViewSelectedStatus();
 		}
 		this.setDefaultMenu();
-	},
+	}
 
-	cancelOtherSubViewSelectedStatus: function() {
+	cancelOtherSubViewSelectedStatus() {
 		switch ( true ) {
 			case typeof ( this.parent_view_controller.sub_user_skill_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_skill_view_controller.unSelectAll();
@@ -109,18 +114,18 @@ UserMembershipViewController = BaseViewController.extend( {
 				this.parent_view_controller.sub_user_language_view_controller.unSelectAll();
 				break;
 		}
-	},
+	}
 
-	onAddClick: function() {
+	onAddClick() {
 
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
 		}
 
-		this._super( 'onAddClick' );
-	},
+		super.onAddClick();
+	}
 
-	onMassEditClick: function() {
+	onMassEditClick() {
 
 		var $this = this;
 		$this.is_add = false;
@@ -161,12 +166,11 @@ UserMembershipViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -178,7 +182,7 @@ UserMembershipViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserMembership' ) ),
+			api_class: TTAPI.APIUserMembership,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_Membership,
@@ -201,7 +205,7 @@ UserMembershipViewController = BaseViewController.extend( {
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -221,7 +225,7 @@ UserMembershipViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
+			api_class: TTAPI.APIQualification,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.QUALIFICATION,
 			show_search_inputs: true,
@@ -245,7 +249,7 @@ UserMembershipViewController = BaseViewController.extend( {
 		// Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+			api_class: TTAPI.APICurrency,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			field: 'currency_id',
@@ -279,12 +283,11 @@ UserMembershipViewController = BaseViewController.extend( {
 
 		form_item_input.TTagInput( { field: 'tag', object_type_id: 255 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_membership_column1, '', null, null, true );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		var default_args = {};
 		default_args.permission_section = 'user_membership';
 		this.search_fields = [
@@ -295,7 +298,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -307,7 +310,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'currency_id',
 				layout_name: ALayoutIDs.CURRENCY,
-				api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+				api_class: TTAPI.APICurrency,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -319,7 +322,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'qualification_id',
 				layout_name: ALayoutIDs.QUALIFICATION,
-				api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
+				api_class: TTAPI.APIQualification,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -395,7 +398,7 @@ UserMembershipViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -407,20 +410,20 @@ UserMembershipViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	searchDone: function() {
-		this._super( 'searchDone' );
+	searchDone() {
+		super.searchDone();
 		TTPromise.resolve( 'Employee_Qualifications_Tab', 'UserMembershipViewController' );
 	}
-} );
+}
 
 UserMembershipViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserMembership', 'SubUserMembershipView.html', function( result ) {

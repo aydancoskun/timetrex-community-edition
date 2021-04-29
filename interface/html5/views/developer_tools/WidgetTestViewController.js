@@ -1,16 +1,20 @@
-WidgetTestViewController = BaseViewController.extend( {
-	el: '#awesomebox_test_view_container',
+class WidgetTestViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#awesomebox_test_view_container',
 
-	_required_files: {
-		10: ['TColorPicker', 'TImage', 'TImageAdvBrowser']
-	},
+			_required_files: ['TColorPicker', 'TImage', 'TImageAdvBrowser'],
 
-	user_api: null,
-	user_group_api: null,
-	company_api: null,
-	user_id_array: null,
+			user_api: null,
+			user_group_api: null,
+			company_api: null,
+			user_id_array: null
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		this.edit_view_tpl = 'WidgetTestEditView.html';
 		this.permission_id = 'user';
 		this.viewId = 'WidgetTest';
@@ -18,28 +22,27 @@ WidgetTestViewController = BaseViewController.extend( {
 		this.table_name_key = 'awesomebox_test';
 		this.context_menu_name = $.i18n._( 'Widget Test' );
 		this.navigation_label = $.i18n._( 'Widget Test' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.api = TTAPI.APIUser;
 		this.select_company_id = LocalCacheData.getCurrentCompany().id;
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.company_api = TTAPI.APICompany;
 		this.user_id_array = [];
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	clearEditViewData: function() {
+	clearEditViewData() {
 		return false;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
 
 		var tab_model = {
@@ -112,7 +115,7 @@ WidgetTestViewController = BaseViewController.extend( {
 			form_item_input.FormulaBuilder( {
 				field: 'formula', width: '100%', onFormulaBtnClick: function() {
 
-					var custom_column_api = new ( APIFactory.getAPIClass( 'APIReportCustomColumn' ) )();
+					var custom_column_api = TTAPI.APIReportCustomColumn;
 
 					custom_column_api.getOptions( 'formula_functions', {
 						onResult: function( fun_result ) {
@@ -215,16 +218,15 @@ WidgetTestViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 		form_item_input.TTextArea( { field: 'textarea' } );
 		this.addEditFieldToColumn( $.i18n._( 'TTextArea' ), form_item_input, tab_employee_column2, '', null, null, true );
+	}
 
-	},
-
-	buildSearchFields: function() {
-		this._super( 'buildSearchFields' );
+	buildSearchFields() {
+		super.buildSearchFields();
 		var $this = this;
 		this.search_fields = [];
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -234,10 +236,10 @@ WidgetTestViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
 	//override that forces same data to grid at all times.
-	search: function() {
+	search() {
 		var $this = this;
 		this.api.getUser( {}, true, {
 			onResult: function( r ) {
@@ -249,9 +251,9 @@ WidgetTestViewController = BaseViewController.extend( {
 				$this.onEditClick( result_data[0].id );
 			}
 		} );
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		var $this = this;
 		setTimeout( function() {
 			TAlertManager.showConfirmAlert( $.i18n._( 'Run tests?' ), null, function( result ) {
@@ -264,10 +266,10 @@ WidgetTestViewController = BaseViewController.extend( {
 			TTPromise.resolve( 'init', 'init' );
 		}, 2500 );
 
-		this._super( 'setEditViewDataDone' );
-	},
+		super.setEditViewDataDone();
+	}
 
-	runTests: function() {
+	runTests() {
 		var $this = this;
 		if ( $( '#qunit_script' ).length == 0 ) {
 			$( '<script id=\'qunit_script\' src=\'framework/qunit/qunit.js\'></script>' ).appendTo( 'head' );
@@ -330,9 +332,9 @@ WidgetTestViewController = BaseViewController.extend( {
 		//todo: search_panel
 		//todo: top_notification
 		//todo: view_min_tab
-	},
+	}
 
-	testCheckbox: function() {
+	testCheckbox() {
 		var $this = this;
 		QUnit.test( 'Checkbox tests', function( assert ) {
 			var cb = $this.edit_view_ui_dic.checkbox;
@@ -346,9 +348,9 @@ WidgetTestViewController = BaseViewController.extend( {
 			$( cb ).click();
 			assert.ok( cb.getValue() == false, 'checkbox unchecked via click' );
 		} );
-	},
+	}
 
-	testColorPicker: function() {
+	testColorPicker() {
 		var $this = this;
 		QUnit.test( 'ColorPicker tests', function( assert ) {
 			var done_testing = assert.async();
@@ -369,9 +371,9 @@ WidgetTestViewController = BaseViewController.extend( {
 				done_testing();
 			}, 1000 );
 		} );
-	},
+	}
 
-	testDatePicker: function() {
+	testDatePicker() {
 		var $this = this;
 		QUnit.test( 'DatePicker tests', function( assert ) {
 			var done_testing = assert.async();
@@ -390,9 +392,9 @@ WidgetTestViewController = BaseViewController.extend( {
 				}, 1000 );
 			}, 1000 );
 		} );
-	},
+	}
 
-	testDateRange: function() {
+	testDateRange() {
 		var $this = this;
 		QUnit.test( 'DateRange tests', function( assert ) {
 			var done_testing = assert.async();
@@ -411,9 +413,9 @@ WidgetTestViewController = BaseViewController.extend( {
 				}, 1000 );
 			}, 1000 );
 		} );
-	},
+	}
 
-	testTimePicker: function() {
+	testTimePicker() {
 		var $this = this;
 		QUnit.test( 'TimePicker tests', function( assert ) {
 			var widget = $this.edit_view_ui_dic.timepicker;
@@ -426,9 +428,9 @@ WidgetTestViewController = BaseViewController.extend( {
 			assert.ok( ( $( '#ui-datepicker-div:visible' ).length == 0 ), 'timepicker widget gone clicking close button' );
 			assert.ok( widget.getValue() != '', 'value is not blank' );
 		} );
-	},
+	}
 
-	testImageBrowser: function() {
+	testImageBrowser() {
 		var $this = this;
 		TTPromise.add( '' );
 		QUnit.test( 'ImageBrowser tests', function( assert ) {
@@ -444,9 +446,9 @@ WidgetTestViewController = BaseViewController.extend( {
 				TTPromise.resolve( 'wizardtests', 'imagebrowser' );
 			}, 1000 );
 		} );
-	},
+	}
 
-	testFormulaBuilder: function() {
+	testFormulaBuilder() {
 		var $this = this;
 		QUnit.test( 'FormulaBuilder tests', function( assert ) {
 			var done_testing = assert.async();
@@ -460,9 +462,9 @@ WidgetTestViewController = BaseViewController.extend( {
 				done_testing();
 			}, 1000 );
 		} );
-	},
+	}
 
-	testButtons: function() {
+	testButtons() {
 		var $this = this;
 		QUnit.test( 'TotalButtons tests', function( assert ) {
 			var done_testing = assert.async();
@@ -507,9 +509,9 @@ WidgetTestViewController = BaseViewController.extend( {
 				}, 1500 );
 			}, 1500 );
 		} );
-	},
+	}
 
-	testTags: function() {
+	testTags() {
 		var $this = this;
 		QUnit.test( 'Tags tests', function( assert ) {
 			var done_testing = assert.async();
@@ -537,9 +539,9 @@ WidgetTestViewController = BaseViewController.extend( {
 				}, 1000 );
 			}, 1000 );
 		} );
-	},
+	}
 
-	testText: function() {
+	testText() {
 		var $this = this;
 		QUnit.test( 'Text test', function( assert ) {
 			//var done_testing = assert.async();
@@ -549,9 +551,9 @@ WidgetTestViewController = BaseViewController.extend( {
 			textbox.setValue( '' );
 			assert.ok( textbox.getValue() == '', 'returned value updates when text is updated' );
 		} );
-	},
+	}
 
-	testPassword: function() {
+	testPassword() {
 		var $this = this;
 		QUnit.test( 'Password box test', function( assert ) {
 			//var done_testing = assert.async();
@@ -561,9 +563,9 @@ WidgetTestViewController = BaseViewController.extend( {
 			textbox.setValue( '' );
 			assert.ok( textbox.getValue() == '', 'returned value updates when text is updated' );
 		} );
-	},
+	}
 
-	testTextarea: function() {
+	testTextarea() {
 		var $this = this;
 		QUnit.test( 'Password box test', function( assert ) {
 			//var done_testing = assert.async();
@@ -575,4 +577,4 @@ WidgetTestViewController = BaseViewController.extend( {
 		} );
 	}
 
-} );
+}

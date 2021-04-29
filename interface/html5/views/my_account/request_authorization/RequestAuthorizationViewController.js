@@ -1,29 +1,30 @@
-RequestAuthorizationViewController = RequestViewCommonController.extend( {
-	el: '#request_authorization_view_container',
+class RequestAuthorizationViewController extends RequestViewCommonController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#request_authorization_view_container',
 
-	_required_files: {
-		10: ['APIRequest', 'APIAuthorization', 'APIAbsencePolicy', 'APIMessageControl', 'APISchedulePolicy', 'APISchedule', 'APIBranch', 'APIDepartment'],
-		20: ['APIJob', 'APIJobItem']
-	},
+			type_array: null,
+			hierarchy_level_array: null,
 
-	type_array: null,
-	hierarchy_level_array: null,
+			messages: null,
 
-	messages: null,
+			authorization_api: null,
+			api_request: null,
+			api_absence_policy: null,
+			message_control_api: null,
 
-	authorization_api: null,
-	api_request: null,
-	api_absence_policy: null,
-	message_control_api: null,
+			authorization_history_columns: [],
 
-	authorization_history_columns: [],
+			authorization_history_default_display_columns: [],
 
-	authorization_history_default_display_columns: [],
+			authorization_history_grid: null,
+			pre_request_schedule: true
+		} );
 
-	authorization_history_grid: null,
-	pre_request_schedule: true,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'RequestAuthorizationEditView.html';
 		this.permission_id = 'request';
@@ -32,17 +33,17 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		this.table_name_key = 'request';
 		this.context_menu_name = $.i18n._( 'Request (Authorizations)' );
 		this.navigation_label = $.i18n._( 'Requests' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
-		this.authorization_api = new ( APIFactory.getAPIClass( 'APIAuthorization' ) )();
-		this.api_request = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
-		this.api_absence_policy = new ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) )();
-		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
+		this.api = TTAPI.APIRequest;
+		this.authorization_api = TTAPI.APIAuthorization;
+		this.api_request = TTAPI.APIRequest;
+		this.api_absence_policy = TTAPI.APIAbsencePolicy;
+		this.message_control_api = TTAPI.APIMessageControl;
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
-			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+			this.job_api = TTAPI.APIJob;
+			this.job_item_api = TTAPI.APIJobItem;
 		}
-		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
+		this.message_control_api = TTAPI.APIMessageControl;
 
 		this.initPermission();
 		this.render();
@@ -51,9 +52,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
@@ -63,10 +64,10 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		if ( Global.isSet( $this.basic_search_field_ui_dic['hierarchy_level'] ) ) {
 			$this.basic_search_field_ui_dic['hierarchy_level'].setSourceData( Global.buildRecordArray( data ) );
 		}
-	},
+	}
 
-	initPermission: function() {
-		this._super( 'initPermission' );
+	initPermission() {
+		super.initPermission();
 
 		if ( this.jobUIValidate() ) {
 			this.show_job_ui = true;
@@ -93,7 +94,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
-		var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		var company_api = TTAPI.APICompany;
 		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
 			var result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } ).getResult();
 		}
@@ -120,9 +121,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				this.show_job_item_ui = false;
 			}
 		}
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				action: {
@@ -238,9 +239,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 		//Check if there is a current_company object at all.
 		if ( LocalCacheData.isLocalCacheExists( 'current_company' ) == false ) {
 			return false;
@@ -321,19 +322,18 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setDefaultMenuAuthorizationExpenseIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAuthorizationExpenseIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( !( Global.getProductEdition() >= 25 ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 
 		context_btn.removeClass( 'disable-image' );
-	},
+	}
 
-	setEditMenu: function() {
+	setEditMenu() {
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
 			var context_btn = $( this.context_menu_array[i] );
@@ -388,18 +388,17 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setEditMenuAuthorizationExpenseIcon: function( context_btn, pId ) {
+	setEditMenuAuthorizationExpenseIcon( context_btn, pId ) {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.send:
 				this.onSaveClick();
@@ -428,18 +427,18 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				this.onNavigationClick( id );
 				break;
 		}
-	},
+	}
 
-	onViewclick: function() {
-		this._super( 'onViewclick' );
+	onViewclick() {
+		super.onViewclick();
 		AuthorizationHistory.init( this );
-	},
+	}
 
-	onAuthorizationExpenseClick: function() {
+	onAuthorizationExpenseClick() {
 		IndexViewController.goToView( 'ExpenseAuthorization' );
-	},
+	}
 
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick( ignoreWarning ) {
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
@@ -466,9 +465,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	onAuthorizationClick: function() {
+	onAuthorizationClick() {
 		var $this = this;
 
 		//Error: TypeError: $this.current_edit_record is null in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 629
@@ -526,9 +525,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				} );
 			}
 		}
-	},
+	}
 
-	onPassClick: function() {
+	onPassClick() {
 		var $this = this;
 
 		function doNext() {
@@ -549,13 +548,13 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		} else {
 			doNext();
 		}
-	},
+	}
 
-	onAuthorizationRequestClick: function() {
+	onAuthorizationRequestClick() {
 		this.search( false );
-	},
+	}
 
-	onDeclineClick: function() {
+	onDeclineClick() {
 		var $this = this;
 
 		function doNext() {
@@ -586,31 +585,30 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		} else {
 			doNext();
 		}
-	},
+	}
 
-	onAuthorizationTimesheetClick: function() {
+	onAuthorizationTimesheetClick() {
 		IndexViewController.goToView( 'TimeSheetAuthorization' );
-	},
+	}
 
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 		if ( this.is_edit ) {
 			return this.uniformMessageVariable( records );
 		}
 		return records;
-	},
+	}
 
-	onGridDblClickRow: function() {
+	onGridDblClickRow() {
 
 		ProgressBar.showOverlay();
 		this.onViewClick();
+	}
 
-	},
-
-	setEditMenuViewIcon: function( context_btn, pId ) {
+	setEditMenuViewIcon( context_btn, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	onSaveResult: function( result ) {
+	onSaveResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 
@@ -640,57 +638,57 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
+	}
 
-	setEditMenuAuthorizationIcon: function( context_btn, pId ) {
+	setEditMenuAuthorizationIcon( context_btn, pId ) {
 		if ( this.is_edit ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuPassIcon: function( context_btn, pId ) {
+	setEditMenuPassIcon( context_btn, pId ) {
 		if ( this.is_edit ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuDeclineIcon: function( context_btn, pId ) {
+	setEditMenuDeclineIcon( context_btn, pId ) {
 		if ( this.is_edit ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuAuthorizationRequestIcon: function( context_btn, pId ) {
+	setEditMenuAuthorizationRequestIcon( context_btn, pId ) {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuAuthorizationTimesheetIcon: function( context_btn, pId ) {
+	setEditMenuAuthorizationTimesheetIcon( context_btn, pId ) {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuSaveIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuSaveIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuEditIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuEditEmployeeIcon: function( context_btn, grid_selected_length ) {
+	setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length ) {
 		if ( !this.editPermissionValidate( 'user' ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -700,31 +698,31 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuAuthorizationIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAuthorizationIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuPassIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPassIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuDeclineIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDeclineIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuAuthorizationRequestIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAuthorizationRequestIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.removeClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuAuthorizationTimesheetIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAuthorizationTimesheetIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.removeClass( 'disable-image' );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -732,7 +730,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -785,7 +783,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -797,16 +795,16 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		var $this = this;
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -901,11 +899,10 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-
-	},
+	}
 
 	//set widget disablebility if view mode or edit mode
-	setEditViewWidgetsMode: function() {
+	setEditViewWidgetsMode() {
 		var did_clean_dic = {};
 		for ( var key in this.edit_view_ui_dic ) {
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
@@ -924,23 +921,23 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				widget.setEnabled( this.enable_edit_view_ui );
 			}
 		}
-	},
+	}
 
-	onAvailableBalanceChange: function() {
+	onAvailableBalanceChange() {
 		this.getAvailableBalance();
-	},
+	}
 
-	setURL: function() {
+	setURL() {
 
 		if ( LocalCacheData.current_doing_context_action === 'edit' ) {
 			LocalCacheData.current_doing_context_action = '';
 			return;
 		}
 
-		this._super( 'setURL' );
-	},
+		super.setURL();
+	}
 
-	getSubViewFilter: function( filter ) {
+	getSubViewFilter( filter ) {
 		if ( filter.length === 0 ) {
 			filter = {};
 		}
@@ -959,10 +956,10 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		}
 
 		return filter;
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_request': { 'label': $.i18n._( 'Message' ) },
@@ -1001,15 +998,14 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column1, '', null, null, true );
 
 		tab_request_column2.css( 'display', 'none' );
+	}
 
-	},
-
-	search: function( set_default_menu, page_action, page_number, callBack ) {
+	search( set_default_menu, page_action, page_number, callBack ) {
 		this.refresh_id = null;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack );
-	},
+		super.search( set_default_menu, page_action, page_number, callBack );
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -1033,21 +1029,20 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			}
 		}
 		this.setEditViewDataDone();
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		var $this = this;
-		this._super( 'setEditViewDataDone' );
+		super.setEditViewDataDone();
 		if ( !this.is_viewing ) {
 			if ( Global.isSet( $this.messages ) ) {
 				$this.messages = null;
 			}
 		}
-
-	},
+	}
 
 	//Make sure this.current_edit_record is updated before validate
-	validate: function() {
+	validate() {
 		var $this = this;
 
 		var record = {};
@@ -1087,12 +1082,12 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	openAuthorizationView: function() {
+	openAuthorizationView() {
 		if ( !this.edit_view ) {
 			this.initEditViewUI( this.viewId, this.edit_view_tpl );
 		}
 	}
 
-} );
+}

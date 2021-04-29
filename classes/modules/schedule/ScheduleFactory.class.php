@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -381,7 +381,12 @@ class ScheduleFactory extends Factory {
 			if ( $raw === true ) {
 				return $value;
 			} else {
-				return TTDate::getMiddleDayEpoch( TTDate::strtotime( $value ) );  //setDateStamp() forces to middle day epoch, so get should do that as well to be consistent. See UserDateTotal and PunchControl.
+				if ( !is_numeric( $value ) ) {                                         //Optimization to avoid converting it when run in CalculatePolicy's loops
+					$value = TTDate::getMiddleDayEpoch( TTDate::strtotime( $value ) ); //Make sure we use middle day epoch when pulling the value from the DB the first time, to match setDateStamp() below. Otherwise setting the datestamp then getting it again before save won't match the same value after its saved to the DB.
+					$this->setGenericDataValue( 'date_stamp', $value );
+				}
+
+				return $value;
 			}
 		}
 
@@ -394,14 +399,18 @@ class ScheduleFactory extends Factory {
 	 */
 	function setDateStamp( $value ) {
 		$value = (int)$value;
+
 		if ( $value > 0 ) {
-			$value = TTDate::getMiddleDayEpoch( $value );
+			//Use middle day epoch to help avoid confusion with different timezones/DST. -- getDateStamp() needs to use middle day epoch too then.
+			//See comments about timezones in CalculatePolicy->_calculate().
+			$retval = $this->setGenericDataValue( 'date_stamp', TTDate::getMiddleDayEpoch( $value ) );
+
+			$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
+
+			return $retval;
 		}
 
-		$retval = $this->setGenericDataValue( 'date_stamp', $value );
-		$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
-
-		return $retval;
+		return false;
 	}
 
 	/**
@@ -1080,7 +1089,7 @@ class ScheduleFactory extends Factory {
 		//Debug::Arr($absence_policy_paid_type_options, 'Paid Absences: ', __FILE__, __LINE__, __METHOD__, 10);
 		$scheduled_user_ids = [];
 		if ( $slf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $slf->getRecordCount(), null, TTi18n::getText( 'Processing Committed Shifts...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $slf->getRecordCount(), null, TTi18n::getText( 'Processing Committed Shifts...' ) );
 
 			$schedule_shifts = [];
 			$i = 0;
@@ -1095,8 +1104,6 @@ class ScheduleFactory extends Factory {
 				} else {
 					$absence_policy_name = null; //Must be NULL for it to appear as "N/A" in legacy interface.
 				}
-
-				$hourly_rate = Misc::MoneyFormat( $s_obj->getColumn( 'user_wage_hourly_rate' ), false );
 
 				if ( $s_obj->getStatus() == 20 //Absence
 						&&
@@ -1113,7 +1120,7 @@ class ScheduleFactory extends Factory {
 					//UnPaid Absence.
 					$total_time_wage = Misc::MoneyFormat( 0 );
 				} else {
-					$total_time_wage = Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), $hourly_rate ), false );
+					$total_time_wage = Misc::MoneyFormat( bcmul( TTDate::getHours( $s_obj->getColumn( 'total_time' ) ), $s_obj->getColumn( 'user_wage_hourly_rate' ) ), false );
 				}
 
 				//v11.5.0 change ISO date stamp to have dashes in it, but that caused problems with existing versions of the app which were expecting no dashes.
@@ -1125,36 +1132,43 @@ class ScheduleFactory extends Factory {
 					}
 				}
 
+				if ( TTUUID::isUUID( $s_obj->getUser() ) && $s_obj->getUser() != TTUUID::getZeroID() && $s_obj->getUser() != TTUUID::getNotExistID() ) {
+					$first_name = $s_obj->getColumn( 'first_name' );
+					$user_full_name = Misc::getFullName( $first_name, null, $s_obj->getColumn( 'last_name' ), false, false );
+				} else {
+					$first_name = $user_full_name = TTi18n::getText( 'OPEN' );
+				}
+
 				$schedule_shifts[$iso_date_stamp][$i] = [
 						'id'                    => TTUUID::castUUID( $s_obj->getID() ),
 						'replaced_id'           => TTUUID::castUUID( $s_obj->getReplacedID() ),
-						'recurring_schedule_id' => TTUUID::castUUID( $s_obj->getColumn( 'recurring_schedule_id' ) ),
-						'pay_period_id'         => TTUUID::castUUID( $s_obj->getColumn( 'pay_period_id' ) ),
+						'recurring_schedule_id' => $s_obj->getColumn( 'recurring_schedule_id' ),
+						'pay_period_id'         => $s_obj->getColumn( 'pay_period_id' ),
 						'user_id'               => TTUUID::castUUID( $s_obj->getUser() ),
-						'user_created_by'       => TTUUID::castUUID( $s_obj->getColumn( 'user_created_by' ) ),
-						'user_full_name'        => ( TTUUID::isUUID( $s_obj->getUser() ) && $s_obj->getUser() != TTUUID::getZeroID() && $s_obj->getUser() != TTUUID::getNotExistID() ) ? Misc::getFullName( $s_obj->getColumn( 'first_name' ), null, $s_obj->getColumn( 'last_name' ), false, false ) : TTi18n::getText( 'OPEN' ),
-						'first_name'            => ( TTUUID::isUUID( $s_obj->getUser() ) && $s_obj->getUser() != TTUUID::getZeroID() && $s_obj->getUser() != TTUUID::getNotExistID() ) ? $s_obj->getColumn( 'first_name' ) : TTi18n::getText( 'OPEN' ),
+						'user_created_by'       => $s_obj->getColumn( 'user_created_by' ),
+						'user_full_name'        => $user_full_name,
+						'first_name'            => $first_name,
 						'last_name'             => $s_obj->getColumn( 'last_name' ),
-						'title_id'              => TTUUID::castUUID( $s_obj->getColumn( 'title_id' ) ),
+						'title_id'              => $s_obj->getColumn( 'title_id' ),
 						'title'                 => $s_obj->getColumn( 'title' ),
-						'group_id'              => TTUUID::castUUID( $s_obj->getColumn( 'group_id' ) ),
+						'group_id'              => $s_obj->getColumn( 'group_id' ),
 						'group'                 => $s_obj->getColumn( 'group' ),
-						'default_branch_id'     => TTUUID::castUUID( $s_obj->getColumn( 'default_branch_id' ) ),
+						'default_branch_id'     => $s_obj->getColumn( 'default_branch_id' ),
 						'default_branch'        => $s_obj->getColumn( 'default_branch' ),
-						'default_department_id' => TTUUID::castUUID( $s_obj->getColumn( 'default_department_id' ) ),
+						'default_department_id' => $s_obj->getColumn( 'default_department_id' ),
 						'default_department'    => $s_obj->getColumn( 'default_department' ),
-						'default_job_id'        => TTUUID::castUUID( $s_obj->getColumn( 'default_job_id' ) ),
+						'default_job_id'        => $s_obj->getColumn( 'default_job_id' ),
 						'default_job'           => $s_obj->getColumn( 'default_job' ),
-						'default_job_item_id'   => TTUUID::castUUID( $s_obj->getColumn( 'default_job_item_id' ) ),
+						'default_job_item_id'   => $s_obj->getColumn( 'default_job_item_id' ),
 						'default_job_item'      => $s_obj->getColumn( 'default_job_item' ),
 
 						'job_id'            => TTUUID::castUUID( $s_obj->getColumn( 'job_id' ) ),
 						'job'               => $s_obj->getColumn( 'job' ),
 						'job_status_id'     => (int)$s_obj->getColumn( 'job_status_id' ),
 						'job_manual_id'     => (int)$s_obj->getColumn( 'job_manual_id' ),
-						'job_branch_id'     => TTUUID::castUUID( $s_obj->getColumn( 'job_branch_id' ) ),
-						'job_department_id' => TTUUID::castUUID( $s_obj->getColumn( 'job_department_id' ) ),
-						'job_group_id'      => TTUUID::castUUID( $s_obj->getColumn( 'job_group_id' ) ),
+						'job_branch_id'     => $s_obj->getColumn( 'job_branch_id' ),
+						'job_department_id' => $s_obj->getColumn( 'job_department_id' ),
+						'job_group_id'      => $s_obj->getColumn( 'job_group_id' ),
 
 						'job_address1'      => $s_obj->getColumn( 'job_address1' ),
 						'job_address2'      => $s_obj->getColumn( 'job_address2' ),
@@ -1185,7 +1199,7 @@ class ScheduleFactory extends Factory {
 
 						'total_time' => $s_obj->getTotalTime(),
 
-						'hourly_rate'     => $hourly_rate,
+						'hourly_rate'     => Misc::MoneyFormat( $s_obj->getColumn( 'user_wage_hourly_rate' ), false ),
 						'total_time_wage' => $total_time_wage,
 
 						'note' => $s_obj->getColumn( 'note' ),
@@ -1217,14 +1231,14 @@ class ScheduleFactory extends Factory {
 					$scheduled_user_ids[] = TTUUID::castUUID( $s_obj->getUser() ); //Used below if
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $slf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $slf->getCurrentRow() );
 
 				$i++;
 			}
 			$max_i = $i;
 			unset( $i );
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			//Debug::Arr($schedule_shifts, 'Committed Schedule Shifts: ', __FILE__, __LINE__, __METHOD__, 10);
 			Debug::text( 'Processed Scheduled Rows: ' . $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -1260,7 +1274,7 @@ class ScheduleFactory extends Factory {
 				$ulf->getAPISearchByCompanyIdAndArrayCriteria( $current_user->getCompany(), $filter_data );
 				Debug::text( 'Found blank employees: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 				if ( $ulf->getRecordCount() > 0 ) {
-					$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Processing Employees...' ) );
+					$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Processing Employees...' ) );
 
 					$i = $max_i;
 					foreach ( $ulf as $u_obj ) {
@@ -1282,11 +1296,20 @@ class ScheduleFactory extends Factory {
 							'default_branch'        => $u_obj->getColumn( 'default_branch' ),
 							'default_department_id' => $u_obj->getColumn( 'default_department_id' ),
 							'default_department'    => $u_obj->getColumn( 'default_department' ),
+							'default_job_id'        => $u_obj->getColumn( 'default_job_id' ),
+							'default_job'           => $u_obj->getColumn( 'default_job' ),
+							'default_job_item_id'   => $u_obj->getColumn( 'default_job_item_id' ),
+							'default_job_item'      => $u_obj->getColumn( 'default_job_item' ),
 
 							'branch_id'     => TTUUID::castUUID( $u_obj->getDefaultBranch() ),
 							'branch'        => $u_obj->getColumn( 'default_branch' ),
 							'department_id' => TTUUID::castUUID( $u_obj->getDefaultDepartment() ),
 							'department'    => $u_obj->getColumn( 'default_department' ),
+
+							'job_id'     => TTUUID::castUUID( $u_obj->getDefaultJob() ),
+							'job'        => $u_obj->getColumn( 'default_job' ),
+							'job_item_id' => TTUUID::castUUID( $u_obj->getDefaultJobItem() ),
+							'job_item'    => $u_obj->getColumn( 'default_job_item' ),
 
 							'created_by_id' => $u_obj->getCreatedBy(),
 							'created_date'  => $u_obj->getCreatedDate(),
@@ -1296,12 +1319,12 @@ class ScheduleFactory extends Factory {
 						//Make sure we add in permission columns.
 						$this->getPermissionColumns( $schedule_shifts[TTDate::getISODateStamp( $filter_data['start_date'] )][$i], TTUUID::castUUID( $u_obj->getID() ), $u_obj->getCreatedBy() );
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $ulf->getCurrentRow() );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $ulf->getCurrentRow() );
 
 						$i++;
 					}
 
-					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+					$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 				}
 			}
 			//Debug::Arr($schedule_shifts, 'Final Scheduled Shifts: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1923,11 +1946,11 @@ class ScheduleFactory extends Factory {
 
 			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 
-			//When overwriting OPEN shifts, always check based on branch/department/job/task, as there could be multople OPEN shifts that are duplicate it from one another.
+			//When overwriting OPEN shifts, always check based on branch/department/job/task, as there could be multiple OPEN shifts that are duplicate it from one another.
 			//  I don't see the point in overwriting OPEN shifts to begin with, but its possible the user may do it without fulling understanding.
 			if ( $this->getUser() == TTUUID::getZeroID() ) {
 				Debug::Text( 'Looking for Conflicting OPEN Shifts...', __FILE__, __LINE__, __METHOD__, 10 );
-				$slf->getConflictingOpenShiftSchedule( $this->getCompany(), $this->getStartTime(), $this->getEndTime(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), $this->getReplacedId(), 1 ); //Limit 1;
+				$slf->getConflictingOpenShiftSchedule( $this->getCompany(), $this->getUser(), $this->getStartTime(), $this->getEndTime(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), $this->getReplacedId(), 1 ); //Limit 1;
 			} else {
 				//Delete any conflicting schedule shift before saving.
 				$slf->getConflictingByCompanyIdAndUserIdAndStartDateAndEndDate( $this->getCompany(), $this->getUser(), $this->getStartTime(), $this->getEndTime(), $this->getId() ); //Don't consider the current record to be conflicting with itself (by passing id argument)
@@ -1960,9 +1983,9 @@ class ScheduleFactory extends Factory {
 		//  Also need to handle the case of filling an OPEN shift, then editing the filled shift to change the start/end times or branch/department/job/task, that should no longer fill the OPEN shift.
 		// 		But if they are changed back, it should refill the shift, because this acts the most similar to existing recurring schedule open shifts.
 		if ( $this->getDeleted() == false && $this->Validator->getValidateOnly() == false
-				&& TTUUID::isUUID( $this->getUser() ) && $this->getUser() != TTUUID::getZeroID() && $this->getUser() != TTUUID::getNotExistID() ) { //Don't check for conflicting OPEN shifts when editing/saving an OPEN shift.
+				&& $this->getStatus() == 10 && TTUUID::isUUID( $this->getUser() ) && $this->getUser() != TTUUID::getZeroID() && $this->getUser() != TTUUID::getNotExistID() ) { //Don't check for conflicting OPEN shifts when editing/saving an OPEN shift.
 			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
-			$slf->getConflictingOpenShiftSchedule( $this->getCompany(), $this->getStartTime(), $this->getEndTime(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), $this->getReplacedId(), 1 ); //Limit 1;
+			$slf->getConflictingOpenShiftSchedule( $this->getCompany(), $this->getUser(), $this->getStartTime(), $this->getEndTime(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), $this->getReplacedId(), 1 ); //Limit 1;
 			if ( $slf->getRecordCount() > 0 ) {
 				Debug::Text( 'Found Conflicting OPEN Shift!!', __FILE__, __LINE__, __METHOD__, 10 );
 				foreach ( $slf as $s_obj ) {
@@ -1983,6 +2006,8 @@ class ScheduleFactory extends Factory {
 			}
 		} else if ( $this->getUser() == TTUUID::getZeroID() ) {
 			$this->setReplacedId( TTUUID::getZeroID() ); //Force this whenever its an OPEN shift.
+		} else if ( $this->getStatus() == 20 && $this->getUser() != TTUUID::getZeroID() ) {
+			$this->setReplacedId( TTUUID::getZeroID() ); //Force this whenever it gets changed to a Absence shift, as they should never fill ANY open shift (recurring or committed), unless they are filled by the OPEN user itself.
 		}
 
 		return true;

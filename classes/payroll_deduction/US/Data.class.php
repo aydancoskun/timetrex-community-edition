@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -70,7 +70,7 @@ CHANGED:14-Dec-19				'NY' => 'New York',		- http://www.tax.ny.gov/forms/withhold
 CHANGED:14-Dec-19				'CA' => 'California' 	- http://www.edd.ca.gov/Payroll_Taxes/Rates_and_Withholding.htm *PIT Withholding schedules
 CHANGED:14-Dec-19				'ME' => 'Maine',		- https://www.maine.gov/revenue/forms/with/2020.htm -- Check each year on the right of the page.
 CHANGED:14-Dec-19				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
-CHANGED:14-Dec-19				'IL' => 'Illinois',		- https://www2.illinois.gov/rev/research/taxinformation/payroll/Pages/default.aspx *Booklet IL-700-T
+CHANGED:14-Dec-19				'IL' => 'Illinois',		- https://www2.illinois.gov/rev/research/taxinformation/WithholdingIncomeTax/Pages/default.aspx *Booklet IL-700-T
 CHANGED:14-Dec-19				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions
 CHANGED:14-Dec-19				'IA' => 'Iowa',			- https://tax.iowa.gov/withholding-tax-information *Iowa Withholding Tax Guide
 CHANGED:19-Dec-19				'SC' => 'South Carolina'- https://dor.sc.gov/tax/withholding/forms *Formula for Computing SC Withholding Tax WH-1603F
@@ -83,7 +83,7 @@ CHANGED:26-Dec-19				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/s
 
 *CHECKAGAIN-*:14-Dec-19			'AL' => 'Alabama' 		- https://revenue.alabama.gov/individual-corporate/taxes-administered-by-individual-corporate-income-tax/withholding-tax/ *Withholding Tax Tables and Instructions
 *CHECKAGAIN-*:14-Dec-19			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
-*CHECKAGAIN-*:14-Dec-19			'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
+*CHANGED-*:29-Jun-20			'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
 NOCHANGE:19-Dec-19				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
 
 //Change less often

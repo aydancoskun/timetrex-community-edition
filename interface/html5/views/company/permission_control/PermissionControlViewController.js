@@ -1,21 +1,27 @@
-PermissionControlViewController = BaseViewController.extend( {
-	el: '#permission_control_view_container',
+class PermissionControlViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#permission_control_view_container',
 
-	_required_files: [],
 
-	level_array: null,
-	user_api: null,
-	permission_array: null,
 
-	quick_search_dic: {},
+			level_array: null,
+			user_api: null,
+			permission_array: null,
 
-	//Save multi key typed when quick search
-	quick_search_typed_keys: '',
+			quick_search_dic: {},
 
-	//use to juedge if need to clear quick_search_this.quick_search_typed_keyss
-	quick_search_timer: null,
+			//Save multi key typed when quick search
+			quick_search_typed_keys: '',
 
-	init: function( options ) {
+			//use to juedge if need to clear quick_search_this.quick_search_typed_keyss
+			quick_search_timer: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PermissionControlEditView.html';
 		this.permission_id = 'permission';
@@ -24,18 +30,17 @@ PermissionControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'permission_control';
 		this.context_menu_name = $.i18n._( 'Permission Group' );
 		this.navigation_label = $.i18n._( 'Permission Group' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPermissionControl' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.api = TTAPI.APIPermissionControl;
+		this.user_api = TTAPI.APIUser;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	onKeyDown: function( e ) {
+	onKeyDown( e ) {
 		var focus = $( ':focus' );
 		var $this = this;
 
@@ -132,10 +137,9 @@ PermissionControlViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	setSubLogViewFilter: function() {
+	setSubLogViewFilter() {
 		if ( !this.sub_log_view_controller ) {
 			return false;
 		}
@@ -151,9 +155,9 @@ PermissionControlViewController = BaseViewController.extend( {
 		};
 
 		return true;
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: [{
@@ -165,18 +169,17 @@ PermissionControlViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setEditViewTabHeight: function() {
-		this._super( 'setEditViewTabHeight' );
+	setEditViewTabHeight() {
+		super.setEditViewTabHeight();
 
 		var permission_grid = this.edit_view_ui_dic.permission;
 
 		permission_grid.setHeight( ( this.edit_view_tab.height() - 325 ) );
+	}
 
-	},
-
-	onCustomContextClick: function( context_menu_id ) {
+	onCustomContextClick( context_menu_id ) {
 
 		var $this = this;
 
@@ -221,9 +224,9 @@ PermissionControlViewController = BaseViewController.extend( {
 
 				} );
 		}
-	},
+	}
 
-	removeDuplicatePermission: function() {
+	removeDuplicatePermission() {
 		var new_array = [];
 		$.each( this.current_edit_record.permission, function( i, el ) {
 			if ( $.inArray( el, new_array ) === -1 ) {
@@ -232,9 +235,9 @@ PermissionControlViewController = BaseViewController.extend( {
 		} );
 
 		this.current_edit_record.permission = new_array;
-	},
+	}
 
-	buildPermissionArray: function( result, valueOnly ) {
+	buildPermissionArray( result, valueOnly ) {
 
 		var arr = [];
 		var val_array = [];
@@ -265,10 +268,9 @@ PermissionControlViewController = BaseViewController.extend( {
 		} else {
 			return val_array;
 		}
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'level', 'level' );
@@ -280,10 +282,9 @@ PermissionControlViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -305,9 +306,9 @@ PermissionControlViewController = BaseViewController.extend( {
 		this.collectUIDataToCurrentEditRecord();
 		this.edit_view_ui_dic.permission.setGridColumnsWidths();
 		this.setEditViewDataDone();
-	},
+	}
 
-	convertPermissionData: function( permission ) {
+	convertPermissionData( permission ) {
 
 		var result = [];
 		for ( var key in permission ) {
@@ -321,9 +322,9 @@ PermissionControlViewController = BaseViewController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	buildSelectItems: function() {
+	buildSelectItems() {
 
 		var items = [];
 		var len = this.permission_array.length;
@@ -340,11 +341,11 @@ PermissionControlViewController = BaseViewController.extend( {
 		}
 
 		return items;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -357,7 +358,7 @@ PermissionControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPermissionControl' ) ),
+			api_class: TTAPI.APIPermissionControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PERMISSION_CONTROL,
@@ -404,7 +405,7 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -436,15 +437,15 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		form_item_input.setColumns( display_columns );
 		form_item_input.setUnselectedGridData( this.permission_array );
-	},
+	}
 
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 
 		records.permission = this.buildAPIFormPermissionResult();
 		return records;
-	},
+	}
 
-	buildAPIFormPermissionResult: function() {
+	buildAPIFormPermissionResult() {
 
 		var val = this.edit_view_ui_dic.permission.getValue();
 		var permission = {};
@@ -463,12 +464,11 @@ PermissionControlViewController = BaseViewController.extend( {
 		}
 
 		return permission;
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -492,7 +492,7 @@ PermissionControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -504,7 +504,7 @@ PermissionControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -513,4 +513,4 @@ PermissionControlViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

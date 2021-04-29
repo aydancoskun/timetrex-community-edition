@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -180,13 +180,13 @@ class APIPayStub extends APIFactory {
 
 		if ( $format == 'pdf' ) {
 			if ( $pslf->getRecordCount() > 0 ) {
-				$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
+				$this->getProgressBarObject()->setDefaultKey( $this->getAPIMessageID() );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pslf->getRecordCount() );
 				$pslf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
 
 				$output = $pslf->getPayStub( $pslf, (bool)$hide_employer_rows );
 
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 				if ( $output != '' ) {
 					return Misc::APIFileDownload( 'pay_stub.pdf', 'application/pdf', $output );
@@ -196,13 +196,13 @@ class APIPayStub extends APIFactory {
 			}
 		} else if ( ( $format == 'export_transactions' ) && $this->getPermissionObject()->Check( 'pay_stub', 'view' ) == true ) {
 			if ( $pslf->getRecordCount() > 0 ) {
-				$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
+				$this->getProgressBarObject()->setDefaultKey( $this->getAPIMessageID() );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pslf->getRecordCount() );
 				$pslf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
 
 				$output = $pslf->exportPayStubTransaction( $pslf, null, $data['setup_last_check_number'] );
 
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 				if ( is_array( $output ) && count( $output ) > 0 ) {
 					//Transmit agency reports to TimeTrex Payment Services
@@ -226,7 +226,7 @@ class APIPayStub extends APIFactory {
 			}
 		} else {
 			if ( $pslf->getRecordCount() > 0 ) {
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $pslf->getRecordCount() );
 
 				$this->setPagerObject( $pslf );
 
@@ -234,10 +234,10 @@ class APIPayStub extends APIFactory {
 				foreach ( $pslf as $ps_obj ) {
 					$retarr[] = $ps_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $pslf->getCurrentRow() );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $pslf->getCurrentRow() );
 				}
 
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 				return $this->returnHandler( $retarr );
 			}
@@ -314,7 +314,7 @@ class APIPayStub extends APIFactory {
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		$validator = $save_result = $key = false;
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
 				$primary_validator = new Validator();
@@ -608,10 +608,10 @@ class APIPayStub extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -649,7 +649,7 @@ class APIPayStub extends APIFactory {
 		$validator = $save_result = $key = false;
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -701,10 +701,10 @@ class APIPayStub extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -767,7 +767,7 @@ class APIPayStub extends APIFactory {
 			$epoch = TTDate::getTime();
 
 			Debug::text( 'Pay Period ID: ' . $pay_period_obj->getID() . ' Schedule ID: ' . $pay_period_obj->getPayPeriodSchedule() . ' Start Date: ' . TTDate::getDate( 'DATE', $pay_period_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10 );
-			if ( $pay_period_obj->isPreviousPayPeriodClosed() == true ) {
+			if ( PRODUCTION == FALSE || $pay_period_obj->isPreviousPayPeriodClosed() == true ) { //Allow generating pay stubs without closing each pay period when not in production.
 				$pslf = TTnew( 'PayStubListFactory' ); /** @var PayStubListFactory $pslf */
 
 				if ( (int)$run_id == 0 ) {
@@ -812,7 +812,7 @@ class APIPayStub extends APIFactory {
 				$total_pay_stubs = $ppsulf->getRecordCount();
 
 				if ( $total_pay_stubs > 0 ) {
-					$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_pay_stubs, null, TTi18n::getText( 'Generating Paystubs...' ) );
+					$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_pay_stubs, null, TTi18n::getText( 'Generating Paystubs...' ) );
 
 					//FIXME: If a pay stub already exists, it is deleted first, but then if the new pay stub fails to generate, the original one is
 					//  still deleted, so that can catch some people off guard if they don't fix the problem and re-generate the paystubs again.
@@ -867,7 +867,7 @@ class APIPayStub extends APIFactory {
 						unset( $cps );
 						$profiler->stopTimer( 'Calculating Pay Stub' );
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $i );
 
 						//sleep(1); /////////////////////////////// FOR TESTING ONLY //////////////////
 
@@ -875,7 +875,7 @@ class APIPayStub extends APIFactory {
 					}
 					unset( $ppsulf );
 
-					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+					$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 				} else {
 					Debug::text( 'ERROR: User not assigned to pay period schedule...', __FILE__, __LINE__, __METHOD__, 10 );
 					UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext( 'ERROR' ), 10, TTi18n::gettext( 'Unable to generate pay stub(s), employee(s) may not be assigned to a pay period schedule.' ), null );

@@ -1,21 +1,25 @@
-UserQualificationReportViewController = ReportBaseViewController.extend( {
+class UserQualificationReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIUserQualificationReport', 'APIQualification'],
+		} );
 
-	initReport: function( options ) {
+		super( options );
+	}
+
+	initReport( options ) {
 		this.script_name = 'UserQualificationReport';
 		this.viewId = 'UserQualificationReport';
 		this.context_menu_name = $.i18n._( 'Qualification Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'UserQualificationReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserQualificationReport' ) )();
-	},
+		this.api = TTAPI.APIUserQualificationReport;
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		return { include: ['default'] };
 	}
 
-
 	/* jshint ignore:end */
 
-} );
+}

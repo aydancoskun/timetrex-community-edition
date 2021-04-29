@@ -1,10 +1,16 @@
-ExceptionViewController = BaseViewController.extend( {
-	el: '#exception_view_container',
-	status_array: null,
+class ExceptionViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#exception_view_container',
+			status_array: null,
 
-	_required_files: ['APIException', 'APIPayPeriod', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APIExceptionPolicy', 'APIUserGroup'],
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'ExceptionEditView.html';
 		this.permission_id = 'punch';
@@ -12,7 +18,7 @@ ExceptionViewController = BaseViewController.extend( {
 		this.script_name = 'ExceptionView';
 		this.context_menu_name = $.i18n._( 'Exceptions' );
 		this.navigation_label = $.i18n._( 'Exception' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIException' ) )();
+		this.api = TTAPI.APIException;
 
 		this.initPermission();
 		this.render();
@@ -20,9 +26,9 @@ ExceptionViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.edit_employee:
 			case ContextMenuIconName.edit_pay_period:
@@ -32,9 +38,9 @@ ExceptionViewController = BaseViewController.extend( {
 				this.onNavigationClick( id );
 				break;
 		}
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -85,30 +91,27 @@ ExceptionViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
+	initPermission() {
 
-	initPermission: function() {
-
-		this._super( 'initPermission' );
+		super.initPermission();
 
 		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
 			this.show_search_tab = true;
 		} else {
 			this.show_search_tab = false;
 		}
+	}
 
-	},
-
-	autoOpenEditViewIfNecessary: function() {
+	autoOpenEditViewIfNecessary() {
 		//Auto open edit view. Should set in IndexController
 		//Don't have any edit view
 		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 2751
 		this.autoOpenEditOnlyViewIfNecessary();
+	}
 
-	},
-
-	setDefaultMenuEditEmployeeIcon: function( context_btn, grid_selected_length ) {
+	setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length ) {
 		if ( !this.editChildPermissionValidate( 'user' ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -118,9 +121,9 @@ ExceptionViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 		var select_item = this.getSelectedItem();
 		//There are cases where select_item might be null. The export button for example.
 		if ( select_item != null ) {
@@ -160,15 +163,15 @@ ExceptionViewController = BaseViewController.extend( {
 
 				break;
 		}
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
-		this.initDropDownOption( 'status', 'user_status_id', new ( APIFactory.getAPIClass( 'APIUser' ) )() );
-		this.initDropDownOption( 'severity', null, new ( APIFactory.getAPIClass( 'APIExceptionPolicy' ) )() );
-		this.initDropDownOption( 'type', 'exception_policy_type_id', new ( APIFactory.getAPIClass( 'APIExceptionPolicy' ) )() );
+		this.initDropDownOption( 'status', 'user_status_id', TTAPI.APIUser );
+		this.initDropDownOption( 'severity', null, TTAPI.APIExceptionPolicy );
+		this.initDropDownOption( 'type', 'exception_policy_type_id', TTAPI.APIExceptionPolicy );
 
-		var user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		var user_group_api = TTAPI.APIUserGroup;
 		user_group_api.getUserGroup( '', false, false, {
 			onResult: function( res ) {
 
@@ -182,10 +185,9 @@ ExceptionViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -230,9 +232,9 @@ ExceptionViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	getSearchPanelFilter: function( getFromTabIndex, save_temp_filter ) {
+	getSearchPanelFilter( getFromTabIndex, save_temp_filter ) {
 
 		if ( Global.isSet( getFromTabIndex ) ) {
 			var search_tab_select_index = getFromTabIndex;
@@ -281,10 +283,9 @@ ExceptionViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	onGridDblClickRow: function() {
+	onGridDblClickRow() {
 
 		var len = this.context_menu_array.length;
 
@@ -309,7 +310,7 @@ ExceptionViewController = BaseViewController.extend( {
 			}
 		}
 
-		for ( i = 0; i < len; i++ ) {
+		for ( var i = 0; i < len; i++ ) {
 
 			if ( need_break ) {
 				break;
@@ -328,12 +329,11 @@ ExceptionViewController = BaseViewController.extend( {
 					break;
 			}
 		}
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -351,7 +351,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
+				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -362,7 +362,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -404,7 +404,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -415,7 +415,7 @@ ExceptionViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -426,7 +426,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -437,7 +437,7 @@ ExceptionViewController = BaseViewController.extend( {
 				field: 'department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -449,7 +449,7 @@ ExceptionViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'title_id',
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -465,9 +465,9 @@ ExceptionViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 		column_filter.exception_color = true;
 		column_filter.exception_background_color = true;
@@ -476,9 +476,9 @@ ExceptionViewController = BaseViewController.extend( {
 		column_filter.pay_period_schedule_id = true;
 
 		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
-	},
+	}
 
-	setGridCellBackGround: function() {
+	setGridCellBackGround() {
 
 		var data = this.grid.getGridParam( 'data' );
 		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
@@ -504,8 +504,8 @@ ExceptionViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
-} );
+	}
+}
 
 ExceptionViewController.loadView = function() {
 

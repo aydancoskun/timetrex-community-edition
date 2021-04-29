@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,7 +41,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$dd = new DemoData();
-		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
+		$dd->setEnableQuickPunch( false );                     //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_' . uniqid( null, true ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
@@ -87,6 +88,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		return array_chunk( $retarr, $chunk_size );
 	}
 
+	/** @noinspection PhpMissingBreakStatementInspection */
 	function runSQLTestOnListFactory( $factory_name ) {
 		if ( class_exists( $factory_name ) ) {
 			$reflectionClass = new ReflectionClass( $factory_name );
@@ -166,29 +168,30 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 					switch ( $factory_name ) {
 						case 'RecurringScheduleControlListFactory':
 							$retarr = $lf->getAPIExpandedSearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
-							$this->assertNotEquals( $retarr, false );
+							$this->assertNotEquals( false, $retarr );
 							$this->assertTrue( is_object( $retarr ), true );
 
 							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
-							$this->assertNotEquals( $retarr, false );
+							$this->assertNotEquals( false, $retarr );
 							$this->assertTrue( is_object( $retarr ), true );
 							break;
 						case 'ScheduleListFactory':
 							$retarr = $lf->getSearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
-							$this->assertNotEquals( $retarr, false );
+							$this->assertNotEquals( false, $retarr );
 							$this->assertTrue( is_object( $retarr ), true );
 
 							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
-							$this->assertNotEquals( $retarr, false );
+							$this->assertNotEquals( false, $retarr );
 							$this->assertTrue( is_object( $retarr ), true );
 							break;
 						case 'MessageControlListFactory':
 							$filter_data['current_user_id'] = $this->user_id;
+							//break; //Intentional that break is not here so it spills into default?
 						default:
 							if ( method_exists( $lf, 'getAPISearchByCompanyIdAndArrayCriteria' ) ) {
 								//Make sure we test pagination, especially with subqueries and the need for _ADODB_COUNT workarounds, $limit = NULL, $page = NULL, $where = NULL, $order = NULL
 								$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, null, null );
-								$this->assertNotEquals( $retarr, false );
+								$this->assertNotEquals( false, $retarr );
 								$this->assertTrue( is_object( $retarr ), true );
 							}
 							break;
@@ -227,7 +230,6 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 			$raw_methods = $reflectionClass->getMethods( ReflectionMethod::IS_PUBLIC );
 			if ( is_array( $raw_methods ) ) {
-				global $db;
 				foreach ( $raw_methods as $raw_method ) {
 					if ( $factory_name == $raw_method->class
 							&& (
@@ -258,10 +260,6 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 												case 'key':
 													$input_argument = '900d6136975e3a728051a62ed119191034568745';
 													break;
-											}
-											break;
-										case 'ClientContactListFactory':
-											switch ( $method_parameter->name ) {
 												case 'name':
 													$input_argument = 'test';
 													break;
@@ -322,7 +320,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 										if ( in_array( $method_parameter->name, [ 'where', 'order', 'page' ] ) ) {
 											$input_argument = null;
 										} else if ( !isset( $input_argument ) && ( $method_parameter->name == 'id' || strpos( $method_parameter->name, '_id' ) !== false || $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
-											$input_argument = 'false'; //Try passing a string where ID is expected.
+											$input_argument = 'false';                                                                                                                                               //Try passing a string where ID is expected.
 										} else if ( !isset( $input_argument ) ) {
 											$input_argument = 2;
 										}
@@ -352,32 +350,31 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 										case 'CompanyListFactory::getByPhoneID':
 											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
-												$this->assertEquals( $retarr, false ); //This will be FALSE
+												$this->assertEquals( false, $retarr ); //This will be FALSE
 											} else {
-												$this->assertNotEquals( $retarr, false );
+												$this->assertNotEquals( false, $retarr );
 												$this->assertTrue( is_object( $retarr ), true );
 											}
 											break;
 										case 'MessageControlListFactory::getByCompanyIdAndObjectTypeAndObjectAndNotUser':
 											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
-											$this->assertEquals( $retarr, false ); //This will be FALSE, but it still executes a query.
+											$this->assertEquals( false, $retarr ); //This will be FALSE, but it still executes a query.
 											//$this->assertTrue( is_object($retarr), TRUE );
 											break;
-										case 'CompanyListFactory::getByPhoneID':
 										case 'PayStubEntryListFactory::getByPayStubIdAndEntryNameId':
 											//FUZZ tests should return FALSE, otherwise they should be normal.
 											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
-												$this->assertEquals( $retarr, false ); //This will be FALSE
+												$this->assertEquals( false, $retarr ); //This will be FALSE
 											} else {
-												$this->assertNotEquals( $retarr, false );
+												$this->assertNotEquals( false, $retarr );
 												$this->assertTrue( is_object( $retarr ), true );
 											}
 											break;
 										default:
 											$retarr = call_user_func_array( [ $lf, $raw_method->name ], $input_arguments );
 											//Debug::Arr($retarr, '    RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
-											$this->assertNotEquals( $retarr, false );
+											$this->assertNotEquals( false, $retarr );
 											$this->assertTrue( is_object( $retarr ), true );
 											break;
 									}
@@ -412,21 +409,36 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			$lf = TTNew( $factory_name );
 			if ( method_exists( $lf, 'getOptions' ) ) {
 				if ( method_exists( $lf, 'getAPISearchByCompanyIdAndArrayCriteria' ) ) {
-					$columns = array_fill_keys( array_keys( array_flip( array_keys( Misc::trimSortPrefix( $lf->getOptions( 'columns' ) ) ) ) ), 'asc' ); //Set sort order to ASC for all columns.
-					if ( is_array( $columns ) ) {
-						try {
-							//$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, array('a.bogus' => 'asc') );
-							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, [], 1, 1, null, $columns );
-							$this->assertNotEquals( $retarr, false );
-							$this->assertTrue( is_object( $retarr ), true );
-						} catch ( Exception $e ) {
-							Debug::Arr( $columns, 'Columns: ', __FILE__, __LINE__, __METHOD__, 10 );
+					$tmp_columns = $lf->getOptions( 'columns' );
+					if ( is_array( $tmp_columns ) && count( $tmp_columns ) > 0 ) {
+						$columns = array_fill_keys( array_keys( array_flip( array_keys( Misc::trimSortPrefix( $lf->getOptions( 'columns' ) ) ) ) ), 'asc' );        //Set sort order to ASC for all columns.
+						unset( $columns['tag'] );                                                                                                                   //Remove columns that we can never sort by.
+						if ( is_array( $columns ) ) {
+							try {
 
-							$this->assertTrue( false );
+								if ( !in_array( $factory_name, [ 'BankAccountListFactory' ] ) ) { //Skip legacy factories.
+									if ( $factory_name == 'MessageControlListFactory' ) {
+										$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, [ 'current_user_id' => TTUUID::getZeroID() ], 1, 1, null, $columns );
+									} else if ( $factory_name == 'RecurringScheduleControlListFactory' ) {
+										$retarr = $lf->getAPIExpandedSearchByCompanyIdAndArrayCriteria( $this->company_id, [ 'current_user_id' => TTUUID::getZeroID() ], 1, 1, null, $columns );
+									} else {
+										//$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, array('a.bogus' => 'asc') );
+										$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, [], 1, 1, null, $columns );
+									}
+
+									$this->assertNotEquals( false, $retarr );
+									$this->assertTrue( is_object( $retarr ), true );
+								}
+							} catch ( Exception $e ) {
+								Debug::Arr( $columns, 'Columns: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+								$this->assertTrue( false, $factory_name . ': ' . $e->getMessage() );
+							}
+						} else {
+							Debug::text( 'getOptions(\'columns\') does not return any data, skipping... Factory: ' . $factory_name, __FILE__, __LINE__, __METHOD__, 10 );
 						}
-					} else {
-						Debug::text( 'getOptions(\'columns\') does not return any data, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
 					}
+					unset( $tmp_columns );
 				}
 			} else {
 				Debug::text( 'getOptions() method does not exist, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -457,7 +469,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			//Run tests with count rows enabled, then with it disabled as well.
 			$db->pageExecuteCountRows = false;
 			foreach ( $class_list as $class_name ) {
-				//$this->runSQLSortTestOnListFactory( $class_name );  //FIXME: Re-enable when we have time and make sure all sorting works.
+				$this->runSQLSortTestOnListFactory( $class_name );
 				$this->runSQLTestOnListFactoryMethods( $class_name );
 				$this->runSQLTestOnListFactory( $class_name );
 			}
@@ -828,199 +840,211 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		//Boolean TRUE
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', (bool)true, 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 1 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 1, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', (int)1, 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 1 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 1, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', 1, 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 1 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 1, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', 1.00, 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 1 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 1, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', '1', 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 1 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 1, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', 'TRUE', 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 1 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 1, $ph[0] );
 
 
 		//Boolean FALSE
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', (bool)false, 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 0 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 0, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', (int)0, 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 0 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 0, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', 0, 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 0 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 0, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', 0.00, 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 0 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 0, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', '0', 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 0 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 0, $ph[0] );
 
 		$ph = [];
 		$retval = $method->invokeArgs( $ulf, [ 'a.private', 'FALSE', 'boolean', &$ph ] );
-		$this->assertEquals( $retval, ' AND a.private = ? ' );
-		$this->assertEquals( $ph[0], 0 );
+		$this->assertEquals( ' AND a.private = ? ', $retval );
+		$this->assertEquals( 0, $ph[0] );
 	}
 
+	/**
+	 * @group SQL_testTransactionNestingA
+	 */
 	function testTransactionNestingA() {
 		$uf = new UserFactory();
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 1 );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 1, $uf->db->transOff );
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 2 );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 2, $uf->db->transOff );
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 3 );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 3, $uf->db->transOff );
 
 		//$uf->FailTransaction();
 		$uf->CommitTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 2 );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 2, $uf->db->transOff );
 
 		$uf->CommitTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 1 );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 1, $uf->db->transOff );
 
 		$uf->CommitTransaction();
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 	}
 
+	/**
+	 * @group SQL_testTransactionNestingB
+	 */
 	function testTransactionNestingB() {
 		$uf = new UserFactory();
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 1 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 1, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 2 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 2, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 3 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 3, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 		$uf->FailTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 3 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 3, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 
 		$uf->CommitTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 2 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 2, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 
 		$uf->CommitTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 1 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 1, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 
 		$uf->CommitTransaction();
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 	}
 
+	/**
+	 * @group SQL_testTransactionNestingC
+	 */
 	function testTransactionNestingC() {
 		$uf = new UserFactory();
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 1 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 1, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 2 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 2, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 		$uf->StartTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 3 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 3, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 		$uf->FailTransaction();
-		$this->assertEquals( $uf->db->transCnt, 1 );
-		$this->assertEquals( $uf->db->transOff, 3 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 1, $uf->db->transCnt );
+		$this->assertEquals( 3, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 
 		$uf->CommitTransaction( true ); //Unest all transactions.
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 	}
 
+	/**
+	 * @group SQL_testTransactionNestingC2
+	 */
 	function testTransactionNestingC2() {
 		$uf = new UserFactory();
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 
 		$uf->StartTransaction();
@@ -1036,17 +1060,20 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$uf->CommitTransaction( true ); //Unest all transactions.
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 	}
 
+	/**
+	 * @group SQL_testTransactionNestingC3
+	 */
 	function testTransactionNestingC3() {
 		$uf = new UserFactory();
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, true );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( true, $uf->db->_transOK );
 
 
 		$uf->StartTransaction();
@@ -1064,8 +1091,8 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		$uf->CommitTransaction( true ); //Unest all transactions.
 
-		$this->assertEquals( $uf->db->transCnt, 0 );
-		$this->assertEquals( $uf->db->transOff, 0 );
-		$this->assertEquals( $uf->db->_transOK, false );
+		$this->assertEquals( 0, $uf->db->transCnt );
+		$this->assertEquals( 0, $uf->db->transOff );
+		$this->assertEquals( false, $uf->db->_transOK );
 	}
 }

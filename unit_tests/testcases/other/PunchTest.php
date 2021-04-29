@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,7 +46,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -182,7 +183,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( $new_shift_trigger_time );
@@ -215,6 +216,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					if ( $initial_date !== false ) {
@@ -707,7 +709,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -764,7 +766,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 
@@ -822,12 +824,12 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) ); //Make sure there are only two punches per shift.
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][1]['shift_data']['punches'] ) ); //Make sure there are only two punches per shift.
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] ); //Make sure there are only two punches per shift.
+		$this->assertCount( 2, $punch_arr[$date_epoch][1]['shift_data']['punches'] ); //Make sure there are only two punches per shift.
 
 		$this->assertNotEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['punch_control_id'], $punch_arr[$date_epoch][1]['shift_data']['punches'][0]['punch_control_id'] ); //Make sure punch_control_id from both shifts don't match.
 
@@ -871,7 +873,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -929,7 +931,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 
@@ -1001,7 +1003,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 3, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 3, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][2]['date_stamp'] );
@@ -1084,7 +1086,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Date 1
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['punch_control_id'], $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['punch_control_id'] ); //Make sure punch_control_id from both shifts DO match.
 
@@ -1096,7 +1098,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Date 2
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch2 ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 		$this->assertEquals( $punch_arr[$date_epoch2][0]['shift_data']['punches'][0]['punch_control_id'], $punch_arr[$date_epoch2][0]['shift_data']['punches'][1]['punch_control_id'] ); //Make sure punch_control_id from both shifts DO match.
 
@@ -1108,7 +1110,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Date 3
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch3 ), TTDate::getEndDayEpoch( $date_epoch3 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch3] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch3] );
 		$this->assertEquals( $date_epoch3, $punch_arr[$date_epoch3][0]['date_stamp'] );
 		$this->assertEquals( $punch_arr[$date_epoch3][0]['shift_data']['punches'][0]['punch_control_id'], $punch_arr[$date_epoch3][0]['shift_data']['punches'][1]['punch_control_id'] ); //Make sure punch_control_id from both shifts DO match.
 
@@ -1151,7 +1153,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -1196,7 +1198,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 
@@ -1258,7 +1260,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($punch_arr);
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][1]['date_stamp'] );
 
@@ -1305,7 +1307,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -1349,7 +1351,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -1396,7 +1398,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 
@@ -1443,7 +1445,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -1471,7 +1473,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$this->assertEquals( $punch_arr[$date_epoch2][0]['shift_data']['punches'][0]['punch_control_id'], $punch_arr[$date_epoch2][1]['shift_data']['punches'][0]['punch_control_id'] ); //Make sure punch_control_id from both shifts DO match.
@@ -1523,7 +1525,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -1563,11 +1565,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		//Date 1
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		//Date 2
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][1]['date_stamp'] );
 
 
@@ -1611,11 +1613,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($punch_arr);
 
 		//Date 1
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		//Date 2
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][2]['date_stamp'] );
 
 
@@ -1657,7 +1659,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($punch_arr);
 
 		//Date 1
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -1692,7 +1694,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($punch_arr);
 
 		//Date 1
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -1717,7 +1719,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
-		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
 		$dd->createPunch( $this->user_id, 10, 10, strtotime( $date_stamp . ' 12:00AM' ), [ 'branch_id' => 0, 'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ], true );
@@ -1727,7 +1728,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($punch_arr);
 
 		//Date 1
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -1811,8 +1812,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -1867,8 +1868,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -1925,10 +1926,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
 		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
-		$date_epoch2 = TTDate::getEndDayEpoch( $date_epoch ); //This accounts for DST.
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -1990,12 +1990,12 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 
-		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch );               //This accounts for DST.
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][1]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][1]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch][1]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][1]['shift_data']['punch_control_ids'] );
 
 		$this->assertNotEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['id'], $punch_arr[$date_epoch][1]['shift_data']['punches'][0]['id'] );
 
@@ -2003,11 +2003,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Since there is an IN punch and an OUT punch (they just aren't paired) a system total record of 0hrs will be created.
-		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] ); //5=System Total
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], TTUUID::getZeroID() );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 0 * 3600 ) );
 
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 1 );
+		$this->assertCount( 1, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -2060,8 +2060,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2121,8 +2121,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Day 1
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -2133,8 +2133,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Day 2
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch2 ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch2, $date_epoch2 );
@@ -2194,8 +2194,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Day 1
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -2221,7 +2221,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
-		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
 
 		//Create just an IN punch.
 		$dd->createPunchPair( $this->user_id,
@@ -2255,8 +2254,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2273,8 +2272,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2334,8 +2333,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2367,8 +2366,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		} else {
 			$this->assertTrue( false );
 		}
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2431,8 +2430,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($punch_arr);
 		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2463,8 +2462,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		} else {
 			$this->assertTrue( false );
 		}
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2523,8 +2522,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2556,8 +2555,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		} else {
 			$this->assertTrue( false );
 		}
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2584,7 +2583,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
-		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
 
 		//Create just an IN punch.
 		$dd->createPunchPair( $this->user_id,
@@ -2631,8 +2629,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 6, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 3, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 6, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 3, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2651,8 +2649,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
 
-		$this->assertEquals( 6, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 3, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 6, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 3, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2700,8 +2698,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		//Make sure previous day has no totals, but new day has proper totals.
@@ -2745,8 +2743,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		} else {
 			$this->assertTrue( false );
 		}
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2809,12 +2807,12 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2][1]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2][1]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2][1]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch2][1]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][1]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2849,8 +2847,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		} else {
 			$this->assertTrue( false );
 		}
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2913,8 +2911,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2943,8 +2941,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		} else {
 			$this->assertTrue( false );
 		}
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -2971,7 +2969,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Cause punch to switch days due to timezone, and not actually changing the dates.
 		//  Make sure that UDT records follow the date properly too.
 		//
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$this->createPayPeriodSchedule( 10 ); //Day shift starts on
 		$this->createPayPeriods();
@@ -3000,8 +2998,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -3010,10 +3008,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( ( 8 * 3600 ), $udt_arr[$date_epoch][0]['total_time'] );
 
 
-		TTDate::setTimeZone( 'MST7MDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Denver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		//After the timezone has been changed, re-get the date_epoch2 so it matches in the correct timezone.
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
-		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
 
 
 		//Edit punch to move out time into next day.
@@ -3032,8 +3029,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 			$this->assertTrue( true );
 		}
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -3042,7 +3039,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( ( 8 * 3600 ), $udt_arr[$date_epoch2][0]['total_time'] );
 
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		//Edit punch to move out time into next day.
 		$dd->editPunch( $punch_arr[$date_epoch2][0]['shift_data']['punches'][1]['id'],
@@ -3060,8 +3057,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 			$this->assertTrue( true );
 		}
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -3086,7 +3083,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ), 1, 'day' );
-		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
 
 		//Create just an IN punch.
 		$dd->createPunchPair( $this->user_id,
@@ -3120,8 +3116,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -3135,8 +3131,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
 
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -3230,8 +3226,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 4, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 4, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -3248,8 +3244,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( $date_epoch ); //This accounts for DST.
 		$date_epoch2 = TTDate::getMiddleDayEpoch( $date_epoch2 ); //This accounts for DST.
 
-		$this->assertEquals( 3, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 3, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -3269,8 +3265,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 			$this->assertTrue( false );
 		}
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch2][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch2][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids'] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -3312,7 +3308,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -3373,7 +3369,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -3435,7 +3431,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -3496,7 +3492,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -3565,7 +3561,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -3672,7 +3668,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -3756,7 +3752,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -3801,7 +3797,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count( $punch_arr ) );
+		$this->assertCount( 0, $punch_arr );
 
 		return true;
 	}
@@ -3842,8 +3838,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr ) );
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 1, $punch_arr );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$dd->createPunchPair( $this->user_id,
@@ -3862,8 +3858,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr ) );
-		$this->assertEquals( 3, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 1, $punch_arr );
+		$this->assertCount( 3, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 
@@ -3881,13 +3877,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										],
 										true
 		);
-		$this->assertEquals( $retval, false ); //Check that adding Punch fails.
+		$this->assertEquals( false, $retval ); //Check that adding Punch fails.
 
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr ) );
-		$this->assertEquals( 3, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
+		$this->assertCount( 1, $punch_arr );
+		$this->assertCount( 3, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		return true;
@@ -3935,7 +3931,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 4:45PM' ) );
@@ -4003,7 +3999,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:03PM' ) );
@@ -4057,7 +4053,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4111,7 +4107,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:03PM' ) );
@@ -4165,7 +4161,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4221,7 +4217,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4275,7 +4271,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:03PM' ) );
@@ -4329,7 +4325,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4387,7 +4383,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4443,7 +4439,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		//$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime($date_stamp.' 12:00PM') );
@@ -4499,7 +4495,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4555,7 +4551,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4612,7 +4608,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		//$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime($date_stamp.' 12:00PM') );
@@ -4668,7 +4664,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4726,7 +4722,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:00PM' ) );
@@ -4825,7 +4821,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:06PM' ) );
@@ -4925,7 +4921,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 12:06PM' ) );
@@ -4982,7 +4978,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03:03AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 4:46:07PM' ) );
@@ -5038,7 +5034,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:03:00AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 4:46:00PM' ) );
@@ -5098,7 +5094,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:17AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 4:43PM' ) );
@@ -5158,7 +5154,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:10AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:10PM' ) );
@@ -5220,7 +5216,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:17:00 AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 4:43:00 PM' ) );
@@ -5294,7 +5290,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:12AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:31PM' ) );
@@ -5367,7 +5363,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:12AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:12PM' ) );
@@ -5436,7 +5432,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:17AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 4:43PM' ) );
@@ -5505,7 +5501,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:10AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:10PM' ) );
@@ -5575,7 +5571,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:10AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:10PM' ) );
@@ -5646,7 +5642,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime( $date_stamp . ' 8:15AM' ) );
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime( $date_stamp . ' 5:10PM' ) );
@@ -5707,7 +5703,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 
@@ -5755,7 +5751,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 
@@ -5817,7 +5813,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 
@@ -5865,7 +5861,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 
@@ -5920,7 +5916,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -5930,8 +5926,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( ( 8 * 3600 ), $udt_arr[$date_epoch][0]['total_time'] );
 
-		$this->assertEquals( 1, count( $udt_arr ) );
-		$this->assertEquals( 2, count( $udt_arr[$date_epoch] ) );
+		$this->assertCount( 1, $udt_arr );
+		$this->assertCount( 2, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -5989,7 +5985,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][1]['date_stamp'] );
 
@@ -6002,8 +5998,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( ( 8 * 3600 ), $udt_arr[$date_epoch][0]['total_time'] );
 
-		$this->assertEquals( 1, count( $udt_arr ) );
-		$this->assertEquals( 3, count( $udt_arr[$date_epoch] ) );
+		$this->assertCount( 1, $udt_arr );
+		$this->assertCount( 3, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -6050,7 +6046,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -6060,8 +6056,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( ( 8 * 3600 ), $udt_arr[$date_epoch][0]['total_time'] );
 
-		$this->assertEquals( 1, count( $udt_arr ) );
-		$this->assertEquals( 2, count( $udt_arr[$date_epoch] ) );
+		$this->assertCount( 1, $udt_arr );
+		$this->assertCount( 2, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -6078,7 +6074,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
@@ -6108,8 +6103,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr ) ); //Make sure only one day exists.
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 1, $punch_arr );             //Make sure only one day exists.
+		$this->assertCount( 1, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch2, $date_epoch2 );
@@ -6121,8 +6116,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( ( 6.5 * 3600 ), $udt_arr[$date_epoch2][0]['total_time'] );
 
-		$this->assertEquals( 1, count( $udt_arr ) );
-		$this->assertEquals( 2, count( $udt_arr[$date_epoch2] ) );
+		$this->assertCount( 1, $udt_arr );
+		$this->assertCount( 2, $udt_arr[$date_epoch2] );
 
 		return true;
 	}
@@ -6169,8 +6164,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr ) ); //Make sure only one day exists.
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr );             //Make sure only one day exists.
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -6181,7 +6176,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( ( 7.5 * 3600 ), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//$this->assertEquals( 1, count($udt_arr) );
-		$this->assertEquals( 2, count( $udt_arr[$date_epoch] ) );
+		$this->assertCount( 2, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -6235,8 +6230,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr ) ); //Make sure only one day exists.
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
+		$this->assertCount( 1, $punch_arr );             //Make sure only one day exists.
+		$this->assertCount( 1, $punch_arr[$date_epoch] );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -6247,7 +6242,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( ( 8 * 3600 ), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//$this->assertEquals( 1, count($udt_arr) );
-		$this->assertEquals( 2, count( $udt_arr[$date_epoch] ) );
+		$this->assertCount( 2, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -6264,7 +6259,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $date_epoch ), 1, 'day' );
 		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
@@ -6301,8 +6295,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 1, count( $punch_arr ) ); //Make sure only one day exists.
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch2] ) );
+		$this->assertCount( 1, $punch_arr );             //Make sure only one day exists.
+		$this->assertCount( 1, $punch_arr[$date_epoch2] );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -6313,7 +6307,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( ( 8 * 3600 ), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		//$this->assertEquals( 1, count($udt_arr) );
-		$this->assertEquals( 2, count( $udt_arr[$date_epoch2] ) );
+		$this->assertCount( 2, $udt_arr[$date_epoch2] );
 
 		return true;
 	}
@@ -6336,11 +6330,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
-		$schedule_a = $this->createSchedule( $this->user_id, $date_epoch, [
+		$this->createSchedule( $this->user_id, $date_epoch, [
 				'schedule_policy_id' => $schedule_policy_id,
 				'start_time'         => ' 8:00AM',
 				'end_time'           => '1:00PM',
@@ -6359,10 +6352,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 		$epoch = strtotime( $date_stamp . ' 1:00PM' );
-
-		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$ulf->getById( $this->user_id );
-		$user_obj = $ulf->getCurrent();
 
 		$plf = TTNew( 'PunchFactory' ); /** @var PunchFactory $plf */
 		$plf->setUser( $this->user_id );
@@ -6393,7 +6382,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
@@ -6405,7 +6393,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 				'department_id'      => $this->tmp_department_id[0],
 		] );
 
-		$schedule_b = $this->createSchedule( $this->user_id, $date_epoch, [
+		$this->createSchedule( $this->user_id, $date_epoch, [
 				'schedule_policy_id' => $schedule_policy_id,
 				'start_time'         => ' 1:00PM',
 				'end_time'           => '5:00PM',
@@ -6416,10 +6404,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 		$epoch = strtotime( $date_stamp . ' 1:00PM' );
-
-		$ulf = TTNew( 'UserListFactory' ); /** @var UserListFactory $ulf */
-		$ulf->getById( $this->user_id );
-		$user_obj = $ulf->getCurrent();
 
 		$plf = TTNew( 'PunchFactory' ); /** @var PunchFactory $plf */
 		$plf->setUser( $this->user_id );
@@ -6437,7 +6421,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testDefaultPunchSettingsNoScheduleA() {
 		//No defaults in station or employee profile.
-		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
@@ -7096,7 +7079,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$prev_punch_obj = TTnew( 'PunchListFactory' ); /** @var PunchListFactory $prev_punch_obj */
 		$status_id = false;
-		$type_id = false;
 
 		//Test similar functionality to what the timeclock would use to avoid duplicate punches.
 		//This is different than what the mobile app would do though, as the mobile app needs to be able to refresh its default punch settings immediately.
@@ -7108,7 +7090,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 			$prev_punch_obj->setUser( $user_obj->getId() );
 
 			$status_id = $prev_punch_obj->getNextStatus();
-			$type_id = $prev_punch_obj->getNextType( $epoch ); //Detects breaks/lunches too.
+			//$type_id = $prev_punch_obj->getNextType( $epoch ); //Detects breaks/lunches too.
 		}
 
 		//If previous punch actual time matches current punch time, we can skip the auto-status logic
@@ -7139,7 +7121,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
@@ -7193,7 +7174,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
@@ -7582,7 +7562,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
@@ -7807,7 +7786,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 //		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10, TTUUID::getZeroID() );
@@ -8035,7 +8013,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
-		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		//$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10, TTUUID::getZeroID() );
@@ -8092,7 +8069,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
-		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
 
 		$dd->createPunchPair( $this->user_id,
 							  strtotime( $date_stamp . ' 1:00AM' ),
@@ -8108,11 +8084,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 							  true
 		);
 
-		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch, 1 ), TTDate::getEndDayEpoch( $date_epoch2, 1 ) );
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -8137,7 +8113,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
 
 		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
-		$date_stamp2 = TTDate::getDate( 'DATE', $date_epoch2 );
 
 		$dd->createPunchPair( $this->user_id,
 							  strtotime( $date_stamp . ' 1:00AM' ),
@@ -8153,12 +8128,12 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 							  true
 		);
 
-		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch, 1 ), TTDate::getEndDayEpoch( $date_epoch2, 1 ) );
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count( $punch_arr ) );
+		$this->assertCount( 0, $punch_arr );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
-		$this->assertEquals( 0, count( $udt_arr ) );
+		$this->assertCount( 0, $udt_arr );
 
 		return true;
 	}
@@ -8208,14 +8183,14 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 							  true
 		);
 
-		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch, 1 ), TTDate::getEndDayEpoch( $date_epoch2, 1 ) );
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][1]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][1]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][1]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][1]['shift_data']['punch_control_ids'] );
 
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
@@ -8273,11 +8248,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 							  true
 		);
 
-		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch, 1 ), TTDate::getEndDayEpoch( $date_epoch2, 1 ) );
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch( $date_epoch ), TTDate::getEndDayEpoch( $date_epoch2 ) );
 		//print_r($punch_arr);
 
-		$this->assertEquals( 2, count( $punch_arr[$date_epoch][0]['shift_data']['punches'] ) );
-		$this->assertEquals( 1, count( $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] ) );
+		$this->assertCount( 2, $punch_arr[$date_epoch][0]['shift_data']['punches'] );
+		$this->assertCount( 1, $punch_arr[$date_epoch][0]['shift_data']['punch_control_ids'] );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
@@ -8289,7 +8264,55 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group testUserDateTotalDateStampMidDayEpochA
+	 */
+	function testUserDateTotalDateStampMidDayEpochA() {
+		//Make sure UserDateTotalFactory->getDateStamp() always returns middle day epoch so we don't have to convert it all the time in all the CalculatePolicy loops.
+		$udtf = TTNew( 'UserDateTotalFactory' );
+		$udtf->setDateStamp( strtotime('01-Jan-2020 08:00:00') );
+		$this->assertEquals( strtotime('01-Jan-2020 12:00:00'), $udtf->getDateStamp() );
+	}
+
+	/**
+	 * @group testUserDateTotalDateStampMidDayEpochB
+	 */
+	function testUserDateTotalDateStampMidDayEpochB() {
+		//Make sure UserDateTotalFactory->getDateStamp() always returns middle day epoch so we don't have to convert it all the time in all the CalculatePolicy loops.
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ); //Start weeks on Monday so DST switchover does cause problems.
+		$date_stamp = TTDate::getDate( 'DATE', $date_epoch );
+
+		$date_epoch2 = TTDate::incrementDate( TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ), 1, 'day' );
+
+		$dd->createPunchPair( $this->user_id,
+							  strtotime( $date_stamp . ' 1:00AM' ),
+							  strtotime( $date_stamp . ' 4:30PM' ),
+							  [
+									  'in_type_id'    => 10,
+									  'out_type_id'   => 10,
+									  'branch_id'     => 0,
+									  'department_id' => 0,
+									  'job_id'        => 0,
+									  'job_item_id'   => 0,
+							  ],
+							  true
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//var_dump($udt_arr);
+
+		$this->assertCount( 1, $udt_arr[$date_epoch] );
+		$this->assertEquals( TTDate::getMiddleDayEpoch($date_epoch), $udt_arr[$date_epoch][0]['date_stamp'] );
+	}
+
+	/**
 	 * @group SQL_UniqueConstraint
+	 * @noinspection PhpInconsistentReturnPointsInspection
 	 */
 	function testSQLUniqueConstraintError() {
 		global $config_vars;
@@ -8298,8 +8321,6 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		if ( stripos( $config_vars['database']['host'], ',' ) !== false ) {
 			return true;
 		}
-
-		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods( strtotime( '01-Jan-2013' ) );
@@ -8370,7 +8391,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 			$this->assertTRUE( false ); //Should never get here
 		} catch ( Exception $e ) {
-			$this->assertEquals( $e->getCode(), -5 );
+			$this->assertEquals( -5, $e->getCode() );
 //			try {
 //				$this->assertEquals( $e->getCode(), -5 );
 //				throw new DBError($e);
@@ -8387,33 +8408,31 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	 * @group Punch_testStationCheckSource
 	 */
 	function testStationCheckSourceNetMask() {
-		global $dd;
-
 		include_once( 'Net/IPv4.php' );
 		include_once( 'Net/IPv6.php' );
 
 		$ipv4 = '75.157.242.71';
 		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
-		$this->assertEquals( Net_IPv4::validateIP( $ipv4 ), true );
-		$this->assertEquals( Net_IPv4::validateIP( $ipv6 ), false );
-		$this->assertEquals( Net_IPv4::ipInNetwork( $ipv4, $ipv4 ), false );
-		$this->assertEquals( Net_IPv4::ipInNetwork( $ipv4, '75.157.242.71/32' ), true );
-		$this->assertEquals( Net_IPv4::ipInNetwork( $ipv4, '75.157.242.0/24' ), true );
+		$this->assertEquals( true, Net_IPv4::validateIP( $ipv4 ) );
+		$this->assertEquals( false, Net_IPv4::validateIP( $ipv6 ) );
+		$this->assertEquals( false, Net_IPv4::ipInNetwork( $ipv4, $ipv4 ) );
+		$this->assertEquals( true, Net_IPv4::ipInNetwork( $ipv4, '75.157.242.71/32' ) );
+		$this->assertEquals( true, Net_IPv4::ipInNetwork( $ipv4, '75.157.242.0/24' ) );
 
 
-		$this->assertEquals( Net_IPv6::checkIPv6( $ipv6 ), true );
-		$this->assertEquals( Net_IPv6::checkIPv6( $ipv4 ), false );
+		$this->assertEquals( true, Net_IPv6::checkIPv6( $ipv6 ) );
+		$this->assertEquals( false, Net_IPv6::checkIPv6( $ipv4 ) );
 
 
-		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, $ipv6, 128 ), true );
-		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61', 128 ), false );
-		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61/128' ), false );
-		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61/128', 4 ), true ); //The specified bits overrides any netmask in the string.
+		$this->assertEquals( true, Net_IPv6::isInNetmask( $ipv6, $ipv6, 128 ) );
+		$this->assertEquals( false, Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61', 128 ) );
+		$this->assertEquals( false, Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61/128' ) );
+		$this->assertEquals( true, Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61/128', 4 ) ); //The specified bits overrides any netmask in the string.
 
-		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e::', 112 ), true );
-		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e::/112' ), true );
-		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4f::', 112 ), false );
-		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4f::/112' ), false );
+		$this->assertEquals( true, Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e::', 112 ) );
+		$this->assertEquals( true, Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e::/112' ) );
+		$this->assertEquals( false, Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4f::', 112 ) );
+		$this->assertEquals( false, Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4f::/112' ) );
 	}
 
 	/**
@@ -8435,9 +8454,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		}
 		unset( $slf );
 		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 	}
 
 	/**
@@ -8459,9 +8478,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		}
 		unset( $slf );
 		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 	}
 
 	/**
@@ -8483,9 +8502,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		}
 		unset( $slf );
 		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 	}
 
 	/**
@@ -8507,15 +8526,15 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		}
 		unset( $slf );
 		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1'; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 
 		$_SERVER['REMOTE_ADDR'] = '76.1.1.1'; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 
 		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 	}
 
 	/**
@@ -8537,9 +8556,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		}
 		unset( $slf );
 		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 	}
 
 	/**
@@ -8561,13 +8580,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		}
 		unset( $slf );
 		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 
 		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 
 		$_SERVER['REMOTE_ADDR'] = '2001:569:f9f0:d900:218:f3ff:fe4f:3333'; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 	}
 
 	/**
@@ -8589,17 +8608,17 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		}
 		unset( $slf );
 		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 
 		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 		$_SERVER['REMOTE_ADDR'] = '2005:569:f9f0:d900:218:f3ff:fe4e:bd60'; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), true );
+		$this->assertEquals( true, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 
 		$_SERVER['REMOTE_ADDR'] = '2001:569:f9f0:d900:218:f3ff:fe4f:3333'; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 		$_SERVER['REMOTE_ADDR'] = '2004:569:f9f0:d900:218:f3ff:fe4f:3333'; //Fake remote IP address for testing.
-		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), false );
+		$this->assertEquals( false, $current_station->checkAllowed( $this->user_id, $station_id, $station_type ) );
 	}
 }
 

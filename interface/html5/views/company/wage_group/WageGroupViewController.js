@@ -1,9 +1,15 @@
-WageGroupViewController = BaseViewController.extend( {
-	el: '#wage_group_view_container',
+class WageGroupViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#wage_group_view_container',
 
-	_required_files: ['APIWageGroup'],
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'WageGroupEditView.html';
 		this.permission_id = 'wage';
@@ -12,28 +18,27 @@ WageGroupViewController = BaseViewController.extend( {
 		this.table_name_key = 'wage_group';
 		this.context_menu_name = $.i18n._( 'Secondary Wage Groups' );
 		this.navigation_label = $.i18n._( 'Secondary Wage Groups' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIWageGroup' ) )();
+		this.api = TTAPI.APIWageGroup;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'UserTitle' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -44,7 +49,7 @@ WageGroupViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIWageGroup' ) ),
+			api_class: TTAPI.APIWageGroup,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.WAGE_GROUP,
@@ -71,12 +76,11 @@ WageGroupViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_secondary_wage_group_column1, 'first_last' );
 
 		form_item_input.parent().width( '45%' );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -93,7 +97,7 @@ WageGroupViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -105,7 +109,7 @@ WageGroupViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -114,4 +118,4 @@ WageGroupViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

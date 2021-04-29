@@ -1,22 +1,27 @@
-SavedReportViewController = BaseViewController.extend( {
-	el: '#saved_report_view_container',
+class SavedReportViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#saved_report_view_container',
 
-	//Issue #1187 - Many of these variables are needed when this view is rendered as a sub view
-	//in that case, init() will not be run so those variables need to be defined at load time instead.
+			//Issue #1187 - Many of these variables are needed when this view is rendered as a sub view
+			//in that case, init() will not be run so those variables need to be defined at load time instead.
 
-	_required_files: ['APIUserReportData', 'APIUser'],
-	sub_report_schedule_view_controller: null,
-	edit_view_tpl: 'SavedReportEditView.html',
-	permission_id: 'report',
-	viewId: 'SavedReport',
-	script_name: 'UserReportDataView',
-	table_name_key: 'user_report_data',
-	context_menu_name: $.i18n._( 'Reports' ),
-	navigation_label: $.i18n._( 'Saved Report' ) + ':',
+			sub_report_schedule_view_controller: null,
+			edit_view_tpl: 'SavedReportEditView.html',
+			permission_id: 'report',
+			viewId: 'SavedReport',
+			script_name: 'UserReportDataView',
+			table_name_key: 'user_report_data',
+			context_menu_name: $.i18n._( 'Reports' ),
+			navigation_label: $.i18n._( 'Saved Report' ) + ':',
 
-	api: new ( APIFactory.getAPIClass( 'APIUserReportData' ) )(),
+			api: TTAPI.APIUserReportData
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 
 		this.render();
 		if ( this.sub_view_mode ) {
@@ -30,10 +35,9 @@ SavedReportViewController = BaseViewController.extend( {
 			}
 			this.setSelectRibbonMenuIfNecessary();
 		}
+	}
 
-	},
-
-	onDeleteResult: function( result, remove_ids ) {
+	onDeleteResult( result, remove_ids ) {
 		var $this = this;
 		ProgressBar.closeOverlay();
 
@@ -52,9 +56,9 @@ SavedReportViewController = BaseViewController.extend( {
 		} else {
 			TAlertManager.showErrorAlert( result );
 		}
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.share_report:
 
@@ -72,9 +76,9 @@ SavedReportViewController = BaseViewController.extend( {
 
 				break;
 		}
-	},
+	}
 
-	onGridDblClickRow: function() {
+	onGridDblClickRow() {
 		ProgressBar.showOverlay();
 
 		if ( this.sub_view_mode ) {
@@ -82,10 +86,9 @@ SavedReportViewController = BaseViewController.extend( {
 		} else {
 			this.onViewClick();
 		}
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				share: {
@@ -121,16 +124,15 @@ SavedReportViewController = BaseViewController.extend( {
 		}
 
 		return context_menu_model;
-	},
+	}
 
-	removeEditView: function() {
+	removeEditView() {
 
-		this._super( 'removeEditView' );
+		super.removeEditView();
 		this.sub_report_schedule_view_controller = null;
+	}
 
-	},
-
-	getGridSetup: function() {
+	getGridSetup() {
 		var $this = this;
 
 		var grid_setup = {
@@ -174,10 +176,9 @@ SavedReportViewController = BaseViewController.extend( {
 		}
 
 		return grid_setup;
+	}
 
-	},
-
-	onViewClick: function( edit_record, noRefreshUI ) {
+	onViewClick( edit_record, noRefreshUI ) {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var id = grid_selected_id_array[0];
 
@@ -245,11 +246,11 @@ SavedReportViewController = BaseViewController.extend( {
 				IndexViewController.openReport( this, report_name );
 			}
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 		var $this = this;
 
 		var tab_model = {
@@ -261,7 +262,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIUserReportData' ) ),
+				api_class: TTAPI.APIUserReportData,
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SAVED_REPORT,
@@ -306,12 +307,11 @@ SavedReportViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_report_column1, '', null, null, true );
 
 		form_item_input.parent().width( '45%' );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 			new SearchField( {
 				label: $.i18n._( 'Name' ),
@@ -335,7 +335,7 @@ SavedReportViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -347,7 +347,7 @@ SavedReportViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -356,17 +356,15 @@ SavedReportViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
+	}
 
-	initSubReportScheduleView: function() {
+	initSubReportScheduleView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
 			TTPromise.resolve( 'BaseViewController', 'onTabShow' ); //Since search() isn't called in this case, and we just display the "Please Save This Record ..." message, resolve the promise.
 			return;
 		}
-
-		$this.sub_view_mode = true;
 
 		if ( Global.getProductEdition() >= 15 ) {
 			if ( this.sub_report_schedule_view_controller ) {
@@ -414,9 +412,9 @@ SavedReportViewController = BaseViewController.extend( {
 
 			$this.sub_report_schedule_view_controller.initData(); //Init data in this parent view
 		}
-	},
+	}
 
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 
 		// Remove in next commit, related to #2698 fix, no longer needed but semi-big refactor to remove
 		// if ( records.hasOwnProperty( 'data' ) && records.data.hasOwnProperty( 'config' ) && records.data.config.hasOwnProperty( 'filter' ) ) {
@@ -424,24 +422,24 @@ SavedReportViewController = BaseViewController.extend( {
 		// }
 
 		return records;
-	},
+	}
 
-	onSaveDone: function( result ) {
+	onSaveDone( result ) {
 		//onSaveDoneCallback is set in Report controller
 		if ( this.parent_view_controller && this.parent_view_controller.onSaveDoneCallback ) {
 			this.parent_view_controller.onSaveDoneCallback( result, this.current_edit_record );
 		}
-	},
+	}
 
-	onSaveAndContinueDone: function( result ) {
+	onSaveAndContinueDone( result ) {
 		this.onSaveDone( result );
-	},
+	}
 
-	onSaveAndNextDone: function( result ) {
+	onSaveAndNextDone( result ) {
 		this.onSaveDone( result );
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 		column_filter.id = true;
 		column_filter.is_owner = true;
@@ -464,9 +462,9 @@ SavedReportViewController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	onAddClick: function( reportData ) {
+	onAddClick( reportData ) {
 
 		ProgressBar.closeOverlay();
 		var $this = this;
@@ -474,17 +472,16 @@ SavedReportViewController = BaseViewController.extend( {
 		$this.openEditView();
 		$this.current_edit_record = reportData;
 		$this.initEditView();
+	}
 
-	},
-
-	searchDone: function() {
+	searchDone() {
 		$( 'window' ).trigger( 'resize' );
 		if ( this.sub_view_mode ) {
 			TTPromise.resolve( 'SubSavedReportView', 'init' );
 		}
-		this._super( 'searchDone' );
+		super.searchDone();
 	}
-} );
+}
 
 SavedReportViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -581,7 +581,7 @@ class LegalEntityFactory extends Factory {
 			$value = $this->getPaymentServicesAPIKey();
 		}
 
-		return Misc::censorString( $value, 'X', 1, 6, 1, 6 );
+		return Misc::censorString( $value, '*', 1, 6, 1, 6 );
 	}
 
 	/**
@@ -608,7 +608,7 @@ class LegalEntityFactory extends Factory {
 		//If X's are in the key, skip setting it
 		// Also if a colon is in the key, its likely an encrypted string, also skip.
 		//This allows them to change other data without seeing the account number.
-		if ( stripos( $value, 'X' ) !== false || stripos( $value, ':' ) !== false ) {
+		if ( stripos( $value, '*' ) !== false || stripos( $value, ':' ) !== false ) {
 			return false;
 		}
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -413,11 +413,11 @@ class AuditTrailReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $columns );
 			$this->tmp_data['user'][$u_obj->getId()]['user_status'] = Option::getByKey( $u_obj->getStatus(), $u_obj->getOptions( 'status' ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Debug::Arr($this->tmp_data['user'], 'TMP User Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -430,11 +430,11 @@ class AuditTrailReport extends Report {
 			$llf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, 5000 );
 
 			Debug::Text( ' Log Rows: ' . $llf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $llf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $llf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 			foreach ( $llf as $key => $l_obj ) {
 				$this->tmp_data['log'][$l_obj->getUser()][] = array_merge( (array)$l_obj->getObjectAsArray( $columns ), [ 'total_log' => 1 ] );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 			//Debug::Arr($this->tmp_data['log'], 'TMP Log Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -447,7 +447,7 @@ class AuditTrailReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['log'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['log'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 		if ( isset( $this->tmp_data['user'] ) ) {
 			$key = 0;
 			if ( isset( $this->tmp_data['log'] ) ) {
@@ -458,7 +458,7 @@ class AuditTrailReport extends Report {
 						}
 					}
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 					$key++;
 				}
 			}

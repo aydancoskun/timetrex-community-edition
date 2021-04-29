@@ -1,25 +1,26 @@
-/*
- * $License$
- */
+class PayStubTransactionSummaryReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-PayStubTransactionSummaryReportViewController = ReportBaseViewController.extend( {
+		} );
 
-	_required_files: ['APIPayStubTransactionSummaryReport', 'APIPayStub'],
+		super( options );
+	}
 
-	initReport: function( options ) {
+	initReport( options ) {
 		this.script_name = 'PayStubTransactionSummaryReport';
 		this.viewId = 'PayStubTransactionSummaryReport';
 		this.context_menu_name = $.i18n._( 'Pay Stub Transaction Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'PayStubTransactionSummaryReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayStubTransactionSummaryReport' ) )();
-	},
+		this.api = TTAPI.APIPayStubTransactionSummaryReport;
+	}
 
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 		this.processTransactions( id );
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				export: {
@@ -40,9 +41,9 @@ PayStubTransactionSummaryReportViewController = ReportBaseViewController.extend(
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.direct_deposit:
 				if ( !this.validate( true ) ) {
@@ -53,4 +54,4 @@ PayStubTransactionSummaryReportViewController = ReportBaseViewController.extend(
 				break;
 		}
 	}
-} );
+}

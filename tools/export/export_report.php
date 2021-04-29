@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,13 +48,14 @@ if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output .= "\n";
 	$help_output .= "  Options:\n";
 	$help_output .= "    -server <URL>				URL to API server\n";
-	$help_output .= "    -username <username>		API username\n";
-	$help_output .= "    -password <password>		API password\n";
-	$help_output .= "    -report <report>			Report to export (ie: TimesheetDetailReport,TimesheetSummaryReport,ScheduleSummaryReport,UserSummaryReport,PayStubSummaryReport)\n";
-	$help_output .= "    -saved_report <name>		Name of saved report\n";
-	$help_output .= "    -template <template>		Name of template\n";
-	$help_output .= "    -time_period <name>		Time Period for report\n";
-	$help_output .= "    -filter <name>=<value>,<name>=<value>		Other filter options\n";
+	$help_output .= "    -username <username>			API username\n";
+	$help_output .= "    -password <password>			API password\n";
+	$help_output .= "    -api_key <key>				API key to use instead of username/password\n";
+	$help_output .= "    -report <report>				Report to export (ie: TimesheetDetailReport,TimesheetSummaryReport,ScheduleSummaryReport,UserSummaryReport,PayStubSummaryReport)\n";
+	$help_output .= "    -saved_report <name>			Name of saved report\n";
+	$help_output .= "    -template <template>			Name of template\n";
+	$help_output .= "    -time_period <name>				Time Period for report\n";
+	$help_output .= "    -filter <name>=<value>,<name>=<value> 	Other filter options\n";
 
 	echo $help_output;
 } else {
@@ -83,6 +84,12 @@ if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$password = trim( $argv[ array_search( '-password', $argv ) + 1 ] );
 	} else {
 		$password = false;
+	}
+
+	if ( in_array( '-api_key', $argv ) ) {
+		$api_key = trim( $argv[ array_search( '-api_key', $argv ) + 1 ] );
+	} else {
+		$api_key = false;
 	}
 
 	if ( in_array( '-report', $argv ) ) {
@@ -147,13 +154,22 @@ if ( $argc < 3 OR in_array( $argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 	$TIMETREX_URL = $api_url;
 
-	$api_session = new TimeTrexClientAPI();
-	$api_session->Login( $username, $password );
-	if ( $TIMETREX_SESSION_ID == false ) {
-		echo "API Username/Password is incorrect!\n";
-		exit( 1 );
+	if ( isset($api_key) && $api_key != '' ) {
+		$TIMETREX_SESSION_ID = $api_key;
+		$api_session = new TimeTrexClientAPI();
+		//if ( $api_session->isLoggedIn() == false ) {
+		//	echo "API Key is incorrect!\n";
+		//	exit( 1 );
+		//}
+	} else {
+		$api_session = new TimeTrexClientAPI();
+		$api_session->Login( $username, $password );
+		if ( $TIMETREX_SESSION_ID == false ) {
+			echo "API Username/Password is incorrect!\n";
+			exit( 1 );
+		}
+		//echo "Session ID: $TIMETREX_SESSION_ID\n";
 	}
-	//echo "Session ID: $TIMETREX_SESSION_ID\n";
 
 	if ( $report != '' ) {
 		$report_obj = new TimeTrexClientAPI( $report );

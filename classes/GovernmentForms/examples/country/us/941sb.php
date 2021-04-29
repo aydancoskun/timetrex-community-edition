@@ -1,4 +1,8 @@
-require_once('../../../GovernmentForms/GovernmentForms.class.php');
+<?php
+
+require_once( '../../../../../includes/global.inc.php' );
+require_once( '../../../../GovernmentForms/GovernmentForms.class.php' );
+
 $gf = new GovernmentForms();
 $gf->tcpdf_dir = '../tcpdf';
 $gf->fpdi_dir = '../fpdi';
@@ -116,4 +120,4 @@ $f941sb_obj->month3 = array(
 $gf->addForm( $f941sb_obj );
 $output = $gf->output( 'PDF' );
 file_put_contents( '941sb.pdf', $output );
-
+?>

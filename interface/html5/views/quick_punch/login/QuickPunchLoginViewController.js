@@ -1,18 +1,19 @@
-QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
-	events: {
-		'change #language': 'onLanguageChange'
-	},
-	authentication_api: null,
-	_required_files: [
-		'APIPunch',
-		'APIAuthentication',
-		'APICurrentUser',
-		//'APICurrency',
-		'APIUserPreference',
-		'APIDate',
-		'APIPermission'
-	],
-	initialize: function() {
+class QuickPunchLoginViewController extends QuickPunchBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			events: {
+				'change #language': 'onLanguageChange'
+			},
+			authentication_api: null,
+
+		} );
+
+		super( options );
+	}
+
+	initialize( options ) {
+		super.initialize( options );
+
 		var row = Global.loadWidget( 'views/quick_punch/login/QuickPunchLoginView.html' );
 		this.template = _.template( row );
 		this.setElement( this.template( {} ) );
@@ -22,19 +23,19 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 
 		var $this = this;
 		require( this.filterRequiredFiles(), function() {
-			$this.api = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
-			$this.authentication_api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
-			$this.currentUser_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
-			// this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
-			$this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
-			$this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-			$this.permission_api = new ( APIFactory.getAPIClass( 'APIPermission' ) )();
+			$this.api = TTAPI.APIPunch;
+			$this.authentication_api = TTAPI.APIAuthentication;
+			$this.currentUser_api = TTAPI.APIAuthentication;
+			$this.user_preference_api = TTAPI.APIUserPreference;
+			$this.date_api = TTAPI.APITTDate;
+			$this.permission_api = TTAPI.APIPermission;
 			$this.edit_view_error_ui_dic = {};
 			LocalCacheData.all_url_args = {};
 			$this.render();
 		} );
-	},
-	render: function() {
+	}
+
+	render() {
 		var $this = this;
 		this.login_btn = this.$( 'button#punch_login' );
 		this.login_btn.on( 'click', function( e ) {
@@ -63,7 +64,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 			}
 		} );
 		return this;
-	},
+	}
 
 	// doLogin: function ( e ) {
 	//     if ( e.keyCode === 13 ) {
@@ -71,7 +72,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 	//     }
 	// },
 
-	onLogin: function( e ) {
+	onLogin( e ) {
 		var $this = this;
 		var quick_punch_id = this.$( '#quick_punch_id' ).val();
 		var quick_punch_password = this.$( '#quick_punch_password' ).val();
@@ -94,7 +95,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 					setCookie( 'SessionID-QP', result.SessionID, { expires: 30, path: LocalCacheData.cookie_path } );
 
 					TTPromise.add( 'QPLogin', 'Permissions' );
-					$this.permission_api.getPermission( {
+					$this.permission_api.getPermissions( {
 						onResult: function( permissionRes ) {
 							var permission_result = permissionRes.getResult();
 
@@ -127,7 +128,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 								LocalCacheData.setCurrentCompany( com_result );
 								Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
 
-								if ( APIGlobal.pre_login_data.application_build != com_result.application_build && APIGlobal.pre_login_data['PRODUCTION'] == true ) {
+								if ( APIGlobal.pre_login_data.production == true && APIGlobal.pre_login_data.application_build != com_result.application_build ) {
 									Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
 									window.location.reload( true );
 								}
@@ -157,14 +158,14 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 				}
 			}
 		} );
-	},
+	}
 
 	/* Checks if browser supports the use of -webkit-text-security, so we can obscure the password.
 	 * We want type number so that mobile devices will trigger the numeric keypad rather than the alphabet keyboard.
 	 * If not supported by browser (E.g. IE), replace element type number with type password.
 	 * Note: type="number" is default in html, otherwise chrome on android does not change the keyboard to numeric keypad if other way around and converting to number from password. Seems to miss/ignore the type change.
 	 */
-	checkForWebkitTextSecuritySupport: function() {
+	checkForWebkitTextSecuritySupport() {
 		if ( typeof CSS !== 'function' || !CSS.supports( '-webkit-text-security', 'disc' ) ) {
 			var old_elem = $( 'input#quick_punch_password' );
 			var new_elem = old_elem.clone( true ); // clone all, including bound events
@@ -172,9 +173,9 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 			// Replace the element rather than simply changing the original, as IE does not support input type change well.
 			old_elem.replaceWith( new_elem );
 		}
-	},
+	}
 
-	getLocale: function() {
+	getLocale() {
 		var result = this.authentication_api.getLocale( $( 'select[name="language"]' ).val(), {
 			onResult: function( result ) {
 				var login_language = 'en_US';
@@ -195,37 +196,35 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 				TTPromise.resolve( 'QPLogin', 'Locale' );
 			}
 		} );
-	},
+	}
 
-	getCurrentUser: function() {
+	getCurrentUser() {
 		this.currentUser_api.getCurrentUser( { onResult: this.onGetCurrentUser, delegate: this } );
-	},
+	}
 
-	getCurrentStation: function( callBack ) {
+	getCurrentStation( callBack ) {
 		var $this = this;
 
 		var station_id = Global.getStationID();
-		require( ['APIStation'], function() {
-			var api_station = new ( APIFactory.getAPIClass( 'APIStation' ) )();
+		var api_station = TTAPI.APIStation;
 
-			if ( !station_id ) {
-				station_id = '';
+		if ( !station_id ) {
+			station_id = '';
+		}
+		api_station.getCurrentStation( station_id, '10', {
+			onResult: function( result ) {
+				TTPromise.resolve( 'QPLogin', 'CurrentStation' );
+				//doNext( result );
 			}
-			api_station.getCurrentStation( station_id, '10', {
-				onResult: function( result ) {
-					TTPromise.resolve( 'QPLogin', 'CurrentStation' );
-					//doNext( result );
-				}
-			} );
 		} );
-	},
+	}
 
-	onGetCurrentUser: function( e ) {
+	onGetCurrentUser( e ) {
 		LocalCacheData.setPunchLoginUser( e.getResult() );
 		TTPromise.resolve( 'QPLogin', 'CurrentUser' );
-	},
+	}
 
-	goToView: function() {
+	goToView() {
 		this.doing_login = false;
 		// TopMenuManager.ribbon_view_controller = null;
 		// TopMenuManager.ribbon_menus = null;
@@ -258,9 +257,9 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 		if ( LocalCacheData && current_company ) {
 			Global.setAnalyticDimensions( LocalCacheData.getPunchLoginUser().first_name + ' (' + LocalCacheData.getPunchLoginUser().id + ')', current_company.name );
 		}
-	},
+	}
 
-	setErrorTips: function( result ) {
+	setErrorTips( result ) {
 		this.clearErrorTips( true );
 		var error_list = result.getDetails() ? result.getDetails()[0] : {};
 		if ( error_list && error_list.hasOwnProperty( 'error' ) ) {
@@ -305,9 +304,9 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 				}
 			} ).focus();
 		}
-	},
+	}
 
-	clearErrorTips: function( clear_all, destroy ) {
+	clearErrorTips( clear_all, destroy ) {
 		for ( var key in this.edit_view_error_ui_dic ) {
 			if ( this.edit_view_error_ui_dic[key].val() !== '' || clear_all ) {
 				this.edit_view_error_ui_dic[key].removeClass( 'error-tip' );
@@ -318,9 +317,9 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 			}
 		}
 		this.edit_view_error_ui_dic = {};
-	},
+	}
 
-	setLanguageSourceData: function( field, source_data, set_empty ) {
+	setLanguageSourceData( field, source_data, set_empty ) {
 		var $this = this;
 		var field_selector = 'select[name="' + field + '"]';
 		if ( this.$( field_selector ) && this.$( field_selector )[0] ) {
@@ -347,9 +346,9 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 			} );
 		}
 		// $this.$( field_selector ).selectpicker();
-	},
+	}
 
-	onLanguageChange: function( e ) {
+	onLanguageChange( e ) {
 		Global.setLanguageCookie( $( e.target ).val() );
 		LocalCacheData.setI18nDic( null );
 		var message_id = TTUUID.generateUUID();
@@ -360,6 +359,6 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 			window.location.reload( true );
 		}, 2000 );
 	}
-} );
+}
 
 

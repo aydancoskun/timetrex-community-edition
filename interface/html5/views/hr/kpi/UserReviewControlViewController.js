@@ -1,24 +1,30 @@
-UserReviewControlViewController = BaseViewController.extend( {
-	el: '#user_review_control_view_container',
+class UserReviewControlViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_review_control_view_container',
 
-	_required_files: ['APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI', 'APICompanyGenericTag'],
 
-	type_array: null,
-	status_array: null,
-	term_array: null,
-	severity_array: null,
 
-	kpi_group_array: null,
+			type_array: null,
+			status_array: null,
+			term_array: null,
+			severity_array: null,
 
-	document_object_type_id: null,
+			kpi_group_array: null,
 
-	kpi_group_api: null,
+			document_object_type_id: null,
 
-	user_review_api: null,
+			kpi_group_api: null,
 
-	kpi_api: null,
+			user_review_api: null,
 
-	init: function( options ) {
+			kpi_api: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserReviewControlEditView.html';
 		this.permission_id = 'user_review';
@@ -27,10 +33,10 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_review_control';
 		this.context_menu_name = $.i18n._( 'Reviews' );
 		this.navigation_label = $.i18n._( 'Review' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserReviewControl' ) )();
-		this.kpi_group_api = new ( APIFactory.getAPIClass( 'APIKPIGroup' ) )();
-		this.user_review_api = new ( APIFactory.getAPIClass( 'APIUserReview' ) )();
-		this.kpi_api = new ( APIFactory.getAPIClass( 'APIKPI' ) )();
+		this.api = TTAPI.APIUserReviewControl;
+		this.kpi_group_api = TTAPI.APIKPIGroup;
+		this.user_review_api = TTAPI.APIUserReview;
+		this.kpi_api = TTAPI.APIKPI;
 		this.document_object_type_id = 220;
 		this.render();
 
@@ -46,18 +52,18 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 
 		this.setSelectRibbonMenuIfNecessary( 'UserReviewControl' );
+	}
 
-	},
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
@@ -96,12 +102,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -113,7 +118,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserReviewControl' ) ),
+			api_class: TTAPI.APIUserReviewControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.KPI_REVIEW_CONTROL,
@@ -139,7 +144,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -156,7 +161,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		// Reviewer
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -262,10 +267,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 		form_item_input.TTextArea( { field: 'note', width: '100%', height: 66 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_review_column4, 'first_last', null, null, true );
+	}
 
-	},
-
-	initInsideEditorUI: function() {
+	initInsideEditorUI() {
 		//Inside editor
 		var tab_review = this.edit_view_tab.find( '#tab_review' );
 
@@ -295,11 +299,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 		} );
 
 		inside_editor_div.append( this.editor );
-	},
+	}
 
 	/* jshint ignore:start */
 
-	addEditFieldToColumn: function( label, widgets, column, firstOrLastRecord, widgetContainer, saveFormItemDiv, setResizeEvent, saveFormItemDivKey, hasKeyEvent, customLabelWidget ) {
+	addEditFieldToColumn( label, widgets, column, firstOrLastRecord, widgetContainer, saveFormItemDiv, setResizeEvent, saveFormItemDivKey, hasKeyEvent, customLabelWidget ) {
 
 		var $this = this;
 		var form_item = $( Global.loadWidgetByName( WidgetNamesDic.EDIT_VIEW_FORM_ITEM ) );
@@ -405,14 +409,13 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 		column.append( form_item );
 		//column.append( "<div class='clear-both-div'></div>" );
-
-	},
+	}
 
 	/* jshint ignore:end */
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 
 		var default_args = {};
 		default_args.permission_section = 'user_review';
@@ -424,7 +427,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -436,7 +439,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'reviewer_user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -529,7 +532,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'kpi_id',
 				layout_name: ALayoutIDs.KPI,
-				api_class: ( APIFactory.getAPIClass( 'APIKPI' ) ),
+				api_class: TTAPI.APIKPI,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -541,7 +544,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -553,26 +556,26 @@ UserReviewControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	removeEditView: function() {
-		this._super( 'removeEditView' );
+	removeEditView() {
+		super.removeEditView();
 		this.editor = null;
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.initInsideEditorData();
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		var $this = this;
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -597,10 +600,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
-
-	onInsideFormItemChange: function( target, doNotValidate ) {
+	onInsideFormItemChange( target, doNotValidate ) {
 		target.clearErrorStyle();
 
 		var key = target.getField();
@@ -623,10 +625,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 			default:
 				break;
 		}
+	}
 
-	},
-
-	initInsideEditorData: function() {
+	initInsideEditorData() {
 
 		var $this = this;
 		var args = {};
@@ -645,12 +646,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-
-	},
+	}
 
 	/* jshint ignore:start */
 
-	setInsideEditorData: function( res ) {
+	setInsideEditorData( res ) {
 		var data = res.getResult();
 		var len = data.length;
 
@@ -706,11 +706,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 
 //		$this.editor.setValue( data );
-	},
+	}
 
 	/* jshint ignore:end */
 
-//	insideEditorSetValue: function( val ) {
+//	insideEditorSetValue( val ) {
 //		var len = val.length;
 //		this.removeAllRows();
 //
@@ -728,7 +728,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 //
 //	},
 
-	insideEditorAddRow: function( data ) {
+	insideEditorAddRow( data ) {
 		var $this = this;
 		if ( !data ) {
 //			this.getDefaultData();
@@ -802,10 +802,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 			this.addIconsEvent( row ); //Bind event to add and minus icon
 			this.removeLastRowLine();
 		}
+	}
 
-	},
-
-	onSaveResult: function( result ) {
+	onSaveResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -827,9 +826,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
+	}
 
-	// onSaveAndContinueResult: function( result ) {
+	// onSaveAndContinueResult( result ) {
 	// 	var $this = this;
 	// 	if ( result.isValid() ) {
 	// 		var result_data = result.getResult();
@@ -853,17 +852,17 @@ UserReviewControlViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	onEditClick: function( editId, noRefreshUI ) {
+	onEditClick( editId, noRefreshUI ) {
 		var $this = this;
 		if ( $this.editor ) {
 			$this.editor.remove();
 			$this.editor = null;
 		}
 
-		$this._super( 'onEditClick', editId, noRefreshUI );
-	},
+		super.onEditClick( editId, noRefreshUI );
+	}
 
-	saveInsideEditorData: function( callBack ) {
+	saveInsideEditorData( callBack ) {
 		var $this = this;
 
 		if ( !this.editor ) {
@@ -876,10 +875,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	insideEditorGetValue: function( current_edit_item_id ) {
+	insideEditorGetValue( current_edit_item_id ) {
 		var len = this.rows_widgets_array.length;
 		for ( var i = 0; i < len; i++ ) {
 			var row = this.rows_widgets_array[i];
@@ -894,9 +892,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 
 		return this.rows_widgets_array;
-	},
+	}
 
-	_continueDoCopyAsNew: function() {
+	_continueDoCopyAsNew() {
 
 		var $this = this;
 		this.is_add = true;
@@ -918,12 +916,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 			ProgressBar.closeOverlay();
 
 		} else {
-			this._super( '_continueDoCopyAsNew' );
+			super._continueDoCopyAsNew();
 		}
+	}
 
-	},
-
-	onSaveAndNewResult: function( result ) {
+	onSaveAndNewResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -947,9 +944,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 			$this.setErrorMenu();
 		}
-	},
+	}
 
-	onSaveAndCopyResult: function( result ) {
+	onSaveAndCopyResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -973,9 +970,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 			$this.setErrorMenu();
 		}
-	},
+	}
 
-	// onSaveAndNextResult: function( result ) {
+	// onSaveAndNextResult( result ) {
 	// 	var $this = this;
 	// 	if ( result.isValid() ) {
 	// 		var result_data = result.getResult();
@@ -997,27 +994,28 @@ UserReviewControlViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	onRightArrowClick: function() {
+	onRightArrowClick() {
 		if ( this.editor ) {
 			this.editor.remove();
 			this.editor = null;
 		}
-		this._super( 'onRightArrowClick' );
-	},
+		super.onRightArrowClick();
+	}
 
-	onLeftArrowClick: function() {
+	onLeftArrowClick() {
 		if ( this.editor ) {
 			this.editor.remove();
 			this.editor = null;
 		}
-		this._super( 'onLeftArrowClick' );
-	},
-	searchDone: function() {
-		this._super( 'searchDone' );
+		super.onLeftArrowClick();
+	}
+
+	searchDone() {
+		super.searchDone();
 		TTPromise.resolve( 'ReviewView', 'init' );
 	}
 
-} );
+}
 
 UserReviewControlViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserReviewControl', 'SubUserReviewControlView.html', function( result ) {

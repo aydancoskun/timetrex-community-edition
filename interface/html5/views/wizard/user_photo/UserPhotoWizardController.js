@@ -1,33 +1,38 @@
-UserPhotoWizardController = BaseWizardController.extend( {
+class UserPhotoWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg',
 
-	el: '.wizard-bg',
+			_required_files: [
+				'TImageBrowser', //only in the upload wizard
+				'CameraBrowser', //only in the upload wizard
+				'TImageAdvBrowser',//only in the upload wizard
+				'TImage',//only in the upload wizard
+				'TImageCutArea'//only in the upload wizard
+			]
 
-	_required_files: [
-		'TImageBrowser', //only in the upload wizard
-		'CameraBrowser', //only in the upload wizard
-		'TImageAdvBrowser',//only in the upload wizard
-		'TImage',//only in the upload wizard
-		'TImageCutArea'//only in the upload wizard
-	],
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Image upload Wizard' );
 		this.steps = 3;
 		this.current_step = 1;
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initCurrentStep();
-
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		var $this = this;
 
@@ -65,11 +70,15 @@ UserPhotoWizardController = BaseWizardController.extend( {
 
 					img.unbind( 'NoImageChange' ).bind( 'NoImageChange', function() {
 						$this.next_btn.addClass( 'disable-image' );
+						// Stop the button glow when 'Try Again' is clicked.
+						Global.glowAnimation.stop( $this.next_btn );
 					} );
 				}
 
 				img.unbind( 'change' ).bind( 'change', function() {
 					$this.next_btn.removeClass( 'disable-image' );
+					// Start the button glow when 'Take Picture' or 'Try Again' is clicked.
+					Global.glowAnimation.start( $this.next_btn, '#00ff00' );
 				} );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -100,9 +109,9 @@ UserPhotoWizardController = BaseWizardController.extend( {
 
 				break;
 		}
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 
@@ -124,11 +133,11 @@ UserPhotoWizardController = BaseWizardController.extend( {
 			case 3:
 				current_step_ui.image_cut.setImage( this.stepsDataDic[2].img_src );
 		}
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -153,10 +162,9 @@ UserPhotoWizardController = BaseWizardController.extend( {
 		}
 
 		$this.onCloseClick();
+	}
 
-	},
-
-	onCloseClick: function() {
+	onCloseClick() {
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		if ( this.current_step === 3 ) {
 			current_step_ui.image_cut.clearSelect();
@@ -168,10 +176,9 @@ UserPhotoWizardController = BaseWizardController.extend( {
 
 		$( this.el ).remove();
 		LocalCacheData.current_open_wizard_controller = null;
+	}
 
-	},
-
-	onNextClick: function() {
+	onNextClick() {
 		if ( this.next_btn.hasClass( 'disable-image' ) ) {
 			return;
 		}
@@ -181,13 +188,15 @@ UserPhotoWizardController = BaseWizardController.extend( {
 		}
 		if ( this.current_step === 2 && this.stepsDataDic[1].image_type === 'camera' ) {
 			current_step_ui.image_data.stopCamera();
+			// Stop the button glow when 'Next Button' is clicked.
+			Global.glowAnimation.stop( this.next_btn );
 		}
 		this.saveCurrentStep();
 		this.current_step = this.current_step + 1;
 		this.initCurrentStep();
-	},
+	}
 
-	onBackClick: function() {
+	onBackClick() {
 		if ( this.back_btn.hasClass( 'disable-image' ) ) {
 			return;
 		}
@@ -197,13 +206,16 @@ UserPhotoWizardController = BaseWizardController.extend( {
 		}
 		if ( this.current_step === 2 && this.stepsDataDic[1].image_type === 'camera' ) {
 			current_step_ui.image_data.stopCamera();
+			// Stop the button glow when 'Back Button' is clicked.
+			Global.glowAnimation.stop( this.next_btn );
+
 		}
 		this.saveCurrentStep();
 		this.current_step = this.current_step - 1;
 		this.initCurrentStep();
-	},
+	}
 
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -221,10 +233,9 @@ UserPhotoWizardController = BaseWizardController.extend( {
 				current_step_data.after_img_src = current_step_ui.image_cut.getAfterImageSrc();
 				break;
 		}
+	}
 
-	},
-
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 
 		if ( !this.default_data ) {
 			return null;
@@ -240,7 +251,6 @@ UserPhotoWizardController = BaseWizardController.extend( {
 		if ( this.getDefaultData( 'pay_period_id' ) ) {
 			this.stepsDataDic[2].pay_period_id = this.getDefaultData( 'pay_period_id' );
 		}
-
 	}
 
-} );
+}

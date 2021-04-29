@@ -1,20 +1,20 @@
-ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
+class ScheduleSummaryReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {} );
 
-	_required_files: {
-		10: ['APIScheduleSummaryReport', 'APISchedule', 'APIAbsencePolicy'],
-		20: ['APIJob', 'APIJobGroup', 'APIJobItemGroup', 'APIJobItem']
-	},
+		super( options );
+	}
 
-	initReport: function( options ) {
+	initReport( options ) {
 		this.script_name = 'ScheduleSummaryReport';
 		this.viewId = 'ScheduleSummaryReport';
 		this.context_menu_name = $.i18n._( 'Schedule Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'ScheduleSummaryReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIScheduleSummaryReport' ) )();
-	},
+		this.api = TTAPI.APIScheduleSummaryReport;
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				schedule: {
@@ -55,29 +55,29 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
 	// Overriding empty ReportBaseViewController.processFilterField() called from base.openEditView to provide view specific logic.
-	processFilterField: function() {
+	processFilterField() {
 		for ( var i = 0; i < this.setup_fields_array.length; i++ ) {
 			var item = this.setup_fields_array[i];
 			if ( item.value === 'status_id' ) {
 				item.value = 'filter';
 			}
 		}
-	},
+	}
 
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 		this.onViewClick( id );
-	},
+	}
 
-	setFilterValue: function( widget, value ) {
+	setFilterValue( widget, value ) {
 		widget.setValue( value.status_id );
-	},
+	}
 
-	onFormItemChangeProcessFilterField: function( target, key ) {
+	onFormItemChangeProcessFilterField( target, key ) {
 		var filter = target.getValue();
 		this.visible_report_values[key] = { status_id: filter };
 	}
 
-} );
+}

@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -45,7 +46,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -54,9 +55,12 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$this->currency_id = $dd->createCurrency( $this->company_id, 10 );
+		$this->currency_id[10] = $dd->createCurrency( $this->company_id, 10 );
+		$this->currency_id[20] = $dd->createCurrency( $this->company_id, 20 );
+		$this->currency_id[30] = $dd->createCurrency( $this->company_id, 30 );
+		$this->currency_id[40] = $dd->createCurrency( $this->company_id, 40 );
 
-		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
+		$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
 		$dd->createPayStubAccount( $this->company_id );
 		$this->createPayStubAccounts();
@@ -69,12 +73,12 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 10 ); // Check
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 20 ); // US - EFT
-		$remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id, 30 ); // CA - EFT
+		$this->remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id[10], 10 ); // Check
+		$this->remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id[10], 20 ); // US - EFT
+		$this->remittance_source_account_ids[$this->legal_entity_id][] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id[10], 30 ); // CA - EFT
 
 		//createUser() also handles remittance destination accounts.
-		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, null, null, null, null, null, null, null, $remittance_source_account_ids );
+		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 100, null, null, null, null, null, null, null, $this->remittance_source_account_ids );
 
 		$this->createPayPeriodSchedule();
 		$this->createPayPeriods();
@@ -613,7 +617,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
@@ -645,6 +649,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					$end_date = TTDate::getBeginYearEpoch( strtotime( '01-Jan-06' ) );
@@ -695,6 +700,22 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		if ( isset( $ps_entry_arr ) ) {
 			return $ps_entry_arr;
+		}
+
+		return false;
+	}
+
+	function getPayStubTransactionArray( $pay_stub_id ) {
+		$pstlf = new PayStubTransactionListFactory();
+		$pstlf->getByPayStubId( $pay_stub_id );
+		if ( $pstlf->getRecordCount() > 0 ) {
+			foreach ( $pstlf as $pst_obj ) {
+				$retarr[] = $pst_obj->getObjectAsArray();
+			}
+		}
+
+		if ( isset( $retarr ) ) {
+			return $retarr;
 		}
 
 		return false;
@@ -1019,19 +1040,19 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		//var_dump($pse_accounts);
 		//var_dump($pse_arr);
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '2408.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '2408.00' );
+		$this->assertEquals( '2408.00', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '2408.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '451.50' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '451.50' );
+		$this->assertEquals( '451.50', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '451.50', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['premium_1']][0]['amount'], '47.88' );
-		$this->assertEquals( $pse_arr[$pse_accounts['premium_1']][0]['ytd_amount'], '47.88' );
+		$this->assertEquals( '47.88', $pse_arr[$pse_accounts['premium_1']][0]['amount'] );
+		$this->assertEquals( '47.88', $pse_arr[$pse_accounts['premium_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['rate'], '10.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['units'], '10.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['amount'], '100.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['ytd_amount'], '100.00' );
+		$this->assertEquals( '10.00', $pse_arr[$pse_accounts['bonus']][0]['rate'] );
+		$this->assertEquals( '10.00', $pse_arr[$pse_accounts['bonus']][0]['units'] );
+		$this->assertEquals( '100.00', $pse_arr[$pse_accounts['bonus']][0]['amount'] );
+		$this->assertEquals( '100.00', $pse_arr[$pse_accounts['bonus']][0]['ytd_amount'] );
 
 
 		//NOTICE: After switching to UUID, it caused ordering by ID (specifically in CalculatePayStub->getOrderedDeductionAndPSAmendment() ) to be inconsistent from one run to the next.
@@ -1040,109 +1061,103 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		// 		  However when running unit tests it can switch from one test to another, so lets account for that.
 		//YTD adjustment
 		if ( $pse_arr[$pse_accounts['other']][0]['amount'] == '240.80' ) {
-			$this->assertEquals( $pse_arr[$pse_accounts['other']][0]['amount'], '240.80' );
-			$this->assertEquals( $pse_arr[$pse_accounts['other']][0]['ytd_amount'], '0.00' );
+			$this->assertEquals( '240.80', $pse_arr[$pse_accounts['other']][0]['amount'] );
+			$this->assertEquals( '0.00', $pse_arr[$pse_accounts['other']][0]['ytd_amount'] );
 			//Fixed amount PS amendment
-			$this->assertEquals( $pse_arr[$pse_accounts['other']][1]['amount'], '1000.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['other']][1]['ytd_amount'], '1240.80' );
+			$this->assertEquals( '1000.00', $pse_arr[$pse_accounts['other']][1]['amount'] );
+			$this->assertEquals( '1240.80', $pse_arr[$pse_accounts['other']][1]['ytd_amount'] );
 		} else {
 			//Fixed amount PS amendment
-			$this->assertEquals( $pse_arr[$pse_accounts['other']][0]['amount'], '1000.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['other']][0]['ytd_amount'], '0.00' );
+			$this->assertEquals( '1000.00', $pse_arr[$pse_accounts['other']][0]['amount'] );
+			$this->assertEquals( '0.00', $pse_arr[$pse_accounts['other']][0]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['other']][1]['amount'], '240.80' );
-			$this->assertEquals( $pse_arr[$pse_accounts['other']][1]['ytd_amount'], '1240.80' );
+			$this->assertEquals( '240.80', $pse_arr[$pse_accounts['other']][1]['amount'] );
+			$this->assertEquals( '1240.80', $pse_arr[$pse_accounts['other']][1]['ytd_amount'] );
 		}
 
-		$this->assertEquals( $pse_arr[$pse_accounts['premium_2']][0]['amount'], '10.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['premium_2']][0]['ytd_amount'], '0.00' );
+		$this->assertEquals( '10.00', $pse_arr[$pse_accounts['premium_2']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['premium_2']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['premium_2']][1]['amount'], '1.99' );
-		$this->assertEquals( $pse_arr[$pse_accounts['premium_2']][1]['ytd_amount'], '11.99' );
+		$this->assertEquals( '1.99', $pse_arr[$pse_accounts['premium_2']][1]['amount'] );
+		$this->assertEquals( '11.99', $pse_arr[$pse_accounts['premium_2']][1]['ytd_amount'] );
 
 		//Vacation accrual release
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '114.67' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '114.67' );
+		$this->assertEquals( '114.67', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '114.67', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
 
 		//Vacation accrual deduction
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '99.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
+		$this->assertEquals( '99.01', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '130.33' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '0.00' );
+		$this->assertEquals( '130.33', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'], '-114.67' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'], '114.67' );
+		$this->assertEquals( '-114.67', $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'] );
+		$this->assertEquals( '114.67', $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'] );
 
 		//Union Dues - Should be 19.98 due to getting close to hitting Wage Base, because a YTD adjustment for Total Gross exists for around 1001.99.
-		$this->assertEquals( $pse_arr[$pse_accounts['union_dues']][0]['amount'], '19.98' );
-		$this->assertEquals( $pse_arr[$pse_accounts['union_dues']][0]['ytd_amount'], '19.98' );
+		$this->assertEquals( '19.98', $pse_arr[$pse_accounts['union_dues']][0]['amount'] );
+		$this->assertEquals( '19.98', $pse_arr[$pse_accounts['union_dues']][0]['ytd_amount'] );
 
 		//Advanced Percent
-		$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_1']][0]['amount'], '20.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_1']][0]['ytd_amount'], '20.00' ); //Exceeds Wage Base
+		$this->assertEquals( '20.00', $pse_arr[$pse_accounts['advanced_percent_1']][0]['amount'] );
+		$this->assertEquals( '20.00', $pse_arr[$pse_accounts['advanced_percent_1']][0]['ytd_amount'] ); //Exceeds Wage Base
 
-		$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_2']][0]['amount'], '24.08' );
-		$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_2']][0]['ytd_amount'], '24.08' ); //Not close to Wage Base.
+		$this->assertEquals( '24.08', $pse_arr[$pse_accounts['advanced_percent_2']][0]['amount'] );
+		$this->assertEquals( '24.08', $pse_arr[$pse_accounts['advanced_percent_2']][0]['ytd_amount'] ); //Not close to Wage Base.
 
-		$this->assertEquals( $pse_arr[$pse_accounts['deduction_other']][0]['amount'], '37.29' );
-		$this->assertEquals( $pse_arr[$pse_accounts['deduction_other']][0]['ytd_amount'], '37.29' );
+		$this->assertEquals( '37.29', $pse_arr[$pse_accounts['deduction_other']][0]['amount'] );
+		$this->assertEquals( '37.29', $pse_arr[$pse_accounts['deduction_other']][0]['ytd_amount'] );
 
 		//EI
-		$this->assertEquals( $pse_arr[$pse_accounts['ei']][0]['amount'], '700.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['ei']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['ei']][1]['amount'], '29.30' ); //HAS TO BE 29.30, as it reached maximum contribution.
-		$this->assertEquals( $pse_arr[$pse_accounts['ei']][1]['ytd_amount'], '729.30' );
+		$this->assertEquals( '700.00', $pse_arr[$pse_accounts['ei']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['ei']][0]['ytd_amount'] );
+		$this->assertEquals( '29.30', $pse_arr[$pse_accounts['ei']][1]['amount'] ); //HAS TO BE 29.30, as it reached maximum contribution.
+		$this->assertEquals( '729.30', $pse_arr[$pse_accounts['ei']][1]['ytd_amount'] );
 
 		//CPP
-		$this->assertEquals( $pse_arr[$pse_accounts['cpp']][0]['amount'], '1900.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['cpp']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['cpp']][1]['amount'], '10.70' );
-		$this->assertEquals( $pse_arr[$pse_accounts['cpp']][1]['ytd_amount'], '1910.70' );
+		$this->assertEquals( '1900.00', $pse_arr[$pse_accounts['cpp']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['cpp']][0]['ytd_amount'] );
+		$this->assertEquals( '10.70', $pse_arr[$pse_accounts['cpp']][1]['amount'] );
+		$this->assertEquals( '1910.70', $pse_arr[$pse_accounts['cpp']][1]['ytd_amount'] );
 
 		if ( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] >= 600
-				&& $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] <= 800
-				&& $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] == $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] ) {
+				&& $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] <= 800 ) {
 			$this->assertTrue( true );
 		} else {
 			$this->assertTrue( false, 'Federal Income Tax not within range! Amount: ' . $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
 		}
 
 		if ( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] >= 100
-				&& $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] <= 300
-				&& $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] == $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] ) {
+				&& $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] <= 300 ) {
 			$this->assertTrue( true );
 		} else {
 			$this->assertTrue( false, 'State Income Tax not within range! Amount: ' . $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
 		}
 
 		if ( $pse_arr[$pse_accounts['medicare']][0]['amount'] >= 10
-				&& $pse_arr[$pse_accounts['medicare']][0]['amount'] <= 100
-				&& $pse_arr[$pse_accounts['medicare']][0]['amount'] == $pse_arr[$pse_accounts['medicare']][0]['amount'] ) {
+				&& $pse_arr[$pse_accounts['medicare']][0]['amount'] <= 100 ) {
 			$this->assertTrue( true );
 		} else {
 			$this->assertTrue( false, 'Medicare not within range!' );
 		}
 
 		if ( $pse_arr[$pse_accounts['state_disability']][0]['amount'] >= 2
-				&& $pse_arr[$pse_accounts['state_disability']][0]['amount'] <= 50
-				&& $pse_arr[$pse_accounts['state_disability']][0]['amount'] == $pse_arr[$pse_accounts['state_disability']][0]['amount'] ) {
+				&& $pse_arr[$pse_accounts['state_disability']][0]['amount'] <= 50 ) {
 			$this->assertTrue( true );
 		} else {
 			$this->assertTrue( false, 'State Disability not within range!' );
 		}
 
 		if ( $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] >= 10
-				&& $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] <= 100
-				&& $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] == $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] ) {
+				&& $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] <= 100 ) {
 			$this->assertTrue( true );
 		} else {
 			$this->assertTrue( false, 'Employer Medicare not within range!' );
 		}
 
 		if ( $pse_arr[$pse_accounts['employer_fica']][0]['amount'] >= 100
-				&& $pse_arr[$pse_accounts['employer_fica']][0]['amount'] <= 250
-				&& $pse_arr[$pse_accounts['employer_fica']][0]['amount'] == $pse_arr[$pse_accounts['employer_fica']][0]['amount'] ) {
+				&& $pse_arr[$pse_accounts['employer_fica']][0]['amount'] <= 250 ) {
 			$this->assertTrue( true );
 		} else {
 			$this->assertTrue( false, 'Employer FICA not within range!' );
@@ -1216,19 +1231,19 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 			//var_dump($pse_accounts);
 			//var_dump($pse_arr);
 
-			$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '2408.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '2408.00' );
+			$this->assertEquals( '2408.00', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+			$this->assertEquals( '2408.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '451.50' );
-			$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '451.50' );
+			$this->assertEquals( '451.50', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+			$this->assertEquals( '451.50', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['premium_1']][0]['amount'], '47.88' );
-			$this->assertEquals( $pse_arr[$pse_accounts['premium_1']][0]['ytd_amount'], '47.88' );
+			$this->assertEquals( '47.88', $pse_arr[$pse_accounts['premium_1']][0]['amount'] );
+			$this->assertEquals( '47.88', $pse_arr[$pse_accounts['premium_1']][0]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['rate'], '10.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['units'], '10.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['amount'], '100.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['ytd_amount'], '100.00' );
+			$this->assertEquals( '10.00', $pse_arr[$pse_accounts['bonus']][0]['rate'] );
+			$this->assertEquals( '10.00', $pse_arr[$pse_accounts['bonus']][0]['units'] );
+			$this->assertEquals( '100.00', $pse_arr[$pse_accounts['bonus']][0]['amount'] );
+			$this->assertEquals( '100.00', $pse_arr[$pse_accounts['bonus']][0]['ytd_amount'] );
 
 			//NOTICE: After switching to UUID, it caused ordering by ID (specifically in CalculatePayStub->getOrderedDeductionAndPSAmendment() ) to be inconsistent from one run to the next.
 			//		  This casued failures here because 240.80 and 1000.00 could be in reverse order.
@@ -1236,119 +1251,113 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 			// 		  However when running unit tests it can switch from one test to another, so lets account for that.
 			//YTD adjustment
 			if ( $pse_arr[$pse_accounts['other']][0]['amount'] == '240.80' ) {
-				$this->assertEquals( $pse_arr[$pse_accounts['other']][0]['amount'], '240.80' );
-				$this->assertEquals( $pse_arr[$pse_accounts['other']][0]['ytd_amount'], '0.00' );
+				$this->assertEquals( '240.80', $pse_arr[$pse_accounts['other']][0]['amount'] );
+				$this->assertEquals( '0.00', $pse_arr[$pse_accounts['other']][0]['ytd_amount'] );
 				//Fixed amount PS amendment
-				$this->assertEquals( $pse_arr[$pse_accounts['other']][1]['amount'], '1000.00' );
-				$this->assertEquals( $pse_arr[$pse_accounts['other']][1]['ytd_amount'], '1240.80' );
+				$this->assertEquals( '1000.00', $pse_arr[$pse_accounts['other']][1]['amount'] );
+				$this->assertEquals( '1240.80', $pse_arr[$pse_accounts['other']][1]['ytd_amount'] );
 			} else {
 				//Fixed amount PS amendment
-				$this->assertEquals( $pse_arr[$pse_accounts['other']][0]['amount'], '1000.00' );
-				$this->assertEquals( $pse_arr[$pse_accounts['other']][0]['ytd_amount'], '0.00' );
+				$this->assertEquals( '1000.00', $pse_arr[$pse_accounts['other']][0]['amount'] );
+				$this->assertEquals( '0.00', $pse_arr[$pse_accounts['other']][0]['ytd_amount'] );
 
-				$this->assertEquals( $pse_arr[$pse_accounts['other']][1]['amount'], '240.80' );
-				$this->assertEquals( $pse_arr[$pse_accounts['other']][1]['ytd_amount'], '1240.80' );
+				$this->assertEquals( '240.80', $pse_arr[$pse_accounts['other']][1]['amount'] );
+				$this->assertEquals( '1240.80', $pse_arr[$pse_accounts['other']][1]['ytd_amount'] );
 			}
 
-			$this->assertEquals( $pse_arr[$pse_accounts['premium_2']][0]['amount'], '10.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['premium_2']][0]['ytd_amount'], '0.00' );
+			$this->assertEquals( '10.00', $pse_arr[$pse_accounts['premium_2']][0]['amount'] );
+			$this->assertEquals( '0.00', $pse_arr[$pse_accounts['premium_2']][0]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['premium_2']][1]['amount'], '1.99' );
-			$this->assertEquals( $pse_arr[$pse_accounts['premium_2']][1]['ytd_amount'], '11.99' );
+			$this->assertEquals( '1.99', $pse_arr[$pse_accounts['premium_2']][1]['amount'] );
+			$this->assertEquals( '11.99', $pse_arr[$pse_accounts['premium_2']][1]['ytd_amount'] );
 
 			//Vacation accrual release
-			$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '114.67' );
-			$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '114.67' );
+			$this->assertEquals( '114.67', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+			$this->assertEquals( '114.67', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
 
 			//Vacation accrual deduction
-			$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '99.01' );
-			$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
+			$this->assertEquals( '99.01', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+			$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '130.33' );
-			$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '0.00' );
+			$this->assertEquals( '130.33', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+			$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'], '-114.67' );
-			$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'], '114.67' );
+			$this->assertEquals( '-114.67', $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'] );
+			$this->assertEquals( '114.67', $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'] );
 
 			//Union Dues - Should be 19.98 due to getting close to hitting Wage Base, because a YTD adjustment for Total Gross exists for around 1001.99.
-			$this->assertEquals( $pse_arr[$pse_accounts['union_dues']][0]['amount'], '19.98' );
-			$this->assertEquals( $pse_arr[$pse_accounts['union_dues']][0]['ytd_amount'], '19.98' );
+			$this->assertEquals( '19.98', $pse_arr[$pse_accounts['union_dues']][0]['amount'] );
+			$this->assertEquals( '19.98', $pse_arr[$pse_accounts['union_dues']][0]['ytd_amount'] );
 
 			//Advanced Percent
-			$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_1']][0]['amount'], '20.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_1']][0]['ytd_amount'], '20.00' ); //Exceeds Wage Base
+			$this->assertEquals( '20.00', $pse_arr[$pse_accounts['advanced_percent_1']][0]['amount'] );
+			$this->assertEquals( '20.00', $pse_arr[$pse_accounts['advanced_percent_1']][0]['ytd_amount'] ); //Exceeds Wage Base
 
-			$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_2']][0]['amount'], '24.08' );
-			$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_2']][0]['ytd_amount'], '24.08' ); //Not close to Wage Base.
+			$this->assertEquals( '24.08', $pse_arr[$pse_accounts['advanced_percent_2']][0]['amount'] );
+			$this->assertEquals( '24.08', $pse_arr[$pse_accounts['advanced_percent_2']][0]['ytd_amount'] ); //Not close to Wage Base.
 
-			$this->assertEquals( $pse_arr[$pse_accounts['deduction_other']][0]['amount'], '37.29' );
-			$this->assertEquals( $pse_arr[$pse_accounts['deduction_other']][0]['ytd_amount'], '37.29' );
+			$this->assertEquals( '37.29', $pse_arr[$pse_accounts['deduction_other']][0]['amount'] );
+			$this->assertEquals( '37.29', $pse_arr[$pse_accounts['deduction_other']][0]['ytd_amount'] );
 
 			//EI
-			$this->assertEquals( $pse_arr[$pse_accounts['ei']][0]['amount'], '700.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['ei']][0]['ytd_amount'], '0.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['ei']][1]['amount'], '29.30' ); //HAS TO BE 29.30, as it reached maximum contribution.
-			$this->assertEquals( $pse_arr[$pse_accounts['ei']][1]['ytd_amount'], '729.30' );
+			$this->assertEquals( '700.00', $pse_arr[$pse_accounts['ei']][0]['amount'] );
+			$this->assertEquals( '0.00', $pse_arr[$pse_accounts['ei']][0]['ytd_amount'] );
+			$this->assertEquals( '29.30', $pse_arr[$pse_accounts['ei']][1]['amount'] ); //HAS TO BE 29.30, as it reached maximum contribution.
+			$this->assertEquals( '729.30', $pse_arr[$pse_accounts['ei']][1]['ytd_amount'] );
 
 			//CPP
-			$this->assertEquals( $pse_arr[$pse_accounts['cpp']][0]['amount'], '1900.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['cpp']][0]['ytd_amount'], '0.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['cpp']][1]['amount'], '10.70' );
-			$this->assertEquals( $pse_arr[$pse_accounts['cpp']][1]['ytd_amount'], '1910.70' );
+			$this->assertEquals( '1900.00', $pse_arr[$pse_accounts['cpp']][0]['amount'] );
+			$this->assertEquals( '0.00', $pse_arr[$pse_accounts['cpp']][0]['ytd_amount'] );
+			$this->assertEquals( '10.70', $pse_arr[$pse_accounts['cpp']][1]['amount'] );
+			$this->assertEquals( '1910.70', $pse_arr[$pse_accounts['cpp']][1]['ytd_amount'] );
 
 			//Custom formula deductions.
-			$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula']][0]['amount'], '5.50' );
-			$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula']][0]['ytd_amount'], '5.500' );
+			$this->assertEquals( '5.50', $pse_arr[$pse_accounts['test_custom_formula']][0]['amount'] );
+			$this->assertEquals( '5.500', $pse_arr[$pse_accounts['test_custom_formula']][0]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula_1']][0]['amount'], '12.51' );
-			$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula_1']][0]['ytd_amount'], '12.51' );
+			$this->assertEquals( '12.51', $pse_arr[$pse_accounts['test_custom_formula_1']][0]['amount'] );
+			$this->assertEquals( '12.51', $pse_arr[$pse_accounts['test_custom_formula_1']][0]['ytd_amount'] );
 
-			$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula_2']][0]['amount'], '35.40' );
-			$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula_2']][0]['ytd_amount'], '35.40' );
+			$this->assertEquals( '35.40', $pse_arr[$pse_accounts['test_custom_formula_2']][0]['amount'] );
+			$this->assertEquals( '35.40', $pse_arr[$pse_accounts['test_custom_formula_2']][0]['ytd_amount'] );
 
 			if ( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] >= 600
-					&& $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] <= 800
-					&& $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] == $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] ) {
+					&& $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] <= 800 ) {
 				$this->assertTrue( true );
 			} else {
 				$this->assertTrue( false, 'Federal Income Tax not within range! Amount: ' . $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
 			}
 
 			if ( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] >= 100
-					&& $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] <= 300
-					&& $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] == $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] ) {
+					&& $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] <= 300 ) {
 				$this->assertTrue( true );
 			} else {
 				$this->assertTrue( false, 'State Income Tax not within range! Amount: ' . $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
 			}
 
 			if ( $pse_arr[$pse_accounts['medicare']][0]['amount'] >= 10
-					&& $pse_arr[$pse_accounts['medicare']][0]['amount'] <= 100
-					&& $pse_arr[$pse_accounts['medicare']][0]['amount'] == $pse_arr[$pse_accounts['medicare']][0]['amount'] ) {
+					&& $pse_arr[$pse_accounts['medicare']][0]['amount'] <= 100 ) {
 				$this->assertTrue( true );
 			} else {
 				$this->assertTrue( false, 'Medicare not within range!' );
 			}
 
 			if ( $pse_arr[$pse_accounts['state_disability']][0]['amount'] >= 2
-					&& $pse_arr[$pse_accounts['state_disability']][0]['amount'] <= 50
-					&& $pse_arr[$pse_accounts['state_disability']][0]['amount'] == $pse_arr[$pse_accounts['state_disability']][0]['amount'] ) {
+					&& $pse_arr[$pse_accounts['state_disability']][0]['amount'] <= 50 ) {
 				$this->assertTrue( true );
 			} else {
 				$this->assertTrue( false, 'State Disability not within range!' );
 			}
 
 			if ( $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] >= 10
-					&& $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] <= 100
-					&& $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] == $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] ) {
+					&& $pse_arr[$pse_accounts['employer_medicare']][0]['amount'] <= 100 ) {
 				$this->assertTrue( true );
 			} else {
 				$this->assertTrue( false, 'Employer Medicare not within range!' );
 			}
 
 			if ( $pse_arr[$pse_accounts['employer_fica']][0]['amount'] >= 100
-					&& $pse_arr[$pse_accounts['employer_fica']][0]['amount'] <= 250
-					&& $pse_arr[$pse_accounts['employer_fica']][0]['amount'] == $pse_arr[$pse_accounts['employer_fica']][0]['amount'] ) {
+					&& $pse_arr[$pse_accounts['employer_fica']][0]['amount'] <= 250 ) {
 				$this->assertTrue( true );
 			} else {
 				$this->assertTrue( false, 'Employer FICA not within range!' );
@@ -1418,26 +1427,26 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 		//var_dump($pse_arr);
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['rate'], '33.33' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['units'], '3.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '99.99' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '2507.99' );
+		$this->assertEquals( '33.33', $pse_arr[$pse_accounts['regular_time']][0]['rate'] );
+		$this->assertEquals( '3.00', $pse_arr[$pse_accounts['regular_time']][0]['units'] );
+		$this->assertEquals( '99.99', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '2507.99', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['rate'], '10.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['units'], '30.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['amount'], '300.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['bonus']][0]['ytd_amount'], '400.00' );
+		$this->assertEquals( '10.00', $pse_arr[$pse_accounts['bonus']][0]['rate'] );
+		$this->assertEquals( '30.00', $pse_arr[$pse_accounts['bonus']][0]['units'] );
+		$this->assertEquals( '300.00', $pse_arr[$pse_accounts['bonus']][0]['amount'] );
+		$this->assertEquals( '400.00', $pse_arr[$pse_accounts['bonus']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['union_dues']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['union_dues']][0]['ytd_amount'], '19.98' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['union_dues']][0]['amount'] );
+		$this->assertEquals( '19.98', $pse_arr[$pse_accounts['union_dues']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '399.99' );
+		$this->assertEquals( '399.99', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
 
 		//Check deductions.
-		$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_1']][0]['amount'], '0.00' ); //Already Exceeded Wage Base, this should be 0!!
-		$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_1']][0]['ytd_amount'], '20.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_2']][0]['amount'], '0.92' ); //Nearing Wage Base, this should be less than 1!!
-		$this->assertEquals( $pse_arr[$pse_accounts['advanced_percent_2']][0]['ytd_amount'], '25.00' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['advanced_percent_1']][0]['amount'] ); //Already Exceeded Wage Base, this should be 0!!
+		$this->assertEquals( '20.00', $pse_arr[$pse_accounts['advanced_percent_1']][0]['ytd_amount'] );
+		$this->assertEquals( '0.92', $pse_arr[$pse_accounts['advanced_percent_2']][0]['amount'] ); //Nearing Wage Base, this should be less than 1!!
+		$this->assertEquals( '25.00', $pse_arr[$pse_accounts['advanced_percent_2']][0]['ytd_amount'] );
 
 		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			if ( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] >= 110
@@ -1499,24 +1508,24 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 		//var_dump($pse_arr);
 
-		$this->assertEquals( (float)$pse_arr[$pse_accounts['regular_time']][0]['rate'], '0.00' );
+		$this->assertEquals( '0.00', (float)$pse_arr[$pse_accounts['regular_time']][0]['rate'] );
 		//$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['units'], '3.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '1000.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '1000.00' );
+		$this->assertEquals( '1000.00', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '1000.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
 
-		$this->assertEquals( count( $pse_arr[$pse_accounts['regular_time']] ), 1 );
+		$this->assertCount( 1, $pse_arr[$pse_accounts['regular_time']] );
 
 
 		$pay_stub_id = $this->getPayStub( $this->pay_period_objs[1]->getId() );
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 		//var_dump($pse_arr);
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['rate'], '33.33' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['units'], '3.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '99.99' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '1099.99' );
+		$this->assertEquals( '33.33', $pse_arr[$pse_accounts['regular_time']][0]['rate'] );
+		$this->assertEquals( '3.00', $pse_arr[$pse_accounts['regular_time']][0]['units'] );
+		$this->assertEquals( '99.99', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '1099.99', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
 
-		$this->assertEquals( count( $pse_arr[$pse_accounts['regular_time']] ), 1 );
+		$this->assertCount( 1, $pse_arr[$pse_accounts['regular_time']] );
 
 		return true;
 	}
@@ -1545,34 +1554,34 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 		//var_dump($pse_arr);
 
-		$this->assertEquals( (float)$pse_arr[$pse_accounts['regular_time']][0]['rate'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['units'], '48.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '857.14' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
+		$this->assertEquals( '0.00', (float)$pse_arr[$pse_accounts['regular_time']][0]['rate'] );
+		$this->assertEquals( '48.00', $pse_arr[$pse_accounts['regular_time']][0]['units'] );
+		$this->assertEquals( '857.14', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
 
-		$this->assertEquals( (float)$pse_arr[$pse_accounts['regular_time']][1]['rate'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['units'], '32.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '428.57' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '0.00' );
+		$this->assertEquals( '0.00', (float)$pse_arr[$pse_accounts['regular_time']][1]['rate'] );
+		$this->assertEquals( '32.00', $pse_arr[$pse_accounts['regular_time']][1]['units'] );
+		$this->assertEquals( '428.57', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( (float)$pse_arr[$pse_accounts['regular_time']][2]['rate'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][2]['units'], '32.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][2]['amount'], '285.71' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][2]['ytd_amount'], '1571.42' );
+		$this->assertEquals( '0.00', (float)$pse_arr[$pse_accounts['regular_time']][2]['rate'] );
+		$this->assertEquals( '32.00', $pse_arr[$pse_accounts['regular_time']][2]['units'] );
+		$this->assertEquals( '285.71', $pse_arr[$pse_accounts['regular_time']][2]['amount'] );
+		$this->assertEquals( '1571.42', $pse_arr[$pse_accounts['regular_time']][2]['ytd_amount'] );
 
-		$this->assertEquals( count( $pse_arr[$pse_accounts['regular_time']] ), 3 );
+		$this->assertCount( 3, $pse_arr[$pse_accounts['regular_time']] );
 
 
 		$pay_stub_id = $this->getPayStub( $this->pay_period_objs[1]->getId() );
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 		//var_dump($pse_arr);
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['rate'], '33.33' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['units'], '3.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '99.99' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '1671.41' );
+		$this->assertEquals( '33.33', $pse_arr[$pse_accounts['regular_time']][0]['rate'] );
+		$this->assertEquals( '3.00', $pse_arr[$pse_accounts['regular_time']][0]['units'] );
+		$this->assertEquals( '99.99', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '1671.41', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
 
-		$this->assertEquals( count( $pse_arr[$pse_accounts['regular_time']] ), 1 );
+		$this->assertCount( 1, $pse_arr[$pse_accounts['regular_time']] );
 
 		return true;
 	}
@@ -1633,23 +1642,96 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		//var_dump($pse_arr);
 
 		for ( $i = 0; $i <= 12; $i++ ) {
-			$this->assertEquals( (float)$pse_arr[$pse_accounts['regular_time']][$i]['rate'], '0.00' );
-			$this->assertEquals( (float)$pse_arr[$pse_accounts['regular_time']][$i]['units'], '0.00' );
-			$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][$i]['amount'], '71.43' );
-			$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][$i]['ytd_amount'], '0.00' );
+			$this->assertEquals( '0.00', (float)$pse_arr[$pse_accounts['regular_time']][$i]['rate'] );
+			$this->assertEquals( '0.00', (float)$pse_arr[$pse_accounts['regular_time']][$i]['units'] );
+			$this->assertEquals( '71.43', $pse_arr[$pse_accounts['regular_time']][$i]['amount'] );
+			$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][$i]['ytd_amount'] );
 		}
 
-		$this->assertEquals( (float)$pse_arr[$pse_accounts['regular_time']][13]['rate'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][13]['units'], '3.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][13]['amount'], '71.43' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][13]['ytd_amount'], '0.00' );
+		$this->assertEquals( '0.00', (float)$pse_arr[$pse_accounts['regular_time']][13]['rate'] );
+		$this->assertEquals( '3.00', $pse_arr[$pse_accounts['regular_time']][13]['units'] );
+		$this->assertEquals( '71.43', $pse_arr[$pse_accounts['regular_time']][13]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][13]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][14]['rate'], '33.33' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][14]['units'], '3.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][14]['amount'], '99.99' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][14]['ytd_amount'], '1172.37' );
+		$this->assertEquals( '33.33', $pse_arr[$pse_accounts['regular_time']][14]['rate'] );
+		$this->assertEquals( '3.00', $pse_arr[$pse_accounts['regular_time']][14]['units'] );
+		$this->assertEquals( '99.99', $pse_arr[$pse_accounts['regular_time']][14]['amount'] );
+		$this->assertEquals( '1172.37', $pse_arr[$pse_accounts['regular_time']][14]['ytd_amount'] );
 
-		$this->assertEquals( count( $pse_arr[$pse_accounts['regular_time']] ), 15 );
+		$this->assertCount( 15, $pse_arr[$pse_accounts['regular_time']] );
+
+		return true;
+	}
+
+	/**
+	 * @group PayStubCalculation_testMultiCurrencyPayStubA
+	 */
+	function testMultiCurrencyPayStubA() {
+		global $dd;
+		$this->remittance_source_account_ids[$this->legal_entity_id][20] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id[20], 100 ); // Check - CAD
+		$this->remittance_source_account_ids[$this->legal_entity_id][30] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id[30], 110 ); // Check - EUR
+		$this->remittance_source_account_ids[$this->legal_entity_id][40] = $dd->createRemittanceSourceAccount( $this->company_id, $this->legal_entity_id, $this->currency_id[40], 120 ); // Check - MXN
+
+		//Delete existing destination accounts so random fixed amounts don't cause problems.
+		$rdlf = TTnew('RemittanceDestinationAccountListFactory');
+		$rdlf->getByUserIdAndCompany( $this->user_id, $this->company_id );
+		if ( $rdlf->getRecordCount() > 0 ) {
+			foreach( $rdlf as $rd_obj ) {
+				$rd_obj->Delete();
+			}
+		}
+		unset($rdlf);
+
+		$dd->createRemittanceDestinationAccount( $this->user_id, $this->currency_id[10], $this->legal_entity_id, $this->remittance_source_account_ids[$this->legal_entity_id][0], 100, 55 );
+		$dd->createRemittanceDestinationAccount( $this->user_id, $this->currency_id[20], $this->legal_entity_id, $this->remittance_source_account_ids[$this->legal_entity_id][20], 110, 10 );
+		$dd->createRemittanceDestinationAccount( $this->user_id, $this->currency_id[30], $this->legal_entity_id, $this->remittance_source_account_ids[$this->legal_entity_id][30], 120, 15 );
+		$dd->createRemittanceDestinationAccount( $this->user_id, $this->currency_id[40], $this->legal_entity_id, $this->remittance_source_account_ids[$this->legal_entity_id][40], 130, 20 );
+
+
+		$this->deleteUserWage( $this->user_id );
+
+		//First Wage Entry
+		$this->createUserSalaryWage( $this->user_id, 1, strtotime( '01-Jan-2001' ) );
+		$this->createUserSalaryWage( $this->user_id, 10000, TTDate::incrementDate( $this->pay_period_objs[0]->getStartDate(), -1, 'day' ) );
+
+		//$this->addPayStubAmendments();
+		$this->createPayStub();
+
+		$pse_accounts = [
+				'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $this->company_id, 10, 'Regular Time' ),
+		];
+
+		$pay_stub_id = $this->getPayStub( $this->pay_period_objs[0]->getId() );
+		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
+		//var_dump($pse_arr);
+
+		$this->assertEquals( '0.00', (float)$pse_arr[$pse_accounts['regular_time']][0]['rate'] );
+		$this->assertEquals( '10000.00', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '10000.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+
+		$this->assertCount( 1, $pse_arr[$pse_accounts['regular_time']] );
+
+		$pst_arr = $this->getPayStubTransactionArray( $pay_stub_id );
+		//var_dump($pst_arr);
+
+		$this->assertEquals( '2294.88', $pst_arr[0]['amount'] );
+		$this->assertEquals( $pst_arr[0]['currency_id'], $this->currency_id[10] );
+		$this->assertEquals( '1.0000000000', $pst_arr[0]['currency_rate'] );
+
+		$this->assertEquals( '500.70', $pst_arr[1]['amount'] );
+		$this->assertEquals( $pst_arr[1]['currency_id'], $this->currency_id[20] );
+		$this->assertEquals( '0.8333333333', $pst_arr[1]['currency_rate'] );
+
+		$this->assertEquals( '813.644', $pst_arr[2]['amount'] );
+		$this->assertEquals( $pst_arr[2]['currency_id'], $this->currency_id[30] );
+		$this->assertEquals( '0.7692307692', $pst_arr[2]['currency_rate'] );
+
+		$this->assertEquals( '8140449.95', $pst_arr[3]['amount'] );
+		$this->assertEquals( $pst_arr[3]['currency_id'], $this->currency_id[40] );
+		$this->assertEquals( '0.0001025115', $pst_arr[3]['currency_rate'] );
+
+
+		$this->assertCount( 4, $pst_arr );
 
 		return true;
 	}
@@ -1679,159 +1761,159 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		//}
 
 		//Test with no birth date defaulting to having CPP deducted.
-		$this->assertEquals( $cdf->isCPPAgeEligible( strtotime( '01-Sep-1990' ), strtotime( '01-Sep-2014' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( '', strtotime( '01-Sep-2014' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( false, strtotime( '01-Sep-2014' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( null, strtotime( '01-Sep-2014' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( strtotime( '01-Sep-2000' ), '' ), false ); //No transaction date specified, always false.
-		$this->assertEquals( $cdf->isCPPAgeEligible( strtotime( '01-Sep-2000' ), false ), false ); //No transaction date specified, always false.
-		$this->assertEquals( $cdf->isCPPAgeEligible( strtotime( '01-Sep-2000' ), null ), false ); //No transaction date specified, always false.
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( strtotime( '01-Sep-1990' ), strtotime( '01-Sep-2014' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( '', strtotime( '01-Sep-2014' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( false, strtotime( '01-Sep-2014' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( null, strtotime( '01-Sep-2014' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( strtotime( '01-Sep-2000' ), '' ) );    //No transaction date specified, always false.
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( strtotime( '01-Sep-2000' ), false ) ); //No transaction date specified, always false.
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( strtotime( '01-Sep-2000' ), null ) );  //No transaction date specified, always false.
 
 
 		$birth_date = strtotime( '16-Oct-1997' ); //18yrs old
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Sep-2014' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Sep-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Oct-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Oct-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Nov-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Nov-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Dec-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Dec-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '14-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '16-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Jan-2017' ) ), true );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Sep-2014' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Sep-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Oct-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Oct-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Nov-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Nov-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Dec-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Dec-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '14-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '16-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Jan-2017' ) ) );
 
 		$birth_date = strtotime( '31-Dec-1997' ); //18yrs old
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Sep-2014' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Sep-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Oct-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Oct-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Nov-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Nov-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Dec-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Dec-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '14-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '16-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Jan-2017' ) ), true );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Sep-2014' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Sep-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Oct-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Oct-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Nov-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Nov-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Dec-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Dec-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '14-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '16-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '31-Jan-2017' ) ) );
 
 
 		$birth_date = strtotime( '15-Jun-1997' ); //18yrs old
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2011' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2011' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2011' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2011' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2011' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2011' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2012' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2012' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2012' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2012' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2012' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2012' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2013' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2013' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2013' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2013' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2013' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2013' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2014' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2014' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2014' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2014' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2014' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2014' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-May-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jun-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '15-Jun-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jul-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '03-Jul-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '15-Jul-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Aug-2015' ) ), true );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-May-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jun-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '15-Jun-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '03-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '15-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Aug-2015' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2016' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2016' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2017' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2017' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2017' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2017' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2017' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2017' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2018' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2018' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2018' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2018' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2018' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2018' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2019' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2019' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2019' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2019' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2019' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2019' ) ) );
 
 
 		$birth_date = strtotime( '15-Jun-1960' ); //55yrs old
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2011' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2011' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2011' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2011' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2011' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2011' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2012' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2012' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2012' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2012' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2012' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2012' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2013' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2013' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2013' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2013' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2013' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2013' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2014' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2014' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2014' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2014' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2014' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2014' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2015' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2015' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2016' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2016' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2016' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2016' ) ) );
 
 
 		$birth_date = strtotime( '15-Jun-1945' ); //70yrs old
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2011' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2011' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2011' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2011' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2011' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2011' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2012' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2012' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2012' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2012' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2012' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2012' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2013' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2013' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2013' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2013' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2013' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2013' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2014' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2014' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2014' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2014' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2014' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2014' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-May-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jun-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '15-Jun-2015' ) ), true );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2015' ) ), true );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-May-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jun-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '15-Jun-2015' ) ) );
+		$this->assertEquals( true, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2015' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jul-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '03-Jul-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '15-Jul-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2015' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Aug-2015' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '01-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '03-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '15-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Aug-2015' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2016' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2016' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2016' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2016' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2016' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2016' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2017' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2017' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2017' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2017' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2017' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2017' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2018' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2018' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2018' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2018' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2018' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2018' ) ) );
 
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2019' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2019' ) ), false );
-		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2019' ) ), false );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-May-2019' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jun-2019' ) ) );
+		$this->assertEquals( false, $cdf->isCPPAgeEligible( $birth_date, strtotime( '30-Jul-2019' ) ) );
 
 		return true;
 	}
@@ -1864,150 +1946,150 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$udf->setStartDate( strtotime( '16-Oct-2015' ) );
 		$udf->setEndDate( '' );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Sep-2014' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Sep-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Oct-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Oct-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Nov-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Nov-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Dec-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Dec-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '14-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '16-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Jan-2017' ) ), true );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Sep-2014' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Sep-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Oct-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '31-Oct-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '01-Nov-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '31-Nov-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '01-Dec-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '31-Dec-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '01-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '14-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '16-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '31-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '31-Jan-2017' ) ) );
 
 		$udf->setStartDate( strtotime( '31-Dec-2015' ) ); //18yrs old
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Sep-2014' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Sep-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Oct-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Oct-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Nov-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Nov-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Dec-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Dec-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '14-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '16-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Jan-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '31-Jan-2017' ) ), true );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Sep-2014' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Sep-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Oct-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '31-Oct-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Nov-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '31-Nov-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Dec-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '31-Dec-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '01-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '14-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '16-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '31-Jan-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '31-Jan-2017' ) ) );
 
 
 		$udf->setStartDate( strtotime( '15-Jun-2015' ) );    //18yrs old
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2011' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2011' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2011' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2011' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2011' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2011' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2012' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2012' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2012' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2012' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2012' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2012' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2013' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2013' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2013' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2013' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2013' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2013' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2014' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2014' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2014' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2014' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2014' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2014' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-May-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Jun-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '15-Jun-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Jul-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '03-Jul-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '15-Jul-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Aug-2015' ) ), true );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-May-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Jun-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '15-Jun-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '01-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '03-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '15-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Aug-2015' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2016' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2016' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2017' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2017' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2017' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2017' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2017' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2017' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2018' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2018' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2018' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2018' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2018' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2018' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2019' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2019' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2019' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2019' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2019' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2019' ) ) );
 
 
 		$udf->setStartDate( strtotime( '15-Jun-2010' ) );    //55yrs old
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2011' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2011' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2011' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2011' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2011' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2011' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2012' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2012' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2012' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2012' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2012' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2012' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2013' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2013' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2013' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2013' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2013' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2013' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2014' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2014' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2014' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2014' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2014' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2014' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2015' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2015' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2016' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2016' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2016' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2016' ) ) );
 
 
 		$udf->setStartDate( strtotime( '15-Jun-1970' ) );
 		$udf->setEndDate( strtotime( '15-Jun-2015' ) );    //70yrs old
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2011' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2011' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2011' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2011' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2011' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2011' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2012' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2012' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2012' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2012' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2012' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2012' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2013' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2013' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2013' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2013' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2013' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2013' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2014' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2014' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2014' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2014' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2014' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2014' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-May-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Jun-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '15-Jun-2015' ) ), true );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2015' ) ), true );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '01-May-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '01-Jun-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '15-Jun-2015' ) ) );
+		$this->assertEquals( true, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2015' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '01-Jul-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '03-Jul-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '15-Jul-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2015' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Aug-2015' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '01-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '03-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '15-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2015' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Aug-2015' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2016' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2016' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2016' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2016' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2016' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2016' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2017' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2017' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2017' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2017' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2017' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2017' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2018' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2018' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2018' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2018' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2018' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2018' ) ) );
 
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-May-2019' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2019' ) ), false );
-		$this->assertEquals( $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2019' ) ), false );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-May-2019' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jun-2019' ) ) );
+		$this->assertEquals( false, $cdf->isActiveDate( $udf, null, strtotime( '30-Jul-2019' ) ) );
 
 		return true;
 	}

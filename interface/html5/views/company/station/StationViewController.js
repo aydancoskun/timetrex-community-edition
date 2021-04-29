@@ -1,30 +1,31 @@
-StationViewController = BaseViewController.extend( {
-	el: '#station_view_container',
+class StationViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#station_view_container',
 
-	_required_files: {
-		10: ['APIStation', 'APIUserGroup', 'APIUserPreference', 'APIBranch', 'APIDepartment'],
-		20: ['APIJob', 'APIJobItem']
-	},
+			user_group_api: null,
+			status_array: null,
+			type_array: null,
 
-	user_group_api: null,
-	status_array: null,
-	type_array: null,
+			time_zone_array: null,
+			time_clock_command_array: null,
+			mode_flag_array: null,
+			default_mode_flag_array: null,
+			poll_frequency_array: null,
+			push_frequency_array: null,
+			partial_push_frequency_array: null,
+			group_selection_type_array: null,
+			branch_selection_type_array: null,
+			department_selection_type_array: null,
+			user_group_array: null,
 
-	time_zone_array: null,
-	time_clock_command_array: null,
-	mode_flag_array: null,
-	default_mode_flag_array: null,
-	poll_frequency_array: null,
-	push_frequency_array: null,
-	partial_push_frequency_array: null,
-	group_selection_type_array: null,
-	branch_selection_type_array: null,
-	department_selection_type_array: null,
-	user_group_array: null,
+			user_preference_api: null
+		} );
 
-	user_preference_api: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'StationEditView.html';
 		this.permission_id = 'station';
@@ -33,14 +34,14 @@ StationViewController = BaseViewController.extend( {
 		this.table_name_key = 'station';
 		this.context_menu_name = $.i18n._( 'Station' );
 		this.navigation_label = $.i18n._( 'Station' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIStation' ) )();
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.user_preference_api = new ( APIFactory.getAPIClass( 'APIUserPreference' ) )();
+		this.api = TTAPI.APIStation;
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.user_preference_api = TTAPI.APIUserPreference;
 
 		if ( ( Global.getProductEdition() >= 20 ) ) {
 
-			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
-			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+			this.job_api = TTAPI.APIJob;
+			this.job_item_api = TTAPI.APIJobItem;
 
 		}
 
@@ -49,19 +50,18 @@ StationViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var $this = this;
 
@@ -96,10 +96,9 @@ StationViewController = BaseViewController.extend( {
 			} );
 
 		} );
+	}
 
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
@@ -146,11 +145,10 @@ StationViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-
-	},
+	}
 
 	/* jshint ignore:start */
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -196,19 +194,18 @@ StationViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-
-	},
+	}
 
 	/* jshint ignore:end */
-	isDisableIncludeEmployees: function() {
+	isDisableIncludeEmployees() {
 		if ( this.edit_view_ui_dic['group'].getEnabled() || this.edit_view_ui_dic['branch'].getEnabled() || this.edit_view_ui_dic['department'].getEnabled() ) {
 			this.edit_view_ui_dic['include_user'].setEnabled( true );
 		} else {
 			this.edit_view_ui_dic['include_user'].setEnabled( false );
 		}
-	},
+	}
 
-	onEmployeeGroupSelectionTypeChange: function() {
+	onEmployeeGroupSelectionTypeChange() {
 
 		if ( parseInt( this.current_edit_record['user_group_selection_type_id'] ) == 10 ) {
 			this.edit_view_ui_dic['group'].setEnabled( false );
@@ -216,8 +213,9 @@ StationViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic['user_group_selection_type_id'].setValue( this.current_edit_record['user_group_selection_type_id'] );
 			this.edit_view_ui_dic['group'].setEnabled( true );
 		}
-	},
-	onBranchSelectionTypeChange: function() {
+	}
+
+	onBranchSelectionTypeChange() {
 		if ( parseInt( this.current_edit_record['branch_selection_type_id'] ) == 10 ) {
 
 			this.edit_view_ui_dic['branch'].setEnabled( false );
@@ -225,17 +223,18 @@ StationViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic['branch_selection_type_id'].setValue( this.current_edit_record['branch_selection_type_id'] );
 			this.edit_view_ui_dic['branch'].setEnabled( true );
 		}
-	},
-	onDepartmentSelectionTypeChange: function() {
+	}
+
+	onDepartmentSelectionTypeChange() {
 		if ( parseInt( this.current_edit_record['department_selection_type_id'] ) == 10 ) {
 			this.edit_view_ui_dic['department'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['department_selection_type_id'].setValue( this.current_edit_record['department_selection_type_id'] );
 			this.edit_view_ui_dic['department'].setEnabled( true );
 		}
-	},
+	}
 
-	onTypeChange: function() {
+	onTypeChange() {
 		if ( parseInt( this.current_edit_record['type_id'] ) == 100 ||
 			parseInt( this.current_edit_record['type_id'] ) == 150 ||
 			parseInt( this.current_edit_record['type_id'] ) == 28 ||
@@ -286,10 +285,9 @@ StationViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
+	}
 
-	},
-
-	initModeFlag: function() {
+	initModeFlag() {
 		var $this = this;
 		this.api.getOptions( 'mode_flag', this.current_edit_record.type_id, true, {
 			onResult: function( result ) {
@@ -300,9 +298,9 @@ StationViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	initDefaultModeFlag: function() {
+	initDefaultModeFlag() {
 		var $this = this;
 		this.api.getOptions( 'default_mode_flag', this.current_edit_record.type_id, true, {
 			onResult: function( result ) {
@@ -315,11 +313,11 @@ StationViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		var $this = this;
-		this._super( 'setEditViewDataDone' );
+		super.setEditViewDataDone();
 
 		this.onTypeChange();
 		this.onEmployeeGroupSelectionTypeChange();
@@ -336,10 +334,9 @@ StationViewController = BaseViewController.extend( {
 				$this.onSaveAndContinue( true );
 			} );
 		}
+	}
 
-	},
-
-	onSaveAndContinue: function( isRun ) {
+	onSaveAndContinue( isRun ) {
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
 		var $this = this;
@@ -368,15 +365,15 @@ StationViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	onSaveDone: function( result ) {
+	onSaveDone( result ) {
 		if ( this.edit_only_mode && this.parent_view_controller ) {
 			this.parent_view_controller.onEditStationDone( result );
 		}
-	},
+	}
 
-	onBuildBasicUIFinished: function() {
+	onBuildBasicUIFinished() {
 		var station_input = this.basic_search_field_ui_dic['station_id'];
 
 		var icon = $( '<img class="station-location" src="' + Global.getRealImagePath( 'images/location.png' ) + '">' );
@@ -390,10 +387,9 @@ StationViewController = BaseViewController.extend( {
 				TAlertManager.showAlert( $.i18n._( 'Current Station is not currently set.' ) );
 			}
 		} );
+	}
 
-	},
-
-	setEditMenuEditIcon: function( context_btn, pId ) {
+	setEditMenuEditIcon( context_btn, pId ) {
 
 		if ( !this.editPermissionValidate( pId ) ) {
 			context_btn.addClass( 'invisible-image' );
@@ -402,9 +398,9 @@ StationViewController = BaseViewController.extend( {
 		if ( !this.is_viewing || !this.editOwnerOrChildPermissionValidate( pId ) ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	openEditView: function( id ) {
+	openEditView( id ) {
 		var $this = this;
 
 		if ( $this.edit_only_mode ) {
@@ -415,7 +411,7 @@ StationViewController = BaseViewController.extend( {
 					$this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 				}
 				$this.getStationData( id, function( result ) {
-					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+					// Waiting for the TTAPI.API returns data to set the current edit record.
 					$this.current_edit_record = result;
 					//if ( !$this.editPermissionValidate() || !$this.editOwnerOrChildPermissionValidate()) {
 					//	$this.is_viewing = true;
@@ -433,10 +429,9 @@ StationViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	getStationData: function( id, callBack ) {
+	getStationData( id, callBack ) {
 		var filter = {};
 		filter.filter_data = {};
 		filter.filter_data.id = [id];
@@ -454,11 +449,10 @@ StationViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -472,7 +466,7 @@ StationViewController = BaseViewController.extend( {
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIStation' ) ),
+				api_class: TTAPI.APIStation,
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.STATION,
@@ -493,9 +487,12 @@ StationViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_station_column1 );
 
-		//Status
+		var form_item_input;
+		var widgetContainer;
+		var label;
 
-		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		//Status
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_station_column1, '' );
@@ -531,7 +528,7 @@ StationViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -544,7 +541,7 @@ StationViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -558,7 +555,7 @@ StationViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -586,7 +583,7 @@ StationViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -668,7 +665,7 @@ StationViewController = BaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -697,7 +694,7 @@ StationViewController = BaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -714,7 +711,7 @@ StationViewController = BaseViewController.extend( {
 		// Include Employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -726,7 +723,7 @@ StationViewController = BaseViewController.extend( {
 		// Exclude Employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -774,8 +771,8 @@ StationViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( { field: 'manual_command' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_clock_command_array ) );
 
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<button type=\'button\' class=\' t-button widget-right-label\'>' + $.i18n._( 'Run' ) + '</button>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<button type=\'button\' class=\' t-button widget-right-label\'>' + $.i18n._( 'Run' ) + '</button>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -856,11 +853,11 @@ StationViewController = BaseViewController.extend( {
 			field: 'default_mode_flag'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Default Punch Mode' ), form_item_input, tab_time_clock_column2 ); //, '', null, null, true );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -915,7 +912,7 @@ StationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -927,7 +924,7 @@ StationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -936,4 +933,4 @@ StationViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

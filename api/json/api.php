@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -43,6 +43,16 @@ require_once( '../../includes/global.inc.php' );
 require_once( '../../includes/API.inc.php' );
 Header( 'Content-Type: application/json; charset=UTF-8' ); //Make sure content type is not text/HTML to help avoid XSS.
 
+/**
+ * Invoke API methods before the user is authenticated.
+ * @param $class_name
+ * @param $method
+ * @param $arguments
+ * @param $message_id
+ * @param $api_auth
+ * @return bool
+ * @throws ReflectionException
+ */
 function unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth ) {
 	global $config_vars;
 	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
@@ -52,8 +62,8 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 		$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
 		if ( $class_name != '' && in_array( $class_name, $valid_unauthenticated_classes ) && class_exists( $class_name ) ) {
 			$obj = new $class_name;
-			if ( method_exists( $obj, 'setAMFMessageID' ) ) {
-				$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
+			if ( method_exists( $obj, 'setAPIMessageID' ) ) {
+				$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
 			}
 			if ( $method != '' && method_exists( $obj, $method ) ) {
 				try {
@@ -87,33 +97,23 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 	return true;
 }
 
+/**
+ * Invoke API methods after the user is authenticated.
+ * @param $class_name
+ * @param $method
+ * @param $arguments
+ * @param $message_id
+ * @param $authentication
+ * @param $api_auth
+ * @return bool
+ */
 function authenticatedInvokeService( $class_name, $method, $arguments, $message_id, $authentication, $api_auth ) {
 	global $current_user, $current_user_prefs, $current_company, $obj;
 
 	$current_user = $authentication->getObject();
 
 	if ( is_object( $current_user ) ) {
-		$current_user->getUserPreferenceObject()->setDateTimePreferences();
-		$current_user_prefs = $current_user->getUserPreferenceObject();
-
-		Debug::text( 'Locale Cookie: ' . TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10 );
-		if ( TTi18n::getLocaleCookie() != '' && $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
-			Debug::text( 'Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10 );
-			$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
-			if ( $current_user_prefs->isValid() ) {
-				$current_user_prefs->Save( false );
-			}
-		} else {
-			Debug::text( 'User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10 );
-		}
-		if ( isset( $_GET['language'] ) && $_GET['language'] != '' ) {
-			TTi18n::setLocale( $_GET['language'] ); //Sets master locale
-		} else {
-			TTi18n::setLanguage( $current_user_prefs->getLanguage() );
-			TTi18n::setCountry( $current_user->getCountry() );
-			TTi18n::setLocale(); //Sets master locale
-		}
-		TTi18n::setLocaleCookie(); //Make sure locale cookie is set so APIGlobal.js.php can read it.
+		$current_user_prefs = handleOverridePreferences( $current_user );
 
 		$clf = new CompanyListFactory();
 		$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();
@@ -124,8 +124,8 @@ function authenticatedInvokeService( $class_name, $method, $arguments, $message_
 			//Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id .' UserName: '. $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $class_name != '' && class_exists( $class_name ) ) {
 				$obj = new $class_name;
-				if ( method_exists( $obj, 'setAMFMessageID' ) ) {
-					$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
+				if ( method_exists( $obj, 'setAPIMessageID' ) ) {
+					$obj->setAPIMessageID( $message_id ); //Sets API message ID so progress bar continues to work.
 				}
 
 				if ( $method != '' && method_exists( $obj, $method ) ) {
@@ -220,8 +220,15 @@ $_POST = array( 'data' => array('filter_data' => array('id' => array(101561) ) )
 //Debug::Arr(file_get_contents('php://input'), 'POST: ', __FILE__, __LINE__, __METHOD__, 10);
 //Debug::Arr($_POST, 'POST: ', __FILE__, __LINE__, __METHOD__, 10);
 
-//$argument_size = strlen( serialize($arguments) );
+$api_auth = TTNew( 'APIAuthentication' ); /** @var APIAuthentication $api_auth */ //Used to handle error cases and display error messages.
+
 $argument_size = strlen( $HTTP_RAW_POST_DATA ); //Just strlen this variable rather than serialize all the data as it should be much faster.
+if ( isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0 ) {
+	if ( (int)$_SERVER['CONTENT_LENGTH'] != $argument_size ) {
+		Debug::Text( 'WARNING: Content Length header: '. $_SERVER['CONTENT_LENGTH'] .' does not match actual content length: ' . $argument_size .'. Request from client is possibly corrupt or cutoff.', __FILE__, __LINE__, __METHOD__, 10 );
+		//TODO: Possibly return an error message to the user to retry?
+	}
+}
 
 $arguments = $_POST;
 if ( isset($_POST['json']) || isset($_GET['json']) ) {
@@ -237,12 +244,23 @@ if ( isset($_POST['json']) || isset($_GET['json']) ) {
 		Debug::Arr( $HTTP_RAW_POST_DATA, 'Raw POST Request: ', __FILE__, __LINE__, __METHOD__, 0 );
 		Debug::Arr( urldecode( $HTTP_RAW_POST_DATA ), 'URL Decoded Raw POST Request: ', __FILE__, __LINE__, __METHOD__, 0 );
 	}
+} elseif ( $HTTP_RAW_POST_DATA != '' ) {
+	$arguments = json_decode( $HTTP_RAW_POST_DATA, true );
+	if ( $arguments !== null && getJSONError() == '' ) {
+		echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'ERROR: JSON payload must be sent within the \'json\' POST variable. ie: json=<JSON DATA>' ) ) );
+	} else {
+		echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'ERROR: No JSON POST variable payload received. Payload must be sent within the \'json\' POST variable. ie: json=<JSON DATA>' ) ) );
+	}
+	Debug::Arr( urldecode( $HTTP_RAW_POST_DATA ), 'URL Decoded Raw POST Request: ', __FILE__, __LINE__, __METHOD__, 0 );
+	Debug::writeToLog();
+	exit;
+
 }
 
 if ( PRODUCTION == true && $argument_size > ( 1024 * 12 ) ) {
 	Debug::Text( 'Arguments too large to display... Size: ' . $argument_size, __FILE__, __LINE__, __METHOD__, 10 );
 } else {
-	if ( ( strtolower( $method ) == 'login' || strtolower( $method ) == 'senderrorreport' ) && isset( $arguments[0] ) ) { //Make sure passwords arent displayed if logging is enabled.
+	if ( ( strtolower( $method ) == 'login' || strtolower( $method ) == 'registerAPIKey' || strtolower( $method ) == 'senderrorreport' ) && isset( $arguments[0] ) ) { //Make sure passwords arent displayed if logging is enabled.
 		Debug::Arr( $arguments[0], '*Censored* Arguments: (Size: ' . $argument_size . ')', __FILE__, __LINE__, __METHOD__, 10 );
 	} else {
 		Debug::Arr( $arguments, 'Arguments: (Size: ' . $argument_size . ')', __FILE__, __LINE__, __METHOD__, 10 );
@@ -250,14 +268,14 @@ if ( PRODUCTION == true && $argument_size > ( 1024 * 12 ) ) {
 }
 unset( $argument_size );
 
-$api_auth = TTNew( 'APIAuthentication' );
-/** @var APIAuthentication $api_auth */ //Used to handle error cases and display error messages.
-$session_id = getSessionID();
 $authentication = new Authentication();
-if ( $authentication->checkValidCSRFToken() == true ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
-	if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == false ) && ( !isset( $config_vars['other']['down_for_maintenance'] ) || isset( $config_vars['other']['down_for_maintenance'] ) && $config_vars['other']['down_for_maintenance'] == '' ) && $session_id != '' && !isset( $_GET['disable_db'] ) && !in_array( strtolower( $method ), [ 'isloggedin', 'ping' ] ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
+if ( isUnauthenticatedMethod( $method ) == true || $authentication->checkValidCSRFToken() == true ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in. However when calling isLoggedIn() after being idle, if the CSRF/SessionID cookies are deleted, it will trigger a CSRF error before logging the user out. So we want to ignore CSRF checks for these functions.
+	$session_id = getSessionID();
+	if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == false ) && ( !isset( $config_vars['other']['down_for_maintenance'] ) || isset( $config_vars['other']['down_for_maintenance'] ) && $config_vars['other']['down_for_maintenance'] == '' ) && $session_id != '' && !isset( $_GET['disable_db'] ) && isUnauthenticatedMethod( $method ) == false ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
 		Debug::text( 'Session ID: ' . $session_id . ' Source IP: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
-		if ( Misc::isMobileAppUserAgent() == true ) {
+		if ( $authentication->isSessionIDAPIKey( $session_id ) == true ) {
+			$authentication_type_id = 700; //API Key
+		} else if ( Misc::isMobileAppUserAgent() == true && Misc::getMobileAppClientVersion() != '' && version_compare( Misc::getMobileAppClientVersion(), '5.0.0', '<' ) ) { //As of Mobile App v5.0 it no longer uses Quick Punch ID/Password.
 			$authentication_type_id = 605; //Phone ID - Mobile App
 		} else {
 			$authentication_type_id = 800; //USER_NAME
@@ -277,7 +295,7 @@ if ( $authentication->checkValidCSRFToken() == true ) { //Help prevent CSRF atta
 		unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
 	}
 } else {
-	echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION', TTi18n::getText( 'Invalid CSRF token, please refresh your browser and try again!' ) ) ); //Could potentially use a SESSION error so the front-end logs the user out so they can login again with a fresh CSRF token.
+	echo json_encode( $api_auth->returnHandler( false, 'EXCEPTION_CSRF', TTi18n::getText( 'Invalid CSRF token, please refresh your browser and try again!' ) ) ); //Could potentially use a SESSION error so the front-end logs the user out so they can login again with a fresh CSRF token.
 }
 
 Debug::text( 'Server Response Time: ' . ( (float)microtime( true ) - $_SERVER['REQUEST_TIME_FLOAT'] ), __FILE__, __LINE__, __METHOD__, 10 );

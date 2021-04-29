@@ -1,20 +1,21 @@
-BranchViewController = BaseViewController.extend( {
-	el: '#branch_view_container',
+class BranchViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#branch_view_container',
 
-	_required_files: {
-		10: ['APIBranch', 'APICompanyGenericTag'],
-		20: ['APIGEOFence']
-	},
+			status_array: null,
+			country_array: null,
+			province_array: null,
 
-	status_array: null,
-	country_array: null,
-	province_array: null,
+			e_province_array: null,
 
-	e_province_array: null,
+			company_api: null
+		} );
 
-	company_api: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'BranchEditView.html';
 		this.permission_id = 'branch';
@@ -23,26 +24,24 @@ BranchViewController = BaseViewController.extend( {
 		this.table_name_key = 'branch';
 		this.context_menu_name = $.i18n._( 'Branch' );
 		this.navigation_label = $.i18n._( 'Branch' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIBranch' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.api = TTAPI.APIBranch;
+		this.company_api = TTAPI.APICompany;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'country', 'country', this.company_api );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [],
 			include: [
@@ -59,9 +58,9 @@ BranchViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onSetSearchFilterFinished: function() {
+	onSetSearchFilterFinished() {
 		var combo;
 		var select_value;
 		if ( this.search_panel.getSelectTabIndex() === 0 ) {
@@ -73,25 +72,24 @@ BranchViewController = BaseViewController.extend( {
 			select_value = combo.getValue();
 			this.setProvince( select_value );
 		}
+	}
 
-	},
-
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
 				this.onImportClick();
 				break;
 		}
-	},
+	}
 
-	onImportClick: function() {
+	onImportClick() {
 		var $this = this;
-		IndexViewController.openWizard( 'ImportCSVWizard', 'branch', function() {
+		IndexViewController.openWizard( 'ImportCSVWizard', 'Branch', function() {
 			$this.search();
 		} );
-	},
+	}
 
-	onBuildAdvUIFinished: function() {
+	onBuildAdvUIFinished() {
 
 		this.adv_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.adv_search_field_ui_dic['country'];
@@ -102,9 +100,9 @@ BranchViewController = BaseViewController.extend( {
 			this.adv_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	onBuildBasicUIFinished: function() {
+	onBuildBasicUIFinished() {
 		this.basic_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.basic_search_field_ui_dic['country'];
 			var selectVal = combo.getValue();
@@ -114,9 +112,9 @@ BranchViewController = BaseViewController.extend( {
 			this.basic_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -139,12 +137,11 @@ BranchViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 		var $this = this;
 
 		var tab_model = {
@@ -156,7 +153,7 @@ BranchViewController = BaseViewController.extend( {
 		var form_item_input;
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
@@ -262,7 +259,7 @@ BranchViewController = BaseViewController.extend( {
 		if ( Global.getProductEdition() >= 20 ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIGEOFence' ) ),
+				api_class: TTAPI.APIGEOFence,
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.GEO_FENCE,
 				show_search_inputs: true,
@@ -277,9 +274,9 @@ BranchViewController = BaseViewController.extend( {
 
 		form_item_input.TTagInput( { field: 'tag', object_type_id: 110 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_branch_column1, '', null, null, true );
-	},
+	}
 
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === '-1' || val === '0' ) {
@@ -303,9 +300,9 @@ BranchViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	eSetProvince: function( val, refresh ) {
+	eSetProvince( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -329,11 +326,11 @@ BranchViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 			new SearchField( {
 				label: $.i18n._( 'Status' ),
@@ -445,7 +442,7 @@ BranchViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -458,7 +455,7 @@ BranchViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -469,4 +466,4 @@ BranchViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

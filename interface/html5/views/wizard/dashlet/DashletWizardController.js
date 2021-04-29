@@ -1,60 +1,44 @@
-DashletWizardController = BaseWizardController.extend( {
+class DashletWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg',
+			user_generic_data_api: null,
+			api_user_report: null,
+			numArray: [
+				{ label: $.i18n._( 'Default' ), value: 0 },
+				{ label: 5, value: 5 },
+				{ label: 10, value: 10 },
+				{ label: 15, value: 15 },
+				{ label: 20, value: 20 },
+				{ label: 25, value: 25 },
+				{ label: 50, value: 50 },
+				{ label: 100, value: 100 },
+				{ label: 250, value: 250 },
+				{ label: 500, value: 500 },
+				{ label: 1000, value: 1000 }
+			]
+		} );
 
-	el: '.wizard-bg',
-	user_generic_data_api: null,
-	api_user_report: null,
-	numArray: [
-		{ label: $.i18n._( 'Default' ), value: 0 },
-		{ label: 5, value: 5 },
-		{ label: 10, value: 10 },
-		{ label: 15, value: 15 },
-		{ label: 20, value: 20 },
-		{ label: 25, value: 25 },
-		{ label: 50, value: 50 },
-		{ label: 100, value: 100 },
-		{ label: 250, value: 250 },
-		{ label: 500, value: 500 },
-		{ label: 1000, value: 1000 }
-	],
-	report_apis: {
-		AccrualBalanceSummaryReport: 'APIAccrualBalanceSummaryReport',
-		AuditTrailReport: 'APIAuditTrailReport',
-		UserSummaryReport: 'APIUserSummaryReport',
-		ExceptionReport: 'APIExceptionSummaryReport',
-		UserExpenseReport: 'APIUserExpenseReport',
-		PayStubSummaryReport: 'APIPayStubSummaryReport',
-		PunchSummaryReport: 'APIPunchSummaryReport',
-		UserQualificationReport: 'APIUserQualificationReport',
-		UserRecruitmentDetailReport: 'APIUserRecruitmentDetailReport',
-		UserRecruitmentSummaryReport: 'APIUserRecruitmentSummaryReport',
-		KPIReport: 'APIKPIReport',
-		ScheduleSummaryReport: 'APIScheduleSummaryReport',
-		TimeSheetDetailReport: 'APITimesheetDetailReport',
-		TimeSheetSummaryReport: 'APITimesheetSummaryReport',
-		JobSummaryReport: 'APIJobSummaryReport',
-		JobDetailReport: 'APIJobDetailReport',
-		JobInformationReport: 'APIJobInformationReport',
-		JobItemInformationReport: 'APIJobItemInformationReport',
-		ActiveShiftReport: 'APIActiveShiftReport'
-	},
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.title = $.i18n._( 'Dashlet Wizard' );
 		this.steps = 2;
 		this.current_step = 1;
-		this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
-		this.api_user_report = new ( APIFactory.getAPIClass( 'APIUserReportData' ) )();
+		this.user_generic_data_api = TTAPI.APIUserGenericData;
+		this.api_user_report = TTAPI.APIUserReportData;
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 		this.initCurrentStep();
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 		var $this = this;
 		this.stepsWidgetDic[this.current_step] = {};
 		this.content_div.empty();
@@ -232,18 +216,18 @@ DashletWizardController = BaseWizardController.extend( {
 
 				break;
 		}
-	},
+	}
 
-	step1ComboboxChanged: function( value ) {
+	step1ComboboxChanged( value ) {
 		if ( Global.getProductEdition() <= 10 && ( value == 'custom_list' || value == 'custom_report' ) ) {
 			TAlertManager.showAlert( Global.getUpgradeMessage(), $.i18n._( 'Denied' ) );
 			Global.setWidgetEnabled( this.next_btn, false );
 		} else {
 			Global.setWidgetEnabled( this.next_btn, true );
 		}
-	},
+	}
 
-	setDefaultName: function( dashlet_type ) {
+	setDefaultName( dashlet_type ) {
 		var step_2_ui = this.stepsWidgetDic[2];
 		var step_1_ui = this.stepsWidgetDic[1];
 		if ( dashlet_type === 'custom_list' ) {
@@ -253,13 +237,13 @@ DashletWizardController = BaseWizardController.extend( {
 		} else {
 			step_2_ui.name.setValue( step_1_ui.dashlet_type.getLabel() );
 		}
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 		var $this = this;
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
-		var api = new ( APIFactory.getAPIClass( 'APIDashboard' ) )();
+		var api = TTAPI.APIDashboard;
 		switch ( this.current_step ) {
 			case 1:
 				api.getOptions( 'dashlets', {
@@ -370,13 +354,15 @@ DashletWizardController = BaseWizardController.extend( {
 				} );
 				break;
 		}
-	},
+	}
 
-	setTemplateSource: function() {
+	setTemplateSource() {
 		var step_2_widgets = this.stepsWidgetDic[2];
 		var script = step_2_widgets.report.getValue();
 		var template_combobox = step_2_widgets.template;
-		var report_api = new ( APIFactory.getAPIClass( this.report_apis[script] ) )();
+		//var report_api = new ( APIFactory.getAPIClass( this.report_apis[script] ) )();
+		//var report_api = TTAPI[this.report_apis[script]];
+		var report_api = TTAPI['API' + script];
 		var template_options_result = report_api.getOptions( 'templates', { async: false } );
 		var templates = template_options_result.getResult();
 		templates = Global.buildRecordArray( templates );
@@ -388,9 +374,9 @@ DashletWizardController = BaseWizardController.extend( {
 			value: 'saved_report'
 		} );
 		template_combobox.setSourceData( templates );
-	},
+	}
 
-	setSavedReport: function() {
+	setSavedReport() {
 		var step_2_data = this.stepsDataDic[2];
 		var step_1_data = this.stepsDataDic[1];
 		var step_2_widgets = this.stepsWidgetDic[2];
@@ -438,9 +424,9 @@ DashletWizardController = BaseWizardController.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	setLayout: function( script ) {
+	setLayout( script ) {
 		var step_2_data = this.stepsDataDic[2];
 		var step_1_data = this.stepsDataDic[1];
 		var layout_combobox = this.stepsWidgetDic[2].layout;
@@ -469,9 +455,9 @@ DashletWizardController = BaseWizardController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	getScriptNameByAPIViewKey: function( key ) {
+	getScriptNameByAPIViewKey( key ) {
 		var result = '';
 		switch ( key ) {
 			case 'Exception':
@@ -561,11 +547,11 @@ DashletWizardController = BaseWizardController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 		this.stepsWidgetDic[2].name.clearErrorStyle();
 		var saved_dashlet = this.stepsDataDic[1].saved_dashlet;
@@ -677,9 +663,9 @@ DashletWizardController = BaseWizardController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		if ( !this.stepsDataDic[this.current_step] ) {
 			this.stepsDataDic[this.current_step] = {};
 		}
@@ -709,10 +695,9 @@ DashletWizardController = BaseWizardController.extend( {
 				current_step_data.auto_refresh = current_step_ui.auto_refresh.getValue();
 				break;
 		}
+	}
 
-	},
-
-	getProperDashletName: function( step_1_data ) {
+	getProperDashletName( step_1_data ) {
 		var key = step_1_data['dashlet_type'];
 		var name = '';
 		switch ( key ) {
@@ -730,9 +715,9 @@ DashletWizardController = BaseWizardController.extend( {
 				break;
 		}
 		return name;
-	},
+	}
 
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 		if ( !this.default_data ) {
 			return null;
 		}
@@ -744,4 +729,4 @@ DashletWizardController = BaseWizardController.extend( {
 		}
 	}
 
-} );
+}

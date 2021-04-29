@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -109,7 +109,7 @@ class RecurringPayStubAmendmentFactory extends Factory {
 						'-1115-frequency'           => TTi18n::gettext( 'Frequency' ),
 						'-1120-type'                => TTi18n::gettext( 'Type' ),
 						'-1130-pay_stub_entry_name' => TTi18n::gettext( 'Account' ),
-						'-1140-effective_date'      => TTi18n::gettext( 'Effective Date' ),
+						//'-1140-effective_date'      => TTi18n::gettext( 'Effective Date' ),
 						'-1150-amount'              => TTi18n::gettext( 'Amount' ),
 						'-1160-rate'                => TTi18n::gettext( 'Rate' ),
 						'-1170-units'               => TTi18n::gettext( 'Units' ),

@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,7 +45,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -116,7 +117,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
@@ -149,7 +150,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
-
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					$end_date = TTDate::getBeginWeekEpoch( TTDate::incrementDate( time(), -42, 'day' ) );
@@ -482,19 +483,19 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8 * 3600 ) );
 		//Regular Time (Part 1)
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 4 * 3600 ) );
 		//Regular Time (Part 2)
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( 4 * 3600 ) );
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 3 );
+		$this->assertCount( 3, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -558,19 +559,19 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8 * 3600 ) );
 		//Regular Time (Part 1)
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 4 * 3600 ) );
 		//Regular Time (Part 2)
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( 4 * 3600 ) );
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 3 );
+		$this->assertCount( 3, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -634,35 +635,35 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 0.5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( 0.5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], ( 4 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], ( 4 * 3600 ) );
 		//Lunch Taken
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 100 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][5]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], ( 0.5 * 3600 ) );
 		//Lunch Taken
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 100 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][6]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], ( 0.5 * 3600 ) );
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 7 );
+		$this->assertCount( 7, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -726,37 +727,37 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 847 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 847, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 953 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 953, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], ( 4 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], ( 4.5 * 3600 ) );
 
 		//Lunch Taken
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], 847 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][5]['type_id'] );
+		$this->assertEquals( 847, $udt_arr[$date_epoch][5]['total_time'] );
 		//Lunch Taken
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], 953 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][6]['type_id'] );
+		$this->assertEquals( 953, $udt_arr[$date_epoch][6]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 7 );
+		$this->assertCount( 7, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -820,38 +821,38 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8.5 * 3600 ) );
 
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 1681 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 1681, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 1919 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 1919, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], ( 3.5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], ( 4.0 * 3600 ) );
 
 		//Lunch Taken
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], 1681 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][5]['type_id'] );
+		$this->assertEquals( 1681, $udt_arr[$date_epoch][5]['total_time'] );
 		//Lunch Taken
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], 1919 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][6]['type_id'] );
+		$this->assertEquals( 1919, $udt_arr[$date_epoch][6]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 7 );
+		$this->assertCount( 7, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -901,8 +902,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8 * 3600 ) );
 		/*
 		//Regular Time
@@ -920,16 +921,16 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		*/
 
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 8 * 3600 ) );
 		//Lunch Taken
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 100 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][2]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( -1 * 3600 ) );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 3 );
+		$this->assertCount( 3, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -979,15 +980,15 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 5 * 3600 ) );
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 2 );
+		$this->assertCount( 2, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -1061,28 +1062,28 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 9720 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 9720, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 22680 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 22680, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time (Lunch deduct)
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], -2520 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( -2520, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time (Lunch deduct)
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], -1080 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 100, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( -1080, $udt_arr[$date_epoch][4]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 5 );
+		$this->assertCount( 5, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -1176,27 +1177,27 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 1.75 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], ( 2.25 * 3600 ) );
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 5 );
+		$this->assertCount( 5, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -1288,27 +1289,27 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 1.75 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], ( 2.25 * 3600 ) );
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 5 );
+		$this->assertCount( 5, $udt_arr[$date_epoch] );
 
 
 		return true;
@@ -1401,61 +1402,61 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8.25 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 196 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 196, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 225 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 225, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], 225 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( 225, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], 254 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( 254, $udt_arr[$date_epoch][4]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][5]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], ( 1.75 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][6]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][7]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][7]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][8]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][8]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], ( 2.25 * 3600 ) );
 
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], 196 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][9]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][9]['type_id'] );
+		$this->assertEquals( 196, $udt_arr[$date_epoch][9]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], 225 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][10]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][10]['type_id'] );
+		$this->assertEquals( 225, $udt_arr[$date_epoch][10]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], 225 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][11]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][11]['type_id'] );
+		$this->assertEquals( 225, $udt_arr[$date_epoch][11]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], 254 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][12]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][12]['type_id'] );
+		$this->assertEquals( 254, $udt_arr[$date_epoch][12]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 13 );
+		$this->assertCount( 13, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -1547,61 +1548,61 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8.25 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 83 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 83, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 88 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 88, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], 88 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( 88, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], 101 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( 101, $udt_arr[$date_epoch][4]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][5]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], ( 1.9 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][6]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][7]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][7]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][8]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][8]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], ( 2.25 * 3600 ) );
 
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], 83 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][9]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][9]['type_id'] );
+		$this->assertEquals( 83, $udt_arr[$date_epoch][9]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], 88 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][10]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][10]['type_id'] );
+		$this->assertEquals( 88, $udt_arr[$date_epoch][10]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], 88 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][11]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][11]['type_id'] );
+		$this->assertEquals( 88, $udt_arr[$date_epoch][11]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], 101 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][12]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][12]['type_id'] );
+		$this->assertEquals( 101, $udt_arr[$date_epoch][12]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 13 );
+		$this->assertCount( 13, $udt_arr[$date_epoch] );
 
 
 		return true;
@@ -1694,61 +1695,61 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 8.15 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 187 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 187, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 227 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 227, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], 227 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( 227, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], 259 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( 259, $udt_arr[$date_epoch][4]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][5]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], ( 1.65 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][6]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][7]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][7]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][8]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][8]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], ( 2.25 * 3600 ) );
 
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], 187 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][9]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][9]['type_id'] );
+		$this->assertEquals( 187, $udt_arr[$date_epoch][9]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], 227 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][10]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][10]['type_id'] );
+		$this->assertEquals( 227, $udt_arr[$date_epoch][10]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], 227 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][11]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][11]['type_id'] );
+		$this->assertEquals( 227, $udt_arr[$date_epoch][11]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], 259 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][12]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][12]['type_id'] );
+		$this->assertEquals( 259, $udt_arr[$date_epoch][12]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 13 );
+		$this->assertCount( 13, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -1798,8 +1799,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9 * 3600 ) );
 		/*
 		//Regular Time
@@ -1817,16 +1818,16 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		*/
 
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 9 * 3600 ) );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 110 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][2]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], ( -0.25 * 3600 ) );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 3 );
+		$this->assertCount( 3, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -1876,15 +1877,15 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], ( 5 * 3600 ) );
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 2 );
+		$this->assertCount( 2, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -1979,93 +1980,93 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9.5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 174 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 174, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 174 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 174, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], 199 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( 199, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], 199 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( 199, $udt_arr[$date_epoch][4]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], 228 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][5]['type_id'] );
+		$this->assertEquals( 228, $udt_arr[$date_epoch][5]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], 228 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][6]['type_id'] );
+		$this->assertEquals( 228, $udt_arr[$date_epoch][6]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], 299 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][7]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][7]['type_id'] );
+		$this->assertEquals( 299, $udt_arr[$date_epoch][7]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], 299 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][8]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][8]['type_id'] );
+		$this->assertEquals( 299, $udt_arr[$date_epoch][8]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][9]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][9]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], ( 1.75 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][10]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][10]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][11]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][11]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], ( 2.25 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][12]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][12]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], ( 3 * 3600 ) );
 
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['total_time'], 174 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][13]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][13]['type_id'] );
+		$this->assertEquals( 174, $udt_arr[$date_epoch][13]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][14]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['total_time'], 199 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][14]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][14]['type_id'] );
+		$this->assertEquals( 199, $udt_arr[$date_epoch][14]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][15]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][15]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][15]['total_time'], 228 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][15]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][15]['type_id'] );
+		$this->assertEquals( 228, $udt_arr[$date_epoch][15]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][16]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][16]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][16]['total_time'], 299 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][16]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][16]['type_id'] );
+		$this->assertEquals( 299, $udt_arr[$date_epoch][16]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][17]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][17]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][17]['total_time'], 174 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][17]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][17]['type_id'] );
+		$this->assertEquals( 174, $udt_arr[$date_epoch][17]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][18]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][18]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][18]['total_time'], 199 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][18]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][18]['type_id'] );
+		$this->assertEquals( 199, $udt_arr[$date_epoch][18]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][19]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][19]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][19]['total_time'], 228 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][19]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][19]['type_id'] );
+		$this->assertEquals( 228, $udt_arr[$date_epoch][19]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][20]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][20]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][20]['total_time'], 299 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][20]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][20]['type_id'] );
+		$this->assertEquals( 299, $udt_arr[$date_epoch][20]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 21 );
+		$this->assertCount( 21, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -2160,93 +2161,93 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9.5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 151 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 151, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 159 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 159, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], 180 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( 180, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], 188 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( 188, $udt_arr[$date_epoch][4]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], 198 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][5]['type_id'] );
+		$this->assertEquals( 198, $udt_arr[$date_epoch][5]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], 226 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][6]['type_id'] );
+		$this->assertEquals( 226, $udt_arr[$date_epoch][6]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], 230 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][7]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][7]['type_id'] );
+		$this->assertEquals( 230, $udt_arr[$date_epoch][7]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], 288 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][8]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][8]['type_id'] );
+		$this->assertEquals( 288, $udt_arr[$date_epoch][8]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][9]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][9]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], ( 1.9 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][10]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][10]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][11]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][11]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], ( 2.25 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][12]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][12]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], ( 2.9 * 3600 ) );
 
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['total_time'], 151 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][13]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][13]['type_id'] );
+		$this->assertEquals( 151, $udt_arr[$date_epoch][13]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][14]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['total_time'], 159 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][14]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][14]['type_id'] );
+		$this->assertEquals( 159, $udt_arr[$date_epoch][14]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][15]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][15]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][15]['total_time'], 180 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][15]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][15]['type_id'] );
+		$this->assertEquals( 180, $udt_arr[$date_epoch][15]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][16]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][16]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][16]['total_time'], 230 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][16]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][16]['type_id'] );
+		$this->assertEquals( 230, $udt_arr[$date_epoch][16]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][17]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][17]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][17]['total_time'], 188 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][17]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][17]['type_id'] );
+		$this->assertEquals( 188, $udt_arr[$date_epoch][17]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][18]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][18]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][18]['total_time'], 198 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][18]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][18]['type_id'] );
+		$this->assertEquals( 198, $udt_arr[$date_epoch][18]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][19]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][19]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][19]['total_time'], 226 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][19]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][19]['type_id'] );
+		$this->assertEquals( 226, $udt_arr[$date_epoch][19]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][20]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][20]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][20]['total_time'], 288 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][20]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][20]['type_id'] );
+		$this->assertEquals( 288, $udt_arr[$date_epoch][20]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 21 );
+		$this->assertCount( 21, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -2312,69 +2313,69 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9.5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 205 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 205, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 205 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 205, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], 205 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( 205, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], 695 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( 695, $udt_arr[$date_epoch][4]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], 695 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][5]['type_id'] );
+		$this->assertEquals( 695, $udt_arr[$date_epoch][5]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], 695 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][6]['type_id'] );
+		$this->assertEquals( 695, $udt_arr[$date_epoch][6]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][7]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][7]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][8]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][8]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], ( 6.75 * 3600 ) );
 
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], 205 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][9]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][9]['type_id'] );
+		$this->assertEquals( 205, $udt_arr[$date_epoch][9]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], 695 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][10]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][10]['type_id'] );
+		$this->assertEquals( 695, $udt_arr[$date_epoch][10]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], 205 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][11]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][11]['type_id'] );
+		$this->assertEquals( 205, $udt_arr[$date_epoch][11]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], 695 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][12]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][12]['type_id'] );
+		$this->assertEquals( 695, $udt_arr[$date_epoch][12]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['total_time'], 205 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][13]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][13]['type_id'] );
+		$this->assertEquals( 205, $udt_arr[$date_epoch][13]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][14]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['total_time'], 695 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][14]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][14]['type_id'] );
+		$this->assertEquals( 695, $udt_arr[$date_epoch][14]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 15 );
+		$this->assertCount( 15, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -2441,69 +2442,69 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9.4 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 208 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 208, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 208 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 208, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], 208 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( 208, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], 692 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( 692, $udt_arr[$date_epoch][4]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], 692 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][5]['type_id'] );
+		$this->assertEquals( 692, $udt_arr[$date_epoch][5]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], 692 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][6]['type_id'] );
+		$this->assertEquals( 692, $udt_arr[$date_epoch][6]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][7]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][7]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][8]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][8]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], ( 6.65 * 3600 ) );
 
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], 208 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][9]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][9]['type_id'] );
+		$this->assertEquals( 208, $udt_arr[$date_epoch][9]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], 692 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][10]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][10]['type_id'] );
+		$this->assertEquals( 692, $udt_arr[$date_epoch][10]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], 208 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][11]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][11]['type_id'] );
+		$this->assertEquals( 208, $udt_arr[$date_epoch][11]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], 692 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][12]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][12]['type_id'] );
+		$this->assertEquals( 692, $udt_arr[$date_epoch][12]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['total_time'], 208 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][13]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][13]['type_id'] );
+		$this->assertEquals( 208, $udt_arr[$date_epoch][13]['total_time'] );
 		//Break Time Taken
-		$this->assertEquals( $udt_arr[$date_epoch][14]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['total_time'], 692 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][14]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][14]['type_id'] );
+		$this->assertEquals( 692, $udt_arr[$date_epoch][14]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 15 );
+		$this->assertCount( 15, $udt_arr[$date_epoch] );
 
 		return true;
 	}
@@ -2552,7 +2553,6 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 							  true
 		);
 
-		return true;
 		$dd->createPunchPair( $this->user_id,
 							  strtotime( $date_stamp . ' 10:06AM' ),
 							  strtotime( $date_stamp . ' 12:00PM' ),
@@ -2613,113 +2613,113 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], ( 9.5 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 56 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][1]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][1]['type_id'] );
+		$this->assertEquals( 56, $udt_arr[$date_epoch][1]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 92 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][2]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][2]['type_id'] );
+		$this->assertEquals( 92, $udt_arr[$date_epoch][2]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], 112 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][3]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][3]['type_id'] );
+		$this->assertEquals( 112, $udt_arr[$date_epoch][3]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], 118 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][4]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][4]['type_id'] );
+		$this->assertEquals( 118, $udt_arr[$date_epoch][4]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], 127 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][5]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][5]['type_id'] );
+		$this->assertEquals( 127, $udt_arr[$date_epoch][5]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], 127 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][6]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][6]['type_id'] );
+		$this->assertEquals( 127, $udt_arr[$date_epoch][6]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], 187 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][7]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][7]['type_id'] );
+		$this->assertEquals( 187, $udt_arr[$date_epoch][7]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], 197 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][8]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][8]['type_id'] );
+		$this->assertEquals( 197, $udt_arr[$date_epoch][8]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], 212 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][9]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][9]['type_id'] );
+		$this->assertEquals( 212, $udt_arr[$date_epoch][9]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], 212 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][10]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][10]['type_id'] );
+		$this->assertEquals( 212, $udt_arr[$date_epoch][10]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][11]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][11]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], ( 0.9 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][12]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][12]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], ( 1.9 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][13]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][13]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][13]['total_time'], ( 2 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][14]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][14]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][14]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][14]['total_time'], ( 2.15 * 3600 ) );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][15]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][15]['type_id'], 20 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][15]['status_id'] );
+		$this->assertEquals( 20, $udt_arr[$date_epoch][15]['type_id'] );
 		$this->assertEquals( $udt_arr[$date_epoch][15]['total_time'], ( 2.15 * 3600 ) );
 
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][16]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][16]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][16]['total_time'], 56 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][16]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][16]['type_id'] );
+		$this->assertEquals( 56, $udt_arr[$date_epoch][16]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][17]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][17]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][17]['total_time'], 92 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][17]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][17]['type_id'] );
+		$this->assertEquals( 112, $udt_arr[$date_epoch][17]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][18]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][18]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][18]['total_time'], 112 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][18]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][18]['type_id'] );
+		$this->assertEquals( 118, $udt_arr[$date_epoch][18]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][19]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][19]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][19]['total_time'], 118 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][19]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][19]['type_id'] );
+		$this->assertEquals( 127, $udt_arr[$date_epoch][19]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][20]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][20]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][20]['total_time'], 127 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][20]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][20]['type_id'] );
+		$this->assertEquals( 127, $udt_arr[$date_epoch][20]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][21]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][21]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][21]['total_time'], 127 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][21]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][21]['type_id'] );
+		$this->assertEquals( 92, $udt_arr[$date_epoch][21]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][22]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][22]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][22]['total_time'], 187 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][22]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][22]['type_id'] );
+		$this->assertEquals( 187, $udt_arr[$date_epoch][22]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][23]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][23]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][23]['total_time'], 197 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][23]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][23]['type_id'] );
+		$this->assertEquals( 197, $udt_arr[$date_epoch][23]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][24]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][24]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][24]['total_time'], 212 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][24]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][24]['type_id'] );
+		$this->assertEquals( 212, $udt_arr[$date_epoch][24]['total_time'] );
 		//Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][25]['status_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][25]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][25]['total_time'], 212 );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][25]['status_id'] );
+		$this->assertEquals( 110, $udt_arr[$date_epoch][25]['type_id'] );
+		$this->assertEquals( 212, $udt_arr[$date_epoch][25]['total_time'] );
 
 		//Make sure no other hours
-		$this->assertEquals( count( $udt_arr[$date_epoch] ), 26 );
+		$this->assertCount( 26, $udt_arr[$date_epoch] );
 
 		return true;
 	}

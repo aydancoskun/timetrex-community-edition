@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -117,7 +117,7 @@ class APIUserGroup extends APIFactory {
 			$uglf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 			Debug::Text( 'Record Count: ' . $uglf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 			if ( $uglf->getRecordCount() > 0 ) {
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uglf->getRecordCount() );
+				$this->getProgressBarObject()->start( $this->getAPIMessageID(), $uglf->getRecordCount() );
 
 				$this->setPagerObject( $uglf );
 
@@ -125,10 +125,10 @@ class APIUserGroup extends APIFactory {
 				foreach ( $uglf as $ug_obj ) {
 					$retarr[] = $ug_obj->getObjectAsArray( $data['filter_columns'] );
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $uglf->getCurrentRow() );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $uglf->getCurrentRow() );
 				}
 
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 				return $this->returnHandler( $retarr );
 			}

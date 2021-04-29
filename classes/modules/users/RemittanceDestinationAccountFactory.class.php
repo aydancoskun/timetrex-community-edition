@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -548,7 +548,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 			$account = $this->getValue3();
 		}
 
-		return Misc::censorString( $account, 'X', 1, 2, 1, 4 );
+		return Misc::censorString( $account, '*', 1, 2, 1, 4 );
 	}
 
 	/**
@@ -564,7 +564,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 		$value = Misc::decrypt( $value );
 
 		//We must check is_numeric to ensure that the value properly decrypted.
-		if ( isset( $value ) && is_numeric( $value ) == false ) {
+		if ( isset( $value ) && $this->Validator->isAlphaNumeric( null, $value ) == false ) {
 			Debug::Text( 'DECRYPTION FAILED: Your salt may have changed.', __FILE__, __LINE__, __METHOD__, 10 );
 		} else {
 			return $value;
@@ -583,11 +583,13 @@ class RemittanceDestinationAccountFactory extends Factory {
 		// Also if a colon is in the account number, its likely an encrypted string, also skip.
 		//This allows them to change other data without seeing the account number.
 
-		if ( stripos( $value, 'X' ) !== false || stripos( $value, ':' ) !== false || ctype_digit( trim( $value ) ) == false ) { //Use ctype_digit to confirm bank account number is DIGITS only, so we don't accept scientific notation "5.18E+11".
+		//$value = $this->Validator->stripNonAlphaNumeric( trim( $value ) ); //Don't strip invalid characters to be a little more strict on ensuring what they input is correct.
+		$value = trim( $value );
+
+		if ( stripos( $value, '*' ) !== false || stripos( $value, ':' ) !== false ) {
 			return false;
 		}
 
-		$value = trim( $value );
 		if ( $value != '' ) { //Make sure we can clear out the value if needed. Misc::encypt() will return FALSE on a blank value.
 			$encrypted_value = Misc::encrypt( $value );
 			if ( $encrypted_value === false ) {
@@ -599,7 +601,6 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 		return $this->setGenericDataValue( 'value3', $encrypted_value );
 	}
-
 
 	/**
 	 * @return bool
@@ -1125,14 +1126,14 @@ class RemittanceDestinationAccountFactory extends Factory {
 															TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
 							}
 
-							if ( strlen( $this->getValue3() ) < 3 || strlen( $this->getValue3() ) > 17 ) {
+							if ( $this->getValue3() !== false && ( strlen( $this->getValue3() ) < 3 || strlen( $this->getValue3() ) > 17 ) ) {
 								$this->Validator->isTrue( 'value3',
 														  false,
 														  TTi18n::gettext( 'Invalid account number length' ) );
 							} else {
-								$this->Validator->isDigits( 'value3',
+								$this->Validator->isAlphaNumeric( 'value3',
 															$this->getValue3(),
-															TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+															TTi18n::gettext( 'Invalid account number, must be alpha numeric only' ) );
 							}
 						} else if ( $this->getType() == 3000 && $country == 'CA' && is_object( $this->getRemittanceSourceAccountObject() ) ) {
 							if ( strlen( $this->getValue1() ) != 3 ) {
@@ -1155,7 +1156,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 															TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
 							}
 
-							if ( strlen( $this->getValue3() ) < 3 || strlen( $this->getValue3() ) > 12 ) {
+							if ( $this->getValue3() !== false && ( strlen( $this->getValue3() ) < 3 || strlen( $this->getValue3() ) > 12 ) ) {
 								$this->Validator->isTrue( 'value3',
 														  false,
 														  TTi18n::gettext( 'Invalid account number length' ) );

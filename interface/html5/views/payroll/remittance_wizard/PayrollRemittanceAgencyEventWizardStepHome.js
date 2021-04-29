@@ -1,13 +1,18 @@
-PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
+class PayrollRemittanceAgencyEventWizardStepHome extends WizardStep {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			name: 'home',
 
-	name: 'home',
+			prae_grid_source_data: null,
+			grid: null,
 
-	prae_grid_source_data: null,
-	grid: null,
+			el: $( '.wizard.process_transactions_wizard' )
+		} );
 
-	el: $( '.wizard.process_transactions_wizard' ),
+		super( options );
+	}
 
-	init: function() {
+	init() {
 		var filter_data = {
 			filter_data: {
 				'status_id': [10, 15], //10=Enabled (Self Service) 15=Enabled (Full Service)
@@ -37,7 +42,7 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 
 		var $this = this;
 
-		var api_payroll_remittance_agency_event = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
+		var api_payroll_remittance_agency_event = TTAPI.APIPayrollRemittanceAgencyEvent;
 
 		api_payroll_remittance_agency_event.getPayrollRemittanceAgencyEvent( filter_data, {
 			onResult: function( result ) {
@@ -45,18 +50,18 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 				$this.render();
 			}
 		} );
-	},
+	}
 
-	getNextStepName: function() {
+	getNextStepName() {
 		//Must have a selected row in home step grid to enable the next button.
 		if ( TTUUID.isUUID( this.getWizardObject().selected_remittance_agency_event_id ) ) {
 			return 'review';
 		} else {
 			return false;
 		}
-	},
+	}
 
-	_render: function() {
+	_render() {
 		this.setTitle( this.getWizardObject().wizard_name );
 		if ( this.prae_grid_source_data.length > 0 ) {
 			var $this = this;
@@ -90,17 +95,16 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 			} );
 
 		} else {
-			var message = $( '<div/>' );
+			var message = $( '<div></div>' );
 			message.html( $.i18n._( 'There are no outstanding tax events at this time.' ) );
 			this.append( message );
 		}
 
 		//If the wizard is closed, it reopens to the home step and must be told what the current step is.
 		this.getWizardObject().setCurrentStepName( 'home' );
+	}
 
-	},
-
-	colorGrid: function() {
+	colorGrid() {
 		var data = this.grid.getData();
 		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 		if ( !data ) {
@@ -117,9 +121,9 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 			}
 
 		}
-	},
+	}
 
-	_onNavigationClick: function( icon ) {
+	_onNavigationClick( icon ) {
 		switch ( icon ) {
 			case 'PayrollRemittanceAgency':
 				this.getWizardObject().minimize();
@@ -132,9 +136,9 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 
 				break;
 		}
-	},
+	}
 
-	getGridColumns: function( gridId, callBack ) {
+	getGridColumns( gridId, callBack ) {
 		var column_info_array = [
 			{
 				name: 'legal_entity_legal_name',
@@ -187,9 +191,9 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 		];
 
 		return column_info_array;
-	},
+	}
 
-	onGridSelectRow: function( selected_id ) {
+	onGridSelectRow( selected_id ) {
 		if ( this.getWizardObject().selected_remittance_agency_event_id != selected_id ) {
 			this.getWizardObject().selected_remittance_agency_event_id = selected_id;
 
@@ -199,4 +203,4 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 		}
 		this.getWizardObject().enableButtons();
 	}
-} );
+}

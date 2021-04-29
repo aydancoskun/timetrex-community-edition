@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -157,10 +157,10 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 	}
 
 	/**
-	 * @param string $company_id UUID
-	 * @param string|string[] $user_ids   UUID
-	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param string $company_id        UUID
+	 * @param string|string[] $user_ids UUID
+	 * @param array $where              Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order              Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayPeriodScheduleListFactory
 	 */
 	function getByCompanyIdAndUserId( $company_id, $user_ids, $where = null, $order = null ) {
@@ -238,12 +238,12 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 	}
 
 	/**
-	 * @param string|string[] $id         UUID
-	 * @param string $company_id UUID
-	 * @param int $limit         Limit the number of records returned
-	 * @param int $page          Page number of records to return for pagination
-	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param string|string[] $id UUID
+	 * @param string $company_id  UUID
+	 * @param int $limit          Limit the number of records returned
+	 * @param int $page           Page number of records to return for pagination
+	 * @param array $where        Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order        Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayPeriodScheduleListFactory
 	 */
 	function getByPayPeriodIdAndCompanyId( $id, $company_id, $limit = null, $page = null, $where = null, $order = null ) {
@@ -371,6 +371,14 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		}
 
 		$additional_order_fields = [ 'total_users' ];
+
+		$sort_column_aliases = [
+				'type'               => 'a.type_id',
+				'start_week_day'     => 'a.start_week_day_id',
+				'shift_assigned_day' => 'a.shift_assigned_day_id',
+		];
+
+		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == null ) {
 			$order = [ 'name' => 'asc' ];

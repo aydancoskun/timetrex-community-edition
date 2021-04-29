@@ -1,26 +1,32 @@
-PayrollRemittanceAgencyViewController = BaseViewController.extend( {
-	el: '#payroll_remittance_agency_view_container',
+class PayrollRemittanceAgencyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#payroll_remittance_agency_view_container',
 
-	_required_files: ['APIPayrollRemittanceAgency', 'APILegalEntity', 'APIRemittanceSourceAccount', 'APIPayrollRemittanceAgencyEvent', 'APIUserGroup', 'APIRecurringHoliday'],
 
-	status_array: null,
-	type_array: null,
-	agency_array: null,
-	country_array: null,
-	province_array: null,
-	district_array: null,
 
-	remittance_source_account_array: null,
-	sub_event_view_controller: null,
+			status_array: null,
+			type_array: null,
+			agency_array: null,
+			country_array: null,
+			province_array: null,
+			district_array: null,
 
-	e_province_array: null,
-	company_api: null,
-	remittance_source_account_api: null,
-	always_week_day_array: null,
+			remittance_source_account_array: null,
+			sub_event_view_controller: null,
 
-	date_api: null,
+			e_province_array: null,
+			company_api: null,
+			remittance_source_account_api: null,
+			always_week_day_array: null,
 
-	init: function() {
+			date_api: null
+		} );
+
+		super( options );
+	}
+
+	init() {
 		this.edit_view_tpl = 'PayrollRemittanceAgencyEditView.html';
 		this.permission_id = 'payroll_remittance_agency';
 		this.viewId = 'PayrollRemittanceAgency';
@@ -28,21 +34,20 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		this.table_name_key = 'payroll_remittance_agency';
 		this.context_menu_name = $.i18n._( 'Remittance Agencies' );
 		this.navigation_label = $.i18n._( 'Remittance Agency' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-		this.remittance_source_account_api = new ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) )();
+		this.api = TTAPI.APIPayrollRemittanceAgency;
+		this.company_api = TTAPI.APICompany;
+		this.date_api = TTAPI.APITTDate;
+		this.remittance_source_account_api = TTAPI.APIRemittanceSourceAccount;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-
-	},
+	}
 
 	//Don't initOptions if edit_only_mode. Do it in sub views
-	initOptions: function( callback ) {
+	initOptions( callback ) {
 		var $this = this;
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'type' );
@@ -56,9 +61,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	openEditView: function( record_id ) {
+	openEditView( record_id ) {
 
 		var $this = this;
 		if ( this.edit_only_mode ) {
@@ -79,7 +84,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 							TAlertManager.showAlert( $.i18n._( 'Invalid agency id' ) );
 							$this.onCancelClick();
 						} else {
-							// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+							// Waiting for the TTAPI.API returns data to set the current edit record.
 							$this.current_edit_record = result;
 
 							$this.initEditView();
@@ -89,11 +94,11 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				} );
 			} );
 		} else {
-			this._super( 'openEditView' );
+			super.openEditView();
 		}
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 		column_filter.is_owner = true;
 		column_filter.id = true;
@@ -122,9 +127,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	onSetSearchFilterFinished: function() {
+	onSetSearchFilterFinished() {
 		var combo;
 		var select_value;
 		if ( this.search_panel.getSelectTabIndex() === 0 ) {
@@ -136,19 +141,18 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			select_value = combo.getValue();
 			this.setProvince( select_value );
 		}
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.export_excel],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onBuildAdvUIFinished: function() {
+	onBuildAdvUIFinished() {
 
 		this.adv_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.adv_search_field_ui_dic['country'];
@@ -159,9 +163,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			this.adv_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	onBuildBasicUIFinished: function() {
+	onBuildBasicUIFinished() {
 		this.basic_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.basic_search_field_ui_dic['country'];
 			var selectVal = combo.getValue();
@@ -171,9 +175,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			this.basic_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -225,10 +229,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	onAgencyIdChange: function() {
+	onAgencyIdChange() {
 		var id_field_array_api_params = { 'agency_id': this.edit_view_ui_dic.agency_id.getValue() };
 		var id_field_array = this.api.getOptions( 'agency_id_field_labels', id_field_array_api_params, { async: false } ).getResult();
 
@@ -241,9 +244,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic[key].find( '.edit-view-form-item-label' ).text( id_field_array[key] + ': ' );
 		}
 		this.editFieldResize();
-	},
+	}
 
-	getAgencyOptions: function() {
+	getAgencyOptions() {
 		var params = {
 			'type_id': this.current_edit_record['type_id'],
 			'country': this.current_edit_record['country'],
@@ -277,10 +280,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				$this.onAgencyIdChange();
 			}
 		} );
+	}
 
-	},
-
-	getRemittanceSourceAccount: function() {
+	getRemittanceSourceAccount() {
 		var $this = this;
 
 		var legal_entity_id = this.edit_view_ui_dic['legal_entity_id'].getValue();
@@ -305,9 +307,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	onTypeChange: function( arg ) {
+	onTypeChange( arg ) {
 		if ( !Global.isSet( arg ) || Global.isFalseOrNull( arg ) ) {
 			if ( !Global.isSet( this.current_edit_record['type_id'] ) || Global.isFalseOrNull( this.current_edit_record['type_id'] ) ) {
 				this.current_edit_record['type_id'] = 10;
@@ -315,10 +317,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
+	}
 
-	},
-
-	setDistrict: function( c, p ) {
+	setDistrict( c, p ) {
 		var $this = this;
 
 		if ( this.edit_view_ui_dic.type_id.getValue() == 30 ) {
@@ -367,9 +368,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			$this.current_edit_record['district'] = '00';
 			$this.edit_view_ui_dic['district'].setValue( '00' );
 		}
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
@@ -390,9 +391,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-	},
+	}
 
-	eSetProvince: function( val, refresh ) {
+	eSetProvince( val, refresh ) {
 		var $this = this;
 
 		if ( this.edit_view_ui_dic.type_id.getValue() > 10 ) {
@@ -443,10 +444,10 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			$this.current_edit_record['province'] = '00';
 			$this.edit_view_ui_dic['province'].setValue( '00 ' );
 		}
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onTypeChange();
 
 		this.detachElement( 'province' );
@@ -455,10 +456,10 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		this.setDistrict( this.current_edit_record['country'], this.current_edit_record['province'] );
 
 		this.getAgencyOptions();
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -475,7 +476,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 		if ( this.navigation ) {
 			this.navigation.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ) ),
+				api_class: TTAPI.APIPayrollRemittanceAgency,
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
@@ -499,7 +500,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		// Legal Entity
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			field: 'legal_entity_id',
@@ -612,7 +613,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		// Contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'contact_user_id',
@@ -625,7 +626,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		// Remittance Source Account
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) ),
+			api_class: TTAPI.APIRemittanceSourceAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
 			field: 'remittance_source_account_id',
@@ -642,7 +643,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRecurringHoliday' ) ),
+			api_class: TTAPI.APIRecurringHoliday,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.RECURRING_HOLIDAY,
 			show_search_inputs: true,
@@ -654,10 +655,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		//prevent flashing province and district on addclick.
 		this.detachElement( 'province' );
 		this.detachElement( 'district' );
+	}
 
-	},
-
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === TTUUID.not_exist_id || val === TTUUID.zero_id ) {
@@ -687,18 +687,18 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 			new SearchField( {
 				label: $.i18n._( 'Legal Entity' ),
 				in_column: 1,
 				field: 'legal_entity_id',
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
-				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -749,7 +749,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -762,7 +762,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -771,9 +771,9 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
+	}
 
-	initSubEventView: function() {
+	initSubEventView() {
 		var $this = this;
 
 		if ( !this.current_edit_record.id ) {
@@ -817,16 +817,16 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				this.initData();
 			};
 		}
-	},
+	}
 
-	onCancelClick: function() {
-		this._super( 'onCancelClick' );
+	onCancelClick() {
+		super.onCancelClick();
 		this.sub_event_view_controller = null;
-	},
+	}
 
-	uniformVariable: function( data ) {
+	uniformVariable( data ) {
 		if ( data ) {
-			this._super( 'collectUIDataToCurrentEditRecord' );
+			super.collectUIDataToCurrentEditRecord();
 
 			if ( this.is_add ) {
 				data.id = false;
@@ -854,4 +854,4 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		return data;
 	}
 
-} );
+}

@@ -1,47 +1,41 @@
-QuickPunchViewController = QuickPunchBaseViewController.extend( {
-	type_array: null,
-	status_array: null,
-	branch_array: null,
-	department_array: null,
-	job_array: null,
-	job_item_array: null,
+class QuickPunchViewController extends QuickPunchBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			type_array: null,
+			status_array: null,
+			branch_array: null,
+			department_array: null,
+			job_array: null,
+			job_item_array: null,
 
-	job_api: null,
-	job_item_api: null,
+			job_api: null,
+			job_item_api: null,
 
-	old_type_status: {},
+			old_type_status: {},
 
-	show_job_ui: false,
-	show_job_item_ui: false,
-	show_branch_ui: false,
-	show_department_ui: false,
-	show_good_quantity_ui: false,
-	show_bad_quantity_ui: false,
-	show_transfer_ui: false,
-	show_node_ui: false,
-	el: '#quick_punch_container',
-	events: {
-		'change input[type="text"]': 'onFormItemChange',
-		'change input[type="checkbox"]': 'onFormItemChange',
-		'change select.form-control': 'onFormItemChange',
-		'change textarea.form-control': 'onFormItemChange'
-	},
-	_required_files: {
-		10: [
-			'APIPunch',
-			'APIBranch',
-			'APIDepartment',
-			'APIOtherField',
-			'APICompany',
-			'APIStation',
-			'APICurrentUser',
-		],
-		20: [
-			'APIJob',
-			'APIJobItem'
-		]
-	},
-	initialize: function() {
+			show_job_ui: false,
+			show_job_item_ui: false,
+			show_branch_ui: false,
+			show_department_ui: false,
+			show_good_quantity_ui: false,
+			show_bad_quantity_ui: false,
+			show_transfer_ui: false,
+			show_node_ui: false,
+			el: '#quick_punch_container',
+			events: {
+				'change input[type="text"]': 'onFormItemChange',
+				'change input[type="checkbox"]': 'onFormItemChange',
+				'change select.form-control': 'onFormItemChange',
+				'change textarea.form-control': 'onFormItemChange'
+			}
+		} );
+
+		super( options );
+	}
+
+	initialize( options ) {
+		super.initialize( options );
+
 		var $this = this;
 		if ( !LocalCacheData.getPunchLoginUser() ) {
 			IndexViewController.instance.router.navigate( 'QuickPunchLogin', true );
@@ -52,17 +46,17 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 		this.permission_id = 'punch';
 		this.other_fields = [];
 		require( this.filterRequiredFiles(), function() {
-			$this.api = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
-			$this.branch_api = new ( APIFactory.getAPIClass( 'APIBranch' ) )();
-			$this.department_api = new ( APIFactory.getAPIClass( 'APIDepartment' ) )();
-			$this.other_field_api = new ( APIFactory.getAPIClass( 'APIOtherField' ) )();
+			$this.api = TTAPI.APIPunch;
+			$this.branch_api = TTAPI.APIBranch;
+			$this.department_api = TTAPI.APIDepartment;
+			$this.other_field_api = TTAPI.APIOtherField;
 			if ( ( Global.getProductEdition() >= 20 ) ) {
-				$this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
-				$this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+				$this.job_api = TTAPI.APIJob;
+				$this.job_item_api = TTAPI.APIJobItem;
 			}
-			$this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
-			$this.api_station = new ( APIFactory.getAPIClass( 'APIStation' ) )();
-			$this.current_user_api = new ( APIFactory.getAPIClass( 'APICurrentUser' ) )();
+			$this.company_api = TTAPI.APICompany;
+			$this.api_station = TTAPI.APIStation;
+			$this.current_user_api = TTAPI.APIAuthentication;
 			$this.initPermission();
 			ProgressBar.showOverlay();
 
@@ -77,9 +71,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				} );
 			} );
 		} );
-	},
+	}
 
-	initPermission: function() {
+	initPermission() {
 		if ( this.jobUIValidate() ) {
 			this.show_job_ui = true;
 		} else {
@@ -130,104 +124,99 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
 		if ( this.company_api && _.isFunction( this.company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
+			var $this = this;
 			this.company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( {
 				onResult: function( result ) {
 					//tried to fix Unable to get property 'getResult' of undefined or null reference, added if(!result)
 					if ( !result ) {
-						this.show_branch_ui = false;
-						this.show_department_ui = false;
-						this.show_job_ui = false;
-						this.show_job_item_ui = false;
+						$this.show_branch_ui = false;
+						$this.show_department_ui = false;
+						$this.show_job_ui = false;
+						$this.show_job_item_ui = false;
 					} else {
 						result = result.getResult();
 						if ( !result.branch ) {
-							this.show_branch_ui = false;
+							$this.show_branch_ui = false;
 						}
 
 						if ( !result.department ) {
-							this.show_department_ui = false;
+							$this.show_department_ui = false;
 						}
 
 						if ( !result.job ) {
-							this.show_job_ui = false;
+							$this.show_job_ui = false;
 						}
 
 						if ( !result.job_item ) {
-							this.show_job_item_ui = false;
+							$this.show_job_item_ui = false;
 						}
 					}
 				}
 			} );
 		}
+	}
 
-		// if ( !this.show_job_ui && !this.show_job_item_ui ) {
-		//     this.show_bad_quantity_ui = false;
-		//     this.show_good_quantity_ui = false;
-		// }
-
-	},
-
-	jobUIValidate: function() {
+	jobUIValidate() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 			PermissionManager.validate( 'punch', 'edit_job' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	jobItemUIValidate: function() {
+	jobItemUIValidate() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 			PermissionManager.validate( 'punch', 'edit_job_item' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	branchUIValidate: function() {
+	branchUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_branch' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	departmentUIValidate: function() {
+	departmentUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_department' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	goodQuantityUIValidate: function() {
+	goodQuantityUIValidate() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 			PermissionManager.validate( 'punch', 'edit_quantity' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	badQuantityUIValidate: function() {
+	badQuantityUIValidate() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 			PermissionManager.validate( 'punch', 'edit_bad_quantity' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	transferUIValidate: function() {
+	transferUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_transfer' ) || PermissionManager.validate( 'punch', 'default_transfer' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	noteUIValidate: function() {
+	noteUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_note' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	preRender: function( callBack ) {
+	preRender( callBack ) {
 		var $this = this;
 		TTPromise.wait( 'QuickPunch_options', null, function() {
 			$this.setSourceData( 'status_id', $this.status_array, true );
@@ -253,9 +242,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				} );
 			} );
 		} );
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		var args = {};
 		args.filter_columns = {
@@ -318,17 +307,17 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				} );
 			} );
 		}
-	},
+	}
 
-	getFirstAvailableField: function() {
+	getFirstAvailableField() {
 		return _.min( this.$( 'input[tabindex], select[tabindex], textarea[tabindex]' ), function( el ) {
 			if ( $( el ).attr( 'tabindex' ) ) {
 				return parseInt( $( el ).attr( 'tabindex' ) );
 			}
 		} );
-	},
+	}
 
-	getOtherFields: function( callBack ) {
+	getOtherFields( callBack ) {
 		var $this = this;
 		var filter = { filter_data: { type_id: 15 } };// punch type
 		this.other_field_api.getOtherField( filter, true, {
@@ -359,9 +348,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				callBack();
 			}
 		} );
-	},
+	}
 
-	render: function() {
+	render() {
 		var $this = this;
 		var row = Global.loadWidget( 'views/quick_punch/punch/QuickPunchView.html' );
 
@@ -437,9 +426,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			}
 		} );
 		return this;
-	},
+	}
 
-	getUserPunch: function() {
+	getUserPunch() {
 		var $this = this;
 
 		var station_id = Global.getStationID();
@@ -486,9 +475,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	showErrorAlert: function( result, callback ) {
+	showErrorAlert( result, callback ) {
 		var error_list = result.getDetails() ? result.getDetails()[0] : {};
 		if ( error_list && error_list.hasOwnProperty( 'error' ) ) {
 			error_list = error_list.error;
@@ -512,9 +501,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			Global.contentContainer().html( container );
 		}
 		callback();
-	},
+	}
 
-	onFormItemChange: function( e, doNotValidate ) {
+	onFormItemChange( e, doNotValidate ) {
 		var key = e.currentTarget.name;
 		var c_value = $( e.currentTarget ).val();
 		this.current_edit_record[key] = c_value;
@@ -552,25 +541,25 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	validate: function() {
+	validate() {
 		var $this = this;
 		this.api.setUserPunch( this.current_edit_record, true, {
 			onResult: function( result ) {
 				$this.validateResult( result );
 			}
 		} );
-	},
+	}
 
-	validateResult: function( result ) {
+	validateResult( result ) {
 		var $this = this;
 		if ( !result.isValid() ) {
 			$this.setErrorTips( result );
 		}
-	},
+	}
 
-	setErrorTips: function( result ) {
+	setErrorTips( result ) {
 		this.clearErrorTips( true );
 		var error_list = {};
 		var no_obj_error_string = '';
@@ -638,9 +627,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			this.save_btn.removeAttr( 'disabled' );
 			TAlertManager.showAlert( no_obj_error_string, 'Error' );
 		}
-	},
+	}
 
-	showErrorTips: function( field_obj, error_msg ) {
+	showErrorTips( field_obj, error_msg ) {
 		field_obj.addClass( 'error-tip' );
 		field_obj.attr( 'data-original-title', error_msg );
 		field_obj.tooltip( {
@@ -652,9 +641,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 		} );
 		field_obj.tooltip( 'show' );
 		// field_obj.tooltip('show');
-	},
+	}
 
-	clearErrorTips: function( clear_all, destroy ) {
+	clearErrorTips( clear_all, destroy ) {
 		for ( var key in this.edit_view_error_ui_dic ) {
 			if ( this.edit_view_error_ui_dic[key].val() !== '' || clear_all ) {
 				this.edit_view_error_ui_dic[key].removeClass( 'error-tip' );
@@ -665,9 +654,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 			}
 		}
 		this.edit_view_error_ui_dic = {};
-	},
+	}
 
-	onJobQuickSearch: function( key, value ) {
+	onJobQuickSearch( key, value ) {
 		var args = {};
 		var $this = this;
 		args.filter_columns = {
@@ -710,10 +699,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	onTransferChanged: function( value ) {
+	onTransferChanged( value ) {
 		if ( value ) {
 
 			this.$( 'select[name="type_id"]' ).attr( 'disabled', true );
@@ -740,9 +728,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				this.current_edit_record.status_id = this.old_type_status.status_id;
 			}
 		}
-	},
+	}
 
-	setJobItemValueWhenJobChanged: function( job, job_item_id_col_name, filter_data ) {
+	setJobItemValueWhenJobChanged( job, job_item_id_col_name, filter_data ) {
 		var $this = this;
 		if ( job_item_id_col_name == undefined ) {
 			job_item_id_col_name = 'job_item_id';
@@ -801,9 +789,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				$this.$( 'input[name="job_item_quick_search"]' ).val( '' );
 			}
 		}
-	},
+	}
 
-	setSourceData: function( field, source_data, set_empty ) {
+	setSourceData( field, source_data, set_empty ) {
 		var $this = this;
 		var field_selector = 'select[name="' + field + '"]';
 		if ( $( this.$el ).find( field_selector ) && $( this.$el ).find( field_selector )[0] ) {
@@ -872,13 +860,13 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 					break;
 			}
 		}
-	},
+	}
 
-	onCancelClick: function() {
+	onCancelClick() {
 		window.history.back();
-	},
+	}
 
-	onSaveClick: function() {
+	onSaveClick() {
 		var $this = this;
 		var record = this.current_edit_record;
 		this.save_btn.attr( 'disabled', 'disabled' );
@@ -905,9 +893,9 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 				}
 			}
 		} );
-	},
+	}
 
-	doLogout: function() {
+	doLogout() {
 		//Don't wait for result of logout in case of slow or disconnected internet. Just clear local cookies and move on.
 		this.current_user_api.Logout( {
 			onResult: function() {
@@ -937,11 +925,19 @@ QuickPunchViewController = QuickPunchBaseViewController.extend( {
 		}
 	}
 
-} );
+}
 
-QuickPunchModalController = Backbone.View.extend( {
-	timed_redirect_time: 0,
-	initialize: function( options ) {
+class QuickPunchModalController extends Backbone.View { //Must extend Backbone.View rather than TTBackbone otherwise Quick Punch success modal fails.
+	constructor( options = {} ) {
+		_.defaults( options, {
+			timed_redirect_time: 0
+		} );
+
+		super( options );
+	}
+
+	initialize( options ) {
+		//super.initialize( options );
 		var $this = this;
 		this._delegateCallback = options._delegateCallback || null;
 		this._timedRedirect = options._timedRedirect;
@@ -952,9 +948,9 @@ QuickPunchModalController = Backbone.View.extend( {
 		window.onpopstate = function() {
 			clearTimeout( $this.timer );
 		};
-	},
+	}
 
-	render: function() {
+	render() {
 		var $this = this;
 		$( document ).off( 'keyup' ).on( 'keyup', function() {
 			$this.stopTimedRedirect();
@@ -983,28 +979,28 @@ QuickPunchModalController = Backbone.View.extend( {
 			$this.timedRedirect( $this._timedRedirect );
 		}
 		return this;
-	},
+	}
 
-	delegateCallback: function() {
+	delegateCallback() {
 		if ( this._delegateCallback ) {
 			this._delegateCallback();
 		}
-	},
+	}
 
-	stopTimedRedirect: function() {
+	stopTimedRedirect() {
 		if ( this.is_modal === false ) {
 			this._delegateCallback = null;
 		}
 		this.removeTimedRedirect();
-	},
+	}
 
-	updateTimedRedirect: function( time ) {
+	updateTimedRedirect( time ) {
 		if ( time != 'undefined' && time > 0 ) {
 			this.timed_redirect_time = time;
 		}
-	},
+	}
 
-	removeTimedRedirect: function() {
+	removeTimedRedirect() {
 		clearTimeout( this.timer );
 		if ( this.is_modal ) {
 			this.$el.modal( 'hide' );
@@ -1012,9 +1008,9 @@ QuickPunchModalController = Backbone.View.extend( {
 			this.$( '#timedRedirect' ).remove();
 			this.delegateCallback();
 		}
-	},
+	}
 
-	timedRedirect: function( time ) {
+	timedRedirect( time ) {
 		var $this = this;
 		this.updateTimedRedirect( time );
 		if ( this.timed_redirect_time > 0 ) {
@@ -1027,4 +1023,4 @@ QuickPunchModalController = Backbone.View.extend( {
 			this.removeTimedRedirect();
 		}
 	}
-} );
+}

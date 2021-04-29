@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,14 +39,19 @@
  * @package API\TimeTrexClientAPI
  */
 class TimeTrexClientAPI {
-	protected $url = 'http://demo.timetrex.com/api/soap/api.php';
+	protected $base_url = 'https://demo.timetrex.com/api/json/api.php';
 	protected $session_id = null;
 	protected $session_hash = null; //Used to determine if we need to login again because the URL or Session changed.
 	protected $class_factory = null;
-	protected $namespace = 'urn:api';
+	protected $class_factory_method = null;
+
+	protected $protocol = null;
 	protected $protocol_version = 2;
 
+	protected $namespace = 'urn:api';
 	protected $soap_obj = null; //Persistent SOAP object.
+
+	protected $curl_obj = null; //Persistent CURL object.
 
 	/**
 	 * TimeTrexClientAPI constructor.
@@ -55,7 +60,7 @@ class TimeTrexClientAPI {
 	 * @param string $session_id UUID
 	 */
 	function __construct( $class = null, $url = null, $session_id = null ) {
-		global $TIMETREX_URL, $TIMETREX_SESSION_ID;
+		global $TIMETREX_URL;
 
 		if ( class_exists( 'SoapClient' ) == false ) {
 			echo "ERROR: PHP SOAP extension is not installed and enabled, please correct this then try again.";
@@ -69,7 +74,7 @@ class TimeTrexClientAPI {
 		}
 
 		if ( $session_id == '' ) {
-			$session_id = $TIMETREX_SESSION_ID;
+			$session_id = $this->getSessionID();
 		}
 
 		$this->setURL( $url );
@@ -80,47 +85,127 @@ class TimeTrexClientAPI {
 	}
 
 	/**
-	 * @return SoapClient
+	 * @return bool
 	 */
-	function getSoapClientObject() {
-		global $TIMETREX_BASIC_AUTH_USER, $TIMETREX_BASIC_AUTH_PASSWORD;
+	function __destruct() {
+		return true;
+	}
 
-		if ( $this->session_id != '' ) {
-			$url_pieces[] = 'SessionID=' . $this->session_id;
-		}
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setProtocol( $value ) {
+		$this->protocol = strtolower( $value );
 
-		$url_pieces[] = 'Class=' . $this->class_factory;
+		return true;
+	}
 
-		if ( strpos( $this->url, '?' ) === false ) {
-			$url_separator = '?';
-		} else {
-			$url_separator = '&';
-		}
+	/**
+	 * @return string
+	 */
+	function getProtocol() {
+		return $this->protocol;
+	}
 
-		$url = $this->url . $url_separator . 'v=' . $this->protocol_version . '&' . implode( '&', $url_pieces );
+	/**
+	 * @return SoapClient|Resource
+	 */
+	function getClientConnectionObject() {
+		global $TIMETREX_API_COOKIES;
 
-		//Try to maintain existing SOAP object as there could be cookies associated with it.
-		if ( !is_object( $this->soap_obj ) ) {
-			$retval = new SoapClient( null, [
-												  'location'    => $url,
-												  'uri'         => $this->namespace,
-												  'encoding'    => 'UTF-8',
-												  'style'       => SOAP_RPC,
-												  'use'         => SOAP_ENCODED,
-												  'login'       => $TIMETREX_BASIC_AUTH_USER,
-												  'password'    => $TIMETREX_BASIC_AUTH_PASSWORD,
-												  //'connection_timeout' => 120,
-												  //'request_timeout' => 3600,
-												  'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
-												  'trace'       => 1,
-												  'exceptions'  => 0,
-										  ]
+		$url = $this->buildURL();
+
+		//Default to standard user preferences so its consistent across all logins.
+		global $TIMETREX_API_STANDARD_PREFERENCES;
+		if ( $TIMETREX_API_STANDARD_PREFERENCES == true ) {
+			$TIMETREX_API_COOKIES['OverrideUserPreference'] = json_encode(
+					[
+							'date_format'      => 'Y-m-d',
+							'time_format'      => 'G:i:s T',
+							'distance_format'  => 30, //Meters
+							'time_zone'        => 'GMT',
+							'time_unit_format' => 40, //Seconds
+					]
 			);
+		}
 
-			$this->soap_obj = $retval;
+		if ( $this->getProtocol() == 'soap' ) {
+			//Try to maintain existing SOAP object as there could be cookies associated with it.
+			if ( !is_object( $this->soap_obj ) ) {
+				global $TIMETREX_BASIC_AUTH_USER, $TIMETREX_BASIC_AUTH_PASSWORD;
+
+				$retval = new SoapClient( null, [
+													  'location'    => $url,
+													  'uri'         => $this->namespace,
+													  'encoding'    => 'UTF-8',
+													  'style'       => SOAP_RPC,
+													  'use'         => SOAP_ENCODED,
+													  'login'       => $TIMETREX_BASIC_AUTH_USER,
+													  'password'    => $TIMETREX_BASIC_AUTH_PASSWORD,
+													  //'connection_timeout' => 120,
+													  //'request_timeout' => 3600,
+													  'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
+													  'trace'       => 1,
+													  'exceptions'  => 0,
+											  ]
+				);
+
+				if ( isset( $TIMETREX_API_COOKIES ) && is_array( $TIMETREX_API_COOKIES ) && count( $TIMETREX_API_COOKIES ) > 0 ) {
+					foreach ( $TIMETREX_API_COOKIES as $name => $data ) {
+						$retval->__setCookie( $name, $data );
+					}
+					unset( $name, $data );
+				}
+
+				//Send SessionID as a cookie rather than on the URL to increase safety just a little bit more.
+				//  Overwrite above set SessionID in case we need to force it to something else.
+				if ( $this->session_id != '' ) {
+					$retval->__setCookie( 'SessionID', $this->session_id );
+				}
+
+				$this->soap_obj = $retval;
+			} else {
+				$retval = $this->soap_obj;
+				$retval->__setLocation( $url );
+			}
 		} else {
-			$retval = $this->soap_obj;
-			$retval->__setLocation( $url );
+			if ( !is_resource( $this->curl_obj ) ) {
+				$retval = curl_init();
+				//curl_setopt( $retval, CURLOPT_VERBOSE, true );
+				curl_setopt( $retval, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1 );
+				curl_setopt( $retval, CURLOPT_URL, $url );
+				curl_setopt( $retval, CURLOPT_REFERER, $url ); //**IMPORTANT: Referer should always be sent to avoid requests being rejected due to CSRF security checks.
+				curl_setopt( $retval, CURLOPT_CONNECTTIMEOUT, 600 );
+				curl_setopt( $retval, CURLOPT_RETURNTRANSFER, true );
+				curl_setopt( $retval, CURLOPT_SSL_VERIFYPEER, false );
+				curl_setopt( $retval, CURLOPT_FOLLOWLOCATION, 1 );
+				curl_setopt( $retval, CURLOPT_COOKIELIST, null ); //Enables curl_getinfo() to get a list of cookies
+				//curl_setopt( $retval, CURLINFO_HEADER_OUT, true ); //Enables "curl_getinfo( $this->curl_obj, CURLINFO_HEADER_OUT )" to show the raw HTTP request for debugging.
+
+
+				//Send SessionID as a cookie rather than on the URL to increase safety just a little bit more.
+				//  Overwrite above set SessionID in case we need to force it to something else.
+				if ( $this->session_id != '' ) {
+					$TIMETREX_API_COOKIES['SessionID'] = $this->session_id;
+				}
+
+				if ( isset( $TIMETREX_API_COOKIES ) && is_array( $TIMETREX_API_COOKIES ) && count( $TIMETREX_API_COOKIES ) > 0 ) {
+					foreach ( $TIMETREX_API_COOKIES as $name => $data ) {
+						$cookies[] = $name . '=' . $data;
+					}
+					unset( $name, $data );
+
+					//curl_setopt( $retval, CURLOPT_HTTPHEADER, [ 'Cookie: ' . implode( ';', $cookies ) ] ); //Send API Key as a cookie.
+					curl_setopt( $retval, CURLOPT_COOKIE, implode( ';', $cookies ) ); //Send API Key as a cookie. Do not URL encode this, as it breaks it.
+					unset( $cookies );
+				}
+
+				$this->curl_obj = $retval;
+			} else {
+				$retval = $this->curl_obj;
+				curl_setopt( $retval, CURLOPT_URL, $url );
+			}
 		}
 
 		return $retval;
@@ -132,7 +217,13 @@ class TimeTrexClientAPI {
 	 */
 	function setURL( $url ) {
 		if ( $url != '' ) {
-			$this->url = $url;
+			$this->base_url = $url;
+
+			if ( strpos( $url, '/api/soap/' ) !== false ) {
+				$this->setProtocol( 'soap' );
+			} else {
+				$this->setProtocol( 'json' );
+			}
 
 			return true;
 		}
@@ -141,13 +232,58 @@ class TimeTrexClientAPI {
 	}
 
 	/**
+	 * @return string
+	 */
+	function buildURL() {
+		$url_pieces[] = 'Class=' . $this->class_factory;
+		if ( $this->class_factory_method != '' ) {
+			$url_pieces[] = 'Method=' . $this->class_factory_method;
+		}
+
+		//TimeTrex v12.1.x and older requires SessionID to still be on the URL for just SOAP API calls, so keep this here for backwards compatibility.
+		if ( $this->getProtocol() == 'soap' && $this->session_id != '' ) {
+			$url_pieces[] = 'SessionID=' . $this->session_id;
+		}
+
+		if ( strpos( $this->base_url, '?' ) === false ) {
+			$url_separator = '?';
+		} else {
+			$url_separator = '&';
+		}
+
+		$url = $this->base_url . $url_separator . 'v=' . $this->protocol_version . '&' . implode( '&', $url_pieces );
+
+		return $url;
+	}
+
+
+	/**
+	 * @return bool|string
+	 */
+	function getSessionID() {
+		global $TIMETREX_SESSION_ID, $TIMETREX_API_KEY;
+
+		if ( $TIMETREX_API_KEY != '' ) {
+			$retval = $TIMETREX_API_KEY;
+		} else if ( $TIMETREX_SESSION_ID != '' ) {
+			$retval = $TIMETREX_SESSION_ID;
+		} else if ( $this->session_id != '' ) {
+			$retval = $this->session_id;
+		} else {
+			$retval = false;
+		}
+
+		return $retval;
+	}
+
+	/**
 	 * @param $value
 	 * @return bool
 	 */
 	function setSessionID( $value ) {
 		if ( $value != '' ) {
-			global $TIMETREX_SESSION_ID;
-			$this->session_id = $TIMETREX_SESSION_ID = $value;
+			global $TIMETREX_SESSION_ID, $TIMETREX_API_KEY;
+			$this->session_id = $TIMETREX_SESSION_ID = $TIMETREX_API_KEY = $value;
 
 			return true;
 		}
@@ -161,6 +297,16 @@ class TimeTrexClientAPI {
 	 */
 	function setClass( $value ) {
 		$this->class_factory = trim( $value );
+
+		return true;
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setMethod( $value ) {
+		$this->class_factory_method = trim( $value );
 
 		return true;
 	}
@@ -187,7 +333,46 @@ class TimeTrexClientAPI {
 	 */
 	private function setSessionHash() {
 		global $TIMETREX_SESSION_HASH;
-		$this->session_hash = $TIMETREX_SESSION_HASH = $this->calcSessionHash( $this->url, $this->session_id );
+		$this->session_hash = $TIMETREX_SESSION_HASH = $this->calcSessionHash( $this->base_url, $this->session_id );
+
+		return true;
+	}
+
+	/**
+	 * Persist cookies in memory across all HTTP calls.
+	 * @return bool
+	 */
+	private function handleServerCookies() {
+		$connection_obj = $this->getClientConnectionObject();
+		if ( is_object( $connection_obj ) || is_resource( $connection_obj ) ) {
+			global $TIMETREX_API_COOKIES;
+
+			$TIMETREX_API_COOKIES = false; //Clear any existing cookies so they are reset.
+			if ( $this->getProtocol() == 'soap' ) {
+				if ( isset( $this->getClientConnectionObject()->_cookies ) ) {
+					$tmp_cookies = $this->getClientConnectionObject()->_cookies;
+
+					//Format SOAP cookies in an name=>value so its consistent with between SOAP and JSON.
+					if ( is_array( $tmp_cookies ) ) {
+						foreach ( $tmp_cookies as $name => $data ) {
+							$TIMETREX_API_COOKIES[$name] = $data[0];
+						}
+					}
+					unset( $tmp_cookies, $name, $data );
+				}
+			} else {
+				$tmp_cookies = curl_getinfo( $connection_obj, CURLINFO_COOKIELIST );
+
+				//Format JSON cookies in an name=>value so its consistent with between SOAP and JSON.
+				if ( is_array( $tmp_cookies ) ) {
+					foreach ( $tmp_cookies as $data ) {
+						$tmp_cookie = explode( "\t", $data ); //5=Name, 6=Value
+						$TIMETREX_API_COOKIES[$tmp_cookie[5]] = $tmp_cookie[6];
+					}
+				}
+				unset( $tmp_cookies, $data, $tmp_cookie );
+			}
+		}
 
 		return true;
 	}
@@ -197,7 +382,7 @@ class TimeTrexClientAPI {
 	 * @return mixed
 	 */
 	function isFault( $result ) {
-		return $this->getSoapClientObject()->is_soap_fault( $result );
+		return $this->getClientConnectionObject()->is_soap_fault( $result );
 	}
 
 	/**
@@ -209,24 +394,25 @@ class TimeTrexClientAPI {
 	function Login( $user_name, $password = null, $type = 'USER_NAME' ) {
 		//Check to see if we are currently logged in as the same user already?
 		global $TIMETREX_SESSION_ID, $TIMETREX_SESSION_HASH;
-		if ( $TIMETREX_SESSION_ID != '' && $TIMETREX_SESSION_HASH == $this->calcSessionHash( $this->url, $TIMETREX_SESSION_ID ) ) { //AND $this->isLoggedIn() == TRUE
+		if ( $TIMETREX_SESSION_ID != '' && $TIMETREX_SESSION_HASH == $this->calcSessionHash( $this->base_url, $TIMETREX_SESSION_ID ) ) { //AND $this->isLoggedIn() == TRUE
 			//Already logged in, skipping unnecessary new login procedure.
 			return true;
 		}
 
 		$this->session_id = $this->session_hash = null; //Don't set old session ID on URL.
-		$retval = $this->getSoapClientObject()->Login( $user_name, $password, $type );
-		if ( is_soap_fault( $retval ) ) {
-			trigger_error( 'SOAP Fault: (Code: ' . $retval->faultcode . ', String: ' . $retval->faultstring . ') - Request: ' . $this->getSoapClientObject()->__getLastRequest() . ' Response: ' . $this->getSoapClientObject()->__getLastResponse(), E_USER_NOTICE );
 
-			return false;
-		}
+		$this->setClass( 'Authentication' );
+		$retval = $this->call( 'Login', [ $user_name, $password, $type ] );
+		if ( is_object( $retval ) && $retval->isValid() ) {
+			$retval = $retval->getResult();
+			if ( !is_array( $retval ) && $retval != false ) {
+				$this->handleServerCookies();
 
-		if ( !is_array( $retval ) && $retval != false ) {
-			$this->setSessionID( $retval );
-			$this->setSessionHash();
+				$this->setSessionID( $retval );
+				$this->setSessionHash();
 
-			return true;
+				return true;
+			}
 		}
 
 		return false;
@@ -238,11 +424,43 @@ class TimeTrexClientAPI {
 	function isLoggedIn() {
 		$old_class = $this->class_factory;
 		$this->setClass( 'Authentication' );
-		$retval = $this->getSoapClientObject()->isLoggedIn();
+		$retval = $this->call( 'isLoggedIn' );
+
 		$this->setClass( $old_class );
 		unset( $old_class );
 
+		if ( is_object( $retval ) && $retval->isValid() ) {
+			$retval = $retval->getResult();
+
+			return $retval;
+		}
+
 		return $retval;
+	}
+
+	/**
+	 * @param $user_name
+	 * @param $password
+	 * @return bool
+	 */
+	function registerAPIKey( $user_name, $password ) {
+		$this->session_id = $this->session_hash = null; //Don't set old session ID on URL.
+
+		$this->setClass( 'Authentication' );
+		$retval = $this->call( 'registerAPIKey', [ $user_name, $password ] );
+		if ( is_object( $retval ) && $retval->isValid() ) {
+			$retval = $retval->getResult();
+			if ( !is_array( $retval ) && $retval != false ) {
+				$this->handleServerCookies();
+
+				$this->setSessionID( $retval );
+				$this->setSessionHash();
+
+				return $retval;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -250,10 +468,12 @@ class TimeTrexClientAPI {
 	 */
 	function Logout() {
 		$this->setClass( 'Authentication' );
-		$retval = $this->getSoapClientObject()->Logout();
-		if ( $retval == true ) {
-			global $TIMETREX_SESSION_ID, $TIMETREX_SESSION_HASH;
-			$TIMETREX_SESSION_ID = $TIMETREX_SESSION_HASH = false;
+		$retval = $this->call( 'Logout' );
+		if ( is_object( $retval ) && $retval->isValid() ) {
+			$retval = $retval->getResult();
+
+			global $TIMETREX_SESSION_ID, $TIMETREX_API_KEY, $TIMETREX_SESSION_HASH, $TIMETREX_API_COOKIES;
+			$TIMETREX_SESSION_ID = $TIMETREX_API_KEY = $TIMETREX_SESSION_HASH = $TIMETREX_API_COOKIES = false;
 			$this->session_id = $this->session_hash = null;
 		}
 
@@ -265,20 +485,42 @@ class TimeTrexClientAPI {
 	 * @param array $args
 	 * @return bool|TimeTrexClientAPIReturnHandler
 	 */
-	function __call( $function_name, $args = [] ) {
-		if ( is_object( $this->getSoapClientObject() ) ) {
-			$retval = call_user_func_array( [ $this->getSoapClientObject(), $function_name ], $args );
+	function call( $function_name, $args = [] ) {
+		$this->setMethod( $function_name );
+		$connection_obj = $this->getClientConnectionObject();
 
-			if ( is_soap_fault( $retval ) ) {
-				trigger_error( 'SOAP Fault: (Code: ' . $retval->faultcode . ', String: ' . $retval->faultstring . ') - Request: ' . $this->getSoapClientObject()->__getLastRequest() . ' Response: ' . $this->getSoapClientObject()->__getLastResponse(), E_USER_NOTICE );
+		if ( is_object( $connection_obj ) || is_resource( $connection_obj ) ) {
+			if ( $this->getProtocol() == 'soap' ) {
+				$retval = call_user_func_array( [ $connection_obj, $function_name ], $args );
 
-				return false;
+				if ( is_soap_fault( $retval ) ) {
+					trigger_error( 'SOAP Fault: (Code: ' . $retval->faultcode . ', String: ' . $retval->faultstring . ') - Request: ' . $this->getClientConnectionObject()->__getLastRequest() . ' Response: ' . $this->getClientConnectionObject()->__getLastResponse(), E_USER_NOTICE );
+
+					return false;
+				}
+			} else {
+				if ( $args !== null ) {
+					$post_data = 'json=' . urlencode( json_encode( $args ) );
+					curl_setopt( $connection_obj, CURLOPT_POSTFIELDS, $post_data );
+				}
+
+				$retval = json_decode( curl_exec( $connection_obj ), true );
+				//curl_close( $connection_obj ); //If the connection is closed, we can't get the cookie information from it.
 			}
 
 			return new TimeTrexClientAPIReturnHandler( $function_name, $args, $retval );
 		}
 
 		return false;
+	}
+
+	/**
+	 * @param $function_name
+	 * @param array $args
+	 * @return bool|TimeTrexClientAPIReturnHandler
+	 */
+	function __call( $function_name, $args = [] ) {
+		return $this->call( $function_name, $args );
 	}
 }
 
@@ -356,7 +598,11 @@ class TimeTrexClientAPIReturnHandler {
 		$output[] = 'Returned:';
 		$output[] = ( $this->isValid() === true ) ? 'IsValid: YES' : 'IsValid: NO';
 		if ( $this->isValid() === true ) {
-			$output[] = 'Return Value: ' . $this->getResult();
+			if ( is_string( $this->getResult() ) ) {
+				$output[] = 'Return Value: ' . $this->getResult();
+			} else {
+				$output[] = 'Return Value (JSON): ' . json_encode( $this->getResult(), JSON_PRETTY_PRINT );
+			}
 		} else {
 			$output[] = 'Code: ' . $this->getCode();
 			$output[] = 'Description: ' . $this->getDescription();

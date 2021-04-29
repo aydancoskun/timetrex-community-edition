@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -72,82 +72,82 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		*/
 		TTDate::setTimeUnitFormat( 10 );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '00:01' ), 60 );
-		$this->assertEquals( TTDate::parseTimeUnit( '-00:01' ), -60 );
+		$this->assertEquals( 60, TTDate::parseTimeUnit( '00:01' ) );
+		$this->assertEquals( -60, TTDate::parseTimeUnit( '-00:01' ) );
 
 
-		$this->assertEquals( TTDate::parseTimeUnit( '01:00' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '10:00' ), 36000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '100:00' ), 360000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1000:00' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1,000:00' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '10,000:00' ), 36000000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '10,000:01.5' ), 36000060 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '01:00' ) );
+		$this->assertEquals( 36000, TTDate::parseTimeUnit( '10:00' ) );
+		$this->assertEquals( 360000, TTDate::parseTimeUnit( '100:00' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( '1000:00' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( '1,000:00' ) );
+		$this->assertEquals( 36000000, TTDate::parseTimeUnit( '10,000:00' ) );
+		$this->assertEquals( 36000060, TTDate::parseTimeUnit( '10,000:01.5' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '01' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '-1' ), -3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:00:00' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:00:01' ), 3601 );
-		$this->assertEquals( TTDate::parseTimeUnit( '"1:00:01"' ), 3601 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '01' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1' ) );
+		$this->assertEquals( -3600, TTDate::parseTimeUnit( '-1' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1:' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1:00:00' ) );
+		$this->assertEquals( 3601, TTDate::parseTimeUnit( '1:00:01' ) );
+		$this->assertEquals( 3601, TTDate::parseTimeUnit( '"1:00:01"' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '00:60' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( ':60' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( ':1' ), 60 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '00:60' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( ':60' ) );
+		$this->assertEquals( 60, TTDate::parseTimeUnit( ':1' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '1:00:01.5' ), 3601 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:1.5' ), 3660 );
+		$this->assertEquals( 3601, TTDate::parseTimeUnit( '1:00:01.5' ) );
+		$this->assertEquals( 3660, TTDate::parseTimeUnit( '1:1.5' ) );
 
 		//Hybrid mode
-		$this->assertEquals( TTDate::parseTimeUnit( '1.000' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1.00' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '-1' ), -3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '01' ), 3600 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1.000' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1.00' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1' ) );
+		$this->assertEquals( -3600, TTDate::parseTimeUnit( '-1' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '01' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '0.25' ), 900 );
-		$this->assertEquals( TTDate::parseTimeUnit( '0.50' ), 1800 );
+		$this->assertEquals( 900, TTDate::parseTimeUnit( '0.25' ) );
+		$this->assertEquals( 1800, TTDate::parseTimeUnit( '0.50' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '0.34' ), 1200 ); //Automatically rounds to nearest 1min
+		$this->assertEquals( 1200, TTDate::parseTimeUnit( '0.34' ) ); //Automatically rounds to nearest 1min
 
 
 
 		TTDate::setTimeUnitFormat( 12 ); //HH:MM:SS
-		$this->assertEquals( TTDate::parseTimeUnit( '00:01' ), 60 );
-		$this->assertEquals( TTDate::parseTimeUnit( '-00:01' ), -60 );
+		$this->assertEquals( 60, TTDate::parseTimeUnit( '00:01' ) );
+		$this->assertEquals( -60, TTDate::parseTimeUnit( '-00:01' ) );
 
 
-		$this->assertEquals( TTDate::parseTimeUnit( '01:00' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '10:00' ), 36000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '100:00' ), 360000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1000:00' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1,000:00' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '10,000:00' ), 36000000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '10,000:01.5' ), 36000060 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '01:00' ) );
+		$this->assertEquals( 36000, TTDate::parseTimeUnit( '10:00' ) );
+		$this->assertEquals( 360000, TTDate::parseTimeUnit( '100:00' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( '1000:00' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( '1,000:00' ) );
+		$this->assertEquals( 36000000, TTDate::parseTimeUnit( '10,000:00' ) );
+		$this->assertEquals( 36000060, TTDate::parseTimeUnit( '10,000:01.5' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '01' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '-1' ), -3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:00:00' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:00:01' ), 3601 );
-		$this->assertEquals( TTDate::parseTimeUnit( '"1:00:01"' ), 3601 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '01' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1' ) );
+		$this->assertEquals( -3600, TTDate::parseTimeUnit( '-1' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1:' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1:00:00' ) );
+		$this->assertEquals( 3601, TTDate::parseTimeUnit( '1:00:01' ) );
+		$this->assertEquals( 3601, TTDate::parseTimeUnit( '"1:00:01"' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '00:60' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( ':60' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( ':1' ), 60 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '00:60' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( ':60' ) );
+		$this->assertEquals( 60, TTDate::parseTimeUnit( ':1' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '1:00:01.5' ), 3601 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:1.5' ), 3660 );
+		$this->assertEquals( 3601, TTDate::parseTimeUnit( '1:00:01.5' ) );
+		$this->assertEquals( 3660, TTDate::parseTimeUnit( '1:1.5' ) );
 
 
 		TTDate::setTimeUnitFormat( 40 ); //Seconds
-		$this->assertEquals( TTDate::parseTimeUnit( '3600' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '3600.001' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '"3600.001"' ), 3600.001 );
-		$this->assertEquals( TTDate::parseTimeUnit( '3629.001' ), 3629 );
-		$this->assertEquals( TTDate::parseTimeUnit( '"3629.001"' ), 3629.001 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '3600' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '3600.001' ) );
+		$this->assertEquals( 3600.001, TTDate::parseTimeUnit( '"3600.001"' ) );
+		$this->assertEquals( 3629, TTDate::parseTimeUnit( '3629.001' ) );
+		$this->assertEquals( 3629.001, TTDate::parseTimeUnit( '"3629.001"' ) );
 	}
 
 	function testTimeUnit2() {
@@ -165,43 +165,43 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		*/
 		TTDate::setTimeUnitFormat( 20 );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '1.000' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1.00' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '10.00' ), 36000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '100.00' ), 360000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1000.00' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1000.0001' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '"1000.0001"' ), 3600000.36 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1,000.00' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '"1,000.00"' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( ' "1, 000.00" ' ), 3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( ' "-1, 000.00" ' ), -3600000 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '-1' ), -3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '01' ), 3600 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1.000' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1.00' ) );
+		$this->assertEquals( 36000, TTDate::parseTimeUnit( '10.00' ) );
+		$this->assertEquals( 360000, TTDate::parseTimeUnit( '100.00' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( '1000.00' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( '1000.0001' ) );
+		$this->assertEquals( 3600000.36, TTDate::parseTimeUnit( '"1000.0001"' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( '1,000.00' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( '"1,000.00"' ) );
+		$this->assertEquals( 3600000, TTDate::parseTimeUnit( ' "1, 000.00" ' ) );
+		$this->assertEquals( -3600000, TTDate::parseTimeUnit( ' "-1, 000.00" ' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1' ) );
+		$this->assertEquals( -3600, TTDate::parseTimeUnit( '-1' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '01' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '0.25' ), 900 );
-		$this->assertEquals( TTDate::parseTimeUnit( '0.50' ), 1800 );
+		$this->assertEquals( 900, TTDate::parseTimeUnit( '0.25' ) );
+		$this->assertEquals( 1800, TTDate::parseTimeUnit( '0.50' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '0.34' ), 1200 ); //Automatically rounds to nearest 1min
+		$this->assertEquals( 1200, TTDate::parseTimeUnit( '0.34' ) ); //Automatically rounds to nearest 1min
 
 		//Hybrid mode
-		$this->assertEquals( TTDate::parseTimeUnit( '00:01' ), 60 );
-		$this->assertEquals( TTDate::parseTimeUnit( '-00:01' ), -60 );
+		$this->assertEquals( 60, TTDate::parseTimeUnit( '00:01' ) );
+		$this->assertEquals( -60, TTDate::parseTimeUnit( '-00:01' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '01:00' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '01' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '-1' ), -3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:00:00' ), 3600 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '01:00' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '01' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1' ) );
+		$this->assertEquals( -3600, TTDate::parseTimeUnit( '-1' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1:' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1:00:00' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '00:60' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( ':60' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( ':1' ), 60 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '00:60' ) );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( ':60' ) );
+		$this->assertEquals( 60, TTDate::parseTimeUnit( ':1' ) );
 
-		$this->assertEquals( TTDate::parseTimeUnit( '1:00:01.5' ), 3600 );
-		$this->assertEquals( TTDate::parseTimeUnit( '1:1.5' ), 3660 );
+		$this->assertEquals( 3600, TTDate::parseTimeUnit( '1:00:01.5' ) );
+		$this->assertEquals( 3660, TTDate::parseTimeUnit( '1:1.5' ) );
 	}
 
 	function testTimeUnit3() {
@@ -299,89 +299,89 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 			30 	=> 'Minutes (135)'
 		*/
 		TTDate::setTimeUnitFormat( 10 );
-		$this->assertEquals( TTDate::getTimeUnit( 3600 ), '01:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 3660 ), '01:01' );
-		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10:01' );
-		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10:11' );
-		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100:11' );
-		$this->assertEquals( TTDate::getTimeUnit( 3600660 ), '1000:11' );
-		$this->assertEquals( TTDate::getTimeUnit( 36000660 ), '10000:11' );
-		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100000:11' );
-		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1000000:11' );
+		$this->assertEquals( '01:00', TTDate::getTimeUnit( 3600 ) );
+		$this->assertEquals( '01:01', TTDate::getTimeUnit( 3660 ) );
+		$this->assertEquals( '10:01', TTDate::getTimeUnit( 36060 ) );
+		$this->assertEquals( '10:11', TTDate::getTimeUnit( 36660 ) );
+		$this->assertEquals( '100:11', TTDate::getTimeUnit( 360660 ) );
+		$this->assertEquals( '1000:11', TTDate::getTimeUnit( 3600660 ) );
+		$this->assertEquals( '10000:11', TTDate::getTimeUnit( 36000660 ) );
+		$this->assertEquals( '100000:11', TTDate::getTimeUnit( 360000660 ) );
+		$this->assertEquals( '1000000:11', TTDate::getTimeUnit( 3600000660 ) );
 		//$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ),  				'ERR(FLOAT)' ); //This is passing a float that is losing precision.
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( PHP_INT_MAX, PHP_INT_MAX ) ), '5124095576030431:00' );
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcadd( PHP_INT_MAX, PHP_INT_MAX ), 660 ) ), '5124095576030431:11' );
+		$this->assertEquals( '5124095576030431:00', TTDate::getTimeUnit( bcadd( PHP_INT_MAX, PHP_INT_MAX ) ) );
+		$this->assertEquals( '5124095576030431:11', TTDate::getTimeUnit( bcadd( bcadd( PHP_INT_MAX, PHP_INT_MAX ), 660 ) ) );
 
 
 		TTDate::setTimeUnitFormat( 10 );
-		$this->assertEquals( TTDate::getTimeUnit( -3600 ), '-01:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -3660 ), '-01:01' );
-		$this->assertEquals( TTDate::getTimeUnit( -36060 ), '-10:01' );
-		$this->assertEquals( TTDate::getTimeUnit( -36660 ), '-10:11' );
-		$this->assertEquals( TTDate::getTimeUnit( -360660 ), '-100:11' );
-		$this->assertEquals( TTDate::getTimeUnit( -3600660 ), '-1000:11' );
-		$this->assertEquals( TTDate::getTimeUnit( -36000660 ), '-10000:11' );
-		$this->assertEquals( TTDate::getTimeUnit( -360000660 ), '-100000:11' );
-		$this->assertEquals( TTDate::getTimeUnit( -3600000660 ), '-1000000:11' );
+		$this->assertEquals( '-01:00', TTDate::getTimeUnit( -3600 ) );
+		$this->assertEquals( '-01:01', TTDate::getTimeUnit( -3660 ) );
+		$this->assertEquals( '-10:01', TTDate::getTimeUnit( -36060 ) );
+		$this->assertEquals( '-10:11', TTDate::getTimeUnit( -36660 ) );
+		$this->assertEquals( '-100:11', TTDate::getTimeUnit( -360660 ) );
+		$this->assertEquals( '-1000:11', TTDate::getTimeUnit( -3600660 ) );
+		$this->assertEquals( '-10000:11', TTDate::getTimeUnit( -36000660 ) );
+		$this->assertEquals( '-100000:11', TTDate::getTimeUnit( -360000660 ) );
+		$this->assertEquals( '-1000000:11', TTDate::getTimeUnit( -3600000660 ) );
 		//$this->assertEquals( TTDate::getTimeUnit( ( ( PHP_INT_MAX + PHP_INT_MAX ) * -1 ) ), 		'ERR(FLOAT)' );
-		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd( PHP_INT_MAX, PHP_INT_MAX ), -1 ) ), '-5124095576030431:00' );
+		$this->assertEquals( '-5124095576030431:00', TTDate::getTimeUnit( bcmul( bcadd( PHP_INT_MAX, PHP_INT_MAX ), -1 ) ) );
 
 
 		TTDate::setTimeUnitFormat( 12 );
-		$this->assertEquals( TTDate::getTimeUnit( 3600 ), '01:00:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 3661 ), '01:01:01' );
-		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10:01:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 3600660 ), '1000:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 36000660 ), '10000:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100000:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1000000:11:00' );
+		$this->assertEquals( '01:00:00', TTDate::getTimeUnit( 3600 ) );
+		$this->assertEquals( '01:01:01', TTDate::getTimeUnit( 3661 ) );
+		$this->assertEquals( '10:01:00', TTDate::getTimeUnit( 36060 ) );
+		$this->assertEquals( '10:11:00', TTDate::getTimeUnit( 36660 ) );
+		$this->assertEquals( '100:11:00', TTDate::getTimeUnit( 360660 ) );
+		$this->assertEquals( '1000:11:00', TTDate::getTimeUnit( 3600660 ) );
+		$this->assertEquals( '10000:11:00', TTDate::getTimeUnit( 36000660 ) );
+		$this->assertEquals( '100000:11:00', TTDate::getTimeUnit( 360000660 ) );
+		$this->assertEquals( '1000000:11:00', TTDate::getTimeUnit( 3600000660 ) );
 		//$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ), 	'ERR(FLOAT)' );
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( PHP_INT_MAX, PHP_INT_MAX ) ), '5124095576030431:00:14' );
+		$this->assertEquals( '5124095576030431:00:14', TTDate::getTimeUnit( bcadd( PHP_INT_MAX, PHP_INT_MAX ) ) );
 
-		$this->assertEquals( TTDate::getTimeUnit( bcmul( PHP_INT_MAX, PHP_INT_MAX ) ), '9223372036854775807:00:49' );
+		$this->assertEquals( '9223372036854775807:00:49', TTDate::getTimeUnit( bcmul( PHP_INT_MAX, PHP_INT_MAX ) ) );
 
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul( PHP_INT_MAX, PHP_INT_MAX ), '0.99999' ) ), '9223372036854775807:00:49' );
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul( PHP_INT_MAX, PHP_INT_MAX ), '0.00001' ) ), '9223372036854775807:00:49' ); // (float)0.00001 gets converted to scientific notation when casted to string, resulting in bcadd() throwing a non-well formed argument error.
+		$this->assertEquals( '9223372036854775807:00:49', TTDate::getTimeUnit( bcadd( bcmul( PHP_INT_MAX, PHP_INT_MAX ), '0.99999' ) ) );
+		$this->assertEquals( '9223372036854775807:00:49', TTDate::getTimeUnit( bcadd( bcmul( PHP_INT_MAX, PHP_INT_MAX ), '0.00001' ) ) ); // (float)0.00001 gets converted to scientific notation when casted to string, resulting in bcadd() throwing a non-well formed argument error.
 
 
 		TTDate::setTimeUnitFormat( 12 );
-		$this->assertEquals( TTDate::getTimeUnit( -3600 ), '-01:00:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -3661 ), '-01:01:01' );
-		$this->assertEquals( TTDate::getTimeUnit( -36060 ), '-10:01:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -36660 ), '-10:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -360660 ), '-100:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -3600660 ), '-1000:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -36000660 ), '-10000:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -360000660 ), '-100000:11:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -3600000660 ), '-1000000:11:00' );
+		$this->assertEquals( '-01:00:00', TTDate::getTimeUnit( -3600 ) );
+		$this->assertEquals( '-01:01:01', TTDate::getTimeUnit( -3661 ) );
+		$this->assertEquals( '-10:01:00', TTDate::getTimeUnit( -36060 ) );
+		$this->assertEquals( '-10:11:00', TTDate::getTimeUnit( -36660 ) );
+		$this->assertEquals( '-100:11:00', TTDate::getTimeUnit( -360660 ) );
+		$this->assertEquals( '-1000:11:00', TTDate::getTimeUnit( -3600660 ) );
+		$this->assertEquals( '-10000:11:00', TTDate::getTimeUnit( -36000660 ) );
+		$this->assertEquals( '-100000:11:00', TTDate::getTimeUnit( -360000660 ) );
+		$this->assertEquals( '-1000000:11:00', TTDate::getTimeUnit( -3600000660 ) );
 		//$this->assertEquals( TTDate::getTimeUnit( ( ( PHP_INT_MAX + PHP_INT_MAX ) * -1 ) ), 		'ERR(FLOAT)' );
-		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd( PHP_INT_MAX, PHP_INT_MAX ), -1 ) ), '-5124095576030431:00:14' );
+		$this->assertEquals( '-5124095576030431:00:14', TTDate::getTimeUnit( bcmul( bcadd( PHP_INT_MAX, PHP_INT_MAX ), -1 ) ) );
 
-		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcmul( PHP_INT_MAX, PHP_INT_MAX ), -1 ) ), '-9223372036854775807:00:49' );
+		$this->assertEquals( '-9223372036854775807:00:49', TTDate::getTimeUnit( bcmul( bcmul( PHP_INT_MAX, PHP_INT_MAX ), -1 ) ) );
 
 
 		TTDate::setTimeUnitFormat( 23 );
-		$this->assertEquals( TTDate::getTimeUnit( 3600 ), '1.0000' );
-		$this->assertEquals( TTDate::getTimeUnit( 3660 ), '1.0167' );
-		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10.0167' );
-		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10.1833' );
-		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100.1833' );
-		$this->assertEquals( TTDate::getTimeUnit( 3600660 ), '1,000.1833' );
-		$this->assertEquals( TTDate::getTimeUnit( 36000660 ), '10,000.1833' );
-		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100,000.1833' );
-		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1,000,000.1833' );
-		$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ), '5,124,095,576,030,431.0000' ); //This is passing a float that is losing precision.
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( PHP_INT_MAX, PHP_INT_MAX ) ), '5,124,095,576,030,431.0000' );
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcadd( PHP_INT_MAX, PHP_INT_MAX ), 660 ) ), '5,124,095,576,030,431.0000' );
+		$this->assertEquals( '1.0000', TTDate::getTimeUnit( 3600 ) );
+		$this->assertEquals( '1.0167', TTDate::getTimeUnit( 3660 ) );
+		$this->assertEquals( '10.0167', TTDate::getTimeUnit( 36060 ) );
+		$this->assertEquals( '10.1833', TTDate::getTimeUnit( 36660 ) );
+		$this->assertEquals( '100.1833', TTDate::getTimeUnit( 360660 ) );
+		$this->assertEquals( '1,000.1833', TTDate::getTimeUnit( 3600660 ) );
+		$this->assertEquals( '10,000.1833', TTDate::getTimeUnit( 36000660 ) );
+		$this->assertEquals( '100,000.1833', TTDate::getTimeUnit( 360000660 ) );
+		$this->assertEquals( '1,000,000.1833', TTDate::getTimeUnit( 3600000660 ) );
+		$this->assertEquals( '5,124,095,576,030,431.0000', TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ) ); //This is passing a float that is losing precision.
+		$this->assertEquals( '5,124,095,576,030,431.0000', TTDate::getTimeUnit( bcadd( PHP_INT_MAX, PHP_INT_MAX ) ) );
+		$this->assertEquals( '5,124,095,576,030,431.0000', TTDate::getTimeUnit( bcadd( bcadd( PHP_INT_MAX, PHP_INT_MAX ), 660 ) ) );
 
-		$this->assertEquals( TTDate::getTimeUnit( '' ), '0.00' );
-		$this->assertEquals( TTDate::getTimeUnit( '--' ), '0.00' );
-		$this->assertEquals( TTDate::getTimeUnit( 'XYZ' ), '0.00' );
-		$this->assertEquals( TTDate::getTimeUnit( null ), '0.00' );
-		$this->assertEquals( TTDate::getTimeUnit( false ), '0.00' );
-		$this->assertEquals( TTDate::getTimeUnit( true ), '0.00' );
+		$this->assertEquals( '0.00', TTDate::getTimeUnit( '' ) );
+		$this->assertEquals( '0.00', TTDate::getTimeUnit( '--' ) );
+		$this->assertEquals( '0.00', TTDate::getTimeUnit( 'XYZ' ) );
+		$this->assertEquals( '0.00', TTDate::getTimeUnit( null ) );
+		$this->assertEquals( '0.00', TTDate::getTimeUnit( false ) );
+		$this->assertEquals( '0.00', TTDate::getTimeUnit( true ) );
 	}
 
 	function testDate_DMY_1() {
@@ -390,20 +390,20 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'd-M-y' );
 		TTDate::setTimeFormat( 'g:i A' );
 
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05' ), 1109318400 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '25-Feb-05' ) );
 
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 8:09 AM' ), 1109347740 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 8:09:10 AM' ), 1109347750 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 8:09:10 AM EST' ), 1109336950 );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '25-Feb-05 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '25-Feb-05 8:09 AM' ) );
+		$this->assertEquals( 1109347750, TTDate::parseDateTime( '25-Feb-05 8:09:10 AM' ) );
+		$this->assertEquals( 1109336950, TTDate::parseDateTime( '25-Feb-05 8:09:10 AM EST' ) );
 
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 18:09:10' ), 1109383750 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 18:09:10 EST' ), 1109372950 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '25-Feb-05 18:09' ) );
+		$this->assertEquals( 1109383750, TTDate::parseDateTime( '25-Feb-05 18:09:10' ) );
+		$this->assertEquals( 1109372950, TTDate::parseDateTime( '25-Feb-05 18:09:10 EST' ) );
 
 		//MST7MDT has been deprecated and does not work. Most 3 letter timezones have too.
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 18:09:10 MST' ), 1109380150 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-05 18:09:10 America/Edmonton' ), 1109380150 );
+		$this->assertEquals( 1109380150, TTDate::parseDateTime( '25-Feb-05 18:09:10 MST' ) );
+		$this->assertEquals( 1109380150, TTDate::parseDateTime( '25-Feb-05 18:09:10 America/Edmonton' ) );
 
 
 		//Fails on PHP 5.1.2 due to strtotime()
@@ -425,16 +425,16 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'd-M-Y' );
 		TTDate::setTimeFormat( 'g:i A' );
 
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-2005' ), 1109318400 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '25-Feb-2005' ) );
 
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-2005 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-2005 8:09 AM' ), 1109347740 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-2005 8:09:10 AM' ), 1109347750 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-2005 8:09:10 AM EST' ), 1109336950 );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '25-Feb-2005 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '25-Feb-2005 8:09 AM' ) );
+		$this->assertEquals( 1109347750, TTDate::parseDateTime( '25-Feb-2005 8:09:10 AM' ) );
+		$this->assertEquals( 1109336950, TTDate::parseDateTime( '25-Feb-2005 8:09:10 AM EST' ) );
 
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-2005 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-2005 18:09:10' ), 1109383750 );
-		$this->assertEquals( TTDate::parseDateTime( '25-Feb-2005 18:09:10 EST' ), 1109372950 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '25-Feb-2005 18:09' ) );
+		$this->assertEquals( 1109383750, TTDate::parseDateTime( '25-Feb-2005 18:09:10' ) );
+		$this->assertEquals( 1109372950, TTDate::parseDateTime( '25-Feb-2005 18:09:10 EST' ) );
 
 		//Fails on PHP 5.1.2 due to strtotime()
 
@@ -459,16 +459,16 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'dMY' );
 		TTDate::setTimeFormat( 'g:i A' );
 
-		$this->assertEquals( TTDate::parseDateTime( '25Feb2005' ), 1109318400 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '25Feb2005' ) );
 
-		$this->assertEquals( TTDate::parseDateTime( '25Feb2005 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '25Feb2005 8:09 AM' ), 1109347740 );
-		$this->assertEquals( TTDate::parseDateTime( '25Feb2005 8:09:10 AM' ), 1109347750 );
-		$this->assertEquals( TTDate::parseDateTime( '25Feb2005 8:09:10 AM EST' ), 1109336950 );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '25Feb2005 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '25Feb2005 8:09 AM' ) );
+		$this->assertEquals( 1109347750, TTDate::parseDateTime( '25Feb2005 8:09:10 AM' ) );
+		$this->assertEquals( 1109336950, TTDate::parseDateTime( '25Feb2005 8:09:10 AM EST' ) );
 
-		$this->assertEquals( TTDate::parseDateTime( '25Feb2005 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '25Feb2005 18:09:10' ), 1109383750 );
-		$this->assertEquals( TTDate::parseDateTime( '25Feb2005 18:09:10 EST' ), 1109372950 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '25Feb2005 18:09' ) );
+		$this->assertEquals( 1109383750, TTDate::parseDateTime( '25Feb2005 18:09:10' ) );
+		$this->assertEquals( 1109372950, TTDate::parseDateTime( '25Feb2005 18:09:10 EST' ) );
 	}
 
 	function testDate_DMY_3() {
@@ -477,16 +477,16 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'd-m-y' );
 
 		TTDate::setTimeFormat( 'g:i A' );
-		$this->assertEquals( TTDate::parseDateTime( '25-02-2005' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( '25-02-2005 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '25-02-2005 8:09 AM' ), 1109347740 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '25-02-2005' ) );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '25-02-2005 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '25-02-2005 8:09 AM' ) );
 
 		TTDate::setTimeFormat( 'g:i A T' );
-		$this->assertEquals( TTDate::parseDateTime( '25-02-2005 8:09 AM EST' ), 1109336940 );
+		$this->assertEquals( 1109336940, TTDate::parseDateTime( '25-02-2005 8:09 AM EST' ) );
 
 		TTDate::setTimeFormat( 'G:i' );
-		$this->assertEquals( TTDate::parseDateTime( '25-02-2005 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '25-02-2005 18:09 EST' ), 1109372940 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '25-02-2005 18:09' ) );
+		$this->assertEquals( 1109372940, TTDate::parseDateTime( '25-02-2005 18:09 EST' ) );
 
 		//
 		// Different separator
@@ -495,39 +495,39 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'd/m/y' );
 
 		TTDate::setTimeFormat( 'g:i A' );
-		$this->assertEquals( TTDate::parseDateTime( '25/02/2005' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( '25/02/2005 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '25/02/2005 8:09 AM' ), 1109347740 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '25/02/2005' ) );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '25/02/2005 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '25/02/2005 8:09 AM' ) );
 
 		TTDate::setTimeFormat( 'g:i A T' );
-		$this->assertEquals( TTDate::parseDateTime( '25/02/2005 8:09 AM EST' ), 1109336940 );
+		$this->assertEquals( 1109336940, TTDate::parseDateTime( '25/02/2005 8:09 AM EST' ) );
 
 		TTDate::setTimeFormat( 'G:i' );
-		$this->assertEquals( TTDate::parseDateTime( '25/02/2005 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '25/02/2005 18:09 EST' ), 1109372940 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '25/02/2005 18:09' ) );
+		$this->assertEquals( 1109372940, TTDate::parseDateTime( '25/02/2005 18:09 EST' ) );
 	}
 
 	function testDate_MDY_1() {
 		Debug::text( 'Testing Date Format: m-d-y', __FILE__, __LINE__, __METHOD__, 10 );
 
 		TTDate::setDateFormat( 'm-d-y' );
-		TTDate::setTimeZone( 'PST8PDT' ); //Force to non-DST timezone. 'PST' isnt actually valid.
+		TTDate::setTimeZone( 'America/Vancouver' ); //Force to non-DST timezone. 'PST' isnt actually valid.
 
 		TTDate::setTimeFormat( 'g:i A' );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-2005' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-05' ), 1109318400 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '02-25-2005' ) );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '02-25-05' ) );
 
-		$this->assertEquals( TTDate::parseDateTime( '10-27-06' ), 1161932400 );
+		$this->assertEquals( 1161932400, TTDate::parseDateTime( '10-27-06' ) );
 
-		$this->assertEquals( TTDate::parseDateTime( '02-25-2005 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-2005 8:09 AM' ), 1109347740 );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '02-25-2005 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '02-25-2005 8:09 AM' ) );
 
 		TTDate::setTimeFormat( 'g:i A T' );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-2005 8:09 AM EST' ), 1109336940 );
+		$this->assertEquals( 1109336940, TTDate::parseDateTime( '02-25-2005 8:09 AM EST' ) );
 
 		TTDate::setTimeFormat( 'G:i' );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-2005 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-2005 18:09 EST' ), 1109372940 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '02-25-2005 18:09' ) );
+		$this->assertEquals( 1109372940, TTDate::parseDateTime( '02-25-2005 18:09 EST' ) );
 
 		//
 		// Different separator
@@ -535,16 +535,16 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'm/d/y' );
 
 		TTDate::setTimeFormat( 'g:i A' );
-		$this->assertEquals( TTDate::parseDateTime( '02/25/2005' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( '02/25/2005 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '02/25/2005 8:09 AM' ), 1109347740 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '02/25/2005' ) );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '02/25/2005 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '02/25/2005 8:09 AM' ) );
 
 		TTDate::setTimeFormat( 'g:i A T' );
-		$this->assertEquals( TTDate::parseDateTime( '02/25/2005 8:09 AM EST' ), 1109336940 );
+		$this->assertEquals( 1109336940, TTDate::parseDateTime( '02/25/2005 8:09 AM EST' ) );
 
 		TTDate::setTimeFormat( 'G:i' );
-		$this->assertEquals( TTDate::parseDateTime( '02/25/2005 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '02/25/2005 18:09 EST' ), 1109372940 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '02/25/2005 18:09' ) );
+		$this->assertEquals( 1109372940, TTDate::parseDateTime( '02/25/2005 18:09 EST' ) );
 	}
 
 	function testDate_MDY_2() {
@@ -553,17 +553,17 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'M-d-y' );
 
 		TTDate::setTimeFormat( 'g:i A' );
-		$this->assertEquals( TTDate::parseDateTime( 'Feb-25-2005' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( 'Feb-25-05' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( 'Feb-25-2005 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( 'Feb-25-2005 8:09 AM' ), 1109347740 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( 'Feb-25-2005' ) );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( 'Feb-25-05' ) );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( 'Feb-25-2005 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( 'Feb-25-2005 8:09 AM' ) );
 
 		TTDate::setTimeFormat( 'g:i A T' );
-		$this->assertEquals( TTDate::parseDateTime( 'Feb-25-2005 8:09 AM EST' ), 1109336940 );
+		$this->assertEquals( 1109336940, TTDate::parseDateTime( 'Feb-25-2005 8:09 AM EST' ) );
 
 		TTDate::setTimeFormat( 'G:i' );
-		$this->assertEquals( TTDate::parseDateTime( 'Feb-25-2005 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( 'Feb-25-2005 18:09 EST' ), 1109372940 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( 'Feb-25-2005 18:09' ) );
+		$this->assertEquals( 1109372940, TTDate::parseDateTime( 'Feb-25-2005 18:09 EST' ) );
 	}
 
 	function testDate_MDY_3() {
@@ -572,22 +572,22 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'm-d-y' );
 
 		TTDate::setTimeFormat( 'g:i A' );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-05' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-05 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-05 8:09 AM' ), 1109347740 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '02-25-05' ) );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '02-25-05 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '02-25-05 8:09 AM' ) );
 
 		TTDate::setTimeFormat( 'g:i A T' );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-05 8:09 AM EST' ), 1109336940 );
+		$this->assertEquals( 1109336940, TTDate::parseDateTime( '02-25-05 8:09 AM EST' ) );
 
 		TTDate::setTimeFormat( 'G:i' );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-05 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-05 18:09 EST' ), 1109372940 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '02-25-05 18:09' ) );
+		$this->assertEquals( 1109372940, TTDate::parseDateTime( '02-25-05 18:09 EST' ) );
 
 		//Try test before 1970, like 1920 - *1920 fails after 2010 has passed, try a different value.
 
-		$this->assertEquals( TTDate::parseDateTime( '02-25-55' ), -468604800 );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-55 8:09PM' ), -468532260 );
-		$this->assertEquals( TTDate::parseDateTime( '02-25-55 8:09 AM' ), -468575460 );
+		$this->assertEquals( -468604800, TTDate::parseDateTime( '02-25-55' ) );
+		$this->assertEquals( -468532260, TTDate::parseDateTime( '02-25-55 8:09PM' ) );
+		$this->assertEquals( -468575460, TTDate::parseDateTime( '02-25-55 8:09 AM' ) );
 	}
 
 
@@ -597,17 +597,17 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setDateFormat( 'Y-m-d' );
 
 		TTDate::setTimeFormat( 'g:i A' );
-		$this->assertEquals( TTDate::parseDateTime( '2005-02-25' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( '05-02-25' ), 1109318400 );
-		$this->assertEquals( TTDate::parseDateTime( '2005-02-25 8:09PM' ), 1109390940 );
-		$this->assertEquals( TTDate::parseDateTime( '2005-02-25 8:09 AM' ), 1109347740 );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '2005-02-25' ) );
+		$this->assertEquals( 1109318400, TTDate::parseDateTime( '05-02-25' ) );
+		$this->assertEquals( 1109390940, TTDate::parseDateTime( '2005-02-25 8:09PM' ) );
+		$this->assertEquals( 1109347740, TTDate::parseDateTime( '2005-02-25 8:09 AM' ) );
 
 		TTDate::setTimeFormat( 'g:i A T' );
-		$this->assertEquals( TTDate::parseDateTime( '2005-02-25 8:09 AM EST' ), 1109336940 );
+		$this->assertEquals( 1109336940, TTDate::parseDateTime( '2005-02-25 8:09 AM EST' ) );
 
 		TTDate::setTimeFormat( 'G:i' );
-		$this->assertEquals( TTDate::parseDateTime( '2005-02-25 18:09' ), 1109383740 );
-		$this->assertEquals( TTDate::parseDateTime( '2005-02-25 18:09 EST' ), 1109372940 );
+		$this->assertEquals( 1109383740, TTDate::parseDateTime( '2005-02-25 18:09' ) );
+		$this->assertEquals( 1109372940, TTDate::parseDateTime( '2005-02-25 18:09 EST' ) );
 	}
 
 	function test_getDayOfNextWeek() {
@@ -659,11 +659,11 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		TTDate::setTimeFormat( 'g:i A' );
 		$this->assertEquals( TTDate::parseDateTime( 1162670400 ), (int)1162670400 );
 
-		$this->assertEquals( TTDate::parseDateTime( 600 ), 600 ); //Test small epochs that may conflict with 24hr time that just has the time and not a date.
-		$this->assertEquals( TTDate::parseDateTime( 1800 ), 1800 );  //Test small epochs that may conflict with 24hr time that just has the time and not a date.
+		$this->assertEquals( 600, TTDate::parseDateTime( 600 ) );    //Test small epochs that may conflict with 24hr time that just has the time and not a date.
+		$this->assertEquals( 1800, TTDate::parseDateTime( 1800 ) );  //Test small epochs that may conflict with 24hr time that just has the time and not a date.
 
-		$this->assertEquals( TTDate::parseDateTime( -600 ), -600 ); //Test small epochs that may conflict with 24hr time that just has the time and not a date.
-		$this->assertEquals( TTDate::parseDateTime( -1800 ), -1800 ); //Test small epochs that may conflict with 24hr time that just has the time and not a date.
+		$this->assertEquals( -600, TTDate::parseDateTime( -600 ) );   //Test small epochs that may conflict with 24hr time that just has the time and not a date.
+		$this->assertEquals( -1800, TTDate::parseDateTime( -1800 ) ); //Test small epochs that may conflict with 24hr time that just has the time and not a date.
 	}
 
 	function test_roundTime() {
@@ -812,50 +812,50 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 	function test_calculateTimeOnEachDayBetweenRange() {
 		$test1_result = TTDate::calculateTimeOnEachDayBetweenRange( strtotime( '01-Jan-09 8:00AM' ), strtotime( '01-Jan-09 11:30PM' ) );
-		$this->assertEquals( count( $test1_result ), 1 );
-		$this->assertEquals( $test1_result[1230796800], 55800 );
+		$this->assertCount( 1, $test1_result );
+		$this->assertEquals( 55800, $test1_result[1230796800] );
 
 		$test2_result = TTDate::calculateTimeOnEachDayBetweenRange( strtotime( '01-Jan-09 4:00PM' ), strtotime( '02-Jan-09 8:00AM' ) );
-		$this->assertEquals( count( $test2_result ), 2 );
-		$this->assertEquals( $test2_result[1230796800], 28800 );
-		$this->assertEquals( $test2_result[1230883200], 28800 );
+		$this->assertCount( 2, $test2_result );
+		$this->assertEquals( 28800, $test2_result[1230796800] );
+		$this->assertEquals( 28800, $test2_result[1230883200] );
 
 		$test3_result = TTDate::calculateTimeOnEachDayBetweenRange( strtotime( '01-Jan-09 4:00PM' ), strtotime( '03-Jan-09 8:00AM' ) );
-		$this->assertEquals( count( $test3_result ), 3 );
-		$this->assertEquals( $test3_result[1230796800], 28800 );
-		$this->assertEquals( $test3_result[1230883200], 86400 );
-		$this->assertEquals( $test3_result[1230969600], 28800 );
+		$this->assertCount( 3, $test3_result );
+		$this->assertEquals( 28800, $test3_result[1230796800] );
+		$this->assertEquals( 86400, $test3_result[1230883200] );
+		$this->assertEquals( 28800, $test3_result[1230969600] );
 
 		$test4_result = TTDate::calculateTimeOnEachDayBetweenRange( strtotime( '01-Jan-09 4:00PM' ), strtotime( '9-Jan-09 8:00AM' ) );
-		$this->assertEquals( count( $test4_result ), 9 );
-		$this->assertEquals( $test4_result[1230796800], 28800 );
-		$this->assertEquals( $test4_result[1230883200], 86400 );
-		$this->assertEquals( $test4_result[1230969600], 86400 );
-		$this->assertEquals( $test4_result[1231056000], 86400 );
-		$this->assertEquals( $test4_result[1231142400], 86400 );
-		$this->assertEquals( $test4_result[1231228800], 86400 );
-		$this->assertEquals( $test4_result[1231315200], 86400 );
-		$this->assertEquals( $test4_result[1231401600], 86400 );
-		$this->assertEquals( $test4_result[1231488000], 28800 );
+		$this->assertCount( 9, $test4_result );
+		$this->assertEquals( 28800, $test4_result[1230796800] );
+		$this->assertEquals( 86400, $test4_result[1230883200] );
+		$this->assertEquals( 86400, $test4_result[1230969600] );
+		$this->assertEquals( 86400, $test4_result[1231056000] );
+		$this->assertEquals( 86400, $test4_result[1231142400] );
+		$this->assertEquals( 86400, $test4_result[1231228800] );
+		$this->assertEquals( 86400, $test4_result[1231315200] );
+		$this->assertEquals( 86400, $test4_result[1231401600] );
+		$this->assertEquals( 28800, $test4_result[1231488000] );
 
 		$test5_result = TTDate::calculateTimeOnEachDayBetweenRange( strtotime( '01-Jan-09 12:00AM' ), strtotime( '01-Jan-09 12:59:59PM' ) );
-		$this->assertEquals( count( $test5_result ), 1 );
-		$this->assertEquals( $test5_result[1230796800], 46799 );
+		$this->assertCount( 1, $test5_result );
+		$this->assertEquals( 46799, $test5_result[1230796800] );
 
 		$test5_result = TTDate::calculateTimeOnEachDayBetweenRange( strtotime( '01-Jan-09 12:00AM' ), strtotime( '02-Jan-09 12:00AM' ) );
-		$this->assertEquals( count( $test5_result ), 1 );
-		$this->assertEquals( $test5_result[1230796800], 86400 );
+		$this->assertCount( 1, $test5_result );
+		$this->assertEquals( 86400, $test5_result[1230796800] );
 
 		$test5_result = TTDate::calculateTimeOnEachDayBetweenRange( strtotime( '01-Jan-09 12:01AM' ), strtotime( '02-Jan-09 12:01AM' ) );
-		$this->assertEquals( count( $test5_result ), 2 );
-		$this->assertEquals( $test5_result[1230796800], 86340 );
-		$this->assertEquals( $test5_result[1230883200], 60 );
+		$this->assertCount( 2, $test5_result );
+		$this->assertEquals( 86340, $test5_result[1230796800] );
+		$this->assertEquals( 60, $test5_result[1230883200] );
 
 		$test5_result = TTDate::calculateTimeOnEachDayBetweenRange( strtotime( '01-Jan-09 1:53PM' ), strtotime( '03-Jan-09 6:12AM' ) );
-		$this->assertEquals( count( $test5_result ), 3 );
-		$this->assertEquals( $test5_result[1230796800], 36420 );
-		$this->assertEquals( $test5_result[1230883200], 86400 );
-		$this->assertEquals( $test5_result[1230969600], 22320 );
+		$this->assertCount( 3, $test5_result );
+		$this->assertEquals( 36420, $test5_result[1230796800] );
+		$this->assertEquals( 86400, $test5_result[1230883200] );
+		$this->assertEquals( 22320, $test5_result[1230969600] );
 	}
 
 	function test_calculateFiscalYearFromEpoch() {
@@ -868,189 +868,189 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		4th quarter: 1 July 2016 – 30 September 2016
 		*/
 
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2015 12:00AM' ), 'US' ), 2015 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '01-Oct-2015 12:00AM' ), 'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '01-Jan-2016 8:00AM' ), 'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '29-Sep-2016 12:00AM' ), 'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2016 12:00AM' ), 'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2016 11:59:59PM' ), 'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '01-Oct-2016 12:00AM' ), 'US' ), 2017 );
+		$this->assertEquals( 2015, TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2015 12:00AM' ), 'US' ) );
+		$this->assertEquals( 2016, TTDate::getFiscalYearFromEpoch( strtotime( '01-Oct-2015 12:00AM' ), 'US' ) );
+		$this->assertEquals( 2016, TTDate::getFiscalYearFromEpoch( strtotime( '01-Jan-2016 8:00AM' ), 'US' ) );
+		$this->assertEquals( 2016, TTDate::getFiscalYearFromEpoch( strtotime( '29-Sep-2016 12:00AM' ), 'US' ) );
+		$this->assertEquals( 2016, TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2016 12:00AM' ), 'US' ) );
+		$this->assertEquals( 2016, TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2016 11:59:59PM' ), 'US' ) );
+		$this->assertEquals( 2017, TTDate::getFiscalYearFromEpoch( strtotime( '01-Oct-2016 12:00AM' ), 'US' ) );
 
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2016 12:00AM' ), 'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '01-Oct-2016 12:00AM' ), 'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '01-Jan-2017 8:00AM' ), 'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '29-Sep-2017 12:00AM' ), 'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2017 12:00AM' ), 'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2017 11:59:59PM' ), 'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '01-Oct-2017 12:00AM' ), 'US' ), 2018 );
+		$this->assertEquals( 2016, TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2016 12:00AM' ), 'US' ) );
+		$this->assertEquals( 2017, TTDate::getFiscalYearFromEpoch( strtotime( '01-Oct-2016 12:00AM' ), 'US' ) );
+		$this->assertEquals( 2017, TTDate::getFiscalYearFromEpoch( strtotime( '01-Jan-2017 8:00AM' ), 'US' ) );
+		$this->assertEquals( 2017, TTDate::getFiscalYearFromEpoch( strtotime( '29-Sep-2017 12:00AM' ), 'US' ) );
+		$this->assertEquals( 2017, TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2017 12:00AM' ), 'US' ) );
+		$this->assertEquals( 2017, TTDate::getFiscalYearFromEpoch( strtotime( '30-Sep-2017 11:59:59PM' ), 'US' ) );
+		$this->assertEquals( 2018, TTDate::getFiscalYearFromEpoch( strtotime( '01-Oct-2017 12:00AM' ), 'US' ) );
 
 		/*
 		In Canada,[9] the government's financial year runs from 1 April to 31 March (Example 1 April 2015 to 31 March 2016 for the current financial year).
 		 */
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '31-Mar-2015 12:00AM' ), 'CA' ), 2014 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '01-Apr-2015 12:00AM' ), 'CA' ), 2015 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '31-Dec-2015 8:00AM' ), 'CA' ), 2015 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '31-Mar-2016 11:59AM' ), 'CA' ), 2015 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime( '01-Apr-2016 12:00AM' ), 'CA' ), 2016 );
+		$this->assertEquals( 2014, TTDate::getFiscalYearFromEpoch( strtotime( '31-Mar-2015 12:00AM' ), 'CA' ) );
+		$this->assertEquals( 2015, TTDate::getFiscalYearFromEpoch( strtotime( '01-Apr-2015 12:00AM' ), 'CA' ) );
+		$this->assertEquals( 2015, TTDate::getFiscalYearFromEpoch( strtotime( '31-Dec-2015 8:00AM' ), 'CA' ) );
+		$this->assertEquals( 2015, TTDate::getFiscalYearFromEpoch( strtotime( '31-Mar-2016 11:59AM' ), 'CA' ) );
+		$this->assertEquals( 2016, TTDate::getFiscalYearFromEpoch( strtotime( '01-Apr-2016 12:00AM' ), 'CA' ) );
 	}
 
 	function test_getWeek() {
 		//Match up with PHP's function
 		$date1 = strtotime( '01-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 44 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 44 );
+		$this->assertEquals( 44, date( 'W', $date1 ) );
+		$this->assertEquals( 44, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '02-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 45 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 45 );
+		$this->assertEquals( 45, date( 'W', $date1 ) );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '03-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 45 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 45 );
+		$this->assertEquals( 45, date( 'W', $date1 ) );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '04-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 45 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 45 );
+		$this->assertEquals( 45, date( 'W', $date1 ) );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '05-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 45 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 45 );
+		$this->assertEquals( 45, date( 'W', $date1 ) );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '06-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 45 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 45 );
+		$this->assertEquals( 45, date( 'W', $date1 ) );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '07-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 45 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 45 );
+		$this->assertEquals( 45, date( 'W', $date1 ) );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '08-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 45 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 45 );
+		$this->assertEquals( 45, date( 'W', $date1 ) );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '09-Nov-09 12:00PM' );
-		$this->assertEquals( date( 'W', $date1 ), 46 );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 46 );
+		$this->assertEquals( 46, date( 'W', $date1 ) );
+		$this->assertEquals( 46, TTDate::getWeek( $date1, 1 ) );
 
 		//Test with Sunday as start day of week.
 		$date1 = strtotime( '01-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '02-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '03-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '04-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '05-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '06-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '07-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '08-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 46 );
+		$this->assertEquals( 46, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '09-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 46 );
+		$this->assertEquals( 46, TTDate::getWeek( $date1, 0 ) );
 
 
 		//Test with Tuesday as start day of week.
 		$date1 = strtotime( '01-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 44 );
+		$this->assertEquals( 44, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '02-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 44 );
+		$this->assertEquals( 44, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '03-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '04-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '05-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '06-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '07-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '08-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '09-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '10-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 46 );
+		$this->assertEquals( 46, TTDate::getWeek( $date1, 2 ) );
 
 		$date1 = strtotime( '11-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 2 ), 46 );
+		$this->assertEquals( 46, TTDate::getWeek( $date1, 2 ) );
 
 
 		//Test with Wed as start day of week.
 		$date1 = strtotime( '03-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 3 ), 44 );
+		$this->assertEquals( 44, TTDate::getWeek( $date1, 3 ) );
 
 		$date1 = strtotime( '04-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 3 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 3 ) );
 
 		$date1 = strtotime( '05-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 3 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 3 ) );
 
 		//Test with Thu as start day of week.
 		$date1 = strtotime( '04-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 4 ), 44 );
+		$this->assertEquals( 44, TTDate::getWeek( $date1, 4 ) );
 
 		$date1 = strtotime( '05-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 4 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 4 ) );
 
 		$date1 = strtotime( '06-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 4 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 4 ) );
 
 		//Test with Fri as start day of week.
 		$date1 = strtotime( '05-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 5 ), 44 );
+		$this->assertEquals( 44, TTDate::getWeek( $date1, 5 ) );
 
 		$date1 = strtotime( '06-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 5 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 5 ) );
 
 		$date1 = strtotime( '07-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 5 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 5 ) );
 
 		//Test with Sat as start day of week.
 		$date1 = strtotime( '06-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 6 ), 44 );
+		$this->assertEquals( 44, TTDate::getWeek( $date1, 6 ) );
 
 		$date1 = strtotime( '07-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 6 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 6 ) );
 
 		$date1 = strtotime( '08-Nov-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 6 ), 45 );
+		$this->assertEquals( 45, TTDate::getWeek( $date1, 6 ) );
 
 		//Test with different years
 		$date1 = strtotime( '31-Dec-09 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 53 );
+		$this->assertEquals( 53, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '01-Jan-10 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 53 );
+		$this->assertEquals( 53, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '04-Jan-10 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 1 ), 1 );
+		$this->assertEquals( 1, TTDate::getWeek( $date1, 1 ) );
 
 		$date1 = strtotime( '03-Jan-10 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 0 ), 1 );
+		$this->assertEquals( 1, TTDate::getWeek( $date1, 0 ) );
 
 		$date1 = strtotime( '09-Jan-10 12:00PM' );
-		$this->assertEquals( TTDate::getWeek( $date1, 6 ), 1 );
+		$this->assertEquals( 1, TTDate::getWeek( $date1, 6 ) );
 
 
 		//Start on Monday as thats what PHP uses.
@@ -1059,27 +1059,27 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		}
 
 		//Start on Sunday.
-		$this->assertEquals( TTDate::getWeek( strtotime( '29-Dec-12' ), 0 ), 52 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '30-Dec-12' ), 0 ), 1 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '31-Dec-12' ), 0 ), 1 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '01-Jan-12' ), 0 ), 1 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '02-Jan-12' ), 0 ), 1 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '03-Jan-12' ), 0 ), 1 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '04-Jan-12' ), 0 ), 1 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '05-Jan-12' ), 0 ), 1 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '06-Jan-13' ), 0 ), 2 );
+		$this->assertEquals( 52, TTDate::getWeek( strtotime( '29-Dec-12' ), 0 ) );
+		$this->assertEquals( 1, TTDate::getWeek( strtotime( '30-Dec-12' ), 0 ) );
+		$this->assertEquals( 1, TTDate::getWeek( strtotime( '31-Dec-12' ), 0 ) );
+		$this->assertEquals( 1, TTDate::getWeek( strtotime( '01-Jan-12' ), 0 ) );
+		$this->assertEquals( 1, TTDate::getWeek( strtotime( '02-Jan-12' ), 0 ) );
+		$this->assertEquals( 1, TTDate::getWeek( strtotime( '03-Jan-12' ), 0 ) );
+		$this->assertEquals( 1, TTDate::getWeek( strtotime( '04-Jan-12' ), 0 ) );
+		$this->assertEquals( 1, TTDate::getWeek( strtotime( '05-Jan-12' ), 0 ) );
+		$this->assertEquals( 2, TTDate::getWeek( strtotime( '06-Jan-13' ), 0 ) );
 
-		$this->assertEquals( TTDate::getWeek( strtotime( '09-Apr-13' ), 0 ), 15 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '28-Jun-13' ), 0 ), 26 );
+		$this->assertEquals( 15, TTDate::getWeek( strtotime( '09-Apr-13' ), 0 ) );
+		$this->assertEquals( 26, TTDate::getWeek( strtotime( '28-Jun-13' ), 0 ) );
 
 		//Start on every other day of the week
-		$this->assertEquals( TTDate::getWeek( strtotime( '28-Jun-13' ), 6 ), 25 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '27-Jun-13' ), 5 ), 25 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '26-Jun-13' ), 4 ), 25 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '25-Jun-13' ), 3 ), 25 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '24-Jun-13' ), 2 ), 25 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '23-Jun-13' ), 1 ), 25 );
-		$this->assertEquals( TTDate::getWeek( strtotime( '22-Jun-13' ), 0 ), 25 );
+		$this->assertEquals( 25, TTDate::getWeek( strtotime( '28-Jun-13' ), 6 ) );
+		$this->assertEquals( 25, TTDate::getWeek( strtotime( '27-Jun-13' ), 5 ) );
+		$this->assertEquals( 25, TTDate::getWeek( strtotime( '26-Jun-13' ), 4 ) );
+		$this->assertEquals( 25, TTDate::getWeek( strtotime( '25-Jun-13' ), 3 ) );
+		$this->assertEquals( 25, TTDate::getWeek( strtotime( '24-Jun-13' ), 2 ) );
+		$this->assertEquals( 25, TTDate::getWeek( strtotime( '23-Jun-13' ), 1 ) );
+		$this->assertEquals( 25, TTDate::getWeek( strtotime( '22-Jun-13' ), 0 ) );
 	}
 
 	function test_getNearestWeekDay() {
@@ -1132,7 +1132,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 	function test_timePeriodDates() {
 		Debug::text( 'Testing Time Period Dates!', __FILE__, __LINE__, __METHOD__, 10 );
-		TTDate::setTimeZone( 'PST8PDT' );
+		TTDate::setTimeZone( 'America/Vancouver' );
 
 		$dates = TTDate::getTimePeriodDates( 'custom_date', strtotime( '15-Jul-10 12:00 PM' ), null, [ 'start_date' => strtotime( '10-Jul-10 12:43 PM' ), 'end_date' => strtotime( '12-Jul-10 12:43 PM' ) ] );
 		$this->assertEquals( $dates['start_date'], (int)1278745200 );
@@ -1252,7 +1252,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function test_getEndWeekEpoch() {
-		TTDate::setTimeZone( 'PST8PDT' ); //Force to timezone with DST.
+		TTDate::setTimeZone( 'America/Vancouver' ); //Force to timezone with DST.
 
 		$this->assertEquals( strtotime( '11-May-2019 11:59:59PM' ), TTDate::getEndWeekEpoch( strtotime( '11-May-2019 12:00AM' ), 0 ) ); //Week starts on Sunday
 		$this->assertEquals( strtotime( '18-May-2019 11:59:59PM' ), TTDate::getEndWeekEpoch( strtotime( '12-May-2019 12:00AM' ), 0 ) ); //Week starts on Sunday
@@ -1307,7 +1307,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 	function test_getYearQuarters() {
 		$quarters = TTDate::getYearQuarters( strtotime( '01-Jan-2019' ) );
-		$this->assertEquals( 4, count( $quarters ) );
+		$this->assertCount( 4, $quarters );
 		$this->assertEquals( strtotime( '01-Jan-2019 12:00AM' ), $quarters[1]['start'] );
 		$this->assertEquals( strtotime( '31-Mar-2019 11:59:59PM' ), $quarters[1]['end'] );
 		$this->assertEquals( strtotime( '01-Apr-2019 12:00AM' ), $quarters[2]['start'] );
@@ -1319,59 +1319,59 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 
 		$quarters = TTDate::getYearQuarters( strtotime( '01-Jan-2019' ), 1 );
-		$this->assertEquals( 2, count( $quarters ) );
+		$this->assertCount( 2, $quarters );
 		$this->assertEquals( strtotime( '01-Jan-2019 12:00AM' ), $quarters['start'] );
 		$this->assertEquals( strtotime( '31-Mar-2019 11:59:59PM' ), $quarters['end'] );
 
 
 		$quarters = TTDate::getYearQuarters( strtotime( '01-Jan-2019' ), 2 );
-		$this->assertEquals( 2, count( $quarters ) );
+		$this->assertCount( 2, $quarters );
 		$this->assertEquals( strtotime( '01-Apr-2019 12:00AM' ), $quarters['start'] );
 		$this->assertEquals( strtotime( '30-Jun-2019 11:59:59PM' ), $quarters['end'] );
 	}
 
 	function test_DST() {
-		TTDate::setTimeZone( 'PST8PDT' ); //Force to timezone with DST.
+		TTDate::setTimeZone( 'America/Vancouver' ); //Force to timezone with DST.
 
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 1:59AM' ) ), false );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 2:00AM' ) ), true );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 2:01AM' ) ), true );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '04-Nov-12 12:30AM' ), strtotime( '04-Nov-12 1:59AM' ) ), false );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '04-Nov-12 12:30AM' ), strtotime( '04-Nov-12 2:00AM' ) ), true );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '04-Nov-12 1:00AM' ), strtotime( '04-Nov-12 6:30AM' ) ), true );
-
-
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 1:59AM' ) ), false );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 2:00AM' ) ), true );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 2:01AM' ) ), true );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '10-Mar-13 12:30AM' ), strtotime( '10-Mar-13 1:59AM' ) ), false );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '10-Mar-13 12:30AM' ), strtotime( '10-Mar-13 2:00AM' ) ), true );
-		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime( '10-Mar-13 1:30AM' ), strtotime( '10-Mar-13 6:30AM' ) ), true );
+		$this->assertEquals( false, TTDate::doesRangeSpanDST( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 1:59AM' ) ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanDST( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 2:00AM' ) ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanDST( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 2:01AM' ) ) );
+		$this->assertEquals( false, TTDate::doesRangeSpanDST( strtotime( '04-Nov-12 12:30AM' ), strtotime( '04-Nov-12 1:59AM' ) ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanDST( strtotime( '04-Nov-12 12:30AM' ), strtotime( '04-Nov-12 2:00AM' ) ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanDST( strtotime( '04-Nov-12 1:00AM' ), strtotime( '04-Nov-12 6:30AM' ) ) );
 
 
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 1:59AM' ) ), 0 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 2:00AM' ) ), -3600 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 2:01AM' ) ), -3600 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '04-Nov-12 12:30AM' ), strtotime( '04-Nov-12 1:59AM' ) ), 0 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '04-Nov-12 12:30AM' ), strtotime( '04-Nov-12 2:00AM' ) ), -3600 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '04-Nov-12 1:00AM' ), strtotime( '04-Nov-12 6:30AM' ) ), -3600 );
+		$this->assertEquals( false, TTDate::doesRangeSpanDST( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 1:59AM' ) ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanDST( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 2:00AM' ) ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanDST( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 2:01AM' ) ) );
+		$this->assertEquals( false, TTDate::doesRangeSpanDST( strtotime( '10-Mar-13 12:30AM' ), strtotime( '10-Mar-13 1:59AM' ) ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanDST( strtotime( '10-Mar-13 12:30AM' ), strtotime( '10-Mar-13 2:00AM' ) ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanDST( strtotime( '10-Mar-13 1:30AM' ), strtotime( '10-Mar-13 6:30AM' ) ) );
 
 
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 1:59AM' ) ), 0 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 2:00AM' ) ), 3600 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 2:01AM' ) ), 3600 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '10-Mar-13 12:30AM' ), strtotime( '10-Mar-13 1:59AM' ) ), 0 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '10-Mar-13 12:30AM' ), strtotime( '10-Mar-13 2:00AM' ) ), 3600 );
-		$this->assertEquals( TTDate::getDSTOffset( strtotime( '10-Mar-13 1:30AM' ), strtotime( '10-Mar-13 6:30AM' ) ), 3600 );
+		$this->assertEquals( 0, TTDate::getDSTOffset( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 1:59AM' ) ) );
+		$this->assertEquals( -3600, TTDate::getDSTOffset( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 2:00AM' ) ) );
+		$this->assertEquals( -3600, TTDate::getDSTOffset( strtotime( '03-Nov-12 10:00PM' ), strtotime( '04-Nov-12 2:01AM' ) ) );
+		$this->assertEquals( 0, TTDate::getDSTOffset( strtotime( '04-Nov-12 12:30AM' ), strtotime( '04-Nov-12 1:59AM' ) ) );
+		$this->assertEquals( -3600, TTDate::getDSTOffset( strtotime( '04-Nov-12 12:30AM' ), strtotime( '04-Nov-12 2:00AM' ) ) );
+		$this->assertEquals( -3600, TTDate::getDSTOffset( strtotime( '04-Nov-12 1:00AM' ), strtotime( '04-Nov-12 6:30AM' ) ) );
+
+
+		$this->assertEquals( 0, TTDate::getDSTOffset( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 1:59AM' ) ) );
+		$this->assertEquals( 3600, TTDate::getDSTOffset( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 2:00AM' ) ) );
+		$this->assertEquals( 3600, TTDate::getDSTOffset( strtotime( '09-Mar-13 10:00PM' ), strtotime( '10-Mar-13 2:01AM' ) ) );
+		$this->assertEquals( 0, TTDate::getDSTOffset( strtotime( '10-Mar-13 12:30AM' ), strtotime( '10-Mar-13 1:59AM' ) ) );
+		$this->assertEquals( 3600, TTDate::getDSTOffset( strtotime( '10-Mar-13 12:30AM' ), strtotime( '10-Mar-13 2:00AM' ) ) );
+		$this->assertEquals( 3600, TTDate::getDSTOffset( strtotime( '10-Mar-13 1:30AM' ), strtotime( '10-Mar-13 6:30AM' ) ) );
 
 
 		//This is a quirk with PHP assuming that PST/PDT both mean PST8PDT, and since 05-Nov-2016 is the day DST changed, it adds an hour and uses PDT timezone instead.
 		//  Not really testing anything useful here, other than confirming this quirk exists.
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', strtotime( '04-Nov-2016 6:00PM PDT' ) ), '04-Nov-16 6:00 PM PDT' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', strtotime( '04-Nov-2016 6:00PM PST' ) ), '04-Nov-16 7:00 PM PDT' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', strtotime( '05-Nov-2016 6:00AM PST' ) ), '05-Nov-16 7:00 AM PDT' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', strtotime( '06-Nov-2016 6:00AM PST' ) ), '06-Nov-16 6:00 AM PST' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', strtotime( '06-Nov-2016 6:00AM PDT' ) ), '06-Nov-16 5:00 AM PST' );
+		$this->assertEquals( '04-Nov-16 6:00 PM PDT', TTDate::getDate( 'DATE+TIME', strtotime( '04-Nov-2016 6:00PM PDT' ) ) );
+		$this->assertEquals( '04-Nov-16 7:00 PM PDT', TTDate::getDate( 'DATE+TIME', strtotime( '04-Nov-2016 6:00PM PST' ) ) );
+		$this->assertEquals( '05-Nov-16 7:00 AM PDT', TTDate::getDate( 'DATE+TIME', strtotime( '05-Nov-2016 6:00AM PST' ) ) );
+		$this->assertEquals( '06-Nov-16 6:00 AM PST', TTDate::getDate( 'DATE+TIME', strtotime( '06-Nov-2016 6:00AM PST' ) ) );
+		$this->assertEquals( '06-Nov-16 5:00 AM PST', TTDate::getDate( 'DATE+TIME', strtotime( '06-Nov-2016 6:00AM PDT' ) ) );
 	}
 
 	function test_inApplyFrequencyWindow() {
@@ -1386,23 +1386,23 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		];
 
 		//No range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime( '01-Jan-2010' ), strtotime( '01-Jan-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime( '02-Jan-2010' ), strtotime( '02-Jan-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime( '03-Jan-2010' ), strtotime( '03-Jan-2010' ), $frequency_criteria ), false );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 20, strtotime( '01-Jan-2010' ), strtotime( '01-Jan-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, strtotime( '02-Jan-2010' ), strtotime( '02-Jan-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 20, strtotime( '03-Jan-2010' ), strtotime( '03-Jan-2010' ), $frequency_criteria ) );
 		//Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime( '01-Jan-2010' ), strtotime( '03-Jan-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime( '02-Jan-2010 12:00PM' ), strtotime( '02-Jan-2010 12:00PM' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime( '02-Jan-2010 12:00AM' ), strtotime( '02-Jan-2010 11:59PM' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '01-Jan-2010' ), -7, 'day' ), strtotime( '01-Jan-2010' ), $frequency_criteria ), false ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '02-Jan-2010' ), -7, 'day' ), strtotime( '02-Jan-2010' ), $frequency_criteria ), true ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '03-Jan-2010' ), -7, 'day' ), strtotime( '03-Jan-2010' ), $frequency_criteria ), true ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '04-Jan-2010' ), -7, 'day' ), strtotime( '04-Jan-2010' ), $frequency_criteria ), true ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '05-Jan-2010' ), -7, 'day' ), strtotime( '05-Jan-2010' ), $frequency_criteria ), true ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '06-Jan-2010' ), -7, 'day' ), strtotime( '06-Jan-2010' ), $frequency_criteria ), true ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '07-Jan-2010' ), -7, 'day' ), strtotime( '07-Jan-2010' ), $frequency_criteria ), true ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '08-Jan-2010' ), -7, 'day' ), strtotime( '08-Jan-2010' ), $frequency_criteria ), true ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '09-Jan-2010' ), -7, 'day' ), strtotime( '09-Jan-2010' ), $frequency_criteria ), true ); //Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '10-Jan-2010' ), -7, 'day' ), strtotime( '10-Jan-2010' ), $frequency_criteria ), false ); //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, strtotime( '01-Jan-2010' ), strtotime( '03-Jan-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, strtotime( '02-Jan-2010 12:00PM' ), strtotime( '02-Jan-2010 12:00PM' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, strtotime( '02-Jan-2010 12:00AM' ), strtotime( '02-Jan-2010 11:59PM' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '01-Jan-2010' ), -7, 'day' ), strtotime( '01-Jan-2010' ), $frequency_criteria ) ); //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '02-Jan-2010' ), -7, 'day' ), strtotime( '02-Jan-2010' ), $frequency_criteria ) );  //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '03-Jan-2010' ), -7, 'day' ), strtotime( '03-Jan-2010' ), $frequency_criteria ) );  //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '04-Jan-2010' ), -7, 'day' ), strtotime( '04-Jan-2010' ), $frequency_criteria ) );  //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '05-Jan-2010' ), -7, 'day' ), strtotime( '05-Jan-2010' ), $frequency_criteria ) );  //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '06-Jan-2010' ), -7, 'day' ), strtotime( '06-Jan-2010' ), $frequency_criteria ) );  //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '07-Jan-2010' ), -7, 'day' ), strtotime( '07-Jan-2010' ), $frequency_criteria ) );  //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '08-Jan-2010' ), -7, 'day' ), strtotime( '08-Jan-2010' ), $frequency_criteria ) );  //Range
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '09-Jan-2010' ), -7, 'day' ), strtotime( '09-Jan-2010' ), $frequency_criteria ) );  //Range
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 20, TTDate::incrementDate( strtotime( '10-Jan-2010' ), -7, 'day' ), strtotime( '10-Jan-2010' ), $frequency_criteria ) ); //Range
 
 
 		//Quarterly
@@ -1416,43 +1416,43 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		];
 
 		//No range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Feb-2010' ), strtotime( '14-Feb-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '15-Feb-2010' ), strtotime( '15-Feb-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Feb-2010' ), strtotime( '16-Feb-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-May-2010' ), strtotime( '14-May-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '15-May-2010' ), strtotime( '15-May-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '16-May-2010' ), strtotime( '16-May-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Aug-2010' ), strtotime( '14-Aug-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '15-Aug-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Aug-2010' ), strtotime( '16-Aug-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Nov-2010' ), strtotime( '14-Nov-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '15-Nov-2010' ), strtotime( '15-Nov-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Nov-2010' ), strtotime( '16-Nov-2010' ), $frequency_criteria ), false );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Feb-2010' ), strtotime( '14-Feb-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '15-Feb-2010' ), strtotime( '15-Feb-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Feb-2010' ), strtotime( '16-Feb-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-May-2010' ), strtotime( '14-May-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '15-May-2010' ), strtotime( '15-May-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '16-May-2010' ), strtotime( '16-May-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Aug-2010' ), strtotime( '14-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '15-Aug-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Aug-2010' ), strtotime( '16-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Nov-2010' ), strtotime( '14-Nov-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '15-Nov-2010' ), strtotime( '15-Nov-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Nov-2010' ), strtotime( '16-Nov-2010' ), $frequency_criteria ) );
 
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Jan-2010' ), strtotime( '14-Jan-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Mar-2010' ), strtotime( '14-Mar-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Apr-2010' ), strtotime( '14-Apr-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Jun-2010' ), strtotime( '14-Jun-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Jul-2010' ), strtotime( '14-Jul-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Sep-2010' ), strtotime( '14-Sep-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Oct-2010' ), strtotime( '14-Oct-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Dec-2010' ), strtotime( '14-Dec-2010' ), $frequency_criteria ), false );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Jan-2010' ), strtotime( '14-Jan-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Mar-2010' ), strtotime( '14-Mar-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Apr-2010' ), strtotime( '14-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Jun-2010' ), strtotime( '14-Jun-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Jul-2010' ), strtotime( '14-Jul-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Sep-2010' ), strtotime( '14-Sep-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Oct-2010' ), strtotime( '14-Oct-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '14-Dec-2010' ), strtotime( '14-Dec-2010' ), $frequency_criteria ) );
 
 		//Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Aug-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '15-Aug-2010' ), strtotime( '20-Aug-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Aug-2010' ), strtotime( '20-Aug-2010' ), $frequency_criteria ), false );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Aug-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '15-Aug-2010' ), strtotime( '20-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Aug-2010' ), strtotime( '20-Aug-2010' ), $frequency_criteria ) );
 
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Jul-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Jun-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '01-May-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Apr-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Apr-2009' ), strtotime( '15-Aug-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Aug-2009' ), strtotime( '14-Dec-2010' ), $frequency_criteria ), true );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Jul-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Jun-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '01-May-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Apr-2010' ), strtotime( '15-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '01-Apr-2009' ), strtotime( '15-Aug-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '16-Aug-2009' ), strtotime( '14-Dec-2010' ), $frequency_criteria ) );
 
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '19-Aug-2009' ), strtotime( '14-Nov-2009' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '19-Aug-2009' ), strtotime( '15-Nov-2009' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime( '19-Aug-2009' ), strtotime( '15-Nov-2010' ), $frequency_criteria ), true );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 25, strtotime( '19-Aug-2009' ), strtotime( '14-Nov-2009' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '19-Aug-2009' ), strtotime( '15-Nov-2009' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 25, strtotime( '19-Aug-2009' ), strtotime( '15-Nov-2010' ), $frequency_criteria ) );
 
 		//Monthly
 		$frequency_criteria = [
@@ -1465,19 +1465,19 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		];
 
 		//No range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '27-Feb-2010' ), strtotime( '27-Feb-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '28-Feb-2010' ), strtotime( '28-Feb-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '01-Mar-2010' ), strtotime( '01-Mar-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '27-Feb-2011' ), strtotime( '27-Feb-2011' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '28-Feb-2011' ), strtotime( '28-Feb-2011' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '01-Mar-2011' ), strtotime( '01-Mar-2011' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '28-Feb-2012' ), strtotime( '28-Feb-2012' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '29-Feb-2012' ), strtotime( '29-Feb-2012' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '01-Mar-2012' ), strtotime( '01-Mar-2012' ), $frequency_criteria ), false );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 30, strtotime( '27-Feb-2010' ), strtotime( '27-Feb-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 30, strtotime( '28-Feb-2010' ), strtotime( '28-Feb-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 30, strtotime( '01-Mar-2010' ), strtotime( '01-Mar-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 30, strtotime( '27-Feb-2011' ), strtotime( '27-Feb-2011' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 30, strtotime( '28-Feb-2011' ), strtotime( '28-Feb-2011' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 30, strtotime( '01-Mar-2011' ), strtotime( '01-Mar-2011' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 30, strtotime( '28-Feb-2012' ), strtotime( '28-Feb-2012' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 30, strtotime( '29-Feb-2012' ), strtotime( '29-Feb-2012' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 30, strtotime( '01-Mar-2012' ), strtotime( '01-Mar-2012' ), $frequency_criteria ) );
 
 		//Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '28-Feb-2010' ), strtotime( '05-Mar-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime( '22-Feb-2010' ), strtotime( '28-Feb-2010' ), $frequency_criteria ), true );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 30, strtotime( '28-Feb-2010' ), strtotime( '05-Mar-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 30, strtotime( '22-Feb-2010' ), strtotime( '28-Feb-2010' ), $frequency_criteria ) );
 
 
 		//Weekly
@@ -1491,27 +1491,27 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		];
 
 		//No range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '12-Apr-2010' ), strtotime( '12-Apr-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '13-Apr-2010' ), strtotime( '13-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '14-Apr-2010' ), strtotime( '14-Apr-2010' ), $frequency_criteria ), false );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 40, strtotime( '12-Apr-2010' ), strtotime( '12-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '13-Apr-2010' ), strtotime( '13-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 40, strtotime( '14-Apr-2010' ), strtotime( '14-Apr-2010' ), $frequency_criteria ) );
 
 		//Range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '07-Apr-2010' ), strtotime( '12-Apr-2010' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '14-Apr-2010' ), strtotime( '19-Apr-2010' ), $frequency_criteria ), false );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 40, strtotime( '07-Apr-2010' ), strtotime( '12-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 40, strtotime( '14-Apr-2010' ), strtotime( '19-Apr-2010' ), $frequency_criteria ) );
 
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '17-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '12-Apr-2010' ), strtotime( '18-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '13-Apr-2010' ), strtotime( '19-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '14-Apr-2010' ), strtotime( '20-Apr-2010' ), $frequency_criteria ), true );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '17-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '12-Apr-2010' ), strtotime( '18-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '13-Apr-2010' ), strtotime( '19-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '14-Apr-2010' ), strtotime( '20-Apr-2010' ), $frequency_criteria ) );
 
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '12-Apr-2010' ), strtotime( '17-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '13-Apr-2010' ), strtotime( '17-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '14-Apr-2010' ), strtotime( '17-Apr-2010' ), $frequency_criteria ), false );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '12-Apr-2010' ), strtotime( '17-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '13-Apr-2010' ), strtotime( '17-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 40, strtotime( '14-Apr-2010' ), strtotime( '17-Apr-2010' ), $frequency_criteria ) );
 
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '18-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '19-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '24-Apr-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '25-Apr-2010' ), $frequency_criteria ), true );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '18-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '19-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '24-Apr-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 40, strtotime( '11-Apr-2010' ), strtotime( '25-Apr-2010' ), $frequency_criteria ) );
 
 		//Specific date
 		$frequency_criteria = [
@@ -1524,14 +1524,14 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		];
 
 		//No range
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime( '01-Jan-2010' ), strtotime( '01-Jan-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime( '31-Dec-2009' ), strtotime( '01-Jan-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime( '01-Jan-2010' ), strtotime( '02-Jan-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime( '30-Dec-2009' ), strtotime( '31-Dec-2009' ), $frequency_criteria ), false );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime( '02-Jan-2010' ), strtotime( '03-Jan-2010' ), $frequency_criteria ), false );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 100, strtotime( '01-Jan-2010' ), strtotime( '01-Jan-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 100, strtotime( '31-Dec-2009' ), strtotime( '01-Jan-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 100, strtotime( '01-Jan-2010' ), strtotime( '02-Jan-2010' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 100, strtotime( '30-Dec-2009' ), strtotime( '31-Dec-2009' ), $frequency_criteria ) );
+		$this->assertEquals( false, TTDate::inApplyFrequencyWindow( 100, strtotime( '02-Jan-2010' ), strtotime( '03-Jan-2010' ), $frequency_criteria ) );
 
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime( '01-Jan-2009' ), strtotime( '01-Jan-2010' ), $frequency_criteria ), true );
-		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime( '01-Jan-2009' ), strtotime( '01-Jan-2011' ), $frequency_criteria ), true );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 100, strtotime( '01-Jan-2009' ), strtotime( '01-Jan-2010' ), $frequency_criteria ) );
+		$this->assertEquals( true, TTDate::inApplyFrequencyWindow( 100, strtotime( '01-Jan-2009' ), strtotime( '01-Jan-2011' ), $frequency_criteria ) );
 	}
 
 	//Compare pure PHP implementation of EasterDays to PHP calendar extension.
@@ -1549,7 +1549,77 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		foreach ( $zones as $zone => $name ) {
 			$retval = TTDate::setTimeZone( Misc::trimSortPrefix( $zone ), true, true );
-			$this->assertEquals( $retval, true, 'Failed TZ: ' . $name );
+			$this->assertEquals( true, $retval, 'Failed TZ: ' . $name );
+		}
+	}
+
+	function testDeprecatedTimeZones() {
+		$upf = new UserPreferenceFactory();
+
+		$countries = ['CA', 'US', ''];
+		foreach( $countries as $country ) {
+			$zones = $upf->getOptions( 'deprecated_timezone', [ 'country' => $country ] );
+
+			//Make sure all
+			foreach ( $zones as $deprecated_zone => $new_zone ) {
+				if ( strpos( $deprecated_zone, 'AST4ADT' ) !== false || strpos( $deprecated_zone, 'YST9YDT' ) !== false || strpos( $deprecated_zone, 'Canada/East-Saskatchewan' ) !== false || strpos( $deprecated_zone, 'CST5CDT' ) !== false ) {
+					continue;
+				}
+
+				$deprecated_zone_retval = TTDate::setTimeZone( Misc::trimSortPrefix( $deprecated_zone ), true, true );
+				$this->assertNotFalse( $deprecated_zone_retval );
+				$deprecated_time = strtotime( '2020-01-01 00:00:00' );
+
+				$new_zone_retval = TTDate::setTimeZone( Misc::trimSortPrefix( $new_zone ), true, true );
+				$this->assertNotFalse( $new_zone_retval );
+				$new_time = strtotime( '2020-01-01 00:00:00' );
+
+				$this->assertEquals( $deprecated_time, $new_time, 'Depcreated Zone: ' . $deprecated_zone . ' New Zone: ' . $new_zone );
+			}
+		}
+	}
+
+	function testCheckForDeprecatedTimeZones() {
+		$countries = ['CA', 'US', ''];
+		foreach( $countries as $country ) {
+			$upf = new UserPreferenceFactory();
+			$zones = $upf->getOptions( 'time_zone' );
+			$deprecated_zones = $upf->getOptions( 'deprecated_timezone', [ 'country' => $country ] );
+			$location_zones = $upf->getOptions( 'location_timezone' );
+			$area_code_zones = $upf->getOptions( 'area_code_timezone' );
+
+			//Make sure all
+			foreach ( $zones as $zone => $name ) {
+				$this->assertTrue( !isset( $deprecated_zones[$zone] ), 'UserPreference Zone is deprecated: ' . $zone );
+				if ( isset( $deprecated_zones[$zone] ) ) {
+					$this->assertTrue( !isset( $zones[$deprecated_zones[$zone]] ), 'Deprecrated Linked Zone does not exist: ' . $deprecated_zones[$zone] );
+				}
+			}
+
+			foreach ( $deprecated_zones as $deprecated_zone => $new_zone ) {
+				$this->assertTrue( isset( $zones[$new_zone] ), 'Zone linked to deprecated zone is invalid!: ' . $new_zone );
+			}
+
+			foreach ( $location_zones as $country => $zone_arr ) {
+				if ( is_array( $zone_arr ) ) {
+					foreach ( $zone_arr as $zone ) {
+						if ( isset( $deprecated_zones[$zone] ) ) {
+							$this->assertTrue( false, 'Location TimeZone Map: Zone is deprecated: ' . $zone . ' Should be: ' . $deprecated_zones[$zone] );
+						}
+					}
+				} else {
+					if ( isset( $deprecated_zones[$zone_arr] ) ) {
+						$this->assertTrue( false, 'Location TimeZone Map: Zone is deprecated: ' . $zone_arr . ' Should be: ' . $deprecated_zones[$zone_arr] );
+					}
+				}
+			}
+
+			foreach ( $area_code_zones as $area_code => $arr ) {
+				$zone = $arr['time_zone'];
+				if ( $zone != '' && isset( $deprecated_zones[$zone] ) ) {
+					$this->assertTrue( false, 'Area Code TimeZone Map: Zone is deprecated: ' . $zone . ' Should be: ' . $deprecated_zones[$zone] );
+				}
+			}
 		}
 	}
 
@@ -1559,37 +1629,37 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		$pre_process_dates = TTDate::getReportDates( null, strtotime( '03-Mar-2015 08:00AM' ), false, $uf ); //Sortable dates
 		//var_dump( $pre_process_dates );
-		$this->assertEquals( $pre_process_dates['date_stamp'], '2015-03-03' );
+		$this->assertEquals( '2015-03-03', $pre_process_dates['date_stamp'] );
 
 		TTDate::setDateFormat( 'Y-m-d' );
-		$this->assertEquals( TTDate::getReportDates( 'date_stamp', $pre_process_dates['date_stamp'], true, $uf ), '2015-03-03' );
+		$this->assertEquals( '2015-03-03', TTDate::getReportDates( 'date_stamp', $pre_process_dates['date_stamp'], true, $uf ) );
 
 		TTDate::setDateFormat( 'd-m-y' );
-		$this->assertEquals( TTDate::getReportDates( 'date_stamp', $pre_process_dates['date_stamp'], true, $uf ), '03-03-15' );
+		$this->assertEquals( '03-03-15', TTDate::getReportDates( 'date_stamp', $pre_process_dates['date_stamp'], true, $uf ) );
 	}
 
 	function testDoesRangeSpanMidnight() {
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 5:00PM' ), false ), false );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 11:59:59PM' ), false ), false );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 12:00:00AM' ), false ), false );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '02-Jan-2016 12:00:00AM' ), false ), false );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '02-Jan-2016 1:00:00AM' ), false ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 1:00:00AM' ), strtotime( '01-Jan-2016 8:00AM' ), false ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '03-Jan-2016 1:00:00AM' ), false ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 2:00:00AM' ), strtotime( '01-Jan-2016 2:00:00AM' ), false ), false );
+		$this->assertEquals( false, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 5:00PM' ), false ) );
+		$this->assertEquals( false, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 11:59:59PM' ), false ) );
+		$this->assertEquals( false, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 12:00:00AM' ), false ) );
+		$this->assertEquals( false, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '02-Jan-2016 12:00:00AM' ), false ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '02-Jan-2016 1:00:00AM' ), false ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 1:00:00AM' ), strtotime( '01-Jan-2016 8:00AM' ), false ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '03-Jan-2016 1:00:00AM' ), false ) );
+		$this->assertEquals( false, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 2:00:00AM' ), strtotime( '01-Jan-2016 2:00:00AM' ), false ) );
 
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 12:00:00AM' ), strtotime( '02-Jan-2016 1:00:00AM' ), false ), false );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 12:00:00AM' ), strtotime( '03-Jan-2016 12:00:00AM' ), false ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 12:00AM' ), strtotime( '02-Jan-2016 8:00:00AM' ), false ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 12:00AM' ), strtotime( '03-Jan-2016 8:00:00AM' ), false ), true );
+		$this->assertEquals( false, TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 12:00:00AM' ), strtotime( '02-Jan-2016 1:00:00AM' ), false ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 12:00:00AM' ), strtotime( '03-Jan-2016 12:00:00AM' ), false ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 12:00AM' ), strtotime( '02-Jan-2016 8:00:00AM' ), false ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 12:00AM' ), strtotime( '03-Jan-2016 8:00:00AM' ), false ) );
 
 
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 12:00AM' ), strtotime( '02-Jan-2016 1:00:00AM' ), true ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 12:00AM' ), strtotime( '02-Jan-2016 12:00:00AM' ), true ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 12:00AM' ), strtotime( '03-Jan-2016 12:00:00AM' ), true ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 12:00AM' ), strtotime( '03-Jan-2016 8:00:00AM' ), true ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '02-Jan-2016 12:00:00AM' ), true ), true );
-		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '03-Jan-2016 8:00:00AM' ), true ), true );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 12:00AM' ), strtotime( '02-Jan-2016 1:00:00AM' ), true ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 12:00AM' ), strtotime( '02-Jan-2016 12:00:00AM' ), true ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '02-Jan-2016 12:00AM' ), strtotime( '03-Jan-2016 12:00:00AM' ), true ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 12:00AM' ), strtotime( '03-Jan-2016 8:00:00AM' ), true ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '02-Jan-2016 12:00:00AM' ), true ) );
+		$this->assertEquals( true, TTDate::doesRangeSpanMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '03-Jan-2016 8:00:00AM' ), true ) );
 	}
 
 
@@ -1599,7 +1669,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '02-Jan-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime( '02-Jan-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '02-Jan-2016 8:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 2 );
+		$this->assertCount( 2, $split_range_arr );
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '03-Jan-2016 8:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '01-Jan-2016 8:00AM' ) );
@@ -1608,7 +1678,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '03-Jan-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime( '03-Jan-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '03-Jan-2016 8:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 3 );
+		$this->assertCount( 3, $split_range_arr );
 
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '04-Jan-2016 8:00AM' ) );
@@ -1620,7 +1690,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '04-Jan-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime( '04-Jan-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime( '04-Jan-2016 8:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 4 );
+		$this->assertCount( 4, $split_range_arr );
 
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 8:00PM' ), strtotime( '01-Jan-2016 7:00AM' ), strtotime( '01-Jan-2016 3:00PM' ) );
@@ -1628,7 +1698,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '01-Jan-2016 3:00PM' ) );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime( '01-Jan-2016 3:00PM' ) );
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '01-Jan-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 2 );
+		$this->assertCount( 2, $split_range_arr );
 
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 8:00PM' ), strtotime( '01-Jan-2016 3:00PM' ), strtotime( '01-Jan-2016 9:00PM' ) );
@@ -1636,7 +1706,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '01-Jan-2016 3:00PM' ) );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime( '01-Jan-2016 3:00PM' ) );
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '01-Jan-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 2 );
+		$this->assertCount( 2, $split_range_arr );
 
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 8:00PM' ), strtotime( '01-Jan-2016 9:00AM' ), strtotime( '01-Jan-2016 7:00PM' ) );
@@ -1646,13 +1716,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '01-Jan-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime( '01-Jan-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '01-Jan-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 3 );
+		$this->assertCount( 3, $split_range_arr );
 
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 3:00PM' ), strtotime( '01-Jan-2016 11:00PM' ), strtotime( '01-Jan-2016 12:00AM' ), strtotime( '02-Jan-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '01-Jan-2016 3:00PM' ) );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '01-Jan-2016 11:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 1 );
+		$this->assertCount( 1, $split_range_arr );
 
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '02-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 11:00PM' ), strtotime( '02-Jan-2016 1:00AM' ) );
@@ -1664,7 +1734,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '02-Jan-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime( '02-Jan-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime( '02-Jan-2016 8:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 4 );
+		$this->assertCount( 4, $split_range_arr );
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '02-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 11:00PM' ), strtotime( '01-Jan-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '01-Jan-2016 8:00AM' ) );
@@ -1675,7 +1745,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '02-Jan-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime( '02-Jan-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime( '02-Jan-2016 8:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 4 );
+		$this->assertCount( 4, $split_range_arr );
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '04-Jan-2016 8:00AM' ), strtotime( '01-Jan-2016 11:00PM' ), strtotime( '02-Jan-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '01-Jan-2016 8:00AM' ) );
@@ -1698,7 +1768,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[8]['end_time_stamp'], strtotime( '04-Jan-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[9]['start_time_stamp'], strtotime( '04-Jan-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[9]['end_time_stamp'], strtotime( '04-Jan-2016 8:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 10 );
+		$this->assertCount( 10, $split_range_arr );
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-2016 8:00AM' ), strtotime( '03-Jan-2016 8:00PM' ), strtotime( '01-Jan-2016 9:00AM' ), strtotime( '01-Jan-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '01-Jan-2016 8:00AM' ) );
@@ -1719,7 +1789,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[7]['end_time_stamp'], strtotime( '03-Jan-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[8]['start_time_stamp'], strtotime( '03-Jan-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[8]['end_time_stamp'], strtotime( '03-Jan-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 9 );
+		$this->assertCount( 9, $split_range_arr );
 
 		//start and end only one day apart
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '10-Mar-2016 8:00AM' ), strtotime( '11-Mar-2016 8:00PM' ) );
@@ -1727,16 +1797,16 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '11-Mar-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime( '11-Mar-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '11-Mar-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 2 );
+		$this->assertCount( 2, $split_range_arr );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Force to timezone that observes DST.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Force to timezone that observes DST.
 		//spans daylight savings time in spring
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '13-Mar-2016 8:00AM' ), strtotime( '14-Mar-2016 8:00PM' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '13-Mar-2016 8:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '14-Mar-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime( '14-Mar-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '14-Mar-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 2 );
+		$this->assertCount( 2, $split_range_arr );
 
 		//spans daylight savings time in spring with filter
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '13-Mar-2016 8:00AM' ), strtotime( '14-Mar-2016 8:00PM' ), strtotime( '01-Jan-2016 9:00AM' ), strtotime( '01-Jan-2016 7:00PM' ) );
@@ -1752,7 +1822,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime( '14-Mar-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[5]['start_time_stamp'], strtotime( '14-Mar-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime( '14-Mar-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 6 );
+		$this->assertCount( 6, $split_range_arr );
 
 		//spans daylight savings time in spring with filter where the filter spans 11-2
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '12-Mar-2016 8:00AM' ), strtotime( '13-Mar-2016 4:00AM' ), strtotime( '12-Mar-2016 11:00PM' ), strtotime( '13-Mar-2016 2:00AM' ) );
@@ -1764,7 +1834,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '13-Mar-2016 3:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime( '13-Mar-2016 3:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime( '13-Mar-2016 4:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 4 );
+		$this->assertCount( 4, $split_range_arr );
 
 		//spans daylight savings time in fall
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '6-Nov-2016 8:00AM' ), strtotime( '7-Nov-2016 8:00PM' ) );
@@ -1772,7 +1842,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '7-Nov-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime( '7-Nov-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '7-Nov-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 2 );
+		$this->assertCount( 2, $split_range_arr );
 
 		//spans daylight savings time in fall with filter
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '6-Nov-2016 8:00AM' ), strtotime( '7-Nov-2016 8:00PM' ), strtotime( '01-Jan-2016 9:00AM' ), strtotime( '01-Jan-2016 7:00PM' ) );
@@ -1788,14 +1858,14 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime( '7-Nov-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[5]['start_time_stamp'], strtotime( '7-Nov-2016 7:00PM' ) );
 		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime( '7-Nov-2016 8:00PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 6 );
+		$this->assertCount( 6, $split_range_arr );
 
 		//http://stackoverflow.com/questions/2613338/date-returning-wrong-day-although-the-timestamp-is-correct
 		//fall daylight savings. illustrating the missing hour
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '6-Nov-2016 8:00AM' ), ( strtotime( '6-Nov-2016 1:00AM' ) + 7200 ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '06-Nov-2016 08:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '06-Nov-2016 02:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 1 );
+		$this->assertCount( 1, $split_range_arr );
 
 		//the missing hour shows up in the filter
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '5-Nov-2016 8:00AM' ), ( strtotime( '6-Nov-2016 1:00AM' ) + 7200 ), strtotime( '6-Nov-2016 8:00AM' ), strtotime( '6-Nov-2016 1:00AM' ) );
@@ -1805,7 +1875,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '6-Nov-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime( '6-Nov-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '6-Nov-2016 2:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 3 );
+		$this->assertCount( 3, $split_range_arr );
 
 		//fall daylight savings. illustrating the missing hour
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '5-Nov-2016 8:00AM' ), ( strtotime( '6-Nov-2016 1:00AM' ) + 7200 ), strtotime( '6-Nov-2016 8:00AM' ), ( strtotime( '6-Nov-2016 1:00AM' ) + 3600 ) );
@@ -1815,13 +1885,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '06-Nov-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime( '06-Nov-2016 1:00AM' ) );
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '06-Nov-2016 2:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 3 );
+		$this->assertCount( 3, $split_range_arr );
 
 		//spring daylight savings. illustrating the extra hour
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '13-Mar-2016 8:00AM' ), ( strtotime( '13-Mar-2016 12:00AM' ) + 7200 ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '13-Mar-2016 8:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '13-Mar-2016 3:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 1 );
+		$this->assertCount( 1, $split_range_arr );
 
 		//spring daylight savings. illustrating the extra hour
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '11-Mar-2016 8:00AM' ), ( strtotime( '13-Mar-2016 12:00AM' ) + 7200 ), strtotime( '13-Mar-2016 4:00AM' ), ( strtotime( '13-Mar-2016 1:00AM' ) + 7200 ) );
@@ -1833,7 +1903,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '13-Mar-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime( '13-Mar-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime( '13-Mar-2016 3:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 4 );
+		$this->assertCount( 4, $split_range_arr );
 
 		//leap year illustration
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '28-Feb-2016 8:00AM' ), ( strtotime( '1-Mar-2016 12:00AM' ) + 7200 ), strtotime( '28-Feb-2016 4:00AM' ), ( strtotime( '28-Feb-2016 1:00AM' ) + 7200 ) );
@@ -1847,7 +1917,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime( '01-Mar-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[4]['start_time_stamp'], strtotime( '01-Mar-2016 12:00AM' ) );
 		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime( '01-Mar-2016 2:00AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 5 );
+		$this->assertCount( 5, $split_range_arr );
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( 'Tue, 03 May 2016 06:00:00 -0600' ), strtotime( 'Thu, 05 May 2016 15:00:00 -0600' ), strtotime( 'Tue, 03 May 2016 08:00:00 -0600' ), strtotime( 'Tue, 03 May 2016 15:00:00 -0600' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '03 May 2016 06:00:00 -0600' ) );
@@ -1866,7 +1936,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[6]['end_time_stamp'], strtotime( '05 May 2016 08:00:00 -0600' ) );
 		$this->assertEquals( $split_range_arr[7]['start_time_stamp'], strtotime( '05 May 2016 08:00:00 -0600' ) );
 		$this->assertEquals( $split_range_arr[7]['end_time_stamp'], strtotime( '05 May 2016 15:00:00 -0600' ) );
-		$this->assertEquals( count( $split_range_arr ), 8 );
+		$this->assertCount( 8, $split_range_arr );
 
 		//multi-year test
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '15-Jun-2010 8:00AM' ), strtotime( '30-Aug-2016 5:00PM' ), strtotime( '25-Jun-2010 2:00AM' ), strtotime( '26-Aug-2016 10:00PM' ) );
@@ -1891,7 +1961,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[6803]['end_time_stamp'], strtotime( '2016-08-30 02:00:00am' ) );
 		$this->assertEquals( $split_range_arr[6804]['start_time_stamp'], strtotime( '2016-08-30 02:00:00am' ) );
 		$this->assertEquals( $split_range_arr[6804]['end_time_stamp'], strtotime( '2016-08-30 05:00:00pm' ) );
-		$this->assertEquals( count( $split_range_arr ), 6805 );
+		$this->assertCount( 6805, $split_range_arr );
 
 		//#2329 <24 hrs between with midnight filter provided.
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '04-Jul-17 9:55 PM' ), strtotime( '05-Jul-17 1:00 AM' ), strtotime( '04-Jul-17 12:00 AM' ), strtotime( '04-Jul-17 10:00 PM' ) );
@@ -1901,7 +1971,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '05-Jul-17 12:00 AM' ) );
 		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime( '05-Jul-17 12:00 AM' ) );
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '05-Jul-17 1:00 AM' ) );
-		$this->assertEquals( count( $split_range_arr ), 3 );
+		$this->assertCount( 3, $split_range_arr );
 
 		//same day
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '04-Jul-17 9:55 PM' ), strtotime( '04-Jul-17 11:00 PM' ), strtotime( '04-Jul-17 10:00 PM' ), strtotime( '04-Jul-17 10:50 PM' ) );
@@ -1911,7 +1981,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '04-Jul-17 10:50 PM' ) );
 		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime( '04-Jul-17 10:50 PM' ) );
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '04-Jul-17 11:00 PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 3 );
+		$this->assertCount( 3, $split_range_arr );
 
 		//next day < 24hrs between
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '04-Jul-17 9:55 PM' ), strtotime( '05-Jul-17 8:00 PM' ), strtotime( '04-Jul-17 10:00 PM' ), strtotime( '04-Jul-17 10:50 PM' ) );
@@ -1923,7 +1993,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '05-Jul-17 12:00 AM' ) );
 		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime( '05-Jul-17 12:00 AM' ) );
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime( '05-Jul-17 8:00 PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 4 );
+		$this->assertCount( 4, $split_range_arr );
 
 
 		//next day < 24hrs between reversed filters (greater, then less.)
@@ -1936,7 +2006,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '05-Jul-17 12:00 AM' ) );
 		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime( '05-Jul-17 12:00 AM' ) );
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime( '05-Jul-17 8:00 PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 4 );
+		$this->assertCount( 4, $split_range_arr );
 
 
 		//very small window
@@ -1947,19 +2017,19 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime( '04-Jul-17 09:57 PM' ) );
 		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime( '04-Jul-17 09:57 PM' ) );
 		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime( '04-Jul-17 09:58 PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 3 );
+		$this->assertCount( 3, $split_range_arr );
 
 		//with filter dates after the end time
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-17 08:00AM' ), strtotime( '01-Jan-17 05:00 PM' ), strtotime( '02-Jan-17 06:00 PM' ), strtotime( '02-Jan-17 07:00 PM' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '01-Jan-17 08:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '01-Jan-17 05:00 PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 1 );
+		$this->assertCount( 1, $split_range_arr );
 
 		//with filter dates before the start time.
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime( '01-Jan-17 08:00AM' ), strtotime( '01-Jan-17 05:00 PM' ), strtotime( '02-Jan-17 03:00 AM' ), strtotime( '02-Jan-17 05:00 am' ) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime( '01-Jan-17 08:00AM' ) );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime( '01-Jan-17 05:00 PM' ) );
-		$this->assertEquals( count( $split_range_arr ), 1 );
+		$this->assertCount( 1, $split_range_arr );
 	}
 
 	/**
@@ -1968,71 +2038,71 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	function testDSTMagic() {
 		TTDate::setTimeFormat( 'g:i A T' );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Force to timezone that observes DST.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Force to timezone that observes DST.
 		$time_stamp = 1457859600; //13-Mar-2016 1:00AM
 		$this->assertEquals( strtotime( '13-Mar-2016 1:00AM' ), $time_stamp );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', $time_stamp ), '13-Mar-16 1:00 AM PST' );
+		$this->assertEquals( '13-Mar-16 1:00 AM PST', TTDate::getDate( 'DATE+TIME', $time_stamp ) );
 
 		$this->assertEquals( strtotime( '13-Mar-2016 2:00AM' ), ( $time_stamp + 3600 ) );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 3:00 AM PDT' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ), '14-Mar-16 1:00 AM PDT' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp + 86400 ) ), '14-Mar-16 2:00 AM PDT' );
+		$this->assertEquals( '13-Mar-16 3:00 AM PDT', TTDate::getDate( 'DATE+TIME', ( $time_stamp + 3600 ) ) );
+		$this->assertEquals( '14-Mar-16 1:00 AM PDT', TTDate::getDate( 'DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ) );
+		$this->assertEquals( '14-Mar-16 2:00 AM PDT', TTDate::getDate( 'DATE+TIME', ( $time_stamp + 86400 ) ) );
 
 		TTDate::setTimeFormat( 'g:i A' );
 		TTDate::setTimeZone( 'Etc/GMT+8', true ); //Force to timezone that does not observe DST.
 		$time_stamp = 1457859600; //13-Mar-2016 1:00AM
 		$this->assertEquals( strtotime( '13-Mar-2016 1:00AM PST' ), $time_stamp );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', $time_stamp ), '13-Mar-16 1:00 AM' ); //Was: GMT+8 - But some versions of PHP return "-08", so just ignore the timezone setting for this case.
+		$this->assertEquals( '13-Mar-16 1:00 AM', TTDate::getDate( 'DATE+TIME', $time_stamp ) ); //Was: GMT+8 - But some versions of PHP return "-08", so just ignore the timezone setting for this case.
 
 		$this->assertEquals( strtotime( '13-Mar-2016 2:00AM PST' ), ( $time_stamp + 3600 ) );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 2:00 AM' ); //Was: GMT+8
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ), '14-Mar-16 1:00 AM' ); //Was: GMT+8
+		$this->assertEquals( '13-Mar-16 2:00 AM', TTDate::getDate( 'DATE+TIME', ( $time_stamp + 3600 ) ) );                         //Was: GMT+8
+		$this->assertEquals( '14-Mar-16 1:00 AM', TTDate::getDate( 'DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ) ); //Was: GMT+8
 
 		TTDate::setTimeFormat( 'g:i A T' );
-		TTDate::setTimeZone( 'PST8PDT', true ); //Force to timezone that observes DST.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Force to timezone that observes DST.
 		$time_stamp = 1478419200; //13-Mar-2016 1:00AM
 		$this->assertEquals( strtotime( '06-Nov-2016 1:00AM' ), $time_stamp );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', $time_stamp ), '06-Nov-16 1:00 AM PDT' );
+		$this->assertEquals( '06-Nov-16 1:00 AM PDT', TTDate::getDate( 'DATE+TIME', $time_stamp ) );
 
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp + 3600 ) ), '06-Nov-16 1:00 AM PST' );
+		$this->assertEquals( '06-Nov-16 1:00 AM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp + 3600 ) ) );
 
 		$this->assertEquals( strtotime( '06-Nov-2016 2:00AM' ), ( $time_stamp + 7200 ) );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp + 7200 ) ), '06-Nov-16 2:00 AM PST' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ), '07-Nov-16 1:00 AM PST' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp + 86400 ) ), '07-Nov-16 12:00 AM PST' );
+		$this->assertEquals( '06-Nov-16 2:00 AM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp + 7200 ) ) );
+		$this->assertEquals( '07-Nov-16 1:00 AM PST', TTDate::getDate( 'DATE+TIME', TTDate::incrementDate( $time_stamp, 1, 'day' ) ) );
+		$this->assertEquals( '07-Nov-16 12:00 AM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp + 86400 ) ) );
 
 
 		//http://stackoverflow.com/questions/2613338/date-returning-wrong-day-although-the-timestamp-is-correct
 		//illustrating that +86400 will not always give you tomorrow.
 		$time_stamp = strtotime( '05-Nov-2016 12:00AM' );
 		$time_stamp += 86400;
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '06-Nov-16 12:00 AM PDT' ); //normal operation
+		$this->assertEquals( '06-Nov-16 12:00 AM PDT', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //normal operation
 		$time_stamp += 86400;
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '06-Nov-16 11:00 PM PST' ); //extra day!!!
+		$this->assertEquals( '06-Nov-16 11:00 PM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //extra day!!!
 		$time_stamp += 86400;
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '07-Nov-16 11:00 PM PST' ); //normal operation
+		$this->assertEquals( '07-Nov-16 11:00 PM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //normal operation
 
 		//and the same for fall daylight savings
 		$time_stamp = strtotime( '15-Mar-2016 12:00AM' );
 		$time_stamp -= 86400;
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '14-Mar-16 12:00 AM PDT' ); //normal operation
+		$this->assertEquals( '14-Mar-16 12:00 AM PDT', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //normal operation
 		$time_stamp -= 86400;
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '12-Mar-16 11:00 PM PST' ); //missing day!!! where is 13th?
+		$this->assertEquals( '12-Mar-16 11:00 PM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //missing day!!! where is 13th?
 		$time_stamp -= 86400;
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '11-Mar-16 11:00 PM PST' ); //normal operation
+		$this->assertEquals( '11-Mar-16 11:00 PM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //normal operation
 
 
 		//illustrating that +86400 will not always give you tomorrow, but the middle day epoch will dodge the issue.
 		//if we do all the math on the middle of day epoch and continually force it back to noon we can avoid problems with dst
 		$time_stamp = TTDate::getMiddleDayEpoch( strtotime( '04-Nov-2016 12:00AM' ) );
 		$time_stamp = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $time_stamp ), 1, 'day' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '05-Nov-16 12:00 PM PDT' ); //normal operation
+		$this->assertEquals( '05-Nov-16 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //normal operation
 		$time_stamp = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $time_stamp ), 1, 'day' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '06-Nov-16 12:00 PM PST' ); //normal operation
+		$this->assertEquals( '06-Nov-16 12:00 PM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //normal operation
 		$time_stamp = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $time_stamp ), 1, 'day' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '07-Nov-16 12:00 PM PST' ); //normal operation
+		$this->assertEquals( '07-Nov-16 12:00 PM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //normal operation
 		$time_stamp = TTDate::incrementDate( TTDate::getMiddleDayEpoch( $time_stamp ), 1, 'day' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ), '08-Nov-16 12:00 PM PST' ); //normal operation
+		$this->assertEquals( '08-Nov-16 12:00 PM PST', TTDate::getDate( 'DATE+TIME', ( $time_stamp ) ) ); //normal operation
 	}
 
 	function testCalendarArr() {
@@ -2227,7 +2297,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testIncrementDate() {
-		TTDate::setTimeZone( 'PST8PDT', true ); //Force to timezone that observes DST.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Force to timezone that observes DST.
 
 		//Increment date across DST switch-over
 		$this->assertEquals( TTDate::incrementDate( strtotime( '09-Mar-2019 12:00:00 PM' ), 1, 'day' ), strtotime( '10-Mar-2019 12:00:00 PM' ) );
@@ -2247,7 +2317,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testDatePeriodGenerator() {
-		TTDate::setTimeZone( 'PST8PDT', true ); //Force to timezone that observes DST.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Force to timezone that observes DST.
 
 		//Test original loop code vs. new loop code.
 		$original_date_arr = $new_date_arr = [];
@@ -2255,34 +2325,34 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		for ( $date = TTDate::getMiddleDayEpoch( strtotime( '27-Oct-19 12:00 PM' ) ); $date < strtotime( '28-Oct-19 11:59:59 PM' ); $date += 86400 ) {
 			switch ( $x ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '27-Oct-19 12:00 PM PDT' );
+					$this->assertEquals( '27-Oct-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '28-Oct-19 12:00 PM PDT' );
+					$this->assertEquals( '28-Oct-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 
 			$original_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 2 );
+		$this->assertEquals( 2, $x );
 
 		$period = TTDate::getDatePeriod( TTDate::getMiddleDayEpoch( strtotime( '27-Oct-19 12:00 PM' ) ), strtotime( '28-Oct-19 11:59:59 PM' ), 'P1D', false );
 		$x = 0;
 		foreach ( $period as $i => $date ) {
 			switch ( $x ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '27-Oct-19 12:00 PM PDT' );
+					$this->assertEquals( '27-Oct-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '28-Oct-19 12:00 PM PDT' );
+					$this->assertEquals( '28-Oct-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 
 			$new_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 2 );
+		$this->assertEquals( 2, $x );
 		$this->assertEquals( $original_date_arr, $new_date_arr );
 
 		//Test original loop code vs. new loop code.
@@ -2291,28 +2361,28 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		for ( $date = TTDate::getMiddleDayEpoch( strtotime( '27-Oct-19 12:00 AM' ) ); $date < strtotime( '28-Oct-19 12:00 PM' ); $date += 86400 ) {
 			switch ( $x ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '27-Oct-19 12:00 PM PDT' );
+					$this->assertEquals( '27-Oct-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 
 			$original_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 1 );
+		$this->assertEquals( 1, $x );
 
 		$period = TTDate::getDatePeriod( TTDate::getMiddleDayEpoch( strtotime( '27-Oct-19 12:00 AM' ) ), strtotime( '28-Oct-19 12:00 PM' ), 'P1D', false );
 		$x = 0;
 		foreach ( $period as $i => $date ) {
 			switch ( $x ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '27-Oct-19 12:00 PM PDT' );
+					$this->assertEquals( '27-Oct-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 
 			$new_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 1 );
+		$this->assertEquals( 1, $x );
 		$this->assertEquals( $original_date_arr, $new_date_arr );
 
 
@@ -2322,40 +2392,40 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		for ( $date = ( TTDate::getMiddleDayEpoch( strtotime( '20-Nov-2018 00:00:00' ) ) - 86400 ); $date <= ( TTDate::getMiddleDayEpoch( strtotime( '20-Nov-2018 23:59:59' ) ) + 86400 ); $date += 86400 ) {
 			switch ( $x ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '19-Nov-18 12:00 PM PST' );
+					$this->assertEquals( '19-Nov-18 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '20-Nov-18 12:00 PM PST' );
+					$this->assertEquals( '20-Nov-18 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 2:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '21-Nov-18 12:00 PM PST' );
+					$this->assertEquals( '21-Nov-18 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 
 			$original_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 3 );
+		$this->assertEquals( 3, $x );
 
 		$period = TTDate::getDatePeriod( ( TTDate::getMiddleDayEpoch( strtotime( '20-Nov-2018 00:00:00' ) ) - 86400 ), ( TTDate::getMiddleDayEpoch( strtotime( '20-Nov-2018 23:59:59' ) ) + 86400 ) );
 		$x = 0;
 		foreach ( $period as $i => $date ) {
 			switch ( $x ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '19-Nov-18 12:00 PM PST' );
+					$this->assertEquals( '19-Nov-18 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '20-Nov-18 12:00 PM PST' );
+					$this->assertEquals( '20-Nov-18 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 2:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '21-Nov-18 12:00 PM PST' );
+					$this->assertEquals( '21-Nov-18 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 
 			$new_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 3 );
+		$this->assertEquals( 3, $x );
 		$this->assertEquals( $original_date_arr, $new_date_arr );
 
 
@@ -2366,7 +2436,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 			$original_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 4 ); //4 iterations is *incorrect* due to DST
+		$this->assertEquals( 4, $x ); //4 iterations is *incorrect* due to DST
 
 		$period = TTDate::getDatePeriod( ( TTDate::getMiddleDayEpoch( strtotime( '09-Mar-2019 12:00:00 PM' ) ) - 86400 ), ( TTDate::getMiddleDayEpoch( strtotime( '11-Mar-2019 12:00:00 PM' ) ) + 86400 ) );
 		$x = 0;
@@ -2374,7 +2444,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 			$new_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 5 ); //5 iterations is correct due to DST
+		$this->assertEquals( 5, $x ); //5 iterations is correct due to DST
 
 		array_pop( $new_date_arr );
 		$this->assertEquals( $original_date_arr, $new_date_arr );
@@ -2387,7 +2457,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 			$original_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 3 ); //3 iterations is *correct* due to DST
+		$this->assertEquals( 3, $x ); //3 iterations is *correct* due to DST
 
 		//$period = TTDate::getDatePeriod( (TTDate::getMiddleDayEpoch(strtotime('03-Nov-2013 00:00:00')) - 86400), (TTDate::getMiddleDayEpoch( strtotime('03-Nov-2013 10:00:00') ) + 86400) ); //This only returns 2 days.
 		$period = TTDate::getDatePeriod( TTDate::incrementDate( strtotime( '03-Nov-2013 00:00:00' ), -1, 'day' ), TTDate::incrementDate( strtotime( '03-Nov-2013 10:00:00' ), 1, 'day' ) );
@@ -2395,20 +2465,20 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		foreach ( $period as $i => $date ) {
 			switch ( $i ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-13 12:00 AM PDT' );
+					$this->assertEquals( '02-Nov-13 12:00 AM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-13 12:00 AM PDT' );
+					$this->assertEquals( '03-Nov-13 12:00 AM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 2:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '04-Nov-13 12:00 AM PST' );
+					$this->assertEquals( '04-Nov-13 12:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 
 			$new_date_arr[] = $x;
 			$x++;
 		}
-		$this->assertEquals( $x, 3 ); //3 iterations is correct due to DST
+		$this->assertEquals( 3, $x ); //3 iterations is correct due to DST
 
 		$this->assertEquals( $original_date_arr, $new_date_arr );
 
@@ -2418,43 +2488,43 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		foreach ( $period as $i => $date ) {
 			switch ( $i ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '09-Mar-19 12:00 PM PST' );
+					$this->assertEquals( '09-Mar-19 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '10-Mar-19 12:00 PM PDT' );
+					$this->assertEquals( '10-Mar-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 			$x++;
 		}
-		$this->assertEquals( $x, 2 );
+		$this->assertEquals( 2, $x );
 
 		$period = TTDate::getDatePeriod( strtotime( '09-Mar-2019 12:00:00 PM' ), strtotime( '10-Mar-2019 12:00:01 PM' ) );
 		$x = 0;
 		foreach ( $period as $i => $date ) {
 			switch ( $i ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '09-Mar-19 12:00 PM PST' );
+					$this->assertEquals( '09-Mar-19 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '10-Mar-19 12:00 PM PDT' );
+					$this->assertEquals( '10-Mar-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 			$x++;
 		}
-		$this->assertEquals( $x, 2 );
+		$this->assertEquals( 2, $x );
 
 
 		$period = TTDate::getDatePeriod( strtotime( '09-Mar-2019 12:00:00 PM' ), strtotime( '11-Mar-2019 12:00:00 PM' ) );
 		foreach ( $period as $i => $date ) {
 			switch ( $i ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '09-Mar-19 12:00 PM PST' );
+					$this->assertEquals( '09-Mar-19 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '10-Mar-19 12:00 PM PDT' );
+					$this->assertEquals( '10-Mar-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 2:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '11-Mar-19 12:00 PM PDT' );
+					$this->assertEquals( '11-Mar-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 		}
@@ -2463,13 +2533,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		foreach ( $period as $i => $date ) {
 			switch ( $i ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '09-Mar-19 12:00 AM PST' );
+					$this->assertEquals( '09-Mar-19 12:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '10-Mar-19 12:00 AM PST' );
+					$this->assertEquals( '10-Mar-19 12:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 2:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '11-Mar-19 12:00 AM PDT' );
+					$this->assertEquals( '11-Mar-19 12:00 AM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 		}
@@ -2479,13 +2549,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		foreach ( $period as $i => $date ) {
 			switch ( $i ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 12:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 12:00 PM PST' );
+					$this->assertEquals( '03-Nov-19 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 2:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '04-Nov-19 12:00 PM PST' );
+					$this->assertEquals( '04-Nov-19 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 		}
@@ -2494,13 +2564,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		foreach ( $period as $i => $date ) {
 			switch ( $i ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 12:00 AM PDT' );
+					$this->assertEquals( '02-Nov-19 12:00 AM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 12:00 AM PDT' );
+					$this->assertEquals( '03-Nov-19 12:00 AM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 2:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '04-Nov-19 12:00 AM PST' );
+					$this->assertEquals( '04-Nov-19 12:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 		}
@@ -2509,126 +2579,126 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		foreach ( $period as $i => $date ) {
 			switch ( $i ) {
 				case 0:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 12:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 12:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 1:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 1:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 1:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 2:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 2:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 2:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 3:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 3:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 3:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 4:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 4:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 4:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 5:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 5:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 5:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 6:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 6:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 6:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 7:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 7:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 7:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 8:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 8:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 8:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 9:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 9:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 9:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 10:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 10:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 10:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 11:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '02-Nov-19 11:00 PM PDT' );
+					$this->assertEquals( '02-Nov-19 11:00 PM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 12:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 12:00 AM PDT' );
+					$this->assertEquals( '03-Nov-19 12:00 AM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 13:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 1:00 AM PDT' );
+					$this->assertEquals( '03-Nov-19 1:00 AM PDT', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 14:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 2:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 2:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 15:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 3:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 3:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 16:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 4:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 4:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 17:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 5:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 5:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 18:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 6:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 6:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 19:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 7:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 7:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 20:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 8:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 8:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 21:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 9:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 9:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 22:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 10:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 10:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 23:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 11:00 AM PST' );
+					$this->assertEquals( '03-Nov-19 11:00 AM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 				case 24:
-					$this->assertEquals( TTDate::getDate( 'DATE+TIME', $date ), '03-Nov-19 12:00 PM PST' );
+					$this->assertEquals( '03-Nov-19 12:00 PM PST', TTDate::getDate( 'DATE+TIME', $date ) );
 					break;
 			}
 		}
 	}
 
 	function testDateOfNextQuarter() {
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '01-Apr-19 12:00:00' ), 1, 1 ) ), '01-Jul-19 12:00 PM -08' );
+		$this->assertEquals( '01-Jul-19 12:00 PM -08', TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '01-Apr-19 12:00:00' ), 1, 1 ) ) );
 
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '11-Sep-1981 12:00:00' ), 3, 1 ) ), '03-Oct-81 12:00 PM -08' );
+		$this->assertEquals( '03-Oct-81 12:00 PM -08', TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '11-Sep-1981 12:00:00' ), 3, 1 ) ) );
 
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '31-Jan-2019 12:00:00' ), 31, 1 ) ), '30-Apr-19 12:00 PM -08' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '30-Apr-2019 12:00:00' ), 31, 1 ) ), '31-Jul-19 12:00 PM -08' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '31-Jul-2019 12:00:00' ), 31, 1 ) ), '31-Oct-19 12:00 PM -08' );
-		$this->assertEquals( TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '31-Oct-2019 12:00:00' ), 31, 1 ) ), '31-Jan-20 12:00 PM -08' );
+		$this->assertEquals( '30-Apr-19 12:00 PM -08', TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '31-Jan-2019 12:00:00' ), 31, 1 ) ) );
+		$this->assertEquals( '31-Jul-19 12:00 PM -08', TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '30-Apr-2019 12:00:00' ), 31, 1 ) ) );
+		$this->assertEquals( '31-Oct-19 12:00 PM -08', TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '31-Jul-2019 12:00:00' ), 31, 1 ) ) );
+		$this->assertEquals( '31-Jan-20 12:00 PM -08', TTDate::getDate( 'DATE+TIME', TTDate::getDateOfNextQuarter( strtotime( '31-Oct-2019 12:00:00' ), 31, 1 ) ) );
 	}
 
 	function testGetDateArray() {
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ) ); //No DayOfWeek filter.
-		$this->assertEquals( count( $date_arr ), 31 );
+		$this->assertCount( 31, $date_arr );
 
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ), false ); //No DayOfWeek filter.
-		$this->assertEquals( count( $date_arr ), 31 );
+		$this->assertCount( 31, $date_arr );
 
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ), 0 ); //Filter Sundays
-		$this->assertEquals( count( $date_arr ), 4 );
+		$this->assertCount( 4, $date_arr );
 		$this->assertEquals( $date_arr[0], strtotime( '04-Dec-2016' ) );
 		$this->assertEquals( $date_arr[1], strtotime( '11-Dec-2016' ) );
 		$this->assertEquals( $date_arr[2], strtotime( '18-Dec-2016' ) );
 		$this->assertEquals( $date_arr[3], strtotime( '25-Dec-2016' ) );
 
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ), 1 ); //Filter Mondays
-		$this->assertEquals( count( $date_arr ), 4 );
+		$this->assertCount( 4, $date_arr );
 
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ), 2 ); //Filter Tuesdays
-		$this->assertEquals( count( $date_arr ), 4 );
+		$this->assertCount( 4, $date_arr );
 
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ), 3 ); //Filter Wednesday
-		$this->assertEquals( count( $date_arr ), 4 );
+		$this->assertCount( 4, $date_arr );
 
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ), 4 ); //Filter Thursdays
-		$this->assertEquals( count( $date_arr ), 5 );
+		$this->assertCount( 5, $date_arr );
 
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ), 5 ); //Filter Fridays
-		$this->assertEquals( count( $date_arr ), 5 );
+		$this->assertCount( 5, $date_arr );
 
 		$date_arr = TTDate::getDateArray( strtotime( '01-Dec-2016' ), strtotime( '31-Dec-2016' ), 6 ); //Filter Saturdays
-		$this->assertEquals( count( $date_arr ), 5 );
+		$this->assertCount( 5, $date_arr );
 		$this->assertEquals( $date_arr[0], strtotime( '03-Dec-2016' ) );
 		$this->assertEquals( $date_arr[1], strtotime( '10-Dec-2016' ) );
 		$this->assertEquals( $date_arr[2], strtotime( '17-Dec-2016' ) );
@@ -2638,7 +2708,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 	function testIsConsecutiveDays() {
 		//Use timezone that observes DST.
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		//Spring DST change
 		$date_array = [
@@ -2646,7 +2716,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 				strtotime( 'Sat, 11 Mar 2017 00:00:00 -0800' ),
 				strtotime( 'Sun, 12 Mar 2017 00:00:00 -0700' ),
 		];
-		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), true );
+		$this->assertEquals( true, TTDate::isConsecutiveDays( $date_array ) );
 
 
 		$date_array = [
@@ -2654,7 +2724,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 				strtotime( 'Sat, 10 Mar 2017 00:00:00 -0800' ),
 				strtotime( 'Sun, 12 Mar 2017 00:00:00 -0700' ),
 		];
-		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), false );
+		$this->assertEquals( false, TTDate::isConsecutiveDays( $date_array ) );
 
 
 		$date_array = [
@@ -2662,7 +2732,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 				strtotime( 'Sat, 11 Mar 2017 00:00:00 -0800' ),
 				strtotime( 'Sun, 12 Mar 2017 00:00:00 -0700' ),
 		];
-		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), false );
+		$this->assertEquals( false, TTDate::isConsecutiveDays( $date_array ) );
 
 		//FALL DST change.
 		$date_array = [
@@ -2671,7 +2741,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 				//1509865200, //strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 00:00:00 -0800
 				1509912000, //strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 12:00:00 -0800
 		];
-		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), true );
+		$this->assertEquals( true, TTDate::isConsecutiveDays( $date_array ) );
 
 		$date_array = [
 				1509692400, //strtotime('Fri, 03 Nov 2017 00:00:00 -0700'), //1509692400=Fri, 03 Nov 2017 00:00:00 -0700
@@ -2679,7 +2749,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 				1509865200, //strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 00:00:00 -0800
 				//1509912000, //strtotime('Sun, 05 Nov 2017 00:00:00 -0800'), //1509912000=Sun, 05 Nov 2017 12:00:00 -0800
 		];
-		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), true );
+		$this->assertEquals( true, TTDate::isConsecutiveDays( $date_array ) );
 
 
 		$date_array = [
@@ -2687,73 +2757,114 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 				strtotime( 'Sat, 04 Nov 2017 00:00:00 -0700' ), //1509778800=Sat, 04 Nov 2017 00:00:00 -0700
 				strtotime( 'Sun, 05 Nov 2017 00:00:00 -0800' ), //1509912000=Sun, 05 Nov 2017 00:00:00 -0800
 		];
-		$this->assertEquals( TTDate::isConsecutiveDays( $date_array ), true );
+		$this->assertEquals( true, TTDate::isConsecutiveDays( $date_array ) );
 	}
 
 	function testLocationTimeZone() {
 		$upf = TTnew( 'UserPreferenceFactory' ); /** @var UserPreferenceFactory $upf */
 
-		$this->assertEquals( $upf->getLocationTimeZone( 'CA', 'BC' ), 'PST8PDT' );
+		$this->assertEquals( 'America/Vancouver', $upf->getLocationTimeZone( 'CA', 'BC' ) );
 
-		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'WA' ), 'PST8PDT' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'WA', '2065555555' ), 'PST8PDT' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'NY' ), 'EST5EDT' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'NY', '2065555555' ), 'EST5EDT' ); //Province doesn't match, so it uses that instead.
+		$this->assertEquals( 'America/Los_Angeles', $upf->getLocationTimeZone( 'US', 'WA' ) );
+		$this->assertEquals( 'America/Los_Angeles', $upf->getLocationTimeZone( 'US', 'WA', '2065555555' ) );
+		$this->assertEquals( 'America/New_York', $upf->getLocationTimeZone( 'US', 'NY' ) );
+		$this->assertEquals( 'America/New_York', $upf->getLocationTimeZone( 'US', 'NY', '2065555555' ) ); //Province doesn't match, so it uses that instead.
 
-		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'FL', '8135555555' ), 'EST5EDT' ); //Same state with different timezones based on phone number.
-		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'FL', '8505555555' ), 'CST6CDT' ); //Same state with different timezones based on phone number.
+		$this->assertEquals( 'America/New_York', $upf->getLocationTimeZone( 'US', 'FL', '8135555555' ) ); //Same state with different timezones based on phone number.
+		$this->assertEquals( 'America/Chicago', $upf->getLocationTimeZone( 'US', 'FL', '8505555555' ) );  //Same state with different timezones based on phone number.
 
-		$this->assertEquals( $upf->getLocationTimeZone( 'AG', '' ), 'America/Antigua' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'AG', '00' ), 'America/Antigua' );
+		$this->assertEquals( 'America/Antigua', $upf->getLocationTimeZone( 'AG', '' ) );
+		$this->assertEquals( 'America/Antigua', $upf->getLocationTimeZone( 'AG', '00' ) );
 
-		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '' ), 'America/Nassau' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '', '2525555555' ), 'America/Nassau' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '00', '2525555555' ), 'America/Nassau' );
+		$this->assertEquals( 'America/Nassau', $upf->getLocationTimeZone( 'BS', '' ) );
+		$this->assertEquals( 'America/Nassau', $upf->getLocationTimeZone( 'BS', '', '2525555555' ) );
+		$this->assertEquals( 'America/Nassau', $upf->getLocationTimeZone( 'BS', '00', '2525555555' ) );
 	}
 
 	function testISODateParsing() {
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
-		$this->assertEquals( TTDate::getISODateStamp( strtotime( '31-Jan-2019' ) ), '2019-01-31' );
+		$this->assertEquals( '2019-01-31', TTDate::getISODateStamp( strtotime( '31-Jan-2019' ) ) );
 		$test_date = strtotime( TTDate::getISODateStamp( strtotime( '31-Jan-2019' ) ) );
-		$this->assertEquals( TTDate::getISODateStamp( $test_date ), '2019-01-31' );
+		$this->assertEquals( '2019-01-31', TTDate::getISODateStamp( $test_date ) );
 
 		$test_date = TTDate::getISODateStamp( strtotime( '31-Jan-2019' ) ); //As if we are passing a string date through an API
-		TTDate::setTimeZone( 'PST8PDT', true ); //Change timezone to something different as its an API server.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Change timezone to something different as its an API server.
 		$this->assertEquals( strtotime( $test_date ), strtotime( '31-Jan-2019' ) ); //Parse string date to the same value on the API server.
 
 
-		TTDate::setTimeZone( 'EST5EDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/New_York', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
-		$this->assertEquals( TTDate::getISOTimeStamp( strtotime( '31-Jan-2019 22:22:22' ) ), 'Thu, 31 Jan 2019 22:22:22 -0500' );
+		$this->assertEquals( 'Thu, 31 Jan 2019 22:22:22 -0500', TTDate::getISOTimeStamp( strtotime( '31-Jan-2019 22:22:22' ) ) );
 		$test_date = strtotime( TTDate::getISOTimeStamp( strtotime( '31-Jan-2019 22:22:22' ) ) );
-		$this->assertEquals( TTDate::getISOTimeStamp( $test_date ), 'Thu, 31 Jan 2019 22:22:22 -0500' );
+		$this->assertEquals( 'Thu, 31 Jan 2019 22:22:22 -0500', TTDate::getISOTimeStamp( $test_date ) );
 
 		$test_date = TTDate::getISOTimeStamp( strtotime( '31-Jan-2019 22:22:22' ) ); //As if we are passing a string date through an API
-		TTDate::setTimeZone( 'PST8PDT', true ); //Change timezone to something different as its an API server.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Change timezone to something different as its an API server.
 		$this->assertEquals( strtotime( $test_date ), strtotime( 'Thu, 31 Jan 2019 22:22:22 -0500' ) ); //Parse string date to the same value on the API server.
 	}
 
 	function testHumanTimeSince() {
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '0.0 sec' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 12:00:02' ), strtotime( '01-Dec-2019 12:00:00' ) ), '2.0 secs' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 11:59:58' ), strtotime( '01-Dec-2019 12:00:00' ) ), '2.0 secs' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 12:01:02' ), strtotime( '01-Dec-2019 12:00:00' ) ), '62.0 secs' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 11:57:02' ), strtotime( '01-Dec-2019 12:00:00' ) ), '3.0 mins' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 09:57:02' ), strtotime( '01-Dec-2019 12:00:00' ) ), '2.0 hrs' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '29-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '48.0 hrs' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '28-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '3.0 days' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '04-Dec-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '3.0 days' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '23-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '8.0 days' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '16-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '2.1 wks' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '4.3 wks' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Aug-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '4.0 mths' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2018 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '12.0 mths' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2017 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '24.0 mths' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2016 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '3.0 yrs' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2000 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '19.0 yrs' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-1905 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '114.0 yrs' );
-		$this->assertEquals( TTDate::getHumanTimeSince( strtotime( '01-Dec-2100 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ), '81.0 yrs' );
+		$this->assertEquals( '0.0 sec', TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '2.0 secs', TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 12:00:02' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '2.0 secs', TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 11:59:58' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '62.0 secs', TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 12:01:02' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '3.0 mins', TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 11:57:02' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '2.0 hrs', TTDate::getHumanTimeSince( strtotime( '01-Dec-2019 09:57:02' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '48.0 hrs', TTDate::getHumanTimeSince( strtotime( '29-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '3.0 days', TTDate::getHumanTimeSince( strtotime( '28-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '3.0 days', TTDate::getHumanTimeSince( strtotime( '04-Dec-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '8.0 days', TTDate::getHumanTimeSince( strtotime( '23-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '2.1 wks', TTDate::getHumanTimeSince( strtotime( '16-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '4.3 wks', TTDate::getHumanTimeSince( strtotime( '01-Nov-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '4.0 mths', TTDate::getHumanTimeSince( strtotime( '01-Aug-2019 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '12.0 mths', TTDate::getHumanTimeSince( strtotime( '01-Dec-2018 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '24.0 mths', TTDate::getHumanTimeSince( strtotime( '01-Dec-2017 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '3.0 yrs', TTDate::getHumanTimeSince( strtotime( '01-Dec-2016 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '19.0 yrs', TTDate::getHumanTimeSince( strtotime( '01-Dec-2000 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '114.0 yrs', TTDate::getHumanTimeSince( strtotime( '01-Dec-1905 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( '81.0 yrs', TTDate::getHumanTimeSince( strtotime( '01-Dec-2100 12:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+	}
+
+	function testTimeStampOverLap() {
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ) ) ); //Exact match
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '02-Dec-2019 8:00:00' ), strtotime( '02-Dec-2019 17:00:00' ) ) );
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 17:05:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) ); //Does not overlap, must be able to end one shift and start a new one at the same time.
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ), strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ) ) ); //Does not overlap, must be able to end one shift and start a new one at the same time.
+
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 01:00:00' ), strtotime( '01-Dec-2019 08:00:00' ) ) ); //Does not overlap, must be able to end one shift and start a new one at the same time.
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 01:00:00' ), strtotime( '01-Dec-2019 08:00:00' ), strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ) ) ); //Does not overlap, must be able to end one shift and start a new one at the same time.
+
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 16:59:59' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 12:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 08:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 07:59:59' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 01:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 01:00:00' ), strtotime( '01-Dec-2019 17:00:01' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 01:00:00' ), strtotime( '01-Dec-2019 12:00:00' ) ) );
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 01:00:00' ), strtotime( '01-Dec-2019 08:00:00' ) ) ); //Does not overlap, must be able to end one shift and start a new one at the same time.
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 01:00:00' ), strtotime( '01-Dec-2019 07:59:59' ) ) );
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 01:00:00' ), strtotime( '01-Dec-2019 07:00:00' ) ) );
+
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 17:00:01' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 20:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 23:00:00' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 23:00:01' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 8:00:00' ), strtotime( '01-Dec-2019 23:59:01' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 16:59:59' ), strtotime( '01-Dec-2019 23:59:01' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 17:00:01' ), strtotime( '01-Dec-2019 23:59:01' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 22:59:59' ), strtotime( '01-Dec-2019 23:59:01' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 23:00:00' ), strtotime( '01-Dec-2019 23:59:01' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '01-Dec-2019 23:00:01' ), strtotime( '01-Dec-2019 23:59:01' ), strtotime( '01-Dec-2019 17:00:00' ), strtotime( '01-Dec-2019 23:00:00' ) ) );
+
+
+		$this->assertEquals( false, TTDate::isTimeOverLap( strtotime( '22-Dec-13 12:00 AM PST' ), strtotime( '22-Dec-13 12:00 AM PST' ), strtotime( '29-Dec-13 12:00 AM PST' ), strtotime( '04-Jan-14 11:59 PM PST' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '22-Dec-13 12:00 AM PST' ), strtotime( '22-Dec-13 12:00 AM PST' ), strtotime( '22-Dec-13 12:00 AM PST' ), strtotime( '28-Dec-13 11:59 PM PST' ) ) );
+		$this->assertEquals( true, TTDate::isTimeOverLap( strtotime( '22-Dec-13 12:00 AM PST' ), strtotime( '28-Dec-13 11:59 PM PST' ), strtotime( '22-Dec-13 12:00 AM PST' ), strtotime( '22-Dec-13 12:00 AM PST' ) ) );
 	}
 }
 

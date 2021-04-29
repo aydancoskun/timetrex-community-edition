@@ -1,18 +1,23 @@
-RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
+class RemittanceSummaryReportViewController extends ReportBaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: ['APIRemittanceSummaryReport', 'APIPayStubEntryAccount'],
+		} );
 
-	initReport: function( options ) {
+		super( options );
+	}
+
+	initReport( options ) {
 		this.script_name = 'RemittanceSummaryReport';
 		this.viewId = 'RemittanceSummaryReport';
 		this.context_menu_name = $.i18n._( 'Remittance Summary' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'RemittanceSummaryReportView.html';
-		this.api = new ( APIFactory.getAPIClass( 'APIRemittanceSummaryReport' ) )();
+		this.api = TTAPI.APIRemittanceSummaryReport;
 		this.include_form_setup = true;
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				form: {
@@ -32,9 +37,9 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	buildFormSetupUI: function() {
+	buildFormSetupUI() {
 
 		var $this = this;
 
@@ -46,11 +51,15 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 		this.edit_view_tabs[3].push( tab3_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		//This Payment (Override)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'this_payment' } );
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'>' + $.i18n._( '(Leave blank to not override)' ) + '</span>' );
+		label = $( '<span class=\'widget-right-label\'>' + $.i18n._( '(Leave blank to not override)' ) + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'This Payment (Override)' ), form_item_input, tab3_column1, '', widgetContainer );
@@ -61,7 +70,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -78,7 +87,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -90,7 +99,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		this.addEditFieldToColumn( $.i18n._( 'Gross Payroll' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Gross Payroll' ) + '\n*' + $.i18n._( 'Must Match T4 Box 14' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Employee/Employer EI Accounts
 		v_box = $( '<div class=\'v-box\'></div>' );
@@ -98,7 +107,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -115,7 +124,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -135,7 +144,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -152,7 +161,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -172,7 +181,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -189,7 +198,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input_1.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -202,10 +211,9 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		v_box.append( form_item );
 
 		this.addEditFieldToColumn( $.i18n._( 'Federal/Provincial Income Tax' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
+	}
 
-	},
-
-	getFormSetupData: function() {
+	getFormSetupData() {
 		var other = {};
 
 		other.this_payment = this.current_edit_record.this_payment;
@@ -228,9 +236,9 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		};
 
 		return other;
-	},
+	}
 
-	setFormSetupData: function( res_data ) {
+	setFormSetupData( res_data ) {
 
 		if ( !res_data ) {
 			this.show_empty_message = true;
@@ -238,7 +246,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 		if ( res_data ) {
 
-			if ( res_data.this_payment) {
+			if ( res_data.this_payment ) {
 				this.edit_view_ui_dic.this_payment.setValue( res_data.this_payment );
 				this.current_edit_record.this_payment = res_data.this_payment;
 			}
@@ -279,4 +287,4 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		}
 	}
 
-} );
+}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -585,17 +585,31 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 			}
 		}
 
-		$additional_order_fields = [ 'schedule_policy_id', 'schedule_policy', 'absence_policy', 'first_name', 'last_name', 'user_status_id', 'group_id', 'group', 'title_id', 'title', 'default_branch_id', 'default_branch', 'default_department_id', 'default_department', 'total_time', 'date_stamp', 'pay_period_id', ];
+		$additional_order_fields = [ 'schedule_policy_id', 'schedule_policy', 'absence_policy', 'first_name', 'last_name', 'user_status_id', 'group_id', 'group', 'title_id', 'title', 'default_branch_id', 'default_branch', 'default_department_id', 'default_department', 'total_time', 'date_stamp', 'pay_period_id', 'j.name', 'k.name' ];
 
 		$sort_column_aliases = [
+				'status'       => 'a.status_id',
 				'first_name'   => 'd.first_name',
 				'last_name'    => 'd.last_name',
+				'user_status'  => 'user_status_id',
+				'branch'       => 'j.name',
+				'department'   => 'k.name',
 				'updated_date' => 'a.updated_date',
 				'created_date' => 'a.created_date',
+				'created_by'   => 'a.created_by',
+				'updated_by'   => 'a.updated_by',
 		];
 
-		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) { //Needed for unit tests to pass when doing pure edition tests.
+			$additional_order_fields = array_merge( [ 'w.name', 'x.name' ], $additional_order_fields );
 
+			$sort_column_aliases = array_merge( [
+														'job'      => 'w.name',
+														'job_item' => 'x.name',
+												], $sort_column_aliases );
+		}
+
+		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == null ) {
 			$order = [ 'a.user_id' => 'asc', 'a.start_time' => 'asc' ];
 			$strict = false;
@@ -605,9 +619,6 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
-		//if ( isset($filter_data['exclude_user_ids']) ) {
-		//	$filter_data['exclude_id'] = $filter_data['exclude_user_ids'];
-		//}
 		if ( isset( $filter_data['exclude_user_ids'] ) ) {
 			$filter_data['exclude_user_id'] = $filter_data['exclude_user_ids'];
 		}

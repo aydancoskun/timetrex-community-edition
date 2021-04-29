@@ -1,27 +1,33 @@
-AccrualViewController = BaseViewController.extend( {
-	el: '#accrual_view_container',
-	type_array: null,
-	_required_files: ['APIAccrualBalance', 'APIAccrual', 'APIUserGroup', 'APIAccrualPolicyAccount', 'APIBranch', 'APIDepartment'],
+class AccrualViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#accrual_view_container',
+			type_array: null,
 
-	user_group_api: null,
-	user_group_array: null,
-	user_type_array: null,
-	system_type_array: null,
-	delete_type_array: null,
-	date_api: null,
+			user_group_api: null,
+			user_group_array: null,
+			user_type_array: null,
+			system_type_array: null,
+			delete_type_array: null,
+			date_api: null,
 
-	edit_enabled: false,
-	delete_enabled: false,
+			edit_enabled: false,
+			delete_enabled: false,
 
-	is_trigger_add: false,
+			is_trigger_add: false,
 
-	sub_view_grid_data: null,
+			sub_view_grid_data: null,
 
-	hide_search_field: false,
+			hide_search_field: false,
 
 //	  parent_filter: null,
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'AccrualEditView.html';
 		this.permission_id = 'accrual';
@@ -31,9 +37,7 @@ AccrualViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Accruals' );
 		this.navigation_label = $.i18n._( 'Accrual' ) + ':';
 
-		this.api = new ( APIFactory.getAPIClass( 'APIAccrual' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
+		this.api = TTAPI.APIAccrual;
 
 		this.initPermission();
 		this.render();
@@ -50,21 +54,20 @@ AccrualViewController = BaseViewController.extend( {
 		}
 		this.setSelectRibbonMenuIfNecessary( 'Accrual' );
 		TTPromise.resolve( 'AccrualViewController', 'init' );
-	},
+	}
 
-	initPermission: function() {
+	initPermission() {
 
-		this._super( 'initPermission' );
+		super.initPermission();
 
 		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
 			this.hide_search_field = false;
 		} else {
 			this.hide_search_field = true;
 		}
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'user_type', null, null, function( res ) {
@@ -86,7 +89,7 @@ AccrualViewController = BaseViewController.extend( {
 			}
 		} );
 
-		this.user_group_api.getUserGroup( '', false, false, {
+		TTAPI.APIUserGroup.getUserGroup( '', false, false, {
 			onResult: function( res ) {
 
 				res = res.getResult();
@@ -100,11 +103,10 @@ AccrualViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -115,7 +117,7 @@ AccrualViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAccrual' ) ),
+			api_class: TTAPI.APIAccrual,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL,
@@ -148,7 +150,7 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.USER,
 				show_search_inputs: true,
@@ -171,7 +173,7 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
+				api_class: TTAPI.APIAccrualPolicyAccount,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
 				show_search_inputs: true,
@@ -206,11 +208,10 @@ AccrualViewController = BaseViewController.extend( {
 			field: 'note'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_accrual_column1, '', null, null, true );
+	}
 
-	},
-
-	buildSearchFields: function() {
-		this._super( 'buildSearchFields' );
+	buildSearchFields() {
+		super.buildSearchFields();
 
 		var default_args = {};
 		default_args.permission_section = 'accrual';
@@ -223,7 +224,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 1,
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -235,7 +236,7 @@ AccrualViewController = BaseViewController.extend( {
 				field: 'accrual_policy_account_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
-				api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
+				api_class: TTAPI.APIAccrualPolicyAccount,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -270,7 +271,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -282,7 +283,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -294,7 +295,7 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
@@ -306,16 +307,16 @@ AccrualViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	setEditViewData: function() {
+	setEditViewData() {
 		//use the user_type_array in edit mode and new mode, use the system_type_array in view mode
 		//this prevents users from choosing type_ids that are for system use only but can see the system type_ids when viewing
 		if ( this.is_viewing ) {
@@ -324,7 +325,7 @@ AccrualViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic.type_id.setSourceData( this.user_type_array );
 		}
 
-		this._super( 'setEditViewData' ); //Set Navigation
+		super.setEditViewData(); //Set Navigation
 
 		if ( !this.sub_view_mode ) {
 			var widget = this.edit_view_ui_dic['user_id'];
@@ -334,9 +335,9 @@ AccrualViewController = BaseViewController.extend( {
 				widget.setAllowMultipleSelection( false );
 			}
 		}
-	},
+	}
 
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 
 		var record_array = [];
 		if ( $.type( records.user_id ) === 'array' ) {
@@ -358,9 +359,9 @@ AccrualViewController = BaseViewController.extend( {
 		}
 
 		return records;
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -380,10 +381,9 @@ AccrualViewController = BaseViewController.extend( {
 		}
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 		column_filter.type_id = true;
 		if ( this.sub_view_mode ) {
@@ -392,15 +392,15 @@ AccrualViewController = BaseViewController.extend( {
 			column_filter.user_id = true;
 		}
 		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
-	},
+	}
 
-	onGridSelectAll: function() {
+	onGridSelectAll() {
 		this.edit_enabled = this.editEnabled();
 		this.delete_enabled = this.deleteEnabled();
 		this.setDefaultMenu();
-	},
+	}
 
-	deleteEnabled: function() {
+	deleteEnabled() {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		if ( grid_selected_id_array.length > 0 ) {
 			for ( var i = grid_selected_id_array.length - 1; i >= 0; i-- ) {
@@ -411,9 +411,9 @@ AccrualViewController = BaseViewController.extend( {
 			}
 		}
 		return false;
-	},
+	}
 
-	editEnabled: function() {
+	editEnabled() {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		if ( grid_selected_id_array.length > 0 ) {
 			for ( var i = grid_selected_id_array.length - 1; i >= 0; i-- ) {
@@ -424,9 +424,9 @@ AccrualViewController = BaseViewController.extend( {
 			}
 		}
 		return false;
-	},
+	}
 
-	onGridSelectRow: function() {
+	onGridSelectRow() {
 
 		var selected_item = null;
 		var grid_selected_id_array = this.getGridSelectIdArray();
@@ -440,9 +440,9 @@ AccrualViewController = BaseViewController.extend( {
 		}
 
 		this.setDefaultMenu();
-	},
+	}
 
-	setDefaultMenuEditIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -456,10 +456,9 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	setDefaultMenuMassEditIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuMassEditIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -473,9 +472,9 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuDeleteIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDeleteIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.deletePermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -489,10 +488,9 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	setEditMenuEditIcon: function( context_btn, pId ) {
+	setEditMenuEditIcon( context_btn, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
 
 			context_btn.addClass( 'invisible-image' );
@@ -506,9 +504,9 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuDeleteIcon: function( context_btn, pId ) {
+	setEditMenuDeleteIcon( context_btn, pId ) {
 		if ( !this.deletePermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -518,9 +516,9 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuDeleteAndNextIcon: function( context_btn, pId ) {
+	setEditMenuDeleteAndNextIcon( context_btn, pId ) {
 		if ( !this.deletePermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -530,9 +528,9 @@ AccrualViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.save_and_continue],
 			include: [
@@ -553,9 +551,9 @@ AccrualViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	getGridSetup: function() {
+	getGridSetup() {
 		var $this = this;
 
 		var grid_setup = {
@@ -584,9 +582,9 @@ AccrualViewController = BaseViewController.extend( {
 		};
 
 		return grid_setup;
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.timesheet:
 				this.onNavigationClick();
@@ -595,16 +593,16 @@ AccrualViewController = BaseViewController.extend( {
 				this.onImportClick();
 				break;
 		}
-	},
+	}
 
-	onImportClick: function() {
+	onImportClick() {
 		var $this = this;
-		IndexViewController.openWizard( 'ImportCSVWizard', 'accrual', function() {
+		IndexViewController.openWizard( 'ImportCSVWizard', 'Accrual', function() {
 			$this.search();
 		} );
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -685,10 +683,9 @@ AccrualViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setEditMenu: function() {
+	setEditMenu() {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
@@ -762,10 +759,9 @@ AccrualViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	onNavigationClick: function() {
+	onNavigationClick() {
 		var $this = this;
 		var filter = { filter_data: {} };
 		var label = this.sub_view_mode ? $.i18n._( 'Accrual Balances' ) : $.i18n._( 'Accruals' );
@@ -789,7 +785,7 @@ AccrualViewController = BaseViewController.extend( {
 				accrual_filter.filter_data = {};
 				accrual_filter.filter_data.id = [selectedId];
 
-				this.api['get' + this.api.key_name]( accrual_filter, {
+				TTAPI.APIAccrual.getAccrual( accrual_filter, {
 					onResult: function( result ) {
 
 						var result_data = result.getResult();
@@ -811,18 +807,17 @@ AccrualViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	getSubViewFilter: function( filter ) {
+	getSubViewFilter( filter ) {
 		if ( this.parent_edit_record && this.parent_edit_record.user_id && this.parent_edit_record.accrual_policy_account_id ) {
 			filter.user_id = this.parent_edit_record.user_id;
 			filter.accrual_policy_account_id = this.parent_edit_record.accrual_policy_account_id;
 		}
 		return filter;
-	},
+	}
 
-	onAddResult: function( result ) {
+	onAddResult( result ) {
 		var $this = this;
 		var result_data = result.getResult();
 
@@ -843,9 +838,9 @@ AccrualViewController = BaseViewController.extend( {
 		$this.current_edit_record = result_data;
 
 		$this.initEditView();
-	},
+	}
 
-	searchDone: function() {
+	searchDone() {
 		var $this = this;
 
 		//When Attendance -> Accrual Balance, New icon is clicked, open the Balance view first, then trigger the New icon to create a new accrual entry from there.
@@ -866,9 +861,9 @@ AccrualViewController = BaseViewController.extend( {
 			}
 		}
 
-		this._super( 'searchDone' );
-	},
-} );
+		super.searchDone();
+	}
+}
 
 AccrualViewController.loadView = function() {
 

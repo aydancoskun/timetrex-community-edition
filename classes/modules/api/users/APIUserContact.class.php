@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -117,7 +117,7 @@ class APIUserContact extends APIFactory {
 		$uclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $uclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $uclf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uclf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $uclf->getRecordCount() );
 
 			$this->setPagerObject( $uclf );
 
@@ -132,10 +132,10 @@ class APIUserContact extends APIFactory {
 
 				$retarr[] = $user_data;
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $uclf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $uclf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->returnHandler( $retarr );
 		}
@@ -209,7 +209,7 @@ class APIUserContact extends APIFactory {
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		$validator = $save_result = $key = false;
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
 				$primary_validator = new Validator();
@@ -262,7 +262,7 @@ class APIUserContact extends APIFactory {
 
 				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == true ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text( 'Attempting to save data... AMF Message ID: ' . $this->getAMFMessageID(), __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( 'Attempting to save data... API Message ID: ' . $this->getAPIMessageID(), __FILE__, __LINE__, __METHOD__, 10 );
 
 					if ( DEMO_MODE == true && $lf->isNew() == false ) { //Allow changing these if DEMO is enabled, but they are adding new records.
 						Debug::Text( 'DEMO Mode ENABLED, disable modifying some data...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -309,10 +309,10 @@ class APIUserContact extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -349,7 +349,7 @@ class APIUserContact extends APIFactory {
 		$validator = $save_result = $key = false;
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -404,10 +404,10 @@ class APIUserContact extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}

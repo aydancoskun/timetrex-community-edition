@@ -1,12 +1,17 @@
-PayStubEntryAccountViewController = BaseViewController.extend( {
-	el: '#pay_stub_entry_account_view_container',
+class PayStubEntryAccountViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#pay_stub_entry_account_view_container',
 
-	_required_files: ['APIPayStubEntryAccount'],
+			type_array: null,
+			status_array: null,
+			accrual_type_array: null
+		} );
 
-	type_array: null,
-	status_array: null,
-	accrual_type_array: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayStubEntryAccountEditView.html';
 		this.permission_id = 'pay_stub_account';
@@ -15,24 +20,23 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_stub_entry_account';
 		this.context_menu_name = $.i18n._( 'Pay Stub Accounts' );
 		this.navigation_label = $.i18n._( 'Pay Stub Account' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) )();
+		this.api = TTAPI.APIPayStubEntryAccount;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'PayStubEntryAccount' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'accrual_type' );
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -51,17 +55,15 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onTypeChange();
 		this.onAccrualPayStubEntryAccountChange();
+	}
 
-	},
-
-	onTypeChange: function() {
+	onTypeChange() {
 		if ( this.current_edit_record.type_id == 50 ) {
 			this.detachElement( 'accrual_pay_stub_entry_account_id' );
 			this.detachElement( 'accrual_type_id' );
@@ -72,8 +74,9 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
-	onAccrualPayStubEntryAccountChange: function() {
+	}
+
+	onAccrualPayStubEntryAccountChange() {
 		if ( TTUUID.isUUID( this.current_edit_record.accrual_pay_stub_entry_account_id ) && this.current_edit_record.accrual_pay_stub_entry_account_id != TTUUID.zero_id ) {
 			this.attachElement( 'accrual_type_id' );
 		} else {
@@ -81,9 +84,9 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [],
 			include: [{
@@ -95,26 +98,26 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.migrate_pay_stub_account:
 				this.onWizardClick();
 				break;
 
 		}
-	},
+	}
 
-	onWizardClick: function() {
+	onWizardClick() {
 		var $this = this;
 		IndexViewController.openWizard( 'PayStubAccountWizard', null, function() {
 		} );
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -125,7 +128,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
@@ -183,7 +186,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -213,12 +216,11 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 		form_item_input.TTextInput( { field: 'credit_account', width: 359 } );
 		this.addEditFieldToColumn( $.i18n._( 'Credit Account' ), form_item_input, tab_pay_stub_account_column1, '' );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -262,7 +264,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -273,7 +275,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -282,4 +284,4 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

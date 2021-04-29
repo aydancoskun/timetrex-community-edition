@@ -1,20 +1,26 @@
-LegalEntityViewController = BaseViewController.extend( {
-	el: '#legal_entity_view_container',
+class LegalEntityViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#legal_entity_view_container',
 
-	_required_files: ['APILegalEntity', 'APICompany', 'TImage', 'TImageAdvBrowser'],
+			_required_files: ['TImage', 'TImageAdvBrowser'],
 
-	status_array: null,
-	type_array: null,
-	classification_code_array: null,
-	country_array: null,
-	province_array: null,
-	e_province_array: null,
+			status_array: null,
+			type_array: null,
+			classification_code_array: null,
+			country_array: null,
+			province_array: null,
+			e_province_array: null,
 
-	payment_services_status_array: null,
+			payment_services_status_array: null,
 
-	company_api: null,
+			company_api: null
+		} );
 
-	init: function() {
+		super( options );
+	}
+
+	init() {
 		//this._super('initialize' );
 		this.edit_view_tpl = 'LegalEntityEditView.html';
 		this.permission_id = 'legal_entity';
@@ -23,18 +29,17 @@ LegalEntityViewController = BaseViewController.extend( {
 		this.table_name_key = 'legal_entity';
 		this.context_menu_name = $.i18n._( 'Legal Entities' );
 		this.navigation_label = $.i18n._( 'Legal Entity' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APILegalEntity' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.api = TTAPI.APILegalEntity;
+		this.company_api = TTAPI.APICompany;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'status' );
@@ -43,9 +48,9 @@ LegalEntityViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'country', 'country', this.company_api );
 
 		this.initDropDownOption( 'payment_services_status' );
-	},
+	}
 
-	onSetSearchFilterFinished: function() {
+	onSetSearchFilterFinished() {
 		var combo;
 		var select_value;
 		if ( this.search_panel.getSelectTabIndex() === 0 ) {
@@ -57,25 +62,24 @@ LegalEntityViewController = BaseViewController.extend( {
 			select_value = combo.getValue();
 			this.setProvince( select_value );
 		}
+	}
 
-	},
-
-	getLogoUrl: function() {
+	getLogoUrl() {
 		var url = false;
 		if ( this.current_edit_record.id ) {
 			url = Global.getBaseURL() + '../send_file.php?api=1&object_type=legal_entity_logo&object_id=' + this.current_edit_record.id;
 		}
 		Debug.Text( url, 'LegalEntityViewController.js', 'LegalEntityViewController', 'getLogoUrl', 10 );
 		return url;
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		this.onPaymentServicesStatusChange();
-		this._super( 'setEditViewDataDone' );
+		super.setEditViewDataDone();
 		this.file_browser.setImage( this.getLogoUrl() );
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.export_excel],
 			include: [{
@@ -88,11 +92,11 @@ LegalEntityViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
-		this._super( 'setDefaultMenu', doNotSetFocus );
+		super.setDefaultMenu( doNotSetFocus );
 
 		var len = this.context_menu_array.length;
 
@@ -110,35 +114,34 @@ LegalEntityViewController = BaseViewController.extend( {
 					break;
 			}
 		}
+	}
 
-	},
-
-	setDefaultMenuPaymentServicesStatementIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPaymentServicesStatementIcon( context_btn, grid_selected_length, pId ) {
 		if ( grid_selected_length === 1 ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.payment_services_statement:
 				this.onPaymentServicesStatementClick();
 				break;
 		}
-	},
+	}
 
-	onPaymentServicesStatementClick: function() {
+	onPaymentServicesStatementClick() {
 		var post_data = { 0: null, 1: null }; //Eventually we could pass start/end dates.
 		this.doFormIFrameCall( post_data );
-	},
+	}
 
-	doFormIFrameCall: function( postData ) {
+	doFormIFrameCall( postData ) {
 		Global.APIFileDownload( this.api.className, 'get' + 'PaymentServicesAccountStatementReport', postData );
-	},
+	}
 
-	onBuildAdvUIFinished: function() {
+	onBuildAdvUIFinished() {
 
 		this.adv_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.adv_search_field_ui_dic['country'];
@@ -149,9 +152,9 @@ LegalEntityViewController = BaseViewController.extend( {
 			this.adv_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	onBuildBasicUIFinished: function() {
+	onBuildBasicUIFinished() {
 		this.basic_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.basic_search_field_ui_dic['country'];
 			var selectVal = combo.getValue();
@@ -161,9 +164,9 @@ LegalEntityViewController = BaseViewController.extend( {
 			this.basic_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -192,10 +195,9 @@ LegalEntityViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	openEditView: function( id ) {
+	openEditView( id ) {
 		if ( id == false ) {
 			var $this = this;
 			this.initOptions();
@@ -210,11 +212,11 @@ LegalEntityViewController = BaseViewController.extend( {
 				}
 			} );
 		} else {
-			this._super( 'openEditView' );
+			super.openEditView();
 		}
-	},
+	}
 
-	onPaymentServicesStatusChange: function() {
+	onPaymentServicesStatusChange() {
 		if ( this.current_edit_record && this.current_edit_record['payment_services_status_id'] == 10 ) {
 			this.attachElement( 'payment_services_user_name' );
 			this.attachElement( 'payment_services_api_key' );
@@ -224,10 +226,10 @@ LegalEntityViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 		var $this = this;
 
 		var tab_model = {
@@ -241,7 +243,7 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		if ( this.navigation ) {
 			this.navigation.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+				api_class: TTAPI.APILegalEntity,
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
@@ -419,10 +421,9 @@ LegalEntityViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'payment_services_api_key', width: 510 } );
 		this.addEditFieldToColumn( $.i18n._( 'API Key' ), form_item_input, tab_payment_services_column1, '', null, true );
+	}
 
-	},
-
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === '-1' || val === '0' ) {
@@ -446,9 +447,9 @@ LegalEntityViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	eSetProvince: function( val, refresh ) {
+	eSetProvince( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -472,11 +473,11 @@ LegalEntityViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 			new SearchField( {
 				label: $.i18n._( 'Status' ),
@@ -581,7 +582,7 @@ LegalEntityViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -594,7 +595,7 @@ LegalEntityViewController = BaseViewController.extend( {
 				in_column: 3,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -605,4 +606,4 @@ LegalEntityViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

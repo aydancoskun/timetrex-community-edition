@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -184,7 +184,8 @@ class RecurringHolidayListFactory extends RecurringHolidayFactory implements Ite
 		$additional_order_fields = [ 'type_id' ];
 
 		$sort_column_aliases = [
-				'type' => 'type_id',
+				'type'      => 'type_id',
+				'next_date' => false, //Don't sort
 		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );

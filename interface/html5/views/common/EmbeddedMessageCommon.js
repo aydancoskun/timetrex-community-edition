@@ -1,6 +1,3 @@
-/*
- * $License$
- */
 EmbeddedMessage = {
 	message_control_api: null,
 	/**
@@ -16,7 +13,7 @@ EmbeddedMessage = {
 		args.filter_data.object_type_id = object_type;
 		args.filter_data.object_id = item_id;
 		var read_ids = [];
-		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
+		this.message_control_api = TTAPI.APIMessageControl;
 
 		var $this = this;
 		this.message_control_api['getEmbeddedMessage']( args, {

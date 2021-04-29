@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -630,11 +630,13 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 //			$filter_data['type_id'] = 5; // Pre-Mature type.
 //		}
 
-		$additional_order_fields = [ 'd.name', 'e.name', 'f.name', 'g.name', 'h.status_id', 'group', 'i.severity_id', 'i.type_id', 'c.first_name', 'c.last_name', 'c.country', 'c.province', 'a.date_stamp', 'pgf.name', 'pscf.name', 'ppsf.name' ];
+		$additional_order_fields = [ 'd.name', 'e.name', 'f.name', 'g.name', 'h.status_id', 'group', 'i.severity_id', 'i.type_id', 'c.first_name', 'c.last_name', 'c.country', 'c.province', 'a.date_stamp', 'pgf.name', 'pscf.name', 'ppsf.name', 'bf.name', 'df.name' ];
 
 		$sort_column_aliases = [
-				'status' => 'status_id',
-				'type'   => 'type_id',
+				'status'     => 'status_id',
+				'type'       => 'type_id',
+				'branch'     => 'bf.name',
+				'department' => 'df.name',
 		];
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 

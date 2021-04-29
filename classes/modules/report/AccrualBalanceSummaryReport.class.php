@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -515,14 +515,14 @@ class AccrualBalanceSummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$columns, [ 'hire_date' => true ] ) );
 			$this->tmp_data['user'][$u_obj->getId()]['user_status'] = Option::getByKey( $u_obj->getStatus(), $u_obj->getOptions( 'status' ) );
 
 			$this->tmp_data['user_wage'][$u_obj->getId()] = [];
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'TMP User Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -531,7 +531,7 @@ class AccrualBalanceSummaryReport extends Report {
 		$uwlf = TTnew( 'UserWageListFactory' ); /** @var UserWageListFactory $uwlf */
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Wage Rows: ' . $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = (array)$uw_obj->getObjectAsArray( [ 'hourly_rate' => true, 'current_currency' => true, 'effective_date' => true ] ); //Force specific columns, otherwise if hourly_rate is not included wage cant be calculated.
@@ -548,7 +548,7 @@ class AccrualBalanceSummaryReport extends Report {
 
 				$this->tmp_data['user_wage'][$uw_obj->getUser()]['effective_date'] = ( isset( $this->tmp_data['user_wage'][$uw_obj->getUser()]['effective_date'] ) ) ? TTDate::parseDateTime( $this->tmp_data['user_wage'][$uw_obj->getUser()]['effective_date'] ) : null;
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user_wage'], 'TMP User Wage Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -556,7 +556,7 @@ class AccrualBalanceSummaryReport extends Report {
 		$alf = TTnew( 'AccrualListFactory' ); /** @var AccrualListFactory $alf */
 		$alf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Accrual Rows: ' . $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $alf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $alf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 
 		if ( !isset( $columns['date_stamp'] ) ) { //Always include the date_stamp column so other date columns can be calculated.
 			$columns['date_stamp'] = true;
@@ -573,7 +573,7 @@ class AccrualBalanceSummaryReport extends Report {
 				}
 				$this->tmp_data['accrual'][$a_obj->getUser()][$a_obj->getAccrualPolicyAccount()][] = $tmp_data;
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		unset( $tmp_data );
 
@@ -587,7 +587,7 @@ class AccrualBalanceSummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['accrual'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['accrual'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 		if ( isset( $this->tmp_data['user'] ) ) {
 			$column_keys = array_keys( $this->getColumnDataConfig() );
 
@@ -625,7 +625,7 @@ class AccrualBalanceSummaryReport extends Report {
 						}
 					}
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 					$key++;
 				}
 			}

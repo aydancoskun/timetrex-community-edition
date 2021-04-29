@@ -1,16 +1,22 @@
-PayStubAmendmentViewController = BaseViewController.extend( {
-	el: '#pay_stub_amendment_view_container',
+class PayStubAmendmentViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#pay_stub_amendment_view_container',
 
-	_required_files: ['APIPayPeriod', 'APIPayStubAmendment', 'APIUserGroup', 'APIPayStubEntryAccount', 'APIUserTitle', 'APIBranch', 'APIDepartment'],
+			user_status_array: null,
+			filtered_status_array: null,
+			type_array: null,
+			is_mass_adding: false,
 
-	user_status_array: null,
-	filtered_status_array: null,
-	type_array: null,
-	is_mass_adding: false,
+			user_api: null,
+			user_group_api: null,
+			user_wage_api: null,
+		} );
 
-	user_api: null,
-	user_group_api: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayStubAmendmentEditView.html';
 		this.permission_id = 'pay_stub_amendment';
@@ -19,20 +25,20 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.table_name_key = 'pay_stub_amendment';
 		this.context_menu_name = $.i18n._( 'Pay Stub Amendment' );
 		this.navigation_label = $.i18n._( 'Pay Stub Amendment' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayStubAmendment' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
+		this.api = TTAPI.APIPayStubAmendment;
+		this.user_api = TTAPI.APIUser;
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.currency_api = TTAPI.APICurrency;
+		this.user_wage_api = TTAPI.APIUserWage;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'PayStubAmendment' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'status', 'user_status_id', this.user_api );
@@ -66,9 +72,44 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getUserHourlyRate( user_id ) {
+		var $this = this;
+
+		if ( !user_id ) {
+			user_id = this.current_edit_record['user_id'];
+		}
+
+		if ( TTUUID.isUUID( user_id ) == false || ( $.isArray( user_id ) && user_id.length != 1 ) ) {
+			user_id = TTUUID.zero_id;
+		}
+
+		//Last Wage record only.
+		this.user_wage_api.getUserWage( {
+			filter_data: {
+				user_id: user_id,
+				wage_group_id: TTUUID.zero_id
+			}
+		}, false, true, {
+			onResult: function( result ) {
+				var rate = '0.00';
+
+				var result_data = result.getResult();
+				if ( result_data && result_data.length > 0 ) {
+					result_data = result_data[0];
+
+					rate = result_data.hourly_rate;
+				}
+
+				$this.edit_view_ui_dic['rate'].setValue( rate );
+				$this.current_edit_record['rate'] = rate;
+				$this.calcAmount();
+			}
+		} );
+	}
+
+	getFilterColumnsFromDisplayColumns() {
 
 		var column_filter = {};
 		column_filter.is_owner = true;
@@ -95,9 +136,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	onReportPrintClick: function( key ) {
+	onReportPrintClick( key ) {
 		var $this = this;
 
 		var grid_selected_id_array;
@@ -132,10 +173,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		var post_data = { 0: args, 1: true, 2: key };
 
 		this.doFormIFrameCall( post_data );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [],
 			include: [
@@ -169,10 +209,10 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
 	/* jshint ignore:start */
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -271,22 +311,22 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
-
-	},
+	}
 
 	//Remove the copy button as it can never work due to API unique constraints.
-	setDefaultMenuCopyIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuCopyIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'invisible-image' );
-	},
-	setEditMenuCopyIcon: function( context_btn, grid_selected_length, pId ) {
+	}
+
+	setEditMenuCopyIcon( context_btn, grid_selected_length, pId ) {
 		context_btn.addClass( 'invisible-image' );
-	},
+	}
 
 	/* jshint ignore:end */
-	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuViewIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( pId === 'punch' || pId === 'schedule' || pId === 'pay_stub' ) {
-			this._super( 'setDefaultMenuViewIcon', context_btn, grid_selected_length, pId );
+			super.setDefaultMenuViewIcon( context_btn, grid_selected_length, pId );
 		} else {
 
 			if ( !this.viewPermissionValidate( pId ) || this.edit_only_mode ) {
@@ -300,28 +340,28 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	setDefaultMenuPrintChecksIcon: function( context_btn, grid_selected_length, pId ) {
-
-		if ( grid_selected_length > 0 ) {
-			context_btn.removeClass( 'disable-image' );
-		} else {
-			context_btn.addClass( 'disable-image' );
-		}
-	},
-
-	setDefaultMenuDirectDepositIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPrintChecksIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( grid_selected_length > 0 ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
+
+	setDefaultMenuDirectDepositIcon( context_btn, grid_selected_length, pId ) {
+
+		if ( grid_selected_length > 0 ) {
+			context_btn.removeClass( 'disable-image' );
+		} else {
+			context_btn.addClass( 'disable-image' );
+		}
+	}
+
 	/* jshint ignore:start */
-	setEditMenu: function() {
+	setEditMenu() {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
@@ -411,10 +451,10 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
 	/* jshint ignore:end */
-	setEditMenuViewIcon: function( context_btn, pId ) {
+	setEditMenuViewIcon( context_btn, pId ) {
 
 		if ( !this.viewPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
@@ -423,10 +463,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -470,10 +509,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	onTypeChange: function() {
+	onTypeChange() {
 		if ( this.current_edit_record.type_id == 10 ) {
 			this.detachElement( 'percent_amount' );
 			this.detachElement( 'percent_amount_entry_name_id' );
@@ -490,14 +528,14 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	calcAmount: function() {
+	calcAmount() {
 		var widget_rate = this.edit_view_ui_dic['rate'];
 		var widget_units = this.edit_view_ui_dic['units'];
 		var widget_amount = this.edit_view_ui_dic['amount'];
 
-		if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
+		if ( widget_rate && widget_rate.getValue().length > 0 && widget_units && widget_units.getValue().length > 0 ) {
 			//widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) ); //This fails on 17.07 * 9.50 as it rounds to 162.16 rather than 162.17
 			//calc_amount = ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ); //This fails on 16.5 * 130.23
 			var calc_amount = new Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed( 4 ); //Need to use Decimal() class for proper money math operations
@@ -511,17 +549,17 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			}
 			widget_amount.setValue( Global.MoneyRound( calc_amount, round_decimal_places ) );
 		} else {
-			if ( widget_amount.getValue() == '' ) {
+			if ( widget_amount && widget_amount.getValue() == '' ) {
 				widget_amount.setValue( '0.00' );
 			}
 		}
 
-		if ( !this.is_mass_editing ) { //Make sure this is only done when editing a single record otherwise Mass Edit will default to changing the amount to 0.00.
+		if ( !this.is_mass_editing && this.edit_view_ui_dic['amount'] && this.current_edit_record ) { //Make sure this is only done when editing a single record otherwise Mass Edit will default to changing the amount to 0.00.
 			this.current_edit_record['amount'] = this.edit_view_ui_dic['amount'].getValue(); //Update current record Amount, otherwise edit/save (without any changes) won't save the rounded value.
 		}
-	},
+	}
 
-	onRateOrUnitChange: function() {
+	onRateOrUnitChange() {
 		var widget_rate = this.edit_view_ui_dic['rate'];
 		var widget_units = this.edit_view_ui_dic['units'];
 		var widget_amount = this.edit_view_ui_dic['amount'];
@@ -531,18 +569,18 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		} else {
 			widget_amount.setReadOnly( false );
 		}
-	},
+	}
 
-	onFormItemKeyUp: function( target ) {
+	onFormItemKeyUp( target ) {
 		this.onRateOrUnitChange();
 		this.calcAmount();
-	},
+	}
 
-	onFormItemKeyDown: function( target ) {
+	onFormItemKeyDown( target ) {
 		this.onRateOrUnitChange();
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
 				this.onImportClick();
@@ -553,17 +591,18 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				this.onNavigationClick( id );
 				break;
 		}
-	},
+	}
 
-	onImportClick: function() {
+	onImportClick() {
 
 		var $this = this;
-		IndexViewController.openWizard( 'ImportCSVWizard', 'paystubamendment', function() {
+		IndexViewController.openWizard( 'ImportCSVWizard', 'PayStubAmendment', function() {
 			$this.search();
 		} );
-	},
+	}
+
 	/* jshint ignore:start */
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 
 		var $this = this;
 
@@ -616,19 +655,19 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
 	/* jshint ignore:end */
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 		this.onReportPrintClick( id );
-	},
+	}
 
 	//not currently called. are we reimplementing the eft code commented out above in this class?
-	doFormIFrameCall: function( postData ) {
+	doFormIFrameCall( postData ) {
 		Global.APIFileDownload( this.api.className, 'get' + this.api.key_name, postData );
-	},
+	}
 
-	setCurrency: function() {
+	setCurrency() {
 		var $this = this;
 		if ( Global.isSet( this.current_edit_record.user_id ) ) {
 			var filter = {};
@@ -646,25 +685,25 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
 			'type_id': 10
 		} );
 
-		this._super( 'setCurrentEditRecordData' );
-	},
+		super.setCurrentEditRecordData();
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.setCurrency();
 		this.onTypeChange();
 		this.onRateOrUnitChange();
-	},
+	}
 
-	validate: function() {
+	validate() {
 
 		var $this = this;
 
@@ -699,13 +738,14 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
-	removeEditView: function() {
-		this.is_mass_adding = false;
-		this._super( 'removeEditView' );
-	},
+	}
 
-	buildMassAddRecord: function( record ) {
+	removeEditView() {
+		this.is_mass_adding = false;
+		super.removeEditView();
+	}
+
+	buildMassAddRecord( record ) {
 		if ( $.isArray( record.user_id ) ) {
 			var records_data = [];
 			var length = record.user_id.length;
@@ -726,9 +766,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}
 
 		return this.uniformVariable( record );
-	},
+	}
 
-	onSaveAndContinue: function( ignoreWarning ) {
+	onSaveAndContinue( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -744,15 +784,15 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	doSaveAPICall: function( record, ignoreWarning ) {
+	doSaveAPICall( record, ignoreWarning ) {
 		// #2644: We have to handle the record as though its a mass_add, as the awesomebox will always return an array of user_id's. Cannot force is_mass_adding, as this affects the save&continue button disabling.
 		record = this.buildMassAddRecord( record );
-		this._super( 'doSaveAPICall', record, ignoreWarning );
-	},
+		super.doSaveAPICall( record, ignoreWarning );
+	}
 
-	onSaveAndCopy: function( ignoreWarning ) {
+	onSaveAndCopy( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -785,9 +825,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	onSaveAndNewClick: function( ignoreWarning ) {
+	onSaveAndNewClick( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -819,18 +859,18 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndContinueIcon( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn, pId );
 
 		if ( this.is_mass_adding || this.is_mass_editing || this.is_viewing || ( this.current_edit_record && Global.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 1 ) ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 		var allow_multiple_selection = false;
@@ -842,7 +882,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubAmendment' ) ),
+			api_class: TTAPI.APIPayStubAmendment,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_AMENDMENT,
@@ -870,7 +910,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: allow_multiple_selection,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -892,7 +932,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		// Pay Stub Account
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -912,20 +952,26 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		// Fixed
 
-		// Rate
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'rate', width: 114, hasKeyEvent: true } );
-		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab_pay_stub_amendment_column1, '', null, true, null, null, true );
-
 		// Units
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'units', width: 114, hasKeyEvent: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Units' ), form_item_input, tab_pay_stub_amendment_column1, '', null, true, null, null, true );
 
-		// Amount
+		// Rate
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'rate', width: 114, hasKeyEvent: true } );
 
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var get_hourly_rate_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px; height: 25px;\' type=\'button\' value=\'' + $.i18n._( 'Get Hourly Rate' ) + '\'></input>' );
+		get_hourly_rate_btn.click( function() {
+			$this.getUserHourlyRate();
+		} );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( get_hourly_rate_btn );
+
+		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab_pay_stub_amendment_column1, '', widgetContainer, true, null, null, true );
+
+		// Amount
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( { field: 'amount', width: 114 } );
@@ -947,7 +993,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		// Percent of
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -982,12 +1028,11 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		//form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		//form_item_input.TCheckbox( {field: 'ytd_adjustment'} );
 		//this.addEditFieldToColumn( $.i18n._( 'Year to Date (YTD) Adjustment' ), form_item_input, tab_pay_stub_amendment_column1, '' );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 
 		var default_args = {};
 		default_args.permission_section = 'pay_stub_amendment';
@@ -1009,7 +1054,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
+				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1021,7 +1066,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				field: 'user_id',
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1032,7 +1077,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_stub_entry_name_id',
 				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-				api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+				api_class: TTAPI.APIPayStubEntryAccount,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1043,7 +1088,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1075,7 +1120,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1086,7 +1131,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1098,7 +1143,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1110,27 +1155,27 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	uniformVariable: function( data ) {
+	uniformVariable( data ) {
 		if ( data.status_id ) {
 			delete data.status_id;
 		}
-		return this._super( 'uniformVariable', data );
-	},
+		return super.uniformVariable( data );
+	}
 
-	copyAsNewResetIds: function( data ) {
+	copyAsNewResetIds( data ) {
 		data = this.uniformVariable( data );
 		data.id = null;
 		data.effective_date = ( new Date ).format( Global.getLoginUserDateFormat() );
 		return data;
 	}
 
-} );
+}

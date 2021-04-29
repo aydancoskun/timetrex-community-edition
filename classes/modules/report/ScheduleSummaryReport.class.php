@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -759,29 +759,29 @@ class ScheduleSummaryReport extends Report {
 	 */
 	function splitDataByHoursWorked( $row, $dynamic_columns ) {
 		$retval = [];
-		if ( isset( $row['start_time'] ) && isset( $row['end_time'] ) && $row['start_time'] > 0 && $row['end_time'] > 0 ) {
-			$total_hour_rows = ceil( ( TTDate::roundTime( $row['end_time'], 3600, 30 ) - TTDate::roundTime( $row['start_time'], 3600, 10 ) ) / 3600 );
+		if ( isset( $row['raw_start_time'] ) && isset( $row['raw_end_time'] ) && $row['raw_start_time'] > 0 && $row['raw_end_time'] > 0 ) {
+			$total_hour_rows = ceil( ( TTDate::roundTime( $row['raw_end_time'], 3600, 30 ) - TTDate::roundTime( $row['raw_start_time'], 3600, 10 ) ) / 3600 );
 			if ( $total_hour_rows == 0 ) {
 				$total_hour_rows = 1;
 			}
 
-			$start_time = TTDate::roundTime( $row['start_time'], 3600, 10 );
+			$raw_start_time = TTDate::roundTime( $row['raw_start_time'], 3600, 10 );
 			//If the employee punches out exact at 5:00PM, minus 1 second from that time so its recorded as an hour for 4:00PM and not 5:00PM.
-			$end_time = TTDate::roundTime( ( $row['end_time'] - 1 ), 3600, 10 );
+			$raw_end_time = TTDate::roundTime( ( $row['raw_end_time'] - 1 ), 3600, 10 );
 
-			//Debug::Text('Total Hours: '. $total_hour_rows .' Start Time: '. TTDate::getDATE('DATE+TIME', $start_time ) .' End Time: '. TTDate::getDATE('DATE+TIME', $end_time ), __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Text('Total Hours: '. $total_hour_rows .' Start Time: '. TTDate::getDATE('DATE+TIME', $raw_start_time ) .' End Time: '. TTDate::getDATE('DATE+TIME', $raw_end_time ), __FILE__, __LINE__, __METHOD__, 10);
 			$x = 0;
-			for ( $i = $start_time; $i <= $end_time; $i += 3600 ) {
+			for ( $i = $raw_start_time; $i <= $raw_end_time; $i += 3600 ) {
 				//Debug::Text('Hour: '. TTDate::getDate('DATE+TIME', $i ) .'('. $i .') Total Hour Rows: '. $total_hour_rows, __FILE__, __LINE__, __METHOD__, 10);
 				$retval[$i]['scheduled_hour_of_day'] = $i;
 
 				//FIXME: Since we don't know exactly when meals and breaks are taken, its makes almost impossible to properly break down the time scheduled per hour.
 				// If we do it like below (similar to TimeSheetDetailReport), it will show more hours than they are actually scheduled.
 				// The only real hope is to somehow add up all meal/break time and take it off in the middle of the day. Or wait until we can somehow schedule actual start/end times for meals/breaks.
-//				if ( $row['start_time'] > $i AND ( $row['start_time'] - $i ) < 3600 ) {
-//					$partial_hour = 3600 - ( $row['start_time'] - $i );
-//				} elseif( $row['end_time'] > $i AND ( $row['end_time'] - $i ) < 3600 ) {
-//					$partial_hour = ( $row['end_time'] - $i );
+//				if ( $row['raw_start_time'] > $i AND ( $row['raw_start_time'] - $i ) < 3600 ) {
+//					$partial_hour = 3600 - ( $row['raw_start_time'] - $i );
+//				} elseif( $row['raw_end_time'] > $i AND ( $row['raw_end_time'] - $i ) < 3600 ) {
+//					$partial_hour = ( $row['raw_end_time'] - $i );
 //				} else {
 //					$partial_hour = 3600;
 //				}
@@ -789,7 +789,7 @@ class ScheduleSummaryReport extends Report {
 				$retval[$i]['scheduled_hour_of_day_total'] = 1.00;
 
 				foreach ( $row as $column => $value ) {
-					if ( isset( $dynamic_columns[$column] ) && is_numeric( $value ) && !in_array( $column, [ 'start_time', 'end_time' ] ) ) {
+					if ( isset( $dynamic_columns[$column] ) && is_numeric( $value ) && !in_array( $column, [ 'raw_start_time', 'raw_end_time' ] ) ) {
 						$retval[$i][$column] = ( $value / $total_hour_rows );
 
 //						if ( $column == 'total_time' ) {
@@ -848,7 +848,7 @@ class ScheduleSummaryReport extends Report {
 			$slf = TTnew( 'ScheduleListFactory' ); /** @var ScheduleListFactory $slf */
 			$slf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, null, null, null, [ 'last_name' => 'asc' ] ); //Sort by last name mainly for the PDF schedule for printing.
 			Debug::Text( ' Total Rows: ' . $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $slf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $slf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach ( $slf as $key => $s_obj ) {
 					$enable_wages = $this->getPermissionObject()->isPermissionChild( $s_obj->getUser(), $wage_permission_children_ids );
@@ -904,12 +904,14 @@ class ScheduleSummaryReport extends Report {
 							//'schedule_type' => Option::getByKey( $s_obj->getType(), $s_obj->getOptions('type'), NULL ), //Recurring/Scheduled?
 							'schedule_status' => Option::getByKey( $s_obj->getStatus(), $s_obj->getOptions( 'status' ), null ),
 
+							'raw_start_time'      => TTDate::strtotime( $s_obj->getColumn( 'start_time' ) ), //This is required in: splitDataByHoursWorked()
+							'raw_end_time'        => TTDate::strtotime( $s_obj->getColumn( 'end_time' ) ), //This is required in: splitDataByHoursWorked()
+
 							//Normalize the timestamps to the same day, otherwise min/max aggregates will always use what times are on the first/last days.
 							//						'start_time' => TTDate::strtotime( $s_obj->getColumn('start_time') ),
 							//						'end_time' => TTDate::strtotime( $s_obj->getColumn('end_time') ),
-							'start_time'      => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'start_time' ) ), 86400 ),
-							'end_time'        => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'end_time' ) ), 86400 ),
-
+							'start_time'      => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'start_time' ) ), 86400 ), //This is required in: splitDataByHoursWorked()
+							'end_time'        => TTDate::getTimeLockedDate( TTDate::strtotime( $s_obj->getColumn( 'end_time' ) ), 86400 ), //This is required in: splitDataByHoursWorked()
 
 							'user_wage_id'         => $s_obj->getColumn( 'user_wage_id' ),
 							'hourly_rate'          => Misc::MoneyFormat( $hourly_rate, false ), //This is required in: splitDataByHoursWorked()
@@ -929,7 +931,7 @@ class ScheduleSummaryReport extends Report {
 
 					$this->tmp_data['schedule'][$s_obj->getUser()][] = $shift_arr;
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				}
 			}
 			//Debug::Arr($this->tmp_data['schedule'], 'Schedule Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -948,11 +950,11 @@ class ScheduleSummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = $this->form_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Add OPEN user to the list so it can printed on schedules.
@@ -972,7 +974,7 @@ class ScheduleSummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess( $format = null ) {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['schedule'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['schedule'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		$columns = $this->getColumnDataConfig();
 		$dynamic_columns = Misc::trimSortPrefix( $this->getOptions( 'dynamic_columns' ) );
@@ -1004,7 +1006,7 @@ class ScheduleSummaryReport extends Report {
 
 							$this->data[] = array_merge( $row, $this->tmp_data['user'][$user_id], $date_columns, $processed_data );
 
-							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+							$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 							//$key++;
 						}
 					}
@@ -1591,8 +1593,8 @@ class ScheduleSummaryReport extends Report {
 
 		//Debug::Arr($this->form_data, 'Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), 2, null, TTi18n::getText( 'Querying Database...' ) ); //Iterations need to be 2, otherwise progress bar is not created.
-		$this->getProgressBarObject()->set( $this->getAMFMessageID(), 2 );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), 2, null, TTi18n::getText( 'Querying Database...' ) ); //Iterations need to be 2, otherwise progress bar is not created.
+		$this->getProgressBarObject()->set( $this->getAPIMessageID(), 2 );
 
 		$sf = TTNew( 'ScheduleFactory' ); /** @var ScheduleFactory $sf */
 
@@ -1613,7 +1615,7 @@ class ScheduleSummaryReport extends Report {
 
 		if ( is_array( $raw_schedule_shifts ) ) {
 			//Debug::Arr($raw_schedule_shifts, 'Raw Schedule Shifts: ', __FILE__, __LINE__, __METHOD__, 10);
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $raw_schedule_shifts, COUNT_RECURSIVE ), null, TTi18n::getText( 'Retrieving Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $raw_schedule_shifts, COUNT_RECURSIVE ), null, TTi18n::getText( 'Retrieving Data...' ) );
 			$key = 0;
 			foreach ( $raw_schedule_shifts as $date_stamp => $day_schedule_shifts ) {
 				foreach ( $day_schedule_shifts as $shift_arr ) {
@@ -1631,7 +1633,7 @@ class ScheduleSummaryReport extends Report {
 						$this->form_data['dates']['end_date'] = $date_stamp;
 					}
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 					$key++;
 				}
 			}
@@ -1721,7 +1723,7 @@ class ScheduleSummaryReport extends Report {
 										$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
 
 										//FIXME: Find a better way to determine how many iterations there will be in this loop.
-										$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $calendar_array ), null, TTi18n::getText( 'Generating Schedules...' ) );
+										$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $calendar_array ), null, TTi18n::getText( 'Generating Schedules...' ) );
 										$key = 0;
 										$i = 0;
 										foreach ( $calendar_array as $calendar_day ) {
@@ -1762,7 +1764,7 @@ class ScheduleSummaryReport extends Report {
 												}
 											}
 
-											$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+											$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 											if ( ( $key % 25 ) == 0 && $this->isSystemLoadValid() == false ) {
 												return false;
 											}
@@ -1796,7 +1798,7 @@ class ScheduleSummaryReport extends Report {
 					];
 
 
-					$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( count( $this->form_data['schedule_by_user'] ) * ( count( $calendar_array ) / 7 ) ), null, TTi18n::getText( 'Generating Schedules...' ) );
+					$this->getProgressBarObject()->start( $this->getAPIMessageID(), ( count( $this->form_data['schedule_by_user'] ) * ( count( $calendar_array ) / 7 ) ), null, TTi18n::getText( 'Generating Schedules...' ) );
 
 					$this->pdf->AddPage( $this->config['other']['page_orientation'], 'LETTER' );
 
@@ -1822,7 +1824,6 @@ class ScheduleSummaryReport extends Report {
 									break 2;
 								}
 
-								$s = 0;
 								//Handle page break.
 								if ( $this->scheduleCheckPageBreak( $this->_pdf_scaleSize( 5 ), true ) == true ) {
 									$this->scheduleFooterWeek();
@@ -1832,11 +1833,9 @@ class ScheduleSummaryReport extends Report {
 								}
 
 								$this->pdf->setFillColor( 255, 255, 255 );
-								if ( $this->scheduleUserWeek( $user_schedule, $calendar_week_array, $start_week_day, $column_widths, $format, $key ) == true ) {
-									$s++;
-								}
+								$this->scheduleUserWeek( $user_schedule, $calendar_week_array, $start_week_day, $column_widths, $format, $key );
 
-								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+								$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 								if ( ( $key % 25 ) == 0 && $this->isSystemLoadValid() == false ) {
 									return false;
 								}
@@ -1863,7 +1862,7 @@ class ScheduleSummaryReport extends Report {
 					];
 
 					if ( isset( $this->form_data['schedule_by_user'] ) && count( $this->form_data['schedule_by_user'] ) > 0 ) {
-						$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( count( $this->form_data['schedule_by_user'] ) * ( count( $calendar_array ) / 7 ) ), null, TTi18n::getText( 'Generating Schedules...' ) );
+						$this->getProgressBarObject()->start( $this->getAPIMessageID(), ( count( $this->form_data['schedule_by_user'] ) * ( count( $calendar_array ) / 7 ) ), null, TTi18n::getText( 'Generating Schedules...' ) );
 						$key = 0;
 
 						foreach ( $this->form_data['schedule_by_user'] as $user_full_name => $user_schedule ) {
@@ -1904,7 +1903,7 @@ class ScheduleSummaryReport extends Report {
 									$this->scheduleUserWeek( $user_schedule, $calendar_week_array, $start_week_day, $column_widths, $format, $key );
 								}
 
-								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+								$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 								if ( ( $key % 25 ) == 0 && $this->isSystemLoadValid() == false ) {
 									return false;
 								}

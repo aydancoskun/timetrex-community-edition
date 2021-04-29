@@ -1,7 +1,8 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
+
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -112,7 +113,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
@@ -144,6 +145,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					//$end_date = TTDate::getBeginYearEpoch();
@@ -211,61 +213,61 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		//									 proRateSalary($salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $termination_date )
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '13-Aug-2016' ), false );
-		$this->assertEquals( $pro_rated_salary, '1000.00' );
+		$this->assertEquals( '1000.00', $pro_rated_salary );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '13-Aug-2016' ), false, strtotime( '13-Aug-2016' ) );
-		$this->assertEquals( $pro_rated_salary, '1000.00' );
+		$this->assertEquals( '1000.00', $pro_rated_salary );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '13-Aug-2016 11:59:59PM' ), false, strtotime( '13-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '1000.00' );
+		$this->assertEquals( '1000.00', $pro_rated_salary );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '1000.00' );
+		$this->assertEquals( '1000.00', $pro_rated_salary );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '02-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '900.00' );
+		$this->assertEquals( '900.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '06-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '500.00' );
+		$this->assertEquals( '500.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '10-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '100.00' );
+		$this->assertEquals( '100.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '11-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '0.00' );
+		$this->assertEquals( '0.00', $pro_rated_salary );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '09-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '900.00' );
+		$this->assertEquals( '900.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '05-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '500.00' );
+		$this->assertEquals( '500.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '01-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '100.00' );
+		$this->assertEquals( '100.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016 6:00AM' ), false, strtotime( '01-Aug-2016 12:00:00AM' ), strtotime( '10-Aug-2016 11:59:59PM' ), false, strtotime( '31-Jul-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '0.00' );
+		$this->assertEquals( '0.00', $pro_rated_salary );
 
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016' ), strtotime( '01-Aug-2016 9:00AM' ), strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '1000.00' );
+		$this->assertEquals( '1000.00', $pro_rated_salary );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '11-Aug-2016' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '900.00' );
+		$this->assertEquals( '900.00', $pro_rated_salary );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Jul-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '11-Aug-2016' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '900.00' );
+		$this->assertEquals( '900.00', $pro_rated_salary );
 
 		//
 		//Test changing salary in the middle of a pay period.
 		//
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '05-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '11-Aug-2016' ), strtotime( '01-Aug-2016 9:00AM' ), strtotime( '11-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '600.00' );
+		$this->assertEquals( '600.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Jul-2016' ), strtotime( '05-Aug-2016' ), strtotime( '01-Aug-2016' ), strtotime( '11-Aug-2016' ), strtotime( '01-Aug-2016 9:00AM' ), strtotime( '10-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '400.00' );
+		$this->assertEquals( '400.00', $pro_rated_salary );
 
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016 11:59:59PM' ) );
-		$this->assertEquals( $pro_rated_salary, '1000.00' );
+		$this->assertEquals( '1000.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016 11:59:59PM' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '08-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '700.00' );
+		$this->assertEquals( '700.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '05-Aug-2016' ), false, strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016 11:59:59PM' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '08-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '400.00' );
+		$this->assertEquals( '400.00', $pro_rated_salary );
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime( '01-Jul-2016' ), strtotime( '05-Aug-2016' ), strtotime( '01-Aug-2016' ), strtotime( '10-Aug-2016 11:59:59PM' ), strtotime( '02-Aug-2016 9:00AM' ), strtotime( '08-Aug-2016 9:00AM' ) );
-		$this->assertEquals( $pro_rated_salary, '300.00' );
+		$this->assertEquals( '300.00', $pro_rated_salary );
 
 		return true;
 	}
@@ -329,43 +331,43 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][1]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][1]['ytd_amount'], '101.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][1]['amount'] );
+		$this->assertEquals( '101.02', $pse_arr[$pse_accounts['over_time_1']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][1]['ytd_amount'], '11.01' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][1]['amount'] );
+		$this->assertEquals( '11.01', $pse_arr[$pse_accounts['medicare']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '4.01' );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '4.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '212.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '136.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '26.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '212.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '136.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '26.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		return true;
 	}
@@ -428,43 +430,43 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '10000000.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '10000010.02' );
+		$this->assertEquals( '10000000.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '10000010.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][1]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][1]['ytd_amount'], '101.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][1]['amount'] );
+		$this->assertEquals( '101.02', $pse_arr[$pse_accounts['over_time_1']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][1]['ytd_amount'], '11.01' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][1]['amount'] );
+		$this->assertEquals( '11.01', $pse_arr[$pse_accounts['medicare']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '4.01' );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '4.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '10000111.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '10000112.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '10000035.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '10000036.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '26.06' );
+		$this->assertEquals( '10000111.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '10000112.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '10000035.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '10000036.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '26.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		return true;
 	}
@@ -533,42 +535,42 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '0.00' ); //YTD adjustment
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '2.03' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] ); //YTD adjustment
+		$this->assertEquals( '2.03', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'], '6.04' );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'] );
+		$this->assertEquals( '6.04', $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -622,38 +624,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '198.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '12.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '320.04' );
+		$this->assertEquals( '198.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '12.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '320.04', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '2.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '53.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '103.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '27.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '52.08' );
+		$this->assertEquals( '1.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '2.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '53.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '103.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '27.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '52.08', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '13.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '23.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '16.09' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '31.14' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '6.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '11.02' );
+		$this->assertEquals( '13.04', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '23.05', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '16.09', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '31.14', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.03', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '6.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '11.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '422.09' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '80.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '155.10' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '131.00' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '266.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '29.13' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '54.19' );
+		$this->assertEquals( '211.05', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '422.09', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '80.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '155.10', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '131.00', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '266.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '29.13', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '54.19', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -710,38 +712,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		//
 		// IN NEW YEAR, YTD amounts are zero'd!
 		//
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '15.03' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '15.03', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -813,42 +815,42 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '0.00' ); //YTD adjustment
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '2.03' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] ); //YTD adjustment
+		$this->assertEquals( '2.03', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'], '6.04' );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'] );
+		$this->assertEquals( '6.04', $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -902,38 +904,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '198.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '12.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '320.04' );
+		$this->assertEquals( '198.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '12.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '320.04', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '2.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '53.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '103.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '27.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '52.08' );
+		$this->assertEquals( '1.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '2.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '53.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '103.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '27.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '52.08', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '13.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '23.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '16.09' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '31.14' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '6.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '11.02' );
+		$this->assertEquals( '13.04', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '23.05', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '16.09', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '31.14', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.03', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '6.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '11.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '422.09' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '80.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '155.10' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '131.00' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '266.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '29.13' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '54.19' );
+		$this->assertEquals( '211.05', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '422.09', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '80.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '155.10', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '131.00', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '266.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '29.13', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '54.19', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		//
@@ -986,38 +988,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '322.06' );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '322.06', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '3.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '104.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '53.09' );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '3.04', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '104.03', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '53.09', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '24.06' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '32.15' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '11.02' );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '24.06', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '32.15', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.01', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '11.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '3.03' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '425.12' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '2.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '157.12' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '268.00' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '2.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '56.21' );
+		$this->assertEquals( '3.03', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '425.12', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '2.02', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '157.12', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '268.00', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '2.02', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '56.21', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		//
@@ -1070,38 +1072,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '324.10' );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '324.10', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '4.06' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '105.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '54.11' );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '4.06', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '105.05', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '54.11', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '25.08' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '33.17' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '11.02' );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '25.08', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '33.17', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.02', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '11.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '3.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '428.18' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '2.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '159.16' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '269.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '2.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '58.25' );
+		$this->assertEquals( '3.06', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '428.18', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '2.04', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '159.16', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '269.02', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '2.04', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '58.25', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		//
@@ -1158,38 +1160,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		//
 		// IN NEW YEAR, YTD amounts are zero'd!
 		//
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '15.03' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '15.03', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		return true;
@@ -1260,42 +1262,42 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '0.00' ); //YTD adjustment
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '2.03' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] ); //YTD adjustment
+		$this->assertEquals( '2.03', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'], '6.04' );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'] );
+		$this->assertEquals( '6.04', $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -1349,38 +1351,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '198.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '12.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '320.04' );
+		$this->assertEquals( '198.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '12.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '320.04', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '2.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '53.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '103.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '27.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '52.08' );
+		$this->assertEquals( '1.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '2.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '53.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '103.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '27.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '52.08', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '13.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '23.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '16.09' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '31.14' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '6.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '11.02' );
+		$this->assertEquals( '13.04', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '23.05', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '16.09', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '31.14', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.03', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '6.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '11.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '422.09' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '80.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '155.10' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '131.00' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '266.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '29.13' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '54.19' );
+		$this->assertEquals( '211.05', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '422.09', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '80.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '155.10', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '131.00', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '266.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '29.13', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '54.19', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		//
@@ -1433,38 +1435,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '322.06' );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '322.06', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '3.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '104.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '53.09' );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '3.04', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '104.03', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '53.09', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '24.06' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '32.15' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '11.02' );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '24.06', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '32.15', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.01', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '11.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '3.03' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '425.12' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '2.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '157.12' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '1.01' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '268.00' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '2.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '56.21' );
+		$this->assertEquals( '3.03', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '425.12', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '2.02', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '157.12', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '1.01', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '268.00', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '2.02', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '56.21', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		//
@@ -1525,35 +1527,35 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		//
 		// IN NEW YEAR, YTD amounts are zero'd!
 		//
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '2.04' );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '2.04', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '1.02' );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '11.02' );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.02', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '11.02', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '3.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '3.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '2.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '2.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '1.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '2.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '2.04' );
+		$this->assertEquals( '3.06', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '3.06', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '2.04', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '2.04', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '1.02', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '2.04', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '2.04', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		//
@@ -1604,38 +1606,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '112.06' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '112.06', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '2.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '51.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '26.06' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '2.02', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '51.03', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '26.06', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '11.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '16.07' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '15.03' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '11.03', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '16.07', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '15.03', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '214.10' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '77.09' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '137.01' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '27.10' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '214.10', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '77.09', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '137.01', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '27.10', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		return true;
@@ -1701,38 +1703,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '4.01' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '4.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -1786,38 +1788,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '198.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '12.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '320.04' );
+		$this->assertEquals( '198.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '12.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '320.04', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '2.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '53.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '103.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '27.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '52.08' );
+		$this->assertEquals( '1.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '2.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '53.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '103.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '27.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '52.08', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '13.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '23.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '16.09' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '31.14' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '6.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '8.99' );
+		$this->assertEquals( '13.04', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '23.05', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '16.09', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '31.14', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.03', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '6.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '8.99', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '422.09' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '80.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '155.10' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '131.00' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '266.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '29.13' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '54.19' );
+		$this->assertEquals( '211.05', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '422.09', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '80.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '155.10', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '131.00', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '266.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '29.13', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '54.19', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -1872,38 +1874,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		//
 		// IN NEW YEAR, YTD amounts are zero'd!
 		//
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '13.00' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '13.00', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 
@@ -1949,38 +1951,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_arr = $this->getPayStubEntryArray( $first_pay_stub_id );
 		//Debug::Arr($pse_arr, 'Pay Stub Entry Arr: ', __FILE__, __LINE__, __METHOD__,10);
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '105.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '115.02' );
+		$this->assertEquals( '105.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '115.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '4.01' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '4.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '216.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '216.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '140.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '140.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '216.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '216.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '140.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '140.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -1992,38 +1994,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pse_arr = $this->getPayStubEntryArray( $second_pay_stub_id );
 		//Debug::Arr($pse_arr, 'Second Pay Stub Entry Arr: ', __FILE__, __LINE__, __METHOD__,10);
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '198.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '12.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '325.04' );
+		$this->assertEquals( '198.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '12.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '325.04', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '2.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '53.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '103.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '27.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '52.08' );
+		$this->assertEquals( '1.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '2.03', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '53.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '103.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '27.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '52.08', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '13.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '23.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '16.09' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '31.14' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '6.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '8.99' );
+		$this->assertEquals( '13.04', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '23.05', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '16.09', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '31.14', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.03', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '6.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '8.99', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '427.09' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '80.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '155.10' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '131.00' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '271.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '29.13' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '54.19' );
+		$this->assertEquals( '211.05', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '427.09', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '80.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '155.10', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '131.00', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '271.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '29.13', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '54.19', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		//
@@ -2031,38 +2033,38 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		//
 		$pse_arr = $this->getPayStubEntryArray( $third_pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '5.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '13.00' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '5.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '13.00', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
 		return true;
@@ -2131,43 +2133,43 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '110.02' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '110.02', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '6.13' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '6.13' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '25.04' );
+		$this->assertEquals( '6.13', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '6.13', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '15.05' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-340.38' ); //YTD adjustment
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
+		$this->assertEquals( '-340.38', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] ); //YTD adjustment
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '-6.13' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '0.00' );
+		$this->assertEquals( '-6.13', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'], '60.03' ); //YTD adjustment
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'], '-286.48' );
+		$this->assertEquals( '60.03', $pse_arr[$pse_accounts['vacation_accrual']][2]['amount'] ); //YTD adjustment
+		$this->assertEquals( '-286.48', $pse_arr[$pse_accounts['vacation_accrual']][2]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '216.17' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '216.17' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '141.12' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '141.12' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '25.06' );
+		$this->assertEquals( '216.17', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '216.17', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '141.12', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '141.12', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -2221,37 +2223,37 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '198.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '12.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '320.04' );
+		$this->assertEquals( '198.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '12.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '320.04', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '100.02' );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
 		//$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.03' );
 		//$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '2.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '53.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '103.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '27.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '52.08' );
+		$this->assertEquals( '53.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '103.02', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '27.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '52.08', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '13.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '23.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '16.09' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '31.14' );
+		$this->assertEquals( '13.04', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '23.05', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '16.09', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '31.14', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '240.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '-46.47' );
+		$this->assertEquals( '240.01', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '-46.47', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '210.02' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '426.19' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '80.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '155.10' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '129.97' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '271.09' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '29.13' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '54.19' );
+		$this->assertEquals( '210.02', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '426.19', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '80.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '155.10', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '129.97', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '271.09', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '29.13', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '54.19', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -2307,39 +2309,39 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		//
 		// IN NEW YEAR, YTD amounts are zero'd!
 		//
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['amount'], '100.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'], '430.06' );
+		$this->assertEquals( '100.01', $pse_arr[$pse_accounts['regular_time']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'] );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['regular_time']][1]['amount'] );
+		$this->assertEquals( '430.06', $pse_arr[$pse_accounts['regular_time']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['amount'], '100.02' );
-		$this->assertEquals( $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'], '200.04' );
+		$this->assertEquals( '100.02', $pse_arr[$pse_accounts['over_time_1']][0]['amount'] );
+		$this->assertEquals( '200.04', $pse_arr[$pse_accounts['over_time_1']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'], '1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'], '7.13' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'], '50.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'], '153.03' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['amount'], '25.04' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'], '77.12' );
+		$this->assertEquals( '1.00', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['amount'] );
+		$this->assertEquals( '7.13', $pse_arr[$pse_accounts['vacation_accrual_release']][0]['ytd_amount'] );
+		$this->assertEquals( '50.01', $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] );
+		$this->assertEquals( '153.03', $pse_arr[$pse_accounts['federal_income_tax']][0]['ytd_amount'] );
+		$this->assertEquals( '25.04', $pse_arr[$pse_accounts['state_income_tax']][0]['amount'] );
+		$this->assertEquals( '77.12', $pse_arr[$pse_accounts['state_income_tax']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['amount'], '10.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'], '33.06' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['amount'], '15.05' );
-		$this->assertEquals( $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'], '46.19' );
+		$this->assertEquals( '10.01', $pse_arr[$pse_accounts['medicare']][0]['amount'] );
+		$this->assertEquals( '33.06', $pse_arr[$pse_accounts['medicare']][0]['ytd_amount'] );
+		$this->assertEquals( '15.05', $pse_arr[$pse_accounts['state_unemployment']][0]['amount'] );
+		$this->assertEquals( '46.19', $pse_arr[$pse_accounts['state_unemployment']][0]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'], '-1.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'], '0.00' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'], '65.01' );
-		$this->assertEquals( $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'], '17.54' );
+		$this->assertEquals( '-1.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['amount'] );
+		$this->assertEquals( '0.00', $pse_arr[$pse_accounts['vacation_accrual']][0]['ytd_amount'] );
+		$this->assertEquals( '65.01', $pse_arr[$pse_accounts['vacation_accrual']][1]['amount'] );
+		$this->assertEquals( '17.54', $pse_arr[$pse_accounts['vacation_accrual']][1]['ytd_amount'] );
 
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'], '211.04' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'], '637.23' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'], '75.05' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'], '230.15' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'], '135.99' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'], '407.08' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '25.06' );
-		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '79.25' );
+		$this->assertEquals( '211.04', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] );
+		$this->assertEquals( '637.23', $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] );
+		$this->assertEquals( '75.05', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['amount'] );
+		$this->assertEquals( '230.15', $pse_arr[$this->pay_stub_account_link_arr['total_deductions']][0]['ytd_amount'] );
+		$this->assertEquals( '135.99', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['amount'] );
+		$this->assertEquals( '407.08', $pse_arr[$this->pay_stub_account_link_arr['net_pay']][0]['ytd_amount'] );
+		$this->assertEquals( '25.06', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'] );
+		$this->assertEquals( '79.25', $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'] );
 
 		unset( $pse_arr, $pay_stub_id, $pay_stub );
 
@@ -2366,77 +2368,77 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rsaf->setDataFormat( 10 ); //10=ACH
 		$rsaf->setValue2( 123456789 ); //Branch/Routing
 		$rsaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rsaf->isValid() );
+		$this->assertCount( 0, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		$rsaf->setValue2( 123456789 ); //Branch/Routing
 		$rsaf->setValue3( 12345678901234567 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rsaf->isValid() );
+		$this->assertCount( 0, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		$rsaf->setValue2( '000456789' ); //Branch/Routing
 		$rsaf->setValue3( '00045678901234567' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rsaf->isValid() );
+		$this->assertCount( 0, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Some bank in Carribean (Antigua?) don't have branch/routing numbers, so we need to accept all zeros.
 		$rsaf->setValue2( '000000000' ); //Branch/Routing
 		$rsaf->setValue3( '00045678901234567' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rsaf->isValid() );
+		$this->assertCount( 0, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Routing number invalid. -- Too short.
 		$rsaf->setValue2( 12345678 ); //Branch/Routing
 		$rsaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Routing number invalid. -- Too long
 		$rsaf->setValue2( 1234567891 ); //Branch/Routing
 		$rsaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too short
 		$rsaf->setValue2( 123456789 ); //Branch/Routing
 		$rsaf->setValue3( 12 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1, $rsaf->Validator->getTextErrors() );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray(), $rsaf->Validator->getTextErrors() );
 		$rsaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too long
 		$rsaf->setValue2( 123456789 ); //Branch/Routing
 		$rsaf->setValue3( 123456789012345678 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Using scientific notation.
 		$rsaf->setValue2( '5.18E+11' ); //Branch/Routing
 		$rsaf->setValue3( '5.18E+11' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 2 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 2, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Using bogus data.
 		$rsaf->setValue2( '123ABC456789' ); //Branch/Routing
-		$rsaf->setValue3( '123ABC456789' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 2 );
+		$rsaf->setValue3( '123!@$456789' ); //Account Number
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 2, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 
@@ -2448,115 +2450,115 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rsaf->setValue1( 123 ); //Institution
 		$rsaf->setValue2( 12345 ); //Branch/Routing
 		$rsaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rsaf->isValid() );
+		$this->assertCount( 0, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		$rsaf->setValue1( 123 ); //Institution
 		$rsaf->setValue2( 12345 ); //Branch/Routing
 		$rsaf->setValue3( 123456789012 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rsaf->isValid() );
+		$this->assertCount( 0, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		$rsaf->setValue1( '001' ); //Institution
 		$rsaf->setValue2( '00045' ); //Branch/Routing
 		$rsaf->setValue3( '000456789012' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rsaf->isValid() );
+		$this->assertCount( 0, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Some bank in Carribean (Antigua?) don't have branch/routing numbers, so we need to accept all zeros.
 		$rsaf->setValue1( '000' ); //Institution
 		$rsaf->setValue2( '00000' ); //Branch/Routing
 		$rsaf->setValue3( '000456789012' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rsaf->isValid() );
+		$this->assertCount( 0, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Institution number invalid. -- Too short.
 		$rsaf->setValue1( '01' ); //Institution
 		$rsaf->setValue2( 12345 ); //Branch/Routing
 		$rsaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value1' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value1' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Institution number invalid. -- Too Long.
 		$rsaf->setValue1( '0013' ); //Institution
 		$rsaf->setValue2( 12345 ); //Branch/Routing
 		$rsaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value1' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value1' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Branch number invalid. -- Too short.
 		$rsaf->setValue1( '001' ); //Institution
 		$rsaf->setValue2( 1234 ); //Branch/Routing
 		$rsaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Branch number invalid. -- Too long
 		$rsaf->setValue1( '001' ); //Institution
 		$rsaf->setValue2( 123456 ); //Branch/Routing
 		$rsaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too short
 		$rsaf->setValue1( '001' ); //Institution
 		$rsaf->setValue2( 12345 ); //Branch/Routing
 		$rsaf->setValue3( 12 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too long
 		$rsaf->setValue1( '001' ); //Institution
 		$rsaf->setValue2( 12345 ); //Branch/Routing
 		$rsaf->setValue3( 1234567890123 ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 1, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Using scientific notation.
 		$rsaf->setValue1( '001' ); //Institution
 		$rsaf->setValue2( '5.18E+11' ); //Branch/Routing
 		$rsaf->setValue3( '5.18E+11' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 2 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 2, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Using bogus data.
 		$rsaf->setValue1( '001' ); //Institution
 		$rsaf->setValue2( '123AB' ); //Branch/Routing
 		$rsaf->setValue3( '123ABC456789' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 2 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 2, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 
 		//Using bogus data.
 		$rsaf->setValue1( '1A1' ); //Institution
 		$rsaf->setValue2( '123AB' ); //Branch/Routing
 		$rsaf->setValue3( '123ABC456789' ); //Account Number
-		$this->assertEquals( $rsaf->isValid(), false );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value1' ), true );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 3 );
+		$this->assertEquals( false, $rsaf->isValid() );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value1' ) );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rsaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 3, $rsaf->Validator->getErrorsArray() );
 		$rsaf->Validator->resetErrors();
 	}
 
@@ -2595,77 +2597,77 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$rdaf->setValue2( 123456789 ); //Branch/Routing
 		$rdaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rdaf->isValid() );
+		$this->assertCount( 0, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		$rdaf->setValue2( 123456789 ); //Branch/Routing
 		$rdaf->setValue3( 12345678901234567 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rdaf->isValid() );
+		$this->assertCount( 0, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		$rdaf->setValue2( '000456789' ); //Branch/Routing
 		$rdaf->setValue3( '00045678901234567' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rdaf->isValid() );
+		$this->assertCount( 0, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Some bank in Carribean (Antigua?) don't have branch/routing numbers, so we need to accept all zeros.
 		$rdaf->setValue2( '000000000' ); //Branch/Routing
 		$rdaf->setValue3( '00045678901234567' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rdaf->isValid() );
+		$this->assertCount( 0, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Routing number invalid. -- Too short.
 		$rdaf->setValue2( 12345678 ); //Branch/Routing
 		$rdaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Routing number invalid. -- Too long
 		$rdaf->setValue2( 1234567891 ); //Branch/Routing
 		$rdaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too short
 		$rdaf->setValue2( 123456789 ); //Branch/Routing
 		$rdaf->setValue3( 12 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too long
 		$rdaf->setValue2( 123456789 ); //Branch/Routing
 		$rdaf->setValue3( 123456789012345678 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Using scientific notation.
 		$rdaf->setValue2( '5.18E+11' ); //Branch/Routing
 		$rdaf->setValue3( '5.18E+11' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 2 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 2, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Using bogus data.
 		$rdaf->setValue2( '123ABC456789' ); //Branch/Routing
-		$rdaf->setValue3( '123ABC456789' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 2 );
+		$rdaf->setValue3( '123!@$456789' ); //Account Number
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 2, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 
@@ -2700,115 +2702,115 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$rdaf->setValue1( 123 ); //Institution
 		$rdaf->setValue2( 12345 ); //Branch/Routing
 		$rdaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rdaf->isValid() );
+		$this->assertCount( 0, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		$rdaf->setValue1( 123 ); //Institution
 		$rdaf->setValue2( 12345 ); //Branch/Routing
 		$rdaf->setValue3( 123456789012 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rdaf->isValid() );
+		$this->assertCount( 0, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		$rdaf->setValue1( '001' ); //Institution
 		$rdaf->setValue2( '00045' ); //Branch/Routing
 		$rdaf->setValue3( '000456789012' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rdaf->isValid() );
+		$this->assertCount( 0, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Some bank in Carribean (Antigua?) don't have branch/routing numbers, so we need to accept all zeros.
 		$rdaf->setValue1( '000' ); //Institution
 		$rdaf->setValue2( '00000' ); //Branch/Routing
 		$rdaf->setValue3( '000456789012' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$this->assertEquals( true, $rdaf->isValid() );
+		$this->assertCount( 0, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Institution number invalid. -- Too short.
 		$rdaf->setValue1( '01' ); //Institution
 		$rdaf->setValue2( 12345 ); //Branch/Routing
 		$rdaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value1' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value1' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Institution number invalid. -- Too Long.
 		$rdaf->setValue1( '0013' ); //Institution
 		$rdaf->setValue2( 12345 ); //Branch/Routing
 		$rdaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value1' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value1' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Branch number invalid. -- Too short.
 		$rdaf->setValue1( '001' ); //Institution
 		$rdaf->setValue2( 1234 ); //Branch/Routing
 		$rdaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Branch number invalid. -- Too long
 		$rdaf->setValue1( '001' ); //Institution
 		$rdaf->setValue2( 123456 ); //Branch/Routing
 		$rdaf->setValue3( 123456789 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too short
 		$rdaf->setValue1( '001' ); //Institution
 		$rdaf->setValue2( 12345 ); //Branch/Routing
 		$rdaf->setValue3( 12 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1, $rsaf->Validator->getTextErrors() );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray(), $rsaf->Validator->getTextErrors() );
 		$rdaf->Validator->resetErrors();
 
 		//Account number invalid. -- Too long
 		$rdaf->setValue1( '001' ); //Institution
 		$rdaf->setValue2( 12345 ); //Branch/Routing
 		$rdaf->setValue3( 1234567890123 ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 1, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Using scientific notation.
 		$rdaf->setValue1( '001' ); //Institution
 		$rdaf->setValue2( '5.18E+11' ); //Branch/Routing
 		$rdaf->setValue3( '5.18E+11' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 2 );
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 2, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Using bogus data.
 		$rdaf->setValue1( '001' ); //Institution
 		$rdaf->setValue2( '123AB' ); //Branch/Routing
-		$rdaf->setValue3( '123ABC456789' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 2 );
+		$rdaf->setValue3( '123!@$456789' ); //Account Number
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 2, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 
 		//Using bogus data.
 		$rdaf->setValue1( '1A1' ); //Institution
 		$rdaf->setValue2( '123AB' ); //Branch/Routing
-		$rdaf->setValue3( '123ABC456789' ); //Account Number
-		$this->assertEquals( $rdaf->isValid(), false );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value1' ), true );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), true );
-		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), true );
-		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 3 );
+		$rdaf->setValue3( '123!@$456789' ); //Account Number
+		$this->assertEquals( false, $rdaf->isValid() );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value1' ) );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value2' ) );
+		$this->assertEquals( true, $rdaf->Validator->hasError( 'value3' ) );
+		$this->assertCount( 3, $rdaf->Validator->getErrorsArray() );
 		$rdaf->Validator->resetErrors();
 	}
 

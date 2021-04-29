@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedFunctionInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -528,6 +528,7 @@ class Debug {
 											&& stristr( $error_str, 'software caused connection abort' ) === false
 											&& stristr( $error_str, 'closed the connection unexpectedly' ) === false
 											&& stristr( $error_str, 'execution was interrupted' ) === false
+											&& stristr( $error_str, 'terminating connection due to administrator command' ) === false
 											&& stristr( $error_str, 'no space left on device' ) === false
 											&& stristr( $error_str, 'unserialize' ) === false
 											&& stristr( $error_str, 'headers already sent by' ) === false
@@ -585,10 +586,10 @@ class Debug {
 			self::Text( 'PHP ERROR - FATAL(' . $error['type'] . '): ' . $error['message'] . ' File: ' . $error['file'] . ' Line: ' . $error['line'], $error['file'], $error['line'], __METHOD__, 0 );
 
 			if ( defined( 'TIMETREX_API' ) && TIMETREX_API == true ) { //Only when a fatal error occurs.
-				global $amf_message_id;
-				if ( $amf_message_id != '' ) {
+				global $api_message_id;
+				if ( $api_message_id != '' ) {
 					$progress_bar = new ProgressBar();
-					$progress_bar->error( $amf_message_id, TTi18n::getText( 'ERROR: Operation cannot be completed.' ) );
+					$progress_bar->error( $api_message_id, TTi18n::getText( 'ERROR: Operation cannot be completed.' ) );
 					unset( $progress_bar );
 				}
 			}

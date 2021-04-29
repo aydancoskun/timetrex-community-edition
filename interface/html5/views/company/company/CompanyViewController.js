@@ -1,21 +1,26 @@
-CompanyViewController = BaseViewController.extend( {
+class CompanyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			_required_files: ['TImage', 'TImageAdvBrowser'],
 
-	_required_files: ['TImage', 'TImageAdvBrowser', 'APICompany'],
+			product_edition_array: null,
+			industry_array: null,
+			country_array: null,
+			province_array: null,
+			e_province_array: null,
+			terminated_user_disable_login_type_array: null,
+			password_policy_type_array: null,
+			password_minimum_permission_level_array: null,
+			password_minimum_strength_array: null,
+			ldap_authentication_type_array: null,
 
-	product_edition_array: null,
-	industry_array: null,
-	country_array: null,
-	province_array: null,
-	e_province_array: null,
-	terminated_user_disable_login_type_array: null,
-	password_policy_type_array: null,
-	password_minimum_permission_level_array: null,
-	password_minimum_strength_array: null,
-	ldap_authentication_type_array: null,
+			file_browser: null
+		} );
 
-	file_browser: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		var $this = this;
 
 		this.permission_id = 'company';
@@ -23,15 +28,15 @@ CompanyViewController = BaseViewController.extend( {
 		this.script_name = 'CompanyView';
 		this.table_name_key = 'company';
 		this.context_menu_name = $.i18n._( 'Company Information' );
-		this.api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.api = TTAPI.APICompany;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -41,9 +46,9 @@ CompanyViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var options = [
 			{ option_name: 'product_edition' },
@@ -63,13 +68,12 @@ CompanyViewController = BaseViewController.extend( {
 			}
 
 		} );
+	}
 
-	},
-
-	getCompanyData: function( callBack ) {
+	getCompanyData( callBack ) {
 		var $this = this;
 
-		// First to get current company's user default data, if no have any data to get the default data which has been set up in (APIFactory.getAPIClass( 'APIUserDefault.' ))
+		// First to get current company's user default data, if no have any data to get the default data which has been set up in TTAPI.APIUserDefault.
 		var args = { filter_data: { id: LocalCacheData.getLoginUser().company_id } };
 
 		$this.api['get' + $this.api.key_name]( args, {
@@ -81,9 +85,9 @@ CompanyViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	openEditView: function() {
+	openEditView() {
 
 		var $this = this;
 
@@ -96,7 +100,7 @@ CompanyViewController = BaseViewController.extend( {
 				}
 
 				$this.getCompanyData( function( result ) {
-					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+					// Waiting for the TTAPI.API returns data to set the current edit record.
 					$this.current_edit_record = result;
 
 					$this.initEditView();
@@ -116,10 +120,9 @@ CompanyViewController = BaseViewController.extend( {
 			new_url = new_url + '&company_id=' + LocalCacheData.getLoginUser().company_id;
 			Global.setURLToBrowser( new_url );
 		}
+	}
 
-	},
-
-	removeCompanyIdFromUrl: function() {
+	removeCompanyIdFromUrl() {
 		var new_url = window.location.href;
 		if ( new_url.indexOf( 'company_id' ) != -1 ) {
 			var parts = new_url.split( '&' );
@@ -129,15 +132,14 @@ CompanyViewController = BaseViewController.extend( {
 			}
 			Global.setURLToBrowser( new_url );
 		}
-	},
+	}
 
-	removeEditView: function() {
+	removeEditView() {
 		this.removeCompanyIdFromUrl();
-		this._super( 'removeEditView' );
+		super.removeEditView();
+	}
 
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
 			if ( Global.isSet( widget ) ) {
@@ -158,14 +160,14 @@ CompanyViewController = BaseViewController.extend( {
 		this.collectUIDataToCurrentEditRecord();
 
 		this.setEditViewDataDone();
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onTypeChange();
-	},
+	}
 
-	initSubPasswordPolicyView: function() {
+	initSubPasswordPolicyView() {
 		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_password_policy' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
@@ -176,13 +178,13 @@ CompanyViewController = BaseViewController.extend( {
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
-	},
+	}
 
-	setEditMenuSaveIcon: function( context_btn, pId ) {
+	setEditMenuSaveIcon( context_btn, pId ) {
 		//#2542 - Always needs a save icon as this view is always in edit-only mode, ver in view mode
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -211,24 +213,23 @@ CompanyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	onSaveDone: function( result ) {
+	onSaveDone( result ) {
 		if ( result.isValid() && result.getResult() === true ) {
 			this.updateCurrentCompanyCache();
 			return true;
 		}
 		return false;
-	},
+	}
 
-	updateCurrentCompanyCache: function() {
+	updateCurrentCompanyCache() {
 
-		var authentication_api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
+		var authentication_api = TTAPI.APIAuthentication;
 		authentication_api.getCurrentCompany( { onResult: this.onGetCurrentCompany } );
-	},
+	}
 
-	onGetCurrentCompany: function( e ) {
+	onGetCurrentCompany( e ) {
 
 		var result = e.getResult();
 		if ( result.is_setup_complete === '1' || result.is_setup_complete === 1 ) {
@@ -238,9 +239,9 @@ CompanyViewController = BaseViewController.extend( {
 		}
 
 		LocalCacheData.setCurrentCompany( result );
-	},
+	}
 
-	updateCompanyLogo: function() {
+	updateCompanyLogo() {
 		var d = new Date();
 		$( '#rightLogo' ).css( 'opacity', 0 );
 		$( '#rightLogo' ).attr( 'src', ServiceCaller.companyLogo + '&t=' + d.getTime() );
@@ -265,9 +266,9 @@ CompanyViewController = BaseViewController.extend( {
 				opacity: 1
 			}, 100 );
 		} );
-	},
+	}
 
-	setErrorMenu: function() {
+	setErrorMenu() {
 
 		var len = this.context_menu_array.length;
 
@@ -285,9 +286,9 @@ CompanyViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === '-1' || val === '0' ) {
@@ -307,9 +308,9 @@ CompanyViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	eSetProvince: function( val, refresh ) {
+	eSetProvince( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -335,11 +336,11 @@ CompanyViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_company': { 'label': $.i18n._( 'Company' ) },
@@ -360,6 +361,8 @@ CompanyViewController = BaseViewController.extend( {
 		var tab_company_column2 = tab_company.find( '.second-column' );
 
 		var form_item_input;
+		var widgetContainer;
+		var label;
 
 		this.edit_view_tabs[0] = [];
 
@@ -441,7 +444,7 @@ CompanyViewController = BaseViewController.extend( {
 		// Administrative Contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -453,7 +456,7 @@ CompanyViewController = BaseViewController.extend( {
 		// billing contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -465,7 +468,7 @@ CompanyViewController = BaseViewController.extend( {
 		// Primary Support contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -597,8 +600,8 @@ CompanyViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'password_minimum_age', width: 30 } );
 
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'in Days' ) + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'in Days' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -720,10 +723,9 @@ CompanyViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Login Attribute' ), form_item_input, tab_ldap_column1, '', widgetContainer, true );
+	}
 
-	},
-
-	onTypeChange: function() {
+	onTypeChange() {
 		if ( this.current_edit_record.ldap_authentication_type_id == 0 ) {
 			this.detachElement( 'ldap_host' );
 			this.detachElement( 'ldap_port' );
@@ -748,7 +750,7 @@ CompanyViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	}
 
-} );
+}
 
 //
 //CompanyViewController.loadView = function() {

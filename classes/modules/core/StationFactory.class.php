@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -321,9 +321,9 @@ class StationFactory extends Factory {
 
 						'-1160-time_zone' => TTi18n::gettext( 'Time Zone' ),
 
-						'-1170-branch_selection_type'     => TTi18n::gettext( 'Branch Selection Type' ),
-						'-1180-department_selection_type' => TTi18n::gettext( 'Department Selection Type' ),
-						'-1190-group_selection_type'      => TTi18n::gettext( 'Group Selection Type' ),
+						//'-1170-branch_selection_type'     => TTi18n::gettext( 'Branch Selection Type' ),
+						//'-1180-department_selection_type' => TTi18n::gettext( 'Department Selection Type' ),
+						//'-1190-group_selection_type'      => TTi18n::gettext( 'Group Selection Type' ),
 
 						'-1200-last_punch_time_stamp' => TTi18n::gettext( 'Last Punch' ),
 
@@ -2067,6 +2067,8 @@ class StationFactory extends Factory {
 
 					if ( is_object( $sf->getCompanyObject() ) && is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {
 						$sf->setTimeZone( $sf->getCompanyObject()->getUserDefaultObject()->getTimeZone() );
+					} else {
+						$sf->setTimeZone( 'America/New_York' ); //Force some timezone so new stations can be created at least.
 					}
 
 					break;

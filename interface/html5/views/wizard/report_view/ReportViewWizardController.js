@@ -1,21 +1,26 @@
-ReportViewWizardController = BaseWizardController.extend( {
+class ReportViewWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#report-view-wizard'
+		} );
 
-	el: '#report-view-wizard',
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.title = $.i18n._( 'Report View' );
 		this.steps = 1;
 		this.current_step = 1;
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 		this.initCurrentStep();
-	},
+	}
 
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 		this.stepsWidgetDic[this.current_step] = {};
 		switch ( this.current_step ) {
 			case 1:
@@ -24,9 +29,9 @@ ReportViewWizardController = BaseWizardController.extend( {
 				this.content_div.children().eq( 0 )[0].contentWindow.document.close();
 				break;
 		}
-	},
+	}
 
-	onCloseClick: function() {
+	onCloseClick() {
 		$( this.el ).remove();
 		LocalCacheData.current_open_wizard_controller = null;
 
@@ -38,10 +43,10 @@ ReportViewWizardController = BaseWizardController.extend( {
 			source: source,
 			force_source: true
 		} );
-	},
+	}
 
-	onDoneClick: function() {
+	onDoneClick() {
 		this.onCloseClick();
 	}
 
-} );
+}

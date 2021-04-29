@@ -1,124 +1,129 @@
-TimeSheetViewController = BaseViewController.extend( {
+class TimeSheetViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#timesheet_view_container', //Must set el here and can only set string, so events can work
+			_required_files: {
+				10: ['TImage'],
+				15: ['leaflet-timetrex']
+			},
+			status_array: null,
+			type_array: null,
+			employee_nav: null,
+			start_date_picker: null,
+			full_timesheet_data: null, //full timesheet data
+			full_format: 'ddd-MMM-DD-YYYY',
+			weekly_format: 'ddd, MMM DD',
+			day_format: 'ddd',
+			date_format: 'MMM DD',
+			start_date: null,
+			end_date: null,
+			select_cells_Array: [], //Timesheet grid
+			select_punches_array: [], //Timesheet grid.
+			absence_select_cells_Array: [], //Absence grid
+			accumulated_time_cells_array: [],
+			premium_cells_array: [],
+			timesheet_data_source: null,
+			accumulated_time_source: null,
+			accumulated_time_grid: null,
+			accumulated_time_source_map: null,
+			branch_grid: null,
+			branch_source_map: null,
+			branch_source: null,
+			department_grid: null,
+			department_source_map: null,
+			department_source: null,
+			job_grid: null,
+			job_source_map: null,
+			job_source: null,
+			job_item_grid: null,
+			job_item_source_map: null,
+			job_item_source: null,
+			premium_grid: null,
+			premium_source_map: null,
+			premium_source: null,
+			absence_grid: null,
+			absence_source: null,
+			absence_original_source: null,
+			accumulated_total_grid: null,
+			accumulated_total_grid_source_map: null,
+			accumulated_total_grid_source: null,
+			punch_note_grid: null,
+			punch_note_grid_source: null,
+			verification_grid: null,
+			verification_grid_source: null,
+			grid_dic: null,
+			pay_period_map: null,
+			pay_period_data: null,
+			timesheet_verify_data: null,
+			api_timesheet: null,
+			api_user_date_total: null,
+			api_date: null,
+			api_station: null,
+			api_punch: null,
+			absence_model: false,
+			select_drag_menu_id: '', //Do drag move or copy
+			is_mass_adding: false,
+			department_cell_count: 0,
+			branch_cell_count: 0,
+			premium_cell_count: 0,
+			job_cell_count: 0,
+			task_cell_count: 0,
+			absence_cell_count: 0,
+			punch_note_account: 0,
+			show_navigation_box: true,
+			station: null,
+			scroll_position: 0,
+			job_api: null,
+			job_item_api: null,
+			api_absence_policy: null,
+			pre_total_time: null,
+			absence_available_balance_dataList: {},
+			available_balance_info: null,
+			show_job_ui: false,
+			show_job_item_ui: false,
+			show_branch_ui: false,
+			show_department_ui: false,
+			show_good_quantity_ui: false,
+			show_bad_quantity_ui: false,
+			show_note_ui: false,
+			show_station_ui: false,
+			show_absence_job_ui: false,
+			show_absence_job_item_ui: false,
+			show_absence_branch_ui: false,
+			show_absence_department_ui: false,
+			holiday_data_dic: {},
+			grid_div: null,
+			actual_time_label: null,
+			column_maps: null,
+			accmulated_order_map: {},
+			url_args_before_set_date_url: {},
+			allow_auto_switch: true,
 
-	el: '#timesheet_view_container', //Must set el here and can only set string, so events can work
-	_required_files: {
-		10: ['APITimeSheet', 'APIPunch', 'APIStation', 'APIBranch', 'APIDepartment', 'APIUserDateTotal', 'APIAbsencePolicy', 'APIUser', 'APIPunchControl', 'TImage'],
-		15: ['leaflet-timetrex'],
-		20: ['APIJob', 'APIJobItem']
-	},
-	status_array: null,
-	type_array: null,
-	employee_nav: null,
-	start_date_picker: null,
-	full_timesheet_data: null, //full timesheet data
-	full_format: 'ddd-MMM-DD-YYYY',
-	weekly_format: 'ddd, MMM DD',
-	day_format: 'ddd',
-	date_format: 'MMM DD',
-	start_date: null,
-	end_date: null,
-	select_cells_Array: [], //Timesheet grid
-	select_punches_array: [], //Timesheet grid.
-	absence_select_cells_Array: [], //Absence grid
-	accumulated_time_cells_array: [],
-	premium_cells_array: [],
-	timesheet_data_source: null,
-	accumulated_time_source: null,
-	accumulated_time_grid: null,
-	accumulated_time_source_map: null,
-	branch_grid: null,
-	branch_source_map: null,
-	branch_source: null,
-	department_grid: null,
-	department_source_map: null,
-	department_source: null,
-	job_grid: null,
-	job_source_map: null,
-	job_source: null,
-	job_item_grid: null,
-	job_item_source_map: null,
-	job_item_source: null,
-	premium_grid: null,
-	premium_source_map: null,
-	premium_source: null,
-	absence_grid: null,
-	absence_source: null,
-	absence_original_source: null,
-	accumulated_total_grid: null,
-	accumulated_total_grid_source_map: null,
-	accumulated_total_grid_source: null,
-	punch_note_grid: null,
-	punch_note_grid_source: null,
-	verification_grid: null,
-	verification_grid_source: null,
-	grid_dic: null,
-	pay_period_map: null,
-	pay_period_data: null,
-	timesheet_verify_data: null,
-	api_timesheet: null,
-	api_user_date_total: null,
-	api_date: null,
-	api_station: null,
-	api_punch: null,
-	absence_model: false,
-	select_drag_menu_id: '', //Do drag move or copy
-	is_mass_adding: false,
-	department_cell_count: 0,
-	branch_cell_count: 0,
-	premium_cell_count: 0,
-	job_cell_count: 0,
-	task_cell_count: 0,
-	absence_cell_count: 0,
-	punch_note_account: 0,
-	show_navigation_box: true,
-	station: null,
-	scroll_position: 0,
-	job_api: null,
-	job_item_api: null,
-	api_absence_policy: null,
-	pre_total_time: null,
-	absence_available_balance_dataList: {},
-	available_balance_info: null,
-	show_job_ui: false,
-	show_job_item_ui: false,
-	show_branch_ui: false,
-	show_department_ui: false,
-	show_good_quantity_ui: false,
-	show_bad_quantity_ui: false,
-	show_note_ui: false,
-	show_station_ui: false,
-	show_absence_job_ui: false,
-	show_absence_job_item_ui: false,
-	show_absence_branch_ui: false,
-	show_absence_department_ui: false,
-	holiday_data_dic: {},
-	grid_div: null,
-	actual_time_label: null,
-	column_maps: null,
-	accmulated_order_map: {},
-	url_args_before_set_date_url: {},
-	allow_auto_switch: true,
+			previous_absence_policy_id: false,
+			events: {}
+		} );
 
-	previous_absence_policy_id: false,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		////this._super('initialize', options );
 		this.permission_id = 'punch';
 		this.viewId = 'TimeSheet';
 		this.script_name = 'TimeSheetView';
 		this.context_menu_name = $.i18n._( 'TimeSheet' );
 		this.navigation_label = $.i18n._( 'TimeSheet' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
-		this.api_timesheet = new ( APIFactory.getAPIClass( 'APITimeSheet' ) )();
-		this.api_user_date_total = new ( APIFactory.getAPIClass( 'APIUserDateTotal' ) )();
-		this.api_date = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-		this.api_station = new ( APIFactory.getAPIClass( 'APIStation' ) )();
-		this.api_punch = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
+		this.api = TTAPI.APIPunch;
+		this.api_timesheet = TTAPI.APITimeSheet;
+		this.api_user_date_total = TTAPI.APIUserDateTotal;
+		this.api_date = TTAPI.APITTDate;
+		this.api_station = TTAPI.APIStation;
+		this.api_punch = TTAPI.APIPunch;
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
-			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+			this.job_api = TTAPI.APIJob;
+			this.job_item_api = TTAPI.APIJobItem;
 		}
-		this.api_absence_policy = new ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) )();
+		this.api_absence_policy = TTAPI.APIAbsencePolicy;
 		this.scroll_position = 0;
 		this.grid_dic = {};
 
@@ -127,14 +132,14 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.buildContextMenu();
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-	},
+	}
 
-	initEditView: function() {
+	initEditView() {
 		TTPromise.resolve( 'TimeSheetViewController', 'addclick' );
-		this._super( 'initEditView' );
-	},
+		super.initEditView();
+	}
 
-	onSubViewRemoved: function( is_cancel ) {
+	onSubViewRemoved( is_cancel ) {
 		if ( !is_cancel ) {
 			this.search();
 		}
@@ -144,16 +149,15 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			this.setEditMenu();
 		}
+	}
 
-	},
-
-	setScrollPosition: function() {
+	setScrollPosition() {
 		if ( this.scroll_position > 0 ) {
 			this.grid_div.scrollTop( this.scroll_position );
 		}
-	},
+	}
 
-	punchModeValidate: function( p_id ) {
+	punchModeValidate( p_id ) {
 		if ( !p_id ) {
 			p_id = 'punch';
 		}
@@ -163,9 +167,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	jobUIValidate: function( p_id ) {
+	jobUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -176,9 +180,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	jobItemUIValidate: function( p_id ) {
+	jobItemUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -188,17 +192,17 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
 	//Refresh to clear warnning messages after saving from employee edit view
-	updateSelectUserAndRefresh: function( new_item ) {
+	updateSelectUserAndRefresh( new_item ) {
 
 		this.employee_nav.updateSelectItem( new_item );
 
 		this.search();
-	},
+	}
 
-	branchUIValidate: function( p_id ) {
+	branchUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -208,9 +212,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	departmentUIValidate: function( p_id ) {
+	departmentUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -220,9 +224,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	goodQuantityUIValidate: function( p_id ) {
+	goodQuantityUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -232,9 +236,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	badQuantityUIValidate: function( p_id ) {
+	badQuantityUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -245,9 +249,21 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	noteUIValidate: function( p_id ) {
+	locationUIValidate( p_id ) {
+
+		if ( !p_id ) {
+			p_id = 'punch';
+		}
+
+		if ( PermissionManager.validate( p_id, 'edit_location' ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	noteUIValidate( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -257,19 +273,20 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	stationValidate: function() {
+	stationValidate() {
 		if ( PermissionManager.validate( 'station', 'enabled' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
 	/* jshint ignore:start */
+
 	//Special permission check for views, need override
-	initPermission: function() {
-		this._super( 'initPermission' );
+	initPermission() {
+		super.initPermission();
 
 		if ( !PermissionManager.validate( 'punch', 'view' ) && !PermissionManager.validate( 'punch', 'view_child' ) ) {
 			this.show_navigation_box = false;
@@ -329,6 +346,12 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.show_note_ui = false;
 		}
 
+		if ( this.locationUIValidate() ) {
+			this.show_location_ui = true;
+		} else {
+			this.show_location_ui = false;
+		}
+
 		if ( this.stationValidate() ) {
 			this.show_station_ui = true;
 		} else {
@@ -358,11 +381,11 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			this.show_absence_department_ui = false;
 		}
+	}
 
-	},
 	/* jshint ignore:end */
 
-	ownerOrChildPermissionValidate: function( p_id, permission_name, selected_item ) {
+	ownerOrChildPermissionValidate( p_id, permission_name, selected_item ) {
 		var field;
 		if ( permission_name && permission_name.indexOf( 'child' ) > -1 ) {
 			field = 'is_child';
@@ -377,16 +400,15 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'status' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				drag_and_drop: {
@@ -524,9 +546,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return context_menu_model;
-	},
+	}
 
-	openEditView: function() {
+	openEditView() {
 		//#2295 - Re-initialize previous_absence_policy_id to ensure that previously saved values are passed correctly into the estimation of projected available balance.
 		this.previous_absence_policy_id = false;
 
@@ -537,12 +559,12 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.is_edit = true;
 			this.initEditViewUI( 'TimeSheet', 'TimeSheetEditView.html' );
 		}
-
-	},
+	}
 
 	/* jshint ignore:start */
+
 	//set widget disablebility if view mode or edit mode
-	setEditViewWidgetsMode: function() {
+	setEditViewWidgetsMode() {
 		var did_clean = false;
 		for ( var key in this.edit_view_ui_dic ) {
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
@@ -574,22 +596,18 @@ TimeSheetViewController = BaseViewController.extend( {
 						if ( this.is_mass_adding ) {
 							this.attachElement( key );
 							widget.css( 'opacity', 1 );
-							break;
 						} else {
 							this.detachElement( key );
 							widget.css( 'opacity', 0 );
-							break;
 						}
 						break;
 					case 'date_stamp':
 						if ( this.is_mass_adding ) {
 							this.detachElement( key );
 							widget.css( 'opacity', 0 );
-							break;
 						} else {
 							this.attachElement( key );
 							widget.css( 'opacity', 1 );
-							break;
 						}
 						break;
 					case 'total_time':
@@ -610,26 +628,21 @@ TimeSheetViewController = BaseViewController.extend( {
 						if ( this.is_mass_adding ) {
 							this.attachElement( key );
 							widget.css( 'opacity', 1 );
-							break;
 						} else {
 							this.detachElement( key );
 							widget.css( 'opacity', 0 );
-							break;
 						}
 						break;
 					case 'punch_date':
 						if ( this.is_mass_adding ) {
 							this.detachElement( key );
 							widget.css( 'opacity', 0 );
-							break;
 						} else {
 							this.attachElement( key );
 							widget.css( 'opacity', 1 );
-							break;
 						}
 						break;
 					case 'quantity':
-
 						if ( this.show_good_quantity_ui && this.show_bad_quantity_ui ) {
 							this.attachElement( key );
 							widget.css( 'opacity', 1 );
@@ -670,11 +683,10 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		}
+	}
 
-	},
-
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -740,7 +752,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
+			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
@@ -804,7 +816,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -827,7 +839,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -852,7 +864,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -890,7 +902,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -1009,6 +1021,11 @@ TimeSheetViewController = BaseViewController.extend( {
 			widgetContainer.click( function() {
 				$this.onMapClick();
 			} );
+
+			// #2117 - Manual location only supported in edit because we need a punch record to append the data to.
+			if ( ( !this.is_edit && !this.is_viewing ) || !this.show_location_ui ) {
+				widgetContainer.parents( '.edit-view-form-item-div' ).hide();
+			}
 		}
 
 		//Station
@@ -1028,17 +1045,15 @@ TimeSheetViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.IMAGE );
 		form_item_input.TImage( { field: 'punch_image' } );
 		this.addEditFieldToColumn( $.i18n._( 'Image' ), form_item_input, tab_punch_column1, '', null, true, true );
-
-	},
+	}
 
 	/* jshint ignore:end */
 
-
-	onEditStationDone: function() {
+	onEditStationDone() {
 		this.setStation();
-	},
+	}
 
-	setAbsencePolicyFilter: function( filter ) {
+	setAbsencePolicyFilter( filter ) {
 		if ( !filter.filter_data ) {
 			filter.filter_data = {};
 		}
@@ -1050,22 +1065,18 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return filter;
-	},
+	}
 
-	onSetSearchFilterFinished: function() {
+	onSetSearchFilterFinished() {
+	}
 
-	},
+	onBuildBasicUIFinished() {
+	}
 
-	onBuildBasicUIFinished: function() {
-	},
+	onBuildAdvUIFinished() {
+	}
 
-	onBuildAdvUIFinished: function() {
-
-	},
-
-	events: {},
-
-	parserDatesRange: function( date ) {
+	parserDatesRange( date ) {
 		var dates = date.split( ' - ' );
 		var resultArray = [];
 		var beginDate = Global.strToDate( dates[0] );
@@ -1081,16 +1092,16 @@ TimeSheetViewController = BaseViewController.extend( {
 		resultArray.push( dates[1] );
 
 		return resultArray;
-	},
+	}
 
-	validate: function() {
+	validate() {
 		var $this = this;
 		var record = this.current_edit_record;
 		var i;
 		if ( this.is_mass_editing ) {
 			record = [];
 			var len = this.mass_edit_record_ids.length;
-			for ( i = 0; i < len; i++ ) {
+			for ( var i = 0; i < len; i++ ) {
 				var temp_item = Global.clone( this.current_edit_record );
 				temp_item.id = this.mass_edit_record_ids[i];
 				record.push( temp_item );
@@ -1106,7 +1117,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				dates_array = this.parserDatesRange( dates_array );
 			}
 
-			for ( i = 0; i < dates_array.length; i++ ) {
+			for ( var i = 0; i < dates_array.length; i++ ) {
 				var common_record = Global.clone( this.current_edit_record );
 				delete common_record.punch_dates;
 				if ( this.absence_model ) {
@@ -1144,10 +1155,10 @@ TimeSheetViewController = BaseViewController.extend( {
 			} );
 
 		}
+	}
 
-	},
 	/* jshint ignore:start */
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -1229,11 +1240,11 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 			this.validate();
 		}
+	}
 
-	},
 	/* jshint ignore:end */
 
-	buildSearchAndLayoutUI: function() {
+	buildSearchAndLayoutUI() {
 		var layout_div = this.search_panel.find( 'div #saved_layout_content_div' );
 
 		var form_item = $( Global.loadWidget( 'global/widgets/search_panel/FormItem.html' ) );
@@ -1246,7 +1257,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.save_search_as_input = $( this.save_search_as_input );
 		this.save_search_as_input.TTextInput();
 
-		var save_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Save' ) + '\' />' );
+		var save_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Save' ) + '\'></input>' );
 
 		form_item_input_div.append( this.save_search_as_input );
 		form_item_input_div.append( save_btn );
@@ -1266,8 +1277,8 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.previous_saved_layout_div.append( form_item_label );
 
 		this.previous_saved_layout_selector = $( '<select style=\'margin-left: 5px\' class=\'t-select\'>' );
-		var update_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Update' ) + '\' />' );
-		var del_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Delete' ) + '\' />' );
+		var update_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Update' ) + '\'></input>' );
+		var del_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Delete' ) + '\'></input>' );
 
 		update_btn.click( function() {
 			$this.onUpdateLayout();
@@ -1284,21 +1295,20 @@ TimeSheetViewController = BaseViewController.extend( {
 		layout_div.append( form_item );
 
 		this.previous_saved_layout_div.css( 'display', 'none' );
+	}
 
-	},
-
-	checkTimesheetData: function() {
+	checkTimesheetData() {
 		if ( this.full_timesheet_data === true ) {
 			return false;
 		}
 
 		return true;
-	},
+	}
 
-	render: function() {
+	render() {
 
 		var $this = this;
-		this._super( 'render' );
+		super.render();
 
 		var control_bar = $( this.el ).find( '.control-bar' );
 		var date_chooser_div = control_bar.find( '.date-chooser-div' );
@@ -1323,6 +1333,21 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.wage_btn.parent().hide();
 		} else {
 			this.wage_btn.parent().show();
+		}
+
+		this.timezone_btn = action_chooser_div.find( '#timezone' );
+		this.timezone_btn = this.timezone_btn.SwitchButton( {
+			icon: SwitchButtonIcon.all_employee,
+			tooltip: $.i18n._( 'Use Employees Timezone' )
+		} );
+		this.timezone_btn.click( function() {
+			$this.onWageOrModeChange( 'timezone' );
+		} );
+
+		if ( !( PermissionManager.validate( 'punch', 'view' ) && PermissionManager.validate( 'punch', 'view_child' ) ) ) {
+			this.timezone_btn.parent().hide();
+		} else {
+			this.timezone_btn.parent().show();
 		}
 
 		//Create Start Date Picker
@@ -1399,7 +1424,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		var default_args = { permission_section: 'punch' };
 		this.employee_nav = this.employee_nav.AComboBox( {
 			id: 'employee_navigation',
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			init_data_immediately: true,
@@ -1524,10 +1549,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				$this.onWageOrModeChange( 'manual' );
 			} );
 		}
+	}
 
-	},
-
-	doNextIfNoValueChangeInManualGrid: function( doNext, reset, mode ) {
+	doNextIfNoValueChangeInManualGrid( doNext, reset, mode ) {
 		!mode && ( mode = 'manual' );
 		var $this = this;
 		if ( this.getPunchMode() === mode && this.editor ) {
@@ -1547,28 +1571,43 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			doNext();
 		}
-	},
+	}
 
-	getPunchMode: function() {
+	getPunchMode() {
 		//Mode toggle does not exist if the user doesn't have access to it.
 		if ( this.toggle_button ) {
 			return this.toggle_button.getValue();
 		} else {
 			return 'punch';
 		}
-	},
+	}
 
-	onWageOrModeChange: function( id ) {
+	handleOverrideUserPreferenceCookie( user_id ) {
+		if ( this.timezone_btn.getValue() == true ) {
+			setCookie( 'OverrideUserPreference', '{ "user_id": "' + user_id + '"}' );
+		} else {
+			deleteCookie( 'OverrideUserPreference' );
+		}
+	}
+
+	onWageOrModeChange( id ) {
 		this.first_build = true;
 		var $this = this;
 		if ( id === 'wage' ) {
 			this.doNextIfNoValueChangeInManualGrid( doNext, resetWage );
+		} else if ( id === 'timezone' ) {
+			this.handleOverrideUserPreferenceCookie( this.getSelectEmployee() );
+			this.doNextIfNoValueChangeInManualGrid( doNext, resetTimeZone );
 		} else if ( id === 'manual' ) {
 			this.doNextIfNoValueChangeInManualGrid( doNext, resetManual, 'punch' );
 		}
 
 		function resetWage() {
 			$this.wage_btn.setValue( !$this.wage_btn.getValue( true ) );
+		}
+
+		function resetTimeZone() {
+			$this.timezone_btn.setValue( !$this.timezone_btn.getValue( true ) );
 		}
 
 		function resetManual() {
@@ -1582,9 +1621,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			$this.search();
 			$this.setDefaultMenu();
 		}
-	},
+	}
 
-	setEmployeeNavArrowsStatus: function() {
+	setEmployeeNavArrowsStatus() {
 		var $this = this;
 		var employee_nav_div = $( this.el ).find( '.employee-nav-div' );
 		var left_click = employee_nav_div.find( '.left-click' );
@@ -1606,9 +1645,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( !source_data || ( selected_index === 0 && current_open_page === 1 ) ) {
 			left_click.addClass( 'disabled' );
 		}
-	},
+	}
 
-	onClearSearch: function() {
+	onClearSearch() {
 		var do_update = false;
 		var default_layout_id;
 		if ( this.search_panel.getLayoutsArray() && this.search_panel.getLayoutsArray().length > 0 ) {
@@ -1665,10 +1704,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	onUpdateLayout: function() {
+	onUpdateLayout() {
 
 		var selectId = $( this.previous_saved_layout_selector ).children( 'option:selected' ).attr( 'value' );
 		var layout_name = $( this.previous_saved_layout_selector ).children( 'option:selected' ).text();
@@ -1691,10 +1729,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	onSaveNewLayout: function( default_layout_name ) {
+	onSaveNewLayout( default_layout_name ) {
 		var layout_name;
 		if ( Global.isSet( default_layout_name ) ) {
 			layout_name = default_layout_name;
@@ -1727,10 +1764,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	onSearch: function() {
+	onSearch() {
 		Global.setUINotready();
 		TTPromise.add( 'init', 'init' );
 		TTPromise.wait();
@@ -1775,14 +1811,15 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	updateManualGrid: function() {
+	updateManualGrid() {
 		var $this = this;
 		var start_date_string = this.start_date_picker.getValue();
 		var user_id = this.getSelectEmployee();
 		ProgressBar.noProgressForNextCall();
+
+		$this.handleOverrideUserPreferenceCookie( user_id );
 		$this.api_timesheet.getTimeSheetData( user_id, start_date_string, {
 			onResult: function( result ) {
 				ProgressBar.removeNanobar();
@@ -1812,10 +1849,11 @@ TimeSheetViewController = BaseViewController.extend( {
 				$this.onReloadSubGridResult( result );
 			}
 		} );
-	},
+	}
+
 	// Dev Note: TODO/REFACTOR: search() params here differ from BaseViewController.search() this could cause confusion or issues,
 	// Currently means any search() calls in baseview using the callback param will not work here in TimeSheet.
-	search: function( setDefaultMenu, force ) {
+	search( setDefaultMenu, force ) {
 
 		this.accumulated_time_cells_array = []; //reset array since the select cell is clean
 		this.premium_cells_array = []; //reset array since the select cell is clean
@@ -1867,6 +1905,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			if ( LocalCacheData.last_timesheet_selected_user ) {
 				LocalCacheData.last_timesheet_selected_show_wage = ( $this.wage_btn ) ? $this.wage_btn.getValue( true ) : false;
+				LocalCacheData.last_timesheet_selected_timezone = ( $this.timezone_btn ) ? $this.timezone_btn.getValue( true ) : false;
 				if ( $this.toggle_button ) {
 					LocalCacheData.last_timesheet_selected_punch_mode = $this.toggle_button.getValue();
 				}
@@ -1878,6 +1917,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 
 				if ( user_id ) {
+					$this.handleOverrideUserPreferenceCookie( user_id );
 					$this.api_timesheet.getTimeSheetData( user_id, start_date_string, args, {
 						onResult: function( result ) {
 							$this.full_timesheet_data = result.getResult();
@@ -1898,9 +1938,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	buildVerificationGrid: function() {
+	buildVerificationGrid() {
 		var $this = this;
 
 		var columns = [];
@@ -1942,9 +1982,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			verticalResize: false,
 			onResizeGrid: false
 		}, columns );
-	},
+	}
 
-	buildPunchNoteGrid: function() {
+	buildPunchNoteGrid() {
 		var $this = this;
 
 		var columns = [];
@@ -2001,10 +2041,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		// Related to issue #2712, and (via bisect) appears to be caused by 4e92c7ab463d9b3418735c0db302a50efc43e8bf when jquery.jqgrid.extend.js was removed in a JS upgrade fix.
 		var table = $( this.grid_dic.punch_note_grid.grid ).parents( '.ui-jqgrid-view' ).find( '.ui-jqgrid-hbox table' ); //grab the hbox
 		table.css( 'width', '100%' );
+	}
 
-	},
-
-	getAccumulatedTotalGridPayperiodHeader: function() {
+	getAccumulatedTotalGridPayperiodHeader() {
 		this.pay_period_header = $.i18n._( 'No Pay Period' );
 
 		var pay_period_id = this.timesheet_verify_data.pay_period_id;
@@ -2021,9 +2060,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	buildAccumulatedTotalGrid: function() {
+	buildAccumulatedTotalGrid() {
 		var $this = this;
 
 		var columns = [];
@@ -2100,15 +2139,14 @@ TimeSheetViewController = BaseViewController.extend( {
 		var accumulated_total_grid_title = $( this.el ).find( '.accumulated-total-grid-title' );
 		accumulated_total_grid_title.css( 'display', 'block' );
 		this.setAccumulatedTotalGridPayPeriodHeaders();
-
-	},
+	}
 
 	//Override and disable as bindTimeSheetGridColumnEvents() is used at a different point instead.
-	bindGridColumnEvents: function() {
-	},
+	bindGridColumnEvents() {
+	}
 
 	//Bind column click event to change sort type and save columns to t_grid_header_array to use to set column style (asc or desc)
-	bindTimeSheetGridColumnEvents: function() {
+	bindTimeSheetGridColumnEvents() {
 		var display_columns = this.grid.getGridParam( 'colModel' );
 
 		//Exception taht display column not existed, not sure when this will happen, but may there will be a second time load if this happen
@@ -2149,10 +2187,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	checkIsSelectedAbsenceCell: function( row_id, cell_index ) {
+	checkIsSelectedAbsenceCell( row_id, cell_index ) {
 		for ( var i = 0, m = this.absence_select_cells_Array.length; i < m; i++ ) {
 			var cell = this.absence_select_cells_Array[i];
 			if ( cell.row_id == row_id && cell.cell_index === cell_index ) {
@@ -2161,9 +2198,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
-	},
+	}
 
-	buildAbsenceGrid: function() {
+	buildAbsenceGrid() {
 		var $this = this;
 
 		var grid_id = 'absence_grid';
@@ -2241,9 +2278,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( this.grid_dic[grid_id] && this.grid_dic[grid_id].grid ) {
 			this.grid_dic.absence_grid.grid.setGridWidth( $( 'body' ).width() );
 		}
-	},
+	}
 
-	checkIsSelectedPunchCell: function( row_id, cell_index ) {
+	checkIsSelectedPunchCell( row_id, cell_index ) {
 		for ( var i = 0, m = this.select_cells_Array.length; i < m; i++ ) {
 			var cell = this.select_cells_Array[i];
 			if ( cell.row_id == row_id && cell.cell_index == cell_index ) {
@@ -2252,12 +2289,12 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
-	},
+	}
 
 	/**
 	 * Paired secondary row coloring for timesheet
 	 */
-	colorTimeSheetRows: function() {
+	colorTimeSheetRows() {
 		var $trs = $( '.timesheet-grid-div .timesheet-grid tr' );
 		var skips = 0;
 		var colored = 0;
@@ -2272,9 +2309,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				skips++;
 			}
 		}
-	},
+	}
 
-	buildTimeSheetGrid: function() {
+	buildTimeSheetGrid() {
 		var grid_id = this.ui_id + '_grid';
 		var $this = this;
 
@@ -2365,9 +2402,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.grid_div.scroll( function( e ) {
 			$this.scroll_position = $this.grid_div.scrollTop();
 		} );
-	},
+	}
 
-	onGridDblClickRow: function( name ) {
+	onGridDblClickRow( name ) {
 		var len = this.context_menu_array.length;
 		var need_break = false;
 		for ( var i = 0; i < len; i++ ) {
@@ -2386,7 +2423,7 @@ TimeSheetViewController = BaseViewController.extend( {
 					break;
 			}
 		}
-		for ( i = 0; i < len; i++ ) {
+		for ( var i = 0; i < len; i++ ) {
 			if ( need_break ) {
 				break;
 			}
@@ -2403,7 +2440,7 @@ TimeSheetViewController = BaseViewController.extend( {
 					break;
 			}
 		}
-		for ( i = 0; i < len; i++ ) {
+		for ( var i = 0; i < len; i++ ) {
 			context_btn = $( this.context_menu_array[i] );
 			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			switch ( id ) {
@@ -2426,9 +2463,9 @@ TimeSheetViewController = BaseViewController.extend( {
 					break;
 			}
 		}
-	},
+	}
 
-	isPunchCells: function() {
+	isPunchCells() {
 		var result = false;
 		var cell = this.select_cells_Array && this.select_cells_Array.length > 0 && this.select_cells_Array[0];
 		var row = cell && this.timesheet_data_source[parseInt( cell.row_id ) - 1];
@@ -2438,9 +2475,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			result = true;
 		}
 		return result;
-	},
+	}
 
-	buildAccumulatedGrid: function() {
+	buildAccumulatedGrid() {
 		var $this = this;
 
 		var grid_id = 'accumulated_time_grid';
@@ -2501,9 +2538,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( this.grid_dic[grid_id] && this.grid_dic[grid_id].grid ) {
 			this.grid_dic[grid_id].grid.setGridWidth( $( 'body' ).width() );
 		}
-	},
+	}
 
-	buildSubGrid: function( grid_id, title ) {
+	buildSubGrid( grid_id, title ) {
 		var $this = this;
 
 		var html_grid_id = this.ui_id + '_' + grid_id;
@@ -2583,9 +2620,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( this.grid_dic[grid_id] && this.grid_dic[grid_id].grid ) {
 			this.grid_dic[grid_id].grid.setGridWidth( $( 'body' ).width() );
 		}
-	},
+	}
 
-	setGridSExpendOrCollapseStatus: function( grid_id, title ) {
+	setGridSExpendOrCollapseStatus( grid_id, title ) {
 		if ( this.grid_dic[grid_id] ) {
 			var grid = this.grid_dic[grid_id].grid;
 			var table = $( $( this.el ).find( 'table[aria-labelledby=gbox_' + this.ui_id + '_' + grid_id + ']' )[0] );
@@ -2598,11 +2635,10 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			this.updateGridHeaderBar( grid_id, title );
 		}
-
-	},
+	}
 
 	//Show expend and collapse button in grid title bar
-	setGridExpendButton: function( grid_id, title ) {
+	setGridExpendButton( grid_id, title ) {
 		var $this = this;
 		var table = $( $( this.el ).find( 'table[aria-labelledby=gbox_' + this.ui_id + '_' + grid_id + ']' )[0] );
 		var title_bar = table.find( '.title-bar' );
@@ -2640,10 +2676,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	updateGridHeaderBar: function( grid_id, description ) {
+	updateGridHeaderBar( grid_id, description ) {
 		var label = description;
 		var table = $( $( this.el ).find( 'table[aria-labelledby=gbox_' + this.ui_id + '_' + grid_id + ']' )[0] );
 		var title_span = table.find( '.title-span' );
@@ -2676,9 +2711,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		title_span.text( label );
-	},
+	}
 
-	setGridHeaderBar: function( grid_id, label ) {
+	setGridHeaderBar( grid_id, label ) {
 		var table = $( this.grid_dic[grid_id].grid ).parents( '.ui-jqgrid-view' ).find( '.ui-jqgrid-hbox table' ); //grab the hbox
 		//table.empty();
 		table.css( 'width', '100vw' ); //set default width of timesheet tables to the width of the screen to set the header widths.
@@ -2688,9 +2723,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		table.find( 'tr:first' ).hide();
 		var title_bar = $( '<div class=\'title-bar\'><span class=\'title-span\'>' + label + '</span></div>' );
 		table.append( title_bar );
-	},
+	}
 
-	buildManualTimeSheetsColumns: function() {
+	buildManualTimeSheetsColumns() {
 		this.day_dic = {};
 		for ( var i = 0; i < 7; i++ ) {
 			var current_date = new Date( new Date( this.start_date.getTime() ).setDate( this.start_date.getDate() + i ) );
@@ -2698,9 +2733,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			var date_text = current_date.format( this.date_format );
 			this.day_dic['day_' + i] = { value: day_text + '<br>' + date_text, field: current_date.format() };
 		}
-	},
+	}
 
-	getManualTimeSheetData: function( callBack ) {
+	getManualTimeSheetData( callBack ) {
 		var $this = this;
 
 		var user_id = this.getSelectEmployee();
@@ -2736,9 +2771,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	buildManualTimeSheetData: function() {
+	buildManualTimeSheetData() {
 		this.time_sheet_data_overrode_true_map = {};
 		this.time_sheet_data_overrode_false_map = {};
 		var sort_by_fields = ['branch_id', 'department_id', 'job_id', 'job_item_id'],
@@ -2800,10 +2835,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	initInsideEditorData: function( updateExistedCell ) {
+	initInsideEditorData( updateExistedCell ) {
 		var $this = this;
 		for ( var key in this.day_dic ) {
 			this.$( '#' + key + '_date' ).html( this.day_dic[key].value );
@@ -2881,13 +2915,13 @@ TimeSheetViewController = BaseViewController.extend( {
 				return;
 			}
 		}
-	},
+	}
 
-	insideEditorAddRow: function( data, index ) {
+	insideEditorAddRow( data, index ) {
 		var $this = this;
 		if ( Global.getProductEdition() >= 20 ) {
-			var job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
-			var job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			var job_item_api = TTAPI.APIJobItem;
+			var job_api = TTAPI.APIJob;
 		}
 		var args;
 		if ( !data ) {
@@ -2948,7 +2982,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			} else {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 				form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+					api_class: TTAPI.APIBranch,
 					width: 90,
 					layout_name: ALayoutIDs.BRANCH,
 					show_search_inputs: true,
@@ -2973,7 +3007,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			} else {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 				form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+					api_class: TTAPI.APIDepartment,
 					width: 90,
 					layout_name: ALayoutIDs.DEPARTMENT,
 					show_search_inputs: true,
@@ -2998,7 +3032,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			} else {
 				var job_form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 				job_form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+					api_class: TTAPI.APIJob,
 					width: 90,
 					layout_name: ALayoutIDs.JOB,
 					show_search_inputs: true,
@@ -3042,7 +3076,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			} else {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 				form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+					api_class: TTAPI.APIJobItem,
 					width: 90,
 					layout_name: ALayoutIDs.JOB_ITEM,
 					show_search_inputs: true,
@@ -3349,10 +3383,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		}
+	}
 
-	},
-
-	autoSaveManualPunch: function() {
+	autoSaveManualPunch() {
 		var $this = this;
 		if ( this.is_saving_manual_grid ) {
 			this.save_manual_grid_after_save = true;
@@ -3365,9 +3398,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				$this.onSaveClick();
 			}
 		}, 2000 );
-	},
+	}
 
-	insideEditorGetValue: function( isSave ) {
+	insideEditorGetValue( isSave ) {
 		var len = this.rows_widgets_array.length;
 		var result = [];
 		for ( var i = 0; i < len; i++ ) {
@@ -3404,9 +3437,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	insideEditorRemoveRow: function( row ) {
+	insideEditorRemoveRow( row ) {
 		var $this = this;
 		var index = row[0].rowIndex - 3;
 		var widget_row = this.rows_widgets_array[index];
@@ -3450,10 +3483,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		}
+	}
 
-	},
-
-	buildManualTimeSheetGrid: function() {
+	buildManualTimeSheetGrid() {
 		var args = {
 			branch: $.i18n._( 'Branch' ),
 			department: $.i18n._( 'Department' ),
@@ -3476,9 +3508,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} );
 		var inside_editor_div = this.$( '.manual-timesheet-inside-editor-div' );
 		inside_editor_div.append( this.editor );
-	},
+	}
 
-	buildCalendars: function() {
+	buildCalendars() {
 		var $this = this;
 		if ( this.is_auto_switch ) {
 			this.getManualTimeSheetData( function() {
@@ -3634,10 +3666,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		}
+	}
 
-	},
-
-	searchDone: function() {
+	searchDone() {
 		$( '.button-rotate' ).removeClass( 'button-rotate' ); //the rotate icon from search panel
 
 		TTPromise.resolve( 'init', 'init' );
@@ -3647,9 +3678,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		//  //This was triggering JS exception: Permission denied to access property "apply" -- Seems like its no longer needed either.
 		// 	$( window ).trigger( 'resize' );
 		// } );
-	},
+	}
 
-	showWarningMessageIfAny: function() {
+	showWarningMessageIfAny() {
 		var $this = this;
 		var timesheet_grid_div;
 		var warning_bar = $( this.el ).find( '.timesheet-warning-title-bar' );
@@ -3717,10 +3748,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			return true;
 		}
+	}
 
-	},
-
-	autoOpenEditViewIfNecessary: function() {
+	autoOpenEditViewIfNecessary() {
 		//Auto open edit view. Should set in IndexController
 
 		switch ( LocalCacheData.current_doing_context_action ) {
@@ -3750,10 +3780,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		this.autoOpenEditOnlyViewIfNecessary();
+	}
 
-	},
-
-	getWeekDayIndexFromADate: function( date_string ) {
+	getWeekDayIndexFromADate( date_string ) {
 
 		var len = this.timesheet_columns.length;
 
@@ -3766,9 +3795,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return 7;
-	},
+	}
 
-	setAccumulatedTotalGridPayPeriodHeaders: function() {
+	setAccumulatedTotalGridPayPeriodHeaders() {
 		var table = $( $( this.el ).find( 'table[aria-labelledby=gbox_' + this.ui_id + '_accumulated_total_grid]' )[0] );
 
 		var new_tr = $( '<tr class="group-column-tr"  role="rowheader"  >' +
@@ -3799,16 +3828,16 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 		table.find( '.rowheader' ).remove();
 		table.find( 'thead' ).prepend( new_tr );
-	},
+	}
 
-	setTimeSheetGridHolidayHeaders: function() {
+	setTimeSheetGridHolidayHeaders() {
 		var holiday_name_map = {};
 		if ( this.full_timesheet_data && this.full_timesheet_data.holiday_data ) {
 			for ( var i = 0; i < this.full_timesheet_data.holiday_data.length; i++ ) {
 				var item = this.full_timesheet_data.holiday_data[i];
 				var standard_date = Global.strToDate( item.date_stamp ).format( this.full_format );
 
-				var cell = $( '<div/>' );
+				var cell = $( '<div></div>' );
 				if ( this.getPunchMode() === 'manual' ) {
 					cell = $( '.manual_grid_day_' + standard_date );
 				} else {
@@ -3822,9 +3851,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		}
-	},
+	}
 
-	getManualPayPeriodDefaultTrColspan: function() {
+	getManualPayPeriodDefaultTrColspan() {
 		var colspan = 2;
 		if ( this.show_branch_ui ) {
 			colspan++;
@@ -3843,9 +3872,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return colspan;
-	},
+	}
 
-	setTimeSheetGridPayPeriodHeaders: function() {
+	setTimeSheetGridPayPeriodHeaders() {
 		var $this = this;
 		var table,
 			size_tr;
@@ -3976,10 +4005,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	setPayPeriodHeaderSize: function() {
+	setPayPeriodHeaderSize() {
 
 		var table = $( $( this.el ).find( 'table[aria-labelledby=gbox_' + this.ui_id + '_grid]' ) );
 		var size_tr = table.find( '.size-tr' );
@@ -4000,10 +4028,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			var item = current_trs.children().eq( i );
 			size_tr.children().eq( i ).css( 'width', item.css( 'width' ) );
 		}
+	}
 
-	},
-
-	highLightSelectDay: function( e ) {
+	highLightSelectDay( e ) {
 
 		if ( this.highlight_header ) {
 			this.highlight_header.removeClass( 'highlight-header' );
@@ -4027,11 +4054,10 @@ TimeSheetViewController = BaseViewController.extend( {
 			$( $( '.timesheet-grid tr#1 td' )[this.highlight_header.index()] ).addClass( 'ui-state-highlight' );
 			$( $( '.timesheet-grid tr#1 td' )[this.highlight_header.index()] ).click(); //trigger grid selection events
 		}
-
-	},
+	}
 
 	/* jshint ignore:start */
-	setGridHeight: function( grid_id ) {
+	setGridHeight( grid_id ) {
 		var grid = this.grid_dic[grid_id];
 		if ( grid.grid ) {
 			grid = grid.grid;
@@ -4104,10 +4130,11 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			grid.parent().parent().parent().parent().show();
 		}
-	},
+	}
+
 	/* jshint ignore:end */
 
-	setGridSize: function() {
+	setGridSize() {
 		var $this = this;
 
 		//TTGrid backwards compatible.
@@ -4144,9 +4171,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( this.getPunchMode() === 'manual' ) {
 			$this.setManualTimeSheetGridSize();
 		}
-	},
+	}
 
-	setPunchNoteGridSize: function( grid ) {
+	setPunchNoteGridSize( grid ) {
 		if ( !grid ) {
 			if ( !this.punch_note_grid || !this.punch_note_grid.grid ) {
 				return false;
@@ -4171,9 +4198,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			grid.setGridWidth( grid_width );
 			$( 'td.notes_grid_td_container' ).css( 'width', '100%' );
 		}
-	},
+	}
 
-	setManualTimeSheetGridSize: function() {
+	setManualTimeSheetGridSize() {
 		var tr = $( this.accumulated_time_grid.grid.find( 'tr:first-child' )[0] );
 		var manual_grid_tr = $( this.editor.find( 'table' ).find( 'tr:first-child' )[0] );
 		var index = 0;
@@ -4187,9 +4214,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		this.editor.width( this.accumulated_time_grid.getGridWidth() );
-	},
+	}
 
-	onCellFormat: function( cell_value, related_data, row ) {
+	onCellFormat( cell_value, related_data, row ) {
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowid;
 		var content_div = $( '<div class=\'punch-content-div\'></div>' );
@@ -4284,7 +4311,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			if ( exception ) {
 				len = exception.length;
 				text = '';
-				for ( i = 0; i < len; i++ ) {
+				for ( var i = 0; i < len; i++ ) {
 					ex = exception[i];
 					ex_span = $( '<span class=\'punch-exceptions\'></span>' );
 					ex_span.css( 'color', ex.exception_color );
@@ -4304,7 +4331,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			if ( Global.isSet( exception ) ) {
 				len = exception.length;
 				text = '';
-				for ( i = 0; i < len; i++ ) {
+				for ( var i = 0; i < len; i++ ) {
 					ex = exception[i];
 					ex_span = $( '<span class=\'punch-exceptions-center\'></span>' );
 					ex_span.css( 'color', ex.exception_color );
@@ -4507,9 +4534,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		content_div.addClass( 'date-column' );
 
 		return content_div.get( 0 ).outerHTML;
-	},
+	}
 
-	onSelectRow: function( grid_id, row_id, target ) {
+	onSelectRow( grid_id, row_id, target ) {
 		var $this = this;
 		var row_tr = $( target ).find( 'tr#' + row_id );
 		$this.timesheet_grid.grid.find( 'td.ui-state-highlight' ).removeClass( 'ui-state-highlight' );
@@ -4554,9 +4581,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 		}
 		/* jshint ignore:end */
-	},
+	}
 
-	unsetSelectedCells: function( grid_id ) {
+	unsetSelectedCells( grid_id ) {
 		if ( grid_id == 'accumulated_grid' ) {
 			grid_id = 'accumulated_time_grid';
 		}
@@ -4573,9 +4600,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		//this.setDefaultMenu();
 		this.last_clicked_grid_id = grid_id;
-	},
+	}
 
-	getRowData: function( grid_id, row_id ) {
+	getRowData( grid_id, row_id ) {
 		var $this = this;
 
 		var row_data = null;
@@ -4600,9 +4627,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return row;
-	},
+	}
 
-	onCellSelect: function( grid_id, row_id, cell_index, cell_val, target, e ) {
+	onCellSelect( grid_id, row_id, cell_index, cell_val, target, e ) {
 		$( '#ribbon_view_container .context-menu:visible a' ).click();
 
 		if ( cell_index < 0 ) {
@@ -4764,7 +4791,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		// Add multiple selectiend_display_date if click cell and hold ctrl or command
 		if ( e.ctrlKey || e.metaKey ) {
 			var found = false;
-			for ( i = 0; i < cells_array.length; i++ ) {
+			for ( var i = 0; i < cells_array.length; i++ ) {
 				info = cells_array[i];
 				if ( row_id == info.row_id && cell_index == info.cell_index ) {
 					cells_array.splice( i, 1 );
@@ -4839,7 +4866,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				end_cell_index = tmp_cell_index;
 			}
 
-			for ( i = 0; i < cells_array.length; i++ ) {
+			for ( var i = 0; i < cells_array.length; i++ ) {
 				info = cells_array[i];
 
 				var tmp_row_id = parseInt( info.row_id );
@@ -5092,13 +5119,12 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return true;
-	},
+	}
 
-	get_selected_punch_array: function() {
+	get_selected_punch_array() {
+	}
 
-	},
-
-	buildTimeSheetRequests: function() {
+	buildTimeSheetRequests() {
 		var request_array = this.full_timesheet_data.request_data;
 		var len = request_array.length;
 		var request_row_index = null;
@@ -5168,9 +5194,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 			return label;
 		}
-	},
+	}
 
-	buildTimeSheetExceptions: function() {
+	buildTimeSheetExceptions() {
 		var exception_array = this.full_timesheet_data.exception_data;
 
 		var len = exception_array.length;
@@ -5204,7 +5230,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			var j;
 			if ( !Global.isFalseOrNull( ex.punch_id ) ) {
 
-				for ( j = 0; j < timesheet_data_source_len; j++ ) {
+				for ( var j = 0; j < timesheet_data_source_len; j++ ) {
 					row = this.timesheet_data_source[j];
 
 					if ( !row[date_string] ) {
@@ -5224,7 +5250,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 
 			} else if ( !Global.isFalseOrNull( ex.punch_control_id ) ) {
-				for ( j = 0; j < timesheet_data_source_len; j++ ) {
+				for ( var j = 0; j < timesheet_data_source_len; j++ ) {
 					row = this.timesheet_data_source[j];
 
 					if ( !row[date_string] ) {
@@ -5244,25 +5270,23 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		}
-	},
+	}
 
 	// Make sure Totle_time go to last item
-	sortAccumulatedTotalData: function() {
+	sortAccumulatedTotalData() {
 
 		var sort_fields = ['order', 'punch_info'];
 		this.accumulated_total_grid_source.sort( Global.m_sort_by( sort_fields ) );
-
-	},
+	}
 
 	// Make sure total time go to last item
-	sortAccumulatedTimeData: function() {
+	sortAccumulatedTimeData() {
 
 		var sort_fields = ['order', 'punch_info'];
 		this.accumulated_time_source.sort( Global.m_sort_by( sort_fields ) );
+	}
 
-	},
-
-	reLoadSubGridsSource: function( force ) {
+	reLoadSubGridsSource( force ) {
 		// Error: Uncaught TypeError: Cannot read property 'pay_period_id' of undefined in interface/html5/#!m=TimeSheet&date=20151214&user_id=null&show_wage=0 line 4290
 		if ( !this.full_timesheet_data || !this.full_timesheet_data.timesheet_verify_data ) {
 			return;
@@ -5300,9 +5324,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	onReloadSubGridResult: function( result ) {
+	onReloadSubGridResult( result ) {
 		var $this = this;
 		result = result.getResult();
 		$this.full_timesheet_data.accumulated_user_date_total_data = result.accumulated_user_date_total_data;
@@ -5333,9 +5357,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		$this.verification_grid.setData( $this.verification_grid_source, false );
 
 		$this.setGridSize();
-	},
+	}
 
-	setDefaultMenuEditIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -5345,9 +5369,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuDeleteIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDeleteIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.deletePermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -5357,9 +5381,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuViewIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.viewPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -5369,9 +5393,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuAddIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuAddIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.addPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -5379,9 +5403,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( this.getPunchMode() === 'manual' && pId !== 'absence' ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuSaveIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuSaveIcon( context_btn, grid_selected_length, pId ) {
 		if ( ( !this.addPermissionValidate( pId ) && !this.editPermissionValidate( pId ) ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -5395,10 +5419,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	buildAccmulatedOrderMap: function( total ) {
+	buildAccmulatedOrderMap( total ) {
 
 		if ( !total ) {
 			return;
@@ -5410,10 +5433,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	buildSubGridsSource: function() {
+	buildSubGridsSource() {
 
 		var accumulated_user_date_total_data = this.full_timesheet_data.accumulated_user_date_total_data;
 		var meal_and_break_total_data = this.full_timesheet_data.meal_and_break_total_data;
@@ -5554,7 +5576,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		if ( Global.isSet( meal_and_break_total_data ) ) {
 
-			for ( key in meal_and_break_total_data ) {
+			for ( var key in meal_and_break_total_data ) {
 				// Error: Uncaught TypeError: Cannot read property 'format' of null in interface/html5/#!m=TimeSheet&date=20151119&user_id=55338&show_wage=0 line 4527
 				date = Global.strToDate( key );
 				if ( !date ) {
@@ -5567,9 +5589,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	buildBreakAndLunchData: function( array, date_string ) {
+	buildBreakAndLunchData( array, date_string ) {
 		var row;
 		for ( var key in array ) {
 			if ( !this.accumulated_time_source_map[key] ) {
@@ -5591,10 +5613,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		}
+	}
 
-	},
-
-	addCellCount: function( key ) {
+	addCellCount( key ) {
 		switch ( key ) {
 			case 'branch_time':
 				this.branch_cell_count = this.branch_cell_count + 1;
@@ -5614,9 +5635,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				break;
 
 		}
-	},
+	}
 
-	buildSubGridsData: function( array, date_string, map, result_array, parent_key ) {
+	buildSubGridsData( array, date_string, map, result_array, parent_key ) {
 		var row;
 		var marked_regular_row = false; //Only mark the first regular time row, as thats where the bold top-line is going to go.
 		for ( var key in array ) {
@@ -5698,10 +5719,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			this.addCellCount( parent_key );
 		}
+	}
 
-	},
-
-	timeSheetVerifyPermissionValidate: function() {
+	timeSheetVerifyPermissionValidate() {
 		if ( PermissionManager.validate( 'punch', 'verify_time_sheet' ) &&
 			this.timesheet_verify_data.hasOwnProperty( 'pay_period_verify_type_id' ) &&
 			this.timesheet_verify_data.pay_period_verify_type_id != 10 ) {
@@ -5709,9 +5729,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
-	},
+	}
 
-	buildVerificationGridSource: function() {
+	buildVerificationGridSource() {
 		this.verification_grid_source = [];
 		var $this = this;
 		var verify_action_bar = $( this.el ).find( '.verification-action-bar' );
@@ -5781,9 +5801,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		//This can be called by clicking on a different date column header, or using the top right refresh icon, so not all grids are resized at that time necessarily.
 		$this.setGridHeight( 'verification_grid' );
-	},
+	}
 
-	buildPunchNoteGridSource: function() {
+	buildPunchNoteGridSource() {
 		this.punch_note_grid_source = [];
 		var punch_array = this.full_timesheet_data.punch_data;
 		var absence_array = this.full_timesheet_data.user_date_total_data;
@@ -5811,9 +5831,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.punch_note_grid_source.push( { note: date_string + ' @ ' + Global.getTimeUnit( absence.total_time ) + ': ' + absence.note.replace( /\n/g, ' ' ) } );
 			}
 		}
-	},
+	}
 
-	buildAbsenceSource: function() {
+	buildAbsenceSource() {
 
 		var map = {};
 		this.absence_source = [];
@@ -5882,10 +5902,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			row.user_id = this.getSelectEmployee();
 			this.absence_source.push( row );
 		}
+	}
 
-	},
-
-	lastDayIsOverride: function( current_date, row, current_data ) {
+	lastDayIsOverride( current_date, row, current_data ) {
 
 		var last_date = new Date( new Date( current_date.getTime() ).setDate( current_date.getDate() - 1 ) );
 
@@ -5898,9 +5917,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
-	},
+	}
 
-	buildTimeSheetSource: function() {
+	buildTimeSheetSource() {
 		this.select_punches_array = [];
 		this.timesheet_data_source = [];
 
@@ -6064,10 +6083,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		row.id = row_id_counter;
 		row_id_counter++;
 		this.timesheet_data_source.push( row );
+	}
 
-	},
-
-	buildTimeSheetsColumns: function() {
+	buildTimeSheetsColumns() {
 		this.timesheet_columns = [];
 		if ( this.getPunchMode() === 'manual' ) {
 			for ( var i = 0; i < 5; i++ ) {
@@ -6116,7 +6134,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		//save full week columns map use to build no pey period column
 		this.column_maps = [];
-		for ( i = 0; i < 7; i++ ) {
+		for ( var i = 0; i < 7; i++ ) {
 			var current_date = new Date( new Date( this.start_date.getTime() ).setDate( this.start_date.getDate() + i ) );
 			var header_text = current_date.format( this.weekly_format );
 
@@ -6145,15 +6163,14 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return this.timesheet_columns;
+	}
 
-	},
-
-	getDefaultDisplayColumns: function( callback ) {
+	getDefaultDisplayColumns( callback ) {
 		// Overriden to allow use of initLayout in BaseViewController, but no default display columns in this view, hence this function is 'disabled'
 		callback();
-	},
+	}
 
-	setSelectLayout: function() {
+	setSelectLayout() {
 		var $this = this;
 
 		if ( !Global.isSet( this.grid ) ) {
@@ -6208,10 +6225,10 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		// this.search( true ); // get punches base on userid, data and filter - commented out as this is already called in BaseViewController.initLayout()
-	},
+	}
 
 	//Start Drag
-	setTimesheetGridDragAble: function() {
+	setTimesheetGridDragAble() {
 		var $this = this;
 
 		var position = 0;
@@ -6340,105 +6357,94 @@ TimeSheetViewController = BaseViewController.extend( {
 			savePunch();
 
 			function savePunch() {
-
 				//Error: Uncaught TypeError: Cannot read property 'date_stamp' of undefined in /interface/html5/#!m=TimeSheet&date=20141229&user_id=39555 line 5207
 				if ( !$this.select_punches_array ) {
 					return;
 				}
 
-				$this.api_date.parseDateTime( target_column_date_str, {
-					onResult: function( date_num_result ) {
-						var date_num = date_num_result.getResult();
+				var new_punch_id = punch.id;
+				var target_id = false;
+				var target_status_id = row.status_id;
+				var action_type = $this.select_drag_menu_id === ContextMenuIconName.move ? 1 : 0;
 
-						var new_punch_id = punch.id;
-						var target_id = false;
-						var target_status_id = row.status_id;
-						var action_type = $this.select_drag_menu_id === ContextMenuIconName.move ? 1 : 0;
+				//Issue #2008 - All in-punches need target_id to be false to ensure that each pair retains its punch_control settings.
+				//Most out-punches need their target id to be the related in-punch.
+				//If these conditions are not met, copying groups of punches with different punch_control data will result in all copied punches having the same punch_control data as the first punch pair.
+				if ( target_punch && punch.status_id == 20 ) {
+					target_id = target_punch.id;
+					target_status_id = false;
+				} else if ( target_related_punch ) {
+					target_id = target_related_punch.id;
+					if ( target_related_punch.status_id == 10 ) {
+						position = 1;
+					} else {
+						position = -1;
+					}
+					target_status_id = false;
+				}
 
-						//Issue #2008 - All in-punches need target_id to be false to ensure that each pair retains its punch_control settings.
-						//Most out-punches need their target id to be the related in-punch.
-						//If these conditions are not met, copying groups of punches with different punch_control data will result in all copied punches having the same punch_control data as the first punch pair.
-						if ( target_punch && punch.status_id == 20 ) {
-							target_id = target_punch.id;
-							target_status_id = false;
-						} else if ( target_related_punch ) {
-							target_id = target_related_punch.id;
-							if ( target_related_punch.status_id == 10 ) {
-								position = 1;
-							} else {
-								position = -1;
+				var api_punch_control = TTAPI.APIPunchControl;
+
+				api_punch_control.dragNdropPunch( new_punch_id, target_id, target_status_id, position, action_type, target_column_date_str, {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						//Error: Uncaught TypeError: Cannot read property 'date_stamp' of undefined in interface/html5/#!m=TimeSheet&date=20150831&user_id=129895&show_wage=0 line 5286
+						if ( result.isValid() && $this.select_punches_array && $this.select_punches_array.length > 0 ) {
+							i = i + 1;
+							if ( i > $this.select_cells_Array.length - 1 ) {
+								$this.search( true );
+								return;
 							}
-							target_status_id = false;
-						}
-
-						var api_punch_control = new ( APIFactory.getAPIClass( 'APIPunchControl' ) )();
-
-						api_punch_control.dragNdropPunch( new_punch_id, target_id, target_status_id, position, action_type, date_num, {
-							onResult: function( result ) {
-								var result_data = result.getResult();
-								//Error: Uncaught TypeError: Cannot read property 'date_stamp' of undefined in interface/html5/#!m=TimeSheet&date=20150831&user_id=129895&show_wage=0 line 5286
-								if ( result.isValid() && $this.select_punches_array && $this.select_punches_array.length > 0 ) {
-									i = i + 1;
-									if ( i > $this.select_cells_Array.length - 1 ) {
-										$this.search( true );
-										return;
-									}
-									//Error: Uncaught TypeError: Cannot read property 'date_stamp' of undefined in interface/html5/#!m=TimeSheet&date=20150831&user_id=129895&show_wage=0 line 5286
-									if ( !$this.select_punches_array[i] ) {
-										$this.search( true );
-										return;
-									}
-									while ( !$this.select_punches_array[i].date_stamp ) {
-										i = i + 1;
-										if ( i > $this.select_cells_Array.length - 1 ) {
-											$this.search( true );
-											return;
-										}
-									}
-									position = 1; //put next punch below last one
-									var last_date_string = target_column_date_str;
-									punch = $this.select_punches_array[i];
-									punch_date = Global.strToDate( punch.punch_date );
-									row = $this.timesheet_data_source[target_cell.parentNode.rowIndex - 1];
-									colModel = $this.grid.getGridParam( 'colModel' );
-									data_field = colModel[target_cell.cellIndex].name;
-									time_offset = punch_date.getTime() - first_select_date.getTime();
-									//drop column date
-									target_column_date = Global.strToDate( data_field, $this.full_format );
-									//Real target column date str
-									target_column_date_str = new Date( target_column_date.getTime() + time_offset ).format();
-									target_punch = { id: result_data };
-									target_related_punch = null;
-									if ( target_column_date_str !== last_date_string ) {
-										position = 0;
-										target_punch = null;
-									}
-									savePunch();
-								} else {
-									TAlertManager.showAlert( $.i18n._( 'Unable to drag and drop punch to the specified location' ) );
-									if ( i > 0 ) {
-										$this.search( true );
-									}
+							//Error: Uncaught TypeError: Cannot read property 'date_stamp' of undefined in interface/html5/#!m=TimeSheet&date=20150831&user_id=129895&show_wage=0 line 5286
+							if ( !$this.select_punches_array[i] ) {
+								$this.search( true );
+								return;
+							}
+							while ( !$this.select_punches_array[i].date_stamp ) {
+								i = i + 1;
+								if ( i > $this.select_cells_Array.length - 1 ) {
+									$this.search( true );
+									return;
 								}
-
 							}
-						} );
-
+							position = 1; //put next punch below last one
+							var last_date_string = target_column_date_str;
+							punch = $this.select_punches_array[i];
+							punch_date = Global.strToDate( punch.punch_date );
+							row = $this.timesheet_data_source[target_cell.parentNode.rowIndex - 1];
+							colModel = $this.grid.getGridParam( 'colModel' );
+							data_field = colModel[target_cell.cellIndex].name;
+							time_offset = punch_date.getTime() - first_select_date.getTime();
+							//drop column date
+							target_column_date = Global.strToDate( data_field, $this.full_format );
+							//Real target column date str
+							target_column_date_str = new Date( target_column_date.getTime() + time_offset ).format();
+							target_punch = { id: result_data };
+							target_related_punch = null;
+							if ( target_column_date_str !== last_date_string ) {
+								position = 0;
+								target_punch = null;
+							}
+							savePunch();
+						} else {
+							TAlertManager.showAlert( $.i18n._( 'Unable to drag and drop punch to the specified location' ) );
+							if ( i > 0 ) {
+								$this.search( true );
+							}
+						}
 					}
 				} );
-
 			}
 		} );
+	}
 
-	},
-
-	setPunchModeClass: function() {
+	setPunchModeClass() {
 		this.$el.removeClass( 'timesheet-punch-mode' );
 		this.$el.removeClass( 'timesheet-manual-mode' );
 		this.getPunchMode() === 'punch' ? this.$el.addClass( 'timesheet-punch-mode' ) : this.$el.addClass( 'timesheet-manual-mode' );
-	},
+	}
 
-	initData: function() {
+	initData() {
 		var $this = this;
 		Global.removeViewTab( this.viewId );
 		var loginUser = LocalCacheData.getLoginUser();
@@ -6455,6 +6461,19 @@ TimeSheetViewController = BaseViewController.extend( {
 		//just need to check that the variable exists before checking properties for the case of the LocalCacheData being empty
 		if ( Global.isSet( LocalCacheData.all_url_args ) && LocalCacheData.all_url_args.show_wage ) {
 			this.wage_btn.setValue( LocalCacheData.all_url_args.show_wage === '1' ? true : false );
+		}
+
+		// Set Use Employee TimeSheet
+		if ( !LocalCacheData.last_timesheet_selected_timezone ) {
+			this.timezone_btn.setValue( false );
+		} else {
+			this.timezone_btn.setValue( LocalCacheData.last_timesheet_selected_timezone );
+		}
+
+		//Error: TypeError: Cannot read property 'show_wage' of null
+		//just need to check that the variable exists before checking properties for the case of the LocalCacheData being empty
+		if ( Global.isSet( LocalCacheData.all_url_args ) && LocalCacheData.all_url_args.timezone ) {
+			this.timezone_btn.setValue( LocalCacheData.all_url_args.timezone === '1' ? true : false );
 		}
 
 		// Set punch mode
@@ -6517,10 +6536,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		$this.initLayout();
 		this.setMoveOrDropMode( ContextMenuIconName.move );
+	}
 
-	},
-
-	setDatePickerValue: function( val ) {
+	setDatePickerValue( val ) {
 		this.start_date_picker.setValue( val );
 
 		var default_date = this.start_date_picker.getDefaultFormatValue();
@@ -6539,7 +6557,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			if ( LocalCacheData.all_url_args ) {
 				for ( var key in LocalCacheData.all_url_args ) {
 					//if ( key === 'm' || key === 'date' || key === 'user_id' || key === 'show_wage' || key === 'mode' ) {
-					if ( key === 'm' || key === 'user_id' || key === 'show_wage' || key === 'mode' ) {
+					if ( key === 'm' || key === 'user_id' || key === 'show_wage' || key === 'timezone' || key === 'mode' ) {
 						continue;
 					}
 					location = location + '&' + key + '=' + LocalCacheData.all_url_args[key];
@@ -6551,12 +6569,11 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		LocalCacheData.last_timesheet_selected_date = val;
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -6564,7 +6581,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -6575,7 +6592,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				field: 'department_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -6586,7 +6603,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_id',
 				layout_name: ALayoutIDs.JOB,
-				api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
+				api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJob : null,
 				multiple: true,
 				basic_search: ( this.show_job_item_ui && ( Global.getProductEdition() >= 20 ) ),
 				adv_search: false,
@@ -6598,16 +6615,16 @@ TimeSheetViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_item_id',
 				layout_name: ALayoutIDs.JOB_ITEM,
-				api_class: ( Global.getProductEdition() >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
+				api_class: ( Global.getProductEdition() >= 20 ) ? TTAPI.APIJobItem : null,
 				multiple: true,
 				basic_search: ( this.show_job_item_ui && ( Global.getProductEdition() >= 20 ) ),
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	getSelectEmployee: function( full_item ) {
+	getSelectEmployee( full_item ) {
 		var user = false;
 		if ( this.show_navigation_box && this.employee_nav && typeof this.employee_nav.getValue == 'function' ) {
 			user = this.employee_nav.getValue( true ); //Always try to get the object (not the id), however in some cases like recalculating timesheets it still seems to return the ID instead of the object.
@@ -6634,9 +6651,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return user;
-	},
+	}
 
-	getSelectDate: function() {
+	getSelectDate() {
 		if ( this.start_date_picker ) {
 			var retval = this.start_date_picker.getValue();
 
@@ -6648,9 +6665,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return null;
-	},
+	}
 
-	onDeleteResult: function( result ) {
+	onDeleteResult( result ) {
 		var $this = this;
 		$this.timesheet_grid.grid.find( 'td.ui-state-highlight' ).removeClass( 'ui-state-highlight' );
 		ProgressBar.closeOverlay();
@@ -6669,9 +6686,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		$this.first_build = true;
 		$this.search();
 		$this.setDefaultMenu(); //Default menu needs to be set as we need to deactivate icons that are valid for the predeletion selection
-	},
+	}
 
-	getDeleteSelectedRecordId: function() {
+	getDeleteSelectedRecordId() {
 		var retval = [];
 		if ( this.edit_view ) {
 			retval.push( this.current_edit_record.id );
@@ -6682,16 +6699,16 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 		}
 		return retval;
-	},
+	}
 
-	reSetURL: function() {
+	reSetURL() {
 		//var args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
-		var args = '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
+		var args = '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&timezone=' + this.timezone_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
 		Global.setURLToBrowser( Global.getBaseURL() + args );
 		LocalCacheData.all_url_args = IndexViewController.instance.router.buildArgDic( args.split( '&' ) );
-	},
+	}
 
-	onSaveAndContinue: function( ignoreWarning ) {
+	onSaveAndContinue( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -6719,7 +6736,7 @@ TimeSheetViewController = BaseViewController.extend( {
 					$this.onEditClick( refresh_id );
 
 					//#2295 - Re-initialize previous_absence_policy_id to ensure that previously saved values are passed correctly into the estimation of projected available balance.
-					this.previous_absence_policy_id = false;
+					$this.previous_absence_policy_id = false;
 
 					$this.onSaveAndContinueDone( result );
 				} else {
@@ -6730,9 +6747,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	getSelectedRecordId: function( record ) {
+	getSelectedRecordId( record ) {
 		var retval = false;
 
 		if ( Global.isSet( record ) ) {
@@ -6750,13 +6767,13 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return retval;
-	},
+	}
 
-	getViewSelectedRecordId: function( record ) {
+	getViewSelectedRecordId( record ) {
 		return this.getSelectedRecordId( record );
-	},
+	}
 
-	doViewAPICall: function( filter, api_args ) {
+	doViewAPICall( filter, api_args ) {
 		var current_api = this.getCurrentAPI();
 		var callback = { onResult: this.handleViewAPICallbackResult.bind( this ) };
 		if ( api_args ) {
@@ -6766,9 +6783,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			return current_api['get' + current_api.key_name]( filter, callback );
 		}
-	},
+	}
 
-	onViewClick: function( record, type ) {
+	onViewClick( record, type ) {
 		if ( type ) {
 			if ( type === 'absence' ) {
 				this.absence_model = true;
@@ -6776,10 +6793,10 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.absence_model = false;
 			}
 		}
-		this._super( 'onViewClick', record );
-	},
+		super.onViewClick( record );
+	}
 
-	buildOtherFieldUI: function( field, label ) {
+	buildOtherFieldUI( field, label ) {
 
 		if ( !this.edit_view_tab ) {
 			return;
@@ -6810,10 +6827,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			form_item_input.setEnabled( true );
 		}
+	}
 
-	},
-
-	onMassEditClick: function() {
+	onMassEditClick() {
 		var $this = this;
 		LocalCacheData.current_doing_context_action = 'mass_edit';
 		$this.openEditView();
@@ -6863,10 +6879,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	setSubLogViewFilter: function() {
+	setSubLogViewFilter() {
 		if ( !this.sub_log_view_controller ) {
 			return false;
 		}
@@ -6888,13 +6903,13 @@ TimeSheetViewController = BaseViewController.extend( {
 		};
 
 		return true;
-	},
+	}
 
-	getEditSelectedRecordId: function( record_id ) {
+	getEditSelectedRecordId( record_id ) {
 		return this.getSelectedRecordId( record_id );
-	},
+	}
 
-	doEditAPICall: function( filter, api_args ) {
+	doEditAPICall( filter, api_args ) {
 		var current_api = this.getCurrentAPI();
 		var callback = { onResult: this.handleEditAPICallbackResult.bind( this ) };
 		if ( api_args ) {
@@ -6904,9 +6919,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			return current_api['get' + current_api.key_name]( filter, callback );
 		}
-	},
+	}
 
-	onEditClick: function( record_id, type ) {
+	onEditClick( record_id, type ) {
 		if ( type ) {
 			if ( type === 'absence' ) {
 				this.absence_model = true;
@@ -6914,10 +6929,10 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.absence_model = false;
 			}
 		}
-		this._super( 'onEditClick', record_id );
-	},
+		super.onEditClick( record_id );
+	}
 
-	setURL: function() {
+	setURL() {
 		var t = this.absence_model ? 'absence' : 'punch';
 		var a = '';
 		switch ( LocalCacheData.current_doing_context_action ) {
@@ -6958,9 +6973,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.add: //This is caught by onContextMenuClick(), so we have to use a different id: add_punch instead.
 			case ContextMenuIconName.add_punch:
@@ -6999,9 +7014,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 				break;
 		}
-	},
+	}
 
-	addRequestFromTimesheetCell: function( id ) {
+	addRequestFromTimesheetCell( id ) {
 		if ( Global.getProductEdition() <= 10 ) {
 			TAlertManager.showAlert( Global.getUpgradeMessage() );
 			return false;
@@ -7053,9 +7068,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		);
-	},
+	}
 
-	getPayPeriod: function( date ) {
+	getPayPeriod( date ) {
 		var current_date = this.getSelectDate();
 
 		//if pass a date in, use the date
@@ -7068,9 +7083,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			return null;
 		}
-	},
+	}
 
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 
 		if ( !this.checkTimesheetData() ) {
 			return;
@@ -7128,20 +7143,20 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.doFormIFrameCall( post_data );
 				break;
 		}
-	},
+	}
 
-	doFormIFrameCall: function( postData ) {
+	doFormIFrameCall( postData ) {
 		Global.APIFileDownload( 'APITimesheetDetailReport', 'getTimesheetDetailReport', postData );
-	},
+	}
 
-	onAccumulatedTimeClick: function() {
+	onAccumulatedTimeClick() {
 		if ( PermissionManager.checkTopLevelPermission( 'AccumulatedTime' ) ) {
 			var select_date = Global.strToDate( this.getSelectDate() ).format( 'YYYY-MM-DD' );
 			IndexViewController.openEditView( this, 'UserDateTotalParent', select_date );
 		}
-	},
+	}
 
-	onMapClick: function() {
+	onMapClick() {
 		// only trigger map load in specific product editions.
 		if ( ( Global.getProductEdition() >= 15 ) ) {
 
@@ -7222,9 +7237,9 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	onWizardClick: function( iconName ) {
+	onWizardClick( iconName ) {
 
 		var $this = this;
 		switch ( iconName ) {
@@ -7257,19 +7272,18 @@ TimeSheetViewController = BaseViewController.extend( {
 				} );
 				break;
 		}
+	}
 
-	},
-
-	onReCalTimeSheetDone: function() {
+	onReCalTimeSheetDone() {
 		//Its possible the user has navigated away from the timesheet while a recalculation is in progress, if so, don't try to refresh the timesheet.
 		//Also fixes: Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': parameter 2 is not of type 'Node'.
 		if ( TopMenuManager.isCurrentView( 'TimeSheet' ) ) {
 			TopMenuManager.goToView( 'TimeSheet', true );
 			//this.initData(); //Do a generic view refresh rather than just initData() as its less likely to cause problems.
 		}
-	},
+	}
 
-	setMoveOrDropMode: function( id ) {
+	setMoveOrDropMode( id ) {
 		var drag_copy_icon = $( '#' + ContextMenuIconName.drag_copy );
 		var move_icon = $( '#' + ContextMenuIconName.move );
 		drag_copy_icon.removeClass( 'selected-menu' );
@@ -7297,10 +7311,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			this.select_drag_menu_id = id;
 		}
+	}
 
-	},
-
-	getSelectDateArray: function() {
+	getSelectDateArray() {
 
 		var result = [];
 
@@ -7323,10 +7336,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return result;
+	}
 
-	},
-
-	onAddClick: function( doing_save_and_new ) {
+	onAddClick( doing_save_and_new ) {
 		TTPromise.add( 'TimeSheetViewController', 'addclick' );
 		TTPromise.wait();
 		var $this = this;
@@ -7499,37 +7511,36 @@ TimeSheetViewController = BaseViewController.extend( {
 				} );
 
 		}
+	}
 
-	},
-
-	removeEditView: function() {
-		this._super( 'removeEditView' );
+	removeEditView() {
+		super.removeEditView();
 		if ( this.absence_select_cells_Array.length > 0 ) {
 			this.absence_model = true;
 		} else {
 			this.absence_model = false;
 		}
 		this.setDefaultMenu();
-	},
+	}
 
-	isMassDate: function() {
+	isMassDate() {
 		//Error: Unable to get property 'punch_dates' of undefined or null reference in /interface/html5/ line 6300
 		if ( this.is_mass_adding && this.current_edit_record && this.current_edit_record.punch_dates && this.current_edit_record.punch_dates.length > 1 ) {
 			return true;
 		}
 
 		return false;
-	},
+	}
 
-	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndContinueIcon( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn, pId );
 
 		if ( this.is_mass_editing || this.is_viewing || this.isMassDate() ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	onSaveAndNewClick: function( ignoreWarning ) {
+	onSaveAndNewClick( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -7573,9 +7584,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	_continueDoCopyAsNew: function() {
+	_continueDoCopyAsNew() {
 		var $this = this;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		this.is_mass_adding = true;
@@ -7606,10 +7617,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.is_changed = false;
 			ProgressBar.closeOverlay();
 		}
+	}
 
-	},
-
-	onSaveAndCopy: function( ignoreWarning ) {
+	onSaveAndCopy( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -7654,9 +7664,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	getCurrentAPI: function() {
+	getCurrentAPI() {
 		var current_api = this.api;
 
 		if ( this.absence_model ) {
@@ -7664,9 +7674,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return current_api;
-	},
+	}
 
-	generateManualTimeSheetRecordKey: function( item ) {
+	generateManualTimeSheetRecordKey( item ) {
 		var key = item.date_stamp + '-' + ( ( this.show_branch_ui && item.branch_id ) ? item.branch_id : TTUUID.zero_id ) +
 			'-' + ( ( this.show_department_ui && item.department_id ) ? item.department_id : TTUUID.zero_id )
 			+ '-' + ( ( this.show_job_ui && item.job_id && Global.getProductEdition() >= 20 ) ? item.job_id : TTUUID.zero_id ) +
@@ -7674,9 +7684,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			'-' + item.total_time;
 
 		return key;
-	},
+	}
 
-	createCurrentManualGridRecordsMap: function( records ) {
+	createCurrentManualGridRecordsMap( records ) {
 		this.manual_grid_records_map = {};
 
 		for ( var i = 0, m = records.length; i < m; i++ ) {
@@ -7690,12 +7700,11 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.manual_grid_records_map[key] = item.row;
 			delete item.row;
 		}
-
-	},
+	}
 
 	//Don't send records with blank total_time to the API, to better handle cases where the employees hire date is in the middle of the week and they accidently enter time on the Monday, which cause a popup validation error.
 	//This allows them to get out of the scenario by simply clearing out the field or setting it back to 0.
-	filterManualGridRecords: function( records ) {
+	filterManualGridRecords( records ) {
 		var retarr = Array();
 
 		for ( var i = 0; i < records.length; i++ ) {
@@ -7707,9 +7716,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return retarr;
-	},
+	}
 
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick( ignoreWarning ) {
 		var $this = this;
 		var record;
 		// Save manual punch
@@ -7811,7 +7820,7 @@ TimeSheetViewController = BaseViewController.extend( {
 					$this.removeEditView();
 
 					//#2295 - Re-initialize previous_absence_policy_id to ensure that previously saved values are passed correctly into the estimation of projected available balance.
-					this.previous_absence_policy_id = false;
+					$this.previous_absence_policy_id = false;
 				} else {
 					$this.setErrorMenu();
 					$this.setErrorTips( result );
@@ -7819,13 +7828,13 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	onMapSaveClick: function( dataset, successCallback ) {
+	onMapSaveClick( dataset, successCallback ) {
 		this.savePunchPosition( dataset, successCallback );
-	},
+	}
 
-	savePunchPosition: function( moved_unsaved_markers, successCallback ) {
+	savePunchPosition( moved_unsaved_markers, successCallback ) {
 		if ( !moved_unsaved_markers || moved_unsaved_markers.length !== 1 ) {
 			Debug.Text( 'ERROR: Invalid params/data passed to function.', 'TimesheetViewConroller.js', 'TimesheetViewConroller', 'savePunchPosition', 1 );
 			return false;
@@ -7834,9 +7843,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		successCallback();
 		this.is_changed = true;
 		return true;
-	},
+	}
 
-	getOtherFieldTypeId: function() {
+	getOtherFieldTypeId() {
 		var res = 15;
 
 		if ( this.absence_model ) {
@@ -7844,13 +7853,13 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return res;
-	},
+	}
 
 	/**
 	 * This function is special as it handles an edit view that deals with both absences and punches.
 	 * This is the only place where 2 different data layouts need to be handled by the same navigation without a change of view.
 	 */
-	setEditViewData: function() {
+	setEditViewData() {
 		var $this = this;
 		var navigation_div = this.edit_view.find( '.navigation-div' );
 		var navigation_widget_div = navigation_div.find( '.navigation-widget-div' );
@@ -7906,7 +7915,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		if ( this.is_mass_editing ) {
-			for ( key in this.edit_view_ui_dic ) {
+			for ( var key in this.edit_view_ui_dic ) {
 				var widget = this.edit_view_ui_dic[key];
 				if ( Global.isSet( widget.setMassEditMode ) ) {
 					widget.setMassEditMode( true );
@@ -7935,9 +7944,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		this.initTabData();
 		this.switchToProperTab();
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 
 		var tab_0_label = this.edit_view.find( 'a[ref=tab_punch]' );
@@ -8064,20 +8073,21 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.setEditMenu(); //To make sure save & continue icon disabled correct when multi dates
 
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		//can't check is_edit here because in timesheet it can be both.
 		if ( this.is_viewing == true && ( this.current_edit_record.latitude == 0 || this.current_edit_record.longitude == 0 ) ) {
 			$( '.widget-h-box-mapLocationWrapper' ).parents( '.edit-view-form-item-div' ).hide();
 		} else {
-			$( '.widget-h-box-mapLocationWrapper' ).parents( '.edit-view-form-item-div' ).show();
+			if ( this.show_location_ui ) {
+				$( '.widget-h-box-mapLocationWrapper' ).parents( '.edit-view-form-item-div' ).show();
+			}
 		}
-	},
+	}
 
-	setLocationValue: function( location_data ) {
+	setLocationValue( location_data ) {
 		if ( Global.getProductEdition() >= 15
 			&& this.edit_view_ui_dic['latitude']
 			&& this.edit_view_ui_dic['longitude']
@@ -8095,13 +8105,14 @@ TimeSheetViewController = BaseViewController.extend( {
 			if ( !this.current_edit_record.latitude && !this.is_mass_editing ) {
 				this.location_wrapper.hide();
 			} else {
-				this.location_wrapper.show();
+				if ( this.show_location_ui ) {
+					this.location_wrapper.show();
+				}
 			}
 		}
+	}
 
-	},
-
-	onAvailableBalanceChange: function() {
+	onAvailableBalanceChange() {
 		if ( this.current_edit_record.hasOwnProperty( 'src_object_id' ) &&
 			this.current_edit_record.src_object_id && !this.is_mass_editing ) {
 			this.getAvailableBalance();
@@ -8109,9 +8120,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.detachElement( 'available_balance' );
 		}
 		this.editFieldResize();
-	},
+	}
 
-	getAvailableBalance: function() {
+	getAvailableBalance() {
 
 		var $this = this;
 		var result_data;
@@ -8160,9 +8171,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			);
 
 		}
-	},
+	}
 
-	setStation: function() {
+	setStation() {
 
 		var $this = this;
 		var arg = { filter_data: { id: this.current_edit_record.station_id } };
@@ -8202,9 +8213,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	getSelectedItems: function() {
+	getSelectedItems() {
 		var selected_item = null;
 		if ( this.edit_view ) {
 			return [this.current_edit_record];
@@ -8216,9 +8227,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return [];
-	},
+	}
 
-	getSelectedItem: function() {
+	getSelectedItem() {
 
 		var selected_item = null;
 		if ( this.edit_view ) {
@@ -8233,9 +8244,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return Global.clone( selected_item );
-	},
+	}
 
-	addPermissionValidate: function( p_id ) {
+	addPermissionValidate( p_id ) {
 		if ( !Global.isSet( p_id ) ) {
 			p_id = this.permission_id;
 		}
@@ -8249,10 +8260,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
+	}
 
-	},
-
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
@@ -8376,10 +8386,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setEditMenuDragCopyIcon: function( context_btn, grid_selected_length, pId ) {
+	setEditMenuDragCopyIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.copyPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -8389,10 +8398,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	setDefaultMenuDragCopyIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDragCopyIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.copyPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -8402,16 +8410,15 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuScheduleIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuScheduleIcon( context_btn, grid_selected_length, pId ) {
 		if ( !PermissionManager.checkTopLevelPermission( 'Schedule' ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
+	}
 
-	},
-
-	reCalculateEditPermissionValidate: function() {
+	reCalculateEditPermissionValidate() {
 
 		var p_id = this.permission_id;
 
@@ -8419,33 +8426,30 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			return true;
 		}
-	},
+	}
 
-	setDefaultMenuReCalculateTimesheet: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuReCalculateTimesheet( context_btn, grid_selected_length, pId ) {
 
 		if ( !this.reCalculateEditPermissionValidate() ) {
 			context_btn.addClass( 'invisible-image' );
 		}
+	}
 
-	},
-
-	setDefaultMenuGeneratePayStubIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuGeneratePayStubIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( !PermissionManager.checkTopLevelPermission( 'GeneratePayStubs' ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
+	}
 
-	},
-
-	setDefaultMenuPayStubIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPayStubIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( !PermissionManager.checkTopLevelPermission( 'PayStub' ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
+	}
 
-	},
-
-	setDefaultMenuEditPayPeriodIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditPayPeriodIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( !this.editPermissionValidate( 'pay_period_schedule' ) ) {
 			context_btn.addClass( 'invisible-image' );
@@ -8456,24 +8460,23 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( $this.getPayPeriod() ) {
 			context_btn.removeClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuAccumulatedTimeIcon: function( context_btn, pId ) {
+	setDefaultMenuAccumulatedTimeIcon( context_btn, pId ) {
 
 		if ( !PermissionManager.checkTopLevelPermission( 'AccumulatedTime' ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
-	},
+	}
 
-	setDefaultMenuEditEmployeeIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( !this.editChildPermissionValidate( 'user' ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
+	}
 
-	},
-
-	editOwnerOrChildPermissionValidate: function( p_id, selected_item ) {
+	editOwnerOrChildPermissionValidate( p_id, selected_item ) {
 
 		if ( !p_id ) {
 			p_id = this.permission_id;
@@ -8497,10 +8500,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
+	}
 
-	},
-
-	viewOwnerOrChildPermissionValidate: function( p_id, selected_item ) {
+	viewOwnerOrChildPermissionValidate( p_id, selected_item ) {
 
 		if ( !p_id ) {
 			p_id = this.permission_id;
@@ -8524,10 +8526,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
+	}
 
-	},
-
-	deleteOwnerOrChildPermissionValidate: function( p_id, selected_item ) {
+	deleteOwnerOrChildPermissionValidate( p_id, selected_item ) {
 
 		if ( !p_id ) {
 			p_id = this.permission_id;
@@ -8551,10 +8552,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
+	}
 
-	},
-
-	editChildPermissionValidate: function( p_id, selected_item ) {
+	editChildPermissionValidate( p_id, selected_item ) {
 		if ( !Global.isSet( p_id ) ) {
 			p_id = this.permission_id;
 		}
@@ -8578,47 +8578,46 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		return false;
+	}
 
-	},
-
-	onReportMenuClick: function( id ) {
+	onReportMenuClick( id ) {
 		this.onNavigationClick( id );
-	},
+	}
 
-	setDefaultMenuPrintIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPrintIcon( context_btn, grid_selected_length, pId ) {
 
 		context_btn.removeClass( 'disable-image' );
-	},
+	}
 
-	setEditMenuMapIcon: function( context_btn, pId ) {
-		this._super( 'setDefaultMenuMapIcon', context_btn );
+	setEditMenuMapIcon( context_btn, pId ) {
+		super.setDefaultMenuMapIcon( context_btn );
 
 		if ( context_btn.hasClass( 'disable-image' ) == false ) {
 			if ( this.absence_model || this.getPunchMode() == 'manual' ) {
 				context_btn.addClass( 'disable-image' );
 			}
 		}
-	},
+	}
 
-	setEditMenuSaveAndAddIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndAddIcon( context_btn, pId ) {
 		this.saveAndNewValidate( context_btn, pId );
 
 		if ( this.is_viewing || this.is_mass_editing ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuMapIcon: function( context_btn, grid_selected_length, pId ) {
-		this._super( 'setDefaultMenuMapIcon', context_btn );
+	setDefaultMenuMapIcon( context_btn, grid_selected_length, pId ) {
+		super.setDefaultMenuMapIcon( context_btn );
 
 		if ( context_btn.hasClass( 'disable-image' ) == false ) {
 			if ( this.absence_model || this.getPunchMode() == 'manual' ) {
 				context_btn.addClass( 'disable-image' );
 			}
 		}
-	},
+	}
 
-	setEditMenuSaveAndNextIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndNextIcon( context_btn, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -8626,17 +8625,17 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( ( !this.current_edit_record || !this.current_edit_record.id ) || this.is_viewing || this.is_mass_adding ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuSaveAndCopyIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndCopyIcon( context_btn, pId ) {
 		this.saveAndNewValidate( context_btn, pId );
 
 		if ( this.is_viewing || this.is_mass_editing ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuCopyAndAddIcon: function( context_btn, pId ) {
+	setEditMenuCopyAndAddIcon( context_btn, pId ) {
 		if ( !this.addPermissionValidate( pId ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -8644,9 +8643,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( ( !this.current_edit_record || !this.current_edit_record.id ) || this.is_viewing || this.is_mass_adding ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenu: function() {
+	setEditMenu() {
 		//this.selectContextMenu();
 		var len = this.context_menu_array.length;
 
@@ -8761,9 +8760,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.setMoveOrDropMode( ContextMenuIconName.move );
 
 		this.setContextMenuGroupVisibility();
-	},
+	}
 
-	enableAddRequestButton: function() {
+	enableAddRequestButton() {
 		var grid_selected_id_array = this.select_cells_Array;
 		var grid_selected_length = grid_selected_id_array.length;
 
@@ -8771,16 +8770,15 @@ TimeSheetViewController = BaseViewController.extend( {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	cleanWhenUnloadView: function( callBack ) {
+	cleanWhenUnloadView( callBack ) {
 
 		$( '#timesheet_view_container' ).remove();
-		this._super( 'cleanWhenUnloadView', callBack );
+		super.cleanWhenUnloadView( callBack );
+	}
 
-	},
-
-	setAddRequestIcon: function( context_btn, grid_selected_length, pId ) {
+	setAddRequestIcon( context_btn, grid_selected_length, pId ) {
 		if ( Global.getProductEdition() <= 10 || !this.addPermissionValidate( 'request' ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -8790,9 +8788,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	userValueSet: function( val ) {
+	userValueSet( val ) {
 		//If the value here is null, the timesheet data will be missing therefore we want to force the value to the currently logged in user.
 		//Mostly caused when developers switch instances or databases during testing.
 		if ( typeof val == 'undefined' ) {
@@ -8801,7 +8799,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 	}
 
-} );
+}
 
 TimeSheetViewController.PUNCH_ROW = 1;
 TimeSheetViewController.EXCEPTION_ROW = 2;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -301,12 +301,14 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 			}
 		}
 
-		$additional_order_fields = [ 'status_id', 'type_id', 'legal_entity_legal_name', 'agency' ];
+		$additional_order_fields = [ 'status_id', 'type_id', 'legal_entity_legal_name', 'agency', 'uf.last_name', 'rsaf.name' ];
 
 		$sort_column_aliases = [
-				'status' => 'status_id',
-				'type'   => 'type_id',
-				'agency' => 'agency_id',
+				'status'                    => 'status_id',
+				'type'                      => 'type_id',
+				'agency'                    => 'agency_id',
+				'contact_user'              => 'uf.last_name',
+				'remittance_source_account' => 'rsaf.name',
 		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );

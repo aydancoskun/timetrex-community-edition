@@ -1,29 +1,31 @@
-InOutViewController = BaseViewController.extend( {
+class InOutViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
 
-	_required_files: {
-		10: ['APIPunch', 'APIStation', 'APIBranch', 'APIDepartment', 'APICompany'],
-		20: ['APIJob', 'APIJobItem']
-	},
-	type_array: null,
+			type_array: null,
 
-	job_api: null,
-	job_item_api: null,
+			job_api: null,
+			job_item_api: null,
 
-	old_type_status: {},
+			old_type_status: {},
 
-	show_job_ui: false,
-	show_job_item_ui: false,
-	show_branch_ui: false,
-	show_department_ui: false,
-	show_good_quantity_ui: false,
-	show_bad_quantity_ui: false,
-	show_transfer_ui: false,
-	show_node_ui: false,
+			show_job_ui: false,
+			show_job_item_ui: false,
+			show_branch_ui: false,
+			show_department_ui: false,
+			show_good_quantity_ui: false,
+			show_bad_quantity_ui: false,
+			show_transfer_ui: false,
+			show_node_ui: false,
 
-	original_note: false,
-	new_note: false,
+			original_note: false,
+			new_note: false
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		Global.setUINotready( true );
 
 		this.permission_id = 'punch';
@@ -31,12 +33,12 @@ InOutViewController = BaseViewController.extend( {
 		this.script_name = 'InOutView';
 		this.table_name_key = 'punch';
 		this.context_menu_name = $.i18n._( 'In/Out' );
-		this.api = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
+		this.api = TTAPI.APIPunch;
 
 		//Tried to fix  Cannot call method 'getJobItem' of null. Use ( Global.getProductEdition() >= 20 )
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
-			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+			this.job_api = TTAPI.APIJob;
+			this.job_item_api = TTAPI.APIJobItem;
 		}
 
 		this.render();
@@ -46,18 +48,18 @@ InOutViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.is_changed = true;
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [ContextMenuIconName.save, ContextMenuIconName.cancel]
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	addPermissionValidate: function( p_id ) {
+	addPermissionValidate( p_id ) {
 		if ( !Global.isSet( p_id ) ) {
 			p_id = this.permission_id;
 		}
@@ -71,69 +73,68 @@ InOutViewController = BaseViewController.extend( {
 		}
 
 		return false;
+	}
 
-	},
-
-	jobUIValidate: function() {
+	jobUIValidate() {
 		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 			PermissionManager.validate( 'punch', 'edit_job' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	jobItemUIValidate: function() {
+	jobItemUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_job_item' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	branchUIValidate: function() {
+	branchUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_branch' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	departmentUIValidate: function() {
+	departmentUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_department' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	goodQuantityUIValidate: function() {
+	goodQuantityUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_quantity' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	badQuantityUIValidate: function() {
+	badQuantityUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_quantity' ) &&
 			PermissionManager.validate( 'punch', 'edit_bad_quantity' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	transferUIValidate: function() {
+	transferUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_transfer' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
-	noteUIValidate: function() {
+	noteUIValidate() {
 		if ( PermissionManager.validate( 'punch', 'edit_note' ) ) {
 			return true;
 		}
 		return false;
-	},
+	}
 
 	//Speical permission check for views, need override
-	initPermission: function() {
+	initPermission() {
 		if ( this.jobUIValidate() ) {
 			this.show_job_ui = true;
 		} else {
@@ -185,7 +186,7 @@ InOutViewController = BaseViewController.extend( {
 		var result = false;
 
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
-		var company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		var company_api = TTAPI.APICompany;
 		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
 			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } );
 		}
@@ -219,14 +220,13 @@ InOutViewController = BaseViewController.extend( {
 			this.show_bad_quantity_ui = false;
 			this.show_good_quantity_ui = false;
 		}
+	}
 
-	},
+	render() {
+		super.render();
+	}
 
-	render: function() {
-		this._super( 'render' );
-	},
-
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var options = [
 			{ option_name: 'type' },
@@ -238,15 +238,14 @@ InOutViewController = BaseViewController.extend( {
 				callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
 			}
 		} );
+	}
 
-	},
-
-	getUserPunch: function( callBack ) {
+	getUserPunch( callBack ) {
 		var $this = this;
 
 		var station_id = Global.getStationID();
 
-		var api_station = new ( APIFactory.getAPIClass( 'APIStation' ) )();
+		var api_station = TTAPI.APIStation;
 
 		if ( station_id ) {
 			api_station.getCurrentStation( station_id, '10', {
@@ -299,15 +298,14 @@ InOutViewController = BaseViewController.extend( {
 			} );
 
 		}
+	}
 
-	},
-
-	onCancelClick: function( force_no_confirm ) {
+	onCancelClick( force_no_confirm ) {
 		this.is_changed = true;
-		this._super( 'onCancelClick', force_no_confirm );
-	},
+		super.onCancelClick( force_no_confirm );
+	}
 
-	openEditView: function() {
+	openEditView() {
 		var $this = this;
 
 		if ( this.edit_only_mode && this.api ) {
@@ -318,7 +316,7 @@ InOutViewController = BaseViewController.extend( {
 				}
 
 				$this.getUserPunch( function( result ) {
-					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+					// Waiting for the TTAPI.API returns data to set the current edit record.
 					$this.current_edit_record = result;
 
 					//keep fields consistent in unit test mode for consistent screenshots
@@ -334,10 +332,9 @@ InOutViewController = BaseViewController.extend( {
 			} );
 
 		}
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -381,10 +378,9 @@ InOutViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	onTransferChanged: function( initial_load ) {
+	onTransferChanged( initial_load ) {
 
 		var is_transfer = false;
 		if ( this.edit_view_ui_dic && this.edit_view_ui_dic['transfer'] && this.edit_view_ui_dic['transfer'].getValue() == true ) {
@@ -437,10 +433,10 @@ InOutViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic.note.setValue( this.original_note ? this.original_note : '' );
 			this.current_edit_record.note = this.original_note ? this.original_note : '';
 		}
-	},
+	}
 
 	//Make sure this.current_edit_record is updated before validate
-	validate: function() {
+	validate() {
 
 		var $this = this;
 
@@ -475,10 +471,10 @@ InOutViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
 	// Overrides BaseViewController
-	doSaveAPICall: function( record, ignoreWarning, callback ) {
+	doSaveAPICall( record, ignoreWarning, callback ) {
 		var current_api = this.getCurrentAPI();
 
 		if ( !callback ) {
@@ -490,16 +486,16 @@ InOutViewController = BaseViewController.extend( {
 		}
 
 		return current_api.setUserPunch( record, false, ignoreWarning, callback );
-	},
+	}
 
-	onSaveResult: function( result ) {
-		this._super( 'onSaveResult', result );
+	onSaveResult( result ) {
+		super.onSaveResult( result );
 		if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
 			LocalCacheData.current_open_primary_controller.search();
 		}
-	},
+	}
 
-	setErrorMenu: function() {
+	setErrorMenu() {
 
 		var len = this.context_menu_array.length;
 
@@ -517,14 +513,14 @@ InOutViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	getOtherFieldReferenceField: function() {
+	getOtherFieldReferenceField() {
 		return 'note';
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -602,7 +598,7 @@ InOutViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+			api_class: TTAPI.APIBranch,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -620,7 +616,7 @@ InOutViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+			api_class: TTAPI.APIDepartment,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -640,7 +636,7 @@ InOutViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+				api_class: TTAPI.APIJob,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
@@ -673,7 +669,7 @@ InOutViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+				api_class: TTAPI.APIJobItem,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
@@ -755,10 +751,9 @@ InOutViewController = BaseViewController.extend( {
 		if ( !this.show_node_ui ) {
 			this.detachElement( 'note' );
 		}
+	}
 
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		// reset old_types, should only be set when type change and transfer is true. fixed bug 1500
 		this.old_type_status = {};
@@ -821,14 +816,13 @@ InOutViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.confirm_on_exit = true; //confirm on leaving even if no changes have been made so users can't accidentally not save punches by logging out without clicking save for example
 	}
-} );
+}
 
 InOutViewController.loadView = function() {
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -38,6 +38,18 @@ define( 'TIMETREX_API', true );
 forceNoCacheHeaders(); //Send headers to disable caching.
 
 /**
+ * Returns if the method should always be a unauthenticated API call.
+ * @return bool
+ */
+function isUnauthenticatedMethod( $method ) {
+	if ( in_array( strtolower( $method ), [ 'isloggedin', 'ping' ] ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
  * Returns valid classes when unauthenticated.
  * @return array
  */
@@ -53,6 +65,27 @@ function getAuthenticatedPortalAPIMethods() {
 			'getJobApplicant', 'getJobApplicantEducation', 'setJobApplicantEducation', 'getJobApplicantEmployment', 'setJobApplicantEmployment', 'getJobApplicantLanguage', 'setJobApplicantLanguage', 'getJobApplicantLicense', 'setJobApplicantLicense', 'getJobApplicantLocation', 'setJobApplicantLocation', 'getJobApplicantMembership', 'setJobApplicantMembership',
 			'getJobApplicantReference', 'setJobApplicantReference', 'getJobApplicantSkill', 'setJobApplicantSkill', 'getJobApplication', 'setJobApplication', 'getAttachment', 'addAttachment', 'uploadAttachment',
 	];
+}
+
+
+/**
+ * Get Cookie/Post/Get variable in that order.
+ * @param $var_name
+ * @param null $default_value
+ * @return mixed|null
+ */
+function getCookiePostGetVariable( $var_name, $default_value = null ) {
+	if ( isset( $_COOKIE[$var_name] ) && $_COOKIE[$var_name] != '' ) {
+		$retval = $_COOKIE[$var_name];
+	} else if ( isset( $_POST[$var_name] ) && $_POST[$var_name] != '' ) {
+		$retval = $_POST[$var_name];
+	} else if ( isset( $_GET[$var_name] ) && $_GET[$var_name] != '' ) {
+		$retval = $_GET[$var_name];
+	} else {
+		$retval = $default_value;
+	}
+
+	return $retval;
 }
 
 /**
@@ -74,16 +107,7 @@ function getSessionID( $authentication_type_id = 800 ) {
 	$authentication = new Authentication();
 	$session_name = $authentication->getName( $authentication_type_id );
 
-	if ( isset( $_COOKIE[$session_name] ) && $_COOKIE[$session_name] != '' ) {
-		$session_id = $_COOKIE[$session_name];
-	} else if ( isset( $_POST[$session_name] ) && $_POST[$session_name] != '' ) {
-		$session_id = $_POST[$session_name];
-	} else if ( isset( $_GET[$session_name] ) && $_GET[$session_name] != '' ) {
-		$session_id = $_GET[$session_name];
-	} else {
-		$session_id = false;
-	}
-
+	$session_id = getCookiePostGetVariable( $session_name, false );
 	if ( is_string( $session_id ) == false ) {
 		$session_id = false;
 	}
@@ -96,15 +120,7 @@ function getSessionID( $authentication_type_id = 800 ) {
  * @return bool|mixed
  */
 function getStationID() {
-	if ( isset( $_COOKIE['StationID'] ) && $_COOKIE['StationID'] != '' ) {
-		$station_id = $_COOKIE['StationID'];
-	} else if ( isset( $_POST['StationID'] ) && $_POST['StationID'] != '' ) {
-		$station_id = $_POST['StationID'];
-	} else if ( isset( $_GET['StationID'] ) && $_GET['StationID'] != '' ) {
-		$station_id = $_GET['StationID'];
-	} else {
-		$station_id = false;
-	}
+	$station_id = getCookiePostGetVariable( 'StationID', false );
 
 	//Check to see if there is a "sticky" user agent based Station ID defined.
 	if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && $_SERVER['HTTP_USER_AGENT'] != '' && stripos( $_SERVER['HTTP_USER_AGENT'], 'StationID:' ) !== false ) {
@@ -121,6 +137,63 @@ function getStationID() {
 	}
 
 	return $station_id;
+}
+
+/**
+ * Handle temporarily overriding user preferences based on Cookie/Post/Get variables.
+ * This is useful for ensuring there is always consistent date/time formats and timezones when accessing the API for multiple users.
+ * @param $user_obj UserFactory
+ * @return bool
+ */
+function handleOverridePreferences( $user_obj ) {
+	$user_pref_obj = $user_obj->getUserPreferenceObject(); /** @var UserPreferenceFactory $user_pref_obj */
+
+	$override_preferences = json_decode( getCookiePostGetVariable( 'OverrideUserPreference' ), true );
+	if ( is_array( $override_preferences ) && count( $override_preferences ) > 0 ) {
+		//If a user_id is specified, pull the timezone for that user and default to it, rather than the UI having to do a lookup itself and passing it through.
+		if ( isset( $override_preferences['user_id'] ) && TTUUID::isUUID( $override_preferences['user_id'] ) && $user_obj->getId() != $override_preferences['user_id'] ) {
+			$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
+			$uplf->getByUserID( $override_preferences['user_id'] ); //Cached
+			if ( $uplf->getRecordCount() > 0 ) {
+				$override_preferences = array_merge( $uplf->getCurrent()->getObjectAsArray( [ 'time_zone' => true ] ), $override_preferences );
+			}
+
+			//If switching to another users timezone, default to appending the timezone on the end of each timestamp unless otherwise specified.
+			if ( !isset( $override_preferences['time_format'] ) && strpos( $user_pref_obj->getTimeFormat(), 'T' ) === false ) {
+				$override_preferences['time_format'] = $user_pref_obj->getTimeFormat() . ' T';
+			}
+		}
+
+		Debug::Arr( $override_preferences, 'Overridden Preferences: ', __FILE__, __LINE__, __METHOD__, 10 );
+		$user_pref_obj->setObjectFromArray( $override_preferences );
+	}
+
+	$user_pref_obj->setDateTimePreferences();
+
+	Debug::text( 'Locale Cookie: ' . TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10 );
+
+	//If override preferences specifies a language, do not save the users preferences, just use it dynamically instead.
+	if ( !isset( $override_preferences['language'] ) && TTi18n::getLocaleCookie() != '' && $user_pref_obj->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
+		Debug::text( 'Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10 );
+		$user_pref_obj->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
+		if ( $user_pref_obj->isValid() ) {
+			$user_pref_obj->Save( false );
+		}
+	} else {
+		Debug::text( 'User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10 );
+	}
+
+	if ( isset( $_GET['language'] ) && $_GET['language'] != '' ) {
+		TTi18n::setLocale( $_GET['language'] ); //Sets master locale
+	} else {
+		TTi18n::setLanguage( $user_pref_obj->getLanguage() );
+		TTi18n::setCountry( $user_obj->getCountry() );
+		TTi18n::setLocale(); //Sets master locale
+	}
+
+	TTi18n::setLocaleCookie(); //Make sure locale cookie is set so APIGlobal.js.php can read it.
+
+	return $user_pref_obj;
 }
 
 /**

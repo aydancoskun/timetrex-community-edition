@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -609,7 +609,7 @@ class Form941Report extends Report {
 		$this->tmp_data = [ 'pay_stub_entry' => [], 'ytd_pay_stub_entry' => [] ];
 
 		$filter_data = $this->getFilterConfig();
-		$form_data = $this->formatFormConfig();
+		$form_data = $setup_data = $this->formatFormConfig();
 
 		require_once( Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction.class.php' );
 		$pd_obj = new PayrollDeduction( 'US', 'WA' ); //State doesn't matter.
@@ -618,6 +618,9 @@ class Form941Report extends Report {
 		$social_security_wage_limit = $pd_obj->getSocialSecurityMaximumEarnings();
 		$social_security_maximum_contribution = $pd_obj->getSocialSecurityMaximumContribution( 'employee' );
 		$medicare_additional_threshold_limit = $pd_obj->getMedicareAdditionalEmployerThreshold();
+		$retention_credit_1st_quarter_start_date = strtotime('13-Mar-'. TTDate::getYear( $filter_data['start_date'] ) );
+		$retention_credit_1st_quarter_end_date = strtotime('31-Mar-'. TTDate::getYear( $filter_data['start_date'] ) );
+		$covid_19_form_start_date = strtotime('01-Apr-'. TTDate::getYear( $filter_data['start_date'] ) ); //For unit testing, make the year relative to the current year we are filtering on.
 		Debug::Text( 'Social Security Wage Limit: ' . $social_security_wage_limit . ' Medicare Threshold: ' . $medicare_additional_threshold_limit . ' Date: ' . TTDate::getDate( 'DATE', $filter_data['end_date'] ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		//Get the total number of employees paid for the pay period that covers the 12th day of the last month of the quarter. (Part 1, Line 1 on the 941 form)
@@ -659,6 +662,7 @@ class Form941Report extends Report {
 		//Debug::Arr($ytd_filter_data, 'YTD Filter Data: Row Count: '.	$pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach ( $pself as $pse_obj ) {
+				$legal_entity_id = $pse_obj->getColumn( 'legal_entity_id' );
 				$user_id = $pse_obj->getColumn( 'user_id' ); //Make sure we don't add this to the unique user_id list.
 				//Always use middle day epoch, otherwise multiple entries could exist for the same day.
 				$date_stamp = TTDate::getMiddleDayEpoch( TTDate::strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ) );
@@ -667,8 +671,10 @@ class Form941Report extends Report {
 				$department = $pse_obj->getColumn( 'default_department' );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
-				if ( !isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] ) ) {
+				if ( !isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] ) ) { //YTD values, don't need to worry about grouping by $run_id
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = [
+							'legal_entity_id'             => $legal_entity_id,
+
 							'pay_stub_status' => Option::getByKey( $pse_obj->getColumn( 'pay_stub_status_id' ), $psf->getOptions( 'status' ) ),
 							'pay_stub_type'   => Option::getByKey( $pse_obj->getColumn( 'pay_stub_type_id' ), $psf->getOptions( 'type' ) ),
 
@@ -693,37 +699,87 @@ class Form941Report extends Report {
 
 			if ( isset( $this->tmp_data['pay_stub_entry'] ) && is_array( $this->tmp_data['pay_stub_entry'] ) ) {
 				foreach ( $this->tmp_data['pay_stub_entry'] as $user_id => $data_a ) {
-					foreach ( $data_a as $date_stamp => $data_b ) {
+					foreach ( $data_a as $date_stamp => $data_c ) {
 						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] ) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = 0;
 						}
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) );
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) );
 
 						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] ) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] = 0;
 						}
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] ) );
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'], Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] ) );
+
+						//Since Sick/Family Leave wages are not included in above Social Security Wages include/exclude, so we need to add them in here. **But only Quarter 2 onward**
+						if ( $date_stamp >= $covid_19_form_start_date ) {
+							if ( isset($form_data['qualified_sick_leave_wages']) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['qualified_sick_leave_wages']['include_pay_stub_entry_account'], $form_data['qualified_sick_leave_wages']['exclude_pay_stub_entry_account'] ) );
+							}
+							if ( isset($form_data['qualified_family_leave_wages']) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['qualified_family_leave_wages']['include_pay_stub_entry_account'], $form_data['qualified_family_leave_wages']['exclude_pay_stub_entry_account'] ) );
+							}
+						}
 
 						//Combine Social Security and Tip wages.
 						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] );
 
-						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] ) ) {
-							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] = 0;
+						//Separate what was actually deducted from the employee vs. what was maybe supposed to be deducted.
+						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee_deducted'] ) ) {
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee_deducted'] = 0;
 						}
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) );
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee_deducted'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee_deducted'], Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) );
+
+						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer_deducted'] ) ) {
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer_deducted'] = 0;
+						}
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer_deducted'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer_deducted'], Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['social_security_tax_employer']['include_pay_stub_entry_account'], $form_data['social_security_tax_employer']['exclude_pay_stub_entry_account'] ) );
+
+						//This causes things to break when the employee may have had more/less deducted in previous quarters than what they should have had. (Even if it was corrected in another quarter)
+						//  However if that happens for some reason, the employer should have never actually remitted the incorrect amounts, since the 941 form recalculates everything itself anyways.
+						//  The IRS also doesn't care what was actually deducted from the employee, so using this to stop calculating any more SS is probably not the best idea.
+						//$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee'] = $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee_deducted'];
+						//$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer'] = $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer_deducted'];
 
 						//Handle additional medicare wages in excess of 200,000
 						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] ) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = 0;
 						}
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] ) );
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] ) );
+
+
+						if ( !isset( $this->form_data['retention_credit_1st_quarter']['l24'] ) ) {
+							$this->form_data['retention_credit_1st_quarter']['l24'] = 0;
+						}
+
+						if ( !isset( $this->form_data['retention_credit_1st_quarter'][$legal_entity_id]['l25'] ) ) {
+							$this->form_data['retention_credit_1st_quarter']['l25'] = 0;
+						}
+
+						//The below can't be split by legal entity, since $social_security_tax_employer_share_remaining is not legal entity specific. So any user that requires this must limit the report to just a single legal entity.
+						if ( isset( $form_data['qualified_retention_credit_wages'] ) && $date_stamp >= $retention_credit_1st_quarter_start_date && $date_stamp <= $retention_credit_1st_quarter_end_date ) {
+							$tmp_retention_credit_wages_1st_quarter = Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['qualified_retention_credit_wages']['include_pay_stub_entry_account'], $form_data['qualified_retention_credit_wages']['exclude_pay_stub_entry_account'] );
+							$this->form_data['retention_credit_1st_quarter']['l24'] = bcadd( $this->form_data['retention_credit_1st_quarter']['l24'], $tmp_retention_credit_wages_1st_quarter ); //Retention Credit Wages March 13th -> 31st of 1st quarter. L24 & WorkSheet 3c
+						}
+
+						if ( isset( $form_data['qualified_health_plan_expenses'] ) && $date_stamp >= $retention_credit_1st_quarter_start_date && $date_stamp <= $retention_credit_1st_quarter_end_date ) {
+							$tmp_wages = ( isset( $form_data['wages'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['wages']['include_pay_stub_entry_account'], $form_data['wages']['exclude_pay_stub_entry_account'] ) : 0;
+							$tmp_qualified_health_plan_expenses_1st_quarter = Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['qualified_health_plan_expenses']['include_pay_stub_entry_account'], $form_data['qualified_health_plan_expenses']['exclude_pay_stub_entry_account'] );
+							if ( $tmp_wages > 0 && $tmp_retention_credit_wages_1st_quarter > 0 ) { //Prevent division by 0.
+								$tmp_qualified_health_plan_expenses_on_retention_credit_1st_quarter = bcmul( $tmp_qualified_health_plan_expenses_1st_quarter, bcdiv( $tmp_retention_credit_wages_1st_quarter, $tmp_wages ) ); //L25 & WorkSheet 1: 3d
+							} else {
+								$tmp_qualified_health_plan_expenses_on_retention_credit_1st_quarter = 0;
+							}
+							$this->form_data['retention_credit_1st_quarter']['l25'] = bcadd( $this->form_data['retention_credit_1st_quarter']['l25'], $tmp_qualified_health_plan_expenses_on_retention_credit_1st_quarter );
+						}
 					}
 				}
 			}
 			//Debug::Arr($this->tmp_data['ytd_pay_stub_entry'], 'YTD Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
-		unset( $pse_obj, $user_id, $date_stamp, $branch, $department, $pay_stub_entry_name_id, $this->tmp_data['pay_stub_entry'], $data_a, $data_b );
+		unset( $pse_obj, $user_id, $date_stamp, $branch, $department, $pay_stub_entry_name_id, $this->tmp_data['pay_stub_entry'], $data_a, $data_c, $tmp_retention_credit_wages_1st_quarter, $tmp_qualified_health_plan_expenses_1st_quarter, $tmp_qualified_health_plan_expenses_1st_quarter, $tmp_wages );
 
+		$social_security_tax_employer_share_remaining = ( isset( $setup_data['form_5884c_credit'] ) && $setup_data['form_5884c_credit'] != '' ) ? Misc::MoneyFormat( $setup_data['form_5884c_credit'], false ) : 0; //WorkSheet1: 1L -- This has to be reduced as its used.
+		$retention_credit_1st_quarter_wages_remaining = bcadd( ( isset($this->form_data['retention_credit_1st_quarter']['l24']) ? $this->form_data['retention_credit_1st_quarter']['l24'] : 0 ), ( isset($this->form_data['retention_credit_1st_quarter']['l24']) ? $this->form_data['retention_credit_1st_quarter']['l25'] : 0 ) );
 
 		//Get just the data for the quarter now.
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -736,8 +792,8 @@ class Form941Report extends Report {
 				$run_id = $pse_obj->getColumn( 'pay_stub_run_id' );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
-				if ( !isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] ) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = [
+				if ( !isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id] ) ) {
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id] = [
 							'legal_entity_id'             => $legal_entity_id,
 
 							'pay_period_start_date'       => strtotime( $pse_obj->getColumn( 'pay_stub_start_date' ) ),
@@ -754,10 +810,10 @@ class Form941Report extends Report {
 					];
 				}
 
-				if ( isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] ) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn( 'amount' ) );
+				if ( isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][$pay_stub_entry_name_id] ) ) {
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn( 'amount' ) );
 				} else {
-					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn( 'amount' );
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn( 'amount' );
 				}
 			}
 			unset( $legal_entity_id, $user_id, $date_stamp, $pay_stub_entry_name_id, $pse_obj );
@@ -765,166 +821,295 @@ class Form941Report extends Report {
 			if ( isset( $this->tmp_data['pay_stub_entry'] ) && is_array( $this->tmp_data['pay_stub_entry'] ) ) {
 				foreach ( $this->tmp_data['pay_stub_entry'] as $user_id => $data_a ) {
 					foreach ( $data_a as $date_stamp => $data_b ) {
-						$legal_entity_id = $data_b['legal_entity_id'];
-						$quarter_month = TTDate::getYearQuarterMonthNumber( $date_stamp );
-						//Debug::Text('Quarter Month: '. $quarter_month .' Epoch: '. TTDate::getDate('DATE', $date_stamp), __FILE__, __LINE__, __METHOD__, 10);
+						foreach ( $data_b as $run_id => $data_c ) {
+							$legal_entity_id = $data_c['legal_entity_id'];
+							$quarter_month = TTDate::getYearQuarterMonthNumber( $date_stamp );
+							//Debug::Text('Quarter Month: '. $quarter_month .' Epoch: '. TTDate::getDate('DATE', $date_stamp), __FILE__, __LINE__, __METHOD__, 10);
 
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] = ( isset( $form_data['wages'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['wages']['include_pay_stub_entry_account'], $form_data['wages']['exclude_pay_stub_entry_account'] ) : 0;
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] = ( isset( $form_data['income_tax'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income_tax']['include_pay_stub_entry_account'], $form_data['income_tax']['exclude_pay_stub_entry_account'] ) : 0;
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['wages'] = ( isset( $form_data['wages'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['wages']['include_pay_stub_entry_account'], $form_data['wages']['exclude_pay_stub_entry_account'] ) : 0;
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['income_tax'] = ( isset( $form_data['income_tax'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['income_tax']['include_pay_stub_entry_account'], $form_data['income_tax']['exclude_pay_stub_entry_account'] ) : 0;
 
-						//Because employees can be excluded from Social Security/Medicare, only include wage amounts if the SS tax is not 0.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted'] = ( isset( $form_data['social_security_tax'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) : 0;
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer_deducted'] = ( isset( $form_data['social_security_tax_employer'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax_employer']['include_pay_stub_entry_account'], $form_data['social_security_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
-						if ( ( isset( $form_data['social_security_tax']['include_pay_stub_entry_account'] ) && !is_array( $form_data['social_security_tax']['include_pay_stub_entry_account'] ) ) || $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted'] != 0 ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = ( isset( $form_data['social_security_wages'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) : 0;
-						} else {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = 0;
-						}
-
-						if ( ( isset( $form_data['social_security_tips']['include_pay_stub_entry_account'] ) && !is_array( $form_data['social_security_tips']['include_pay_stub_entry_account'] ) || $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted'] != 0 ) ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] = ( isset( $form_data['social_security_tips'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] ) : 0;
-						} else {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] = 0;
-						}
-
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] );                                       //Includes Wages and Tips
-
-						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] ) ) {
-							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = 0;
-						}
-						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] ) ) {
-							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] = 0;
-						}
-
-						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] ) ) {
-							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] = 0;
-						}
-
-						//Handle maximum amount for social security tips.
-						// Calculate tips first as it should favor the employee in that case?
-						if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] < $social_security_wage_limit ) {
-							if ( bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] ) > $social_security_wage_limit ) {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'], bcsub( bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] ), $social_security_wage_limit ) );
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] );
-								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = $social_security_wage_limit;
+							//Because employees can be excluded from Social Security/Medicare, only include wage amounts if the SS tax is not 0.
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employee_deducted'] = ( isset( $form_data['social_security_tax'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) : 0;
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employer_deducted'] = ( isset( $form_data['social_security_tax_employer'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['social_security_tax_employer']['include_pay_stub_entry_account'], $form_data['social_security_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
+							if ( ( isset( $form_data['social_security_tax']['include_pay_stub_entry_account'] ) && !is_array( $form_data['social_security_tax']['include_pay_stub_entry_account'] ) ) || $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employee_deducted'] != 0 ) {
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'] = ( isset( $form_data['social_security_wages'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) : 0;
 							} else {
-								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] );
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'] = 0;
 							}
-						} else {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] );
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] = 0;
-						}
 
-
-						//Handle maximum amount for social security wages.
-						if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] < $social_security_wage_limit ) {
-							if ( bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] ) > $social_security_wage_limit ) {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'], bcsub( bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] ), $social_security_wage_limit ) );
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] );
-								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = $social_security_wage_limit;
+							if ( ( isset( $form_data['social_security_tips']['include_pay_stub_entry_account'] ) && !is_array( $form_data['social_security_tips']['include_pay_stub_entry_account'] ) || $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employee_deducted'] != 0 ) ) {
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tip_wages'] = ( isset( $form_data['social_security_tips'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] ) : 0;
 							} else {
-								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] );
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tip_wages'] = 0;
 							}
-						} else {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] );
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = 0;
-						}
 
-						//Social Security Tax must be calculated after the wages are fully adjusted.
-						//Calculate the social security based on the wages, not what the employee actually had deducted as the IRS doesn't care about that for the 941 Form. The W2's reconcile that part.
-						//  Make sure we cap the YTD social security amount at the proper maximum as well, since just basing it off wages can result in fractions of a cent difference per pay period when the employee reaches the cap.
-						//  The pay stubs handle it this way too, so this makes the two values match. Essentially this can result in positive fractions of a cent for the first 3 quarters (ie: 0.07) then a negative for the last quarter (ie: -0.07) if employees have reached the cap.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ), 2 );                                                          //Rate is employee & employer rate, so divide by two so we can split it up separately.
-						if ( bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] ) > $social_security_maximum_contribution ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] = bcsub( $social_security_maximum_contribution, $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] );
-						}
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'];
-
-
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employee_deducted'] = ( isset( $form_data['medicare_tax'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax']['include_pay_stub_entry_account'], $form_data['medicare_tax']['exclude_pay_stub_entry_account'] ) : 0;
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer_deducted'] = ( isset( $form_data['medicare_tax_employer'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax_employer']['include_pay_stub_entry_account'], $form_data['medicare_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
-						if ( ( isset( $form_data['medicare_tax']['include_pay_stub_entry_account'] ) && !is_array( $form_data['medicare_tax']['include_pay_stub_entry_account'] ) ) || $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employee_deducted'] != 0 ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = ( isset( $form_data['medicare_wages'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] ) : 0;
-						} else {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = 0;
-						}
-
-						//Medicare Tax must be calculated after the wages are fully adjusted.
-						//Calculate the medicare based on the wages, not what the employee actually had deducted as the IRS doesn't care about that for the 941 Form. The W2's reconcile that part.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'], bcdiv( $this->getF941Object()->medicare_rate, 2 ) ), 2 ); //Rate is employeer & employer rate, so divide by two so we can split it up separately.
-
-
-						//Handle medicare additional wage limit, only consider wages earned above the threshold to be "medicare_additional_wages"
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = 0;
-						if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] ) ) {
-							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = 0;
-						}
-
-						if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] > $medicare_additional_threshold_limit ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'];
-						} else {
-							if ( ( ( isset( $form_data['medicare_tax']['include_pay_stub_entry_account'] ) && !is_array( $form_data['medicare_tax']['include_pay_stub_entry_account'] ) ) || $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] != 0 )
-									&& bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] ) > $medicare_additional_threshold_limit ) {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = bcsub( bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] ), $medicare_additional_threshold_limit );
+							if ( $date_stamp >= $covid_19_form_start_date ) {
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages'] = ( isset( $form_data['qualified_sick_leave_wages'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['qualified_sick_leave_wages']['include_pay_stub_entry_account'], $form_data['qualified_sick_leave_wages']['exclude_pay_stub_entry_account'] ) : 0;
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages'] = ( isset( $form_data['qualified_family_leave_wages'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['qualified_family_leave_wages']['include_pay_stub_entry_account'], $form_data['qualified_family_leave_wages']['exclude_pay_stub_entry_account'] ) : 0;
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_wages'] = ( isset( $form_data['qualified_retention_credit_wages'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['qualified_retention_credit_wages']['include_pay_stub_entry_account'], $form_data['qualified_retention_credit_wages']['exclude_pay_stub_entry_account'] ) : 0;
 							} else {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = 0;
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages'] = 0;
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages'] = 0;
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_wages'] = 0;
+							}
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages_over_threshold'] = 0;
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages_over_threshold'] = 0;
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tip_wages'] );                                       //Includes Wages and Tips
+
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = 0;
+							}
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = 0;
+							}
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee'] = 0;
+							}
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer'] = 0;
+							}
+
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] = 0;
+							}
+
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['qualified_sick_leave_wages'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['qualified_sick_leave_wages'] = 0;
+							}
+
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['qualified_family_leave_wages'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['qualified_family_leave_wages'] = 0;
+							}
+
+
+							//Handle maximum amount for social security tips.
+							// Calculate tips first as it should favor the employee in that case?
+							$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tip_wages'], $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $social_security_wage_limit );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tip_wages'] = $tmp_amount_around_limit_arr['adjusted_amount'];
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tip_wages'], $tmp_amount_around_limit_arr['adjusted_amount'] );
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $tmp_amount_around_limit_arr['adjusted_amount'] );
+
+							//Handle maximum amount for social security wages.
+							$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'], $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $social_security_wage_limit );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'] = $tmp_amount_around_limit_arr['adjusted_amount'];
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], $tmp_amount_around_limit_arr['adjusted_amount'] );
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $tmp_amount_around_limit_arr['adjusted_amount'] );
+
+
+							//Handle maximum amount for Qualified Sick/Family Leave Wages
+							//  Qualified sick/family leave wages aren't subject to the employer share of social security tax; therefore, the tax rate on these wages is 6.2% (0.062). Stop paying social security
+							//  tax on and entering an employee's wages on line 5a(i) when the employee's taxable wages, including wages reported on line 5a, qualified sick leave wages, qualified family leave
+							//  wages, and tips, reach $137,700 for the year.
+							$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages'], $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $social_security_wage_limit );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages'] = $tmp_amount_around_limit_arr['adjusted_amount'];
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages_over_threshold'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages_over_threshold'], $tmp_amount_around_limit_arr['over_limit'] );
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $tmp_amount_around_limit_arr['adjusted_amount'] );
+
+							$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages'], $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $social_security_wage_limit );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages'] = $tmp_amount_around_limit_arr['adjusted_amount'];
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages_over_threshold'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages_over_threshold'], $tmp_amount_around_limit_arr['over_limit'] );
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'], $tmp_amount_around_limit_arr['adjusted_amount'] );
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses'] = ( isset( $form_data['qualified_health_plan_expenses'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['qualified_health_plan_expenses']['include_pay_stub_entry_account'], $form_data['qualified_health_plan_expenses']['exclude_pay_stub_entry_account'] ) : 0;
+
+
+							//Social Security Tax must be calculated after the wages are fully adjusted.
+							//Calculate the social security based on the wages, not what the employee actually had deducted as the IRS doesn't care about that for the 941 Form. The W2's reconcile that part.
+							//  Make sure we cap the YTD social security amount at the proper maximum as well, since just basing it off wages can result in fractions of a cent difference per pay period when the employee reaches the cap.
+							//  The pay stubs handle it this way too, so this makes the two values match. Essentially this can result in positive fractions of a cent for the first 3 quarters (ie: 0.07) then a negative for the last quarter (ie: -0.07) if employees have reached the cap.
+							//  With Sick/Family leave wages, only the employee pays social security on those, so we can't just double the amount anymore for the employer.
+							$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( round( bcmul( bcadd( bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tip_wages'] ), bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages'] ) ), bcdiv( $this->getF941Object()->social_security_rate, 2 ) ), 2 ), $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee'], $social_security_maximum_contribution );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employee'] = $tmp_amount_around_limit_arr['adjusted_amount'];
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employee'], $tmp_amount_around_limit_arr['adjusted_amount'] );
+
+							//Due to COVID-19 changes and sick/family leave being exempt from employer social security, we need to calculate these separately along with the maximum contributions.
+							$tmp_amount_around_limit_arr = Misc::getAmountAroundLimit( round( bcmul( bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tip_wages'] ), bcdiv( $this->getF941Object()->social_security_rate, 2 ) ), 2 ), $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer'], $social_security_maximum_contribution );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employer'] = $tmp_amount_around_limit_arr['adjusted_amount'];
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_tax_employer'], $tmp_amount_around_limit_arr['adjusted_amount'] );
+
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employee_deducted'] = ( isset( $form_data['medicare_tax'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['medicare_tax']['include_pay_stub_entry_account'], $form_data['medicare_tax']['exclude_pay_stub_entry_account'] ) : 0;
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer_deducted'] = ( isset( $form_data['medicare_tax_employer'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['medicare_tax_employer']['include_pay_stub_entry_account'], $form_data['medicare_tax_employer']['exclude_pay_stub_entry_account'] ) : 0;
+							if ( ( isset( $form_data['medicare_tax']['include_pay_stub_entry_account'] ) && !is_array( $form_data['medicare_tax']['include_pay_stub_entry_account'] ) ) || $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employee_deducted'] != 0 ) {
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_wages'] = ( isset( $form_data['medicare_wages'] ) ) ? Misc::calculateMultipleColumns( $data_c['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] ) : 0;
+							} else {
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_wages'] = 0;
+							}
+
+							//Medicare Tax must be calculated after the wages are fully adjusted.
+							//Calculate the medicare based on the wages, not what the employee actually had deducted as the IRS doesn't care about that for the 941 Form. The W2's reconcile that part.
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_wages'], bcdiv( $this->getF941Object()->medicare_rate, 2 ) ), 2 ); //Rate is employeer & employer rate, so divide by two so we can split it up separately.
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_leave_tax'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ), 2 ); //Rate is employer rate, so divide by two so we can split it up separately.
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_sick_leave_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages_over_threshold'] ); //WorkSheet 1: 2a(ii)
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_sick_leave'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['wages'] > 0 ? bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses'], bcdiv( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_sick_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['wages'] ) ) : 0; //L19 & WorkSheet 1: 2b
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer_sick_leave_wages'] = bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_sick_leave_wages'], bcdiv( $this->getF941Object()->medicare_rate, 2 ) ); //WorkSheet 1: 2c
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_leave_credit'] = bcadd( bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_sick_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer_sick_leave_wages'] ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_sick_leave'] ); //WorkSheet 1: 2d
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_family_leave_tax'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ), 2 ); //Rate is employer rate, so divide by two so we can split it up separately.
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_family_leave_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages_over_threshold']); //WorkSheet 1: 2e(ii)
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_family_leave'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['wages'] > 0 ? bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses'], bcdiv( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_family_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['wages'] ) ) : 0; //L20 & WorkSheet 1: 2f
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer_family_leave_wages'] = bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_family_leave_wages'], bcdiv( $this->getF941Object()->medicare_rate, 2 ) ); //WorkSheet 1: 2g
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_family_leave_credit'] = bcadd( bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_family_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer_family_leave_wages'] ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_family_leave'] ); //WorkSheet 1: 2h
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_and_family_leave_credit'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_leave_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_family_leave_credit'] ); //WorkSheet 1: 2i
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_retention_credit'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['wages'] > 0 ? bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses'], bcdiv( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['wages'] ) ) : 0; //L22 & WorkSheet 1: 3b
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_total_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_retention_credit'] ); //WorkSheet 1: 3e
+
+							//Handle 1st quarter retention credit here, by adding back in up to the same amount of qualified_retention_credit_total_wages;
+							if ( $retention_credit_1st_quarter_wages_remaining > 0 ) {
+								$tmp_retention_credit_1st_quarter_wages = min( $retention_credit_1st_quarter_wages_remaining, $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_total_wages'] );
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_total_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_total_wages'], $tmp_retention_credit_1st_quarter_wages );
+								$retention_credit_1st_quarter_wages_remaining = bcsub( $retention_credit_1st_quarter_wages_remaining, $tmp_retention_credit_1st_quarter_wages );
+							}
+							unset( $tmp_retention_credit_1st_quarter_wages );
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit'] = bcmul($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_total_wages'], 0.50 ); //WorkSheet 1: 3f
+
+
+							//Handle medicare additional wage limit, only consider wages earned above the threshold to be "medicare_additional_wages"
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_additional_wages'] = 0;
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = 0;
+							}
+							if ( !isset( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_additional_wages'] ) ) {
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_additional_wages'] = 0;
+							}
+
+							if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] > $medicare_additional_threshold_limit ) {
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_additional_wages'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_wages'];
+							} else {
+								if ( ( ( isset( $form_data['medicare_tax']['include_pay_stub_entry_account'] ) && !is_array( $form_data['medicare_tax']['include_pay_stub_entry_account'] ) ) || $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax'] != 0 )
+										&& bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_wages'] ) > $medicare_additional_threshold_limit ) {
+									$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_additional_wages'] = bcsub( bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_wages'] ), $medicare_additional_threshold_limit );
+								} else {
+									$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_additional_wages'] = 0;
+								}
+							}
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['additional_medicare_tax'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_additional_wages'], $this->getF941Object()->medicare_additional_rate ), 2 );
+							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_wages'] );
+							//Debug::Text('User ID: '. $user_id .' DateStamp: '. TTDate::getDate('DATE', $date_stamp ) .' YTD Medicare Additional Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] .' This Pay Stub: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_additional_wages'], __FILE__, __LINE__, __METHOD__, 10);
+
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_total'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employee'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employer'] );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_total'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer'] ); //This *does not* include the additional_medicare_tax.
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['total_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['income_tax'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_total'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_total'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['additional_medicare_tax'] ) ) );
+
+							//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
+							if ( !isset( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] ) ) {
+								$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] = Misc::preSetArrayValues( [], [ 'l2', 'l3', 'l5a', 'l5ai', 'l5aii', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'income_tax', 'medicare_tax_employee_deducted', 'medicare_tax_employer_deducted', 'medicare_tax', 'social_security_tax_employee_deducted', 'social_security_tax_employer_deducted', 'social_security_tax', 'social_security_tax_employee', 'social_security_tax_employer', 'l5a2', 'l5ai', 'l5aii', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10', 'social_security_qualified_sick_leave_tax', 'social_security_total_qualified_sick_leave_wages', 'medicare_tax_employer_sick_leave_wages', 'social_security_qualified_sick_leave_credit', 'social_security_qualified_family_leave_tax', 'social_security_total_qualified_family_leave_wages', 'medicare_tax_employer_family_leave_wages', 'social_security_qualified_family_leave_credit', 'social_security_qualified_sick_and_family_leave_credit', 'nonrefundable_credit_for_qualified_sick_and_family_leave', 'refundable_credit_for_qualified_sick_and_family_leave', 'qualified_retention_credit_wages', 'qualified_retention_credit_total_wages', 'qualified_retention_credit', 'refundable_qualified_retention_credit', 'nonrefundable_qualified_retention_credit', 'qualified_health_plan_expenses', 'qualified_health_plan_expenses_on_sick_leave', 'qualified_health_plan_expenses_on_family_leave', 'qualified_health_plan_expenses_on_retention_credit' ], 0 );
+							}
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employee_deducted'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employer_deducted'] );
+							//Debug::Text('User: '. $user_id .' Date: '. TTDate::getDate('DATE', $date_stamp) .' SS Amounts: YTD Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] .' Wages: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'] .' Pre-Rounded: '. bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ) .' Rounded: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax'] .' Deducted: '. $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'], __FILE__, __LINE__, __METHOD__, 10);
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employee_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employee_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employee_deducted'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer_deducted'] );
+
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_sick_leave_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_sick_leave_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_leave_tax'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_total_qualified_sick_leave_wages'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_total_qualified_sick_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_sick_leave_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_sick_leave_wages'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_sick_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer_sick_leave_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_sick_leave_credit'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_sick_leave_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_leave_credit'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_family_leave_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_family_leave_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_family_leave_tax'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_total_qualified_family_leave_wages'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_total_qualified_family_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_total_qualified_family_leave_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_family_leave_wages'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_family_leave_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax_employer_family_leave_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_family_leave_credit'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_family_leave_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_family_leave_credit'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_sick_and_family_leave_credit'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_qualified_sick_and_family_leave_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_and_family_leave_credit'] );
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l2'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l2'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['income_tax'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5ai'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5ai'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_sick_leave_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5aii'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5aii'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_family_leave_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tip_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_wages'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_additional_wages'] );
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5f'] = 0; //Not implemented currently.
+
+							//Calculated fields, make sure we don't use += on these.
+							//Calculate amounts for Schedule B.
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'], $this->getF941Object()->social_security_rate );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5ai2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5ai'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5aii2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5aii'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'], $this->getF941Object()->social_security_rate );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'], $this->getF941Object()->medicare_rate );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'], $this->getF941Object()->medicare_additional_rate );
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5e'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a2'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5ai2'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5aii2'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b2'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c2'], $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d2'] ) ) ) ) );
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l6'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5e'], $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5f'] ) );
+
+							//Total up Social Security / Medicare Taxes withheld from the employee only, then double them for the employer portion, this helps calculate l7 further down.
+							// Since medicare_tax does not include the additional_medicare_tax, we must manually re-add it here.
+							// The form setup for Medicare Taxes Witheld should only ever be setup for whatever the employee had withheld, not employee and employer.
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['income_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['income_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['income_tax'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employee'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employer'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employee'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_tax_employer'] ) );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax'], bcadd( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['medicare_tax'], 2 ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['additional_medicare_tax'] ) );
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l10'] = $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l6']; //Add L6 -> L9 if they are implemented later.
+
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_retention_credit_wages'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_retention_credit_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_wages'] ); //L21
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_retention_credit_total_wages'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_retention_credit_total_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit_total_wages'] ); //WorkSheet 1: 3e
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_retention_credit'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_retention_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit'] ); //WorkSheet 1: 3f
+
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_health_plan_expenses'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_health_plan_expenses'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses'] );
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_health_plan_expenses_on_sick_leave'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_health_plan_expenses_on_sick_leave'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_sick_leave'] ); //L19
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_health_plan_expenses_on_family_leave'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_health_plan_expenses_on_family_leave'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_family_leave'] ); //L20
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_health_plan_expenses_on_retention_credit'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['qualified_health_plan_expenses_on_retention_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_health_plan_expenses_on_retention_credit'] ); //L22
+
+
+							//Worksheet 1: 1l -- Once this amount has been allocated to the non-refundable credit below ( WorkSheet 1: 2j ), then amounts switch to going into the refundable credit.
+							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_after_reduced_by_credit_claimed'] = bcmul( bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a2'], $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b2'] ), 0.50 ); //Worksheet 1: 1l
+
+							if ( $date_stamp >= $covid_19_form_start_date ) {
+								$social_security_tax_employer_share_remaining = bcadd( $social_security_tax_employer_share_remaining, $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_after_reduced_by_credit_claimed'] ); //Worksheet 1: 1l
+
+								//Sick/Family Leave
+								if ( $social_security_tax_employer_share_remaining > 0 ) {
+									if ( bcsub( $social_security_tax_employer_share_remaining, $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_and_family_leave_credit'] ) > 0 ) {
+										$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_credit_for_qualified_sick_and_family_leave'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_credit_for_qualified_sick_and_family_leave'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_and_family_leave_credit'] ); //WorkSheet 1: 2j
+									} else {
+										$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_credit_for_qualified_sick_and_family_leave'] = $social_security_tax_employer_share_remaining;                                                                                                                                    //WorkSheet 1: 2j
+										$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['refundable_credit_for_qualified_sick_and_family_leave'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_and_family_leave_credit'], $social_security_tax_employer_share_remaining ); //WorkSheet 1: 2k
+									}
+									$social_security_tax_employer_share_remaining = bcsub( $social_security_tax_employer_share_remaining, $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_credit_for_qualified_sick_and_family_leave'] );
+								} else {
+									$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['refundable_credit_for_qualified_sick_and_family_leave'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['refundable_credit_for_qualified_sick_and_family_leave'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['social_security_qualified_sick_and_family_leave_credit'] ); //WorkSheet 1: 2k
+								}
+
+								//Employee Retention Credit
+								if ( $social_security_tax_employer_share_remaining > 0 ) {
+									$tmp_worksheet1_3i = bcsub( $social_security_tax_employer_share_remaining, $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_credit_for_qualified_sick_and_family_leave'] ); // nonrefundable_credit_for_qualified_sick_and_family_leave = 2j
+
+									if ( $tmp_worksheet1_3i > 0 ) {
+										if ( bcsub( $tmp_worksheet1_3i, $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit'] ) > 0 ) {
+											$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_qualified_retention_credit'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_qualified_retention_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit'] ); //WorkSheet 1: 3j
+										} else {
+											$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_qualified_retention_credit'] = $tmp_worksheet1_3i;                                                                                                        //WorkSheet 1: 3j
+											$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['refundable_qualified_retention_credit'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit'], $tmp_worksheet1_3i ); //WorkSheet 1: 3k
+										}
+										$social_security_tax_employer_share_remaining = bcsub( $social_security_tax_employer_share_remaining, $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['nonrefundable_qualified_retention_credit'] );
+
+									} else {
+										$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['refundable_qualified_retention_credit'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['refundable_qualified_retention_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit'] ); //WorkSheet 1: 3k
+									}
+
+								} else {
+									$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['refundable_qualified_retention_credit'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['refundable_qualified_retention_credit'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['qualified_retention_credit'] ); //WorkSheet 1: 3k
+								}
 							}
 						}
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['additional_medicare_tax'] = round( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'], $this->getF941Object()->medicare_additional_rate ), 2 );
-
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] );
-						//Debug::Text('User ID: '. $user_id .' DateStamp: '. TTDate::getDate('DATE', $date_stamp ) .' YTD Medicare Additional Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] .' This Pay Stub: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'], __FILE__, __LINE__, __METHOD__, 10);
-
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['sick_wages'] = ( isset( $form_data['sick_wages'] ) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['sick_wages']['include_pay_stub_entry_account'], $form_data['sick_wages']['exclude_pay_stub_entry_account'] ) : 0;
-
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_total'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_total'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer'] ); //This *does not* include the additional_medicare_tax.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_total'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_total'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['additional_medicare_tax'] ) ) );
-
-						//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
-						if ( !isset( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] ) ) {
-							$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp] = Misc::preSetArrayValues( [], [ 'l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'income_tax', 'medicare_tax_employee_deducted', 'medicare_tax_employer_deducted', 'medicare_tax', 'social_security_tax_employee_deducted', 'social_security_tax_employer_deducted', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ], 0 );
-						}
-
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employee_deducted'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employer_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax_employer_deducted'] );
-						//Debug::Text('User: '. $user_id .' Date: '. TTDate::getDate('DATE', $date_stamp) .' SS Amounts: YTD Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_total_wages'] .' Wages: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] .' Pre-Rounded: '. bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_total_wages'], bcdiv( $this->getF941Object()->social_security_rate, 2 ) ) .' Rounded: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] .' Deducted: '. $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax_employee_deducted'], __FILE__, __LINE__, __METHOD__, 10);
-
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employee_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employee_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employee_deducted'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_deducted'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax_employer_deducted'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax_employer_deducted'] );
-
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l2'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l2'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tip_wages'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] );
-
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5f'] = 0; //Not implemented currently.
-
-						//Calculated fields, make sure we don't use += on these.
-						//Calculate amounts for Schedule B.
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a'], $this->getF941Object()->social_security_rate );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b'], $this->getF941Object()->social_security_rate );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c'], $this->getF941Object()->medicare_rate );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d2'] = bcmul( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d'], $this->getF941Object()->medicare_additional_rate );
-
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5e'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5a2'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5b2'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5c2'], $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5d2'] ) ) );
-
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l6'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l3'], bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5e'], $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l5f'] ) );
-
-						//Total up Social Security / Medicare Taxes withheld from the employee only, then double them for the employer portion, this helps calculate l7 further down.
-						// Since medicare_tax does not include the additional_medicare_tax, we must manually re-add it here.
-						// The form setup for Medicare Taxes Witheld should only ever be setup for whatever the employee had withheld, not employee and employer.
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['income_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['income_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['social_security_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], 2 ) );
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['medicare_tax'], bcadd( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], 2 ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['additional_medicare_tax'] ) );
-
-						$this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l10'] = $this->form_data['pay_period'][$legal_entity_id][$quarter_month][$date_stamp]['l6']; //Add L6 -> L9 if they are implemented later.
 					}
 				}
-				unset( $legal_entity_id, $quarter_month, $date_stamp, $user_id, $data_a, $data_b );
+				unset( $legal_entity_id, $quarter_month, $date_stamp, $user_id, $data_a, $data_b, $data_c );
 
 				//Total all pay periods by quarter
 				if ( isset( $this->form_data['pay_period'] ) ) {
@@ -943,6 +1128,7 @@ class Form941Report extends Report {
 			}
 		}
 
+		Debug::Text( '  Social Security Tax Employer Share Remaining (Should never be less than 0?): '. $social_security_tax_employer_share_remaining, __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->user_ids, 'User IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->form_data, 'Form Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -951,12 +1137,12 @@ class Form941Report extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
 			$this->tmp_data['user'][$u_obj->getId()]['legal_entity_id'] = $u_obj->getLegalEntity();
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -964,7 +1150,7 @@ class Form941Report extends Report {
 		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Legal Entity Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
 		if ( $lelf->getRecordCount() > 0 ) {
 			foreach ( $lelf as $key => $le_obj ) {
 				if ( $format == 'html' || $format == 'pdf' ) {
@@ -973,7 +1159,7 @@ class Form941Report extends Report {
 				} else {
 					$this->form_data['legal_entity'][$le_obj->getId()] = $le_obj;
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 		}
 
@@ -983,14 +1169,14 @@ class Form941Report extends Report {
 		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
 		if ( $ralf->getRecordCount() > 0 ) {
 			foreach ( $ralf as $key => $ra_obj ) {
 				if ( $ra_obj->parseAgencyID( null, 'id' ) == 10 ) {
 					$province_id = ( $ra_obj->getType() == 20 ) ? $ra_obj->getProvince() : '00';
 					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$province_id] = $ra_obj;
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 			unset( $province_id );
 		}
@@ -1006,25 +1192,27 @@ class Form941Report extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset( $this->tmp_data['pay_stub_entry'] ) ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['pay_stub_entry'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 			foreach ( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
-				foreach ( $level_1 as $date_stamp => $row ) {
-					$date_columns = TTDate::getReportDates( null, $date_stamp, false, $this->getUserObject(), [ 'pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date'] ] );
-					$processed_data = [//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-					];
+				foreach ( $level_1 as $date_stamp => $level_2 ) {
+					foreach ( $level_2 as $row ) {
+						$date_columns = TTDate::getReportDates( null, $date_stamp, false, $this->getUserObject(), [ 'pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date'] ] );
+						$processed_data = [//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
+						];
 
-					$tmp_legal_array = [];
-					if ( isset( $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']] ) ) {
-						$tmp_legal_array = $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']];
+						$tmp_legal_array = [];
+						if ( isset( $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']] ) ) {
+							$tmp_legal_array = $this->tmp_data['legal_entity'][$this->tmp_data['user'][$user_id]['legal_entity_id']];
+						}
+						$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $tmp_legal_array );
+
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
+						$key++;
 					}
-					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $tmp_legal_array );
-
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-					$key++;
 				}
 			}
-			unset( $this->tmp_data, $row, $date_columns, $processed_data, $level_1 );
+			unset( $this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2 );
 		}
 
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1102,38 +1290,79 @@ class Form941Report extends Report {
 				$f941->quarter = TTDate::getYearQuarter( $filter_data['end_date'] );
 
 				//Debug::Arr($this->form_data, 'Final Data for Form: ', __FILE__, __LINE__, __METHOD__, 10);
-				if ( isset( $this->form_data ) && count( $this->form_data ) == 5 ) {
+				if ( isset( $this->form_data ) && isset( $this->form_data['total'] ) && isset( $this->form_data['quarter'] ) && isset( $this->form_data['pay_period'] ) && isset( $this->form_data['legal_entity'] ) && isset( $this->form_data['remittance_agency'] ) ) {
 					$f941->l1 = ( isset( $this->user_ids[$legal_entity_id] ) ) ? count( $this->user_ids[$legal_entity_id] ) : 0;
 					$f941->l2 = $this->form_data['total'][$legal_entity_id]['l2'];
 					$f941->l3 = $this->form_data['total'][$legal_entity_id]['l3'];
 
 					$f941->l5a = $this->form_data['total'][$legal_entity_id]['l5a'];
+					$f941->l5ai = $this->form_data['total'][$legal_entity_id]['l5ai'];
+					$f941->l5aii = $this->form_data['total'][$legal_entity_id]['l5aii'];
 					$f941->l5b = $this->form_data['total'][$legal_entity_id]['l5b'];
 					$f941->l5c = $this->form_data['total'][$legal_entity_id]['l5c'];
 					$f941->l5d = $this->form_data['total'][$legal_entity_id]['l5d'];
 
-					Debug::Text( 'L7 - Social Security Tax Total (Including Amount on Tips): ' . $this->form_data['total'][$legal_entity_id]['social_security_tax'] . ' Medicare Tax Total: ' . $this->form_data['total'][$legal_entity_id]['medicare_tax'], __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( 'L7 - Social Security Tax Total (Including Amount on Tips): ' . $this->form_data['total'][$legal_entity_id]['social_security_tax'] . ' Medicare Tax Total: ' . $this->form_data['total'][$legal_entity_id]['medicare_tax'] .' Qualified Sick Leave: '. $this->form_data['total'][$legal_entity_id]['social_security_qualified_sick_leave_tax'] .' Family Leave: '. $this->form_data['total'][$legal_entity_id]['social_security_qualified_family_leave_tax'], __FILE__, __LINE__, __METHOD__, 10 );
 					$f941->l7z = bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax'], $this->form_data['total'][$legal_entity_id]['medicare_tax'] ); //Input value used to calculate L7 itself. Be sure to include 'l5b2' (Social Security on Tip Wages)
 
 					Debug::Text( 'L5 - Actually Deducted from Employee Total: Social Security: ' . bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax_employee_deducted'], $this->form_data['total'][$legal_entity_id]['social_security_tax_employer_deducted'] ) . ' Medicare Tax Total: ' . bcadd( $this->form_data['total'][$legal_entity_id]['medicare_tax_employee_deducted'], $this->form_data['total'][$legal_entity_id]['medicare_tax_employer_deducted'] ), __FILE__, __LINE__, __METHOD__, 10 );
 					$f941->l5_actual_deducted = bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax_employee_deducted'], bcadd( $this->form_data['total'][$legal_entity_id]['social_security_tax_employer_deducted'], bcadd( $this->form_data['total'][$legal_entity_id]['medicare_tax_employee_deducted'], $this->form_data['total'][$legal_entity_id]['medicare_tax_employer_deducted'] ) ) ); //Input value used to calculate L7 itself.
 
-					if ( isset( $setup_data['quarter_deposit'] ) && $setup_data['quarter_deposit'] != '' ) {
-						$f941->l13 = Misc::MoneyFormat( $setup_data['quarter_deposit'], false );
+					$f941->l19 = ( isset( $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_sick_leave'] ) && $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_sick_leave'] != 0 ) ? $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_sick_leave'] : null;
+					$f941->l20 = ( isset( $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_family_leave'] ) &&  $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_family_leave'] != 0 ) ? $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_family_leave'] : null;
+
+					$f941->l21 = ( isset( $this->form_data['total'][$legal_entity_id]['qualified_retention_credit_wages'] ) && $this->form_data['total'][$legal_entity_id]['qualified_retention_credit_wages'] != 0 ) ? $this->form_data['total'][$legal_entity_id]['qualified_retention_credit_wages'] : null;
+					$f941->l22 = ( isset( $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_retention_credit'] ) && $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_retention_credit'] != 0 ) ? $this->form_data['total'][$legal_entity_id]['qualified_health_plan_expenses_on_retention_credit'] : null;
+
+					$f941->l23 = ( isset( $setup_data['form_5884c_credit'] ) && $setup_data['form_5884c_credit'] != '' ) ? Misc::MoneyFormat( $setup_data['form_5884c_credit'], false ) : null;
+					$f941->l24 = ( isset( $this->form_data['retention_credit_1st_quarter']['l24'] ) && $this->form_data['retention_credit_1st_quarter']['l24'] != 0 ) ? $this->form_data['retention_credit_1st_quarter']['l24'] : null;
+					$f941->l25 = ( isset( $this->form_data['retention_credit_1st_quarter']['l25'] ) && $this->form_data['retention_credit_1st_quarter']['l24'] != 0 ) ? $this->form_data['retention_credit_1st_quarter']['l25'] : null;
+
+					if ( $f941->quarter > 1 && array_sum( [ $f941->l5ai, $f941->l5aii, $f941->l21, $f941->l22 ] ) != 0 ) { //Don't include worksheet for Quarter 1 2020.
+						$f941worksheet1 = $this->getFormObject()->getFormObject( '941worksheet1', 'US' );
+						$f941worksheet1->setShowBackground( $show_background );
+
+						$f941worksheet1->l1a = $f941->calcL5A2();
+						$f941worksheet1->l1b = $f941->calcL5B2();
+						$f941worksheet1->l1e = Misc::MoneyFormat( $f941->l8, false);
+
+						$f941worksheet1->l1j = Misc::MoneyFormat( $f941->l23, false );
+
+						$f941worksheet1->l2a = Misc::MoneyFormat( $f941->l5ai, false);
+						$f941worksheet1->l2b = Misc::MoneyFormat( $f941->l19, false);
+						$f941worksheet1->l2e = Misc::MoneyFormat( $f941->l5aii, false);
+						$f941worksheet1->l2f = Misc::MoneyFormat( $f941->l20, false);
+
+						$f941worksheet1->l3a = Misc::MoneyFormat( $f941->l21, false); //Does not include health expenses.
+						$f941worksheet1->l3b = Misc::MoneyFormat( $f941->l22, false);
+
+						if ( $f941->quarter == 2 ) {
+							$f941worksheet1->l3c = Misc::MoneyFormat( $f941->l24, false );
+							$f941worksheet1->l3d = Misc::MoneyFormat( $f941->l25, false );
+						}
 					}
-					//Debug::Text('L13: '. $f941->l13 .' L6: '. $f941->calcL6() .' - '. $this->form_data['total']['l10'], __FILE__, __LINE__, __METHOD__, 10);
+
+					$f941->l11b = Misc::MoneyFormat( $this->form_data['total'][$legal_entity_id]['nonrefundable_credit_for_qualified_sick_and_family_leave'], false ); //WorkSheet 1: 2j
+					$f941->l11c = Misc::MoneyFormat( $this->form_data['total'][$legal_entity_id]['nonrefundable_qualified_retention_credit'], false ); //WorkSheet 1: 3j
+
+					$f941->l13a = ( isset( $setup_data['quarter_deposit'] ) && $setup_data['quarter_deposit'] != '' ) ? Misc::MoneyFormat( $setup_data['quarter_deposit'], false ) : null;
+					$f941->l13b = ( isset( $setup_data['deferred_social_security_tax_employer'] ) && $setup_data['deferred_social_security_tax_employer'] != '' ) ? Misc::MoneyFormat( $setup_data['deferred_social_security_tax_employer'], false ) : null;
+					$f941->l13c = ( $this->form_data['total'][$legal_entity_id]['refundable_credit_for_qualified_sick_and_family_leave'] != 0 ) ? Misc::MoneyFormat( $this->form_data['total'][$legal_entity_id]['refundable_credit_for_qualified_sick_and_family_leave'], false ) : null; //WorkSheet 1: 2k
+					$f941->l13d = ( $this->form_data['total'][$legal_entity_id]['refundable_qualified_retention_credit'] != 0 ) ? Misc::MoneyFormat( $this->form_data['total'][$legal_entity_id]['refundable_qualified_retention_credit'], false ) : null; //WorkSheet 1: 3k
+					$f941->l13f = ( isset( $setup_data['form_7200_advances'] ) && $setup_data['form_7200_advances'] != '' ) ? Misc::MoneyFormat( $setup_data['form_7200_advances'], false ) : null;
+					//Debug::Text('L13a: '. $f941->l13a .' L6: '. $f941->calcL6() .' - '. $this->form_data['total']['l10'], __FILE__, __LINE__, __METHOD__, 10);
 
 					$f941->l15b = true;
 
 					if ( isset( $setup_data['deposit_schedule'] ) && $setup_data['deposit_schedule'] == 10 ) {
 						if ( isset( $this->form_data['quarter'][$legal_entity_id][1]['l10'] ) ) {
-							$f941->l16_month1 = bcadd( $this->form_data['quarter'][$legal_entity_id][1]['income_tax'], bcadd( $this->form_data['quarter'][$legal_entity_id][1]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][1]['medicare_tax'] ) ); //Don't use L10 as it is slightly off due to rounding.
+							$f941->l16_month1 = bcsub( bcadd( $this->form_data['quarter'][$legal_entity_id][1]['income_tax'], bcadd( $this->form_data['quarter'][$legal_entity_id][1]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][1]['medicare_tax'] ) ), bcadd( $this->form_data['quarter'][$legal_entity_id][1]['nonrefundable_credit_for_qualified_sick_and_family_leave'], $this->form_data['quarter'][$legal_entity_id][1]['nonrefundable_qualified_retention_credit'] ) ); //Don't use L10 as it is slightly off due to rounding.
 						}
 						if ( isset( $this->form_data['quarter'][$legal_entity_id][2]['l10'] ) ) {
-							$f941->l16_month2 = bcadd( $this->form_data['quarter'][$legal_entity_id][2]['income_tax'], bcadd( $this->form_data['quarter'][$legal_entity_id][2]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][2]['medicare_tax'] ) ); //Don't use L10 as it is slightly off due to rounding.
+							$f941->l16_month2 = bcsub( bcadd( $this->form_data['quarter'][$legal_entity_id][2]['income_tax'], bcadd( $this->form_data['quarter'][$legal_entity_id][2]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][2]['medicare_tax'] ) ), bcadd( $this->form_data['quarter'][$legal_entity_id][2]['nonrefundable_credit_for_qualified_sick_and_family_leave'], $this->form_data['quarter'][$legal_entity_id][2]['nonrefundable_qualified_retention_credit'] ) ); //Don't use L10 as it is slightly off due to rounding.
 						}
 						if ( isset( $this->form_data['quarter'][$legal_entity_id][3]['l10'] ) ) {
-							$f941->l16_month3 = bcadd( $this->form_data['quarter'][$legal_entity_id][3]['income_tax'], bcadd( $this->form_data['quarter'][$legal_entity_id][3]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][3]['medicare_tax'] ) ); //Don't use L10 as it is slightly off due to rounding.
+							$f941->l16_month3 = bcsub( bcadd( $this->form_data['quarter'][$legal_entity_id][3]['income_tax'], bcadd( $this->form_data['quarter'][$legal_entity_id][3]['social_security_tax'], $this->form_data['quarter'][$legal_entity_id][3]['medicare_tax'] ) ), bcadd( $this->form_data['quarter'][$legal_entity_id][3]['nonrefundable_credit_for_qualified_sick_and_family_leave'], $this->form_data['quarter'][$legal_entity_id][3]['nonrefundable_qualified_retention_credit'] ) ); //Don't use L10 as it is slightly off due to rounding.
 						}
 					} else if ( isset( $setup_data['deposit_schedule'] ) && $setup_data['deposit_schedule'] == 20 ) {
 						$f941sb = $this->getFormObject()->getFormObject( '941sb', 'US' );
@@ -1150,9 +1379,10 @@ class Form941Report extends Report {
 							if ( isset( $this->form_data['pay_period'][$legal_entity_id][$i] ) ) {
 								foreach ( $this->form_data['pay_period'][$legal_entity_id][$i] as $pay_period_epoch => $data ) {
 									//Debug::Text('SB: Month: '. $i .' Pay Period Date: '. TTDate::getDate('DATE', $pay_period_epoch) .' DOM: '. TTDate::getDayOfMonth($pay_period_epoch) .' Amount: '. $data['l10'], __FILE__, __LINE__, __METHOD__, 10);
-									$f941sb_data[$i][TTDate::getDayOfMonth( $pay_period_epoch )] = bcadd( $data['income_tax'], bcadd( $data['social_security_tax'], $data['medicare_tax'] ) ); //This should be values that appeared on the actual pay stubs, which are already rounded of course.
+									$f941sb_data[$i][TTDate::getDayOfMonth( $pay_period_epoch )] = bcsub( bcadd( $data['income_tax'], bcadd( $data['social_security_tax'], $data['medicare_tax'] ) ), bcadd( $data['nonrefundable_credit_for_qualified_sick_and_family_leave'], $data['nonrefundable_qualified_retention_credit'] ) ); //This should be values that appeared on the actual pay stubs, which are already rounded of course.
 									$f941->schedule_b_total = bcadd( $f941->schedule_b_total, $f941sb_data[$i][TTDate::getDayOfMonth( $pay_period_epoch )] );
 								}
+								unset( $pay_period_epoch, $data );
 							}
 						}
 						//$f941->schedule_b_total += 1; Test mismatch of Schedule B totals.
@@ -1177,6 +1407,10 @@ class Form941Report extends Report {
 
 				if ( isset( $f941sb ) && is_object( $f941sb ) ) {
 					$this->getFormObject()->addForm( $f941sb );
+				}
+
+				if ( isset( $f941worksheet1 ) && is_object( $f941worksheet1 ) ) {
+					$this->getFormObject()->addForm( $f941worksheet1 );
 				}
 
 				if ( $format == 'efile_xml' ) {

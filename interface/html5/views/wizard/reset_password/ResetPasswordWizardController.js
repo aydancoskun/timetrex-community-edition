@@ -1,8 +1,13 @@
-ResetPasswordWizardController = BaseWizardController.extend( {
+class ResetPasswordWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard'
+		} );
 
-	el: '.wizard',
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.title = $.i18n._( 'Reset Password' );
 		this.steps = 1;
@@ -10,19 +15,18 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 		if ( this.default_data && typeof this.default_data.api_class != 'undefined' ) {
 			this.api = this.default_data.api_class;
 		} else {
-			this.api = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
+			this.api = TTAPI.APIAuthentication;
 		}
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initCurrentStep();
+	}
 
-	},
-
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		var $this = this;
 		this.content_div.empty();
@@ -91,9 +95,9 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 				break;
 
 		}
-	},
+	}
 
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -109,25 +113,22 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
+	buildCurrentStepData() {
+	}
 
-	buildCurrentStepData: function() {
-
-	},
-
-	onCloseClick: function() {
+	onCloseClick() {
 
 		$( this.el ).remove();
 		LocalCacheData.current_open_wizard_controller = null;
 		LocalCacheData.extra_filter_for_next_open_view = null;
+	}
 
-	},
-
-	onDoneClick: function() {
+	onDoneClick() {
 
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 
 		var current_password = this.stepsDataDic[1].current_password;
@@ -145,9 +146,6 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 		} else if ( new_password !== confirm_password ) {
 			this.stepsWidgetDic[1].new_password.setErrorStyle( $.i18n._( 'New password does not match' ), true );
 		} else {
-
-			// var api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
-
 			if ( !this.default_data || !this.default_data.user_name ) {
 				TAlertManager.showAlert( $.i18n._( 'Invalid user name' ) );
 				return;
@@ -173,9 +171,8 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 					}
 				} );
 		}
-
 	}
 
-} );
+}
 
 ResetPasswordWizardController.type = '';

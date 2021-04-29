@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,6 +40,15 @@
  */
 class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = [
+			20200701 => [
+					[ 'income' => 41725, 'rate' => 5.06, 'constant' => 0 ],
+					[ 'income' => 83451, 'rate' => 7.7, 'constant' => 1102 ],
+					[ 'income' => 95812, 'rate' => 10.5, 'constant' => 3438 ],
+					[ 'income' => 116344, 'rate' => 12.29, 'constant' => 5153 ],
+					[ 'income' => 157748, 'rate' => 14.7, 'constant' => 7957 ],
+					[ 'income' => 220000, 'rate' => 16.8, 'constant' => 11270 ],
+					[ 'income' => 220000, 'rate' => 24.2, 'constant' => 27550 ],
+			],
 			20200101 => [
 					[ 'income' => 41725, 'rate' => 5.06, 'constant' => 0 ],
 					[ 'income' => 83451, 'rate' => 7.7, 'constant' => 1102 ],

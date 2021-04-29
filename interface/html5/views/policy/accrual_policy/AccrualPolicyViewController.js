@@ -1,21 +1,26 @@
-AccrualPolicyViewController = BaseViewController.extend( {
-	el: '#accrual_policy_view_container',
+class AccrualPolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#accrual_policy_view_container',
 
-	_required_files: ['APIAccrualPolicy', 'APIAccrualPolicyMilestone', 'APIAccrualPolicyUserModifier', 'APIContributingShiftPolicy', 'APIAccrualPolicyAccount', 'APIContributingPayCodePolicy'],
+			type_array: null,
+			apply_frequency_array: null,
+			month_of_year_array: null,
+			day_of_month_array: null,
+			day_of_week_array: null,
+			month_of_quarter_array: null,
+			length_of_service_unit_array: null,
+			date_api: null,
+			accrual_policy_milestone_api: null,
+			accrual_policy_user_modifier_api: null,
 
-	type_array: null,
-	apply_frequency_array: null,
-	month_of_year_array: null,
-	day_of_month_array: null,
-	day_of_week_array: null,
-	month_of_quarter_array: null,
-	length_of_service_unit_array: null,
-	date_api: null,
-	accrual_policy_milestone_api: null,
-	accrual_policy_user_modifier_api: null,
+			sub_accrual_policy_user_modifier_view_controller: null
+		} );
 
-	sub_accrual_policy_user_modifier_view_controller: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'AccrualPolicyEditView.html';
 		this.permission_id = 'accrual_policy';
@@ -24,28 +29,27 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'accrual_policy';
 		this.context_menu_name = $.i18n._( 'Accrual Policy' );
 		this.navigation_label = $.i18n._( 'Accrual Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-		this.accrual_policy_milestone_api = new ( APIFactory.getAPIClass( 'APIAccrualPolicyMilestone' ) )();
-		this.accrual_policy_user_modifier_api = new ( APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ) )();
+		this.api = TTAPI.APIAccrualPolicy;
+		this.date_api = TTAPI.APITTDate;
+		this.accrual_policy_milestone_api = TTAPI.APIAccrualPolicyMilestone;
+		this.accrual_policy_user_modifier_api = TTAPI.APIAccrualPolicyUserModifier;
 		this.month_of_quarter_array = Global.buildRecordArray( { 1: 1, 2: 2, 3: 3 } );
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'AccrualPolicy' );
+	}
 
-	},
-
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.re_calculate_accrual:
 				this.onReCalAccrualClick();
 				break;
 		}
-	},
+	}
 
-	onReCalAccrualClick: function() {
+	onReCalAccrualClick() {
 		var default_data = {};
 		var $this = this;
 
@@ -58,9 +62,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		IndexViewController.openWizard( 'ReCalculateAccrualWizard', default_data, function() {
 			$this.search();
 		} );
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [],
 			include: [
@@ -76,9 +80,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'apply_frequency' );
@@ -101,16 +105,16 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				$this.day_of_week_array = res;
 			}
 		} );
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}
 
-		this._super( 'setDefaultMenu', doNotSetFocus );
+		super.setDefaultMenu( doNotSetFocus );
 
 		var len = this.context_menu_array.length;
 
@@ -131,12 +135,11 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
+	setEditMenu() {
 
-	setEditMenu: function() {
-
-		this._super( 'setEditMenu' );
+		super.setEditMenu();
 
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
@@ -151,10 +154,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setEditMenuReCalAccrualWizardIcon: function( context_btn ) {
+	setEditMenuReCalAccrualWizardIcon( context_btn ) {
 		if ( PermissionManager.validate( 'accrual_policy', 'enabled' ) &&
 			( PermissionManager.validate( 'accrual_policy', 'edit' ) || PermissionManager.validate( 'accrual_policy', 'edit_child' ) || PermissionManager.validate( 'accrual_policy', 'edit_own' ) )
 		) {
@@ -169,10 +171,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	setDefaultMenuReCalAccrualWizardIcon: function( context_btn, grid_selected_length ) {
+	setDefaultMenuReCalAccrualWizardIcon( context_btn, grid_selected_length ) {
 		if ( PermissionManager.validate( 'accrual_policy', 'enabled' ) &&
 			( PermissionManager.validate( 'accrual_policy', 'edit' ) || PermissionManager.validate( 'accrual_policy', 'edit_child' ) || PermissionManager.validate( 'accrual_policy', 'edit_own' ) )
 		) {
@@ -187,12 +188,11 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -209,7 +209,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) ),
+			api_class: TTAPI.APIAccrualPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY,
@@ -231,8 +231,12 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_accrual_policy_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		//Name
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_accrual_policy_column1, '' );
@@ -256,7 +260,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingShiftPolicy' ) ),
+			api_class: TTAPI.APIContributingShiftPolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
@@ -269,7 +273,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		// Accrual Account
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ),
+			api_class: TTAPI.APIAccrualPolicyAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
 			show_search_inputs: true,
@@ -282,7 +286,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		//Length of Service contributing pay codes.
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIContributingPayCodePolicy' ) ),
+			api_class: TTAPI.APIContributingPayCodePolicy,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
 			show_search_inputs: true,
@@ -367,8 +371,8 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		//Enable Opening Balance
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( { field: 'enable_opening_balance' } );
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Applies Initial Accrual Amount on Hire Date)' ) + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Applies Initial Accrual Amount on Hire Date)' ) + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Enable Opening Balance' ), form_item_input, tab_accrual_policy_column2, '', widgetContainer, true );
@@ -410,10 +414,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		} );
 
 		inside_editor_div.append( this.editor );
+	}
 
-	},
-
-	onMilestoneRolloverHireDate: function() {
+	onMilestoneRolloverHireDate() {
 		if ( this.current_edit_record['milestone_rollover_hire_date'] === true ) {
 			this.detachElement( 'milestone_rollover_month' );
 			this.detachElement( 'milestone_rollover_day_of_month' );
@@ -423,9 +426,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	onApplyFrequencyHireDate: function() {
+	onApplyFrequencyHireDate() {
 		if ( this.current_edit_record['apply_frequency_id'] == 20 ) {
 			this.attachElement( 'apply_frequency_hire_date' );
 			if ( this.current_edit_record['apply_frequency_hire_date'] === true ) {
@@ -438,10 +441,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 			this.editFieldResize();
 		}
+	}
 
-	},
-
-	onApplyFrequencyChange: function( arg ) {
+	onApplyFrequencyChange( arg ) {
 
 		if ( !Global.isSet( arg ) ) {
 
@@ -471,10 +473,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
+	}
 
-	},
-
-	onTypeChange: function() {
+	onTypeChange() {
 		if ( !Global.isSet( this.current_edit_record['type_id'] ) ) {
 			this.current_edit_record['type_id'] = 20;
 		}
@@ -514,9 +515,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		this.editFieldResize();
 		this.setAccrualRageFormat();
-	},
+	}
 
-	setAccrualRageFormat: function( type ) {
+	setAccrualRageFormat( type ) {
 
 		var len = this.editor.rows_widgets_array.length;
 
@@ -540,10 +541,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			td.text( $.i18n._( 'Accrual Rate/Year' ) );
 			$( '.annual-maximum-time-td' ).hide();
 		}
+	}
 
-	},
-
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -570,10 +570,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	isDisplayLengthOfServiceHoursBasedOn: function() {
+	isDisplayLengthOfServiceHoursBasedOn() {
 		var len = this.editor.rows_widgets_array.length;
 
 		var count = 0;
@@ -593,9 +592,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			this.attachElement( 'length_of_service_contributing_pay_code_policy_id' );
 			this.edit_view_tab.find( '#tab_length_of_service_milestones' ).find( '.first-column' ).css( 'border', '1px solid #c7c7c7' );
 		}
-	},
+	}
 
-	insideEditorSetValue: function( val ) {
+	insideEditorSetValue( val ) {
 		var len = val.length;
 
 		this.removeAllRows();
@@ -609,9 +608,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			}
 
 		}
-	},
+	}
 
-	insideEditorAddRow: function( data, index ) {
+	insideEditorAddRow( data, index ) {
 
 		if ( !data ) {
 			data = {};
@@ -626,13 +625,16 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		//Build row widgets
 
+		var form_item_input;
+		var widgetContainer;
+
 		// Length Of Service
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 		var label_1 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'After' ) + ': ' + ' </span>' );
 		var label_2 = $( '<span class=\'widget-right-label\'>&nbsp;</span>' );
 
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'length_of_service', width: 30 } );
 		form_item_input.setValue( data.length_of_service ? data.length_of_service : 0 );
 		form_item_input.attr( 'milestone_id', row_id );
@@ -748,9 +750,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		this.removeLastRowLine();
 
 		this.parent_controller.setAccrualRageFormat();
-	},
+	}
 
-	insideEditorRemoveRow: function( row ) {
+	insideEditorRemoveRow( row ) {
 		var index = row[0].rowIndex - 1;
 		var remove_id = this.rows_widgets_array[index].length_of_service.attr( 'milestone_id' );
 		if ( remove_id && TTUUID.isUUID( remove_id ) && remove_id != TTUUID.not_exist_id && remove_id != TTUUID.zero_id ) {
@@ -761,9 +763,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		this.removeLastRowLine();
 
 		this.parent_controller.isDisplayLengthOfServiceHoursBasedOn();
-	},
+	}
 
-	insideEditorGetValue: function( current_edit_item_id ) {
+	insideEditorGetValue( current_edit_item_id ) {
 		var len = this.rows_widgets_array.length;
 
 		var result = [];
@@ -799,10 +801,10 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 
 		this.onApplyFrequencyChange();
 
@@ -811,10 +813,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		this.onMilestoneRolloverHireDate();
 
 		this.initInsideEditorData();
+	}
 
-	},
-
-	initInsideEditorData: function() {
+	initInsideEditorData() {
 
 		var $this = this;
 		var args = {};
@@ -864,10 +865,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 //
 //			}} );
 //		}
+	}
 
-	},
-
-	saveInsideEditorData: function( result, callBack ) {
+	saveInsideEditorData( result, callBack ) {
 		var $this = this;
 		var data = this.editor.getValue( this.refresh_id );
 		var remove_ids = $this.editor.delete_ids;
@@ -889,10 +889,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				}
 			}
 		} );
+	}
 
-	},
-
-	onSaveResult: function( result ) {
+	onSaveResult( result ) {
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
 			if ( result_data === true ) {
@@ -919,15 +918,15 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			this.setErrorMenu();
 			this.setErrorTips( result );
 		}
-	},
+	}
 
-	removeEditView: function() {
+	removeEditView() {
 
-		this._super( 'removeEditView' );
+		super.removeEditView();
 		this.sub_accrual_policy_user_modifier_view_controller = null;
-	},
+	}
 
-	// onSaveAndContinueResult: function( result ) {
+	// onSaveAndContinueResult( result ) {
 	//
 	// 	var $this = this;
 	// 	if ( result.isValid() ) {
@@ -975,7 +974,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	onSaveAndCopyResult: function( result ) {
+	onSaveAndCopyResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -996,9 +995,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 			$this.setErrorMenu();
 		}
-	},
+	}
 
-	// onSaveAndNextResult: function( result ) {
+	// onSaveAndNextResult( result ) {
 	// 	var $this = this;
 	// 	if ( result.isValid() ) {
 	// 		var result_data = result.getResult();
@@ -1022,7 +1021,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	_continueDoCopyAsNew: function() {
+	_continueDoCopyAsNew() {
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		this.is_add = true;
 		if ( Global.isSet( this.edit_view ) ) {
@@ -1030,10 +1029,10 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				this.editor.rows_widgets_array[i].length_of_service.attr( 'milestone_id', '' );
 			}
 		}
-		this._super( '_continueDoCopyAsNew' );
-	},
+		super._continueDoCopyAsNew();
+	}
 
-	onCopyAsNewResult: function( result ) {
+	onCopyAsNewResult( result ) {
 		var $this = this;
 		var result_data = result.getResult();
 
@@ -1057,11 +1056,11 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		$this.current_edit_record = result_data;
 		$this.initEditView();
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -1090,7 +1089,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -1102,16 +1101,16 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	initSubAccrualPolicyUserModifier: function() {
+	initSubAccrualPolicyUserModifier() {
 		var $this = this;
 
 		if ( Global.getProductEdition() <= 10 ) { //This must go before the current_edit_record.id check below, otherwise we return too early and it displays the wrong div.
@@ -1167,4 +1166,4 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		}
 	}
 
-} );
+}

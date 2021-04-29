@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -265,8 +265,8 @@ class APIDashboard extends APIFactory {
 					$retarr['ScheduleSummaryReport'] = TTi18n::getText( 'Schedule Summary' );
 				}
 				if ( $this->getPermissionObject()->Check( 'report', 'enabled' ) && $this->getPermissionObject()->Check( 'report', 'view_timesheet_summary' ) ) {
-					$retarr['TimeSheetSummaryReport'] = TTi18n::getText( 'TimeSheet Summary' );
-					$retarr['TimeSheetDetailReport'] = TTi18n::getText( 'TimeSheet Detail' );
+					$retarr['TimesheetSummaryReport'] = TTi18n::getText( 'TimeSheet Summary' );
+					$retarr['TimesheetDetailReport'] = TTi18n::getText( 'TimeSheet Detail' );
 				}
 				if ( $this->getPermissionObject()->Check( 'report', 'enabled' ) && $this->getPermissionObject()->Check( 'report', 'view_punch_summary' ) ) {
 					$retarr['PunchSummaryReport'] = TTi18n::getText( 'Punch Summary' );
@@ -467,10 +467,10 @@ class APIDashboard extends APIFactory {
 
 				$current_epoch = time();
 
-				$product_edition = $this->getCurrentCompanyObject()->getProductEdition();
+				//$product_edition = $this->getCurrentCompanyObject()->getProductEdition();
 
-				$permission = new Permission();
-				$permission_level = $permission->getLevel( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
+				//$permission = new Permission();
+				//$permission_level = $permission->getLevel( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
 
 				//Notify user of new features.
 				//if ( Misc::MajorVersionCompare( APPLICATION_VERSION, '9.0.0', '=' ) && TTDate::getBeginDayEpoch( $this->getCurrentUserObject()->getLastLoginDate() ) <= APPLICATION_VERSION_DATE ) {
@@ -900,7 +900,7 @@ class APIDashboard extends APIFactory {
 	 * @return array
 	 */
 	function getDefaultDashlets() {
-		$parameters = false;
+		$parameters = [];
 
 		$permission = new Permission();
 		$permission_level = $permission->getLevel( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );

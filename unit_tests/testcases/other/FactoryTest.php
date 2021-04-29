@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -150,7 +150,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUserPre1970BirthDates() {
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
@@ -160,7 +160,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		$data['birth_date'] = '31-Jul-69';
 		$u_obj->setObjectFromArray( $data );
 		if ( $u_obj->isValid() ) {
-			$result = $u_obj->Save();
+			$u_obj->Save();
 		}
 		unset( $u_obj );
 
@@ -168,11 +168,11 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		$u_obj = $ulf->getById( $this->user_id )->getCurrent();
 		$data = $u_obj->getObjectAsArray();
 		unset( $data['permission_control_id'] );
-		$this->assertEquals( $data['birth_date'], '31-Jul-69' );
+		$this->assertEquals( '31-Jul-69', $data['birth_date'] );
 		$data['birth_date'] = '31-Jul-69';
 		$u_obj->setObjectFromArray( $data );
 		if ( $u_obj->isValid() ) {
-			$result = $u_obj->Save();
+			$u_obj->Save();
 		}
 		unset( $u_obj );
 
@@ -180,11 +180,11 @@ class FactoryTest extends PHPUnit_Framework_TestCase {
 		$u_obj = $ulf->getById( $this->user_id )->getCurrent();
 		$data = $u_obj->getObjectAsArray();
 		unset( $data['permission_control_id'] );
-		$this->assertEquals( $data['birth_date'], '31-Jul-69' );
+		$this->assertEquals( '31-Jul-69', $data['birth_date'] );
 		$data['birth_date'] = '31-Jul-69';
 		$u_obj->setObjectFromArray( $data );
 		if ( $u_obj->isValid() ) {
-			$result = $u_obj->Save();
+			$u_obj->Save();
 		}
 		unset( $u_obj );
 	}

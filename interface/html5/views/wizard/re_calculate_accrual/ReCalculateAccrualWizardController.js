@@ -1,9 +1,14 @@
-ReCalculateAccrualWizardController = BaseWizardController.extend( {
+class ReCalculateAccrualWizardController extends BaseWizardController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '.wizard-bg',
 
-	el: '.wizard-bg',
-	_required_files: ['APIAccrualPolicy', 'APIPayPeriod', 'APITimesheetSummaryReport', 'APIPayPeriodSchedule', 'APIUser'],
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 
 		this.title = $.i18n._( 'Accrual ReCalculation Wizard' );
@@ -11,17 +16,16 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 		this.current_step = 1;
 
 		this.render();
-	},
+	}
 
-	render: function() {
-		this._super( 'render' );
+	render() {
+		super.render();
 
 		this.initCurrentStep();
-
-	},
+	}
 
 	//Create each page UI
-	buildCurrentStepUI: function() {
+	buildCurrentStepUI() {
 
 		this.content_div.empty();
 		var $this = this;
@@ -31,7 +35,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more accrual policies' ) + ':' );
 
-				var a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) ), true, ALayoutIDs.ACCRUAL_POLICY, 'accrual_policy_id' );
+				var a_combobox = this.getAComboBox( TTAPI.APIAccrualPolicy, true, ALayoutIDs.ACCRUAL_POLICY, 'accrual_policy_id' );
 				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -83,7 +87,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var pay_period = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriod' ) ), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
+				var pay_period = this.getAComboBox( TTAPI.APIPayPeriod, true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 
 				form_item_label.text( $.i18n._( 'Pay Period' ) + ': ' );
 				form_item_input_div.append( pay_period );
@@ -94,7 +98,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				form_item_label = form_item.find( '.form-item-label' );
 				form_item_input_div = form_item.find( '.form-item-input-div' );
 
-				var pay_period_schedule = this.getAComboBox( ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ), true, ALayoutIDs.PAY_PERIOD_SCHEDULE, 'pay_period_schedule_id' );
+				var pay_period_schedule = this.getAComboBox( TTAPI.APIPayPeriodSchedule, true, ALayoutIDs.PAY_PERIOD_SCHEDULE, 'pay_period_schedule_id' );
 
 				form_item_label.text( $.i18n._( 'Pay Period Schedule' ) + ': ' );
 				form_item_input_div.append( pay_period_schedule );
@@ -119,7 +123,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more employees' ) + ':' );
 
-				a_combobox = this.getAComboBox( ( APIFactory.getAPIClass( 'APIUser' ) ), true, ALayoutIDs.USER, 'user_id', true );
+				a_combobox = this.getAComboBox( TTAPI.APIUser, true, ALayoutIDs.USER, 'user_id', true );
 				div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
@@ -130,9 +134,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				this.content_div.append( div );
 				break;
 		}
-	},
+	}
 
-	onTimePeriodChange: function( target ) {
+	onTimePeriodChange( target ) {
 		var value = target.getValue();
 
 		var start_date_div = this.stepsWidgetDic[this.current_step]['start_date'].parent().parent();
@@ -161,12 +165,11 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 			pay_period_div.css( 'display', 'none' );
 			pay_period_schedule_div.css( 'display', 'none' );
 		}
+	}
 
-	},
-
-	onDoneClick: function() {
+	onDoneClick() {
 		var $this = this;
-		this._super( 'onDoneClick' );
+		super.onDoneClick();
 		this.saveCurrentStep();
 		var accrual_policy_id = this.stepsDataDic[1].accrual_policy_id;
 		var user_ids = this.stepsDataDic[3].user_id;
@@ -183,7 +186,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 		}
 
-		var accrual_policy_api = new ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) )();
+		var accrual_policy_api = TTAPI.APIAccrualPolicy;
 
 		accrual_policy_api.recalculateAccrual( accrual_policy_id, time_period, user_ids, {
 			onResult: function( result ) {
@@ -195,9 +198,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	buildCurrentStepData: function() {
+	buildCurrentStepData() {
 		var $this = this;
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -215,7 +218,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 				break;
 			case 2:
-				new ( APIFactory.getAPIClass( 'APITimesheetSummaryReport' ) )().getOptions( 'time_period', {
+				TTAPI.APITimesheetSummaryReport.getOptions( 'time_period', {
 					onResult: function( result ) {
 
 						current_step_ui['time_period'].setSourceData( Global.buildRecordArray( result.getResult() ) );
@@ -242,7 +245,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				if ( !current_step_data ) {
 					current_step_ui['user_id'].setValue( TTUUID.not_exist_id );
 				} else {
-					for ( key in current_step_data ) {
+					for ( var key in current_step_data ) {
 						if ( !current_step_data.hasOwnProperty( key ) ) {
 							continue;
 						}
@@ -253,7 +256,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 				break;
 			default:
-				for ( key in current_step_data ) {
+				for ( var key in current_step_data ) {
 					if ( !current_step_data.hasOwnProperty( key ) ) {
 						continue;
 					}
@@ -262,10 +265,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
-
-	saveCurrentStep: function() {
+	saveCurrentStep() {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -289,10 +291,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				current_step_data.user_id = current_step_ui.user_id.getValue();
 				break;
 		}
+	}
 
-	},
-
-	setDefaultDataToSteps: function() {
+	setDefaultDataToSteps() {
 
 		if ( !this.default_data ) {
 			return null;
@@ -303,7 +304,6 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 		if ( this.getDefaultData( 'accrual_policy_id' ) ) {
 			this.stepsDataDic[1].accrual_policy_id = this.getDefaultData( 'accrual_policy_id' );
 		}
-
 	}
 
-} );
+}

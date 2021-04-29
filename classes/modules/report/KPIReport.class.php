@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -480,41 +480,41 @@ class KPIReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = Misc::addKeyPrefix( 'user.', (array)$u_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user.', $columns ) ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Get KPI data for joining.
 		$klf = TTnew( 'KPIListFactory' ); /** @var KPIListFactory $klf */
 		$klf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' KPI Rows: ' . $klf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $klf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $klf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $klf as $key => $k_obj ) {
 			$this->tmp_data['kpi'][$k_obj->getId()] = Misc::addKeyPrefix( 'kpi.', (array)$k_obj->getObjectAsArray( Misc::removeKeyPrefix( 'kpi.', $columns ) ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Get user review control data for joining.
 		$urclf = TTnew( 'UserReviewControlListFactory' ); /** @var UserReviewControlListFactory $urclf */
 		$urclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Review Control Rows: ' . $urclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $urclf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $urclf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $urclf as $key => $urc_obj ) {
 			$this->tmp_data['user_review_control'][$urc_obj->getId()][$urc_obj->getUser()] = Misc::addKeyPrefix( 'user_review_control.', (array)$urc_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_review_control.', $columns ) ) );
 			$this->tmp_data['user_review_control'][$urc_obj->getId()][$urc_obj->getUser()]['total_review'] = 1;
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		$urlf = TTnew( 'UserReviewListFactory' ); /** @var UserReviewListFactory $urlf */
 		$urlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Review Rows: ' . $urlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $urlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $urlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $urlf as $key => $ur_obj ) {
 			$this->tmp_data['user_review'][$ur_obj->getUserReviewControl()][$ur_obj->getKPI()] = Misc::addKeyPrefix( 'user_review.', (array)$ur_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_review.', $columns ) ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Debug::Arr($this->tmp_data, ' TMP Rows: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -527,7 +527,7 @@ class KPIReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['user_review_control'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['user_review_control'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		$key = 0;
 		if ( isset( $this->tmp_data['user_review_control'] ) ) {
@@ -583,7 +583,7 @@ class KPIReport extends Report {
 						$this->data[] = array_merge( $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
 					}
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				$key++;
 			}
 			unset( $this->tmp_data, $kpi, $user_review_control, $hire_date_columns, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );

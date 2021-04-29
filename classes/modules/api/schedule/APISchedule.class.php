@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -264,7 +264,7 @@ class APISchedule extends APIFactory {
 			$sf->setQueryStatementTimeout( 1200000 );
 		}
 
-		$sf->setAMFMessageID( $this->getAMFMessageID() );
+		$sf->setAPIMessageID( $this->getAPIMessageID() );
 
 		$retarr = $sf->getScheduleArray( $data['filter_data'] );
 		//Hide wages if the user doesn't have permission to see them.
@@ -356,7 +356,7 @@ class APISchedule extends APIFactory {
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], null, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $blf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $blf->getRecordCount() );
 
 			$this->setPagerObject( $blf );
 
@@ -365,10 +365,10 @@ class APISchedule extends APIFactory {
 			foreach ( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $blf->getCurrentRow() );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			//Debug::Arr($retarr, 'Schedule Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -459,7 +459,7 @@ class APISchedule extends APIFactory {
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		$validator = $save_result = $key = false;
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
 				$transaction_function = function () use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
@@ -558,10 +558,10 @@ class APISchedule extends APIFactory {
 
 				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -602,7 +602,7 @@ class APISchedule extends APIFactory {
 		$validator = $save_result = $key = false;
 		$validator_stats = [ 'total_records' => $total_records, 'valid_records' => 0 ];
 		if ( is_array( $data ) && $total_records > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $total_records );
 
 			foreach ( $data as $key => $id ) {
 				$transaction_function = function () use ( $data, $validator_stats, $validator, $save_result, $key, $id, $permission_children_ids ) {
@@ -666,10 +666,10 @@ class APISchedule extends APIFactory {
 
 				list( $validator, $validator_stats, $key, $save_result ) = $this->RetryTransaction( $transaction_function );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
@@ -704,12 +704,7 @@ class APISchedule extends APIFactory {
 			$sf->setUser( $user_id );
 		}
 
-
-		//Prefix the current date to the template, this avoids issues with parsing 24hr clock only, ie: 0600
-		//Flex was only sending the times before, so the above worked, but if date is being sent too then it fails.
-		//$date_epoch = time();
-		//$sf->setStartTime( TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ).' '. $start) );
-		//$sf->setEndTime( TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ).' '. $end) );
+		//Recurring Schedule Templates and Schedules should all send Dates & Times, otherwise 24hr integer format (ie: 0600) will not get parsed properly (due to being integer) and will result in schedule total time being incorrect.
 		$sf->setStartTime( TTDate::parseDateTime( $start ) );
 		$sf->setEndTime( TTDate::parseDateTime( $end ) );
 

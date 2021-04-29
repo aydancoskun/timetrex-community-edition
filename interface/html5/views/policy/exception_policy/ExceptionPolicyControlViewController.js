@@ -1,15 +1,19 @@
-ExceptionPolicyControlViewController = BaseViewController.extend( {
-	el: '#exception_policy_control_view_container',
+class ExceptionPolicyControlViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#exception_policy_control_view_container',
 
-	_required_files: ['APIExceptionPolicyControl', 'APIExceptionPolicy'],
+			severity_array: null,
+			email_notification_array: null,
+			editor: null,
+			api_exception_policy: null,
+			date_api: null
+		} );
 
-	severity_array: null,
-	email_notification_array: null,
-	editor: null,
-	api_exception_policy: null,
-	date_api: null,
+		super( options );
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'ExceptionPolicyControlEditView.html';
 		this.permission_id = 'exception_policy';
@@ -18,37 +22,35 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'exception_policy_control';
 		this.context_menu_name = $.i18n._( 'Exception Policy' );
 		this.navigation_label = $.i18n._( 'Exception Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIExceptionPolicyControl' ) )();
-		this.api_exception_policy = new ( APIFactory.getAPIClass( 'APIExceptionPolicy' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.api = TTAPI.APIExceptionPolicyControl;
+		this.api_exception_policy = TTAPI.APIExceptionPolicy;
+		this.date_api = TTAPI.APITTDate;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'ExceptionPolicyControl' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'severity', 'severity_id', this.api_exception_policy );
 		this.initDropDownOption( 'email_notification', 'email_notification_id', this.api_exception_policy );
+	}
 
-	},
-
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -59,7 +61,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIExceptionPolicyControl' ) ),
+			api_class: TTAPI.APIExceptionPolicyControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HIERARCHY,
@@ -123,10 +125,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		} );
 
 		inside_editor_div.append( this.editor );
+	}
 
-	},
-
-	_continueDoCopyAsNew: function() {
+	_continueDoCopyAsNew() {
 		this.setCurrentEditViewState( 'new' );
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
@@ -134,10 +135,10 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				this.editor.rows_widgets_array[i].current_edit_item.id = '';
 			}
 		}
-		this._super( '_continueDoCopyAsNew' );
-	},
+		super._continueDoCopyAsNew();
+	}
 
-	onCopyAsNewResult: function( result ) {
+	onCopyAsNewResult( result ) {
 		var $this = this;
 		var result_data = result.getResult();
 
@@ -160,15 +161,14 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		$this.current_edit_record = result_data;
 		$this.initEditView();
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.initInsideEditorData();
+	}
 
-	},
-
-	initInsideEditorData: function() {
+	initInsideEditorData() {
 		var $this = this;
 		var args = {};
 		args.filter_data = {};
@@ -268,9 +268,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	insideEditorUpdateAllRows: function( val ) {
+	insideEditorUpdateAllRows( val ) {
 		var len = this.rows_widgets_array.length;
 		for ( var i = 0; i < len; i++ ) {
 			var c_row = this.rows_widgets_array[i];
@@ -310,10 +310,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	insideEditorSetValue: function( val ) {
+	insideEditorSetValue( val ) {
 		var len = val.length;
 
 		if ( len === 0 ) {
@@ -331,10 +330,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		} else {
 			this.updateAllRows( val );
 		}
+	}
 
-	},
-
-	insideEditorAddRow: function( data, index ) {
+	insideEditorAddRow( data, index ) {
 		if ( !data ) {
 			data = {};
 		}
@@ -432,10 +430,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		}
 
 		this.removeLastRowLine();
+	}
 
-	},
-
-	insideEditorGetValue: function( current_edit_item_id ) {
+	insideEditorGetValue( current_edit_item_id ) {
 
 		var len = this.rows_widgets_array.length;
 
@@ -462,9 +459,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	onSaveResult: function( result ) {
+	onSaveResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -486,9 +483,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
+	}
 
-	// onSaveAndContinueResult: function( result ) {
+	// onSaveAndContinueResult( result ) {
 	// 	var $this = this;
 	// 	if ( result.isValid() ) {
 	// 		var result_data = result.getResult();
@@ -535,7 +532,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	onSaveAndCopyResult: function( result ) {
+	onSaveAndCopyResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -556,9 +553,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 			$this.setErrorMenu();
 		}
-	},
+	}
 
-	// onSaveAndNextResult: function( result ) {
+	// onSaveAndNextResult( result ) {
 	// 	var $this = this;
 	// 	if ( result.isValid() ) {
 	// 		var result_data = result.getResult();
@@ -582,7 +579,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	saveInsideEditorData: function( callBack ) {
+	saveInsideEditorData( callBack ) {
 
 		var data = this.editor.getValue( this.refresh_id );
 
@@ -595,12 +592,11 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -617,7 +613,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -629,7 +625,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -638,4 +634,4 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

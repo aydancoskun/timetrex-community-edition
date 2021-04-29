@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -98,7 +98,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					}
 					$jar->setUserObject( $this->getUserObject() );
 
-					$retval = $jar->getOptions( 'static_columns' );
+					$retval = $jar->getOptions( 'static_columns' );  //Custom columns come from JobDetail or TimeSheetDetail reports, not PayrollExport report.
 				} else {
 					$retval = parent::getOptions( 'static_columns' );
 				}
@@ -1011,7 +1011,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					Debug::Text( 'Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10 );
 					$jar = TTNew( 'TimesheetDetailReport' ); /** @var TimesheetDetailReport $jar */
 				}
-				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setAPIMessageID( $this->getAPIMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
@@ -1192,7 +1192,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				//Get job data...
 				$jar = TTNew( 'JobDetailReport' ); /** @var JobDetailReport $jar */
-				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setAPIMessageID( $this->getAPIMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
@@ -1645,7 +1645,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					Debug::Text( 'Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10 );
 					$jar = TTNew( 'TimesheetDetailReport' ); /** @var TimesheetDetailReport $jar */
 				}
-				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setAPIMessageID( $this->getAPIMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
@@ -2028,7 +2028,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					Debug::Text( 'Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10 );
 					$jar = TTNew( 'TimesheetDetailReport' ); /** @var TimesheetDetailReport $jar */
 				}
-				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setAPIMessageID( $this->getAPIMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
@@ -2247,7 +2247,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					Debug::Text( 'Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10 );
 					$jar = TTNew( 'TimesheetDetailReport' ); /** @var TimesheetDetailReport $jar */
 				}
-				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setAPIMessageID( $this->getAPIMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
@@ -2463,7 +2463,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					Debug::Text( 'Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10 );
 					$jar = TTNew( 'TimesheetDetailReport' ); /** @var TimesheetDetailReport $jar */
 				}
-				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setAPIMessageID( $this->getAPIMessageID() );
 				$jar->setUserObject( $this->getUserObject() );
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );

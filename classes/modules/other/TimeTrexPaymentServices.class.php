@@ -172,7 +172,10 @@ class TimeTrexPaymentServices {
 
 				'name'             => $uf_obj->getFullName( true ),
 				'reference_number' => $confirmation_number,
-				'due_date'         => TTDate::getISOTimeStamp( $ps_obj->getTransactionDate() ), //Don't pass epoch as the remote system won't know the timezone.
+
+				//Use the Pay Stub Transaction Object Transaction Date, rather than the pay stub transaction date itself, as in cases where the customer might need to back-date the pay stub transaction date, but forward date the direct deposit itself.
+				// The batch_id is still based on the pay stub date itself, so that should continue to match.
+				'due_date'         => TTDate::getISOTimeStamp( $pst_obj->getTransactionDate() ), //Don't pass epoch as the remote system won't know the timezone.
 
 				'amount' => $pst_obj->getAmount(),
 		];
@@ -637,8 +640,6 @@ class TimeTrexPaymentServices {
 			//Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
 			return false; //This will trigger a general error to the user.
 		}
-
-		return true;
 	}
 
 	/**
@@ -666,8 +667,6 @@ class TimeTrexPaymentServices {
 			//Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
 			return false; //This will trigger a general error to the user.
 		}
-
-		return true;
 	}
 
 
@@ -694,8 +693,6 @@ class TimeTrexPaymentServices {
 			//Debug::Arr( $api_result, 'PaymentServices API: Retval: ' . $api_result->getResult(), __FILE__, __LINE__, __METHOD__, 10 );
 			return false; //This will trigger a general error to the user.
 		}
-
-		return false;
 	}
 
 

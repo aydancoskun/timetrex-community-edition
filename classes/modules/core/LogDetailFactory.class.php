@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -450,6 +450,8 @@ class LogDetailFactory extends Factory {
 						$old_value = $old_data[$field];
 						if ( is_bool( $old_value ) && $old_value === false ) {
 							$old_value = null;
+						} else if ( is_float( $old_value ) ) {
+							$old_value = Misc::removeTrailingZeros( $old_value, 0 ); //Normalize without trailing zeros, so 73.000 and 73.00 and 73.0 and 73 are all treated the same.
 						} else if ( is_array( $old_value ) ) {
 							//$old_value = serialize($old_value);
 							//If the old value is an array, replace it with NULL because it will always match the NEW value too.
@@ -460,6 +462,8 @@ class LogDetailFactory extends Factory {
 					$new_value = $new_data[$field];
 					if ( is_bool( $new_value ) && $new_value === false ) {
 						$new_value = null;
+					} else if ( is_float( $new_value ) ) {
+						$new_value = Misc::removeTrailingZeros( $new_value, 0 ); //Normalize without trailing zeros, so 73.000 and 73.00 and 73.0 and 73 are all treated the same.
 					} else if ( is_array( $new_value ) ) {
 						$new_value = serialize( $new_value );
 					} else if ( isset( $old_data[$field] ) == false && $new_value == TTUUID::getZeroID() ) { //Don't log cases where old value doesn't exist but new value is a zero UUID.
@@ -467,7 +471,7 @@ class LogDetailFactory extends Factory {
 					}
 
 					//Debug::Text('Old Value: '. $old_value .' New Value: '. $new_value, __FILE__, __LINE__, __METHOD__, 10);
-					if ( !( $old_value == '' && $new_value == '' ) ) {
+					if ( !( $old_value == '' && $new_value == '' ) && ( $old_value != $new_value ) ) {
 						$ph[] = $this->getNextInsertId(); //This needs work before UUID and after.
 						$ph[] = TTUUID::castUUID( $system_log_id );
 						$ph[] = $field;

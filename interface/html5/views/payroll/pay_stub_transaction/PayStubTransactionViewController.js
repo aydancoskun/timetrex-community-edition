@@ -1,22 +1,26 @@
-PayStubTransactionViewController = BaseViewController.extend( {
-	el: '#pay_stub_transaction_view_container',
+class PayStubTransactionViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#pay_stub_transaction_view_container',
 
-	_required_files: ['APIPayStubTransaction', 'APICurrency', 'APIRemittanceSourceAccount', 'APIRemittanceDestinationAccount', 'APIPayStubEntry', 'APIPayStub', 'APIUserGroup', 'APIPayPeriod'],
+			status_array: null,
+			currency_array: null,
+			user_status_array: null,
+			user_group_array: null,
+			type_array: null,
 
-	status_array: null,
-	currency_array: null,
-	user_status_array: null,
-	user_group_array: null,
-	type_array: null,
+			user_api: null,
+			user_group_api: null,
+			company_api: null,
+			pay_stub_entry_api: null,
 
-	user_api: null,
-	user_group_api: null,
-	company_api: null,
-	pay_stub_entry_api: null,
+			include_entries: true
+		} );
 
-	include_entries: true,
+		super( options );
+	}
 
-	init: function() {
+	init() {
 		//this._super('initialize' );
 		this.edit_view_tpl = 'PayStubTransactionEditView.html';
 		this.permission_id = 'pay_stub';
@@ -26,15 +30,15 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Pay Stub Transaction' );
 		this.navigation_label = $.i18n._( 'Pay Stub Transactions' ) + ':';
 
-		this.api = new ( APIFactory.getAPIClass( 'APIPayStubTransaction' ) )();
-		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
-		this.remittance_source_account_api = new ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) )();
-		this.remittance_destination_account_api = new ( APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
-		this.pay_stub_entry_api = new ( APIFactory.getAPIClass( 'APIPayStubEntry' ) )();
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
-		this.pay_period_api = new ( APIFactory.getAPIClass( 'APIPayPeriod' ) )();
+		this.api = TTAPI.APIPayStubTransaction;
+		this.currency_api = TTAPI.APICurrency;
+		this.remittance_source_account_api = TTAPI.APIRemittanceSourceAccount;
+		this.remittance_destination_account_api = TTAPI.APIRemittanceDestinationAccount;
+		this.user_api = TTAPI.APIUser;
+		this.pay_stub_entry_api = TTAPI.APIPayStubEntry;
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.company_api = TTAPI.APICompany;
+		this.pay_period_api = TTAPI.APIPayPeriod;
 
 		this.initPermission();
 		this.render();
@@ -42,26 +46,25 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'PayStub' );
-	},
+	}
 
-	initPermission: function() {
-		this._super( 'initPermission' );
+	initPermission() {
+		super.initPermission();
 
 		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
 			this.show_search_tab = true;
 		} else {
 			this.show_search_tab = false;
 		}
+	}
 
-	},
-
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 		var $this = this;
 
 		this.initDropDownOption( 'status', 'transaction_status_id' );
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -112,9 +115,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
@@ -180,9 +183,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 			}
 		}
 		this.setContextMenuGroupVisibility();
-	},
+	}
 
-	setDefaultMenuEditPayPeriodIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditPayPeriodIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.editPermissionValidate( 'pay_period_schedule' ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -191,9 +194,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuEditEmployeeIcon: function( context_btn, grid_selected_length ) {
+	setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length ) {
 		if ( !this.editChildPermissionValidate( 'user' ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -203,11 +206,11 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuViewIcon( context_btn, grid_selected_length, pId ) {
 		if ( pId === 'punch' || pId === 'schedule' || pId === 'pay_stub_amendment' ) {
-			this._super( 'setDefaultMenuViewIcon', context_btn, grid_selected_length, pId );
+			super.setDefaultMenuViewIcon( context_btn, grid_selected_length, pId );
 		} else {
 			if ( !this.viewPermissionValidate( pId ) || this.edit_only_mode ) {
 				context_btn.addClass( 'invisible-image' );
@@ -219,9 +222,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				context_btn.addClass( 'disable-image' );
 			}
 		}
-	},
+	}
 
-	setEditMenu: function() {
+	setEditMenu() {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
@@ -302,9 +305,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
-	},
+	}
 
-	setEditMenuViewIcon: function( context_btn, pId ) {
+	setEditMenuViewIcon( context_btn, pId ) {
 		if ( !this.viewPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -312,18 +315,18 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuGeneratePayStubIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuGeneratePayStubIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( grid_selected_length > 0 ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		this.include_entries = true;
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -339,10 +342,10 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 
 		this.edit_view_ui_dic.user_id.setEnabled( false );
 		this.edit_view_ui_dic.remittance_source_account_id.setEnabled( false );
@@ -350,16 +353,16 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		this.edit_view_ui_dic.currency_id.setEnabled( false );
 		this.edit_view_ui_dic.amount.setEnabled( false );
 		this.edit_view_ui_dic.confirmation_number.setEnabled( false );
-	},
+	}
 
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick( ignoreWarning ) {
 		if ( this.is_mass_editing ) {
 			this.include_entries = false; // Note: not sure if we really need this, as a code search for this variable shows it only set in one other place, but not used. Was in original onSaveClick, so including it here for now.
 		}
-		this._super( 'onSaveClick', ignoreWarning );
-	},
+		super.onSaveClick( ignoreWarning );
+	}
 
-	onSaveAndContinue: function( ignoreWarning ) {
+	onSaveAndContinue( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -375,9 +378,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				$this.onSaveAndContinueResult( result );
 			}
 		} );
-	},
+	}
 
-	onSaveAndContinueResult: function( result ) {
+	onSaveAndContinueResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -396,9 +399,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 			$this.setErrorMenu();
 		}
-	},
+	}
 
-	// onSaveAndNextResult: function( result ) {
+	// onSaveAndNextResult( result ) {
 	// 	var $this = this;
 	// 	if ( result.isValid() ) {
 	// 		var result_data = result.getResult();
@@ -418,7 +421,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 		column_filter.pay_stub_transaction_date = true;
 		column_filter.pay_stub_start_date = true;
@@ -444,9 +447,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 			}
 		}
 		return column_filter;
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		var $this = this;
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -458,9 +461,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	validate: function() {
+	validate() {
 		var $this = this;
 		var record = {};
 
@@ -488,10 +491,10 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				$this.validateResult( result );
 			}
 		} );
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 		var $this = this;
 
 		var tab_model = {
@@ -501,7 +504,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStub' ) ),
+			api_class: TTAPI.APIPayStub,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB,
@@ -520,7 +523,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: false,
@@ -536,7 +539,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) ),
+			api_class: TTAPI.APIRemittanceSourceAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
 			show_search_inputs: false,
@@ -547,7 +550,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' ) ),
+			api_class: TTAPI.APIRemittanceDestinationAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT,
 			show_search_inputs: false,
@@ -563,7 +566,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.CURRENCY,
 			allow_multiple_selection: false,
 			show_search_inputs: false,
-			api_class: ( APIFactory.getAPIClass( 'APICurrency' ) )
+			api_class: TTAPI.APICurrency
 		} );
 		;
 		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab_pay_stub_transaction_column1 );
@@ -583,10 +586,10 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 		form_item_input.TTextArea( { field: 'note', width: 300 } );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_pay_stub_transaction_column1 );
-	},
+	}
 
-	buildSearchFields: function() {
-		this._super( 'buildSearchFields' );
+	buildSearchFields() {
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -605,7 +608,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'remittance_source_account_id',
 				layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
-				api_class: ( APIFactory.getAPIClass( 'APIRemittanceSourceAccount' ) ),
+				api_class: TTAPI.APIRemittanceSourceAccount,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -617,7 +620,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
+				api_class: TTAPI.APIPayPeriod,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -628,7 +631,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -640,7 +643,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Currency' ),
 				in_column: 2,
 				field: 'currency_id',
-				api_class: ( APIFactory.getAPIClass( 'APICurrency' ) ),
+				api_class: TTAPI.APICurrency,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -660,9 +663,9 @@ PayStubTransactionViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.timesheet:
 			case ContextMenuIconName.schedule:
@@ -675,13 +678,13 @@ PayStubTransactionViewController = BaseViewController.extend( {
 				this.onNavigationClick( id );
 				break;
 		}
-	},
+	}
 
-	onViewClick: function( editId, noRefreshUI ) {
+	onViewClick( editId, noRefreshUI ) {
 		this.onNavigationClick( ContextMenuIconName.view );
-	},
+	}
 
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 		var $this = this;
 		var grid_selected_id_array;
 		var filter = {};
@@ -795,7 +798,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 
 	}
 
-} );
+}
 
 PayStubTransactionViewController.loadView = function() {
 	Global.loadViewSource( 'PayStubTransaction', 'PayStubTransactionView.html', function( result ) {

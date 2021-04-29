@@ -52,10 +52,12 @@
 				if ( key === 'country' && filter[key].value == TTUUID.not_exist_id ) {
 					continue;
 				}
+
 				//For Documents view
-				if ( key === 'template' && filter[key].value == false ) {
+				if ( $.inArray( key, ['private', 'template','is_attachment' ] ) !== -1 && filter[key].value == false ) {
 					continue;
 				}
+
 				// For Authorizations views
 				if ( key === 'hierarchy_level' && ( filter[key].value == 1 || filter[key].value.value == 1 ) ) {
 					continue;

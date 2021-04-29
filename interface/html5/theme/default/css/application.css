@@ -189,6 +189,43 @@ progress::-moz-progress-bar {
 	text-decoration: underline;
 }
 
+/* CSS Flash Div
+ * Used to make a div flash. For example in the CameraBrowser when a photo is taken.
+ * Usage: Add the class, then remove it after x seconds. Make sure the JS duration matches the CSS duration.
+ * If individual usage requires modification, override the class with more specificity, rather than making changes to this global style.
+
+ Example JS:
+
+ my-div.addClass( 'flash' );
+ setTimeout( function(){
+	my-div.removeClass( 'flash' );
+ }, 1000);	// Timeout must be the same length as the CSS3 transition or longer (or you'll mess up the transition)
+
+ */
+.flash {
+	animation: flash 1s ease-out;
+	animation-iteration-count: 1;
+}
+
+@keyframes flash {
+	0% { opacity:1;}
+	10% { opacity:0;}
+	100% { opacity:1}
+}
+/* End flash code */
+
+/* Animated glow border around images. For example for blue next arrows and green ticks animation.
+ * e.g. blue is #2b82b8
+ */
+.animate-glow {
+	animation: animate-glow 2s alternate infinite;
+}
+@keyframes animate-glow {
+	0% { filter: drop-shadow(0 0 0 currentColor) drop-shadow(0 0 0 currentColor) }
+	100% { filter: drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor) drop-shadow(0 0 0 currentColor) drop-shadow(0 0 0 currentColor); }
+}
+/* arrow and tick glow end */
+
 .grid-div {
 	max-height: calc(100% - 70px);
 	position: relative;
@@ -894,6 +931,10 @@ progress::-moz-progress-bar {
 	padding: 5px 20px;
 	text-decoration: none;
 	cursor: pointer;
+}
+
+.t-button:disabled {
+	color: #cccccc;
 }
 
 .bottom-bar-yes-btn {

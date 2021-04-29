@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpUndefinedFunctionInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,7 +47,7 @@ abstract class Factory {
 	protected $enable_system_log_detail = true;
 
 	protected $progress_bar_obj = null;
-	protected $AMF_message_id = null;
+	protected $api_message_id = null;
 
 	public $Validator = null;
 	public $validate_only = false; //Used by the API to ignore certain validation checks if we are doing validation only.
@@ -76,9 +76,9 @@ abstract class Factory {
 	 * Used for updating progress bar for API calls.
 	 * @return bool|null
 	 */
-	function getAMFMessageID() {
-		if ( $this->AMF_message_id != null ) {
-			return $this->AMF_message_id;
+	function getAPIMessageID() {
+		if ( $this->api_message_id != null ) {
+			return $this->api_message_id;
 		}
 
 		return false;
@@ -88,9 +88,9 @@ abstract class Factory {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setAMFMessageID( $id ) {
+	function setAPIMessageID( $id ) {
 		if ( $id != '' ) {
-			$this->AMF_message_id = $id;
+			$this->api_message_id = $id;
 
 			return true;
 		}
@@ -2008,7 +2008,9 @@ abstract class Factory {
 
 			foreach ( $columns as $column => $sort_order ) {
 				if ( isset( $aliases[$column] ) && !isset( $columns[$aliases[$column]] ) ) {
-					$retarr[$aliases[$column]] = $sort_order;
+					if ( $aliases[$column] != '' ) { //If the alias column is set to null/false, just ignore that sort column completely.
+						$retarr[$aliases[$column]] = $sort_order;
+					}
 				} else {
 					$retarr[$column] = $sort_order;
 				}

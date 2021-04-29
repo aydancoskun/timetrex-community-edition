@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1002,6 +1002,7 @@ class PermissionFactory extends Factory {
 								'edit_quantity'     => TTi18n::gettext( 'Edit Quantity Field' ),
 								'edit_bad_quantity' => TTi18n::gettext( 'Edit Bad Quantity Field' ),
 								'edit_note'         => TTi18n::gettext( 'Edit Note Field' ),
+								'edit_location'     => TTi18n::gettext( 'Edit Location' ),
 								'edit_other_id1'    => TTi18n::gettext( 'Edit Other ID1 Field' ),
 								'edit_other_id2'    => TTi18n::gettext( 'Edit Other ID2 Field' ),
 								'edit_other_id3'    => TTi18n::gettext( 'Edit Other ID3 Field' ),
@@ -2378,6 +2379,7 @@ class PermissionFactory extends Factory {
 														'view'   => true,
 														'edit'   => true,
 														'delete' => true,
+														'edit_location'=> true,
 												],
 												'absence' => [
 														'view'       => true,

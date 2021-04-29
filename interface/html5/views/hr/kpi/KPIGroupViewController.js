@@ -1,13 +1,19 @@
-KPIGroupViewController = BaseTreeViewController.extend( {
-	el: '#kpi_group_view_container',
+class KPIGroupViewController extends BaseTreeViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#kpi_group_view_container',
 
-	_required_files: ['APIKPIGroup'],
 
-	tree_mode: null,
-	grid_table_name: null,
-	grid_select_id_array: null,
 
-	init: function( options ) {
+			tree_mode: null,
+			grid_table_name: null,
+			grid_select_id_array: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'KPIGroupEditView.html';
 		this.permission_id = 'kpi';
@@ -22,16 +28,16 @@ KPIGroupViewController = BaseTreeViewController.extend( {
 		this.primary_tab_label = $.i18n._( 'KPI Group' );
 		this.primary_tab_key = 'tab_kpi_group';
 
-		this.api = new ( APIFactory.getAPIClass( 'APIKPIGroup' ) )();
+		this.api = TTAPI.APIKPIGroup;
 		this.grid_select_id_array = [];
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [
 				ContextMenuIconName.copy,
@@ -47,4 +53,4 @@ KPIGroupViewController = BaseTreeViewController.extend( {
 		return context_menu_model;
 	}
 
-} );
+}

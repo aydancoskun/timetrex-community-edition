@@ -1,20 +1,26 @@
-ROEViewController = BaseViewController.extend( {
-	el: '#roe_view_container', //Must set el here and can only set string, so events can work
-	user_api: null,
-	company_api: null,
-	pay_period_schedule_api: null,
-	user_status_array: null,
-	status_array: null,
-	code_array: null,
-	type_array: null,
+class ROEViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#roe_view_container', //Must set el here and can only set string, so events can work
+			user_api: null,
+			company_api: null,
+			pay_period_schedule_api: null,
+			user_status_array: null,
+			status_array: null,
+			code_array: null,
+			type_array: null,
 
-	user_generic_data_api: null,
+			user_generic_data_api: null,
 
-	form_setup_item: null,
+			form_setup_item: null,
 
-	_required_files: ['APIROE', 'APIUser', 'APICompany', 'APIPayPeriodSchedule', 'APIUserGenericData', 'APIAbsencePolicy', 'APIPayStubEntryAccount'],
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.permission_id = 'roe';
@@ -24,22 +30,21 @@ ROEViewController = BaseViewController.extend( {
 		this.table_name_key = 'roe';
 		this.context_menu_name = $.i18n._( 'Record Of Employment' );
 		this.navigation_label = $.i18n._( 'Record Of Employment' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIROE' ) )();
-		this.report_api = new ( APIFactory.getAPIClass( 'APIROEReport' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
-		this.pay_period_schedule_api = new ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) )();
-		this.user_generic_data_api = new ( APIFactory.getAPIClass( 'APIUserGenericData' ) )();
+		this.api = TTAPI.APIROE;
+		this.report_api = TTAPI.APIROEReport;
+		this.user_api = TTAPI.APIUser;
+		this.company_api = TTAPI.APICompany;
+		this.pay_period_schedule_api = TTAPI.APIPayPeriodSchedule;
+		this.user_generic_data_api = TTAPI.APIUserGenericData;
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
 
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'status' );
@@ -51,17 +56,16 @@ ROEViewController = BaseViewController.extend( {
 			$this['type_array'] = Global.buildRecordArray( result );
 			$this['type_array'].shift();
 		} );
+	}
 
-	},
-
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 		column_filter.user_id = true;
 
 		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			groups: {
 				form: {
@@ -126,9 +130,9 @@ ROEViewController = BaseViewController.extend( {
 		}
 
 		return context_menu_model;
-	},
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -217,6 +221,7 @@ ROEViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.timesheet:
 					this.setDefaultMenuTimesheetIcon( context_btn, grid_selected_length );
+					break;
 				case ContextMenuIconName.export_excel:
 					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
@@ -224,32 +229,32 @@ ROEViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
-	},
+	}
 
-	setDefaultMenuPrintIcon: function( context_btn, grid_selected_length, pId ) {
-
-		if ( grid_selected_length > 0 ) {
-			context_btn.removeClass( 'disable-image' );
-		} else {
-			context_btn.addClass( 'disable-image' );
-		}
-	},
-
-	setDefaultMenuEfileIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPrintIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( grid_selected_length > 0 ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuSaveSetupIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEfileIcon( context_btn, grid_selected_length, pId ) {
+
+		if ( grid_selected_length > 0 ) {
+			context_btn.removeClass( 'disable-image' );
+		} else {
+			context_btn.addClass( 'disable-image' );
+		}
+	}
+
+	setDefaultMenuSaveSetupIcon( context_btn, grid_selected_length, pId ) {
 
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuPayStubIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuPayStubIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( !PermissionManager.checkTopLevelPermission( 'PayStub' ) ) {
 			context_btn.addClass( 'invisible-image' );
@@ -260,9 +265,9 @@ ROEViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuEditEmployeeIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( !this.editPermissionValidate( 'user' ) ) {
 			context_btn.addClass( 'invisible-image' );
@@ -273,27 +278,27 @@ ROEViewController = BaseViewController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuTimesheetIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuTimesheetIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( grid_selected_length === 1 ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuViewIcon( context_btn, grid_selected_length, pId ) {
 
 		if ( grid_selected_length > 0 ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenu: function() {
+	setEditMenu() {
 
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
@@ -388,60 +393,59 @@ ROEViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setEditMenuViewIcon: function( context_btn, pId ) {
+	setEditMenuViewIcon( context_btn, pId ) {
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuPrintIcon: function( context_btn, pId ) {
-
-		if ( !this.current_edit_record || !this.current_edit_record.id ) {
-			context_btn.addClass( 'disable-image' );
-		}
-	},
-
-	setEditMenuEfileIcon: function( context_btn, pId ) {
+	setEditMenuPrintIcon( context_btn, pId ) {
 
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuSaveSetupIcon: function( context_btn, pId ) {
+	setEditMenuEfileIcon( context_btn, pId ) {
+
+		if ( !this.current_edit_record || !this.current_edit_record.id ) {
+			context_btn.addClass( 'disable-image' );
+		}
+	}
+
+	setEditMenuSaveSetupIcon( context_btn, pId ) {
 
 //		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 //			context_btn.addClass( 'disable-image' );
 //		}
-	},
+	}
 
-	setEditMenuPayStubIcon: function( context_btn, pId ) {
-
-		if ( !this.current_edit_record || !this.current_edit_record.id ) {
-			context_btn.addClass( 'disable-image' );
-		}
-	},
-
-	setEditMenuEditEmployeeIcon: function( context_btn, pId ) {
+	setEditMenuPayStubIcon( context_btn, pId ) {
 
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuTimeSheetIcon: function( context_btn, pId ) {
+	setEditMenuEditEmployeeIcon( context_btn, pId ) {
 
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	buildSearchFields: function() {
+	setEditMenuTimeSheetIcon( context_btn, pId ) {
 
-		this._super( 'buildSearchFields' );
+		if ( !this.current_edit_record || !this.current_edit_record.id ) {
+			context_btn.addClass( 'disable-image' );
+		}
+	}
+
+	buildSearchFields() {
+
+		super.buildSearchFields();
 		var default_args = { permission_section: 'roe' };
 		this.search_fields = [
 
@@ -453,7 +457,7 @@ ROEViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 			new SearchField( {
@@ -510,7 +514,7 @@ ROEViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -522,7 +526,7 @@ ROEViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
@@ -530,23 +534,19 @@ ROEViewController = BaseViewController.extend( {
 			} )
 
 		];
+	}
 
-	},
-
-	search: function( set_default_menu, page_action, page_number, callBack ) {
-		var $this = this;
-
+	search( set_default_menu, page_action, page_number, callBack ) {
 		if ( !this.form_setup_item ) {
-			this.initFormSetup( function() {
-				$this._super( 'search', set_default_menu, page_action, page_number, callBack );
+			this.initFormSetup( () => {
+				super.search( set_default_menu, page_action, page_number, callBack );
 			} );
 		} else {
-			$this._super( 'search', set_default_menu, page_action, page_number, callBack );
+			super.search( set_default_menu, page_action, page_number, callBack );
 		}
+	}
 
-	},
-
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -572,12 +572,11 @@ ROEViewController = BaseViewController.extend( {
 		this.setFormSetupData();
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
+	}
 
-	},
+	buildEditViewUI() {
 
-	buildEditViewUI: function() {
-
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -589,7 +588,7 @@ ROEViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIROE' ) ),
+			api_class: TTAPI.APIROE,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ROE,
@@ -613,10 +612,14 @@ ROEViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0].push( tab_roe_column1 );
 		this.edit_view_tabs[1].push( tab_form_setup_column1 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		// Employee
-		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
@@ -651,8 +654,8 @@ ROEViewController = BaseViewController.extend( {
 		// First Day Worked
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( { field: 'first_date' } );
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Or first day since last ROE' ) + ')' + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Or first day since last ROE' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'First Day Worked' ), form_item_input, tab_roe_column1, '', widgetContainer );
@@ -660,8 +663,8 @@ ROEViewController = BaseViewController.extend( {
 		// Last Day For Which Paid
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( { field: 'last_date' } );
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Last day worked or received insurable earnings' ) + ')' + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Last day worked or received insurable earnings' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Last Day For Which Paid' ), form_item_input, tab_roe_column1, '', widgetContainer );
@@ -669,8 +672,8 @@ ROEViewController = BaseViewController.extend( {
 		//Final Pay Period Ending Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( { field: 'pay_period_end_date' } );
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Pay period end date after Last Day For Which Paid' ) + ')' + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Pay period end date after Last Day For Which Paid' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Final Pay Period Ending Date' ), form_item_input, tab_roe_column1, '', widgetContainer );
@@ -707,8 +710,8 @@ ROEViewController = BaseViewController.extend( {
 		//Final Pay Stub End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( { field: 'final_pay_stub_end_date' } );
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'May be after Final Pay Period Ending Date if vacation/severence is paid separately' ) + ')' + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'May be after Final Pay Period Ending Date if vacation/severence is paid separately' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Final Pay Stub End Date' ), form_item_input, tab_roe_column1, '', widgetContainer );
@@ -721,7 +724,7 @@ ROEViewController = BaseViewController.extend( {
 		// Insurable Absence Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
+			api_class: TTAPI.APIAbsencePolicy,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			field: 'absence_policy_ids',
@@ -739,7 +742,7 @@ ROEViewController = BaseViewController.extend( {
 		// Insurable Earnings (Box 15B)
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			field: 'insurable_earnings_psea_ids',
@@ -754,7 +757,7 @@ ROEViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			field: 'vacation_psea_ids',
@@ -764,10 +767,9 @@ ROEViewController = BaseViewController.extend( {
 
 		form_item_input.setDefaultArgs( args );
 		this.addEditFieldToColumn( $.i18n._( 'Vacation Pay (Box 17A)' ), form_item_input, tab_form_setup_column1, '' );
+	}
 
-	},
-
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.download:
 				this.onDownloadClick();
@@ -785,9 +787,9 @@ ROEViewController = BaseViewController.extend( {
 			case ContextMenuIconName.save_setup:
 				this.onSaveSetup();
 		}
-	},
+	}
 
-	initFormSetup: function( callBack ) {
+	initFormSetup( callBack ) {
 		var args = {};
 		var $this = this;
 		args.filter_data = {};
@@ -812,17 +814,17 @@ ROEViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setFormSetupData: function() {
+	setFormSetupData() {
 		if ( this.form_setup_item.data ) {
 			this.edit_view_ui_dic.absence_policy_ids.setValue( this.form_setup_item.data.absence_policy_ids );
 			this.edit_view_ui_dic.insurable_earnings_psea_ids.setValue( this.form_setup_item.data.insurable_earnings_psea_ids );
 			this.edit_view_ui_dic.vacation_psea_ids.setValue( this.form_setup_item.data.vacation_psea_ids );
 		}
-	},
+	}
 
-	getFormSetupData: function( form_item ) {
+	getFormSetupData( form_item ) {
 
 		//Error: TypeError: form_item is undefined in /interface/html5/framework/jquery.min.js?v=8.0.0-20141117-091433 line 2 > eval line 1015
 		if ( !form_item ) {
@@ -836,9 +838,9 @@ ROEViewController = BaseViewController.extend( {
 		form_item.form.vacation_psea_ids = this.edit_view_ui_dic.vacation_psea_ids.getValue();
 
 		return form_item;
-	},
+	}
 
-	onSaveSetup: function() {
+	onSaveSetup() {
 		var $this = this;
 		var form_setup = this.form_setup_item;
 
@@ -867,10 +869,9 @@ ROEViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	onNavigationClick: function( iconName ) {
+	onNavigationClick( iconName ) {
 
 		var $this = this;
 
@@ -971,62 +972,61 @@ ROEViewController = BaseViewController.extend( {
 				break;
 
 		}
+	}
 
-	},
-
-	doFormIFrameCall: function( postData ) {
+	doFormIFrameCall( postData ) {
 		Global.APIFileDownload( 'APIROEReport', 'getROEReport', postData );
-	},
+	}
 
-	onSaveResult: function( result ) {
-		this._super( 'onSaveResult', result );
+	onSaveResult( result ) {
+		super.onSaveResult( result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
 		}
-	},
+	}
 
-	onSaveAndNewResult: function( result ) {
-		this._super( 'onSaveAndNewResult', result );
+	onSaveAndNewResult( result ) {
+		super.onSaveAndNewResult( result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
 		}
-	},
+	}
 
-	onSaveAndContinueResult: function( result ) {
-		this._super( 'onSaveAndContinueResult', result );
+	onSaveAndContinueResult( result ) {
+		super.onSaveAndContinueResult( result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
 		}
-	},
+	}
 
-	onSaveAndNextResult: function( result ) {
-		this._super( 'onSaveAndNextResult', result );
+	onSaveAndNextResult( result ) {
+		super.onSaveAndNextResult( result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
 		}
-	},
+	}
 
-	onSaveAndCopyResult: function( result ) {
-		this._super( 'onSaveAndCopyResult', result );
+	onSaveAndCopyResult( result ) {
+		super.onSaveAndCopyResult( result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
 		}
-	},
+	}
 
-	showStatusReport: function( result, id ) {
+	showStatusReport( result, id ) {
 		var user_ids = id;
 		var user_generic_status_batch_id = result.getAttributeInAPIDetails( 'user_generic_status_batch_id' );
 		if ( user_generic_status_batch_id && TTUUID.isUUID( user_generic_status_batch_id ) && user_generic_status_batch_id != TTUUID.zero_id && user_generic_status_batch_id != TTUUID.not_exist_id ) {
 			UserGenericStatusWindowController.open( user_generic_status_batch_id, user_ids );
 		}
-	},
+	}
 
 	/**
 	 * Originally copied from same function name in ReportBaseViewController
 	 * FIXME: refactor to base class when needed in other children
 	 * @param label
 	 */
-	checkFormSetupSaved: function( label ) {
+	checkFormSetupSaved( label ) {
 		var $this = this;
 
 		label = $.i18n._( 'Form Setup' );
@@ -1039,9 +1039,9 @@ ROEViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		if ( this.getEditViewTabIndex() == 1 ) {
 			this.form_setup_changed = true;
 		}
@@ -1087,14 +1087,13 @@ ROEViewController = BaseViewController.extend( {
 				}
 				break;
 		}
+	}
 
-	},
-
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 
 		records.form = this.getFormSetupData( records ).form;
 
 		return records;
 	}
 
-} );
+}

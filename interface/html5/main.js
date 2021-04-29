@@ -75,9 +75,9 @@ require.config( {
 		'RibbonSubMenuGroup': 'model/RibbonSubMenuGroup',
 		'RibbonSubMenuNavItem': 'model/RibbonSubMenuNavItem',
 		'ServiceCaller': 'services/ServiceCaller',
-		'APIProgressBar': 'services/core/APIProgressBar',
-		'APIFactory': 'services/APIFactory',
+		'TimeTrexClientAPI': 'services/TimeTrexClientAPI',
 		'APIReturnHandler': 'model/APIReturnHandler',
+		'TTBackboneView': 'views/TTBackboneView',
 		'BaseViewController': 'views/BaseViewController',
 		'BaseWindowController': 'views/BaseWindowController',
 		'BaseWizardController': 'views/wizard/BaseWizardController',
@@ -122,200 +122,6 @@ require.config( {
 
 		'TTGrid': 'global/widgets/ttgrid/TTGrid',
 
-		/**
-		 * API paths
-		 */
-
-		'APICurrency': 'services/core/APICurrency',
-		'APICurrencyRate': 'services/core/APICurrencyRate',
-		'APIUserPreference': 'services/users/APIUserPreference',
-		'APIDate': 'services/APIDate',
-		'APIPermission': 'services/core/APIPermission',
-		'APIUserGenericData': 'services/users/APIUserGenericData',
-		'APIUser': 'services/users/APIUser',
-		'APIUserGroup': 'services/users/APIUserGroup',
-		'APIBranch': 'services/company/APIBranch',
-		'APILegalEntity': 'services/company/APILegalEntity',
-		'APIRemittanceSourceAccount': 'services/company/APIRemittanceSourceAccount',
-		'APIRemittanceDestinationAccount': 'services/users/APIRemittanceDestinationAccount',
-		'APIPayrollRemittanceAgency': 'services/company/APIPayrollRemittanceAgency',
-		'APIGEOFence': 'services/company/APIGEOFence',
-		'APIDepartment': 'services/department/APIDepartment',
-		'APICompany': 'services/company/APICompany',
-		'APIPayrollRemittanceAgencyEvent': 'services/company/APIPayrollRemittanceAgencyEvent',
-		'APIHierarchyLevel': 'services/company/APIHierarchyLevel',
-		'APIUserTitle': 'services/users/APIUserTitle',
-		'APIAbout': 'services/help/APIAbout',
-		'APIRoundingIntervalPolicy': 'services/policy/APIRoundingIntervalPolicy',
-		'APIPermissionControl': 'services/core/APIPermissionControl',
-		'APIPayPeriodSchedule': 'services/payperiod/APIPayPeriodSchedule',
-		'APIPolicyGroup': 'services/policy/APIPolicyGroup',
-		'APIExceptionPolicy': 'services/policy/APIExceptionPolicy',
-		'APIExceptionPolicyControl': 'services/policy/APIExceptionPolicyControl',
-		'APILog': 'services/core/APILog',
-		'APIHierarchyControl': 'services/hierarchy/APIHierarchyControl',
-		'APIUserWage': 'services/users/APIUserWage',
-		'APIUserDeduction': 'services/users/APIUserDeduction',
-		'APIWageGroup': 'services/company/APIWageGroup',
-		'APIPunch': 'services/core/APIPunch',
-		'APITimeSheet': 'services/core/APITimeSheet',
-		'APIJob': 'services/job/APIJob',
-		'APIJobGroup': 'services/job/APIJobGroup',
-		'APIJobItem': 'services/job_item/APIJobItem',
-		'APIJobItemAmendment': 'services/job_item_amendment/APIJobItemAmendment',
-		'APIJobItemGroup': 'services/job_item/APIJobItemGroup',
-		'APIUserContact': 'services/users/APIUserContact',
-		'APIEthnicGroup': 'services/users/APIEthnicGroup',
-		'APIGovernmentDocument': 'services/payroll/APIGovernmentDocument',
-		'APIBankAccount': 'services/users/APIBankAccount',
-		'APIUserDefault': 'services/users/APIUserDefault',
-		'APICompanyDeduction': 'services/company/APICompanyDeduction',
-		'APIAbsencePolicy': 'services/policy/APIAbsencePolicy',
-		'APIExpensePolicy': 'services/policy/APIExpensePolicy',
-		'APIUserDateTotal': 'services/core/APIUserDateTotal',
-		'APIPunchControl': 'services/core/APIPunchControl',
-		'APIROE': 'services/users/APIROE',
-		'APIROEReport': 'services/reports/APIROEReport',
-		'APIClient': 'services/invoice/APIClient',
-		'APIClientGroup': 'services/invoice/APIClientGroup',
-		'APIClientContact': 'services/invoice/APIClientContact',
-		'APIClientPayment': 'services/invoice/APIClientPayment',
-		'APITaxPolicy': 'services/invoice/APITaxPolicy',
-		'APIShippingPolicy': 'services/invoice/APIShippingPolicy',
-		'APIPaymentGateway': 'services/invoice/APIPaymentGateway',
-		'APIInvoiceConfig': 'services/invoice/APIInvoiceConfig',
-		'APIInvoiceDistrict': 'services/invoice/APIInvoiceDistrict',
-		'APIAreaPolicy': 'services/invoice/APIAreaPolicy',
-		'APIPayPeriod': 'services/payroll/APIPayPeriod',
-		'APISchedule': 'services/attendance/APISchedule',
-		'APIScheduleAdvanced': 'services/attendance/APIScheduleAdvanced',
-		'APIRecurringScheduleTemplate': 'services/attendance/APIRecurringScheduleTemplate',
-		'APIRecurringScheduleTemplateControl': 'services/attendance/APIRecurringScheduleTemplateControl',
-		'APIOtherField': 'services/core/APIOtherField',
-		'APIStation': 'services/company/APIStation',
-		'APIPayStub': 'services/payroll/APIPayStub',
-		'APIPayStubTransaction': 'services/payroll/APIPayStubTransaction',
-		'APIPayStubEntry': 'services/payroll/APIPayStubEntry',
-		'APIPayStubEntryAccountLink': 'services/payroll/APIPayStubEntryAccountLink',
-		'APIPayStubAmendment': 'services/payroll/APIPayStubAmendment',
-		'APIRecurringPayStubAmendment': 'services/payroll/APIRecurringPayStubAmendment',
-		'APIPayStubEntryAccount': 'services/payroll/APIPayStubEntryAccount',
-		'APISchedulePolicy': 'services/policy/APISchedulePolicy',
-		'APIUserExpense': 'services/payroll/APIUserExpense',
-		'APIMealPolicy': 'services/policy/APIMealPolicy',
-		'APIBreakPolicy': 'services/policy/APIBreakPolicy',
-		'APIPayCode': 'services/policy/APIPayCode',
-		'APIPayFormulaPolicy': 'services/policy/APIPayFormulaPolicy',
-		'APIContributingPayCodePolicy': 'services/policy/APIContributingPayCodePolicy',
-		'APIContributingShiftPolicy': 'services/policy/APIContributingShiftPolicy',
-		'APIRegularTimePolicy': 'services/policy/APIRegularTimePolicy',
-		'APIOvertimePolicy': 'services/policy/APIOvertimePolicy',
-		'APIAccrualPolicyAccount': 'services/policy/APIAccrualPolicyAccount',
-		'APIAccrualPolicy': 'services/policy/APIAccrualPolicy',
-		'APIAccrualPolicyUserModifier': 'services/policy/APIAccrualPolicyUserModifier',
-		'APIRecurringHoliday': 'services/policy/APIRecurringHoliday',
-		'APIHolidayPolicy': 'services/policy/APIHolidayPolicy',
-		'APIHoliday': 'services/policy/APIHoliday',
-		'APIDocument': 'services/document/APIDocument',
-		'APITransaction': 'services/invoice/APITransaction',
-		'APIProduct': 'services/invoice/APIProduct',
-		'APIProductPrice': 'services/invoice/APIProductPrice',
-		'APIDocumentRevision': 'services/document/APIDocumentRevision',
-		'APIDocumentGroup': 'services/document/APIDocumentGroup',
-		'APIPremiumPolicy': 'services/policy/APIPremiumPolicy',
-		'APIAccrualPolicyMilestone': 'services/policy/APIAccrualPolicyMilestone',
-		'APIUserGenericStatus': 'services/users/APIUserGenericStatus',
-		'APIRecurringScheduleControl': 'services/attendance/APIRecurringScheduleControl',
-
-		'APIActiveShiftReport': 'services/reports/APIActiveShiftReport',
-		'APIUserReportData': 'services/reports/APIUserReportData',
-		'APIReportSchedule': 'services/reports/APIReportSchedule',
-		'APIReportCustomColumn': 'services/reports/APIReportCustomColumn',
-		'APIUserSummaryReport': 'services/reports/APIUserSummaryReport',
-		'APIAuditTrailReport': 'services/reports/APIAuditTrailReport',
-		'APITimesheetDetailReport': 'services/reports/APITimesheetDetailReport',
-		'APIPunchSummaryReport': 'services/reports/APIPunchSummaryReport',
-		'APIAccrualBalanceSummaryReport': 'services/reports/APIAccrualBalanceSummaryReport',
-		'APIAccrual': 'services/attendance/APIAccrual',
-		'APIAccrualBalance': 'services/attendance/APIAccrualBalance',
-		'APIScheduleSummaryReport': 'services/reports/APIScheduleSummaryReport',
-		'APITimesheetSummaryReport': 'services/reports/APITimesheetSummaryReport',
-		'APITimeSheetVerify': 'services/reports/APITimeSheetVerify',
-		'APIExceptionSummaryReport': 'services/reports/APIExceptionSummaryReport',
-		'APIPayStubSummaryReport': 'services/reports/APIPayStubSummaryReport',
-		'APIPayStubTransactionSummaryReport': 'services/reports/APIPayStubTransactionSummaryReport',
-		'APIGeneralLedgerSummaryReport': 'services/reports/APIGeneralLedgerSummaryReport',
-		'APIUserExpenseReport': 'services/reports/APIUserExpenseReport',
-		'APIJobSummaryReport': 'services/reports/APIJobSummaryReport',
-		'APIJobDetailReport': 'services/reports/APIJobDetailReport',
-		'APIJobInformationReport': 'services/reports/APIJobInformationReport',
-		'APIJobItemInformationReport': 'services/reports/APIJobItemInformationReport',
-		'APIInvoiceTransactionSummaryReport': 'services/reports/APIInvoiceTransactionSummaryReport',
-		'APIInvoice': 'services/invoice/APIInvoice',
-		'APIProductGroup': 'services/invoice/APIProductGroup',
-		'APIRemittanceSummaryReport': 'services/reports/APIRemittanceSummaryReport',
-		'APIT4SummaryReport': 'services/reports/APIT4SummaryReport',
-		'APIT4ASummaryReport': 'services/reports/APIT4ASummaryReport',
-		'APITaxSummaryReport': 'services/reports/APITaxSummaryReport',
-		'APIForm940Report': 'services/reports/APIForm940Report',
-		'APIForm941Report': 'services/reports/APIForm941Report',
-		'APIForm1099MiscReport': 'services/reports/APIForm1099MiscReport',
-		'APIFormW2Report': 'services/reports/APIFormW2Report',
-		'APIAffordableCareReport': 'services/reports/APIAffordableCareReport',
-		'APIUserQualificationReport': 'services/reports/APIUserQualificationReport',
-		'APIQualificationGroup': 'services/hr/APIQualificationGroup',
-		'APIQualification': 'services/hr/APIQualification',
-		'APIQualificationPortal': 'services/hr/APIQualificationPortal',
-		'APIUserSkill': 'services/hr/APIUserSkill',
-		'APIRequest': 'services/my_account/APIRequest',
-		'APIRequestSchedule': 'services/my_account/APIRequestSchedule',
-		'APIMessageControl': 'services/my_account/APIMessageControl',
-		'APIPayPeriodTimeSheetVerify': 'services/my_account/APIPayPeriodTimeSheetVerify',
-		'APIJobApplicantEmployment': 'services/hr/APIJobApplicantEmployment',
-		'APIJobApplicantLanguage': 'services/hr/APIJobApplicantLanguage',
-		'APIJobApplicantLicense': 'services/hr/APIJobApplicantLicense',
-		'APIJobApplicantMembership': 'services/hr/APIJobApplicantMembership',
-		'APIJobApplicantEducation': 'services/hr/APIJobApplicantEducation',
-		'APIJobApplicantSkill': 'services/hr/APIJobApplicantSkill',
-		'APIJobApplicantReference': 'services/hr/APIJobApplicantReference',
-		'APIJobApplicantLocation': 'services/hr/APIJobApplicantLocation',
-		'APIUserLicense': 'services/hr/APIUserLicense',
-		'APIUserEducation': 'services/hr/APIUserEducation',
-		'APIUserLanguage': 'services/hr/APIUserLanguage',
-		'APIUserMembership': 'services/hr/APIUserMembership',
-		'APIKPIReport': 'services/reports/APIKPIReport',
-		'APIKPIGroup': 'services/hr/APIKPIGroup',
-		'APIKPI': 'services/hr/APIKPI',
-		'APIUserReview': 'services/hr/APIUserReview',
-		'APIRecruitmentPortalConfig': 'services/hr/APIRecruitmentPortalConfig',
-		'APIUserReviewControl': 'services/hr/APIUserReviewControl',
-		'APIUserRecruitmentSummaryReport': 'services/reports/APIUserRecruitmentSummaryReport',
-		'APIJobApplicant': 'services/hr/APIJobApplicant',
-		'APIJobApplication': 'services/hr/APIJobApplication',
-		'APIJobVacancy': 'services/hr/APIJobVacancy',
-		'APIUserRecruitmentDetailReport': 'services/reports/APIUserRecruitmentDetailReport',
-		'APIPayrollExportReport': 'services/reports/APIPayrollExportReport',
-		'APIImport': 'services/core/APIImport',
-		'APIAuthorization': 'services/core/APIAuthorization',
-		'APIAuthentication': 'services/unauthenticated/APIAuthentication',
-		'APICurrentUser': 'services/APICurrentUser',
-		'APIRoundIntervalPolicy': 'services/policy/APIRoundIntervalPolicy',
-		'APIException': 'services/attendance/APIException',
-		'APIDocumentAttachment': 'services/document/APIDocumentAttachment',
-		'APINotification': 'services/core/APINotification',
-		'APIMisc': 'services/core/APIMisc',
-		'APICompanyGenericTag': 'services/company/APICompanyGenericTag',
-		'APIDashboard': 'services/core/APIDashboard',
-		'APIInstall': 'services/install/APIInstall',
-		'APIJobVacancyPortal': 'services/hr/APIJobVacancyPortal',
-		'APIJobApplicantPortal': 'services/hr/APIJobApplicantPortal',
-		'APIRecruitmentAuthentication': 'services/core/APIRecruitmentAuthentication',
-		'APICompanyPortal': 'services/company/APICompanyPortal',
-		'APIEthnicGroupPortal': 'services/users/APIEthnicGroupPortal',
-		'APIUserDefaultPortal': 'services/users/APIUserDefaultPortal',
-		'APICurrencyPortal': 'services/core/APICurrencyPortal',
-		'APIDocumentPortal': 'services/document/APIDocumentPortal',
-
 		'RequestViewCommonController': 'views/common/RequestViewCommonController',
 		'EmbeddedMessageCommon': 'views/common/EmbeddedMessageCommon',
 		'AuthorizationHistoryCommon': 'views/common/AuthorizationHistoryCommon',
@@ -340,6 +146,7 @@ require.config( {
 			deps: [
 				'polyfill',
 				'backbone',
+				'TTBackboneView',
 				'LocalCacheData',
 				'jquery.masonry',
 				'APIGlobal'
@@ -362,10 +169,12 @@ require.config( {
 		'Base': {
 			deps: ['backbone']
 		},
-
+		'TTBackboneView': {
+			deps: ['backbone']
+		},
 		'BaseViewController': {
 			deps: [
-				'backbone',
+				'TTBackboneView',
 				'ContextMenuConstant',
 				'ServiceCaller',
 				'APIGlobal'
@@ -444,9 +253,6 @@ require.config( {
 		'TTagInput': {
 			deps: ['jquery']
 		},
-		'TRangePicker': {
-			deps: ['jquery']
-		},
 		'TTextInput': {
 			deps: ['jquery']
 		},
@@ -468,14 +274,8 @@ require.config( {
 		'ServiceCaller': {
 			deps: ['APIReturnHandler', 'Base', 'ResponseObject']
 		},
-		'BaseViewController': {
-			deps: ['backbone', 'ContextMenuConstant', 'ServiceCaller']
-		},
 		'BaseWindowController': {
-			deps: ['backbone']
-		},
-		'APIProgressBar': {
-			deps: ['ServiceCaller']
+			deps: ['TTBackboneView']
 		},
 		'BaseWizardController': {
 			deps: ['BaseWindowController']
@@ -511,16 +311,16 @@ require.config( {
 			}
 		},
 
-		'APIAuthentication': {
-			deps: ['ServiceCaller', 'APIFactory']
+		'TimeTrexClientAPI': {
+			deps: ['ServiceCaller', 'Global']
 		},
 
 		'WizardStep': {
-			deps: ['Wizard', 'backbone']
+			deps: ['Wizard', 'TTBackboneView']
 		},
 
 		'Wizard': {
-			deps: ['backbone']
+			deps: ['TTBackboneView']
 		}
 	}
 } );
@@ -537,9 +337,10 @@ require( [
 	'jquery.i18n',
 	'jquery_ba_resize',
 	'IndexController',
+	'TTBackboneView',
 	'BaseViewController',
-	'APIFactory',
-	'APIProgressBar',
+	'ServiceCaller',
+	'TimeTrexClientAPI',
 	'TTextInput',
 	'TPasswordInput',
 	'FormItemType',
@@ -548,7 +349,6 @@ require( [
 	'TAlertManager',
 	'TTPromise',
 	'TTUUID',
-	'APIAuthentication',
 	'Wizard',
 	'WizardStep'
 ], function( r, lcd, bb, G, html2canvas, moment ) {
@@ -607,7 +407,7 @@ require( [
 		$.support.cors = true; // For IE
 		cleanProgress();
 
-		var api_authentication = new ( APIFactory.getAPIClass( 'APIAuthentication' ) )();
+		var api_authentication = TTAPI.APIAuthentication;
 
 		if ( Error ) {
 			Error.stackTraceLimit = 50; //Increase JS exception stack trace limit.
@@ -892,27 +692,27 @@ require( [
 					if ( cookie_session_id != LocalCacheData.getSessionID() ) {
 						Debug.Text( 'Session ID has changed out from out underneath us! Session ID: Memory: ' + LocalCacheData.getSessionID() + ' Cookie: ' + cookie_session_id, 'main.js', '', 'handleVisibilityChange', 1 );
 
-						var api = new ( APIFactory.getAPIClass( 'APIMisc' ) )();
-						if ( typeof api.isLoggedIn === 'function' ) {
-							api.isLoggedIn( false, {
-								onResult: function( result ) {
-									var result_data = result.getResult();
+						var api = TTAPI.APIAuthentication;
+						api.isLoggedIn( false, {
+							onResult: function( result ) {
+								var result_data = result.getResult();
 
-									if ( result_data === true ) {
-										TAlertManager.showAlert( $.i18n._( 'It appears that you have logged in from another web browser window or tab.<br><br>Please be patient while the session is resumed here...' ), 'Session Changed', function() {
-											Global.sendAnalyticsEvent( 'session', 'session:changed', 'session:changed' );
-											window.location.reload( true );
-										} );
-									} else {
-										//Don't do Logout here, as we need to display a "Session Expired" message to the user, which is triggered from the ServiceCaller.
-										api.ping( {
-											onResult: function() {
-											}
-										} );
-									}
+								if ( result_data === true ) {
+									TAlertManager.showAlert( $.i18n._( 'It appears that you have logged in from another web browser window or tab.<br><br>Please be patient while the session is resumed here...' ), 'Session Changed', function() {
+										Global.sendAnalyticsEvent( 'session', 'session:changed', 'session:changed' );
+										window.location.reload( true );
+									} );
+								} else {
+									//Don't do Logout here, as we need to display a "Session Expired" message to the user, which is triggered from the ServiceCaller.
+									//  In order to trigger that though, we need to make an *Authenticated* API call to APIMisc.Ping(), rather than UnAuthenticated call to APIAuthentication.Ping()
+									var api = TTAPI.APIMisc;
+									api.ping( {
+										onResult: function() {
+										}
+									} );
 								}
-							} );
-						}
+							}
+						} );
 					}
 				}
 			}
@@ -998,7 +798,8 @@ require( [
 	function loadViewRequiredJS() {
 		LocalCacheData.loadViewRequiredJSReady = false;
 
-		var require_array = [
+		require( [
+			//NOTE: If the order is changed here, you must update the below require() line as well. ie: require( require_array, function( Backbone, Global, BaseViewController, Nanobar, Decimal )
 			'backbone',
 			'Global',
 			'nanobar', //only in timesheet
@@ -1052,40 +853,23 @@ require( [
 			'Paging2',
 			'jquery-ui',
 			'TTGrid',
-
-			//API's required to loads views. This is a preemtive move before removing loadScript() from Global
-			'APILog',
-			'APINotification',
-			'APIPermissionControl',
-			'APIUserGenericData',
-			'APIMisc',
-			'APIOtherField',
-			'APIDate',
-			'APIUser',
-			'APICompany',
 			'AuthorizationHistoryCommon',
 			'RequestViewCommonController',
 			'EmbeddedMessageCommon',
-			'BaseTreeViewController',
+			'BaseTreeViewController'
+		], function( Backbone, Global, Nanobar, Decimal ) {
+			window.Nanobar = Nanobar;
+			window.Decimal = Decimal;
 
-		];
+			//Revert jQuery preFilter behavior in v3.5.0 back to pre-v3.5.0 so it doesn't break jqGrid getGridParam( 'colModel' ).
+			// Attendance -> TimeSheet, expand employee dropdown, click icon to customize columns, triggers JS exception: Uncaught TypeError: Cannot read property 'width' of undefined
+			var rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi;
+			jQuery.htmlPrefilter = function( html ) {
+				return html.replace( rxhtmlTag, "<$1></$2>" );
+			};
 
-		//do not load interact on mobile.
-		if ( Global.detectMobileBrowser() == true ) {
-			require_array.splice( require_array.indexOf( 'interact' ), 1 );
-			require( require_array, function( Backbone, Global, Nanobar, Decimal ) {
-				window.Nanobar = Nanobar;
-				window.Decimal = Decimal;
-				LocalCacheData.loadViewRequiredJSReady = true;
-			} );
-		} else {
-			require( require_array, function( Backbone, Global, Nanobar, Decimal, interact ) {
-				window.interact = interact;
-				window.Nanobar = Nanobar;
-				window.Decimal = Decimal;
-				LocalCacheData.loadViewRequiredJSReady = true;
-			} );
-		}
+			LocalCacheData.loadViewRequiredJSReady = true;
+		} );
 	}
 
 	function stripDuplicateSlashes( url ) {

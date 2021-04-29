@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -356,23 +356,23 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 
 		//Make sure when the user is not ACTIVE that we switch to using the terminated permission group instead.
 		$query = '
-					SELECT	a.*,
-							b.level as level
-					FROM	' . $this->getTable() . ' as a,
-							' . $pcf->getTable() . ' as b,
-							' . $puf->getTable() . ' as c,
-							' . $uf->getTable() . ' as uf
+					SELECT pf.*,
+						   pcf.level as level
+					FROM ' . $this->getTable() . ' AS pf
+					LEFT JOIN ' . $pcf->getTable() . ' as pcf ON ( pf.permission_control_id = pcf.id )
 					WHERE 
-						uf.company_id = ?
-						AND	uf.id = ?
-						AND uf.id = c.user_id
-						AND b.id = a.permission_control_id
-				        AND ( CASE WHEN uf.status_id = 10 THEN ( b.id = c.permission_control_id ) ELSE ( b.id = uf.terminated_permission_control_id ) END )											
-						AND ( a.deleted = 0 AND b.deleted = 0 AND uf.deleted = 0 )
+						pf.permission_control_id = (  SELECT 
+															( CASE WHEN uf.status_id = 10 THEN puf.permission_control_id ELSE uf.terminated_permission_control_id END ) AS permission_control_id
+													  FROM ' . $uf->getTable() . ' AS uf
+															   LEFT JOIN ' . $puf->getTable() . ' AS puf ON (uf.id = puf.user_id)
+													  WHERE uf.company_id = ? 
+															AND uf.id = ? 
+															AND uf.deleted = 0
+													)
+						AND ( pf.deleted = 0 AND pcf.deleted = 0 )								  		
 				';
 
 		$this->rs = $this->ExecuteSQL( $query, $ph );
-
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;

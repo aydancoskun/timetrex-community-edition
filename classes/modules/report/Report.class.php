@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -126,7 +126,7 @@ class Report {
 	public $validator = null;
 
 	protected $progress_bar_obj = null;
-	protected $AMF_message_id = null;
+	protected $api_message_id = null;
 
 	protected $enable_system_columns = false;
 
@@ -566,12 +566,12 @@ class Report {
 	}
 
 	/**
-	 * Returns the AMF messageID for each individual call.
+	 * Returns the API messageID for each individual call.
 	 * @return bool|null
 	 */
-	function getAMFMessageID() {
-		if ( $this->AMF_message_id != null ) {
-			return $this->AMF_message_id;
+	function getAPIMessageID() {
+		if ( $this->api_message_id != null ) {
+			return $this->api_message_id;
 		}
 
 		return false;
@@ -581,10 +581,10 @@ class Report {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setAMFMessageID( $id ) {
-		Debug::Text( 'AMF Message ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+	function setAPIMessageID( $id ) {
+		Debug::Text(  'API Message ID: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $id != '' ) {
-			$this->AMF_message_id = $id;
+			$this->api_message_id = $id;
 
 			return true;
 		}
@@ -1539,11 +1539,11 @@ class Report {
 
 		$format_group_config = $this->formatGroupConfig();
 		if ( is_array( $format_group_config ) && count( $format_group_config ) > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, null, TTi18n::getText( 'Grouping Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, null, TTi18n::getText( 'Grouping Data...' ) );
 
 			$this->data = Group::GroupBy( $this->data, $format_group_config );
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
 			//Debug::Arr($format_group_config, 'Group Config: ', __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Arr($this->data, 'Group Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -1565,13 +1565,13 @@ class Report {
 
 		$this->profiler->startTimer( 'sort' );
 		if ( is_array( $this->getSortConfig() ) && count( $this->getSortConfig() ) > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, null, TTi18n::getText( 'Sorting Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, null, TTi18n::getText( 'Sorting Data...' ) );
 
 			Debug::Arr( $this->getSortConfig(), 'Sort Config: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			$this->data = Sort::arrayMultiSort( $this->data, $this->getSortConfig() );
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
 		}
 
 		$this->profiler->stopTimer( 'sort' );
@@ -1588,7 +1588,7 @@ class Report {
 	function sortFormData() {
 		$this->profiler->startTimer( 'sort' );
 		if ( is_array( $this->getSortConfig() ) && count( $this->getSortConfig() ) > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->form_data ), null, TTi18n::getText( 'Sorting Form Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->form_data ), null, TTi18n::getText( 'Sorting Form Data...' ) );
 
 			Debug::Arr( $this->getSortConfig(), 'Sort Config: ', __FILE__, __LINE__, __METHOD__, 10 );
 			if ( isset( $this->form_data['user'] ) ) {
@@ -1599,7 +1599,7 @@ class Report {
 				Debug::Text( ' WARNING: Unable to sort form data due to user array element does not exist.', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), count( $this->form_data ) );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), count( $this->form_data ) );
 		}
 		$this->profiler->stopTimer( 'sort' );
 
@@ -1670,7 +1670,7 @@ class Report {
 		$this->profiler->startTimer( 'subTotal' );
 		if ( is_array( $this->getSubTotalConfig() ) && count( $this->getSubTotalConfig() ) > 0 ) {
 
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->formatSubTotalConfig() ), null, TTi18n::getText( 'Totaling Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->formatSubTotalConfig() ), null, TTi18n::getText( 'Totaling Data...' ) );
 
 			$sub_total_data = [];
 			$i = 0;
@@ -1703,7 +1703,7 @@ class Report {
 					}
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $k );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $k );
 
 				$i++;
 			}
@@ -1728,7 +1728,7 @@ class Report {
 	function pageBreak() {
 		$this->profiler->startTimer( 'pageBreak' );
 		if ( is_array( $this->data ) && is_array( $this->getPageBreakConfig() ) && count( $this->getPageBreakConfig() ) > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, null, TTi18n::getText( 'Inserting Page Breaks...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, null, TTi18n::getText( 'Inserting Page Breaks...' ) );
 
 			$this->data = array_values( $this->data );
 			$page_break_data = Group::PageBreakBy( $this->data, $this->getPageBreakConfig() );
@@ -1739,7 +1739,7 @@ class Report {
 			}
 			unset( $page_break_data );
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
 		}
 
 		$this->profiler->stopTimer( 'pageBreak' );
@@ -2049,7 +2049,7 @@ class Report {
 	 */
 	function _postProcess( $format = null ) {
 		if ( is_array( $this->data ) && count( $this->data ) > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->data ), null, TTi18n::getText( 'Post-Processing Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->data ), null, TTi18n::getText( 'Post-Processing Data...' ) );
 
 			$columns = $this->getReportColumns();
 
@@ -2080,7 +2080,7 @@ class Report {
 						}
 					}
 				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 
 				if ( $this->config['other']['maximum_row_limit'] > 0 && $key >= $this->config['other']['maximum_row_limit'] ) {
 					Debug::Text( '  Reached maximum row limit (' . $this->config['other']['maximum_row_limit'] . '), stop processing...', __FILE__, __LINE__, __METHOD__, 10 );
@@ -2370,8 +2370,8 @@ class Report {
 
 		$this->start_time = microtime( true );
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), 2, null, TTi18n::getText( 'Querying Database...' ) ); //Iterations need to be 2, otherwise progress bar is not created.
-		$this->getProgressBarObject()->set( $this->getAMFMessageID(), 2 );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), 2, null, TTi18n::getText( 'Querying Database...' ) ); //Iterations need to be 2, otherwise progress bar is not created.
+		$this->getProgressBarObject()->set( $this->getAPIMessageID(), 2 );
 
 		$this->_preOutput( $format );
 
@@ -2486,7 +2486,7 @@ class Report {
 
 		$this->_postOutput( $format );
 
-		$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+		$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 		Debug::Text( ' Format: ' . $format . ' Total Time: ' . ( microtime( true ) - $this->start_time ) . ' Memory Usage: Current: ' . memory_get_usage() . ' Peak: ' . memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10 );
 		Debug::Arr( Debug::profileTimers( $this->profiler ), ' Profile Timers: ', __FILE__, __LINE__, __METHOD__, 10 );
@@ -3275,7 +3275,7 @@ class Report {
 	function _html_Table() {
 		$this->profiler->startTimer( 'HTML Table' );
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ? count( $this->data ) : 0 ), null, TTi18n::getText( 'Generating HTML...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), ( is_array( $this->data ) ? count( $this->data ) : 0 ), null, TTi18n::getText( 'Generating HTML...' ) );
 
 		$static_column_options = (array)Misc::trimSortPrefix( $this->getOptions( 'static_columns' ) );
 		$column_format_config = $this->getColumnFormatConfig();
@@ -3487,7 +3487,7 @@ class Report {
 					$sub_total_rows[$total_row_sub_total_columns] = 0;
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 
 				$prev_row = $row;
 			}
@@ -3742,7 +3742,7 @@ class Report {
 		$css = '* { margin:0; padding:0;}';
 		$css .= 'body{ font-size: 100%, font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;padding: 15px;}';
 		$css .= '.report table{ border-collapse: collapse; border-spacing:0;}';
-		$css .= '.report th, .report td{ padding: 2;}';
+		$css .= '.report th, .report td{ padding: 2px 4px 2px 4px;}';
 		$css .= 'div.page-break{ page-break-after: always; page-break-inside: avoid; }'; //Handle page breaks when <div class="page-break"></div> is specified.
 		$css .= '.header{ width: 100%}';
 		$css .= '.full-width{ width: 100%}';
@@ -3762,7 +3762,7 @@ class Report {
 		$css .= '.content-thead td{ padding: 0; }';
 		$css .= '.content-thead tbody{ font-size: ' . $this->_html_fontSize( 100 ) . '%;}';
 		$css .= '.content-tbody{ white-space: nowrap; font-size: ' . $this->_html_fontSize( 100 ) . '%;}';
-		$css .= '.content-tbody td{ padding: 2px; width: 1%;}';
+		$css .= '.content-tbody td{ padding: 2px 4px 2px 4px; width: 1%;}';
 		$css .= '.exceeded-error{ text-align:center; font-size: ' . $this->_html_fontSize( 250 ) . '%; font-weight: bold; color: #FF0000}';
 		$css .= '.exceeded-warning{ text-align:center; font-size: ' . $this->_html_fontSize( 200 ) . '%; font-weight: bold;}';
 		$css .= '.blank-row{ height: 10px}';
@@ -4200,7 +4200,7 @@ class Report {
 	function _pdf_Table() {
 		$this->profiler->startTimer( 'PDF Table' );
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ? count( $this->data ) : 0 ), null, TTi18n::getText( 'Generating PDF...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), ( is_array( $this->data ) ? count( $this->data ) : 0 ), null, TTi18n::getText( 'Generating PDF...' ) );
 
 		$border = 0;
 
@@ -4447,7 +4447,7 @@ class Report {
 					$sub_total_rows[$total_row_sub_total_columns] = 0;
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 
 				$prev_row = $row;
 			}

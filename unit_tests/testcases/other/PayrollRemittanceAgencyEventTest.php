@@ -1,7 +1,7 @@
-<?php
+<?php /** @noinspection PhpMissingDocCommentInspection */
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -50,7 +50,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
-		TTDate::setTimeZone( 'PST8PDT', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		TTDate::setTimeZone( 'America/Vancouver', true ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( false ); //Helps prevent duplicate punch IDs and validation failures.
@@ -189,7 +189,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTransactionDate( 7 );
 
 		$ppsf->setTransactionDateBusinessDay( true );
-		$ppsf->setTimeZone( 'PST8PDT' );
+		$ppsf->setTimeZone( 'America/Vancouver' );
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( ( 4 * 3600 ) );
@@ -230,6 +230,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
+			$end_date = null;
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					if ( $initial_date !== false ) {
@@ -2228,7 +2229,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//testing every day in every pay period:
 		$result = $praef->calculateNextDate( $test_date );
 		$this->assertEquals( true, is_array( $result ), '$result should be an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', ( $pp_obj->getTransactionDate() + ( $praef->getDueDateDelayDays() * 86400 ) ) ), 'Due date Matches.' );
 
 		$loop_counter = 1;
@@ -2246,7 +2247,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pp_obj = $this->pay_period_objs[0];
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2254,7 +2255,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setDueDateDelayDays( 3 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '20-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2262,7 +2263,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setDueDateDelayDays( 6 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '09-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2270,7 +2271,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setDueDateDelayDays( 9 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '26-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2332,7 +2333,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//testing every day in every pay period:
 		$result = $praef->calculateNextDate( $test_date );
 		$this->assertEquals( true, is_array( $result ), '$result should be an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', ( $pp_obj->getTransactionDate() + ( $praef->getDueDateDelayDays() * 86400 ) ) ), 'Due date Matches.' );
 
 		$loop_counter = 1;
@@ -2350,7 +2351,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$pp_obj = $this->pay_period_objs[0];
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '21-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '03-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2358,7 +2359,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setDueDateDelayDays( 3 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Feb-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '20-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2366,7 +2367,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setDueDateDelayDays( 6 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '18-Feb-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '03-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '09-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2374,7 +2375,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setDueDateDelayDays( 9 );
 		$result = $praef->calculateNextDate( $pp_obj->getTransactionDate() );
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 4, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 4, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '04-Mar-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '17-Mar-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '26-Mar-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2480,7 +2481,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$result = $praef->calculateNextDate( strtotime( '01-Jan-2017 12:00PM' ) );
 
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '15-Feb-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2641,7 +2642,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$result = $praef->calculateNextDate( strtotime( '01-Jan-2017 12:00PM' ) );
 
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '07-Jan-2017 23:59:59' ) ), 'End date Matches.' );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '10-Jan-2017 12:00:00' ) ), 'Due date Matches.' );
@@ -2736,7 +2737,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//sanity check
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 
 		//Q1
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
@@ -2843,7 +2844,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//sanity check
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017' ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Jan-2017 23:59:59' ) ), 'End date Matches.' );
@@ -3031,7 +3032,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//sanity check
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
@@ -3122,7 +3123,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//sanity check
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
@@ -3177,7 +3178,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//Debug::Arr( $result, 'FOURTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 		$this->assertEmpty( $result['start_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['end_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['due_date'], '$result elements should  be empty.' );
@@ -3193,7 +3194,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//Debug::Arr( $result, 'FIFTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['due_date'], '$result elements should not be empty.' );
@@ -3237,7 +3238,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//sanity check
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
@@ -3315,7 +3316,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//sanity check
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
@@ -3370,7 +3371,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//Debug::Arr( $result, 'FOURTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 		$this->assertEmpty( $result['start_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['end_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['due_date'], '$result elements should  be empty.' );
@@ -3384,7 +3385,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		//Debug::Arr( $result, 'FIFTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['due_date'], '$result elements should not be empty.' );
@@ -3436,7 +3437,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		//sanity check
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 
 		//failure.
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
@@ -3497,7 +3498,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$result = $praef->calculateNextDate( null, $fake_time );
 
 		$this->assertEquals( true, is_array( $result ), '$result should be  an array.' );
-		$this->assertEquals( 3, count( $result ), '$result should have 3 elements.' );
+		$this->assertCount( 3, $result, '$result should have 3 elements.' );
 		$this->assertEmpty( $result['start_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['end_date'], '$result elements should  be empty.' );
 		$this->assertEmpty( $result['due_date'], '$result elements should  be empty.' );
@@ -3663,7 +3664,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
 
 		//not saved. no due date means no reminder date.
-		$this->assertEquals( $praef->getNextReminderDate( true ), false );
+		$this->assertEquals( false, $praef->getNextReminderDate( true ) );
 
 
 		//Make sure you test the case where this is no due date, and therefore no reminder date.
@@ -3677,14 +3678,14 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$praef->setEffectiveDate( strtotime( '01-Jan-2016' ) );
 
 		//not saved. no due date means no reminder date.
-		$this->assertEquals( $praef->getNextReminderDate( true ), false );
+		$this->assertEquals( false, $praef->getNextReminderDate( true ) );
 		$praef->setEnableRecalculateDates( true );
 
 		if ( $praef->isValid() ) {
 			$praef->Save( false, true );
 		}
 		//saved. should not be able to calculate a due date because no payperiods exist.
-		$this->assertEquals( $praef->getNextReminderDate( true ), false );
+		$this->assertEquals( false, $praef->getNextReminderDate( true ) );
 	}
 }
 

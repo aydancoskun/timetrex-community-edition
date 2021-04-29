@@ -45,7 +45,8 @@ elif [ "$1" == "-v" ] ; then
 	#$php_bin $phpunit_bin -d max_execution_time=86400 --configuration config.xml $@ | tail -n 3 | tr -s "\n" | tr "\n" " "
 
 	#Capture output to a variable so we show it all if a unit test fails.
-	PHPUNIT_OUTPUT=$($php_bin $phpunit_bin -d max_execution_time=86400 --configuration config.xml $@)
+	#Always stop on failure in this mode so gitlab pipelines are handled properly.
+	PHPUNIT_OUTPUT=$($php_bin $phpunit_bin -d max_execution_time=86400 --configuration config.xml --stop-on-failure $@)
 	#Capture the exit status of PHPUNIT and make sure we return that.
 	exit_code=${PIPESTATUS[0]};
 
@@ -60,5 +61,6 @@ elif [ "$1" == "-v" ] ; then
 	echo ""
 	exit $exit_code;
 else
+  # Don't stop on failure when running a single test.
 	$php_bin $phpunit_bin -d max_execution_time=86400 --configuration config.xml $@
 fi

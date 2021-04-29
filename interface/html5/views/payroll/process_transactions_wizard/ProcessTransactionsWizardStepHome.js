@@ -1,14 +1,19 @@
-ProcessTransactionsWizardStepHome = WizardStep.extend( {
+class ProcessTransactionsWizardStepHome extends WizardStep {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			name: 'home',
 
-	name: 'home',
-	_required_files: ['APIPayrollRemittanceAgencyEvent', 'APIPayStubTransaction'],
-	source_accounts: [],
-	pay_periods: [],
-	types: [],
+			source_accounts: [],
+			pay_periods: [],
+			types: [],
 
-	filter_data: null,
+			filter_data: null
+		} );
 
-	init: function() {
+		super( options );
+	}
+
+	init() {
 		var $this = this;
 		require( this._required_files, function() {
 			var external_data = $this.getWizardObject().getExternalData();
@@ -20,7 +25,7 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 				return;
 			}
 
-			var api = new ( APIFactory.getAPIClass( 'APIPayStubTransaction' ) )();
+			var api = TTAPI.APIPayStubTransaction;
 			var filter_data = {};
 			if ( external_data ) {
 				var temp_filter_data = external_data.filter_data;
@@ -42,9 +47,9 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 				}
 			} );
 		} );
-	},
+	}
 
-	normalizeSourceAccounts: function( data ) {
+	normalizeSourceAccounts( data ) {
 		this.source_accounts = [];
 
 		var external_data = this.getWizardObject().getExternalData();
@@ -69,18 +74,18 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 			}
 		}
 		this.getWizardObject().setExternalData( external_data );
-	},
+	}
 
-	initCardsBlock: function() {
+	initCardsBlock() {
 		$( this.wizard_obj.el ).find( '.download_warning' ).html( 'Click the <button class="done-btn"></button> icon to download the transaction file. Be sure to save it to your computer rather than open it' );
-	},
+	}
 
-	getNextStepName: function() {
+	getNextStepName() {
 		//This is a single-step wizard. Always return false;
 		return false;
-	},
+	}
 
-	_render: function() {
+	_render() {
 		this.setTitle( this.getWizardObject().wizard_name );
 
 		//If the wizard is closed, it reopens to the home step and must be told what the current step is.
@@ -94,34 +99,33 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 			$( $( '.process_transactions_wizard input' )[0] ).focus();
 		} );
 		this.buildForm();
+	}
 
-	},
-
-	buildForm: function() {
+	buildForm() {
 		if ( this.source_accounts.length > 0 ) {
 			var tab_index = 1050;
 			var instruction_text = $.i18n._( 'Select source accounts to processs transactions for' );
 			var $this = this;
-			var container = $( '<div/>' );
-			var form = $( '<form id="process_transactions_wizard_select_accounts_form"/>' ).appendTo( container );
+			var container = $( '<div></div>' );
+			var form = $( '<form id="process_transactions_wizard_select_accounts_form"></form>' ).appendTo( container );
 
-			var table = $( '<table id="process_transactions_wizard_source_account_table"/>' );
-			var header_row = $( '<tr/>' );
+			var table = $( '<table id="process_transactions_wizard_source_account_table"></table>' );
+			var header_row = $( '<tr></tr>' );
 			header_row.html( '<th colspan="7">' + instruction_text + '<br><br></th>' );
-			var column_header_row = $( '<tr/>' );
-			var th_chk = $( '<th/>' ).appendTo( column_header_row );
-			var th_name = $( '<th/>' ).html( $.i18n._( 'Source Account' ) ).appendTo( column_header_row );
-			var th_format = $( '<th/>' ).html( $.i18n._( 'Type' ) ).appendTo( column_header_row );
-			var th_last_check = $( '<th/>' ).html( $.i18n._( 'Last #' ) ).appendTo( column_header_row );
-			var th_next_check = $( '<th/>' ).html( $.i18n._( 'Next #' ) ).appendTo( column_header_row );
-			var th_amount = $( '<th/>' ).html( $.i18n._( 'Amount' ) ).appendTo( column_header_row );
-			var th_transactions = $( '<th/>' ).html( $.i18n._( 'Transactions' ) ).appendTo( column_header_row );
+			var column_header_row = $( '<tr></tr>' );
+			var th_chk = $( '<th></th>' ).appendTo( column_header_row );
+			var th_name = $( '<th></th>' ).html( $.i18n._( 'Source Account' ) ).appendTo( column_header_row );
+			var th_format = $( '<th></th>' ).html( $.i18n._( 'Type' ) ).appendTo( column_header_row );
+			var th_last_check = $( '<th></th>' ).html( $.i18n._( 'Last #' ) ).appendTo( column_header_row );
+			var th_next_check = $( '<th></th>' ).html( $.i18n._( 'Next #' ) ).appendTo( column_header_row );
+			var th_amount = $( '<th></th>' ).html( $.i18n._( 'Amount' ) ).appendTo( column_header_row );
+			var th_transactions = $( '<th></th>' ).html( $.i18n._( 'Transactions' ) ).appendTo( column_header_row );
 			table.append( header_row );
 			table.append( column_header_row );
 			for ( var n in this.source_accounts ) {
 				var item = this.source_accounts[n];
-				var row = $( '<tr/>' );
-				var chk = $( '<input type="checkbox" value="' + item.id + '" CHECKED="CHECKED" tabIndex="' + tab_index + '"/>' );
+				var row = $( '<tr></tr>' );
+				var chk = $( '<input type="checkbox" value="' + item.id + '" CHECKED="CHECKED" tabIndex="' + tab_index + '"></input>' );
 				tab_index++;
 
 				chk.on( 'change', function( e ) {
@@ -129,9 +133,9 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 					$this.onCheck();
 				} );
 
-				var td_chk = $( '<td/>' ).append( chk ).appendTo( row );
-				var td_name = $( '<td/>' ).html( item.name ).appendTo( row );
-				var td_format = $( '<td/>' ).html( $.i18n._( item.type ) ).appendTo( row );
+				var td_chk = $( '<td></td>' ).append( chk ).appendTo( row );
+				var td_name = $( '<td></td>' ).html( item.name ).appendTo( row );
+				var td_format = $( '<td></td>' ).html( $.i18n._( item.type ) ).appendTo( row );
 				var last_transaction_input = $( '<input value="' + item.last_transaction_number + '" class="last_transaction_number" type="text" style="width:50px" tabIndex="' + tab_index + '">' );
 				tab_index++;
 
@@ -156,10 +160,10 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 					result_element.val( parseInt( $( e.target ).val() ) - 1 );
 				} );
 
-				var td_last_check = $( '<td/>' ).append( last_transaction_input ).appendTo( row );
-				var td_last_check = $( '<td/>' ).append( next_transaction_input ).appendTo( row );
-				var td_last_check = $( '<td/>' ).html( item.total_amount ).appendTo( row );
-				var td_last_check = $( '<td/>' ).html( item.total_transactions ).appendTo( row );
+				var td_last_check = $( '<td></td>' ).append( last_transaction_input ).appendTo( row );
+				var td_last_check = $( '<td></td>' ).append( next_transaction_input ).appendTo( row );
+				var td_last_check = $( '<td></td>' ).html( item.total_amount ).appendTo( row );
+				var td_last_check = $( '<td></td>' ).html( item.total_transactions ).appendTo( row );
 
 				row.appendTo( table );
 			}
@@ -177,16 +181,17 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 
 		this.onCheck(); //ensure that the done button is enabled by default
 		TTPromise.resolve( 'processTransactionsWizard', 'render' );
-	},
+	}
 
-	onCheckNoKeyDown: function( e ) {
+	onCheckNoKeyDown( e ) {
 		//only allow digits, delete, backspace and arrows
 		if ( isNaN( e.key ) && [9, 8, 46, 37, 39].indexOf( e.keyCode ) == -1 ) {
 			e.preventDefault();
 			return false;
 		}
-	},
-	onCheck: function() {
+	}
+
+	onCheck() {
 		var checkboxes = $( this.getWizardObject().el ).find( '.content input[type="checkbox"]' ).filter( ':checked' );
 		if ( checkboxes.length > 0 ) {
 			var data = [];
@@ -200,14 +205,15 @@ ProcessTransactionsWizardStepHome = WizardStep.extend( {
 			this.getWizardObject().setTransactionIds( [] );
 			$( this.getWizardObject().el ).find( '.done-btn' ).addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setFilterData: function( data ) {
+	setFilterData( data ) {
 		this.filter_data = data;
 		TTPromise.resolve( 'ProcessTransactionsWizardStepHome', 'init_filter' );
-	},
-	getFilterData: function() {
+	}
+
+	getFilterData() {
 		return this.filter_data;
 	}
 
-} );
+}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -433,11 +433,11 @@ class ExceptionReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $columns );
 			$this->tmp_data['user'][$u_obj->getId()]['user_status'] = Option::getByKey( $u_obj->getStatus(), $u_obj->getOptions( 'status' ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'TMP User Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		$columns['pay_period_start_date'] = $columns['pay_period_end_date'] = $columns['pay_period_transaction_date'] = true;
@@ -448,13 +448,13 @@ class ExceptionReport extends Report {
 		$elf = TTnew( 'ExceptionListFactory' ); /** @var ExceptionListFactory $elf */
 		$elf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' Exception Rows: ' . $elf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $elf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $elf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $elf as $key => $e_obj ) {
 			$user_id = $e_obj->getUser();
 			$this->tmp_data['exception'][$user_id][$e_obj->getID()] = (array)$e_obj->getObjectAsArray( array_merge( [ 'date_stamp' => true ], $columns ) );
 			$this->tmp_data['exception'][$user_id][$e_obj->getID()]['demerit'] = $e_obj->getColumn( 'demerit' );
 			$this->tmp_data['exception'][$user_id][$e_obj->getID()]['total_exception'] = 1;
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Debug::Arr($this->tmp_data['exception'], 'TMP Exception Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -466,7 +466,7 @@ class ExceptionReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['exception'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['exception'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 		if ( isset( $this->tmp_data['user'] ) ) {
 			$key = 0;
 			if ( isset( $this->tmp_data['exception'] ) ) {
@@ -478,7 +478,7 @@ class ExceptionReport extends Report {
 							$this->data[] = array_merge( $level_2, $this->tmp_data['user'][$user_id], $date_columns );
 						}
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+						$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 						$key++;
 					}
 				}

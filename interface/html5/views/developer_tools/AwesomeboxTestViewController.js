@@ -1,22 +1,20 @@
-AwesomeboxTestViewController = BaseViewController.extend( {
-	el: '#awesomebox_test_view_container',
+class AwesomeboxTestViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#awesomebox_test_view_container',
 
-	_required_files: {
-		10: [
-			'APICompany', 'APIUserGroup', 'APIHierarchyControl', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APICompanyGenericTag', 'TImage', 'APILegalEntity',
-			'APIPayPeriodSchedule', 'APIPolicyGroup', 'APICurrency', 'APIEthnicGroup', 'APIUserSkill', 'APIQualification', 'APIQualificationGroup',
-			'APIUserEducation', 'APIUserMembership', 'APIUserLicense', 'APIUserLanguage', 'APIRemittanceDestinationAccount', 'APIUserDefault', 'APIRemittanceSourceAccount', 'APIAccrualPolicyUserModifier',
-			'APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI', 'TImageAdvBrowser'
-		],
-		20: ['APIJob', 'APIJobItem']
-	},
+			_required_files: ['TImage', 'TImageAdvBrowser'],
 
-	user_api: null,
-	user_group_api: null,
-	company_api: null,
-	user_id_array: null,
+			user_api: null,
+			user_group_api: null,
+			company_api: null,
+			user_id_array: null
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		this.edit_view_tpl = 'AwesomeboxTestEditView.html';
 		this.permission_id = 'user';
 		this.viewId = 'AwesomeboxTest';
@@ -24,27 +22,27 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		this.table_name_key = 'awesomebox_test';
 		this.context_menu_name = $.i18n._( 'AwesomeBox Test' );
 		this.navigation_label = $.i18n._( 'AwesomBox Test' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.api = TTAPI.APIUser;
 		this.select_company_id = LocalCacheData.getCurrentCompany().id;
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.company_api = TTAPI.APICompany;
 		this.user_id_array = [];
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-	},
+	}
 
-	clearEditViewData: function() {
+	clearEditViewData() {
 		return false;
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
 
 		var tab_model = {
@@ -64,7 +62,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 //		User
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_DROPDOWN );
 		form_item_input.ADropDown( {
-			//api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			//api_class: TTAPI.APIUser,
 			field: 'user_id',
 			display_show_all: false,
 			id: 'user_id_dropdown',
@@ -89,7 +87,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		//Company
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -102,7 +100,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		//Company
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APICompany' ) ),
+			api_class: TTAPI.APICompany,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.COMPANY,
 			show_search_inputs: true,
@@ -115,7 +113,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		//Legal Entity
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+			api_class: TTAPI.APILegalEntity,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			show_search_inputs: true,
@@ -157,11 +155,11 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_employee_column1 );
 
 		TTPromise.resolve( 'Awesomeboxtest', 'init' );
-	},
+	}
 
-	buildSearchFields: function() {
+	buildSearchFields() {
 
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 
 		var $this = this;
 		this.search_fields = [
@@ -170,7 +168,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'company_id',
 				layout_name: ALayoutIDs.COMPANY,
-				api_class: ( APIFactory.getAPIClass( 'APICompany' ) ),
+				api_class: TTAPI.APICompany,
 				multiple: false,
 				custom_first_label: Global.default_item,
 				basic_search: PermissionManager.checkTopLevelPermission( 'Companies' ) ? true : false,
@@ -182,7 +180,7 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'legal_entity_id',
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
-				api_class: ( APIFactory.getAPIClass( 'APILegalEntity' ) ),
+				api_class: TTAPI.APILegalEntity,
 				multiple: true,
 				custom_first_label: Global.any_item,
 				basic_search: PermissionManager.checkTopLevelPermission( 'LegalEntity' ) ? true : false,
@@ -221,10 +219,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -235,9 +232,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var options = [
 			{ option_name: 'status' },
@@ -251,10 +248,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			}
 
 		} );
+	}
 
-	},
-
-	initDropDownOptions: function( options, callBack ) {
+	initDropDownOptions( options, callBack ) {
 		var $this = this;
 		var len = options.length + 2;
 		var complete_count = 0;
@@ -296,11 +292,10 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				callBack( option_result );
 			}
 		}
-
-	},
+	}
 
 	//override that forces same data to grid at all times.
-	search: function() {
+	search() {
 		var result_data = JSON.parse( '[{"id":"11e85213-a799-d200-b041-123456abcdef","status":"Active","employee_number":100,"first_name":"Mr.","last_name":"FAKE","full_name":"Administrator, Mr.","home_phone":"471-438-3900","is_owner":true,"is_child":false},' +
 			'{"id":"11e85213-ad34-e0e0-8541-123456abcdef","status":"Active","employee_number":13,"first_name":"Tristen","last_name":"Braun","full_name":"FAKE Braun, Tristen","home_phone":"527-500-4852","is_owner":false,"is_child":true},' +
 			'{"id":"11e85213-af64-d0e0-9b00-123456abcdef","status":"Active","employee_number":20,"first_name":"Jane","last_name":"Doe","full_name":"FAKE Doe, Jane","home_phone":"477-443-9650","is_owner":false,"is_child":true},' +
@@ -319,9 +314,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 		} );
 
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		var $this = this;
 		setTimeout( function() {
 			TAlertManager.showConfirmAlert( $.i18n._( 'Run tests?' ), null, function( result ) {
@@ -332,12 +327,12 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			$this.setTabOVisibility( true );
 			$( '.edit-view-tab-bar' ).css( 'opacity', 1 );
 		}, 2500 );
-	},
+	}
 
 	/**
 	 * in the testing code are a lot of null null waits to ensure that all awesomeboxes are ready for next step in test
 	 */
-	runTests: function() {
+	runTests() {
 		if ( $( '#qunit_script' ).length == 0 ) {
 			$( '<script id=\'qunit_script\' src=\'framework/qunit/qunit.js\'></script>' ).appendTo( 'head' );
 			$( '<link rel=\'stylesheet\' type=\'text/css\' href=\'framework/qunit/qunit.css\'>' ).appendTo( 'head' );
@@ -400,10 +395,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			} );
 
 		} );
+	}
 
-	},
-
-	checkMultiTreeAwesomeBox: function( assert, callback ) {
+	checkMultiTreeAwesomeBox( assert, callback ) {
 		var awesomebox = this.edit_view_ui_dic['group_id2'];
 		awesomebox.trigger( 'click' );
 		var visible_awesomebox = $( '#group_id2a_dropdown_div' );
@@ -439,9 +433,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			}, 1000 );
 
 		} );
-	},
+	}
 
-	checkTreeBox: function( assert, callback ) {
+	checkTreeBox( assert, callback ) {
 		var awesomebox = this.edit_view_ui_dic['group_id'];
 		var val = awesomebox.getValue();
 		assert.ok( ( val == TTUUID.zero_id ), 'tree - unselection valid' );
@@ -464,9 +458,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 
 			} );
 		}, 1000 );
-	},
+	}
 
-	checkAwesomeBox: function( assert, callback ) {
+	checkAwesomeBox( assert, callback ) {
 		var awesomebox = this.edit_view_ui_dic['legal_entity_id'];
 		var val = awesomebox.getValue();
 
@@ -490,9 +484,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 
 			} );
 		}, 1000 );
-	},
+	}
 
-	checkMultiSelectAwesomeBox: function( assert, callback ) {
+	checkMultiSelectAwesomeBox( assert, callback ) {
 		var awesomebox = this.edit_view_ui_dic['company_id'];
 		awesomebox.trigger( 'click' );
 		var visible_awesomebox = $( '#company_ida_dropdown_div' );
@@ -528,9 +522,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			}, 2000 );
 
 		} );
-	},
+	}
 
-	checkOpenAwesomeBox: function( box, assert, callback ) {
+	checkOpenAwesomeBox( box, assert, callback ) {
 		var selected_id = box.find( '.unselect-grid-div tbody tr:last' ).attr( 'id' );
 		box.find( '.unselect-grid-div tbody tr:last td:last' ).trigger( 'click' );
 		box.find( '.a-grid-right-arrow' ).trigger( 'click' );
@@ -553,9 +547,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 				} );
 			}
 		} );
-	},
+	}
 
-	checkGridWidths: function( box, assert ) {
+	checkGridWidths( box, assert ) {
 
 		var unselect_grid_container_width = box.find( '.unselect-grid-border-div' ).width();
 		var unselect_grid_width = box.find( '.ui-jqgrid' ).width();
@@ -570,9 +564,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 
 			assert.ok( ( select_grid_diff <= 2 ), 'select grid width diff <= 2: ' + select_grid_diff );
 		}
-	},
+	}
 
-	checkClearSearch: function( box, assert, callback ) {
+	checkClearSearch( box, assert, callback ) {
 		// open
 		var $this = this;
 		box.trigger( 'click' );
@@ -687,9 +681,9 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			}
 			return all_found;
 		}
-	},
+	}
 
-	checkMoveAllScenario: function( box, assert, callback ) {
+	checkMoveAllScenario( box, assert, callback ) {
 		// open
 		var $this = this;
 		box.trigger( 'click' );
@@ -783,4 +777,4 @@ AwesomeboxTestViewController = BaseViewController.extend( {
 			return all_found;
 		}
 	}
-} );
+}

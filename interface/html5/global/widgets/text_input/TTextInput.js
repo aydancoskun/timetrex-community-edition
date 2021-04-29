@@ -49,7 +49,7 @@
 		// var parseDateAsync = function( callBack ) {
 		// 	parsed_value = -1;
 		// 	if ( !api_date ) {
-		// 		api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
+		// 		api_date = TTAPI.APITTDate;
 		// 	}
 		// 	api_date.parseTimeUnit( $this.val(), {
 		// 		onResult: function( result ) {
@@ -143,7 +143,7 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox"></input>' +
 					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 				check_box.change( function() {
@@ -326,7 +326,7 @@
 			need_parser_sec = o.need_parser_sec;
 
 			if ( need_parser_date || need_parser_sec ) {
-				api_date = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+				api_date = TTAPI.APITTDate;
 			}
 
 			if ( o.mode ) {

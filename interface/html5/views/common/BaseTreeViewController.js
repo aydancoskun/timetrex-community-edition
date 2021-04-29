@@ -1,5 +1,5 @@
-BaseTreeViewController = BaseViewController.extend( {
-	setSelectLayout: function( column_start_from ) {
+class BaseTreeViewController extends BaseViewController {
+	setSelectLayout( column_start_from ) {
 		var $this = this;
 
 		var grid;
@@ -68,9 +68,9 @@ BaseTreeViewController = BaseViewController.extend( {
 		this.showGridBorders();
 
 		$this.setGridSize();
-	},
+	}
 
-	search: function( set_default_menu, page_action, page_number ) {
+	search( set_default_menu, page_action, page_number ) {
 		var $this = this;
 
 		if ( !Global.isSet( set_default_menu ) ) {
@@ -136,9 +136,9 @@ BaseTreeViewController = BaseViewController.extend( {
 				$this.searchDone();
 			}
 		} );
-	},
+	}
 
-	reSetGridTreeData: function( val ) {
+	reSetGridTreeData( val ) {
 		var $this = this;
 
 		var col_model = this.grid.getGridParam( 'colModel' );
@@ -166,16 +166,16 @@ BaseTreeViewController = BaseViewController.extend( {
 			treedatatype: 'local',
 			ExpandColumn: 'name',
 		}, col_model );
-	},
+	}
 
-	getGridSelectIdArray: function() {
+	getGridSelectIdArray() {
 		var result = [];
 		result = this.grid_select_id_array;
 
 		return result;
-	},
+	}
 
-	initLayout: function() {
+	initLayout() {
 		var $this = this;
 		this.real_this = this.constructor.__super__; // this seems first entry point. needed where view controller is extended twice, Base->Tree-View, used with onViewClick _super
 
@@ -183,9 +183,9 @@ BaseTreeViewController = BaseViewController.extend( {
 			$this.setSelectLayout();
 			$this.search();
 		} );
-	},
+	}
 
-	getAllColumns: function( callBack ) {
+	getAllColumns( callBack ) {
 		var $this = this;
 
 		this.api.getOptions( 'columns', {
@@ -200,9 +200,9 @@ BaseTreeViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -221,9 +221,9 @@ BaseTreeViewController = BaseViewController.extend( {
 		}
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-	},
+	}
 
-	setEditViewData: function() {
+	setEditViewData() {
 		var $this = this;
 
 		this.is_changed = false;
@@ -282,9 +282,9 @@ BaseTreeViewController = BaseViewController.extend( {
 			}
 		}
 		this.switchToProperTab();
-	},
+	}
 
-	addIdFieldToNavigation: function( array ) {
+	addIdFieldToNavigation( array ) {
 		$.each( array, function( key, item ) {
 			$( item ).each( function( i_key, i_item ) {
 				i_item.id = i_item._id_;
@@ -292,44 +292,45 @@ BaseTreeViewController = BaseViewController.extend( {
 		} );
 
 		return array;
-	},
+	}
 
-	doViewAPICall: function( filter ) {
-		return this._super( 'doViewAPICall', filter, [filter, false, false] );
-	},
-	handleViewAPICallbackResult: function( result ) {
+	doViewAPICall( filter ) {
+		return super.doViewAPICall( filter, [filter, false, false] );
+	}
+
+	handleViewAPICallbackResult( result ) {
 		return this.handleAPICallbackResult( result );
-	},
+	}
 
-	handleAPICallbackResult: function( result ) {
+	handleAPICallbackResult( result ) {
 		var result_data = result.getResult();
 		var record_id = this.getCurrentSelectedRecord();
 		result_data = Global.getParentIdByTreeRecord( Global.buildTreeRecord( result_data ), record_id );
 		result_data = result_data[0];
 		result_data.id = record_id;
 
-		this._super( 'handleViewAPICallbackResult', result_data );
-	},
+		super.handleViewAPICallbackResult( result_data );
+	}
 
-	handleEditAPICallbackResult: function( result ) {
+	handleEditAPICallbackResult( result ) {
 		return this.handleAPICallbackResult( result );
-	},
+	}
 
-	onDeleteDone: function( result ) {
+	onDeleteDone( result ) {
 		this.grid_select_id_array = [];
 		this.setDefaultMenu();
 		this.removeDeletedRows();
-	},
+	}
 
-	onSaveDone: function( result ) {
+	onSaveDone( result ) {
 		this.grid_select_id_array = [];
-	},
+	}
 
-	doEditAPICall: function( filter ) {
-		return this._super( 'doEditAPICall', filter, [filter, false, false] );
-	},
+	doEditAPICall( filter ) {
+		return super.doEditAPICall( filter, [filter, false, false] );
+	}
 
-	_continueDoCopyAsNew: function() {
+	_continueDoCopyAsNew() {
 		var $this = this;
 
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
@@ -385,9 +386,9 @@ BaseTreeViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
 
 		//No navigation when edit only mode
@@ -469,4 +470,4 @@ BaseTreeViewController = BaseViewController.extend( {
 
 		form_item_input.parent().width( '45%' );
 	}
-} );
+}

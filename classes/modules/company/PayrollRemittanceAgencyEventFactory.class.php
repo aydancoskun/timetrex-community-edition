@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -145,18 +145,18 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						'-1010-status'                         => TTi18n::gettext( 'Status' ),
 						'-1025-type'                           => TTi18n::gettext( 'Type' ),
 						'-1350-frequency'                      => TTi18n::gettext( 'Frequency' ),
-						'-1351-quarter_month'                  => TTi18n::getText( 'Quarter Month' ),
-						'-1360-week'                           => TTi18n::gettext( 'Week' ),
-						'-1365-primary_month'                  => TTi18n::gettext( 'Primary Month' ),
-						'-1370-primary_day_of_month'           => TTi18n::gettext( 'Primary Day Of Month' ),
-						'-1365-secondary_month'                => TTi18n::gettext( 'Secondary Month' ),
-						'-1370-secondary_day_of_month'         => TTi18n::gettext( 'Secondary Day Of Month' ),
-						'-1380-day_of_week'                    => TTi18n::gettext( 'Day Of Week' ),
+						//'-1351-quarter_month'                  => TTi18n::getText( 'Quarter Month' ),
+						//'-1360-week'                           => TTi18n::gettext( 'Week' ),
+						//'-1365-primary_month'                  => TTi18n::gettext( 'Primary Month' ),
+						//'-1370-primary_day_of_month'           => TTi18n::gettext( 'Primary Day Of Month' ),
+						//'-1365-secondary_month'                => TTi18n::gettext( 'Secondary Month' ),
+						//'-1370-secondary_day_of_month'         => TTi18n::gettext( 'Secondary Day Of Month' ),
+						//'-1380-day_of_week'                    => TTi18n::gettext( 'Day Of Week' ),
 						'-1385-due_date_delay_days'            => TTi18n::gettext( 'Due Date Delay Days' ),
 						'-1390-effective_date'                 => TTi18n::gettext( 'Effective Date' ),
 						'-1400-reminder_days'                  => TTi18n::gettext( 'Reminder Days' ),
 						'-1410-note'                           => TTi18n::gettext( 'Notes' ),
-						'-1415-user_report_data_id'            => TTi18n::gettext( 'Saved Report' ),
+						//'-1415-user_report_data_id'            => TTi18n::gettext( 'Saved Report' ),
 
 						'-1420-due_date'           => TTi18n::gettext( 'Due Date' ),
 						'-1430-next_reminder_date' => TTi18n::gettext( 'Next Reminder Date' ),
@@ -1263,7 +1263,6 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 					$le_obj = $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject();
 					if ( is_object( $le_obj ) ) {
 						$pplf->getByCompanyIdAndRemittanceAgencyIdAndTransactionDateAndPayPeriodSchedule( $le_obj->getCompany(), $this->getPayrollRemittanceAgencyId(), $last_due_date, $this->getPayPeriodSchedule() );
-
 						if ( $pplf->getRecordCount() > 0 ) {
 							Debug::Text( 'Looping over Pay Periods: ' . $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 							foreach ( $pplf as $pp_obj ) {
@@ -1289,6 +1288,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 									Debug::Text( 'Skipping: Pay Period: ' . $pp_obj->getId() . ' Start Date: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getStartDate() ) . ' End Date: ' . TTDate::getDate( 'DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 								}
 							}
+						} else {
+							Debug::Text( '  No pay periods found!', __FILE__, __LINE__, __METHOD__, 10 );
 						}
 					}
 				}
@@ -1726,17 +1727,18 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				if ( is_object( $this->getCompanyObject() ) ) {
 					$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 
-					//As of schema version 1093A, the hire date column was changed to a date_stamp rather than epoch, which causes a SQL error during upgrade from old versions of TimeTrex.
+					//As of schema version 1093A, the hire date column was changed to a date_stamp rather than epoch, and additional columns have also been added, which causes a SQL error during upgrade from old versions of TimeTrex.
 					// So when called through the installer, use a less optimized SQL query that won't trigger that error.
 					global $config_vars;
 					if ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == true ) {
 						Debug::Text( 'Installer Enabled, skipping optimized WHERE clause...', __FILE__, __LINE__, __METHOD__, 10 );
-						$filter_data = [];
+						$ulf->getByCompanyId( $this->getCompanyObject()->getId(), 1, null, null, [ 'hire_date' => 'asc' ] ); //Limit 1 so we get the earliest termination date first.
 					} else {
 						$filter_data = [ 'hire_start_date' => $start_date, 'hire_end_date' => $end_date ];
+						$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), $filter_data, 1, null, null, [ 'hire_date' => 'asc' ] ); //Limit 1 so we get the earliest termination date first.
 					}
 
-					$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), $filter_data, 1, null, null, [ 'hire_date' => 'asc' ] ); //Limit 1 so we get the earliest termination date first.
+
 					Debug::Text( '  Hired users: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $ulf->getRecordCount() > 0 ) {
 						//Find the earliest termination date so we can start from there.
@@ -1800,15 +1802,16 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 					//As of schema version 1093A, the hire date column was changed to a date_stamp rather than epoch, which causes a SQL error during upgrade from old versions of TimeTrex.
 					// So when called through the installer, use a less optimized SQL query that won't trigger that error.
+					// As of schema version 1093A, the hire date column was changed to a date_stamp rather than epoch, and additional columns have also been added, which causes a SQL error during upgrade from old versions of TimeTrex.
 					global $config_vars;
 					if ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == true ) {
 						Debug::Text( 'Installer Enabled, skipping optimized WHERE clause...', __FILE__, __LINE__, __METHOD__, 10 );
-						$filter_data = [];
+						$ulf->getByCompanyId( $this->getCompanyObject()->getId(), 1, null, null, [ 'termination_date' => 'asc' ] ); //Limit 1 so we get the earliest termination date first.
 					} else {
 						$filter_data = [ 'termination_start_date' => $start_date, 'termination_end_date' => $end_date ];
+						$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), $filter_data, 1, null, null, [ 'termination_date' => 'asc' ] ); //Limit 1 so we get the earliest termination date first.
 					}
 
-					$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), $filter_data, 1, null, null, [ 'termination_date' => 'asc' ] ); //Limit 1 so we get the earliest termination date first.
 					Debug::Text( '  Terminated users: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $ulf->getRecordCount() > 0 ) {
 						//Find the earliest termination date so we can start from there.

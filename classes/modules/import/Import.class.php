@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -52,7 +52,7 @@ class Import {
 
 	protected $company_obj = null;
 	protected $progress_bar_obj = null;
-	protected $AMF_message_id = null;
+	protected $api_message_id = null;
 
 	public $branch_options = false;
 	public $branch_manual_id_options = false;
@@ -72,7 +72,7 @@ class Import {
 	function getObject() {
 		if ( !is_object( $this->obj ) ) {
 			$this->obj = TTnew( $this->class_name );
-			$this->obj->setAMFMessageID( $this->getAMFMessageID() ); //Need to transfer the same AMF message id so progress bars continue to work.
+			$this->obj->setAPIMessageID( $this->getAPIMessageID() ); //Need to transfer the same API message id so progress bars continue to work.
 		}
 
 		return $this->obj;
@@ -99,12 +99,12 @@ class Import {
 	}
 
 	/**
-	 * Returns the AMF messageID for each individual call.
+	 * Returns the API messageID for each individual call.
 	 * @return bool|null
 	 */
-	function getAMFMessageID() {
-		if ( $this->AMF_message_id != null ) {
-			return $this->AMF_message_id;
+	function getAPIMessageID() {
+		if ( $this->api_message_id != null ) {
+			return $this->api_message_id;
 		}
 
 		return false;
@@ -114,9 +114,9 @@ class Import {
 	 * @param string $id UUID
 	 * @return bool
 	 */
-	function setAMFMessageID( $id ) {
+	function setAPIMessageID( $id ) {
 		if ( $id != '' ) {
-			$this->AMF_message_id = $id;
+			$this->api_message_id = $id;
 
 			return true;
 		}
@@ -633,7 +633,7 @@ class Import {
 
 		//Debug::Arr($raw_data, 'Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $raw_data ), null, TTi18n::getText( 'Parsing import data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $raw_data ), null, TTi18n::getText( 'Parsing import data...' ) );
 
 		$x = 0;
 		foreach ( $raw_data as $raw_row ) {
@@ -684,13 +684,13 @@ class Import {
 				}
 			}
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $x );
 
 			$x++;
 		}
 
 		//Don't stop the current progress bar, let it continue into the process/_import function.
-		//$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+		//$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 
 		Debug::Arr( $parsed_data, 'Parsed Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 

@@ -1,13 +1,18 @@
-RoundIntervalPolicyViewController = BaseViewController.extend( {
-	el: '#round_interval_policy_view_container',
+class RoundIntervalPolicyViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#round_interval_policy_view_container',
 
-	_required_files: ['APIRoundIntervalPolicy'],
+			punch_type_array: null,
+			round_type_array: null,
+			condition_type_array: null,
+			date_api: null
+		} );
 
-	punch_type_array: null,
-	round_type_array: null,
-	condition_type_array: null,
-	date_api: null,
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'RoundIntervalPolicyEditView.html';
 		this.permission_id = 'round_policy';
@@ -16,25 +21,24 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		this.table_name_key = 'round_interval_policy';
 		this.context_menu_name = $.i18n._( 'Rounding Policy' );
 		this.navigation_label = $.i18n._( 'Rounding Policy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIRoundIntervalPolicy' ) )();
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
+		this.api = TTAPI.APIRoundIntervalPolicy;
+		this.date_api = TTAPI.APITTDate;
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'RoundIntervalPolicy' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		this.initDropDownOption( 'punch_type' );
 		this.initDropDownOption( 'round_type' );
 		this.initDropDownOption( 'condition_type' );
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -45,7 +49,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRoundIntervalPolicy' ) ),
+			api_class: TTAPI.APIRoundIntervalPolicy,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
@@ -149,12 +153,11 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'condition_stop_window', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Stop Window' ), form_item_input, tab_rounding_policy_column1, '', null, true );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -194,7 +197,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -206,16 +209,16 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -241,9 +244,9 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
-	},
+	}
 
-	onConditionTypeChange: function() {
+	onConditionTypeChange() {
 
 		var condition_type_id = parseInt( this.current_edit_record.condition_type_id );
 
@@ -287,12 +290,11 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onConditionTypeChange();
 	}
 
-} );
+}

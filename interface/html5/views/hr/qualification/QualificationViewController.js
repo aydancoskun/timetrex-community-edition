@@ -1,18 +1,24 @@
-QualificationViewController = BaseViewController.extend( {
-	el: '#qualification_view_container',
+class QualificationViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#qualification_view_container',
 
-	_required_files: ['APIKPIGroup', 'APIQualification', 'APIQualificationGroup', 'APICompanyGenericTag'],
 
-	type_array: null,
-	visibility_type_array: null,
-	source_type_array: null,
-	qualification_group_array: null,
 
-	qualification_group_api: null,
+			type_array: null,
+			visibility_type_array: null,
+			source_type_array: null,
+			qualification_group_array: null,
 
-	document_object_type_id: null,
+			qualification_group_api: null,
 
-	init: function( options ) {
+			document_object_type_id: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'QualificationEditView.html';
 		this.permission_id = 'qualification';
@@ -21,18 +27,17 @@ QualificationViewController = BaseViewController.extend( {
 		this.table_name_key = 'qualification';
 		this.context_menu_name = $.i18n._( 'Qualification' );
 		this.navigation_label = $.i18n._( 'Qualification' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIQualification' ) )();
-		this.qualification_group_api = new ( APIFactory.getAPIClass( 'APIQualificationGroup' ) )();
+		this.api = TTAPI.APIQualification;
+		this.qualification_group_api = TTAPI.APIQualificationGroup;
 		this.document_object_type_id = 120;
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'Qualification' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
@@ -51,11 +56,11 @@ QualificationViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -67,7 +72,7 @@ QualificationViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIQualification' ) ),
+			api_class: TTAPI.APIQualification,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.QUALIFICATION,
@@ -132,12 +137,11 @@ QualificationViewController = BaseViewController.extend( {
 
 		form_item_input.TTagInput( { field: 'tag', object_type_id: 250 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_qualification_column1, '', null, null, true );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -200,7 +204,7 @@ QualificationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -212,7 +216,7 @@ QualificationViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -220,4 +224,4 @@ QualificationViewController = BaseViewController.extend( {
 			} )
 		];
 	}
-} );
+}

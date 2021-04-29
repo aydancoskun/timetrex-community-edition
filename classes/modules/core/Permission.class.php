@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,7 +46,7 @@ class Permission {
 	/**
 	 * @param string $user_id    UUID
 	 * @param string $company_id UUID
-	 * @return bool
+	 * @return array
 	 */
 	function getPermissions( $user_id, $company_id ) {
 		//When Permission->Check() is used in a tight loop, even getCache() can be slow as it has to load a large array.
@@ -560,7 +560,7 @@ class Permission {
 
 	/**
 	 * @param string $user_id                 UUID
-	 * @param string $permission_children_ids UUID
+	 * @param string|string[] $permission_children_ids UUID
 	 * @return bool
 	 */
 	function isPermissionChild( $user_id, $permission_children_ids ) {

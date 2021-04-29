@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -59,7 +59,7 @@ class LogFactory extends Factory {
 						10  => TTi18n::gettext( 'Add' ),
 						20  => TTi18n::gettext( 'Edit' ),
 						30  => TTi18n::gettext( 'Delete' ),
-						//31 => TTi18n::gettext('Delete (F)'), //Full Delete (Not actually used currently)
+						31  => TTi18n::gettext( 'Delete (F)' ), //Full Delete (Only used by PurgeDatabase, but must be left in otherwise blank actions may be visible.)
 						40  => TTi18n::gettext( 'UnDelete' ),
 						100 => TTi18n::gettext( 'Login' ),
 						110 => TTi18n::gettext( 'Logout' ),

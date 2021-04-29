@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -672,7 +672,7 @@ class UserContactFactory extends Factory {
 			$sin = $this->getSIN();
 		}
 		if ( $sin != '' ) {
-			return Misc::censorString( $sin, 'X', null, 1, 4, 4 );
+			return Misc::censorString( $sin, '*', null, 1, 4, 4 );
 		}
 
 		return false;
@@ -692,7 +692,7 @@ class UserContactFactory extends Factory {
 	function setSIN( $value ) {
 		//If *'s are in the SIN number, skip setting it
 		//This allows them to change other data without seeing the SIN number.
-		if ( stripos( $value, 'X' ) !== false ) {
+		if ( stripos( $value, '*' ) !== false ) {
 			return false;
 		}
 

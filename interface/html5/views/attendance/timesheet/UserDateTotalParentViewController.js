@@ -1,10 +1,16 @@
-UserDateTotalParentViewController = BaseViewController.extend( {
-	el: '#user_date_total_parent_view_container',
-	sub_user_date_total_view_controller: null,
+class UserDateTotalParentViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#user_date_total_parent_view_container',
+			sub_user_date_total_view_controller: null,
 
-	_required_files: ['APIUserDateTotal'],
 
-	init: function( options ) {
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'UserDateTotalParentEditView.html';
 		this.permission_id = 'punch';
@@ -13,7 +19,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		this.table_name_key = 'user_date_total_parent';
 		this.context_menu_name = $.i18n._( 'Accumulated Time' );
 		this.navigation_label = $.i18n._( 'Accumulated Time' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIUserDateTotal' ) )();
+		this.api = TTAPI.APIUserDateTotal;
 
 		this.render();
 
@@ -28,22 +34,21 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 			this.initData();
 		}
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	removeEditView: function() {
-		this._super( 'removeEditView' );
+	removeEditView() {
+		super.removeEditView();
 
 		if ( this.parent_view_controller && this.parent_view_controller.viewId === 'TimeSheet' ) {
 			this.parent_view_controller.onSubViewRemoved();
 		}
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		return { include: ['default'] };
-	},
+	}
 
-	openEditView: function( date_str ) {
+	openEditView( date_str ) {
 
 		var $this = this;
 
@@ -71,17 +76,16 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	buildSearchFields: function() {
-		this._super( 'buildSearchFields' );
+	buildSearchFields() {
+		super.buildSearchFields();
 		this.search_fields = [];
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -91,17 +95,16 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		TTPromise.resolve( 'UserDateTotalParent', 'init' );
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		this.edit_view_tab.find( '#tab_user_date_total_parent' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 		this.initSubUserDateTotalView( 'tab_user_date_total_parent' );
 		this.setEditViewDataDone();
+	}
 
-	},
-
-	initSubUserDateTotalView: function( tab_id ) {
+	initSubUserDateTotalView( tab_id ) {
 		var $this = this;
 
 		if ( this.sub_user_date_total_view_controller ) {
@@ -151,7 +154,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		}
 	}
 
-} );
+}
 
 UserDateTotalParentViewController.loadView = function( container ) {
 	Global.loadViewSource( 'UserDateTotalParent', 'UserDateTotalParentView.html', function( result ) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -211,7 +211,7 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 		}
 
 		//Allow master administrators adding a new administrator for a company not populating the Legal Entity dropdown box due to the legal entity API not allowing cross-company filtering.
-		if ( $company_id != PRIMARY_COMPANY_ID || !isset($filter_data['company_id']) ) {
+		if ( $company_id != PRIMARY_COMPANY_ID || !isset( $filter_data['company_id'] ) ) {
 			$filter_data['company_id'] = $company_id; //Unless its the primary company, never let the company_id be specified.
 		}
 
@@ -222,10 +222,12 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 			}
 		}
 
-		$additional_order_fields = [ 'status_id' ];
+		$additional_order_fields = [ 'type_id', 'status_id', 'classification_code_name', 'in_use' ];
 
 		$sort_column_aliases = [
-				'status' => 'status_id',
+				'type'                     => 'type_id',
+				'status'                   => 'status_id',
+				'classification_code_name' => 'classification_code',
 		];
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );

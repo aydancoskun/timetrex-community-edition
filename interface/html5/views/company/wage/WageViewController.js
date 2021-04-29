@@ -1,29 +1,35 @@
-WageViewController = BaseViewController.extend( {
+class WageViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#wage_view_container', //Must set el here and can only set string, so events can work
 
-	el: '#wage_view_container', //Must set el here and can only set string, so events can work
 
-	_required_files: ['APIUserWage', 'APIUserGroup', 'APICurrency', 'APIWageGroup', 'APIBranch', 'APIDepartment', 'APIUserTitle'],
 
-	user_api: null,
-	user_group_api: null,
-	company_api: null,
-	currency_api: null,
+			user_api: null,
+			user_group_api: null,
+			company_api: null,
+			currency_api: null,
 
-	type_array: null,
-	status_array: null,
-	sex_array: null,
-	user_group_array: null,
-	country_array: null,
-	province_array: null,
+			type_array: null,
+			status_array: null,
+			sex_array: null,
+			user_group_array: null,
+			country_array: null,
+			province_array: null,
 
-	e_province_array: null,
+			e_province_array: null,
 
-	currency: '',
-	code: '',
+			currency: '',
+			code: '',
 
-	is_mass_adding: false,
+			is_mass_adding: false,
+			events: {}
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'WageEditView.html';
@@ -34,11 +40,11 @@ WageViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Wage' );
 		this.navigation_label = $.i18n._( 'Wage' ) + ':';
 		this.document_object_type_id = 110;
-		this.api = new ( APIFactory.getAPIClass( 'APIUserWage' ) )();
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
-		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
-		this.currency_api = new ( APIFactory.getAPIClass( 'APICurrency' ) )();
+		this.api = TTAPI.APIUserWage;
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.company_api = TTAPI.APICompany;
+		this.user_api = TTAPI.APIUser;
+		this.currency_api = TTAPI.APICurrency;
 		this.render();
 
 		if ( this.sub_view_mode ) {
@@ -53,10 +59,9 @@ WageViewController = BaseViewController.extend( {
 		}
 
 		this.setSelectRibbonMenuIfNecessary();
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
@@ -76,10 +81,9 @@ WageViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.copy],
 			include: [{
@@ -94,9 +98,9 @@ WageViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -124,10 +128,10 @@ WageViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
 	/* jshint ignore:start */
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -209,13 +213,12 @@ WageViewController = BaseViewController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
-
-	},
+	}
 
 	/* jshint ignore:end */
 
 	//Make sure this.current_edit_record is updated before validate
-	validate: function() {
+	validate() {
 		var $this = this;
 		var record = {};
 		LocalCacheData.current_doing_context_action = 'validate';
@@ -248,62 +251,61 @@ WageViewController = BaseViewController.extend( {
 				$this.validateResult( result );
 			}
 		} );
-	},
+	}
 
-	setDefaultMenuImportIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuImportIcon( context_btn, grid_selected_length, pId ) {
+	}
 
-	},
-
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
 				this.onImportClick();
 				break;
 		}
-	},
+	}
 
-	onImportClick: function() {
+	onImportClick() {
 		var $this = this;
 
-		IndexViewController.openWizard( 'ImportCSVWizard', 'userwage', function() {
+		IndexViewController.openWizard( 'ImportCSVWizard', 'UserWage', function() {
 			$this.search();
 		} );
-	},
+	}
 
-	doSaveAPICall: function( record, ignoreWarning, callback ) {
+	doSaveAPICall( record, ignoreWarning, callback ) {
 		// #2644: We have to handle the record as though its a mass_add, as the awesomebox will always return an array of user_id's. See 733f709e287626070b84e39ca67f78e69a3fcee6.
 		// Normal handling results in 'Invalid Employee' errors for single records. Cannot force is_mass_adding flag, as this affects the save&continue button disabling.
 		record = this.buildMassAddRecord( record );
-		this._super( 'doSaveAPICall', record, ignoreWarning, callback );
-	},
+		super.doSaveAPICall( record, ignoreWarning, callback );
+	}
 
-	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndContinueIcon( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn );
 
 		if ( this.is_mass_adding || !this.current_edit_record ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuSaveAndAddIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndAddIcon( context_btn, pId ) {
 		this.saveAndNewValidate( context_btn );
 
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuSaveAndCopyIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndCopyIcon( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn );
 
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditViewData: function() {
+	setEditViewData() {
 		var $this = this;
-		this._super( 'setEditViewData' ); //Set Navigation
+		super.setEditViewData(); //Set Navigation
 
 		this.setCurrency();
 
@@ -319,9 +321,9 @@ WageViewController = BaseViewController.extend( {
 		}
 
 		$this.onTypeChange( false );
-	},
+	}
 
-	setCurrency: function() {
+	setCurrency() {
 
 		var $this = this;
 		if ( Global.isSet( this.current_edit_record.user_id ) ) {
@@ -342,9 +344,9 @@ WageViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	getHourlyRate: function() {
+	getHourlyRate() {
 
 		var $this = this;
 		if ( this.current_edit_record.wage &&
@@ -365,10 +367,9 @@ WageViewController = BaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	onTypeChange: function( getRate ) {
+	onTypeChange( getRate ) {
 
 		if ( parseInt( this.current_edit_record.type_id ) != 10 ) {
 			this.attachElement( 'weekly_time' );
@@ -382,11 +383,11 @@ WageViewController = BaseViewController.extend( {
 			this.detachElement( 'weekly_time' );
 			this.detachElement( 'hourly_rate' );
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 
-		this._super( 'buildEditViewUI' );
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -398,7 +399,7 @@ WageViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserWage' ) ),
+			api_class: TTAPI.APIUserWage,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.WAGE,
@@ -415,13 +416,15 @@ WageViewController = BaseViewController.extend( {
 		var tab_wage_column1 = tab_wage.find( '.first-column' );
 
 		var form_item_input;
+		var widgetContainer;
+		var label;
 
 		if ( !this.sub_view_mode ) {
 			//Employee
 
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.USER,
 				show_search_inputs: true,
@@ -440,7 +443,7 @@ WageViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIWageGroup' ) ),
+			api_class: TTAPI.APIWageGroup,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.WAGE_GROUP,
 			show_search_inputs: true,
@@ -467,7 +470,7 @@ WageViewController = BaseViewController.extend( {
 
 		form_item_input.TTextInput( { field: 'wage', width: 90 } );
 
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 		this.currency = $( '<span class=\'widget-left-label\'></span>' );
 		this.code = $( '<span class=\'widget-right-label\'></span>' );
 
@@ -483,7 +486,7 @@ WageViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( { field: 'weekly_time', need_parser_sec: true } );
 
 		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '40 hours / week' ) + ' )</span>' );
+		label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '40 hours / week' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -520,23 +523,18 @@ WageViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 		form_item_input.TTextArea( { field: 'note', width: 389, height: 117 } );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_wage_column1, '', null, null, true );
-
-	},
+	}
 
 	//Override for: Do not show first 2 columns in sub wage view
-	setSelectLayout: function() {
+	setSelectLayout() {
 		if ( this.sub_view_mode ) {
-			this._super( 'setSelectLayout', ['first_name', 'last_name'] );
+			super.setSelectLayout( ['first_name', 'last_name'] );
 		} else {
-			this._super( 'setSelectLayout' );
+			super.setSelectLayout();
 		}
-	},
+	}
 
-	initCountryList: function() {
-
-	},
-
-	setProvince: function( val, m ) {
+	setProvince( val, m ) {
 		var $this = this;
 
 		if ( !val || val === '-1' || val === '0' ) {
@@ -556,9 +554,9 @@ WageViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	eSetProvince: function( val ) {
+	eSetProvince( val ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -579,23 +577,22 @@ WageViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
-	onSetSearchFilterFinished: function() {
+	onSetSearchFilterFinished() {
 
 		if ( this.search_panel.getSelectTabIndex() === 1 ) {
 			var combo = this.adv_search_field_ui_dic['country'];
 			var select_value = combo.getValue();
 			this.setProvince( select_value );
 		}
+	}
 
-	},
-
-	onBuildBasicUIFinished: function() {
+	onBuildBasicUIFinished() {
 		var basicSearchTabPanel = this.search_panel.find( 'div #basic_search' );
-	},
+	}
 
-	onBuildAdvUIFinished: function() {
+	onBuildAdvUIFinished() {
 
 		this.adv_search_field_ui_dic['country'].change( $.proxy( function() {
 			var combo = this.adv_search_field_ui_dic['country'];
@@ -606,13 +603,11 @@ WageViewController = BaseViewController.extend( {
 			this.adv_search_field_ui_dic['province'].setValue( null );
 
 		}, this ) );
-	},
+	}
 
-	events: {},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 
 		var default_args = { permission_section: 'wage' };
 		this.search_fields = [
@@ -622,7 +617,7 @@ WageViewController = BaseViewController.extend( {
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
 				default_args: default_args,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -645,7 +640,7 @@ WageViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'wage_group_id',
 				layout_name: ALayoutIDs.WAGE_GROUP,
-				api_class: ( APIFactory.getAPIClass( 'APIWageGroup' ) ),
+				api_class: TTAPI.APIWageGroup,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -680,7 +675,7 @@ WageViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -693,7 +688,7 @@ WageViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -706,7 +701,7 @@ WageViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -717,7 +712,7 @@ WageViewController = BaseViewController.extend( {
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -729,7 +724,7 @@ WageViewController = BaseViewController.extend( {
 				field: 'title_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.JOB_TITLE,
-				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
+				api_class: TTAPI.APIUserTitle,
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -757,21 +752,20 @@ WageViewController = BaseViewController.extend( {
 			} )
 
 		];
-	},
-
-	cleanWhenUnloadView: function( callBack ) {
-
-		$( '#wage_view_container' ).remove();
-		this._super( 'cleanWhenUnloadView', callBack );
-
-	},
-
-	searchDone: function() {
-		TTPromise.resolve( 'WageView', 'init' );
-		this._super( 'searchDone' );
 	}
 
-} );
+	cleanWhenUnloadView( callBack ) {
+
+		$( '#wage_view_container' ).remove();
+		super.cleanWhenUnloadView( callBack );
+	}
+
+	searchDone() {
+		TTPromise.resolve( 'WageView', 'init' );
+		super.searchDone();
+	}
+
+}
 
 WageViewController.loadView = function( container ) {
 	Global.loadViewSource( 'Wage', 'WageView.html', function( result ) {

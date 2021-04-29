@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -206,21 +206,21 @@ class PayStubFactory extends Factory {
 	}
 
 	/**
-	 * @return bool
+	 * @return bool|PayPeriodObject
 	 */
 	function getPayPeriodObject() {
 		return $this->getGenericObject( 'PayPeriodListFactory', $this->getPayPeriod(), 'pay_period_obj' );
 	}
 
 	/**
-	 * @return bool
+	 * @return bool|CurrencyFactory
 	 */
 	function getCurrencyObject() {
 		return $this->getGenericObject( 'CurrencyListFactory', $this->getCurrency(), 'currency_obj' );
 	}
 
 	/**
-	 * @return bool
+	 * @return bool|UserFactory
 	 */
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
@@ -320,6 +320,7 @@ class PayStubFactory extends Factory {
 	}
 
 	/**
+	 * Currency exchange rate to convert the amount back to the base currency. Rate=1 would usually only happen if the current currency is the base currency.
 	 * @param $value
 	 * @return bool
 	 */
@@ -944,7 +945,6 @@ class PayStubFactory extends Factory {
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		if ( count( $pay_stub_entry_ids ) > 0 ) {
 			foreach ( $pay_stub_entry_ids as $pay_stub_entry_id ) {
-				Debug::Text( 'Entry ID: ' . $pay_stub_entry_id, __FILE__, __LINE__, __METHOD__, 10 );
 				$pay_stub1_entry_arr = $pself->getSumByPayStubIdAndEntryNameIdAndNotPSAmendment( $pay_stub1_obj->getId(), $pay_stub_entry_id );
 
 				if ( isset( $pay_stub2_obj ) ) {
@@ -952,7 +952,7 @@ class PayStubFactory extends Factory {
 				} else {
 					$pay_stub2_entry_arr = [ 'amount' => 0, 'units' => 0 ];
 				}
-				Debug::Text( 'Pay Stub1 Amount: ' . $pay_stub1_entry_arr['amount'] . ' Pay Stub2 Amount: ' . $pay_stub2_entry_arr['amount'], __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( '  Entry ID: ' . $pay_stub_entry_id .' Pay Stub1: Amount: ' . $pay_stub1_entry_arr['amount'] . ' Units: '. $pay_stub1_entry_arr['units'] .' Pay Stub2: Amount: ' . $pay_stub2_entry_arr['amount'] .' Units: '. $pay_stub1_entry_arr['units'], __FILE__, __LINE__, __METHOD__, 10 );
 
 				if ( $pay_stub1_entry_arr['amount'] != $pay_stub2_entry_arr['amount'] ) {
 					//Generate PS Amendment.
@@ -964,7 +964,7 @@ class PayStubFactory extends Factory {
 
 					$units_diff = abs( bcsub( $pay_stub1_entry_arr['units'], $pay_stub2_entry_arr['units'], 4 ) );                                                                                                                                                                                   //Allow units to be up to 4 decimal places, especially important for customers who don't round punches, as this could result in a slightly different amount than expected, especially if the rate is auto calculated below.
 					$amount_diff = Misc::MoneyRound( bcsub( $pay_stub1_entry_arr['amount'], $pay_stub2_entry_arr['amount'], 4 ), 2, ( ( is_object( $psaf->getUserObject() ) && is_object( $psaf->getUserObject()->getCurrencyObject() ) ) ? $psaf->getUserObject()->getCurrencyObject() : null ) ); //Set MIN decimals to 2 and max to the currency rounding.
-					Debug::Text( 'aFOUND DIFFERENCE of: Amount: ' . $amount_diff . ' Units: ' . $units_diff, __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Text( '    aFOUND DIFFERENCE of: Amount: ' . $amount_diff . ' Units: ' . $units_diff, __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $units_diff > 0 ) {
 						//Re-calculate amount when units are involved, due to rounding issues.
 						//FIXME: However in the case of salaried employees, where there were no units previously, or no units after,
@@ -976,7 +976,7 @@ class PayStubFactory extends Factory {
 						//   Not sure if there is an easy way to fix this...
 						$unit_rate = bcdiv( $amount_diff, $units_diff, 4 );
 						$amount_diff = Misc::MoneyRound( bcmul( $unit_rate, $units_diff, 4 ), 2, ( ( is_object( $psaf->getUserObject() ) && is_object( $psaf->getUserObject()->getCurrencyObject() ) ) ? $psaf->getUserObject()->getCurrencyObject() : null ) ); //Set MIN decimals to 2 and max to the currency rounding.
-						Debug::Text( 'bFOUND DIFFERENCE of: Amount: ' . $amount_diff . ' Units: ' . $units_diff . ' Unit Rate: ' . $unit_rate, __FILE__, __LINE__, __METHOD__, 10 );
+						Debug::Text( '    bFOUND DIFFERENCE of: Amount: ' . $amount_diff . ' Units: ' . $units_diff . ' Unit Rate: ' . $unit_rate, __FILE__, __LINE__, __METHOD__, 10 );
 
 						$psaf->setRate( $unit_rate );
 						$psaf->setUnits( $units_diff );
@@ -2198,11 +2198,11 @@ class PayStubFactory extends Factory {
 			return false;
 		}
 
-		//Round amount to 2 decimal places.
+		//Round amount to 2 decimal places (or whatever the currency object is set too)
 		//So any totaling is proper after this point, because it gets rounded to two decimal places in PayStubEntryFactory too.
 		//PHP has a bug that round() converts large values with 0's on the end into scientific notation. Use number_format() instead.
-		//$amount = ( is_object($this->getCurrencyObject()) ) ? $this->getCurrencyObject()->round( $amount ) : Misc::MoneyFormat( $amount, FALSE );
-		//$ytd_amount = ( is_object($this->getCurrencyObject()) ) ? $this->getCurrencyObject()->round( $ytd_amount ) : Misc::MoneyFormat( $ytd_amount, FALSE );
+		$rate = ( $rate != '' ) ? Misc::MoneyRound( $rate, 4 ) : $rate; //DB schema limits to 4 decimal places.
+		$units = ( $units != '' ) ? Misc::MoneyRound( $units, 4 ) : $units; //DB schema limits to 4 decimal places.
 		$amount = Misc::MoneyRound( $amount, 2, $this->getCurrencyObject() );
 		$ytd_amount = Misc::MoneyRound( $ytd_amount, 2, $this->getCurrencyObject() );
 		if ( is_numeric( $amount ) ) {
@@ -2250,7 +2250,7 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function addEntry( $pay_stub_entry_account_id, $amount, $units = null, $rate = null, $description = null, $ps_amendment_id = null, $ytd_amount = null, $ytd_units = null, $ytd_adjustment = false, $user_expense_id = null ) {
-		Debug::text( 'Add Entry: PSE Account ID: ' . $pay_stub_entry_account_id . ' Amount: ' . $amount . ' YTD Amount: ' . $ytd_amount . ' Pay Stub Amendment Id: ' . $ps_amendment_id . ' User Expense: ' . $user_expense_id, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Add Entry: PSE Account ID: ' . $pay_stub_entry_account_id . ' Amount: ' . $amount . ' Rate: '. $rate .' Units: '. $units .' YTD Amount: ' . $ytd_amount . ' Pay Stub Amendment Id: ' . $ps_amendment_id . ' User Expense: ' . $user_expense_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$retarr = $this->prepareEntry( $pay_stub_entry_account_id, $amount, $units, $rate, $description, $ps_amendment_id, $ytd_amount, $ytd_units, $ytd_adjustment, $user_expense_id );
 		if ( is_array( $retarr ) ) {
@@ -2446,7 +2446,7 @@ class PayStubFactory extends Factory {
 
 		foreach ( $this->tmp_data['current_pay_stub']['entries'] as $pse_arr ) {
 			if ( isset( $pse_arr['pay_stub_entry_account_id'] ) && isset( $pse_arr['amount'] ) ) {
-				Debug::Text( 'Current Pay Stub ID: ' . $this->getId() . ' Adding Pay Stub Entry for: ' . $pse_arr['pay_stub_entry_account_id'] . ' Amount: ' . $pse_arr['amount'] . ' YTD Amount: ' . $pse_arr['ytd_amount'] . ' YTD Units: ' . $pse_arr['ytd_units'], __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( 'Current Pay Stub ID: ' . $this->getId() . ' Adding Pay Stub Entry for: ' . $pse_arr['pay_stub_entry_account_id'] . ' Amount: ' . $pse_arr['amount'] . ' Rate: '. $pse_arr['rate'] .' Units: '. $pse_arr['units'] .' YTD Amount: ' . $pse_arr['ytd_amount'] . ' YTD Units: ' . $pse_arr['ytd_units'], __FILE__, __LINE__, __METHOD__, 10 );
 				$psef = TTnew( 'PayStubEntryFactory' ); /** @var PayStubEntryFactory $psef */
 				$psef->setPayStub( $this->getId() );
 				$psef->setPayStubEntryNameId( $pse_arr['pay_stub_entry_account_id'] );
@@ -2691,7 +2691,17 @@ class PayStubFactory extends Factory {
 			foreach ( $this->tmp_data['current_pay_stub']['transactions'] as $pst_obj ) {
 				//Include amounts from both pending and paid transactions, as combined they should never exceed net pay.
 				if ( in_array( $pst_obj->getStatus(), [ 10, 20 ] ) && ( !isset( $pst_obj->data['deleted'] ) || $pst_obj->data['deleted'] == 0 ) ) {
-					$total = bcadd( $pst_obj->getAmount(), $total );
+					//Convert the transactions back to the pay stub currency so they can be added together.
+					if ( $pst_obj->getCurrency() == $this->getCurrency() ) {
+						$amount = $pst_obj->getAmount();
+					} else {
+						//Since PayStubTransactions currency_rate is only used to get the transaction amount back into the base currency, we have to convert to the base currency first,
+						//  then use the PayStub currency_rate to convert into the pay stub currency.
+						$amount = $this->getCurrencyObject()->convert( $this->getCurrencyRate(), 1, $this->getCurrencyObject()->convert( 1, $pst_obj->getCurrencyRate(), $pst_obj->getAmount(), 10 ), $this->getCurrencyObject()->getRoundDecimalPlaces() ); //Convert back to Pay Stub's currency.
+					}
+
+					Debug::Text( '   PayStubTransction ID: ' . $pst_obj->getId() .' Raw Amount: '. $pst_obj->getAmount()  .' Currency Converted Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10 );
+					$total = bcadd( $amount, $total );
 				}
 			}
 		}
@@ -2811,7 +2821,6 @@ class PayStubFactory extends Factory {
 
 		if ( isset( $pst_total ) && isset( $net_pay ) && $pst_total != $net_pay ) {
 			Debug::Text( 'Mismatched Net Pay / Transaction total: ' . $pst_total . ' Net Pay: ' . $net_pay, __FILE__, __LINE__, __METHOD__, 10 );
-
 			return false;
 		}
 
@@ -2954,7 +2963,27 @@ class PayStubFactory extends Factory {
 							$amount = $primary_currency_obj->round( $amount );
 						}
 
-						$pstf->setAmount( $amount );
+						if ( $this->getCurrency() == $pstf->getCurrency() ) {
+							$pstf->setAmount( $amount );
+						} else {
+							$currency_converted_amount = $this->getCurrencyObject()->convert( $this->getCurrencyObject()->getConversionRate(), $rda_obj->getRemittanceSourceAccountObject()->getCurrencyObject()->getConversionRate(), $amount, 10 );
+							$currency_converted_rounded_amount = $rda_obj->getRemittanceSourceAccountObject()->getCurrencyObject()->round( $currency_converted_amount );
+							$rounding_adjusted_currency_rate = bcadd( $pstf->getCurrencyObject()->getReverseConversionRate(), bcsub( bcdiv( $currency_converted_amount, $currency_converted_rounded_amount, 10 ), 1 ) );
+
+							$pstf->setAmount( $currency_converted_rounded_amount );
+
+							//Recalculate currency rate based on rounded $currency_converted_amount, so we can easily get it back to the exact right rounded value.
+							//Currency rate must be the rate to get the amount back into the *non-rounded* base currency.
+							//  From there we can use the currency_rate of the pay stub to get the amount back into the pay stub currency.
+							//For example if a currency rate is 1USD=9755Leones, and pay stub currency is Leones with a net pay of 429166.67 Leones, that gets converted to 43.99 USD (had to round to nearest penny).
+							//  The raw converted currency amount is 43.9945190917 (rounds to: 43.99), so the conversion rate needs to be 1.0001027299 to get 43.99 back to 43.9945190917.
+							//  Then based on the pay stub currency rate of 9755, we can get 43.9945190917 back to 429166.67.
+							//Even though this is technically two steps when it could be done in one, it keeps the conversion_rate functionality consistent, in that it always converts back to the base rate.
+							$pstf->setCurrencyRate( $rounding_adjusted_currency_rate );
+
+							Debug::Text( '   Currency differences... Amount: ' . $amount . ' ( '. $currency_converted_amount .' @ '. $rda_obj->getRemittanceSourceAccountObject()->getCurrencyObject()->getISOCode() .'= R1: '. $this->getCurrencyObject()->getConversionRate() .' R2: '. $rda_obj->getRemittanceSourceAccountObject()->getCurrencyObject()->getConversionRate() .' Adjusted Rate: '. $rounding_adjusted_currency_rate .') Remaining Amount: ' . $remaining_amount, __FILE__, __LINE__, __METHOD__, 10 );
+							unset( $currency_converted_amount, $currency_converted_rounded_amount, $rounding_adjusted_currency_rate );
+						}
 
 						if ( $pstf->isValid() ) {
 							$this->addTransaction( $pstf );
@@ -3253,7 +3282,7 @@ class PayStubFactory extends Factory {
 
 			$legal_entity_obj_cache = [];
 			$i = 0;
-			foreach ( $pslf as $pay_stub_obj ) {
+			foreach ( $pslf as $pay_stub_obj ) { /** @var PayStubFactory $pay_stub_obj */
 				if ( $i == 0 ) {
 					$pdf = new TTPDF( 'P', 'mm', 'LETTER', $pay_stub_obj->getUserObject()->getCompanyObject()->getEncoding() );
 					$pdf->setMargins( 0, 0 ); //Margins are ignored because we use setXY() to force the coordinates before each drawing and therefore ignores margins.
@@ -3974,12 +4003,12 @@ class PayStubFactory extends Factory {
 
 					$pdf->SetFont( '', '', $default_line_item_font_size );
 					$cell_height = $pdf->getStringHeight( 10, 'Z' );
-					foreach ( $pstlf as $pst_obj ) {
+					foreach ( $pstlf as $pst_obj ) { /** @var PayStubTransactionFactory $pst_obj */
 						$rda_obj = $pst_obj->getRemittanceDestinationAccountObject();
 						$rsa_obj = $pst_obj->getRemittanceSourceAccountObject();
 						if ( is_object( $rda_obj ) ) {
 
-							$cross_conversion_rate = $pay_stub_obj->getCurrencyObject()->getCrossConversionRate( $pst_obj->getCurrencyObject()->getConversionRate(), $pay_stub_obj->getCurrencyObject()->getConversionRate() );
+							$cross_conversion_rate = $pay_stub_obj->getCurrencyObject()->getCrossConversionRate( $pay_stub_obj->getCurrencyObject()->getConversionRate(), $pst_obj->getCurrencyObject()->getConversionRate() );
 							Debug::Text( 'Transaction Currency: ' . $pst_obj->getCurrencyObject()->getISOCode() . '(' . $pst_obj->getCurrencyObject()->getConversionRate() . ') Pay Stub Currency: ' . $pay_stub_obj->getCurrencyObject()->getISOCode() . '(' . $pay_stub_obj->getCurrencyObject()->getConversionRate() . ') Cross Rate: ' . $cross_conversion_rate, __FILE__, __LINE__, __METHOD__, 10 );
 							$pdf->setXY( Misc::AdjustXY( 1, $adjust_x ), Misc::AdjustXY( $block_adjust_y, $adjust_y ) );
 
@@ -3987,15 +4016,15 @@ class PayStubFactory extends Factory {
 								$pdf->Cell( 45, $cell_height, $rda_obj->getName(), $border, 0, 'L', false, '', 1 );
 								$pdf->Cell( 20, $cell_height, Option::getByKey( $rsa_obj->getType(), $rsa_obj->getOptions( 'type' ) ), $border, 0, 'R', false, '', 1 );
 								$pdf->Cell( 23, $cell_height, $pst_obj->getConfirmationNumber(), $border, 0, 'R', false, '', 1 );
-								$pdf->Cell( 25, $cell_height, $pay_stub_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pst_obj->getAmount(), true, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ) . ' ' . $pay_stub_obj->getCurrencyObject()->getISOCode(), $border, 0, 'R', false, '', 1 );
-								$pdf->Cell( 25, $cell_height, '@ ' . Misc::RemoveTrailingZeros( TTi18n::formatNumber( $cross_conversion_rate, true, 6, 6 ), 4 ), $border, 0, 'L', false, '', 1 );
-								$pdf->Cell( 35, $cell_height, $pst_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pay_stub_obj->getCurrencyObject()->convert( $pst_obj->getCurrencyObject()->getConversionRate(), $pay_stub_obj->getCurrencyObject()->getConversionRate(), $pst_obj->getAmount() ), true, $pst_obj->getCurrencyObject()->getRoundDecimalPlaces() ) . ' ' . $pst_obj->getCurrencyObject()->getISOCode(), $border, 0, 'R', false, '', 1 );
+								$pdf->Cell( 25, $cell_height, $pay_stub_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pay_stub_obj->getCurrencyObject()->convert( $pst_obj->getCurrencyObject()->getConversionRate(), $pay_stub_obj->getCurrencyObject()->getConversionRate(), $pst_obj->getAmount() ), true, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ) . ' ' . $pay_stub_obj->getCurrencyObject()->getISOCode(), $border, 0, 'R', false, '', 1 );
+								$pdf->Cell( 25, $cell_height, '@ ' . TTi18n::formatNumber( $cross_conversion_rate, true, 2, 6 ), $border, 0, 'L', false, '', 1 );
+								$pdf->Cell( 35, $cell_height, $pst_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pst_obj->getAmount(), true, $pst_obj->getCurrencyObject()->getRoundDecimalPlaces() ) . ' ' . $pst_obj->getCurrencyObject()->getISOCode(), $border, 0, 'R', false, '', 1 );
 							} else {
 								$pdf->Cell( 55, $cell_height, $rda_obj->getName(), $border, 0, 'L', false, '', 1 );
 								$pdf->Cell( 30, $cell_height, Option::getByKey( $rsa_obj->getType(), $rsa_obj->getOptions( 'type' ) ), $border, 0, 'R', false, '', 1 );
 								$pdf->Cell( 44, $cell_height, ( ( $pst_obj->getStatus() == 20 ) ? $pst_obj->getConfirmationNumber() : Option::getByKey( $pst_obj->getStatus(), $pst_obj->getOptions( 'status' ) ) ), $border, 0, 'R', false, '', 1 );
 
-								$stop_payment = ( ( in_array( $pst_obj->getStatus(), [ 100, 200 ] ) ) ? TTi18n::getTExt( 'SP' ) . ' ' : '' );
+								$stop_payment = ( ( in_array( $pst_obj->getStatus(), [ 100, 200 ] ) ) ? TTi18n::getText( 'SP' ) . ' ' : '' );
 								$pdf->Cell( 44, $cell_height, $stop_payment . $pst_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pay_stub_obj->getCurrencyObject()->convert( $pst_obj->getCurrencyObject()->getConversionRate(), $pay_stub_obj->getCurrencyObject()->getConversionRate(), $pst_obj->getAmount() ), true, $pst_obj->getCurrencyObject()->getRoundDecimalPlaces() ) . ' ' . $pst_obj->getCurrencyObject()->getISOCode(), $border, 0, 'R', false, '', 1 );
 							}
 

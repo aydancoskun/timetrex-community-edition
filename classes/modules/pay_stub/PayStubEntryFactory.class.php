@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -213,9 +213,8 @@ class PayStubEntryFactory extends Factory {
 		if ( $value == null || $value == '' ) {
 			return false;
 		}
-		//Must round to 2 decimals otherwise discreptancy can occur when generating pay stubs.
-		//$this->data['rate'] = Misc::MoneyFormat( $value, FALSE );
-		return $this->setGenericDataValue( 'rate', $value );
+
+		return $this->setGenericDataValue( 'rate', Misc::MoneyRound( $value, 4 ) ); //DB schema limits to 4 decimal places, so make sure we round to that here, rather than let the DB truncate the value. This ensures the value in the DB always matches the value in memory, which is critical for calculating pay stub differences and avoiding being off by $0.01
 	}
 
 	/**
@@ -236,10 +235,7 @@ class PayStubEntryFactory extends Factory {
 			return false;
 		}
 
-		Debug::text( 'Rate: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
-		//Must round to 2 decimals otherwise discreptancy can occur when generating pay stubs.
-		//$this->data['units'] = Misc::MoneyFormat( $value, FALSE );
-		return $this->setGenericDataValue( 'units', $value );
+		return $this->setGenericDataValue( 'units', Misc::MoneyRound( $value, 4 ) ); //DB schema limits to 4 decimal places, so make sure we round to that here, rather than let the DB truncate the value. This ensures the value in the DB always matches the value in memory, which is critical for calculating pay stub differences and avoiding being off by $0.01
 	}
 
 	/**
@@ -259,8 +255,6 @@ class PayStubEntryFactory extends Factory {
 		if ( $value == null || $value == '' ) {
 			return false;
 		}
-
-		Debug::text( 'YTD Units: ' . $value . ' Name: ' . $this->getPayStubEntryNameId(), __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $this->setGenericDataValue( 'ytd_units', $value );
 	}
@@ -321,9 +315,6 @@ class PayStubEntryFactory extends Factory {
 	function setAmount( $value ) {
 		$value = trim( $value );
 
-		//PHP v5.3.5 has a bug that it converts large values with 0's on the end into scientific notation.
-		Debug::text( 'Amount: ' . $value . ' Name: ' . $this->getPayStubEntryNameId(), __FILE__, __LINE__, __METHOD__, 10 );
-
 		//if ($value == NULL OR $value == '' OR $value < 0) {
 		//Allow negative values for things like minusing vacation accural?
 		if ( $value == null || $value == '' ) {
@@ -349,7 +340,6 @@ class PayStubEntryFactory extends Factory {
 		if ( $value == null || $value == '' ) {
 			return false;
 		}
-		Debug::text( 'YTD Amount: ' . $value . ' Name: ' . $this->getPayStubEntryNameId(), __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $this->setGenericDataValue( 'ytd_amount', ( is_object( $this->getPayStubObject() ) && is_object( $this->getPayStubObject()->getCurrencyObject() ) ) ? $this->getPayStubObject()->getCurrencyObject()->round( $value ) : Misc::MoneyFormat( $value, false ) );
 	}
@@ -375,7 +365,7 @@ class PayStubEntryFactory extends Factory {
 	 * @return bool
 	 */
 	function preSave() {
-		Debug::text( 'Pay Stub ID: ' . $this->getPayStub() . ' Calc YTD: ' . (int)$this->getEnableCalculateYTD(), __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Pay Stub ID: ' . $this->getPayStub() . ' Amount: '. $this->getAmount() .' Rate: '. $this->getRate() .' Units: '. $this->getUnits() .' PS Account: '. $this->getPayStubEntryNameId() .' PSA ID: '. $this->getPayStubAmendment() .' Expense: '. $this->getUserExpense() .' Calc YTD: ' . (int)$this->getEnableCalculateYTD(), __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( $this->getYTDAmount() == false ) {
 			$this->setYTDAmount( 0 );

@@ -1,9 +1,16 @@
-RecurringPayStubAmendmentViewController = BaseViewController.extend( {
-	el: '#recurring_pay_stub_amendment_view_container',
-	type_array: null,
-	filtered_status_array: null,
-	frequency_array: null,
-	init: function( options ) {
+class RecurringPayStubAmendmentViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#recurring_pay_stub_amendment_view_container',
+			type_array: null,
+			filtered_status_array: null,
+			frequency_array: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'RecurringPayStubAmendmentEditView.html';
 		this.permission_id = 'pay_stub_amendment';
@@ -12,26 +19,25 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		this.table_name_key = 'recurring_ps_amendment';
 		this.context_menu_name = $.i18n._( 'Recurring PS Amendment' );
 		this.navigation_label = $.i18n._( 'Recurring PS Amendment' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIRecurringPayStubAmendment' ) )();
+		this.api = TTAPI.APIRecurringPayStubAmendment;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'RecurringPayStubAmendment' );
+	}
 
-	},
-
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'filtered_status', 'status_id', this.api, function() {
 			$this.basic_search_field_ui_dic['status_id'].setSourceData( $this.filtered_status_array );
 		} );
 		this.initDropDownOption( 'frequency' );
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 
@@ -62,19 +68,18 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+	}
 
-	},
-
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 
 		if ( records.type_id == 20 ) {
 			records.amount = records.percent_amount;
 		}
 
 		return records;
-	},
+	}
 
-	onTypeChange: function() {
+	onTypeChange() {
 		if ( this.current_edit_record.type_id == 10 ) {
 			this.detachElement( 'percent_amount' );
 			this.detachElement( 'percent_amount_entry_name_id' );
@@ -91,9 +96,9 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	onFormItemKeyUp: function( target ) {
+	onFormItemKeyUp( target ) {
 		var widget_rate = this.edit_view_ui_dic['rate'];
 		var widget_units = this.edit_view_ui_dic['units'];
 		var widget_amount = this.edit_view_ui_dic['amount'];
@@ -110,10 +115,10 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		} else {
 			widget_amount.setValue( '0.00' );
 		}
+	}
 
-	},
 	/* jshint ignore:start */
-	onFormItemKeyDown: function( target ) {
+	onFormItemKeyDown( target ) {
 		var widget = this.edit_view_ui_dic['amount'];
 		var widget_rate = this.edit_view_ui_dic['rate'];
 		var widget_units = this.edit_view_ui_dic['units'];
@@ -124,9 +129,10 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		}
 
 		widget.setReadOnly( true );
-	},
+	}
+
 	/* jshint ignore:end */
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
@@ -155,15 +161,15 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onTypeChange();
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 		var allow_multiple_selection = false;
@@ -175,7 +181,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIRecurringPayStubAmendment' ) ),
+			api_class: TTAPI.APIRecurringPayStubAmendment,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.RECURRING_AMENDMENT,
@@ -242,7 +248,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		// Employee(s)
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -267,7 +273,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -320,7 +326,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		// Percent of
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ),
+			api_class: TTAPI.APIPayStubEntryAccount,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
@@ -336,12 +342,11 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		form_item_input.TTextInput( { field: 'ps_amendment_description', width: 359 } );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab_recurring_ps_amendment_column1, '' );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -384,7 +389,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
@@ -395,7 +400,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
@@ -403,4 +408,4 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		];
 	}
 
-} );
+}

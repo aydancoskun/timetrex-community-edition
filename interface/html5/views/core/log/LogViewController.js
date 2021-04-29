@@ -1,119 +1,125 @@
-LogViewController = BaseViewController.extend( {
-	el: '#log_view_container',
-	tables: {
-		'product': ['product', 'product_price'],
-		'user_contact': ['user_contact'],
-		'users': ['users', 'user_preference', 'user_wage', 'authentication'],
-		'user_wage': ['user_wage'],
-		'user_title': ['user_title'],
-		'user_preference': ['user_preference'],
-		'bank_account': ['bank_account'],
-		'user_default': ['user_default'],
-		'user_group': ['user_group'],
-		'company': ['company'],
-		'pay_period_schedule': ['pay_period_schedule', 'pay_period', 'pay_period_schedule_user'],
-		'pay_period': ['pay_period'],
-		'branch': ['branch'],
-		'department': ['department'],
-		'hierarchy_control': ['hierarchy_control', 'hierarchy_object_type', 'hierarchy_user', 'hierarchy_level'],
-		'wage_group': ['wage_group'],
-		'ethnic_group': ['ethnic_group'],
-		'currency': ['currency'],
-		'currency_rate': ['currency_rate'],
-		'permission_control': ['permission_control', 'permission_user'],
-		'other_field': ['other_field'],
-		'station': ['station', 'station_user_group', 'station_branch', 'station_department', 'station_include_user', 'station_exclude_user'],
-		'pay_stub_amendment': ['pay_stub_amendment'],
-		'recurring_ps_amendment': ['recurring_ps_amendment', 'recurring_ps_amendment_user'],
-		'pay_stub_entry_account': ['pay_stub_entry_account'],
-		'company_deduction': ['company_deduction', 'user_deduction', 'company_deduction_pay_stub_entry_account'],
-		'user_expense': ['user_expense'],
-		'round_interval_policy': ['round_interval_policy'],
-		'meal_policy': ['meal_policy'],
-		'break_policy': ['break_policy'],
-		'over_time_policy': ['over_time_policy'],
-		'absence_policy': ['absence_policy'],
-		'recurring_holiday': ['recurring_holiday'],
-		'holiday_policy': ['holiday_policy', 'holiday_policy_recurring_holiday'],
-		'holidays': ['holidays'],
-		'premium_policy': ['premium_policy'],
-		'policy_group': ['policy_group', 'policy_group_user'],
-		'document': ['document', 'document_revision'],
-		'document_group': ['document_group'],
-		'document_revision': ['document_revision'],
-		'schedule_policy': ['schedule_policy'],
-		'accrual_policy': ['accrual_policy', 'accrual_policy_milestone', 'accrual_policy_user_modifier'],
-		'client': ['client', 'client_contact', 'client_payment'],
-		'report_custom_column': ['report_custom_column'],
-		'client_contact': ['client_contact'],
-		'client_payment': ['client_payment'],
-		'invoice_transaction': ['invoice_transaction'],
-		'invoice': ['invoice'],
-		'job': ['job', 'job_exclude_job_item', 'job_exclude_user', 'job_include_job_item', 'job_include_user', 'job_job_item_group', 'job_user_branch', 'job_user_group', 'job_user_department'],
-		'client_group': ['client_group'],
-		'product_group': ['product_group'],
-		'job_item': ['job_item'],
-		'job_group': ['job_group'],
-		'job_item_group': ['job_item_group'],
-		'report_schedule': ['report_schedule'],
-		'accrual_policy_account': ['accrual_policy_account'],
-		'accrual': ['accrual'],
-		'accrual_balance': ['accrual_balance'],
-		'schedule': ['schedule'],
-		'recurring_schedule_control': ['recurring_schedule_control', 'recurring_schedule_user'],
-		'recurring_schedule_template_control': ['recurring_schedule_template_control', 'recurring_schedule_template'],
-		'punch': ['punch', 'punch_control'],
-		'kpi': ['kpi'],
-		'kpi_group': ['kpi_group'],
-		'qualification': ['qualification'],
-		'qualification_group': ['qualification_group'],
-		'user_skill': ['user_skill'],
-		'user_education': ['user_education'],
-		'user_membership': ['user_membership'],
-		'user_license': ['user_license'],
-		'user_language': ['user_language'],
-		'job_vacancy': ['job_vacancy'],
-		'job_application': ['job_application'],
-		'job_applicant': ['job_applicant'],
-		'invoice_district': ['invoice_district'],
-		'job_applicant_employment': ['job_applicant_employment'],
-		'job_applicant_reference': ['job_applicant_reference'],
-		'job_applicant_location': ['job_applicant_location'],
-		'job_applicant_skill': ['job_applicant_skill'],
-		'job_applicant_education': ['job_applicant_education'],
-		'job_applicant_license': ['job_applicant_license'],
-		'job_applicant_membership': ['job_applicant_membership'],
-		'job_applicant_language': ['job_applicant_language'],
-		'tax_policy': ['tax_policy'],
-		'area_policy': ['area_policy'],
-		'shipping_policy': ['shipping_policy'],
-		'payment_gateway': ['payment_gateway'],
-		'request': ['request'],
-		'exception_policy_control': ['exception_policy_control', 'exception_policy'],
-		'user_review_control': ['user_review_control', 'user_review'],
-		'roe': ['roe'],
-		'expense_policy': ['expense_policy'],
-		'user_report_data': ['user_report_data'],
-		'regular_time_policy': ['regular_time_policy'],
-		'pay_code': ['pay_code'],
-		'pay_formula_policy': ['pay_formula_policy'],
-		'contributing_pay_code_policy': ['contributing_pay_code_policy'],
-		'contributing_shift_policy': ['contributing_shift_policy'],
-		'accrual_policy_user_modifier': ['accrual_policy_user_modifier'],
-		'job_item_amendment': ['job_item_amendment'],
-		'user_date_total': ['user_date_total'],
-		'pay_stub': ['pay_stub', 'pay_stub_entry'],
-		'legal_entity': ['legal_entity'],
-		'payroll_remittance_agency': ['payroll_remittance_agency'],
-		'payroll_remittance_agency_event': ['payroll_remittance_agency_event'],
-		'remittance_source_account': ['remittance_source_account'],
-		'remittance_destination_account': ['remittance_destination_account'],
-		'geo_fence': ['geo_fence']
-	},
-	log_detail_grid: null,
-	log_detail_script_name: null,
+class LogViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#log_view_container',
+			tables: {
+				'product': ['product', 'product_price'],
+				'user_contact': ['user_contact'],
+				'users': ['users', 'user_preference', 'user_wage', 'authentication'],
+				'user_wage': ['user_wage'],
+				'user_title': ['user_title'],
+				'user_preference': ['user_preference'],
+				'bank_account': ['bank_account'],
+				'user_default': ['user_default'],
+				'user_group': ['user_group'],
+				'company': ['company'],
+				'pay_period_schedule': ['pay_period_schedule', 'pay_period', 'pay_period_schedule_user'],
+				'pay_period': ['pay_period'],
+				'branch': ['branch'],
+				'department': ['department'],
+				'hierarchy_control': ['hierarchy_control', 'hierarchy_object_type', 'hierarchy_user', 'hierarchy_level'],
+				'wage_group': ['wage_group'],
+				'ethnic_group': ['ethnic_group'],
+				'currency': ['currency'],
+				'currency_rate': ['currency_rate'],
+				'permission_control': ['permission_control', 'permission_user'],
+				'other_field': ['other_field'],
+				'station': ['station', 'station_user_group', 'station_branch', 'station_department', 'station_include_user', 'station_exclude_user'],
+				'pay_stub_amendment': ['pay_stub_amendment'],
+				'recurring_ps_amendment': ['recurring_ps_amendment', 'recurring_ps_amendment_user'],
+				'pay_stub_entry_account': ['pay_stub_entry_account'],
+				'company_deduction': ['company_deduction', 'user_deduction', 'company_deduction_pay_stub_entry_account'],
+				'user_expense': ['user_expense'],
+				'round_interval_policy': ['round_interval_policy'],
+				'meal_policy': ['meal_policy'],
+				'break_policy': ['break_policy'],
+				'over_time_policy': ['over_time_policy'],
+				'absence_policy': ['absence_policy'],
+				'recurring_holiday': ['recurring_holiday'],
+				'holiday_policy': ['holiday_policy', 'holiday_policy_recurring_holiday'],
+				'holidays': ['holidays'],
+				'premium_policy': ['premium_policy'],
+				'policy_group': ['policy_group', 'policy_group_user'],
+				'document': ['document', 'document_revision'],
+				'document_group': ['document_group'],
+				'document_revision': ['document_revision'],
+				'schedule_policy': ['schedule_policy'],
+				'accrual_policy': ['accrual_policy', 'accrual_policy_milestone', 'accrual_policy_user_modifier'],
+				'client': ['client', 'client_contact', 'client_payment'],
+				'report_custom_column': ['report_custom_column'],
+				'client_contact': ['client_contact'],
+				'client_payment': ['client_payment'],
+				'invoice_transaction': ['invoice_transaction'],
+				'invoice': ['invoice'],
+				'job': ['job', 'job_exclude_job_item', 'job_exclude_user', 'job_include_job_item', 'job_include_user', 'job_job_item_group', 'job_user_branch', 'job_user_group', 'job_user_department'],
+				'client_group': ['client_group'],
+				'product_group': ['product_group'],
+				'job_item': ['job_item'],
+				'job_group': ['job_group'],
+				'job_item_group': ['job_item_group'],
+				'report_schedule': ['report_schedule'],
+				'accrual_policy_account': ['accrual_policy_account'],
+				'accrual': ['accrual'],
+				'accrual_balance': ['accrual_balance'],
+				'schedule': ['schedule'],
+				'recurring_schedule_control': ['recurring_schedule_control', 'recurring_schedule_user'],
+				'recurring_schedule_template_control': ['recurring_schedule_template_control', 'recurring_schedule_template'],
+				'punch': ['punch', 'punch_control'],
+				'kpi': ['kpi'],
+				'kpi_group': ['kpi_group'],
+				'qualification': ['qualification'],
+				'qualification_group': ['qualification_group'],
+				'user_skill': ['user_skill'],
+				'user_education': ['user_education'],
+				'user_membership': ['user_membership'],
+				'user_license': ['user_license'],
+				'user_language': ['user_language'],
+				'job_vacancy': ['job_vacancy'],
+				'job_application': ['job_application'],
+				'job_applicant': ['job_applicant'],
+				'invoice_district': ['invoice_district'],
+				'job_applicant_employment': ['job_applicant_employment'],
+				'job_applicant_reference': ['job_applicant_reference'],
+				'job_applicant_location': ['job_applicant_location'],
+				'job_applicant_skill': ['job_applicant_skill'],
+				'job_applicant_education': ['job_applicant_education'],
+				'job_applicant_license': ['job_applicant_license'],
+				'job_applicant_membership': ['job_applicant_membership'],
+				'job_applicant_language': ['job_applicant_language'],
+				'tax_policy': ['tax_policy'],
+				'area_policy': ['area_policy'],
+				'shipping_policy': ['shipping_policy'],
+				'payment_gateway': ['payment_gateway'],
+				'request': ['request'],
+				'exception_policy_control': ['exception_policy_control', 'exception_policy'],
+				'user_review_control': ['user_review_control', 'user_review'],
+				'roe': ['roe'],
+				'expense_policy': ['expense_policy'],
+				'user_report_data': ['user_report_data'],
+				'regular_time_policy': ['regular_time_policy'],
+				'pay_code': ['pay_code'],
+				'pay_formula_policy': ['pay_formula_policy'],
+				'contributing_pay_code_policy': ['contributing_pay_code_policy'],
+				'contributing_shift_policy': ['contributing_shift_policy'],
+				'accrual_policy_user_modifier': ['accrual_policy_user_modifier'],
+				'job_item_amendment': ['job_item_amendment'],
+				'user_date_total': ['user_date_total'],
+				'pay_stub': ['pay_stub', 'pay_stub_entry'],
+				'legal_entity': ['legal_entity'],
+				'payroll_remittance_agency': ['payroll_remittance_agency'],
+				'payroll_remittance_agency_event': ['payroll_remittance_agency_event'],
+				'remittance_source_account': ['remittance_source_account'],
+				'remittance_destination_account': ['remittance_destination_account'],
+				'geo_fence': ['geo_fence']
+			},
+			log_detail_grid: null,
+			log_detail_script_name: null
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'LogEditView.html';
@@ -122,7 +128,7 @@ LogViewController = BaseViewController.extend( {
 		this.viewId = 'Log';
 		this.script_name = 'LogView';
 		this.log_detail_script_name = 'LogDetailView';
-		this.api = new ( APIFactory.getAPIClass( 'APILog' ) )();
+		this.api = TTAPI.APILog;
 		this.noticeDiv = $( '.audit-info' );
 
 		this.render();
@@ -132,11 +138,10 @@ LogViewController = BaseViewController.extend( {
 		} else {
 			this.buildContextMenu();
 		}
+	}
 
-	},
-
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_audit_details': { 'label': $.i18n._( 'Audit Details' ) },
@@ -144,7 +149,7 @@ LogViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APILog' ) ),
+			api_class: TTAPI.APILog,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LOG,
@@ -189,10 +194,9 @@ LogViewController = BaseViewController.extend( {
 
 		// set the log details information.
 		this.initLogDetailsView();
+	}
 
-	},
-
-	search: function( set_default_menu, page_action, page_number, callBack ) {
+	search( set_default_menu, page_action, page_number, callBack ) {
 
 		if ( !Global.isSet( set_default_menu ) ) {
 			set_default_menu = true;
@@ -382,10 +386,9 @@ LogViewController = BaseViewController.extend( {
 
 			}
 		} );
+	}
 
-	},
-
-	getGridSetup: function() {
+	getGridSetup() {
 		var $this = this;
 		return {
 			container_selector: this.sub_view_mode ? '.edit-view-tab-bar' : 'body',
@@ -416,9 +419,9 @@ LogViewController = BaseViewController.extend( {
 				$this.baseViewSubTabGridResize( 'tab_audit' ); //Works for Edit Employee -> Audit tab
 			}
 		};
-	},
+	}
 
-	_setGridSizeGridHeight: function( header_size ) {
+	_setGridSizeGridHeight( header_size ) {
 		// if ( !this.sub_view_mode ) {
 		// 	this.grid.setGridHeight( ($( this.el ).height() - (this.search_panel && this.search_panel.is( ':visible' ) ? this.search_panel.height() : 0) - 68 - header_size) );
 		// } else if ( !Global.isSet( this.resizeSubGrid ) ) {
@@ -429,16 +432,16 @@ LogViewController = BaseViewController.extend( {
 		}
 
 		// }
-	},
+	}
 
-	setAuditInfo: function() {
+	setAuditInfo() {
 		var updated_info = ( this.parent_edit_record['updated_date'] || $.i18n._( 'N/A' ) ) + ' ' + $.i18n._( 'by' ) + ' ' + ( this.parent_edit_record['updated_by'] || $.i18n._( 'N/A' ) ) + ' ';
 		var created_info = ( this.parent_edit_record['created_date'] || $.i18n._( 'N/A' ) ) + ' ' + $.i18n._( 'by' ) + ' ' + ( this.parent_edit_record['created_by'] || $.i18n._( 'N/A' ) ) + ' ';
 		this.noticeDiv.find( '.left > .info' ).text( updated_info );
 		this.noticeDiv.find( '.right > .info' ).text( created_info );
-	},
+	}
 
-	autoOpenEditViewIfNecessary: function() {
+	autoOpenEditViewIfNecessary() {
 		//Auto open edit view. Should set in IndexController
 		switch ( LocalCacheData.current_doing_context_action ) {
 			case 'view':
@@ -450,10 +453,9 @@ LogViewController = BaseViewController.extend( {
 		}
 
 		this.autoOpenEditOnlyViewIfNecessary();
+	}
 
-	},
-
-	initLogDetailsView: function( column_start_from ) {
+	initLogDetailsView( column_start_from ) {
 
 		var grid = this.edit_view.find( '#grid' );
 
@@ -501,10 +503,10 @@ LogViewController = BaseViewController.extend( {
 		};
 
 		this.log_detail_grid = new TTGrid( this.log_detail_script_name + '_grid', grid_setup, column_info_array );
-	},
+	}
 
-	initEditViewData: function() {
-		this._super( 'initEditViewData' );
+	initEditViewData() {
+		super.initEditViewData();
 		if ( Global.getProductEdition() >= 15 ) {
 			this.edit_view_tab.find( '#tab_audit_details' ).find( '.detail-grid-row' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
@@ -515,13 +517,13 @@ LogViewController = BaseViewController.extend( {
 		}
 
 		this.log_detail_grid.setGridColumnsWidth();
-	},
+	}
 
-	onGridDblClickRow: function() {
+	onGridDblClickRow() {
 		this.onViewDetailClick();
-	},
+	}
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -547,9 +549,9 @@ LogViewController = BaseViewController.extend( {
 		}
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-	},
+	}
 
-	setLogDetailsViewData: function( log_detail_data ) {
+	setLogDetailsViewData( log_detail_data ) {
 
 		var $this = this;
 
@@ -564,9 +566,9 @@ LogViewController = BaseViewController.extend( {
 		$this.log_detail_grid.setData( log_detail_data );
 
 		$this.setLogDetailGridSize();
-	},
+	}
 
-	setLogDetailGridSize: function() {
+	setLogDetailGridSize() {
 
 		if ( !this.log_detail_grid || !$( this.log_detail_grid.grid ).is( ':visible' ) ) {
 			return;
@@ -576,10 +578,9 @@ LogViewController = BaseViewController.extend( {
 		var first_row = this.edit_view.find( '.first-row' );
 		this.log_detail_grid.grid.setGridWidth( tab_audit_details.width() );
 		this.log_detail_grid.grid.setGridHeight( tab_audit_details.height() - first_row.height() );
+	}
 
-	},
-
-	showDetailNoResultCover: function() {
+	showDetailNoResultCover() {
 		this.removeNoResultCover();
 		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
 		this.no_result_box.NoResultBox( { related_view_controller: this, is_new: false } );
@@ -587,18 +588,18 @@ LogViewController = BaseViewController.extend( {
 		var grid_div = this.edit_view.find( '.grid-div' );
 
 		grid_div.append( this.no_result_box );
-	},
+	}
 
-	showNoResultCover: function() {
-		this._super( 'showNoResultCover', false );
-	},
+	showNoResultCover() {
+		super.showNoResultCover( false );
+	}
 
-	onEditClick: function( editId, noRefreshUI ) {
+	onEditClick( editId, noRefreshUI ) {
 
 		this.onViewDetailClick( editId, noRefreshUI );
-	},
+	}
 
-	onViewDetailClick: function( editId ) {
+	onViewDetailClick( editId ) {
 
 		var $this = this;
 		this.is_viewing = false;
@@ -651,9 +652,9 @@ LogViewController = BaseViewController.extend( {
 				$this.initEditView();
 			}
 		} );
-	},
+	}
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns() {
 		var column_filter = {};
 		column_filter.id = true;
 		column_filter.table_name = true;
@@ -674,9 +675,9 @@ LogViewController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	getFilterColumnsForViewDetails: function() {
+	getFilterColumnsForViewDetails() {
 		var display_columns = this.grid.getGridParam( 'colModel' );
 
 		var column_filter = {};
@@ -692,9 +693,9 @@ LogViewController = BaseViewController.extend( {
 		}
 
 		return column_filter;
-	},
+	}
 
-	setDefaultMenu: function() {
+	setDefaultMenu() {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -728,18 +729,17 @@ LogViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.view_detail:
 				this.onViewDetailClick();
 				break;
 		}
-	},
+	}
 
-	setEditMenu: function() {
+	setEditMenu() {
 
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
@@ -756,10 +756,9 @@ LogViewController = BaseViewController.extend( {
 			}
 
 		}
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -774,24 +773,24 @@ LogViewController = BaseViewController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	getSubViewFilter: function( filter ) {
+	getSubViewFilter( filter ) {
 		if ( Global.isSet( this.table_name_key ) ) {
 			filter['table_name'] = this.tables[this.table_name_key];
 		}
 
 		return filter;
-	},
+	}
 
-	searchDone: function() {
+	searchDone() {
 		$( 'window' ).trigger( 'resize' );
 		TTPromise.resolve( 'initSubAudit', 'init' );
-		this._super( 'searchDone' );
+		super.searchDone();
 
 	}
 
-} );
+}
 
 LogViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 

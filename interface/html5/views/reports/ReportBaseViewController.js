@@ -1,56 +1,61 @@
-ReportBaseViewController = BaseViewController.extend( {
+class ReportBaseViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			view_file: '',
 
-	view_file: '',
+			page_orientation_array: null,
+			font_size_array: null,
+			auto_refresh_array: null,
+			chart_display_mode_array: null,
+			chart_type_array: null,
+			templates_array: null,
+			setup_fields_array: null,
 
-	page_orientation_array: null,
-	font_size_array: null,
-	auto_refresh_array: null,
-	chart_display_mode_array: null,
-	chart_type_array: null,
-	templates_array: null,
-	setup_fields_array: null,
+			log_action_id_array: null,
 
-	log_action_id_array: null,
+			log_table_name_id_array: null,
 
-	log_table_name_id_array: null,
+			time_period_array: null,
 
-	time_period_array: null,
+			visible_report_widgets: null,
 
-	visible_report_widgets: null,
+			visible_report_values: null,
 
-	visible_report_values: null,
+			visible_report_widgets_order_fix: null,
 
-	visible_report_widgets_order_fix: null,
+			status_id_array: null,
 
-	status_id_array: null,
+			api_user_report: null,
 
-	api_user_report: null,
+			current_saved_report: null, // Current saved report if any
 
-	current_saved_report: null, // Current saved report if any
+			saved_report_array: null,
 
-	saved_report_array: null,
+			sub_saved_report_view_controller: null,
 
-	sub_saved_report_view_controller: null,
+			sub_custom_column_view_controller: null,
 
-	sub_custom_column_view_controller: null,
+			need_refresh_display_columns: false, //When custom column changed. Set this to true.
 
-	need_refresh_display_columns: false, //When custom column changed. Set this to true.
+			ReportMissedField: null,
 
-	ReportMissedField: null,
+			include_form_setup: false,
 
-	include_form_setup: false,
+			show_empty_message: false,
 
-	show_empty_message: false,
+			do_validate_after_create_ui: false, //Do validate if there is a saved report
 
-	do_validate_after_create_ui: false, //Do validate if there is a saved report
+			form_setup_changed: false
+		} );
 
-	form_setup_changed: false,
+		super( options );
+	}
 
-	preInit: function( options ) {
+	preInit( options ) {
 		this.preInitReport();
-	},
+	}
 
-	init: function( options ) {
+	init( options ) {
 		//Initialize this.real_this without having to call _super,
 		//this avoids Maximum stack size errors in other functions that call _super. Copied from __super.
 		this.real_this = this.constructor.__super__;
@@ -60,56 +65,45 @@ ReportBaseViewController = BaseViewController.extend( {
 		LocalCacheData.current_open_report_controller = this;
 
 		var $this = this;
-		require( [
-				'APIPayPeriodSchedule',
-				'APIUserReportData',
-				'APIDepartment',
-				'APIBranch',
-				'APIUserGroup',
-				'APIUserTitle',
-				'APILegalEntity',
-				'APIPayStub'
-			],
-			function() {
-				$this.api_user_report = new ( APIFactory.getAPIClass( 'APIUserReportData' ) )();
-				$this.initReport();
-				$this.buildContextMenu();
-				TTPromise.resolve( 'Reports', 'openReport' );
-				$this.postInitReport();
-			} );
-	},
+
+		$this.api_user_report = TTAPI.APIUserReportData;
+		$this.initReport();
+		$this.buildContextMenu();
+		TTPromise.resolve( 'Reports', 'openReport' );
+		$this.postInitReport();
+	}
 
 	// Removed because the require callback in init() serves this function and calls postInitReport() at the proper time.
 	// postInit: function(){
 	// },
 
-	preInitReport: function( options ) {
-	},
-	initReport: function( options ) {
-	},
-	postInitReport: function( options ) {
-	},
+	preInitReport( options ) {
+	}
 
-	render: function() {
+	initReport( options ) {
+	}
 
-	},
+	postInitReport( options ) {
+	}
+
+	render() {
+	}
 
 	// Need always override if report has filter field.
-	processFilterField: function() {
+	processFilterField() {
+	}
 
-	},
-
-	getDefaultReport: function( data ) {
+	getDefaultReport( data ) {
 		var item = _.find( data, function( item ) {
 			return item.is_default === true;
 		} );
 		data && data.length > 0 && !item && ( item = data[0] );
 
 		return item;
-	},
+	}
 
 	// overrides BaseViewController.getDefaultContextMenuModel()
-	getDefaultContextMenuModel: function() {
+	getDefaultContextMenuModel() {
 
 		var default_context_menu_model = {
 			// only put groups that are used in default here, others go in the relevant view controller to avoid confusion on which are obsolete.
@@ -172,13 +166,13 @@ ReportBaseViewController = BaseViewController.extend( {
 		};
 
 		return default_context_menu_model;
-	},
+	}
 
 	//this prevents the function of the same name in base class from hiding all of the export to excel buttons on all reports due to their lack of a grid.
-	setDefaultMenuExportIcon: function( context_btn, grid_selected_length, pId ) {
-	},
+	setDefaultMenuExportIcon( context_btn, grid_selected_length, pId ) {
+	}
 
-	openEditView: function() {
+	openEditView() {
 		var $this = this;
 		var $context_menu_array = $this.context_menu_array;
 		this.initOptions( function() {
@@ -227,9 +221,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			} );
 		} );
-	},
+	}
 
-	setDefaultConfigData: function() {
+	setDefaultConfigData() {
 
 		var $this = this;
 		this.api.getOtherConfig( {
@@ -277,19 +271,17 @@ ReportBaseViewController = BaseViewController.extend( {
 				}
 			}
 		} );
+	}
 
-	},
-
-	setTabStatus: function() {
+	setTabStatus() {
 		//Handle most cases that one tab and on audit tab
-	},
+	}
 
 	//Call this from setEditViewData
-	initTabData: function() {
+	initTabData() {
+	}
 
-	},
-
-	getReportData: function( callBack ) {
+	getReportData( callBack ) {
 
 		var $this = this;
 		var args = {};
@@ -303,10 +295,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				callBack( res_data );
 			}
 		} );
+	}
 
-	},
-
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 		var options = [
 			{ option_name: 'page_orientation' },
 			{ option_name: 'font_size' },
@@ -321,11 +312,10 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.initDropDownOptions( options, function( result ) {
 			callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
 		} );
-
-	},
+	}
 
 	//Call this from setEditViewData
-	initEditViewData: function() {
+	initEditViewData() {
 		var $this = this;
 
 		//Set Navigation Awesomebox
@@ -356,18 +346,18 @@ ReportBaseViewController = BaseViewController.extend( {
 		//Init *Please save this record before modifying any related data* box
 		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( { related_view_controller: this } );
 		this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'none' );
-	},
+	}
 
-	onRightOrLeftArrowClickCallBack: function( next_select_item ) {
+	onRightOrLeftArrowClickCallBack( next_select_item ) {
 		this.navigation.setValue( next_select_item );
 		this.current_saved_report = next_select_item;
 		this.current_edit_record = {};
 		this.visible_report_values = {};
 		this.initEditView();
-	},
+	}
 
 	//Call this after initEditViewUI, usually after current_edit_record is set
-	initEditView: function() {
+	initEditView() {
 		var $this = this;
 		var current_url = window.location.href;
 		if ( current_url.indexOf( '&sm' ) > 0 ) {
@@ -390,11 +380,10 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		Global.setURLToBrowser( current_url );
 
-		this._super( 'initEditView' );
+		super.initEditView();
+	}
 
-	},
-
-	setNavigation: function() {
+	setNavigation() {
 
 		var $this = this;
 
@@ -421,10 +410,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 			Global.triggerAnalyticsEditViewNavigation( 'navigation', $this.viewId );
 		} );
+	}
 
-	},
-
-	initSubCustomColumnView: function( callBack ) {
+	initSubCustomColumnView( callBack ) {
 		var $this = this;
 
 		$this.sub_view_mode = true;
@@ -472,13 +460,13 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 			$this.sub_custom_column_view_controller.initData(); //Init data in this parent view
 		}
-	},
+	}
 
-	onSavedReportDelete: function() {
+	onSavedReportDelete() {
 		this.refreshNav();
-	},
+	}
 
-	initSubSavedReportView: function( callBack ) {
+	initSubSavedReportView( callBack ) {
 		var $this = this;
 
 		$this.sub_view_mode = true;
@@ -528,9 +516,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				$this.sub_saved_report_view_controller.initData(); //Init data in this parent view
 			}
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
+	buildEditViewUI() {
 		var $this = this;
 
 		var navigation_div = this.edit_view.find( '.navigation-div' );
@@ -585,7 +573,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUserReportData' ) ),
+			api_class: TTAPI.APIUserReportData,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_REPORT_DATA,
@@ -698,13 +686,13 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Combine Columns' ), form_item_input, tab2_column1, '' );
 
 		TTPromise.resolve( 'init', 'init' );
-	},
+	}
 
-	buildFormSetupUI: function() {
+	buildFormSetupUI() {
 		//Need always override
-	},
+	}
 
-	buildSelectTemplateData: function() {
+	buildSelectTemplateData() {
 		var template = this.current_saved_report.data.template;
 		var config = this.current_saved_report.data.config;
 
@@ -721,9 +709,10 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		return result;
-	},
+	}
+
 	/* jshint ignore:start */
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData() {
 
 		var $this = this;
 		if ( LocalCacheData.default_filter_for_next_open_view ) {
@@ -815,12 +804,12 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		this.setDefaultConfigData();
 		this.setEditViewDataDone();
+	}
 
-	},
 	/* jshint ignore:end */
 
 	//set tab 0 visible after all data set done. This be hide when init edit view data
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 //		LocalCacheData.current_doing_context_action = '';
 		this.setTabOVisibility( true );
 
@@ -848,15 +837,14 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		TTPromise.resolve( 'init', 'init' );
 		$( '.edit-view-tab-bar' ).css( 'opacity', 1 );
-
-	},
+	}
 
 	//This is just calling into the base anyway, so commented out for now.
-	// validateResult: function( result ) {
-	// 	this._super( 'validateResult', result );
+	// validateResult( result ) {
+	// 	super.validateResult( result );
 	// },
 
-	initRightClickMenuForViewButton: function() {
+	initRightClickMenuForViewButton() {
 		var $this = this;
 		var selector = '#viewHTMLIcon';
 		if ( $( selector ).length == 0 ) {
@@ -880,9 +868,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			items: items,
 			zIndex: 50
 		} );
-	},
+	}
 
-	getViewButtonRightClickItems: function() {
+	getViewButtonRightClickItems() {
 		var $this = this;
 		var items = {};
 		items['viewHTMLIcon'] = {
@@ -905,26 +893,25 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		return items;
-	},
+	}
 
-//	onViewRightClick: function( key ) {
+//	onViewRightClick( key ) {
 //		//TODO show view
 //		alert('dfdf');
 //	},
 
 	// Need always override if report has filter field
-	onFormItemChangeProcessFilterField: function() {
-
-	},
+	onFormItemChangeProcessFilterField() {
+	}
 
 	//Shim method to allow override for classes that need their own onFormItemChange for a specific purpose ie payroll export reports
 	//eg in payroll export, when export_type is changed, we need to execute code but also need the default behaviour of onFormItemChange.
-	preFormItemChange: function( target, doNotDoValidate ) {
+	preFormItemChange( target, doNotDoValidate ) {
 		return true;
-	},
+	}
 
 	/* jshint ignore:start */
-	onFormItemChange: function( target, doNotDoValidate ) {
+	onFormItemChange( target, doNotDoValidate ) {
 		this.preFormItemChange( target ); //shim for child class
 		var $this = this;
 		this.setIsChanged( target );
@@ -1019,10 +1006,12 @@ ReportBaseViewController = BaseViewController.extend( {
 		if ( this.include_form_setup && key === 3 ) {
 			this.form_setup_changed = true;
 		}
-	},
+	}
+
 	/* jshint ignore:end */
+
 	//Create first tab widget base on select template
-	onTemplateChange: function( templateId ) {
+	onTemplateChange( templateId ) {
 		var $this = this;
 		this.api.getTemplate( templateId, {
 			onResult: function( result ) {
@@ -1031,9 +1020,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			}
 		} );
-	},
+	}
 
-	setSelectTemplate: function( result_data ) {
+	setSelectTemplate( result_data ) {
 		var $this = this;
 		var result = Global.buildRecordArray( result_data );
 
@@ -1056,9 +1045,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			$this.createUI( result );
 		}
-	},
+	}
 
-	getFieldLabel: function( field ) {
+	getFieldLabel( field ) {
 		var len = this.setup_fields_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
@@ -1067,10 +1056,10 @@ ReportBaseViewController = BaseViewController.extend( {
 				return setup_field.label;
 			}
 		}
-	},
+	}
 
 	//Create widgets,
-	createUI: function( uiModel ) {
+	createUI( uiModel ) {
 
 		this.cleanUI();
 		var $this = this;
@@ -1177,16 +1166,15 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.setEditViewWidgetsMode();
 		this.need_refresh_display_columns = false;
 		this.editFieldResize( 0 );
+	}
 
-	},
-
-	// onTabIndexChange: function( e, ui ) {
+	// onTabIndexChange( e, ui ) {
 	//
 	// },	// onTabIndexChange: function( e, ui ) {
 	//
 	// },
 	/* jshint ignore:start */
-	onTabShow: function( e ) {
+	onTabShow( e ) {
 		var $this = this;
 		var key = $( e.target ).tabs( 'option', 'active' );
 
@@ -1283,14 +1271,14 @@ ReportBaseViewController = BaseViewController.extend( {
 		if ( key === 0 ) {
 			this.validate();
 		}
-	},
+	}
 
 	/**
 	 * Copied to ROEViewController as it doesn't share this base
 	 * FIXME: might need to go into BaseViewController eventually
 	 * @param label
 	 */
-	checkFormSetupSaved: function( last_index, label ) {
+	checkFormSetupSaved( last_index, label ) {
 		var $this = this;
 
 		if ( label == undefined ) {
@@ -1305,15 +1293,22 @@ ReportBaseViewController = BaseViewController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
 	/* jshint ignore:end */
-	cleanUI: function() {
+	cleanUI() {
 		for ( var key in this.edit_view_form_item_dic ) {
 			if ( !this.edit_view_form_item_dic.hasOwnProperty( key ) ) {
 				continue;
 			}
 			var html_item = this.edit_view_form_item_dic[key];
+
+			//Check if its a separator with a key of separated_X and skip removing it if it is.
+			// FIXME: Would be nice to get a better way to detect a separator widget.
+			if ( typeof html_item.getField === 'undefined' && key.indexOf('separated_') != -1 ) {
+				continue;
+			}
+
 			html_item.remove();
 		}
 
@@ -1329,21 +1324,22 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 		$( '.errortip-box' ).remove();
 		$( '.errortip-box' ).remove();
-	},
+	}
 
-	removeEditView: function() {
+	removeEditView() {
 
-		this._super( 'removeEditView' );
+		super.removeEditView();
 		this.sub_custom_column_view_controller = null;
 		this.sub_saved_report_view_controller = null;
 
 		//this is also happening in Ribbonviewcontoller in onSubMenuClick
 		LocalCacheData.current_open_report_controller = null;
+	}
 
-	},
 	/* jshint ignore:start */
+
 	//Get Widget base on field
-	getUIWidget: function( field ) {
+	getUIWidget( field ) {
 		var widget;
 
 		if ( field.indexOf( 'time_period' ) >= 0 ) {
@@ -1438,45 +1434,45 @@ ReportBaseViewController = BaseViewController.extend( {
 				case 'exclude_reviewer_user_id':
 				case 'job_applicant_interviewer_user_id':
 				case 'job_application_interviewer_user_id':
-					widget = this.getTComboBox( field, ALayoutIDs.USER, ( APIFactory.getAPIClass( 'APIUser' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.USER, TTAPI.APIUser );
 					break;
 				case 'user_title_id':
-					widget = this.getTComboBox( field, ALayoutIDs.USER_TITLE, ( APIFactory.getAPIClass( 'APIUserTitle' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.USER_TITLE, TTAPI.APIUserTitle );
 					break;
 				case 'payroll_remittance_agency_id':
-					widget = this.getTComboBox( field, ALayoutIDs.PAYROLL_REMITTANCE_AGENCY, ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.PAYROLL_REMITTANCE_AGENCY, TTAPI.APIPayrollRemittanceAgency );
 					break;
 				case 'legal_entity_id':
-					widget = this.getTComboBox( field, ALayoutIDs.LEGAL_ENTITY, ( APIFactory.getAPIClass( 'APILegalEntity' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.LEGAL_ENTITY, TTAPI.APILegalEntity );
 					break;
 				case 'default_branch_id':
 				case 'schedule_branch_id':
 				case 'punch_branch_id':
 
-					widget = this.getTComboBox( field, ALayoutIDs.BRANCH, ( APIFactory.getAPIClass( 'APIBranch' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.BRANCH, TTAPI.APIBranch );
 					break;
 				case 'default_department_id':
 				case 'schedule_department_id':
 				case 'punch_department_id':
-					widget = this.getTComboBox( field, ALayoutIDs.DEPARTMENT, ( APIFactory.getAPIClass( 'APIDepartment' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.DEPARTMENT, TTAPI.APIDepartment );
 					break;
 				case 'default_job_id':
 				case 'punch_job_id':
 				case 'include_job_id':
 				case 'exclude_job_id':
-					widget = this.getTComboBox( field, ALayoutIDs.JOB, ( APIFactory.getAPIClass( 'APIJob' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.JOB, TTAPI.APIJob );
 					break;
 				case 'default_job_item_id':
 				case 'punch_job_item_id':
 				case 'include_job_item_id':
 				case 'exclude_job_item_id':
-					widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, ( APIFactory.getAPIClass( 'APIJobItem' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, TTAPI.APIJobItem );
 					break;
 				case 'absence_policy_id':
-					widget = this.getTComboBox( field, ALayoutIDs.ABSENCES_POLICY, ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.ABSENCES_POLICY, TTAPI.APIAbsencePolicy );
 					break;
 				case 'currency_id':
-					widget = this.getTComboBox( field, ALayoutIDs.CURRENCY, ( APIFactory.getAPIClass( 'APICurrency' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.CURRENCY, TTAPI.APICurrency );
 					break;
 				case 'include_no_data_rows':
 				case 'exclude_ytd_adjustment':
@@ -1484,54 +1480,54 @@ ReportBaseViewController = BaseViewController.extend( {
 					widget = this.getCheckBox( field );
 					break;
 				case 'accrual_policy_id':
-					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY, ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY, TTAPI.APIAccrualPolicy );
 					break;
 				case 'pay_period_id':
-					widget = this.getTComboBox( field, ALayoutIDs.PAY_PERIOD, ( APIFactory.getAPIClass( 'APIPayPeriod' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
 					break;
 				case 'job_id':
 					if ( ( Global.getProductEdition() >= 20 ) ) {
-						widget = this.getTComboBox( field, ALayoutIDs.JOB, ( APIFactory.getAPIClass( 'APIJob' ) ) );
+						widget = this.getTComboBox( field, ALayoutIDs.JOB, TTAPI.APIJob );
 					}
 					break;
 				case 'job_item_id':
 					if ( ( Global.getProductEdition() >= 20 ) ) {
-						widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, ( APIFactory.getAPIClass( 'APIJobItem' ) ) );
+						widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, TTAPI.APIJobItem );
 					}
 					break;
 				case 'expense_policy_id':
-					widget = this.getTComboBox( field, ALayoutIDs.EXPENSE_POLICY, ( APIFactory.getAPIClass( 'APIExpensePolicy' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.EXPENSE_POLICY, TTAPI.APIExpensePolicy );
 					break;
 				case 'pay_stub_entry_account_id':
-					widget = this.getTComboBox( field, ALayoutIDs.PAY_STUB_ACCOUNT, ( APIFactory.getAPIClass( 'APIPayStubEntryAccount' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.PAY_STUB_ACCOUNT, TTAPI.APIPayStubEntryAccount );
 					break;
 				case 'product_id':
 				case 'exclude_product_id':
 				case 'include_product_id':
-					widget = this.getTComboBox( field, ALayoutIDs.PRODUCT, ( APIFactory.getAPIClass( 'APIProduct' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.PRODUCT, TTAPI.APIProduct );
 					break;
 				case 'job_client_id':
 				case 'exclude_client_id':
 				case 'include_client_id':
-					widget = this.getTComboBox( field, ALayoutIDs.CLIENT, ( APIFactory.getAPIClass( 'APIClient' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.CLIENT, TTAPI.APIClient );
 					break;
 				case 'company_deduction_id':
-					widget = this.getTComboBox( field, ALayoutIDs.COMPANY_DEDUCTION, ( APIFactory.getAPIClass( 'APICompanyDeduction' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.COMPANY_DEDUCTION, TTAPI.APICompanyDeduction );
 					break;
 				case 'qualification_id':
-					widget = this.getTComboBox( field, ALayoutIDs.QUALIFICATION, ( APIFactory.getAPIClass( 'APIQualification' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.QUALIFICATION, TTAPI.APIQualification );
 					break;
 				case 'kpi_id':
-					widget = this.getTComboBox( field, ALayoutIDs.KPI, ( APIFactory.getAPIClass( 'APIKPI' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.KPI, TTAPI.APIKPI );
 					break;
 				case 'job_applicant_id':
-					widget = this.getTComboBox( field, ALayoutIDs.JOB_APPLICANT, ( APIFactory.getAPIClass( 'APIJobApplicant' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.JOB_APPLICANT, TTAPI.APIJobApplicant );
 					break;
 				case 'job_vacancy_id':
-					widget = this.getTComboBox( field, ALayoutIDs.JOB_VACANCY, ( APIFactory.getAPIClass( 'APIJobVacancy' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.JOB_VACANCY, TTAPI.APIJobVacancy );
 					break;
 				case 'accrual_policy_account_id':
-					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY_ACCOUNT, ( APIFactory.getAPIClass( 'APIAccrualPolicyAccount' ) ) );
+					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY_ACCOUNT, TTAPI.APIAccrualPolicyAccount );
 					break;
 
 				default:
@@ -1548,17 +1544,18 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		return widget;
-	},
+	}
+
 	/* jshint ignore:end */
-	getTag: function( field ) {
+	getTag( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
 		widget.TTagInput( { field: field } );
 
 		return widget;
-	},
+	}
 
-	getTreeModeAComboBox: function( field ) {
+	getTreeModeAComboBox( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		widget = widget.AComboBox( {
@@ -1570,9 +1567,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getCheckBox: function( field ) {
+	getCheckBox( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.CHECKBOX );
 
 		widget = widget.TCheckbox( {
@@ -1580,9 +1577,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getTComboBox: function( field, layoutName, apiClass ) {
+	getTComboBox( field, layoutName, apiClass ) {
 
 		var widget = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -1596,9 +1593,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getSortComboBox: function( field ) {
+	getSortComboBox( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		widget = widget.AComboBox( {
 			field: field,
@@ -1609,9 +1606,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		} );
 
 		return widget;
-	},
+	}
 
-	getSimpleTComboBox: function( field, allowMultiple ) {
+	getSimpleTComboBox( field, allowMultiple ) {
 
 		if ( !Global.isSet( allowMultiple ) ) {
 			allowMultiple = true;
@@ -1628,10 +1625,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		} );
 
 		return widget;
+	}
 
-	},
-
-	getComboBox: function( field ) {
+	getComboBox( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		widget = widget.TComboBox( {
@@ -1640,9 +1636,10 @@ ReportBaseViewController = BaseViewController.extend( {
 		} );
 
 		return widget;
-	},
+	}
+
 	/* jshint ignore:start */
-	initSourceData: function( field, widget ) {
+	initSourceData( field, widget ) {
 
 		var api_instance = null;
 		var option = '';
@@ -1661,7 +1658,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 				break;
 			case 'kpi_group_id':
-				new ( APIFactory.getAPIClass( 'APIKPIGroup' ) )().getKPIGroup( '', false, false, {
+				TTAPI.APIKPIGroup.getKPIGroup( '', false, false, {
 					onResult: function( res ) {
 						res = res.getResult();
 						res = Global.buildTreeRecord( res );
@@ -1672,7 +1669,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				break;
 
 			case 'qualification_group_id':
-				new ( APIFactory.getAPIClass( 'APIQualificationGroup' ) )().getQualificationGroup( '', false, false, {
+				TTAPI.APIQualificationGroup.getQualificationGroup( '', false, false, {
 					onResult: function( res ) {
 
 						res = res.getResult();
@@ -1683,7 +1680,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				} );
 				break;
 			case 'product_group_id':
-				new ( APIFactory.getAPIClass( 'APIProductGroup' ) )().getProductGroup( '', false, false, {
+				TTAPI.APIProductGroup.getProductGroup( '', false, false, {
 					onResult: function( res ) {
 
 						res = res.getResult();
@@ -1694,7 +1691,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				} );
 				break;
 			case 'client_group_id':
-				new ( APIFactory.getAPIClass( 'APIClientGroup' ) )().getClientGroup( '', false, false, {
+				TTAPI.APIClientGroup.getClientGroup( '', false, false, {
 					onResult: function( res ) {
 
 						res = res.getResult();
@@ -1705,7 +1702,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				} );
 				break;
 			case 'user_group_id':
-				new ( APIFactory.getAPIClass( 'APIUserGroup' ) )().getUserGroup( '', false, false, {
+				TTAPI.APIUserGroup.getUserGroup( '', false, false, {
 					onResult: function( res ) {
 
 						res = res.getResult();
@@ -1716,7 +1713,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				} );
 				break;
 			case 'job_group_id':
-				new ( APIFactory.getAPIClass( 'APIJobGroup' ) )().getJobGroup( '', false, false, {
+				TTAPI.APIJobGroup.getJobGroup( '', false, false, {
 					onResult: function( res ) {
 						res = res.getResult();
 						res = Global.buildTreeRecord( res );
@@ -1726,7 +1723,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				} );
 				break;
 			case 'job_item_group_id':
-				new ( APIFactory.getAPIClass( 'APIJobItemGroup' ) )().getJobItemGroup( '', false, false, {
+				TTAPI.APIJobItemGroup.getJobItemGroup( '', false, false, {
 					onResult: function( res ) {
 						res = res.getResult();
 						res = Global.buildTreeRecord( res );
@@ -1736,87 +1733,87 @@ ReportBaseViewController = BaseViewController.extend( {
 				} );
 				break;
 			case 'job_vacancy_employment_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobVacancy' ) )();
+				api_instance = TTAPI.APIJobVacancy;
 				option = 'employment_status';
 				break;
 			case 'job_vacancy_level_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobVacancy' ) )();
+				api_instance = TTAPI.APIJobVacancy;
 				option = 'level';
 				break;
 			case 'job_vacancy_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobVacancy' ) )();
+				api_instance = TTAPI.APIJobVacancy;
 				option = 'status';
 				break;
 			case 'job_vacancy_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobVacancy' ) )();
+				api_instance = TTAPI.APIJobVacancy;
 				option = 'type';
 				break;
 			case 'job_vacancy_wage_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobVacancy' ) )();
+				api_instance = TTAPI.APIJobVacancy;
 				option = 'wage_type';
 				break;
 			case 'job_application_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobApplication' ) )();
+				api_instance = TTAPI.APIJobApplication;
 				option = 'status';
 				break;
 			case 'job_application_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobApplication' ) )();
+				api_instance = TTAPI.APIJobApplication;
 				option = 'type';
 				break;
 			case 'job_applicant_sex_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobApplicant' ) )();
+				api_instance = TTAPI.APIJobApplicant;
 				option = 'sex';
 				break;
 			case 'job_applicant_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobApplicant' ) )();
+				api_instance = TTAPI.APIJobApplicant;
 				option = 'status';
 				break;
 			case 'user_review_control_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserReviewControl' ) )();
+				api_instance = TTAPI.APIUserReviewControl;
 				option = 'type';
 				break;
 			case 'user_review_control_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserReviewControl' ) )();
+				api_instance = TTAPI.APIUserReviewControl;
 				option = 'status';
 				break;
 			case 'severity_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserReviewControl' ) )();
+				api_instance = TTAPI.APIUserReviewControl;
 				option = 'severity';
 				break;
 			case 'term_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserReviewControl' ) )();
+				api_instance = TTAPI.APIUserReviewControl;
 				option = 'term';
 				break;
 			case 'kpi_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIKPI' ) )();
+				api_instance = TTAPI.APIKPI;
 				option = 'status';
 				break;
 			case 'kpi_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIKPI' ) )();
+				api_instance = TTAPI.APIKPI;
 				option = 'type';
 				break;
 			case 'proficiency_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserSkill' ) )();
+				api_instance = TTAPI.APIUserSkill;
 				option = 'proficiency';
 				break;
 			case 'fluency_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserLanguage' ) )();
+				api_instance = TTAPI.APIUserLanguage;
 				option = 'fluency';
 				break;
 			case 'competency_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserLanguage' ) )();
+				api_instance = TTAPI.APIUserLanguage;
 				option = 'competency';
 				break;
 			case 'user_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+				api_instance = TTAPI.APIUser;
 				option = 'status';
 				break;
 			case 'pay_stub_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+				api_instance = TTAPI.APIPayStub;
 				option = 'filtered_status';
 				break;
 			case 'ownership_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserMembership' ) )();
+				api_instance = TTAPI.APIUserMembership;
 				option = 'ownership';
 				break;
 			case 'license_expiry_date':
@@ -1842,12 +1839,12 @@ ReportBaseViewController = BaseViewController.extend( {
 				option = 'static_columns';
 				break;
 			case 'pay_period_time_sheet_verify_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APITimeSheetVerify' ) )();
+				api_instance = TTAPI.APIPayPeriodTimeSheetVerify;
 				//show valid values specific to the report
 				option = 'filter_report_status';
 				break;
 			case 'job_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+				api_instance = TTAPI.APIJob;
 				option = 'status';
 
 				break;
@@ -1858,90 +1855,90 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			case 'log_action_id':
 
-				api_instance = new ( APIFactory.getAPIClass( 'APILog' ) )();
+				api_instance = TTAPI.APILog;
 				option = 'action';
 
 				break;
 			case 'log_table_name_id':
 
-				api_instance = new ( APIFactory.getAPIClass( 'APILog' ) )();
+				api_instance = TTAPI.APILog;
 				option = 'table_name';
 
 				break;
 			case 'filter':
 				if ( this.script_name === 'ScheduleSummaryReport' ) {
-					api_instance = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
+					api_instance = TTAPI.APISchedule;
 					option = 'status';
 				} else if ( this.script_name === 'InvoiceTransactionSummaryReport' ) {
-					api_instance = new ( APIFactory.getAPIClass( 'APITransaction' ) )();
+					api_instance = TTAPI.APITransaction;
 					option = 'type';
 				} else if ( this.script_name === 'PayStubSummaryReport' ) {
-					api_instance = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+					api_instance = TTAPI.APIPayStub;
 					option = 'status';
 				} else if ( this.script_name === 'ActiveShiftReport' ) {
-					api_instance = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+					api_instance = TTAPI.APIUser;
 					option = 'status';
 				}
 
 				break;
 			case 'accrual_policy_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIAccrualPolicy' ) )();
+				api_instance = TTAPI.APIAccrualPolicy;
 				option = 'type';
 				break;
 			case 'accrual_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIAccrual' ) )();
+				api_instance = TTAPI.APIAccrual;
 				option = 'type';
 				break;
 			case 'qualification_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIQualification' ) )();
+				api_instance = TTAPI.APIQualification;
 				option = 'type';
 				break;
 			case 'exception_policy_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIExceptionPolicy' ) )();
+				api_instance = TTAPI.APIExceptionPolicy;
 				option = 'type';
 				break;
 			case 'exception_policy_severity_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIExceptionPolicy' ) )();
+				api_instance = TTAPI.APIExceptionPolicy;
 				option = 'severity';
 				break;
 			case 'expense_policy_require_receipt_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIExpensePolicy' ) )();
+				api_instance = TTAPI.APIExpensePolicy;
 				option = 'require_receipt';
 				break;
 			case 'expense_policy_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIExpensePolicy' ) )();
+				api_instance = TTAPI.APIExpensePolicy;
 				option = 'type';
 				break;
 			case 'user_expense_payment_method_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserExpense' ) )();
+				api_instance = TTAPI.APIUserExpense;
 				option = 'payment_method';
 				break;
 			case 'user_expense_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIUserExpense' ) )();
+				api_instance = TTAPI.APIUserExpense;
 				option = 'status';
 				break;
 			case 'job_item_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+				api_instance = TTAPI.APIJobItem;
 				option = 'status';
 				break;
 			case 'client_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIClient' ) )();
+				api_instance = TTAPI.APIClient;
 				option = 'status';
 				break;
 			case 'invoice_status_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIInvoice' ) )();
+				api_instance = TTAPI.APIInvoice;
 				option = 'status';
 				break;
 			case 'invoice_transaction_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APITransaction' ) )();
+				api_instance = TTAPI.APITransaction;
 				option = 'type';
 				break;
 			case 'product_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIProduct' ) )();
+				api_instance = TTAPI.APIProduct;
 				option = 'type';
 				break;
 			case 'pay_stub_type_id':
-				api_instance = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+				api_instance = TTAPI.APIPayStub;
 				option = 'type';
 				break;
 			case 'transaction_type_id':
@@ -1960,7 +1957,6 @@ ReportBaseViewController = BaseViewController.extend( {
 				result = Global.buildRecordArray( result );
 				widget.setSourceData( result );
 				return;
-				break;
 			default:
 				//Don't deal with awesomebox with api
 				if ( widget.getAPI && widget.getAPI() ) {
@@ -2009,24 +2005,24 @@ ReportBaseViewController = BaseViewController.extend( {
 			if ( field === 'sort' ) {
 				res_data = $this.buildSortSelectorUnSelectColumns( res_data );
 			} else if ( field.indexOf( 'time_period' ) >= 0 ) {
-				this.time_period_array = res_data;
+				$this.time_period_array = res_data;
 			}
 
 			widget.setSourceData( res_data );
 
 		}
+	}
 
-	},
 	/* jshint ignore:end */
-	getDatePicker: function( field ) {
+	getDatePicker( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		widget.TDatePicker( { field: field } );
 
 		return widget;
-	},
+	}
 
-	putInputToInsideFormItem: function( form_item_input, label ) {
+	putInputToInsideFormItem( form_item_input, label ) {
 		var form_item = $( Global.loadWidgetByName( WidgetNamesDic.EDIT_VIEW_SUB_FORM_ITEM ) );
 		var form_item_label = form_item.find( '.edit-view-form-item-label' );
 		var form_item_input_div = form_item.find( '.edit-view-form-item-input-div' );
@@ -2036,9 +2032,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		form_item_input_div.append( form_item_input );
 
 		return form_item;
-	},
+	}
 
-	onLicenseExpiryDate: function( target, defaultValue ) {
+	onLicenseExpiryDate( target, defaultValue ) {
 
 		var $this = this;
 		var value = target.getValue();
@@ -2070,7 +2066,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( 'license_expiry_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_3', ALayoutIDs.PAY_PERIOD_SCHEDULE, ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_3', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2111,7 +2107,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( 'license_expiry_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id_3', ALayoutIDs.PAY_PERIOD, ( APIFactory.getAPIClass( 'APIPayPeriod' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_id_3', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
 
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2215,10 +2211,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 		}
+	}
 
-	},
-
-	onEducationGraduateDate: function( target, defaultValue ) {
+	onEducationGraduateDate( target, defaultValue ) {
 
 		var $this = this;
 		var value = target.getValue();
@@ -2250,7 +2245,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( 'education_graduate_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_4', ALayoutIDs.PAY_PERIOD_SCHEDULE, ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_4', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2291,7 +2286,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( 'education_graduate_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id_4', ALayoutIDs.PAY_PERIOD, ( APIFactory.getAPIClass( 'APIPayPeriod' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_id_4', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
 
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2395,10 +2390,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 		}
+	}
 
-	},
-
-	onSkillExpiryDate: function( target, defaultValue ) {
+	onSkillExpiryDate( target, defaultValue ) {
 
 		var $this = this;
 		var value = target.getValue();
@@ -2430,7 +2424,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( 'skill_expiry_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_2', ALayoutIDs.PAY_PERIOD_SCHEDULE, ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_2', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2471,7 +2465,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( 'skill_expiry_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id_2', ALayoutIDs.PAY_PERIOD, ( APIFactory.getAPIClass( 'APIPayPeriod' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_id_2', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
 
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2575,10 +2569,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 		}
+	}
 
-	},
-
-	onMembershipRenewalDateChange: function( target, defaultValue ) {
+	onMembershipRenewalDateChange( target, defaultValue ) {
 
 		var $this = this;
 		var value = target.getValue();
@@ -2610,7 +2603,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( 'membership_renewal_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_1', ALayoutIDs.PAY_PERIOD_SCHEDULE, ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id_1', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2651,7 +2644,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( 'membership_renewal_date', time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id_1', ALayoutIDs.PAY_PERIOD, ( APIFactory.getAPIClass( 'APIPayPeriod' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_id_1', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
 
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2755,10 +2748,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 		}
+	}
 
-	},
-
-	onTimePeriodChange: function( target, defaultValue ) {
+	onTimePeriodChange( target, defaultValue ) {
 		var $this = this;
 		var value = target.getValue();
 		var field = target.getField();
@@ -2785,7 +2777,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( field, time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_schedule_id', ALayoutIDs.PAY_PERIOD_SCHEDULE, ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_schedule_id', ALayoutIDs.PAY_PERIOD_SCHEDULE, TTAPI.APIPayPeriodSchedule );
 			pay_period.attr( 'time_period_key', field );
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
@@ -2825,7 +2817,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initSourceData( field, time_period );
 			time_period.setValue( value );
 
-			var pay_period = $this.getTComboBox( 'pay_period_id', ALayoutIDs.PAY_PERIOD, ( APIFactory.getAPIClass( 'APIPayPeriod' ) ) );
+			var pay_period = $this.getTComboBox( 'pay_period_id', ALayoutIDs.PAY_PERIOD, TTAPI.APIPayPeriod );
 			pay_period.attr( 'time_period_key', field );
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2927,11 +2919,10 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 		}
-
-	},
+	}
 
 	//Override this if more than one tab
-	setErrorTips: function( result, dont_switch_tab ) {
+	setErrorTips( result, dont_switch_tab ) {
 		this.clearErrorTips();
 
 		var details = result.getDetails();
@@ -2985,9 +2976,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			this.showEditViewError( result );
 
 		}
-	},
+	}
 
-	buildSortSelectorUnSelectColumns: function( display_columns ) {
+	buildSortSelectorUnSelectColumns( display_columns ) {
 		var fina_array = [];
 		var i = 100;
 		$.each( display_columns, function( index, content ) {
@@ -2999,9 +2990,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		} );
 
 		return fina_array;
-	},
+	}
 
-	setEditViewWidgetsMode: function() {
+	setEditViewWidgetsMode() {
 		var did_clean_dic = {};
 		for ( var key in this.edit_view_ui_dic ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -3017,18 +3008,16 @@ ReportBaseViewController = BaseViewController.extend( {
 				}
 			}
 		}
+	}
 
-	},
-
-	buildReportUIBaseOnSetupFields: function() {
+	buildReportUIBaseOnSetupFields() {
 		var setup_field = this.current_edit_record.setup_field;
 		if ( setup_field && setup_field.length > 0 ) {
 			this.createUI( setup_field );
 		}
+	}
 
-	},
-
-	getFormValues: function() {
+	getFormValues() {
 		var other = {};
 
 		other.page_orientation = this.current_edit_record.page_orientation;
@@ -3045,9 +3034,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		return other;
-	},
+	}
 
-	getChartValues: function() {
+	getChartValues() {
 
 		var chart = {};
 
@@ -3059,9 +3048,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		chart.combine_columns = this.current_edit_record.combine_columns;
 
 		return chart;
-	},
+	}
 
-	convertSortValues: function( sort ) {
+	convertSortValues( sort ) {
 
 		var result = [];
 		for ( var i = 0; i < sort.length; i++ ) {
@@ -3078,9 +3067,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	addOrderFix: function( report ) {
+	addOrderFix( report ) {
 
 		var new_report_fields = {};
 
@@ -3098,10 +3087,10 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		return new_report_fields;
-	},
+	}
 
 	//Make sure this.current_edit_record is updated before validate
-	validate: function( synchronous ) {
+	validate( synchronous ) {
 		var $this = this;
 		var other = this.getFormValues();
 		var chart = this.getChartValues();
@@ -3146,10 +3135,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				return result.getResult();
 			}
 		}
+	}
 
-	},
-
-	onViewExcelClick: function( message_override ) {
+	onViewExcelClick( message_override ) {
 
 		var config = this.getPostReportJson();
 		var post_data = { 0: config, 1: 'csv' };
@@ -3179,9 +3167,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			force_source: true,
 			delay: 5000
 		} );
-	},
+	}
 
-	getVisibleReportValues: function() {
+	getVisibleReportValues() {
 		//#2353 - cut out any zero uuid strings, they are likely --none-- in a multiselect
 		for ( var i in this.visible_report_values.filter ) {
 			if ( this.visible_report_values.filter[i] == TTUUID.zero_id ) {
@@ -3189,9 +3177,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 		}
 		return this.visible_report_values;
-	},
+	}
 
-	getPostReportJson: function( noPreFix ) {
+	getPostReportJson( noPreFix ) {
 		var other = this.getFormValues();
 		var chart = this.getChartValues();
 		var report = this.getVisibleReportValues();
@@ -3222,10 +3210,10 @@ ReportBaseViewController = BaseViewController.extend( {
 		config.chart = chart;
 
 		return config;
-	},
+	}
 
 	//Reports don't share many icons with other views, so override the entire function here.
-	onContextMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick( context_btn, menu_name ) {
 		ProgressBar.showOverlay();
 		//this flag is turned off in ProgressBarManager::closeOverlay, or 2s whichever happens first
 		if ( window.clickProcessing == true ) {
@@ -3300,9 +3288,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				break;
 		}
 		Global.triggerAnalyticsContextMenuClick( context_btn, menu_name );
-	},
+	}
 
-	onSaveSetup: function( label ) {
+	onSaveSetup( label ) {
 		var $this = this;
 		var form_setup = this.getFormSetupData();
 
@@ -3337,14 +3325,13 @@ ReportBaseViewController = BaseViewController.extend( {
 		} else {
 			TAlertManager.showAlert( label + ' ' + $.i18n._( 'invalid, please try again' ) );
 		}
+	}
 
-	},
-
-	getFormSetupData: function() {
+	getFormSetupData() {
 		//Always need override
-	},
+	}
 
-	onViewClick: function( key, new_window, message_override ) {
+	onViewClick( key, new_window, message_override ) {
 //		Global.loadPage('temp_page.html',function(result){
 //			IndexViewController.openizard( 'ReportViewWizard', result);
 //		});
@@ -3459,29 +3446,27 @@ ReportBaseViewController = BaseViewController.extend( {
 				delay: 5000
 			} );
 		}
+	}
 
-	},
-
-	processTransactions: function( key ) {
+	processTransactions( key ) {
 		var args = this.getPostReportJson( true );
 		var post_data = { 0: { filter_data: args }, 1: true, 2: key };
-		var pay_stub_api = new ( APIFactory.getAPIClass( 'APIPayStub' ) )();
+		var pay_stub_api = TTAPI.APIPayStub;
 		var url = ServiceCaller.getURLWithSessionId( 'Class=' + pay_stub_api.className + '&Method=' + 'get' + pay_stub_api.key_name );
 		Global.APIFileDownload( pay_stub_api.className, pay_stub_api.key_name, post_data, url );
-	},
+	}
 
-	setEditMenuViewIcon: function( context_btn, pId ) {
+	setEditMenuViewIcon( context_btn, pId ) {
+	}
 
-	},
-
-	doFormIFrameCall: function( postData ) {
+	doFormIFrameCall( postData ) {
 
 		var url = ServiceCaller.getURLWithSessionId( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name );
 
 		Global.APIFileDownload( this.api.className, this.api.key_name, postData, url );
-	},
+	}
 
-	onSaveNewReportClick: function() {
+	onSaveNewReportClick() {
 		var $this = this;
 		var config = this.getPostReportJson( true );
 		var select_field = this.current_edit_record.setup_field;
@@ -3506,9 +3491,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.sub_saved_report_view_controller.buildContextMenu( true );
 			$this.sub_saved_report_view_controller.onAddClick( report_data );
 		}
-	},
+	}
 
-	onSaveExistedReportClick: function() {
+	onSaveExistedReportClick() {
 		var $this = this;
 		var config = this.getPostReportJson( true );
 		var select_field = this.current_edit_record.setup_field;
@@ -3541,25 +3526,25 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.sub_saved_report_view_controller.buildContextMenu( true );
 			$this.sub_saved_report_view_controller.onAddClick( report_data );
 		}
-	},
+	}
 
-	onSaveDoneCallback: function( result, current_edit_record ) {
+	onSaveDoneCallback( result, current_edit_record ) {
 		var new_id = result.getResult();
 
 		if ( TTUUID.isUUID( new_id ) == false && current_edit_record && current_edit_record.id ) {
 			new_id = current_edit_record.id;
 		}
 		this.refreshNav( new_id );
-	},
+	}
 
-	refreshNav: function( newId ) {
+	refreshNav( newId ) {
 
 		var $this = this;
 
 		this.navigation.setSourceData( null );
 
 		$this.getReportData( function( result ) {
-			// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+			// Waiting for the TTAPI.API returns data to set the current edit record.
 
 			if ( result && result.length > 0 ) {
 
@@ -3589,7 +3574,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initEditView();
 
 		} );
-	},
+	}
 
 	//#2543 - fixing disconnected menu leading to page_orientation JavaScript exception
 	//This caused a bug that if you go to Dashboard, then Report -> TimeSheet Report, then click the X at the top right, the ribbon menu would get out of sync and have the last "Help" top level menu selected.
@@ -3610,6 +3595,6 @@ ReportBaseViewController = BaseViewController.extend( {
 	// 	}
 	// }
 
-} );
+}
 
 ReportBaseViewController.ReportMissedField = null;

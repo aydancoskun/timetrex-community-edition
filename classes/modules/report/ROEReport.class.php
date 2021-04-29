@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -447,7 +447,7 @@ class ROEReport extends Report {
 		$rlf = TTnew( 'ROEListFactory' ); /** @var ROEListFactory $rlf */
 		$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' ROE Total Rows: ' . $rlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $rlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $rlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		if ( $rlf->getRecordCount() > 0 ) {
 			foreach ( $rlf as $key => $r_obj ) {
 				$this->tmp_data['roe'][$r_obj->getUser()] = (array)$r_obj->getObjectAsArray(); //Don't pass $this->getColumnDataConfig() here as no columns are sent from Flex so it breaks the report.
@@ -460,7 +460,7 @@ class ROEReport extends Report {
 					$this->tmp_data['roe'][$r_obj->getUser()]['vacation_pay'] = $vacation_pay;
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 			//Debug::Arr($this->tmp_data['roe'], 'ROE Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -471,13 +471,13 @@ class ROEReport extends Report {
 			$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 			$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			Debug::Text( ' User Total Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 			if ( $ulf->getRecordCount() > 0 ) {
 				foreach ( $ulf as $key => $u_obj ) {
 					$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray(); //Don't pass $this->getColumnDataConfig() here as no columns are sent from Flex so it breaks the report.
 					$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
 					$this->tmp_data['user'][$u_obj->getId()]['legal_entity_id'] = $u_obj->getLegalEntity();
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				}
 				//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 			}
@@ -488,7 +488,7 @@ class ROEReport extends Report {
 			$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 			$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			//Debug::Text( ' User Total Rows: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Legal Entity Data...' ) );
 			if ( $lelf->getRecordCount() > 0 ) {
 				foreach ( $lelf as $key => $le_obj ) {
 					if ( $format == 'html' || $format == 'pdf' ) {
@@ -497,7 +497,7 @@ class ROEReport extends Report {
 					} else {
 						$this->form_data['legal_entity'][$le_obj->getId()] = $le_obj;
 					}
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				}
 			}
 
@@ -507,11 +507,11 @@ class ROEReport extends Report {
 			$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' ); /** @var PayrollRemittanceAgencyListFactory $ralf */
 			$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			//Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $lelf->getRecordCount(), null, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
 			if ( $ralf->getRecordCount() > 0 ) {
 				foreach ( $ralf as $key => $ra_obj ) {
 					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$ra_obj->parseAgencyID( null, 'id' )] = $ra_obj;
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				}
 			}
 		}
@@ -524,7 +524,7 @@ class ROEReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['roe'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['roe'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		//Merge time data with user data
 		$key = 0;
@@ -564,7 +564,7 @@ class ROEReport extends Report {
 
 					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $first_date_columns, $last_date_columns, $pay_period_end_date_columns, $recall_date_columns, $tmp_legal_array );
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 					$key++;
 				}
 			}

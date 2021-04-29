@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -897,7 +897,7 @@ class UserSummaryReport extends Report {
 		$ulf = TTnew( 'UserListFactory' ); /** @var UserListFactory $ulf */
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, null, null, null, null, $include_last_punch_time );
 		Debug::Text( ' User Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $ulf as $key => $u_obj ) {
 			//We used to just get return the entire $u_obj->data array, but this wouldn't include tags and other columns that required some additional processing.
 			//Not sure why this was done that way... I think because we had problems with the multiple date fields (Hire Date/Termination Date/Birth Date, etc...)
@@ -929,7 +929,7 @@ class UserSummaryReport extends Report {
 			$this->tmp_data['user_wage'][$u_obj->getId()] = [];
 
 			$this->tmp_data['user'][$u_obj->getId()]['total_user'] = 1;
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'TMP User Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -937,10 +937,10 @@ class UserSummaryReport extends Report {
 		$uplf = TTnew( 'UserPreferenceListFactory' ); /** @var UserPreferenceListFactory $uplf */
 		$uplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Preference Rows: ' . $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uplf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $uplf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $uplf as $key => $up_obj ) {
 			$this->tmp_data['user_preference'][$up_obj->getUser()] = (array)$up_obj->getObjectAsArray( $columns );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' ); /** @var RemittanceDestinationAccountListFactory $rdalf */
@@ -950,7 +950,7 @@ class UserSummaryReport extends Report {
 		//FIXME: This report can only display a single bank account. We need to add a new report for just Employee Payment Methods in the future.
 		$rdalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $rda_filter_data, null, null, null, [ 'priority' => 'desc' ] ); //Order priority DESC first so highest priority account comes last and overwrites any previous account.
 		Debug::Text( ' Remittance Destination Account Rows: ' . $rdalf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $rdalf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $rdalf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		foreach ( $rdalf as $key => $rda_obj ) {
 			$this->tmp_data['user_bank'][$rda_obj->getUser()] = (array)$rda_obj->getObjectAsArray( [ 'user_id' => true, 'value1' => true, 'value2' => true, 'value3' => true ] );
 
@@ -959,7 +959,7 @@ class UserSummaryReport extends Report {
 			$this->tmp_data['user_bank'][$rda_obj->getUser()]['transit'] = ( isset( $this->tmp_data['user_bank'][$rda_obj->getUser()]['value2'] ) ) ? $this->tmp_data['user_bank'][$rda_obj->getUser()]['value2'] : null;
 			$this->tmp_data['user_bank'][$rda_obj->getUser()]['account'] = ( isset( $this->tmp_data['user_bank'][$rda_obj->getUser()]['value3'] ) ) ? $this->tmp_data['user_bank'][$rda_obj->getUser()]['value3'] : null;
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		unset( $rdalf, $rda_filter_data, $key, $rda_obj );
 
@@ -967,31 +967,31 @@ class UserSummaryReport extends Report {
 		$blf = TTnew( 'BranchListFactory' ); /** @var BranchListFactory $blf */
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text( ' Branch Total Rows: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), null, TTi18n::getText( 'Retrieving Branches...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $blf->getRecordCount(), null, TTi18n::getText( 'Retrieving Branches...' ) );
 		foreach ( $blf as $key => $b_obj ) {
 			//$this->tmp_data['default_branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'default_branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
 			$this->tmp_data['branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'branch_', (array)$b_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$dlf = TTnew( 'DepartmentListFactory' ); /** @var DepartmentListFactory $dlf */
 		$dlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text( ' Department Total Rows: ' . $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Departments...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $dlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Departments...' ) );
 		foreach ( $dlf as $key => $d_obj ) {
 			$this->tmp_data['department'][$d_obj->getId()] = Misc::addKeyPrefix( 'department_', (array)$d_obj->getObjectAsArray( [ 'id' => true, 'name' => true, 'manual_id' => true, 'other_id1' => true, 'other_id2' => true, 'other_id3' => true, 'other_id4' => true, 'other_id5' => true ] ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		$utlf = TTnew( 'UserTitleListFactory' ); /** @var UserTitleListFactory $utlf */
 		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), [] ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text( ' User Title Total Rows: ' . $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$user_title_column_config = array_merge( (array)Misc::removeKeyPrefix( 'user_title_', (array)$this->getColumnDataConfig() ), [ 'id' => true ] ); //Always include title_id column so we can merge title data.
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $utlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Titles...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $utlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Titles...' ) );
 		foreach ( $utlf as $key => $ut_obj ) {
 			$this->tmp_data['user_title'][$ut_obj->getId()] = Misc::addKeyPrefix( 'user_title_', (array)$ut_obj->getObjectAsArray( $user_title_column_config ) );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -999,26 +999,26 @@ class UserSummaryReport extends Report {
 			$jlf = TTnew( 'JobListFactory' ); /** @var JobListFactory $jlf */
 			$jlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			Debug::Text( ' Job Total Rows: ' . $jlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $jlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Jobs...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $jlf->getRecordCount(), null, TTi18n::getText( 'Retrieving Jobs...' ) );
 			$job_column_config = array_merge( (array)Misc::removeKeyPrefix( 'job_', (array)$this->getColumnDataConfig() ), [ 'client_id' => true ] ); //Always include client_id column so we can merge client data.
 			$this->tmp_data['job'][TTUUID::getZeroID()] = [ 'name' => TTi18n::getText( 'No Job' ), 'description' => TTi18n::getText( 'No Job' ), 'job_manual_id' => 0 ];
 			foreach ( $jlf as $key => $j_obj ) {
 				$this->tmp_data['job'][$j_obj->getId()] = (array)Misc::addKeyPrefix( 'job_', (array)$j_obj->getObjectAsArray( $job_column_config ) );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 			unset( $jlf, $j_obj, $key );
 
 			$jilf = TTnew( 'JobItemListFactory' ); /** @var JobItemListFactory $jilf */
 			$jilf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			Debug::Text( ' Job Item Total Rows: ' . $jilf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $jilf->getRecordCount(), null, TTi18n::getText( 'Retrieving Tasks...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), $jilf->getRecordCount(), null, TTi18n::getText( 'Retrieving Tasks...' ) );
 			$job_item_column_config = Misc::removeKeyPrefix( 'job_item_', (array)$this->getColumnDataConfig() );
 			$this->tmp_data['job_item'][TTUUID::getZeroID()] = [ 'name' => TTi18n::getText( 'No Task' ), 'description' => TTi18n::getText( 'No Task' ), 'job_item_manual_id' => 0 ];
 			foreach ( $jilf as $key => $ji_obj ) {
 				$this->tmp_data['job_item'][$ji_obj->getId()] = (array)Misc::addKeyPrefix( 'job_item_', (array)$ji_obj->getObjectAsArray( $job_item_column_config ) );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 			}
 			unset( $jilf, $ji_obj, $key );
 		}
@@ -1029,7 +1029,7 @@ class UserSummaryReport extends Report {
 		$filter_data['permission_children_ids'] = $wage_permission_children_ids;
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text( ' User Wage Rows: ' . $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), $ulf->getRecordCount(), null, TTi18n::getText( 'Retrieving Data...' ) );
 		unset( $columns['note'] ); //Prevent wage note from overwriting user note.
 		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) { //This is required in cases where they have 'view'(all) wage permisisons, but only view_child user permissions. As the SQL will return all employees wages, which then need to be filtered out here.
@@ -1047,7 +1047,7 @@ class UserSummaryReport extends Report {
 
 				$this->tmp_data['user_wage'][$uw_obj->getUser()]['effective_date'] = ( isset( $this->tmp_data['user_wage'][$uw_obj->getUser()]['effective_date'] ) ) ? TTDate::parseDateTime( $this->tmp_data['user_wage'][$uw_obj->getUser()]['effective_date'] ) : null;
 			}
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 		}
 
 		//Debug::Arr($this->tmp_data['user_preference'], 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1059,7 +1059,7 @@ class UserSummaryReport extends Report {
 	 * @return bool
 	 */
 	function _preProcess() {
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $this->tmp_data['user'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
+		$this->getProgressBarObject()->start( $this->getAPIMessageID(), count( $this->tmp_data['user'] ), null, TTi18n::getText( 'Pre-Processing Data...' ) );
 
 		$key = 0;
 		if ( isset( $this->tmp_data['user'] ) ) {
@@ -1123,7 +1123,7 @@ class UserSummaryReport extends Report {
 
 				$this->data[] = array_merge( $row, $hire_date_columns, $termination_date_columns, $birth_date_columns, $created_date_columns, $updated_date_columns, $processed_data );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $key );
 				$key++;
 			}
 			unset( $this->tmp_data, $row, $user_id, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );

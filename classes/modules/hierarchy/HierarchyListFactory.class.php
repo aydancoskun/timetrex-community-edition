@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -622,8 +622,6 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 			return false;
 		}
 
-		$retval = false;
-
 		//Parents are only considered if an employee is explicitly assigned to a hierarchy as a subordinate.
 		//This does not take into account an employee being in the middle of a hierarchy but not assigned to it as a subordinate.
 		//This is because the same employee can be assigned as a superior to many hierarchies, but only to a single hierarchy (of the same object type) if they are subordinates.
@@ -660,6 +658,8 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
+			$retval = [];
+
 			$valid_level = false;
 			foreach ( $rs as $row ) {
 				if ( $immediate_parents_only == true ) {
@@ -683,6 +683,8 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 			if ( $immediate_parents_only == false ) {
 				ksort( $retval );
 			}
+		} else {
+			$retval = false;
 		}
 
 		return $retval;

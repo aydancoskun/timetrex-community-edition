@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -62,7 +62,7 @@ class APISetupPresets extends APIFactory {
 		}
 
 		if ( is_array( $location_data ) ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( count( $location_data ) + 1 ), null, TTi18n::getText( 'Creating policies...' ) );
+			$this->getProgressBarObject()->start( $this->getAPIMessageID(), ( count( $location_data ) + 1 ), null, TTi18n::getText( 'Creating policies...' ) );
 
 			$sp = $this->getMainClassObject();
 			$sp->setCompany( $this->getCurrentCompanyObject()->getId() );
@@ -92,11 +92,11 @@ class APISetupPresets extends APIFactory {
 					$already_processed_country[] = $location['country'];
 				}
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+				$this->getProgressBarObject()->set( $this->getAPIMessageID(), $i );
 				$i++;
 			}
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i, TTi18n::getText( 'Creating Permissions...' ) );
+			$this->getProgressBarObject()->set( $this->getAPIMessageID(), $i, TTi18n::getText( 'Creating Permissions...' ) );
 			$sp->Permissions();
 			$sp->UserDefaults( $this->getCurrentUserObject()->getLegalEntity() );
 
@@ -129,7 +129,7 @@ class APISetupPresets extends APIFactory {
 				$this->getCurrentCompanyObject()->Save();
 			}
 
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAPIMessageID() );
 		}
 
 		return true;

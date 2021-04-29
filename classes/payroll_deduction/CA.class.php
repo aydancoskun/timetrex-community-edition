@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -71,7 +71,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 				//Return BPAF which is calculated based on income.
 				//  However CompanyDeductionFactory->updateCompanyDeductionForTaxYear() doesn't know annual income when it updates claim amounts each year, so in that case just the basic amount is used.
-				return $this->getFederalBasicPersonalAmount();
+				return $this->getBasicPersonalAmount( 'CA' ); //Federal;
 				//return $this->getBasicFederalClaimCodeAmount();
 			}
 		}
@@ -109,7 +109,10 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			) {
 				Debug::text( 'Using Basic Provincial Claim Code Amount: ' . $this->getBasicProvinceClaimCodeAmount() . ' (Previous Amount: ' . $this->data['provincial_total_claim_amount'] . ') Date: ' . $this->getDate(), __FILE__, __LINE__, __METHOD__, 10 );
 
-				return $this->getBasicProvinceClaimCodeAmount();
+				//Return BPAP which is calculated based on income.
+				//  However CompanyDeductionFactory->updateCompanyDeductionForTaxYear() doesn't know annual income when it updates claim amounts each year, so in that case just the basic amount is used.
+				return $this->getBasicPersonalAmount( $this->getProvince() );
+				//return $this->getBasicProvinceClaimCodeAmount();
 			}
 		}
 
@@ -347,55 +350,50 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return $A;
 	}
 
-	function getFederalBasicPersonalAmount() {
+	function getBasicPersonalAmount( $province = 'CA' ) { //Default to 'CA' for Federal.
 		/*
-		Where NI* ≤ $150,473, BPAF = $13,229
-		Where $150,473 < NI* ≤ $214,368, BPAF** = $12,298 + [($13,229-$12,298) - ($13,229-$12,298) × Lesser of (1, (NI* – $150,473)/($214,368-$150,473))***]
+		Where NI* ≤ $150,473, BPA = $13,229
+		Where $150,473 < NI* ≤ $214,368, BPA** = $12,298 + [($13,229-$12,298) - ($13,229-$12,298) × Lesser of (1, (NI* – $150,473)/($214,368-$150,473))***]
 
 		* Variable NI represents Net Income = A + HD
 
-		** If the BPAF has three or more digits after the decimal point, increase the second digit after the decimal point by one if
+		** If the BPA has three or more digits after the decimal point, increase the second digit after the decimal point by one if
 		the third digit is five or more, and drop the third digit. If the third digit after the decimal point is less than five, drop the third
 		digit
 
 		*** Note that there is no rounding on this division
+		*/
 
-		 */
-
-		$BPAF = 0;
+		$BPA = 0;
 
 		$basic_claim_code_data = $this->getBasicClaimCodeData( $this->getDate() ); // float OR after 01-Jan-2020: array( 'CA' => array( 'min' => 12298, 'max' => 13229, 'phase_out_start' => 150473, 'phase_out_end' => 214368 ) )
-		if ( isset( $basic_claim_code_data['CA'] ) ) {
-			$basic_personal_amount_data = $basic_claim_code_data['CA'];
-
-			if ( $this->getDate() >= 20200101 ) {
+		if ( isset( $basic_claim_code_data[$province] ) ) {
+			$basic_personal_amount_data = $basic_claim_code_data[$province];
+			if ( is_array( $basic_personal_amount_data ) ) {
 				$NI = $this->getAnnualTaxableIncome(); //Net income for the year or ( A + HD )
 
-				if ( is_array( $basic_personal_amount_data ) ) {
-					if ( $NI <= $basic_personal_amount_data['phase_out_start'] ) {
-						$BPAF = $basic_personal_amount_data['max'];
-					} else if ( $NI >= $basic_personal_amount_data['phase_out_end'] ) {
-						$BPAF = $basic_personal_amount_data['min'];
-					} else {
-						$tmp_NI_threshold = bcdiv( bcsub( $NI, $basic_personal_amount_data['phase_out_start'] ), bcsub( $basic_personal_amount_data['phase_out_end'], $basic_personal_amount_data['phase_out_start'] ) );
-						if ( $tmp_NI_threshold > 1 ) {
-							$tmp_NI_threshold = 1;
-						}
-
-						$BPAF = round( bcadd( $basic_personal_amount_data['min'], ( bcsub( bcsub( $basic_personal_amount_data['max'], $basic_personal_amount_data['min'] ), bcmul( bcsub( $basic_personal_amount_data['max'], $basic_personal_amount_data['min'] ), $tmp_NI_threshold ) ) ) ), 2 );
-						Debug::text( ' BPAF: ' . $BPAF . ' Min: ' . $basic_personal_amount_data['min'] . ' Max: ' . $basic_personal_amount_data['max'] . ' Phase Out: Start: ' . $basic_personal_amount_data['phase_out_start'] . ' End: ' . $basic_personal_amount_data['phase_out_end'], __FILE__, __LINE__, __METHOD__, 10 );
+				if ( $NI <= $basic_personal_amount_data['phase_out_start'] ) {
+					$BPA = $basic_personal_amount_data['max'];
+				} else if ( $NI >= $basic_personal_amount_data['phase_out_end'] ) {
+					$BPA = $basic_personal_amount_data['min'];
+				} else {
+					$tmp_NI_threshold = bcdiv( bcsub( $NI, $basic_personal_amount_data['phase_out_start'] ), bcsub( $basic_personal_amount_data['phase_out_end'], $basic_personal_amount_data['phase_out_start'] ) );
+					if ( $tmp_NI_threshold > 1 ) {
+						$tmp_NI_threshold = 1;
 					}
-				}
 
-				unset( $basic_claim_code_data );
+					$BPA = round( bcadd( $basic_personal_amount_data['min'], ( bcsub( bcsub( $basic_personal_amount_data['max'], $basic_personal_amount_data['min'] ), bcmul( bcsub( $basic_personal_amount_data['max'], $basic_personal_amount_data['min'] ), $tmp_NI_threshold ) ) ) ), 2 );
+					Debug::text( ' BPA('. $province .'): ' . $BPA . ' Min: ' . $basic_personal_amount_data['min'] . ' Max: ' . $basic_personal_amount_data['max'] . ' Phase Out: Start: ' . $basic_personal_amount_data['phase_out_start'] . ' End: ' . $basic_personal_amount_data['phase_out_end'], __FILE__, __LINE__, __METHOD__, 10 );
+				}
 			} else if ( is_numeric( $basic_personal_amount_data ) ) {
-				$BPAF = $basic_personal_amount_data; //Federal Basic Personal Amount
+				$BPA = $basic_personal_amount_data; //Federal Basic Personal Amount
 			}
 		}
+		unset( $basic_claim_code_data );
 
-		Debug::text( ' BPAF: ' . $BPAF, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( ' BPA('. $province .'): ' . $BPA, __FILE__, __LINE__, __METHOD__, 10 );
 
-		return $BPAF;
+		return $BPA;
 	}
 
 	function getFederalBasicTax() {

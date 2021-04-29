@@ -1,30 +1,34 @@
-PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
+class PayrollRemittanceAgencyEventViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#payroll_remittance_agency_event_view_container', //Must set el here and can only set string, so events can work
 
-	el: '#payroll_remittance_agency_event_view_container', //Must set el here and can only set string, so events can work
+			user_api: null,
+			status_array: null,
+			action_array: null,
+			agency_array: null,
+			payment_frequency_array: null,
+			report_frequency_array: null,
+			country_array: null,
+			province_array: null,
+			district_array: null,
 
-	user_api: null,
-	status_array: null,
-	action_array: null,
-	agency_array: null,
-	payment_frequency_array: null,
-	report_frequency_array: null,
-	country_array: null,
-	province_array: null,
-	district_array: null,
+			month_of_year_array: null,
+			month_of_quarter_array: null,
+			week_interval_array: null,
+			day_of_month_array: null,
+			day_of_week_array: null,
 
-	month_of_year_array: null,
-	month_of_quarter_array: null,
-	week_interval_array: null,
-	day_of_month_array: null,
-	day_of_week_array: null,
+			remittance_source_account_array: null,
+			sub_event_view_controller: null,
 
-	week_interval_array: null,
-	remittance_source_account_array: null,
-	sub_event_view_controller: null,
 
-	_required_files: ['APIPayrollRemittanceAgency', 'APIPayrollRemittanceAgencyEvent', 'APIUserGroup', 'APICompany', 'APIDate', 'APIPayPeriodSchedule', 'APIUserReportData'],
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayrollRemittanceAgencyEventEditView.html';
@@ -34,12 +38,12 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		this.viewId = 'PayrollRemittanceAgencyEvent';
 		this.context_menu_name = $.i18n._( 'Remittance Agency Event' );
 		this.navigation_label = $.i18n._( 'Remittance Agency Event' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) )();
-		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
-		this.company_api = new ( APIFactory.getAPIClass( 'APICompany' ) )();
+		this.api = TTAPI.APIPayrollRemittanceAgencyEvent;
+		this.user_group_api = TTAPI.APIUserGroup;
+		this.company_api = TTAPI.APICompany;
 
-		this.date_api = new ( APIFactory.getAPIClass( 'APIDate' ) )();
-		this.api_user_report = new ( APIFactory.getAPIClass( 'APIUserReportData' ) )();
+		this.date_api = TTAPI.APITTDate;
+		this.api_user_report = TTAPI.APIUserReportData;
 		this.month_of_quarter_array = Global.buildRecordArray( { 1: 1, 2: 2, 3: 3 } );
 
 		this.render();
@@ -56,16 +60,15 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		}
 
 		this.setSelectRibbonMenuIfNecessary();
-
-	},
+	}
 
 	//override required because this is a subview in an edit view.
-	_setGridSizeGridWidthOfSubViewMode: function() {
+	_setGridSizeGridWidthOfSubViewMode() {
 		this.grid.setGridWidth( $( this.el ).parents( '.edit-view-tab' ).parent().parent().width() - 10 );
-	},
+	}
 
 	//Don't initOptions if edit_only_mode. Do it in sub views
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'status' );
@@ -96,9 +99,9 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 				$this.day_of_week_array = res;
 			}
 		} );
-	},
+	}
 
-	getTypeOptions: function() {
+	getTypeOptions() {
 		var $this = this;
 		var type_params = {
 			'payroll_remittance_agency_id': this.edit_view_ui_dic.payroll_remittance_agency_id.getValue()
@@ -116,19 +119,19 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 				TTPromise.resolve( 'PayrollRemittanceAgencyEvent', 'updateUI' );
 			}
 		} );
-	},
+	}
 
-	getReportOptions: function() {
+	getReportOptions() {
 		var $this = this;
 		this.api_user_report.getUserReportData( { filter_data: { include_user_report_id: this.current_edit_record.user_report_data_id } }, {
 			onResult: function( res ) {
 				$this.edit_view_ui_dic.user_report_data_id.setSourceData( res.getResult() );
 			}
 		} );
-	},
+	}
 
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.onFrequencyChange();
 
 		if ( typeof this.current_edit_record.id == 'undefined' ) {
@@ -138,9 +141,9 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		this.getTypeOptions();
 		this.getReportOptions();
 		this.confirm_on_exit = false;
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -171,9 +174,9 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 			$this.validate();
 			$this.updateFutureDates();
 		} );
-	},
+	}
 
-	updateFutureDates: function() {
+	updateFutureDates() {
 		Debug.Text( 'Updating remittance agency event dates.', null, null, null, 10 );
 		var $this = this;
 		this.api.calculateNextRunDate( this.current_edit_record, {
@@ -185,9 +188,9 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 				$this.edit_view_ui_dic.next_reminder_date.setValue( result.next_reminder_date );
 			}
 		} );
-	},
+	}
 
-	onFrequencyChange: function( arg ) {
+	onFrequencyChange( arg ) {
 		if ( !Global.isSet( arg ) ) {
 
 			if ( !Global.isSet( this.current_edit_record['frequency_id'] ) ) {
@@ -252,19 +255,20 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize();
-	},
+	}
 
-	setDefaultMenuMassEditIcon: function( context_btn, grid_selected_length ) {
+	setDefaultMenuMassEditIcon( context_btn, grid_selected_length ) {
 		context_btn.addClass( 'invisible-image' );
-	},
-	setDefaultMenuSaveAndCopyIcon: function( context_btn, grid_selected_length ) {
+	}
+
+	setDefaultMenuSaveAndCopyIcon( context_btn, grid_selected_length ) {
 		context_btn.addClass( 'invisible-image' );
-	},
+	}
 
 	/* jshint ignore:end */
 
 	//Make sure this.current_edit_record is updated before validate
-	// validate: function() {
+	// validate() {
 	// 	var $this = this;
 	// 	var record = {};
 	// 	LocalCacheData.current_doing_context_action = 'validate';
@@ -299,11 +303,10 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 	// 	} );
 	// },
 
-	setDefaultMenuImportIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuImportIcon( context_btn, grid_selected_length, pId ) {
+	}
 
-	},
-
-	copyAsNewResetIds: function record( record ) {
+	copyAsNewResetIds( record ) {
 		record['id'] = '';
 		record['start_date'] = '';
 		record['end_date'] = '';
@@ -312,42 +315,42 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		record['next_reminder_date'] = '';
 		record['last_reminder_date'] = '';
 		return record;
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
 				this.onImportClick();
 				break;
 		}
-	},
+	}
 
-	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndContinueIcon( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn );
 
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuSaveAndAddIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndAddIcon( context_btn, pId ) {
 		this.saveAndNewValidate( context_btn );
 
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuSaveAndCopyIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndCopyIcon( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn );
 
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 		var $this = this;
 		var form_item_input;
 
@@ -358,7 +361,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ) ),
+			api_class: TTAPI.APIPayrollRemittanceAgencyEvent,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
@@ -375,7 +378,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' ) ),
+			api_class: TTAPI.APIPayrollRemittanceAgency,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
 			show_search_inputs: true,
@@ -455,7 +458,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIPayPeriodSchedule' ) ),
+			api_class: TTAPI.APIPayPeriodSchedule,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 			show_search_inputs: true,
@@ -483,7 +486,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		//user to remind
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -542,7 +545,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 	}
 
-} );
+}
 
 PayrollRemittanceAgencyEventViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'PayrollRemittanceAgencyEvent', 'SubPayrollRemittanceAgencyEventView.html', function( result ) {

@@ -1,20 +1,21 @@
-RequestViewController = RequestViewCommonController.extend( {
-	el: '#request_view_container',
+class RequestViewController extends RequestViewCommonController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#request_view_container',
 
-	_required_files: {
-		10: ['APIRequest', 'APIMessageControl', 'APIAuthorization', 'APISchedulePolicy', 'APISchedule', 'APIAbsencePolicy', 'APISchedulePolicy', 'APIBranch', 'APIDepartment'],
-		15: ['APIRequestSchedule'],
-		20: ['APIJob', 'APIJobItem']
-	},
-	type_array: null,
-	status_array: null,
+			type_array: null,
+			status_array: null,
 
-	api_request_schedule: null,
-	authorization_api: null,
-	hierarchy_type_id: false,
-	messages: null,
+			api_request_schedule: null,
+			authorization_api: null,
+			hierarchy_type_id: false,
+			messages: null
+		} );
 
-	init: function( options ) {
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options);
 		this.edit_view_tpl = 'RequestEditView.html';
 		this.permission_id = 'request';
@@ -23,20 +24,20 @@ RequestViewController = RequestViewCommonController.extend( {
 		this.table_name_key = 'request';
 		this.context_menu_name = $.i18n._( 'Requests' );
 		this.navigation_label = $.i18n._( 'Request' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIRequest' ) )();
-		this.api_absence_policy = new ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) )();
-		this.api_schedule = new ( APIFactory.getAPIClass( 'APISchedule' ) )();
-		this.message_control_api = new ( APIFactory.getAPIClass( 'APIMessageControl' ) )();
+		this.api = TTAPI.APIRequest;
+		this.api_absence_policy = TTAPI.APIAbsencePolicy;
+		this.api_schedule = TTAPI.APISchedule;
+		this.message_control_api = TTAPI.APIMessageControl;
 
 		if ( ( Global.getProductEdition() >= 15 ) ) {
-			this.api_request_schedule = new ( APIFactory.getAPIClass( 'APIRequestSchedule' ) )();
+			this.api_request_schedule = TTAPI.APIRequestSchedule;
 		}
 		if ( ( Global.getProductEdition() >= 20 ) ) {
-			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
-			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
+			this.job_api = TTAPI.APIJob;
+			this.job_item_api = TTAPI.APIJobItem;
 		}
 
-		this.authorization_api = new ( APIFactory.getAPIClass( 'APIAuthorization' ) )();
+		this.authorization_api = TTAPI.APIAuthorization;
 
 		this.initPermission();
 		this.render();
@@ -44,10 +45,10 @@ RequestViewController = RequestViewCommonController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-	},
+	}
 
 	// override allows a callback after initOptions when run as sub view (from EmployeeViewController)
-	initOptions: function( callBack ) {
+	initOptions( callBack ) {
 
 		var options = [
 			{ option_name: 'status' },
@@ -61,11 +62,10 @@ RequestViewController = RequestViewCommonController.extend( {
 			}
 
 		} );
+	}
 
-	},
-
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var tab_model = {
 			'tab_request': { 'label': $.i18n._( 'Message' ) },
@@ -101,10 +101,10 @@ RequestViewController = RequestViewCommonController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column1, '', null, null, true );
 
 		tab_request_column2.css( 'display', 'none' );
-	},
+	}
 
-	buildAddViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildAddViewUI() {
+		super.buildEditViewUI();
 		var $this = this;
 
 		var tab_model = {
@@ -127,8 +127,12 @@ RequestViewController = RequestViewCommonController.extend( {
 		this.edit_view_tabs[0].push( tab_request_column1 );
 		this.edit_view_tabs[0].push( tab_request_column2 );
 
+		var form_item_input;
+		var widgetContainer;
+		var label;
+
 		// Employee
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( { field: 'full_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1, '' );
 
@@ -141,8 +145,8 @@ RequestViewController = RequestViewCommonController.extend( {
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( { field: 'date_stamp' } );
-		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
-		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Use the first or only date affected by this request)' ) + '</span>' );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Use the first or only date affected by this request)' ) + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1, '', widgetContainer );
@@ -186,7 +190,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			var form_item_sat_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
 			form_item_sat_checkbox.TCheckbox( { field: 'sat' } );
 
-			widgetContainer = $( '<div/>' );
+			widgetContainer = $( '<div></div>' );
 
 			var sun = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Sun' ) + ' <br> ' + ' </span>' );
 			var mon = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Mon' ) + ' <br> ' + ' </span>' );
@@ -234,7 +238,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			//Schedule Policy
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APISchedulePolicy' ) ),
+				api_class: TTAPI.APISchedulePolicy,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
 				show_search_inputs: true,
@@ -246,7 +250,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			//Absence Policy
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIAbsencePolicy' ) ),
+				api_class: TTAPI.APIAbsencePolicy,
 				customSearchFilter: function() {
 					return { filter_data: { user_id: LocalCacheData.getLoginUser().id } };
 				},
@@ -269,7 +273,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			//branch
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
+				api_class: TTAPI.APIBranch,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.BRANCH,
 				show_search_inputs: true,
@@ -283,7 +287,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			//Dept
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
+				api_class: TTAPI.APIDepartment,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.DEPARTMENT,
 				show_search_inputs: true,
@@ -300,7 +304,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
+					api_class: TTAPI.APIJob,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB,
 					show_search_inputs: true,
@@ -336,7 +340,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 				form_item_input.AComboBox( {
-					api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
+					api_class: TTAPI.APIJobItem,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB_ITEM,
 					show_search_inputs: true,
@@ -385,10 +389,10 @@ RequestViewController = RequestViewCommonController.extend( {
 
 		this.onTypeChanged();
 		this.onWorkingStatusChanged();
-	},
+	}
 
-	buildSearchFields: function() {
-		this._super( 'buildSearchFields' );
+	buildSearchFields() {
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -396,7 +400,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -448,7 +452,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -460,16 +464,16 @@ RequestViewController = RequestViewCommonController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: ['default'],
 			include: [
@@ -545,9 +549,9 @@ RequestViewController = RequestViewCommonController.extend( {
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	setCurrentEditRecordData: function( current_edit_record ) {
+	setCurrentEditRecordData( current_edit_record ) {
 		if ( current_edit_record ) {
 			this.current_edit_record = current_edit_record;
 		}
@@ -594,11 +598,11 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 
 		this.setEditViewDataDone();
-	},
+	}
 
-	setEditViewDataDone: function() {
+	setEditViewDataDone() {
 		var $this = this;
-		this._super( 'setEditViewDataDone' );
+		super.setEditViewDataDone();
 		if ( this.is_viewing ) {
 
 		} else {
@@ -606,11 +610,10 @@ RequestViewController = RequestViewCommonController.extend( {
 				$this.messages = null;
 			}
 		}
+	}
 
-	},
-
-	initViewingView: function() {
-		this._super( 'initViewingView' );
+	initViewingView() {
+		super.initViewingView();
 		if ( this.edit_view_ui_dic.message ) {
 			this.edit_view_ui_dic.message.parents( '.edit-view-form-item-div' ).hide();
 		}
@@ -634,19 +637,19 @@ RequestViewController = RequestViewCommonController.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	setURL: function() {
+	setURL() {
 
 		if ( LocalCacheData.current_doing_context_action === 'edit' ) {
 			LocalCacheData.current_doing_context_action = '';
 			return;
 		}
 
-		this._super( 'setURL' );
-	},
+		super.setURL();
+	}
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	setDefaultMenu( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -712,10 +715,9 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setEditMenu: function() {
+	setEditMenu() {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
@@ -761,16 +763,15 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 
 		this.setContextMenuGroupVisibility();
+	}
 
-	},
-
-	setDefaultMenuCancelIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuCancelIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.sub_view_mode && !this.is_viewing ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuExportIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuExportIcon( context_btn, grid_selected_length, pId ) {
 		if ( this.edit_only_mode || this.grid == undefined ) {
 			context_btn.addClass( 'invisible-image' );
 		} else {
@@ -778,40 +779,39 @@ RequestViewController = RequestViewCommonController.extend( {
 				context_btn.addClass( 'disable-image' );
 			}
 		}
-	},
+	}
 
-	setEditMenuAddIcon: function( context_btn, pId ) {
-		this._super( 'setEditMenuAddIcon', context_btn, pId );
+	setEditMenuAddIcon( context_btn, pId ) {
+		super.setEditMenuAddIcon( context_btn, pId );
 
 		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
+	}
 
-	},
-
-	setEditMenuDeleteAndNextIcon: function( context_btn, pId ) {
+	setEditMenuDeleteAndNextIcon( context_btn, pId ) {
 		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuNavViewIcon: function( context_btn, pId ) {
+	setEditMenuNavViewIcon( context_btn, pId ) {
 		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setEditMenuViewIcon: function( context_btn, pId ) {
+	setEditMenuViewIcon( context_btn, pId ) {
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setEditMenuDeleteIcon: function( context_btn, pId ) {
+	setEditMenuDeleteIcon( context_btn, pId ) {
 		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	onTypeChanged: function( arg ) {
+	onTypeChanged( arg ) {
 		if ( this.current_edit_record && Global.getProductEdition() >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) { //schedule adjustment || absence selected
 
 			if ( this.edit_view_ui_dic.date_stamp ) {
@@ -832,12 +832,17 @@ RequestViewController = RequestViewCommonController.extend( {
 			} else if ( this.edit_view_ui_dic.type_id.getValue() == 40 ) {
 				this.edit_view_ui_dic.request_schedule_status_id.setValue( 10 );
 			}
+
+			if ( arg ) {
+				arg.request_schedule_status_id = this.edit_view_ui_dic.request_schedule_status_id.getValue(); //arg is passed on setRequestFormDefaultData() below, so make sure it matches the UI here.
+			}
+
 			this.onWorkingStatusChanged();
 
 			var $this = this;
 			this.setRequestFormDefaultData( arg, function() {
 				$this.getAvailableBalance();
-				$this.setCurrentEditRecordData( this.current_edit_record );
+				$this.setCurrentEditRecordData( $this.current_edit_record );
 				$this.getScheduleTotalTime();
 			} );
 		} else {
@@ -848,9 +853,9 @@ RequestViewController = RequestViewCommonController.extend( {
 			}
 			this.onWorkingStatusChanged();
 		}
-	},
+	}
 
-	setRequestFormDefaultData: function( data, callback_function ) {
+	setRequestFormDefaultData( data, callback_function ) {
 		if ( Global.getProductEdition() >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) {
 			if ( data == undefined ) {
 				var $this = this;
@@ -882,9 +887,9 @@ RequestViewController = RequestViewCommonController.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	onAvailableBalanceChange: function() {
+	onAvailableBalanceChange() {
 		if ( Global.getProductEdition() >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
 			if ( this.edit_view_ui_dic && this.edit_view_ui_dic.absence_policy_id && this.edit_view_ui_dic.request_schedule_status_id.getValue() == 20 && this.edit_view_ui_dic.absence_policy_id.getValue() != TTUUID.zero_id ) {
 				this.getAvailableBalance();
@@ -892,10 +897,10 @@ RequestViewController = RequestViewCommonController.extend( {
 				this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).hide();
 			}
 		}
-	},
+	}
 
 	//post hook for onSaveResult
-	onSaveDone: function( result ) {
+	onSaveDone( result ) {
 		var retval;
 		if ( this.is_edit ) {
 			this.onViewClick( this.current_edit_record.id );
@@ -907,9 +912,9 @@ RequestViewController = RequestViewCommonController.extend( {
 			source: 'Send'
 		} );
 		return retval;
-	},
+	}
 
-	uniformVariable: function( records ) {
+	uniformVariable( records ) {
 		if ( typeof records === 'object' ) {
 			records.user_id = LocalCacheData.loginUser.id;
 			records.first_name = LocalCacheData.loginUser.first_name;
@@ -929,9 +934,9 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 
 		return records;
-	},
+	}
 
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick( ignoreWarning ) {
 		var $this = this;
 		LocalCacheData.current_doing_context_action = 'save';
 		if ( !Global.isSet( ignoreWarning ) ) {
@@ -971,21 +976,21 @@ RequestViewController = RequestViewCommonController.extend( {
 				}
 			);
 		}
-	},
+	}
 
-	search: function( set_default_menu, page_action, page_number, callBack ) {
+	search( set_default_menu, page_action, page_number, callBack ) {
 		this.refresh_id = null;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack );
-	},
+		super.search( set_default_menu, page_action, page_number, callBack );
+	}
 
-	setDefaultMenuEditIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuEditIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuScheduleIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuScheduleIcon( context_btn, grid_selected_length, pId ) {
 		if ( !PermissionManager.checkTopLevelPermission( 'Schedule' ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -995,17 +1000,17 @@ RequestViewController = RequestViewCommonController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	setDefaultMenuSendIcon: function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuSendIcon( context_btn, grid_selected_length, pId ) {
 		if ( !this.addPermissionValidate( pId ) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 
 		context_btn.addClass( 'disable-image' );
-	},
+	}
 
-	setDefaultMenuEditEmployeeIcon: function( context_btn, grid_selected_length ) {
+	setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length ) {
 		if ( !this.editChildPermissionValidate( 'user' ) ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -1015,9 +1020,9 @@ RequestViewController = RequestViewCommonController.extend( {
 		} else {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
+	}
 
-	onCustomContextClick: function( id ) {
+	onCustomContextClick( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.timesheet:
 			case ContextMenuIconName.schedule:
@@ -1028,9 +1033,9 @@ RequestViewController = RequestViewCommonController.extend( {
 				this.onSaveClick();
 				break;
 		}
-	},
+	}
 
-	setEditViewWidgetsMode: function() {
+	setEditViewWidgetsMode() {
 		var did_clean = false;
 		for ( var key in this.edit_view_ui_dic ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -1051,9 +1056,9 @@ RequestViewController = RequestViewCommonController.extend( {
 				}
 			}
 		}
-	},
+	}
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange( target, doNotValidate ) {
 		var $this = this;
 		this.collectUIDataToCurrentEditRecord();
 		this.setIsChanged( target );
@@ -1162,9 +1167,9 @@ RequestViewController = RequestViewCommonController.extend( {
 			}
 			$this.setEditMenu();
 		}
-	},
+	}
 
-	validate: function() {
+	validate() {
 		var $this = this;
 		var record = this.current_edit_record;
 		record = this.uniformVariable( record );
@@ -1179,10 +1184,9 @@ RequestViewController = RequestViewCommonController.extend( {
 				$this.validateResult( result );
 			}
 		} );
+	}
 
-	},
-
-	onAddClick: function( data ) {
+	onAddClick( data ) {
 		TTPromise.add( 'Request', 'add' );
 		TTPromise.wait();
 		var $this = this;
@@ -1212,16 +1216,16 @@ RequestViewController = RequestViewCommonController.extend( {
 				}
 			} );
 		}
-	},
+	}
 
 	//To be called only by external scripts creating requests (timesheet and schedule at this time)
-	openAddView: function( data_array ) {
+	openAddView( data_array ) {
 		this.sub_view_mode = true;
 		this.edit_only_mode = true;
 		var $this = this;
 		this.initOptions( function() {
 			$this.onAddClick( data_array );
 		} );
-	},
+	}
 
-} );
+}

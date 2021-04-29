@@ -1,14 +1,20 @@
-HierarchyControlViewController = BaseViewController.extend( {
-	el: '#hierarchy_control_view_container',
+class HierarchyControlViewController extends BaseViewController {
+	constructor( options = {} ) {
+		_.defaults( options, {
+			el: '#hierarchy_control_view_container',
 
-	_required_files: ['APIHierarchyControl', 'APIHierarchyLevel'],
 
-	object_type_array: null,
-	editor: null,
 
-	hierarchy_level_api: null,
+			object_type_array: null,
+			editor: null,
 
-	init: function( options ) {
+			hierarchy_level_api: null
+		} );
+
+		super( options );
+	}
+
+	init( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'HierarchyControlEditView.html';
 		this.permission_id = 'hierarchy';
@@ -17,35 +23,33 @@ HierarchyControlViewController = BaseViewController.extend( {
 		this.table_name_key = 'hierarchy_control';
 		this.context_menu_name = $.i18n._( 'Hierarchy' );
 		this.navigation_label = $.i18n._( 'Hierarchy' ) + ':';
-		this.api = new ( APIFactory.getAPIClass( 'APIHierarchyControl' ) )();
-		this.hierarchy_level_api = new ( APIFactory.getAPIClass( 'APIHierarchyLevel' ) )();
+		this.api = TTAPI.APIHierarchyControl;
+		this.hierarchy_level_api = TTAPI.APIHierarchyLevel;
 
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'HierarchyControl' );
+	}
 
-	},
-
-	getCustomContextMenuModel: function() {
+	getCustomContextMenuModel() {
 		var context_menu_model = {
 			exclude: [ContextMenuIconName.mass_edit],
 			include: []
 		};
 
 		return context_menu_model;
-	},
+	}
 
-	initOptions: function() {
+	initOptions() {
 		var $this = this;
 
 		this.initDropDownOption( 'object_type', 'object_type' );
+	}
 
-	},
-
-	buildEditViewUI: function() {
-		this._super( 'buildEditViewUI' );
+	buildEditViewUI() {
+		super.buildEditViewUI();
 
 		var $this = this;
 
@@ -56,7 +60,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIHierarchyControl' ) ),
+			api_class: TTAPI.APIHierarchyControl,
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HIERARCHY,
@@ -113,7 +117,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -146,10 +150,9 @@ HierarchyControlViewController = BaseViewController.extend( {
 		} );
 
 		inside_editor_div.append( this.editor );
+	}
 
-	},
-
-	insideEditorSetValue: function( val ) {
+	insideEditorSetValue( val ) {
 
 		var len = val.length;
 		this.removeAllRows();
@@ -164,16 +167,14 @@ HierarchyControlViewController = BaseViewController.extend( {
 		} else {
 			this.getDefaultData();
 		}
+	}
 
-	},
-
-	setEditViewDataDone: function() {
-		this._super( 'setEditViewDataDone' );
+	setEditViewDataDone() {
+		super.setEditViewDataDone();
 		this.initInsideEditorData();
+	}
 
-	},
-
-	initInsideEditorData: function() {
+	initInsideEditorData() {
 		var $this = this;
 
 		var args = {};
@@ -195,10 +196,9 @@ HierarchyControlViewController = BaseViewController.extend( {
 				}
 			} );
 		}
+	}
 
-	},
-
-	insideEditorRemoveRow: function( row ) {
+	insideEditorRemoveRow( row ) {
 		var index = row[0].rowIndex - 1;
 		var remove_id = this.rows_widgets_array[index].current_edit_item.id;
 		if ( TTUUID.isUUID( remove_id ) && remove_id != TTUUID.zero_id && remove_id != TTUUID.not_exist_id ) {
@@ -207,9 +207,9 @@ HierarchyControlViewController = BaseViewController.extend( {
 		row.remove();
 		this.rows_widgets_array.splice( index, 1 );
 		this.removeLastRowLine();
-	},
+	}
 
-	insideEditorAddRow: function( data, index ) {
+	insideEditorAddRow( data, index ) {
 		if ( !data ) {
 			data = {};
 		}
@@ -232,7 +232,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		//Superiors
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+			api_class: TTAPI.APIUser,
 			width: 132,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -268,9 +268,9 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 		this.addIconsEvent( row ); //Bind event to add and minus icon
 		this.removeLastRowLine();
-	},
+	}
 
-	insideEditorGetValue: function( current_edit_item_id ) {
+	insideEditorGetValue( current_edit_item_id ) {
 		var len = this.rows_widgets_array.length;
 
 		var result = [];
@@ -285,9 +285,9 @@ HierarchyControlViewController = BaseViewController.extend( {
 		}
 
 		return result;
-	},
+	}
 
-	onSaveResult: function( result ) {
+	onSaveResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -308,9 +308,9 @@ HierarchyControlViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
+	}
 
-	// onSaveAndContinueResult: function( result ) {
+	// onSaveAndContinueResult( result ) {
 	// 	var $this = this;
 	// 	if ( result.isValid() ) {
 	// 		var result_data = result.getResult();
@@ -359,7 +359,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 	// 	}
 	// },
 
-	onSaveAndCopyResult: function( result ) {
+	onSaveAndCopyResult( result ) {
 		var $this = this;
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
@@ -380,9 +380,9 @@ HierarchyControlViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 			$this.setErrorMenu();
 		}
-	},
+	}
 
-	saveInsideEditorData: function( callBack ) {
+	saveInsideEditorData( callBack ) {
 
 		var $this = this;
 
@@ -410,12 +410,11 @@ HierarchyControlViewController = BaseViewController.extend( {
 				} );
 			}
 		} );
+	}
 
-	},
+	buildSearchFields() {
 
-	buildSearchFields: function() {
-
-		this._super( 'buildSearchFields' );
+		super.buildSearchFields();
 		this.search_fields = [
 
 			new SearchField( {
@@ -441,7 +440,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'superior_user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -452,7 +451,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -473,7 +472,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -485,16 +484,16 @@ HierarchyControlViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
+				api_class: TTAPI.APIUser,
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
+	}
 
-	onCopyAsNewResult: function( result ) {
+	onCopyAsNewResult( result ) {
 		var $this = this;
 		var result_data = result.getResult();
 
@@ -519,4 +518,4 @@ HierarchyControlViewController = BaseViewController.extend( {
 		$this.initEditView();
 	}
 
-} );
+}

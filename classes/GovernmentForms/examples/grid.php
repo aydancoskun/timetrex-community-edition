@@ -1,4 +1,7 @@
 <?php
+/*
+ * Use Scribus to get exact coordinates for elements in PDFs!
+ */
 require_once( '../../../includes/global.inc.php' );
 require_once( '../../../includes/CLI.inc.php' );
 require_once( '../../GovernmentForms/GovernmentForms.class.php' );

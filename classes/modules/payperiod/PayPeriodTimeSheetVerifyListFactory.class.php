@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -611,7 +611,9 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 		$additional_order_fields = [ 'start_date', 'end_date', 'transaction_date', 'user_status_id', 'last_name', 'first_name', 'default_branch', 'default_department', 'user_group', 'title' ];
 
 		$sort_column_aliases = [
-				'status' => 'status_id',
+				'status'            => 'status_id',
+				'window_start_date' => false, //Don't sort.
+				'window_end_date'   => false,
 		];
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 

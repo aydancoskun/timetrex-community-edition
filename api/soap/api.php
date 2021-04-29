@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -65,34 +65,22 @@ $soap_server = new SoapServer( null, [ 'uri' => 'urn:api', 'encoding' => 'UTF-8'
 if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == false ) && ( !isset( $config_vars['other']['down_for_maintenance'] ) || isset( $config_vars['other']['down_for_maintenance'] ) && $config_vars['other']['down_for_maintenance'] == '' ) ) {
 	$authentication = new Authentication();
 
-	if ( isset( $_GET['SessionID'] ) && $_GET['SessionID'] != '' ) {
-		Debug::text( 'SOAP Session ID: ' . $_GET['SessionID'] . ' Source IP: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
-		if ( $authentication->Check( $_GET['SessionID'] ) === true ) {
+	$session_id = getSessionID();
+	if ( isset( $session_id ) && $session_id != '' ) {
+		Debug::text( 'SOAP Session ID: ' . $session_id . ' Source IP: ' . Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $authentication->isSessionIDAPIKey( $session_id ) == true ) {
+			$authentication_type_id = 700; //API Key
+		} else {
+			$authentication_type_id = 800; //USER_NAME
+		}
+
+		if ( $authentication->Check( $session_id, $authentication_type_id ) === true ) {
 			Debug::text( 'SOAP Class Factory: ' . $class_name, __FILE__, __LINE__, __METHOD__, 10 );
 			if ( $class_name != '' && class_exists( $class_name ) ) {
 				$current_user = $authentication->getObject();
 
 				if ( is_object( $current_user ) ) {
-					$current_user->getUserPreferenceObject()->setDateTimePreferences();
-					$current_user_prefs = $current_user->getUserPreferenceObject();
-
-					Debug::text( 'Locale Cookie: ' . TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10 );
-					if ( TTi18n::getLocaleCookie() != '' && $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
-						Debug::text( 'Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10 );
-						$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
-						if ( $current_user_prefs->isValid() ) {
-							$current_user_prefs->Save( false );
-						}
-					} else {
-						Debug::text( 'User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10 );
-					}
-					if ( isset( $_GET['language'] ) && $_GET['language'] != '' ) {
-						TTi18n::setLocale( $_GET['language'] ); //Sets master locale
-					} else {
-						TTi18n::setLanguage( $current_user_prefs->getLanguage() );
-						TTi18n::setCountry( $current_user->getCountry() );
-						TTi18n::setLocale(); //Sets master locale
-					}
+					$current_user_prefs = handleOverridePreferences( $current_user );
 
 					$clf = new CompanyListFactory();
 					$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();

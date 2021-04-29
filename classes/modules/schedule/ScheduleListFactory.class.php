@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -577,6 +577,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 	/**
 	 * Find all *committed* open shifts that conflict, so they can be entered in the replaced_id field.
 	 * @param string $company_id    UUID
+	 * @param $user_id
 	 * @param $start_time
 	 * @param $end_time
 	 * @param string $branch_id     UUID
@@ -589,8 +590,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 	 * @param array $where          Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
 	 * @param array $order          Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ScheduleListFactory
+	 * @throws DBError
 	 */
-	function getConflictingOpenShiftSchedule( $company_id, $start_time, $end_time, $branch_id, $department_id, $job_id, $job_item_id, $replaced_id = 0, $limit = null, $page = null, $where = null, $order = null ) {
+	function getConflictingOpenShiftSchedule( $company_id, $user_id, $start_time, $end_time, $branch_id, $department_id, $job_id, $job_item_id, $replaced_id = 0, $limit = null, $page = null, $where = null, $order = null ) {
 		if ( $company_id == '' || $start_time == '' || $end_time == '' ) {
 			return false;
 		}
@@ -604,9 +606,13 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		Debug::Text( 'Getting conflicting Open Shifts...', __FILE__, __LINE__, __METHOD__, 10 );
 
+		$uf = new UserFactory();
+		$rsf = new RecurringScheduleFactory();
+
 		$ph = [
+				'user_id'       => TTUUID::castUUID( $user_id ),
 				'company_id'    => TTUUID::castUUID( $company_id ),
-				'user_id'       => TTUUID::getZeroID(), //Open Shift
+				'open_user_id'  => TTUUID::getZeroID(), //Open Shift
 				'start_time'    => $this->db->BindTimeStamp( (int)$start_time ),
 				'end_time'      => $this->db->BindTimeStamp( (int)$end_time ),
 				'branch_id'     => TTUUID::castUUID( $branch_id ),
@@ -615,10 +621,22 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 				'job_item_id'   => TTUUID::castUUID( $job_item_id ),
 		];
 
+
+		//Handle cases where the user edits/saves (no changes) a recurring schedule that is already filling an OPEN shift. The commit shift shouldn't also fill a commited OPEN shift too.
+		//  We do this by joining to the recurring_schedule table and ensuring that the committed shift doesn't override a recurring schedule.
 		$query = '
 					SELECT	a.*
 					FROM	' . $this->getTable() . ' as a
 					LEFT JOIN ' . $this->getTable() . ' as b ON ( a.id = b.replaced_id AND b.deleted = 0 )
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
+					LEFT JOIN ' . $rsf->getTable() . ' AS rsf ON (
+						rsf.user_id = ?			
+						AND a.date_stamp = rsf.date_stamp			 
+						AND a.start_time = rsf.start_time
+						AND a.end_Time = rsf.end_time
+						AND rsf.deleted = 0
+					)
+					
 					WHERE	( 	a.company_id = ?
 								AND a.user_id = ?
 								AND a.start_time = ?
@@ -628,6 +646,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								AND a.job_id = ?
 								AND a.job_item_id = ?
 								AND ( a.replaced_id = \'' . TTUUID::getZeroID() . '\' AND b.replaced_id IS NULL )
+								AND ( rsf.id IS NULL )
 								AND a.deleted = 0
 							)
 					';
@@ -652,34 +671,36 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
-
 		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
 
 	/**
-	 * Returning RecurringScheduleIDs that have already been overridden by a committed shift, so we can exclude them from subsequent queries like getSearchByCompanyIdAndArrayCriteria()
-	 * @param string $company_id UUID
+	 * @param $company_id
 	 * @param $filter_data
-	 * @param int $limit         Limit the number of records returned
-	 * @param int $page          Page number of records to return for pagination
-	 * @param array $where       Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
-	 * @param array $order       Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @param null $limit
+	 * @param null $page
+	 * @param null $where
+	 * @param null $order
 	 * @return array|bool
+	 * @throws ReflectionException
 	 */
 	function getOverriddenOpenShiftRecurringSchedules( $company_id, $filter_data, $limit = null, $page = null, $where = null, $order = null ) {
 		if ( $company_id == '' ) {
 			return false;
 		}
 
-		if ( $order == null ) {
-			//$order = array( 'udf.pay_period_id' => 'asc', 'udf.user_id' => 'asc', 'a.start_time' => 'asc' );
-			$order = [ 'uf.last_name' => 'asc', 'a.start_time' => 'asc' ];
-			$strict = false;
-		} else {
-			$strict = true;
-		}
+		//Must always force the same order as thats critical to this function working.
+		$order = [ 'layer_order' => 'asc', 'a.user_id' => 'asc', 'a.start_time' => 'asc' ];
+		$strict = false;
+
+		//if ( $order == null ) {
+		//	$order = [ 'layer_order' => 'asc', 'uf.last_name' => 'asc', 'a.start_time' => 'asc' ];
+		//	$strict = false;
+		//} else {
+		//	$strict = true;
+		//}
 
 		Debug::Text( 'Getting overrriden Open Shifts...', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -734,8 +755,23 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$filter_data['job_item_id'] = $filter_data['job_item_ids'];
 		}
 
+		//Since these are OPEN shifts, none of them are assigned to pay periods. So we need to convert filtered Pay Period IDs to date ranges instead.
+		if ( isset( $filter_data['pay_period_id'] ) && !isset( $filter_data['start_date'] ) && !isset( $filter_data['end_date'] ) ) {
+			$pplf = TTnew( 'PayPeriodListFactory' ); /** @var PayPeriodListFactory $pplf */
+			$pay_period_dates = $pplf->getStartAndEndDateRangeFromCompanyIdAndPayPeriodId( $company_id, $filter_data['pay_period_id'] );
+			if ( is_array( $pay_period_dates ) ) {
+				$filter_data['start_date'] = $pay_period_dates['start_date'];
+				$filter_data['end_date'] = $pay_period_dates['end_date'];
+				Debug::Arr( $filter_data['pay_period_id'], '  Converted Pay Period IDs to Dates: Start: ' . TTDate::getDate( 'DATE+TIME', $pay_period_dates['start_date'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $pay_period_dates['end_date'] ), __FILE__, __LINE__, __METHOD__, 10 );
+				unset( $filter_data['pay_period_id'] );
+			}
+
+			unset( $pplf, $pay_period_dates );
+		}
+
 		$uf = new UserFactory();
 		$apf = new AbsencePolicyFactory();
+		$sf = new ScheduleFactory();
 		$rsf = new RecurringScheduleFactory();
 		$rscf = new RecurringScheduleControlFactory();
 
@@ -744,7 +780,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$jif = new JobItemFactory();
 		}
 
-		$ph = [];
+		$ph['company_id1'] = TTUUID::castUUID( $company_id );
 
 		//Check for committed OPEN schedules that override open recurring schedules.
 		//  Check against replaced_id to ensure we ignore cases where 1 of 2 recurring OPEN shifts are overridden by a committed OPEN shift (basically an edit/save without any changes),
@@ -752,9 +788,29 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		//  Essentially we are two levels deep of overrides here, so there should still be one OPEN shift displayed in this case.
 		$query = '
 					SELECT
-							a.id as id,
-							a.user_id as user_id,
-							a.recurring_schedule_id as recurring_schedule_id
+						a.id as id,
+						a.company_id as company_id,
+						a.user_id as user_id,
+						a.status_id as status_id,
+						a.date_stamp as date_stamp,
+						a.start_time as start_time,
+						a.end_time as end_time,
+						
+						a.branch_id as branch_id,
+						a.department_id as department_id,
+						a.job_id as job_id,
+						a.job_item_id as job_item_id,
+						
+						uf.default_branch_id as default_branch_id,
+						uf.default_department_id as default_department_id, 
+						uf.default_job_id as default_job_id,
+						uf.default_job_item_id as default_job_item_id,
+												
+						a.total_time as total_time,
+						a.schedule_policy_id as schedule_policy_id,
+						a.absence_policy_id as absence_policy_id,
+						a.deleted as deleted,
+						a.layer_order as layer_order					
 					FROM
 						(
 								SELECT
@@ -762,6 +818,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 										rsf_b.company_id as company_id,
 										rsf_b.user_id as user_id,
 										rsf_b.status_id as status_id,
+										rsf_b.date_stamp as date_stamp,
 										rsf_b.start_time as start_time,
 										rsf_b.end_time as end_time,
 
@@ -773,88 +830,51 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 										rsf_b.schedule_policy_id as schedule_policy_id,
 										rsf_b.absence_policy_id as absence_policy_id,
 										rsf_b.deleted as deleted,
-										sf_c.id as recurring_schedule_id
+										CASE WHEN rsf_b.user_id = \'' . TTUUID::getZeroID() . '\' THEN 8 ELSE 1 END as layer_order
 								FROM ' . $rsf->getTable() . ' as rsf_b
 								LEFT JOIN ' . $rscf->getTable() . ' as rscf_b ON ( rsf_b.recurring_schedule_control_id = rscf_b.id )
-								LEFT JOIN schedule as sf_c ON 			(
-																			rsf_b.company_id = sf_c.company_id
-																			AND rsf_b.user_id = \'' . TTUUID::getZeroID() . '\'
-																			AND rsf_b.date_stamp = sf_c.date_stamp 
-																			AND ( rsf_b.branch_id = sf_c.branch_id OR rsf_b.branch_id = \'' . TTUUID::getNotExistID() . '\' )
-																			AND ( rsf_b.department_id = sf_c.department_id OR rsf_b.department_id = \'' . TTUUID::getNotExistID() . '\' )
-																			AND ( rsf_b.job_id = sf_c.job_id OR rsf_b.job_id = \'' . TTUUID::getNotExistID() . '\' )
-																			AND ( rsf_b.job_item_id = sf_c.job_item_id OR rsf_b.job_item_id = \'' . TTUUID::getNotExistID() . '\' )
-																			AND rsf_b.start_time = sf_c.start_time
-																			AND rsf_b.end_time = sf_c.end_time ';
-
-		$query .= ( isset( $filter_data['start_date'] ) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : null;
-		$query .= ( isset( $filter_data['end_date'] ) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : null;
-		$ph['company_id'] = TTUUID::castUUID( $company_id );
-		$ph['company_id4'] = TTUUID::castUUID( $company_id ); //Needs to be twice.
-
-		//Check for NON-OPEN recurring schedules that override other open recurring schedules.
-		$query .= '
-																			AND sf_c.deleted = 0
-																		)
-								LEFT JOIN schedule as sf_d ON ( sf_d.id = sf_c.replaced_id AND sf_c.replaced_id != \'' . TTUUID::getZeroID() . '\' AND sf_d.deleted = 0 )
+								
 								WHERE rsf_b.company_id = ?
-									AND rsf_b.user_id = \'' . TTUUID::getZeroID() . '\'
-									AND sf_c.id IS NOT NULL 
-									AND sf_d.id IS NULL
+								';
+
+		$query .= ( isset( $filter_data['start_date'] ) ) ? $this->getWhereClauseSQL( 'rsf_b.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : null;
+		$query .= ( isset( $filter_data['end_date'] ) ) ? $this->getWhereClauseSQL( 'rsf_b.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : null;
+
+		$query .= '		
 									AND ( rsf_b.deleted = 0 AND rscf_b.deleted = 0 )
 
 							UNION ALL
 
 								SELECT
-										rsf_b.id as id,
-										rsf_b.company_id as company_id,
-										rsf_b.user_id as user_id,
-										rsf_b.status_id as status_id,
-										rsf_b.start_time as start_time,
-										rsf_b.end_time as end_time,
+										sf_b.id as id,
+										sf_b.company_id as company_id,
+										sf_b.user_id as user_id,
+										sf_b.status_id as status_id,
+										sf_b.date_stamp as date_stamp,
+										sf_b.start_time as start_time,
+										sf_b.end_time as end_time,
 			
-										rsf_b.branch_id as branch_id,
-										rsf_b.department_id as department_id,
-										rsf_b.job_id as job_id,
-										rsf_b.job_item_id as job_item_id,
-										rsf_b.total_time as total_time,
-										rsf_b.schedule_policy_id as schedule_policy_id,
-										rsf_b.absence_policy_id as absence_policy_id,
-										rsf_b.deleted as deleted,
-										rsf_c.id as recurring_schedule_id
-								FROM ' . $rsf->getTable() . ' as rsf_b
-								LEFT JOIN ' . $rscf->getTable() . ' as rscf_b ON ( rsf_b.recurring_schedule_control_id = rscf_b.id )
-								LEFT JOIN 	( 
-												SELECT  rsf_d.*, 
-														uf_c.default_branch_id as default_branch_id,
-														uf_c.default_department_id as default_department_id,
-														uf_c.default_job_id as default_job_id,
-														uf_c.default_job_item_id as default_job_item_id
-												FROM ' . $rsf->getTable() . ' as rsf_d
-												LEFT JOIN users as uf_c ON ( rsf_d.user_id = uf_c.id )
-												WHERE 	rsf_d.company_id = ? 
-														AND rsf_d.user_id != \'' . TTUUID::getZeroID() . '\' 
-											) as rsf_c ON 	(
-																			rsf_b.company_id = rsf_c.company_id
-																			AND ( rsf_b.user_id = \'' . TTUUID::getZeroID() . '\' AND rsf_c.user_id != \'' . TTUUID::getZeroID() . '\' )
-																			AND ( rsf_b.branch_id = rsf_c.branch_id OR ( rsf_c.branch_id = \'' . TTUUID::getNotExistID() . '\' AND rsf_b.branch_id = rsf_c.default_branch_id ) )
-																			AND ( rsf_b.department_id = rsf_c.department_id OR ( rsf_c.department_id = \'' . TTUUID::getNotExistID() . '\' AND rsf_b.department_id = rsf_c.default_department_id ) )
-																			AND ( rsf_b.job_id = rsf_c.job_id OR ( rsf_c.job_id = \'' . TTUUID::getNotExistID() . '\' AND rsf_b.job_id = rsf_c.default_job_id ) )
-																			AND ( rsf_b.job_item_id = rsf_c.job_item_id OR ( rsf_c.job_item_id = \'' . TTUUID::getNotExistID() . '\' AND rsf_b.job_item_id = rsf_c.default_job_item_id ) )
-																			AND rsf_b.start_time = rsf_c.start_time
-																			AND rsf_b.end_time = rsf_c.end_time ';
+										sf_b.branch_id as branch_id,
+										sf_b.department_id as department_id,
+										sf_b.job_id as job_id,
+										sf_b.job_item_id as job_item_id,
+										sf_b.total_time as total_time,
+										sf_b.schedule_policy_id as schedule_policy_id,
+										sf_b.absence_policy_id as absence_policy_id,
+										sf_b.deleted as deleted,
+										CASE WHEN sf_b.user_id = \'' . TTUUID::getZeroID() . '\' THEN 9 ELSE 2 END as layer_order
+								FROM ' . $sf->getTable() . ' as sf_b
+								WHERE sf_b.company_id = ?
+								';
 
-		$query .= ( isset( $filter_data['start_date'] ) ) ? $this->getWhereClauseSQL( 'rsf_c.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : null;
-		$query .= ( isset( $filter_data['end_date'] ) ) ? $this->getWhereClauseSQL( 'rsf_c.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : null;
 		$ph['company_id2'] = TTUUID::castUUID( $company_id );
 
+		$query .= ( isset( $filter_data['start_date'] ) ) ? $this->getWhereClauseSQL( 'sf_b.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : null;
+		$query .= ( isset( $filter_data['end_date'] ) ) ? $this->getWhereClauseSQL( 'sf_b.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : null;
+
 		$query .= '
-																			AND ( rsf_c.deleted = 0 AND rscf_b.deleted = 0 )
-																		)
-								WHERE rsf_b.company_id = ?
-									AND rsf_b.user_id = \'' . TTUUID::getZeroID() . '\'
-									AND rsf_c.id IS NOT NULL
-									AND ( rsf_b.deleted = 0 AND rscf_b.deleted = 0 )
+								
+									AND ( sf_b.deleted = 0 )
 						) as a
 					LEFT JOIN ' . $uf->getTable() . ' as uf ON a.user_id = uf.id
 					LEFT JOIN ' . $apf->getTable() . ' as apf ON a.absence_policy_id = apf.id
@@ -900,24 +920,107 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
-		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+
 		$rows = $this->db->GetAll( $query, $ph );
+		Debug::Text( '  Shifts to process: '. count($rows), __FILE__, __LINE__, __METHOD__, 10 );
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+
 		if ( is_array( $rows ) ) {
-			//Debug::Arr($rows, 'Result: ', __FILE__, __LINE__, __METHOD__, 10);
-			$schedule_conflict_index = [];
-			$recurring_schedule_conflict_index = [];
-			foreach ( $rows as $row ) {
-				if ( !isset( $schedule_conflict_index[$row['id']] ) && !isset( $recurring_schedule_conflict_index[$row['recurring_schedule_id']] ) ) {
-					//Debug::Text('  Adding... ID: '. $row['id'] .' Recurring Schedule ID: '. $row['recurring_schedule_id'], __FILE__, __LINE__, __METHOD__, 10);
-					$schedule_conflict_index[$row['id']] = true;
-					$recurring_schedule_conflict_index[$row['recurring_schedule_id']] = true;
+			$i = 0;
+			$retarr = [];
+			$recurring_schedules = [];
+			foreach( $rows as $key => $row ) {
+				$row_iso_date_stamp = TTDate::getISODateStamp( strtotime( $row['start_time'] ) );
+
+				//Debug::Text( 'Row: ' . $row['id'] . '['. $row['layer_order'] .'] ( User: '. $row['user_id'] .' Start: ' . TTDate::getDate( 'DATE+TIME', $row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $row['end_time'] ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
+
+				if ( $row['layer_order'] == 1 ) { //Recurring shifts
+					$recurring_schedules[ $row['user_id'] ][$row_iso_date_stamp][] = $row;
+				} else if ( $row['layer_order'] == 2 ) { //Override shifts
+					if ( isset($recurring_schedules[ $row['user_id'] ]) ) {
+						foreach ( $recurring_schedules[$row['user_id']] as $rs_user_date => $rs_user_date_rows ) {
+							foreach ( $rs_user_date_rows as $rs_key => $rs_row ) {
+								//Committed shifts overlap recurring shifts in any way whatsoever.
+								if ( $row['user_id'] == $rs_row['user_id']
+										&& $row['user_id'] != TTUUID::getZeroID()
+										&& TTDate::isTimeOverLap( strtotime( $row['start_time'] ), strtotime( $row['end_time'] ), strtotime( $rs_row['start_time'] ), strtotime( $rs_row['end_time'] ) )
+										&& ( $row['branch_id'] == $rs_row['branch_id'] || ( $rs_row['branch_id'] == TTUUID::getNotExistID() && $row['branch_id'] == TTUUID::getZeroID() ) || ( $row['branch_id'] == TTUUID::getNotExistID() && $rs_row['branch_id'] == $row['default_branch_id'] ) )
+										&& ( $row['department_id'] == $rs_row['department_id'] || ( $rs_row['department_id'] == TTUUID::getNotExistID() && $row['department_id'] == TTUUID::getZeroID() ) || ( $row['department_id'] == TTUUID::getNotExistID() && $rs_row['department_id'] == $row['default_department_id'] ) )
+										&& ( $row['job_id'] == $rs_row['job_id'] || ( $rs_row['job_id'] == TTUUID::getNotExistID() && $row['job_id'] == TTUUID::getZeroID() ) || ( $row['job_id'] == TTUUID::getNotExistID() && $rs_row['job_id'] == $row['default_job_id'] ) )
+										&& ( $row['job_item_id'] == $rs_row['job_item_id'] || ( $rs_row['job_item_id'] == TTUUID::getNotExistID() && $row['job_item_id'] == TTUUID::getZeroID() ) || ( $row['job_item_id'] == TTUUID::getNotExistID() && $rs_row['job_item_id'] == $row['default_job_item_id'] ) )
+								) {
+									//Debug::Text( '  Committed Shift overrides Recurring Shift: ' . $row['id'] . '[' . $row['layer_order'] . '] ( Start: ' . TTDate::getDate( 'DATE+TIME', $row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $row['end_time'] ) . ') That overlaps recurring shift: ' . $rs_row['id'] . ' ( Start: ' . TTDate::getDate( 'DATE+TIME', $rs_row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $rs_row['end_time'] ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
+									$recurring_schedules[$row['user_id']][$row_iso_date_stamp][$rs_key] = $row;
+									continue 3;
+								}
+
+								$i++;
+							}
+						}
+					}
+
+					//No override found, because "continue 2" didn't trigger above, keep this shift.
+					//Debug::Text( '   Committed Shift DOES NOT override Recurring Shift: ' . $row['id'] . '['. $row['layer_order'] .'] ( Start: ' . TTDate::getDate( 'DATE+TIME', $row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $row['end_time'] ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
+					$recurring_schedules[$row['user_id']][$row_iso_date_stamp][] = $row;
+				} else if ( $row['layer_order'] == 8 ) { //OPEN recurring shifts
+					foreach( $recurring_schedules as $rs_user_id => $rs_user_date_rows ) {
+						if ( isset($rs_user_date_rows[$row_iso_date_stamp]) ) {
+							foreach ( $rs_user_date_rows[$row_iso_date_stamp] as $rs_key => $rs_row ) {
+								//All shifts overlapping OPEN shifts must match exactly
+								if ( !isset( $rs_row['override'] )
+										&& $row['user_id'] == TTUUID::getZeroID()
+										&& $row['status_id'] == 10 && $rs_row['status_id'] == 10 //Absence shifts can never fill OPEN shifts. If a working shift that is filling an open shift changes to absence, the open shift should be unfilled.
+										&& $row['start_time'] == $rs_row['start_time'] && $row['end_time'] == $rs_row['end_time']
+										&& ( $row['branch_id'] == $rs_row['branch_id'] || ( $row['branch_id'] == TTUUID::getNotExistID() && $rs_row['branch_id'] == TTUUID::getZeroID() ) || ( $rs_row['branch_id'] == TTUUID::getNotExistID() && $row['branch_id'] == $rs_row['default_branch_id'] ) )
+										&& ( $row['department_id'] == $rs_row['department_id'] || ( $row['department_id'] == TTUUID::getNotExistID() && $rs_row['department_id'] == TTUUID::getZeroID() ) || ( $rs_row['department_id'] == TTUUID::getNotExistID() && $row['department_id'] == $rs_row['default_department_id'] ) )
+										&& ( $row['job_id'] == $rs_row['job_id'] || ( $row['job_id'] == TTUUID::getNotExistID() && $rs_row['job_id'] == TTUUID::getZeroID() ) || ( $rs_row['job_id'] == TTUUID::getNotExistID() && $row['job_id'] == $rs_row['default_job_id'] ) )
+										&& ( $row['job_item_id'] == $rs_row['job_item_id'] || ( $row['job_item_id'] == TTUUID::getNotExistID() && $rs_row['job_item_id'] == TTUUID::getZeroID() ) || ( $rs_row['job_item_id'] == TTUUID::getNotExistID() && $row['job_item_id'] == $rs_row['default_job_item_id'] ) )
+								) {
+									//Debug::Text( '  Recurring OR Committed Shift overrides OPEN shift: ' . $row['id'] . '[' . $row['layer_order'] . '] ( Start: ' . TTDate::getDate( 'DATE+TIME', $row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $row['end_time'] ) . ') That overlaps recurring shift: ' . $rs_row['id'] . ' ( Start: ' . TTDate::getDate( 'DATE+TIME', $rs_row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $rs_row['end_time'] ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
+									unset( $recurring_schedules[$rs_user_id][$row_iso_date_stamp][$rs_key] );
+									$retarr[] = $row['id']; //Exclude $row in this case.
+									continue 3;             //Move to next $row in outer loop
+								}
+
+								$i++;
+							}
+						}
+					}
+
+					//No override found, because "continue 3" didn't trigger above, keep this shift.
+					//Debug::Text( '    No override found, keep OPEN recurring Shift: ' . $row['id'] . '['. $row['layer_order'] .'] ( Start: ' . TTDate::getDate( 'DATE+TIME', $row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $row['end_time'] ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
+					$recurring_schedules[$row['user_id']][$row_iso_date_stamp][] = array_merge( $row, [ 'override' => 1 ] );
+				} else if ( $row['layer_order'] == 9 ) { //OPEN committed shifts
+					foreach( $recurring_schedules as $rs_user_id => $rs_user_date_rows ) {
+						if ( isset($rs_user_date_rows[$row_iso_date_stamp]) ) {
+							foreach ( $rs_user_date_rows[$row_iso_date_stamp] as $rs_key => $rs_row ) {
+								//All shifts overlapping OPEN shifts must match exactly
+								if ( $row['user_id'] == $rs_row['user_id']
+										&& $row['start_time'] == $rs_row['start_time'] && $row['end_time'] == $rs_row['end_time']
+										&& ( $row['branch_id'] == $rs_row['branch_id'] || ( $rs_row['branch_id'] == TTUUID::getNotExistID() && $row['branch_id'] == TTUUID::getZeroID() ) )
+										&& ( $row['department_id'] == $rs_row['department_id'] || ( $rs_row['department_id'] == TTUUID::getNotExistID() && $row['department_id'] == TTUUID::getZeroID() ) )
+										&& ( $row['job_id'] == $rs_row['job_id'] || ( $rs_row['job_id'] == TTUUID::getNotExistID() && $row['job_id'] == TTUUID::getZeroID() ) )
+										&& ( $row['job_item_id'] == $rs_row['job_item_id'] || ( $rs_row['job_item_id'] == TTUUID::getNotExistID() && $row['job_item_id'] == TTUUID::getZeroID() ) )
+								) {
+									//Debug::Text( '  OPEN Committed Shift overrides OPEN shift: ' . $row['id'] . '[' . $row['layer_order'] . '] ( Start: ' . TTDate::getDate( 'DATE+TIME', $row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $row['end_time'] ) . ') That overlaps recurring shift: ' . $rs_row['id'] . ' ( Start: ' . TTDate::getDate( 'DATE+TIME', $rs_row['start_time'] ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $rs_row['end_time'] ) . ')', __FILE__, __LINE__, __METHOD__, 10 );
+									unset( $recurring_schedules[$rs_user_id][$row_iso_date_stamp][$rs_key] );
+									$retarr[] = $rs_row['id']; //Exclude $rs_row (recurring) in this case.
+									continue 3;
+								}
+
+								$i++;
+							}
+						}
+					}
 				}
-				//else {
-				//	Debug::Text('  Skipping... ID: '. $row['id'] .' Recurring Schedule ID: '. $row['recurring_schedule_id'] .'('. (int)isset($recurring_schedule_conflict_index[$row['recurring_schedule_id']]).')', __FILE__, __LINE__, __METHOD__, 10);
-				//}
 			}
-			$retarr = array_keys( $schedule_conflict_index );
+
+			Debug::Text( 'Total Loops: ' . $i, __FILE__, __LINE__, __METHOD__, 10 );
+
+			$retarr = array_unique( $retarr );
+			unset($recurring_schedules, $rs_user_rows, $row_row, $rs_user_id, $row);
 		}
+		unset($rows);
 
 		if ( isset( $retarr ) ) {
 			//Debug::Arr($retarr, 'Excluded Recurring OPEN shifts: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -963,6 +1066,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 				'last_name'  => 'uf.last_name',
 				'first_name' => 'uf.first_name',
 		];
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) { //Needed for unit tests to pass when doing pure edition tests.
+			$additional_order_fields = array_merge( [ 'jf.name', 'jif.name' ], $additional_order_fields );
+
+			$sort_column_aliases = array_merge( [
+														'job'      => 'jf.name',
+														'job_item' => 'jif.name',
+												], $sort_column_aliases );
+		}
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == null ) {
@@ -1068,7 +1180,6 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							a.id as schedule_id,
 							a.recurring_schedule_id as recurring_schedule_id,
 							a.replaced_id as replaced_id,
-							sf.id as replaced_by_id,
 							a.status_id as status_id,
 							a.start_time as start_time,
 							a.end_time as end_time,
@@ -1187,7 +1298,22 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 									sf.updated_date as updated_date,
 									sf.deleted as deleted
 								FROM ' . $sf->getTable() . ' as sf
-								WHERE sf.company_id = \'' . TTUUID::castUUID( $company_id ) . '\'
+								LEFT JOIN ' . $sf->getTable() . ' as sf_b ON ( sf.id = sf_b.replaced_id AND sf_b.deleted = 0 )
+								WHERE sf.company_id = \'' . TTUUID::castUUID( $company_id ) . '\' 
+								';
+
+		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( ( (int)$filter_data['start_date'] - 86400 ) );
+			$query .= ' AND sf.date_stamp >= ?';
+		}
+		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
+			$ph[] = $this->db->BindDate( ( (int)$filter_data['end_date'] + 86400 ) );
+			$query .= ' AND sf.date_stamp <= ?';
+		}
+
+		$query .= ' 
+				
+									AND sf_b.replaced_id IS NULL								
 									AND sf.deleted = 0
 							)
 						UNION ALL
@@ -1231,11 +1357,11 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								LEFT JOIN schedule as sf_b ON (
 																( sf_b.user_id != \'' . TTUUID::getZeroID() . '\' AND sf_b.user_id = rsf.user_id ) ';
 
-		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( $filter_data['start_date'] ) != '' ) {
+		if ( isset( $filter_data['start_date'] ) && !is_array( $filter_data['start_date'] ) && trim( (string)$filter_data['start_date'] ) != '' ) {
 			$ph[] = $this->db->BindDate( ( (int)$filter_data['start_date'] - 86400 ) );
 			$query .= ' AND sf_b.date_stamp >= ?';
 		}
-		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( $filter_data['end_date'] ) != '' ) {
+		if ( isset( $filter_data['end_date'] ) && !is_array( $filter_data['end_date'] ) && trim( (string)$filter_data['end_date'] ) != '' ) {
 			$ph[] = $this->db->BindDate( ( (int)$filter_data['end_date'] + 86400 ) );
 			$query .= ' AND sf_b.date_stamp <= ?';
 		}
@@ -1268,8 +1394,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							)
 					) as a
 
-					LEFT JOIN ' . $sf->getTable() . ' as sf ON ( a.id = sf.replaced_id AND sf.replaced_id != \'' . TTUUID::getZeroID() . '\' AND sf.deleted = 0 )
-					LEFT JOIN ' . $uf->getTable() . ' as uf ON ( a.user_id = uf.id )
+					LEFT JOIN ' . $uf->getTable() . ' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
 					LEFT JOIN ' . $bf->getTable() . ' as bf ON ( uf.default_branch_id = bf.id AND bf.deleted = 0)
 					LEFT JOIN ' . $bf->getTable() . ' as bfb ON ( a.branch_id = bfb.id AND bfb.deleted = 0)
 					LEFT JOIN ' . $df->getTable() . ' as df ON ( uf.default_department_id = df.id AND df.deleted = 0)
@@ -1287,21 +1412,21 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					';
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '
-						LEFT JOIN ' . $jf->getTable() . ' as jfb ON uf.default_job_id = jfb.id
-						LEFT JOIN ' . $jif->getTable() . ' as jifb ON uf.default_job_item_id = jifb.id
+						LEFT JOIN ' . $jf->getTable() . ' as jfb ON ( uf.default_job_id = jfb.id AND jfb.deleted = 0 )
+						LEFT JOIN ' . $jif->getTable() . ' as jifb ON ( uf.default_job_item_id = jifb.id AND jifb.deleted = 0 )
 			
-						LEFT JOIN ' . $jf->getTable() . ' as jf ON a.job_id = jf.id
-						LEFT JOIN ' . $jif->getTable() . ' as jif ON a.job_item_id = jif.id
-						LEFT JOIN ' . $bf->getTable() . ' as jbf ON jf.branch_id = jbf.id
-						LEFT JOIN ' . $df->getTable() . ' as jdf ON jf.department_id = jdf.id
-						LEFT JOIN ' . $jgf->getTable() . ' as jgf ON jf.group_id = jgf.id
-						LEFT JOIN ' . $jigf->getTable() . ' as jigf ON jif.group_id = jigf.id
+						LEFT JOIN ' . $jf->getTable() . ' as jf ON ( a.job_id = jf.id AND jf.deleted = 0 )
+						LEFT JOIN ' . $jif->getTable() . ' as jif ON ( a.job_item_id = jif.id AND jif.deleted = 0 )
+						LEFT JOIN ' . $bf->getTable() . ' as jbf ON ( jf.branch_id = jbf.id AND jbf.deleted = 0 )
+						LEFT JOIN ' . $df->getTable() . ' as jdf ON ( jf.department_id = jdf.id AND jdf.deleted = 0 )
+						LEFT JOIN ' . $jgf->getTable() . ' as jgf ON ( jf.group_id = jgf.id AND jgf.deleted = 0 )
+						LEFT JOIN ' . $jigf->getTable() . ' as jigf ON ( jif.group_id = jigf.id AND jigf.deleted = 0 )
 						';
 		}
 
 		$query .= Permission::getPermissionHierarchySQL( $company_id, ( isset( $filter_data['permission_current_user_id'] ) ) ? $filter_data['permission_current_user_id'] : 0, 'a.user_id' );
 
-		$query .= '	WHERE ( a.company_id = \'' . TTUUID::castUUID( $company_id ) . '\' AND sf.replaced_id IS NULL )';
+		$query .= '	WHERE ( a.company_id = \'' . TTUUID::castUUID( $company_id ) . '\' )';
 
 		$query .= Permission::getPermissionIsChildIsOwnerFilterSQL( $filter_data, 'a.user_id' );
 		$query .= ( isset( $filter_data['permission_children_ids'] ) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'uuid_list', $ph ) : null;
@@ -1351,8 +1476,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -1378,17 +1503,29 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			}
 		}
 
-		$additional_order_fields = [ 'schedule_policy_id', 'schedule_policy', 'absence_policy', 'first_name', 'last_name', 'user_status_id', 'group_id', 'group', 'title_id', 'title', 'default_branch_id', 'default_branch', 'default_department_id', 'default_department', 'total_time', 'date_stamp', 'pay_period_id', ];
+		$additional_order_fields = [ 'schedule_policy_id', 'schedule_policy', 'absence_policy', 'first_name', 'last_name', 'user_status_id', 'group_id', 'group', 'title_id', 'title', 'default_branch_id', 'default_branch', 'default_department_id', 'default_department', 'total_time', 'date_stamp', 'pay_period_id', 'j.name', 'k.name' ];
 
 		$sort_column_aliases = [
+				'status'       => 'status_id',
 				'first_name'   => 'd.first_name',
 				'last_name'    => 'd.last_name',
+				'user_status'  => 'user_status_id',
+				'branch'       => 'j.name',
+				'department'   => 'k.name',
 				'updated_date' => 'a.updated_date',
 				'created_date' => 'a.created_date',
 		];
 
-		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) { //Needed for unit tests to pass when doing pure edition tests.
+			$additional_order_fields = array_merge( [ 'w.name', 'x.name' ], $additional_order_fields );
 
+			$sort_column_aliases = array_merge( [
+														'job'      => 'w.name',
+														'job_item' => 'x.name',
+												], $sort_column_aliases );
+		}
+
+		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == null ) {
 			$order = [ 'a.start_time' => 'desc', 'd.last_name' => 'asc', 'd.first_name' => 'asc', 'a.user_id' => 'asc' ];
 			$strict = false;
@@ -1549,7 +1686,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		$query .= '
 					from	' . $this->getTable() . ' as a
-							LEFT JOIN ' . $sf->getTable() . ' as sf ON ( a.id = sf.replaced_id AND sf.replaced_id != \'' . TTUUID::getZeroID() . '\' AND sf.deleted = 0 )
+							LEFT JOIN ' . $sf->getTable() . ' as sf ON ( a.id = sf.replaced_id AND sf.deleted = 0 )
 							LEFT JOIN ' . $spf->getTable() . ' as i ON a.schedule_policy_id = i.id
 							LEFT JOIN ' . $uf->getTable() . ' as d ON ( a.user_id = d.id AND d.deleted = 0 )
 

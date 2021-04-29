@@ -350,7 +350,6 @@ var PermissionManager = ( function() {
 					result = true;
 				}
 				break;
-				break;
 			case 'ActiveShiftReport':
 				if ( PermissionManager.validate( 'report', 'view_active_shift' ) ) {
 					result = true;

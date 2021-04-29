@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2018 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2020 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -581,17 +581,17 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								'x'      => 331,
 								'y'      => 238,
 								'h'      => 12,
-								'w'      => 40,
+								'w'      => 87,
 								'halign' => 'L',
 						],
 				],
 				'l14a'          => [
 						'function'    => [ 'MoneyFormat', 'drawNormal' ],
 						'coordinates' => [
-								'x'      => 371,
+								'x'      => 418,
 								'y'      => 238,
 								'h'      => 12,
-								'w'      => 82,
+								'w'      => 35,
 								'halign' => 'R',
 						],
 				],
@@ -600,17 +600,17 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								'x'      => 331,
 								'y'      => 250,
 								'h'      => 12,
-								'w'      => 40,
+								'w'      => 87,
 								'halign' => 'L',
 						],
 				],
 				'l14b'          => [
 						'function'    => [ 'MoneyFormat', 'drawNormal' ],
 						'coordinates' => [
-								'x'      => 371,
+								'x'      => 418,
 								'y'      => 250,
 								'h'      => 12,
-								'w'      => 82,
+								'w'      => 35,
 								'halign' => 'R',
 						],
 				],
@@ -619,17 +619,17 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								'x'      => 331,
 								'y'      => 262,
 								'h'      => 12,
-								'w'      => 40,
+								'w'      => 87,
 								'halign' => 'L',
 						],
 				],
 				'l14c'          => [
 						'function'    => [ 'MoneyFormat', 'drawNormal' ],
 						'coordinates' => [
-								'x'      => 371,
+								'x'      => 418,
 								'y'      => 262,
 								'h'      => 12,
-								'w'      => 82,
+								'w'      => 35,
 								'halign' => 'R',
 						],
 				],
@@ -638,17 +638,17 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								'x'      => 331,
 								'y'      => 274,
 								'h'      => 12,
-								'w'      => 40,
+								'w'      => 87,
 								'halign' => 'L',
 						],
 				],
 				'l14d'          => [
 						'function'    => [ 'MoneyFormat', 'drawNormal' ],
 						'coordinates' => [
-								'x'      => 371,
+								'x'      => 418,
 								'y'      => 274,
 								'h'      => 12,
-								'w'      => 82,
+								'w'      => 35,
 								'halign' => 'R',
 						],
 				],

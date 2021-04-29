@@ -17,7 +17,13 @@
 		this.stopCamera = function() {
 
 			if ( local_stream ) {
-				local_stream.stop();
+				if ( local_stream.stop ) {
+					// This is the legacy method to stop video.
+					local_stream.stop();
+				} else if ( local_stream.getTracks ) {
+					// This is the modern approach for stopping the video. https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack/stop
+					local_stream.getTracks().forEach( track => track.stop() );
+				}
 			}
 		};
 
@@ -25,10 +31,35 @@
 
 			// check for getUserMedia support
 			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
-			if ( navigator.getUserMedia ) {
+			if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+				// Most up to date as of May 2020 (Aside from using async and await) https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+
+				// get webcam feed if available
+				navigator.mediaDevices.getUserMedia( { video: true } )
+					.then(function(stream) {
+						if ('srcObject' in video) {
+							video.srcObject = stream;
+						} else {
+							// Fallback for older browsers. https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/srcObject#Supporting_fallback_to_the_src_property
+							video.src = URL.createObjectURL( stream );
+						}
+						video.play();
+						local_stream = stream;
+					})
+					.catch(function(err) {
+						errorBack();
+					});
+			} else if ( navigator.getUserMedia ) {
+				// Semi-deprecated, legacy, but still works. https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getUserMedia
+
 				// get webcam feed if available
 				navigator.getUserMedia( { video: true }, function( stream ) {
-					video.src = window.URL.createObjectURL( stream );
+					if ('srcObject' in video) {
+						video.srcObject = stream;
+					} else {
+						// Fallback for older browsers. https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/srcObject#Supporting_fallback_to_the_src_property
+						video.src = URL.createObjectURL( stream );
+					}
 					video.play();
 					local_stream = stream;
 				}, errorBack );
@@ -45,11 +76,11 @@
 					local_stream = stream;
 				}, errorBack );
 			} else {
-				TAlertManager.showAlert( $.i18n._( 'Your browser don\'t support Camera, please use File tipe in step 1, or use Chrome or FireFox' ) );
+				errorBack();
 			}
 
 			function errorBack() {
-				TAlertManager.showAlert( $.i18n._( 'No camera' ) );
+				TAlertManager.showAlert( $.i18n._( 'Unable to access Camera.<br><br>Please check your camera connections, permissions, and ensure you are using HTTPS. Alternatively, use the File upload method instead.' ) );
 			}
 		};
 
@@ -149,16 +180,35 @@
 			var take_picture = $( this ).children().eq( 1 ).children().eq( 0 );
 			var try_again = $( this ).children().eq( 1 ).children().eq( 1 );
 
+			// Set initial states of the buttons.
+			take_picture.prop( 'disabled', false );
+			try_again.prop( 'disabled', true );
+
 			take_picture.bind( 'click', function() {
+				take_picture.prop( 'disabled', true );
+				try_again.prop( 'disabled', false );
+				// Global.glowAnimation.start(); // not needed here as its triggered in UserPhotoWizardController.buildCurrentStepUI()
+
+				// flash the photo area to indicate a picture has been taken.
+				canvas.parent().addClass( 'flash' );
+
+				setTimeout( function(){
+					canvas.parent().removeClass( 'flash' );
+				}, 1000);	// Timeout must be the same length as the CSS3 transition or longer (or you'll mess up the transition)
+
+				// handle picture taking
 				var ctx = canvas[0].getContext( '2d' );
 				ctx.drawImage( video, 0, 0, 400, 300 );
 				canvas.css( 'z-index', 51 );
 
 				$this.trigger( 'change', [$this] );
-
 			} );
 
 			try_again.bind( 'click', function() {
+				take_picture.prop( 'disabled', false );
+				try_again.prop( 'disabled', true );
+				Global.glowAnimation.stop();
+
 				canvas.css( 'z-index', -1 );
 
 				$this.trigger( 'NoImageChange', [$this] );
