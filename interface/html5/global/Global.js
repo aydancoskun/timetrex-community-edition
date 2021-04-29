@@ -631,7 +631,7 @@ Global.roundTime = function( epoch, round_value, round_type ) {
 		var thousands_separator = ',';
 		var decimal_separator = '.';
 
-		time_unit = time_unit.replace( thousands_separator, '' ).replace( ' ', '' ).replace( '"', '' );
+		time_unit = time_unit.replace( new RegExp( thousands_separator, 'g'), '' ).replace( new RegExp( ' ', 'g'), '' ).replace( new RegExp( '"', 'g'), '' ); //Need to use regex to replace all instances.
 
 		switch ( format ) {
 			case 10: //hh:mm
@@ -652,6 +652,10 @@ Global.roundTime = function( epoch, round_value, round_type ) {
 
 				if ( !time_units[2] ) {
 					time_units[2] = 0;
+				} else {
+					if ( time_units[2] != 0 ) {
+						enable_rounding = false; //Since seconds were specified, don't round to nearest minute.
+					}
 				}
 
 				negative_number = false;
@@ -674,17 +678,21 @@ Global.roundTime = function( epoch, round_value, round_type ) {
 				}
 
 				seconds = ( time_unit * 3600 );
-				if ( enable_rounding == true ) {
-					seconds = Global.roundTime( seconds, 60 );
-				}
-
 				break;
 			case 30: //minutes
 				seconds = ( time_unit * 60 );
 				break;
 			case 40: //seconds
-				seconds = Math.round( time_unit );
+				seconds = time_unit;
+				if ( enable_rounding == true ) {
+					seconds = round( seconds ); //Round to nearest whole number by default.
+				}
+				enable_rounding = false; //Since seconds were specified, don't round to nearest minute. Also for accruals might need to allow decimal seconds.
 				break;
+		}
+
+		if ( enable_rounding == true ) {
+			seconds = Global.roundTime( seconds, 60 );
 		}
 
 		//Debug.Text( 'Time Unit: '+ time_unit +' Retval: '+ seconds, 'Global.js', '', 'parseTimeUnit', 10 );

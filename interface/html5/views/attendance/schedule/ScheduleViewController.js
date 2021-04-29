@@ -7295,7 +7295,7 @@ ScheduleViewController = BaseViewController.extend( {
 			}
 
 			row.total_time = Global.getTimeUnit( total_time );
-			row.total_time_wage = LocalCacheData.getCurrentCurrencySymbol() + total_wage.toFixed( 2 );
+			row.total_time_wage = LocalCacheData.getCurrentCurrencySymbol() + Global.MoneyRound( total_wage );
 			//ViewManagerUtil.getTimeUnit(totalTime);
 			row.shifts = shifts;
 			row.absences = absences;
@@ -7479,7 +7479,7 @@ ScheduleViewController = BaseViewController.extend( {
 						//#2381 - total_time can be a string from the API
 						row_data.total_time = parseInt( row_data.total_time );
 
-						total_row_key_data.total_time_wage = parseFloat( parseFloat( row_data.total_time_wage ) + parseFloat( total_row_key_data.total_time_wage ) ).toFixed( 2 );
+						total_row_key_data.total_time_wage = Global.MoneyRound( parseFloat( parseFloat( row_data.total_time_wage ) + parseFloat( total_row_key_data.total_time_wage ) ) );
 						if ( row_data.status_id == 10 ) {
 							total_row_key_data.total_time = parseFloat( row_data.total_time ) + parseFloat( total_row_key_data.total_time );
 							total_row_key_data.shifts = total_row_key_data.shifts + 1;
@@ -7524,7 +7524,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 					row_data = row[no_data_key + '_data'];
 
-					total_row_key_data.total_time_wage = parseFloat( parseFloat( row_data.total_time_wage ) + parseFloat( total_row_key_data.total_time_wage ) ).toFixed( 2 );
+					total_row_key_data.total_time_wage = Global.MoneyRound( parseFloat( parseFloat( row_data.total_time_wage ) + parseFloat( total_row_key_data.total_time_wage ) ) );
 					if ( row_data.status_id == 10 ) {
 						total_row_key_data.total_time = parseFloat( row_data.total_time ) + parseFloat( total_row_key_data.total_time );
 						total_row_key_data.shifts = total_row_key_data.shifts + 1;

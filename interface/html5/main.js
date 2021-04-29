@@ -877,6 +877,11 @@ require( [
 
 			//When the user switched away from, then back again to our tab, make sure the session is still the same so they don't get two different login sessions confused.
 			function handleVisibilityChange() {
+				//No need to handle anything if installer is enabled.
+				if ( APIGlobal.pre_login_data && APIGlobal.pre_login_data.installer_enabled && APIGlobal.pre_login_data.installer_enabled == true ) {
+					return null;
+				}
+
 				var is_hidden = document.hidden;
 				var cookie_session_id = getCookie( Global.getSessionIDKey() );
 
@@ -888,7 +893,7 @@ require( [
 						Debug.Text( 'Session ID has changed out from out underneath us! Session ID: Memory: ' + LocalCacheData.getSessionID() + ' Cookie: ' + cookie_session_id, 'main.js', '', 'handleVisibilityChange', 1 );
 
 						var api = new ( APIFactory.getAPIClass( 'APIMisc' ) )();
-						if ( typeof api.isLoggedIn === "function" ) {
+						if ( typeof api.isLoggedIn === 'function' ) {
 							api.isLoggedIn( false, {
 								onResult: function( result ) {
 									var result_data = result.getResult();

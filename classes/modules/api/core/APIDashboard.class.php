@@ -106,7 +106,7 @@ class APIDashboard extends APIFactory {
 					}
 				}
 
-				if ( $this->getPermissionObject()->Check( 'punch', 'enabled' ) && $this->getPermissionObject()->Check( 'report', 'view_active_shift' ) && ( $this->getPermissionObject()->Check( 'punch', 'view_child' ) || $this->getPermissionObject()->Check( 'punch', 'view' ) ) ) {
+				if ( $this->getPermissionObject()->Check( 'report', 'enabled' ) && $this->getPermissionObject()->Check( 'report', 'view_active_shift' ) ) { //Don't check punch/user permissions, as the ActiveShift report itself does not do that.
 					$retarr['user_active_shift_summary'] = TTi18n::getText( 'Whos In/Out' );  //Subordinates/All
 				}
 
@@ -473,13 +473,13 @@ class APIDashboard extends APIFactory {
 				$permission_level = $permission->getLevel( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
 
 				//Notify user of new features.
-				if ( Misc::MajorVersionCompare( APPLICATION_VERSION, '9.0.0', '=' ) && TTDate::getBeginDayEpoch( $this->getCurrentUserObject()->getLastLoginDate() ) <= APPLICATION_VERSION_DATE ) {
-					$retarr[] = '*<b>' . TTi18n::getText( 'Tip' ) . '</b>: ' . TTi18n::getText( 'You can set the default screen that appears after login under MyAccount -> Preferences in the menu along the top of the screen.' );
-				}
-
-				if ( $product_edition > 10 && $permission_level >= 10 && Misc::MajorVersionCompare( APPLICATION_VERSION, '9.0.0', '=' ) && TTDate::getBeginDayEpoch( $this->getCurrentUserObject()->getLastLoginDate() ) <= APPLICATION_VERSION_DATE ) {
-					$retarr[] = '*<b>' . TTi18n::getText( 'Tip' ) . '</b>: ' . TTi18n::getText( 'You can add your own custom reports to the dashboard by clicking the Add Dashlet icon at the top left.' );
-				}
+				//if ( Misc::MajorVersionCompare( APPLICATION_VERSION, '9.0.0', '=' ) && TTDate::getBeginDayEpoch( $this->getCurrentUserObject()->getLastLoginDate() ) <= APPLICATION_VERSION_DATE ) {
+				//	$retarr[] = '*<b>' . TTi18n::getText( 'Tip' ) . '</b>: ' . TTi18n::getText( 'You can set the default screen that appears after login under MyAccount -> Preferences in the menu along the top of the screen.' );
+				//}
+				//
+				//if ( $product_edition > 10 && $permission_level >= 40 && Misc::MajorVersionCompare( APPLICATION_VERSION, '9.0.0', '=' ) && TTDate::getBeginDayEpoch( $this->getCurrentUserObject()->getLastLoginDate() ) <= APPLICATION_VERSION_DATE ) {
+				//	$retarr[] = '*<b>' . TTi18n::getText( 'Tip' ) . '</b>: ' . TTi18n::getText( 'You can add your own custom reports to the dashboard by clicking the Add Dashlet icon at the top left.' );
+				//}
 
 				//
 				//Regular Employee Related news:
@@ -930,29 +930,29 @@ class APIDashboard extends APIFactory {
 		( ( isset( $dashlet_options['exception_summary'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'exception_summary', TTi18n::getText( 'Exception Summary' ) ) : null );
 		( ( isset( $dashlet_options['message_summary'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'message_summary', TTi18n::getText( 'Messages (UnRead)' ) ) : null );
 
-		if ( $permission_level >= 10 ) {
+		if ( $permission_level >= 40 ) {
 			( ( isset( $dashlet_options['request_authorize_summary'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'request_authorize_summary', TTi18n::getText( 'Request Authorizations' ) ) : null );
 			( ( isset( $dashlet_options['exception_summary_child'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'exception_summary_child', TTi18n::getText( 'Exceptions (Subordinates)' ) ) : null );
 			( ( isset( $dashlet_options['schedule_summary_child'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'schedule_summary_child', TTi18n::getText( 'Schedule Summary (Subordinates)' ) ) : null );
 		}
 
-		if ( $permission_level <= 10 ) {
+		if ( $permission_level <= 40 ) {
 			( ( isset( $dashlet_options['timesheet_summary'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'timesheet_summary', TTi18n::getText( 'TimeSheet Summary' ) ) : null );
 		}
 		( ( isset( $dashlet_options['schedule_summary'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'schedule_summary', TTi18n::getText( 'Schedule Summary' ) ) : null );
-		if ( $permission_level <= 10 ) {
+		if ( $permission_level <= 40 ) {
 			( ( isset( $dashlet_options['accrual_balance_summary'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'accrual_balance_summary', TTi18n::getText( 'Accrual Balances' ) ) : null );
 		}
 
 		if ( $enabled_timesheet_verification == true ) {
-			if ( $permission_level == 10 ) {
+			if ( $permission_level == 40 ) {
 				( ( isset( $dashlet_options['timesheet_verification_summary_child'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'timesheet_verification_summary_child', TTi18n::getText( 'TimeSheet Verifications (Subordinates)' ) ) : null );
-			} else if ( $permission_level >= 15 ) {
+			} else if ( $permission_level >= 50 ) {
 				( ( isset( $dashlet_options['timesheet_verification_summary'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'timesheet_verification_summary', TTi18n::getText( 'TimeSheet Verifications' ) ) : null );
 			}
 		}
 
-		if ( $permission_level >= 10 ) {
+		if ( $permission_level >= 40 ) {
 			( ( isset( $dashlet_options['user_active_shift_summary'] ) ) ? $parameters[] = $this->createDefaultDashletData( 'user_active_shift_summary', TTi18n::getText( 'Whos In/Out' ) ) : null );
 		}
 

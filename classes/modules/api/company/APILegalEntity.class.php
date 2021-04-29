@@ -571,7 +571,11 @@ class APILegalEntity extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		$data['filter_data'] = $legal_entity_id;
+		$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
+
+		if ( TTUUID::isUUID( $legal_entity_id ) == true ) {
+			$data['filter_data']['id'] = $legal_entity_id;
+		}
 
 		$lelf = TTnew( 'LegalEntityListFactory' ); /** @var LegalEntityListFactory $lelf */
 		$lelf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'] );

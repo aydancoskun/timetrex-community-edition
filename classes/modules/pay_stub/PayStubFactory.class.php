@@ -1120,7 +1120,11 @@ class PayStubFactory extends Factory {
 	/**
 	 * @return bool
 	 */
-	function preSave() {
+	function preValidate() {
+		if ( $this->getStatus() == '' ) {
+			$this->setStatus( 25 ); //Open
+		}
+
 		if ( $this->getType() == '' ) {
 			$this->setType( 10 ); //Normal In-Cycle
 		}
@@ -1129,7 +1133,24 @@ class PayStubFactory extends Factory {
 			$this->setStatusBy();
 		}
 
+		//Automatically default to the users currency so this doesn't need to be specified in most cases.
+		if ( $this->getCurrency() == '' && is_object( $this->getUserObject() ) ) {
+			$this->setCurrency( $this->getUserObject()->getCurrency() );
+		}
+
 		$this->checkIfPayStubOrderChanged();
+
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function preSave() {
+		//Remember if this is a new pay stub for postSave()
+		if ( $this->isNew( true ) == true ) {
+			$this->is_new = true;
+		}
 
 		return true;
 	}
@@ -2862,10 +2883,10 @@ class PayStubFactory extends Factory {
 		Debug::Text( 'Saving Pay Stub transactions', __FILE__, __LINE__, __METHOD__, 10 );
 		if ( isset( $this->tmp_data['current_pay_stub']['transactions'] ) && count( $this->tmp_data['current_pay_stub']['transactions'] ) > 0 ) {
 			foreach ( $this->tmp_data['current_pay_stub']['transactions'] as $pst_obj ) {
+				//Pass along the current pay stub object rather than having PayStubTransaction have to get it from the database again. This also helps PayStubTransaction determine if this is a new pay stub or not.
+				$pst_obj->setPayStubObject( $this );
+
 				$pst_obj->setPayStub( $this->getId() );
-				if ( $pst_obj->isNew() ) {
-					$pst_obj->setStatus( 10 );
-				}
 				if ( $pst_obj->isValid() ) {
 					$pst_obj->Save( false ); //To prevent clearing the object before validation is called.
 				}

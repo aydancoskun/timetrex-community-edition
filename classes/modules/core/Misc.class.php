@@ -4045,6 +4045,31 @@ class Misc {
 
 		return null;
 	}
+
+	/**
+	 * Checks the max post size and file upload size, and returns the lower of the two.
+	 * @return int
+	 */
+	static function getPHPMaxUploadSize() {
+		$max_post_size = (int)convertHumanSizeToBytes( ini_get( 'post_max_size' ) );
+		$max_upload_filesize = (int)convertHumanSizeToBytes( ini_get( 'upload_max_filesize' ) );
+
+		$max_size = ( $max_upload_filesize < $max_post_size ) ? $max_upload_filesize : $max_post_size;
+
+		return (int)$max_size;
+	}
+
+	/**
+	 * @return bool
+	 */
+	static function doesRequestExceedPHPMaxPostSize() {
+		$retval = false;
+		if ( isset( $_SERVER['CONTENT_LENGTH'] ) && (int)$_SERVER['CONTENT_LENGTH'] > Misc::getPHPMaxUploadSize() ) {
+			$retval = true;
+		}
+
+		return $retval;
+	}
 }
 
 ?>

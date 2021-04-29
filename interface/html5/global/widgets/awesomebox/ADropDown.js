@@ -1438,7 +1438,8 @@
 		};
 
 		//Set select item when not allow multiple selection
-		this.setSelectItem = function( val ) {
+		// *IMPORTANT* This cannot be defined as this.setSelectItem() as it will break.
+		setSelectItem = function( val ) {
 			select_item = val;
 		};
 

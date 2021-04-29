@@ -22,10 +22,10 @@ TTUUID.generateUUID = function( seed ) {
 
 	var now = new Date().getTime();
 	var sequence = TTUUID.randomUI14();
-	var node = seed;//(TTUUID.randomUI08() | 1) * 0x10000000000 + TTUUID.randomUI40();
+	var node = seed; //(TTUUID.randomUI08() | 1) * 0x10000000000 + TTUUID.randomUI40();
 	var tick = TTUUID.randomUI04();
 	var timestamp = 0;
-	var timestampRatio = 1 / 4;
+	var timestamp_ratio = ( 1 / 4 );
 
 	if ( now != timestamp ) {
 		if ( now < timestamp ) {
@@ -33,7 +33,7 @@ TTUUID.generateUUID = function( seed ) {
 		}
 		timestamp = now;
 		tick = TTUUID.randomUI04();
-	} else if ( Math.random() < timestampRatio && tick < 9984 ) {
+	} else if ( Math.random() < timestamp_ratio && tick < 9984 ) {
 		tick += 1 + TTUUID.randomUI04();
 	} else {
 		sequence++;
@@ -102,15 +102,15 @@ TTUUID.limitUI16 = TTUUID.maxFromBits( 16 );
 TTUUID.limitUI40 = TTUUID.maxFromBits( 40 );
 
 TTUUID.randomUI04 = function() {
-	return TTUUID.getRandomInt( 0, TTUUID.limitUI04 - 1 );
+	return TTUUID.getRandomInt( 0, ( TTUUID.limitUI04 - 1 ) );
 };
 
 TTUUID.randomUI08 = function() {
-	return TTUUID.getRandomInt( 0, TTUUID.limitUI08 - 1 );
+	return TTUUID.getRandomInt( 0, ( TTUUID.limitUI08 - 1 ) );
 };
 
 TTUUID.randomUI14 = function() {
-	return TTUUID.getRandomInt( 0, TTUUID.limitUI14 - 1 );
+	return TTUUID.getRandomInt( 0, ( TTUUID.limitUI14 - 1 ) );
 };
 
 TTUUID.randomUI40 = function() {
@@ -136,5 +136,19 @@ TTUUID.paddedString = function( string, length, z ) {
 };
 
 TTUUID.getRandomInt = function( min, max ) {
-	return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+	var random_num;
+
+	var crypto_obj = window.crypto || window.msCrypto; // for IE 11
+	if ( crypto_obj ) {
+		var byte_array = new Uint8Array( 1 );
+		crypto_obj.getRandomValues( byte_array );
+
+		random_num = '0.' + byte_array[0].toString();
+	} else {
+		random_num = Math.random();
+	}
+
+	random_num = Math.floor( random_num * ( max - min + 1 ) ) + min;
+
+	return random_num;
 };

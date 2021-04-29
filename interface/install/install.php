@@ -61,7 +61,7 @@ echo " 3...";
 
 echo " 4...";
 $redir = true;
-if ( version_compare( PHP_VERSION, '7.0.0', '<' ) == 1 ) {
+if ( version_compare( PHP_VERSION, '7.0.0', '<' ) == 1 ) { //Also update CLI.inc.php for the minimum PHP version.
 	echo "You are currently using PHP v<b>" . PHP_VERSION . "</b> TimeTrex requires PHP <b>v7.0</b> or greater!<br><br>\n";
 	$redir = false;
 }

@@ -69,6 +69,7 @@ class SugarCRM {
 																 'encoding'           => 'UTF-8',
 																 'connection_timeout' => 30,
 																 'keep_alive'         => false, //This prevents "Error fetching HTTP headers" SOAP error.
+																 'compression'        => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
 																 'trace'              => 1,
 																 'exceptions'         => 0,
 														 ]

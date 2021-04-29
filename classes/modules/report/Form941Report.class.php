@@ -131,6 +131,10 @@ class Form941Report extends Report {
 					'-2070-default_department_id' => TTi18n::gettext( 'Default Department' ),
 					'-2100-custom_filter'         => TTi18n::gettext( 'Custom Filter' ),
 
+					'-2200-pay_stub_status_id' => TTi18n::gettext( 'Pay Stub Status' ),
+					'-2205-pay_stub_type_id'   => TTi18n::gettext( 'Pay Stub Type' ),
+					'-2210-pay_stub_run_id'    => TTi18n::gettext( 'Payroll Run' ),
+
 					//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
 					'-5000-columns'   => TTi18n::gettext( 'Display Columns' ),
@@ -214,6 +218,10 @@ class Form941Report extends Report {
 					'-1400-permission_control'  => TTi18n::gettext( 'Permission Group' ),
 					'-1410-pay_period_schedule' => TTi18n::gettext( 'Pay Period Schedule' ),
 					'-1420-policy_group'        => TTi18n::gettext( 'Policy Group' ),
+
+					'-2800-pay_stub_status' => TTi18n::gettext( 'Pay Stub Status' ),
+					'-2810-pay_stub_type'   => TTi18n::gettext( 'Pay Stub Type' ),
+					'-2820-pay_stub_run_id' => TTi18n::gettext( 'Payroll Run' ),
 				];
 
 				$retval = array_merge( $retval, $this->getOptions( 'date_columns' ), (array)$this->getOptions( 'report_static_custom_column' ) );
@@ -639,6 +647,8 @@ class Form941Report extends Report {
 		}
 		unset( $pplf, $pslf, $legal_entity_id, $employee_count_date, $employee_count_pay_periods );
 
+		$psf = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $psf */ //For getOptions() below.
+
 		//Need to get totals up to the beginning of this quarter so we can determine if any employees have exceeded the social security/additional medicare limit.
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$ytd_filter_data = $filter_data;
@@ -652,16 +662,25 @@ class Form941Report extends Report {
 				$user_id = $pse_obj->getColumn( 'user_id' ); //Make sure we don't add this to the unique user_id list.
 				//Always use middle day epoch, otherwise multiple entries could exist for the same day.
 				$date_stamp = TTDate::getMiddleDayEpoch( TTDate::strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ) );
+				$run_id = $pse_obj->getColumn( 'pay_stub_run_id' );
 				$branch = $pse_obj->getColumn( 'default_branch' );
 				$department = $pse_obj->getColumn( 'default_department' );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
 				if ( !isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] ) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = [
+							'pay_stub_status' => Option::getByKey( $pse_obj->getColumn( 'pay_stub_status_id' ), $psf->getOptions( 'status' ) ),
+							'pay_stub_type'   => Option::getByKey( $pse_obj->getColumn( 'pay_stub_type_id' ), $psf->getOptions( 'type' ) ),
+
 							'pay_period_start_date'       => strtotime( $pse_obj->getColumn( 'pay_stub_start_date' ) ),
 							'pay_period_end_date'         => strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) ),
 							'pay_period_transaction_date' => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
 							'pay_period'                  => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
+
+							'pay_stub_start_date'       => strtotime( $pse_obj->getColumn( 'pay_stub_start_date' ) ),
+							'pay_stub_end_date'         => strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) ),
+							'pay_stub_transaction_date' => TTDate::getMiddleDayEpoch( strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ) ), //Some transaction dates could be throughout the day for terminated employees being paid early, so always forward them to the middle of the day to keep group_by working correctly.
+							'pay_stub_run_id'           => $run_id,
 					];
 				}
 
@@ -714,15 +733,24 @@ class Form941Report extends Report {
 				$legal_entity_id = $pse_obj->getColumn( 'legal_entity_id' );
 				$user_id = $pse_obj->getColumn( 'user_id' );
 				$date_stamp = TTDate::getMiddleDayEpoch( TTDate::strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ) ); //Always use middle day epoch, otherwise multiple entries could exist for the same day.
+				$run_id = $pse_obj->getColumn( 'pay_stub_run_id' );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
 				if ( !isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] ) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = [
 							'legal_entity_id'             => $legal_entity_id,
+
 							'pay_period_start_date'       => strtotime( $pse_obj->getColumn( 'pay_stub_start_date' ) ),
 							'pay_period_end_date'         => strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) ),
 							'pay_period_transaction_date' => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
 							'pay_period'                  => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
+
+							'pay_stub_status' => Option::getByKey( $pse_obj->getColumn( 'pay_stub_status_id' ), $psf->getOptions( 'status' ) ),
+							'pay_stub_type'   => Option::getByKey( $pse_obj->getColumn( 'pay_stub_type_id' ), $psf->getOptions( 'type' ) ),
+							'pay_stub_start_date'       => strtotime( $pse_obj->getColumn( 'pay_stub_start_date' ) ),
+							'pay_stub_end_date'         => strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) ),
+							'pay_stub_transaction_date' => TTDate::getMiddleDayEpoch( strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ) ), //Some transaction dates could be throughout the day for terminated employees being paid early, so always forward them to the middle of the day to keep group_by working correctly.
+							'pay_stub_run_id'           => $run_id,
 					];
 				}
 

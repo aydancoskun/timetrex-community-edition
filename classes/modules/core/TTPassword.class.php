@@ -144,12 +144,12 @@ class TTPassword {
 	}
 
 	/**
-	 * @param $user_entered_password
-	 * @param $database_password
+	 * @param string $user_entered_password
+	 * @param string $database_password
 	 * @return bool
 	 */
 	static function checkPassword( $user_entered_password, $database_password ) {
-		if ( $user_entered_password === $database_password ) {
+		if ( (string)$user_entered_password === (string)$database_password ) {
 			return true;
 		}
 

@@ -1658,6 +1658,15 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$config_vars['path']['base_url'] = '/timetrex/interface';
 		$this->assertEquals( $authentication->parseEndPointID( '/timetrex//soap/server.php' ), 'soap/server' );
 	}
+
+	function testHumanSizeToBytes() {
+		$this->assertEquals( convertHumanSizeToBytes( '-1' ), -1 );
+		$this->assertEquals( convertHumanSizeToBytes( '1' ), 1 );
+		$this->assertEquals( convertHumanSizeToBytes( '1000' ), 1000 );
+		$this->assertEquals( convertHumanSizeToBytes( '1K' ), 1000 );
+		$this->assertEquals( convertHumanSizeToBytes( '1M' ), 1000000 );
+		$this->assertEquals( convertHumanSizeToBytes( '1G' ), 1000000000 );
+	}
 }
 
 ?>

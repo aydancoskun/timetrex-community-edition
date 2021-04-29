@@ -614,8 +614,8 @@ PayStubViewController = BaseViewController.extend( {
 				result_data.id = false;
 
 				data.push( result_data );
-				callback( data, index );
 
+				callback( data, index );
 			}
 		} );
 	},
@@ -630,12 +630,13 @@ PayStubViewController = BaseViewController.extend( {
 				if ( !$this.edit_view ) {
 					return;
 				}
+
 				var result_data = res.getResult();
 				if ( _.size( result_data ) == 0 ) {
 					result_data = [];
 				}
-				callback( result_data );
 
+				callback( result_data );
 			}
 		} );
 	},
@@ -972,7 +973,7 @@ PayStubViewController = BaseViewController.extend( {
 				var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 				var right_label;
 				var args = { filter_data: {} };
-				var pay_stub_amendment_id = 0, user_expense_id = 0;
+				var pay_stub_amendment_id = '', user_expense_id = '';
 				var pay_stub_status_id = $this.parent_controller['current_edit_record']['status_id'];
 
 				var is_add = false;
@@ -993,8 +994,8 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				if ( $this.parent_controller.copied_record_id ) {
-					pay_stub_amendment_id = 0;
-					user_expense_id = 0;
+					pay_stub_amendment_id = '';
+					user_expense_id = '';
 				}
 
 				var row_enabled = true;
@@ -1198,13 +1199,6 @@ PayStubViewController = BaseViewController.extend( {
 					}
 				} else {
 					if ( Global.isSet( index ) || is_add || ( _.size( data ) === 1 && ( $this.parent_controller.isEditMode() == true ) ) ) {
-//						if ( (data['type_id'] === '40' || data['type_id'] == 40) && ( type == 20 || type == 30 || type == 50 || type == 80 ) ) {
-//							widgets[form_item_note_text.getField()] = form_item_note_text;
-//							row.children().eq( 1 ).append( form_item_note_text );
-//						} else if ( type != 40 ) {
-//							widgets[form_item_note_input.getField()] = form_item_note_input;
-//							row.children().eq( 1 ).append( form_item_note_input );
-//						}
 						if ( ( data['type_id'] == 40 || data.total_row === true ) ) {
 
 						} else {
@@ -2530,10 +2524,10 @@ PayStubViewController = BaseViewController.extend( {
 				var is_add = false;
 				if ( !$this.parent_controller.current_edit_record.id && !$this.parent_controller.copied_record_id ) {
 					is_add = true;
+					data.status_id = 10; //10=Pending == When using Copy as New force transaction statuses to pending.
 				}
 
-				// Destination Account
-				// writable
+				// Destination Account - writable
 				var allowed_statuses = [10];
 				if ( $this.parent_controller.is_add == false ) {
 					allowed_statuses.push( 20 );
@@ -2563,8 +2557,7 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_remittance_destination_account_text.TText( { field: 'remittance_destination_account' } );
 				form_item_remittance_destination_account_text.setValue( data.remittance_destination_account ? data.remittance_destination_account : '' );
 
-				// Note
-				// writable
+				// Note - writable
 				var form_item_note_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_note_input.TTextInput( { field: 'note', width: 300, display_na: false } );
 				form_item_note_input.setValue( data.note );
@@ -2574,8 +2567,7 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_note_text.TText( { field: 'description', display_na: false } );
 				form_item_note_text.setValue( data.description );
 
-				// Transaction Status
-				// writable
+				// Transaction Status - writable
 				var form_item_status_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 				form_item_status_input.TComboBox( { field: 'status_id', set_empty: false } );
 				form_item_status_input.setSourceData( Global.addFirstItemToArray( $this.parent_controller.transaction_status_array ) );
@@ -2589,8 +2581,7 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_status_text.TText( { field: 'status' } );
 				form_item_status_text.setValue( data.status ? data.status : '' );
 
-				// Transaction Date
-				// writable
+				// Transaction Date - writable
 				var form_item_transaction_date_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 				form_item_transaction_date_input.TDatePicker( { field: 'transaction_date' } );
 				form_item_transaction_date_input.setValue( data.transaction_date ? data.transaction_date : '' );
@@ -2608,8 +2599,7 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_confirmation_number_text.TText( { field: 'transaction_date' } );
 				form_item_confirmation_number_text.setValue( data.transaction_date ? data.transaction_date : '' );
 
-				// Amount
-				// writable
+				// Amount - writable
 				var form_item_amount_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_amount_input.TTextInput( { field: 'amount', width: 60 } );
 				form_item_amount_input.setValue( data.amount ? Global.removeTrailingZeros( data.amount ) : '' );

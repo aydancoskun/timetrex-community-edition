@@ -486,6 +486,14 @@ InstallWizardController = BaseWizardController.extend( {
 					this.addEditFieldToColumn( $.i18n._( 'Memory Limit' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( { field: 'post_size' } );
+					this.addEditFieldToColumn( $.i18n._( 'Max Post Size' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( { field: 'upload_size' } );
+					this.addEditFieldToColumn( $.i18n._( 'Max Upload Size' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( { field: 'base_url' } );
 					this.addEditFieldToColumn( $.i18n._( 'Base URL' ), form_item_input, requirements_column2, '', null, true, true );
 
@@ -1477,12 +1485,38 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key].check_php_memory_limit == 0 ) {
 								var str = $.i18n._( 'OK' );
 								if ( stepData[key].memory_limit > 0 ) {
-									str += '(' + stepData[key].memory_limit + 'M' + ')';
+									str += '(' + stepData[key].memory_limit + ' bytes' + ')';
 								}
 								widget.html( str );
 								edit_view_form_item_dic.hide();
 							} else if ( stepData[key].check_php_memory_limit == 1 ) {
-								widget.html( stepData[key].memory_limit + 'M' + ' (' + $.i18n._( 'Set this to 512M or higher' ) + ')' );
+								widget.html( stepData[key].memory_limit + ' bytes' + ' (' + $.i18n._( 'Set this to 512M or higher' ) + ')' );
+								widget.addClass( 'dataError' );
+							}
+							break;
+						case 'post_size':
+							if ( stepData[key].check_php_post_size == 0 ) {
+								var str = $.i18n._( 'OK' );
+								if ( stepData[key].post_size > 0 ) {
+									str += '(' + stepData[key].post_size + ' bytes' + ')';
+								}
+								widget.html( str );
+								edit_view_form_item_dic.hide();
+							} else if ( stepData[key].check_php_post_size == 1 ) {
+								widget.html( stepData[key].post_size + ' bytes' + ' (' + $.i18n._( 'Set this to 25M or higher, recommend 128M' ) + ')' );
+								widget.addClass( 'dataError' );
+							}
+							break;
+						case 'upload_size':
+							if ( stepData[key].check_php_upload_size == 0 ) {
+								var str = $.i18n._( 'OK' );
+								if ( stepData[key].upload_size > 0 ) {
+									str += '(' + stepData[key].post_size + ' bytes' + ')';
+								}
+								widget.html( str );
+								edit_view_form_item_dic.hide();
+							} else if ( stepData[key].check_php_upload_size == 1 ) {
+								widget.html( stepData[key].upload_size + ' bytes' + ' (' + $.i18n._( 'Set this to 25M or higher, recommend 128M' ) + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;

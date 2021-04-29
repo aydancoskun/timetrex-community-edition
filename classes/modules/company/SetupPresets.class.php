@@ -500,7 +500,7 @@ class SetupPresets extends Factory {
 							'company_id'     => $this->getCompany(),
 							'status_id'      => 10,
 							'type_id'        => 10,
-							'name'           => 'Termination Pay', //Different from severance pay. Usually used in lieu of notice of termination.
+							'name'           => 'Termination Pay (In Lieu Of Notice)', //Different from severance pay. Usually used in lieu of notice of termination.
 							'ps_order'       => 160,
 							'debit_account'  => 'Wages' . $gl_account_expense_suffix, //5410
 							'credit_account' => '',
@@ -2196,7 +2196,7 @@ class SetupPresets extends Factory {
 															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
 															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
 															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Retro Pay' ),
-															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Termination Pay' ),
+															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Termination Pay (In Lieu Of Notice)' ),
 															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Bereavement' ),
 															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Jury Duty' ),
 															   $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ), //Employer paid RRSP contributions are pensionable and insurable.

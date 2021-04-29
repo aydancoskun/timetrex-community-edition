@@ -2095,8 +2095,8 @@ class UserDateTotalFactory extends Factory {
 						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] = false;
 						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['hourly_rate'] = false;
 					} else {
-						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] += ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0;
-						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['hourly_rate'] = ( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] / ( ( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] ) : 1 ) );
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] = bcadd( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'], ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0 );
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['hourly_rate'] = bcdiv( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'], ( ( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] ) : 1 ) );
 
 						//Calculate Accumulated Time Total.
 						if ( in_array( $row['object_type_id'], [ 20, 25, 30 ] ) ) {
@@ -2114,11 +2114,8 @@ class UserDateTotalFactory extends Factory {
 								$retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] = 0;
 							}
 
-							$retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] += ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0;
-							$retval[$row['date_stamp']]['accumulated_time']['total']['hourly_rate'] = ( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] / ( ( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] ) : 1 ) );
-
-							//$retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-							//$retval[$row['date_stamp']]['accumulated_time']['worked_time']['hourly_rate'] = ( $retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time_amount'] / ( ($retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time'] ) : 1 ) );
+							$retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] = bcadd( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'], ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0 );
+							$retval[$row['date_stamp']]['accumulated_time']['total']['hourly_rate'] = bcdiv( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'], ( ( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] ) : 1 ) );
 						}
 					}
 
@@ -2139,8 +2136,8 @@ class UserDateTotalFactory extends Factory {
 						$retval['total'][$primary_array_key][$secondary_array_key]['total_time_amount'] = false;
 						$retval['total'][$primary_array_key][$secondary_array_key]['hourly_rate'] = false;
 					} else {
-						$retval['total'][$primary_array_key][$secondary_array_key]['total_time_amount'] += ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0;
-						$retval['total'][$primary_array_key][$secondary_array_key]['hourly_rate'] = ( $retval['total'][$primary_array_key][$secondary_array_key]['total_time_amount'] / ( ( $retval['total'][$primary_array_key][$secondary_array_key]['total_time'] > 0 ) ? TTDate::getHours( $retval['total'][$primary_array_key][$secondary_array_key]['total_time'] ) : 1 ) );
+						$retval['total'][$primary_array_key][$secondary_array_key]['total_time_amount'] = bcadd( $retval['total'][$primary_array_key][$secondary_array_key]['total_time_amount'], ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0 );
+						$retval['total'][$primary_array_key][$secondary_array_key]['hourly_rate'] = bcdiv( $retval['total'][$primary_array_key][$secondary_array_key]['total_time_amount'], ( ( $retval['total'][$primary_array_key][$secondary_array_key]['total_time'] > 0 ) ? TTDate::getHours( $retval['total'][$primary_array_key][$secondary_array_key]['total_time'] ) : 1 ) );
 
 						//Calculate Accumulated Time Total.
 						if ( in_array( $row['object_type_id'], [ 20, 25, 30 ] ) ) {
@@ -2158,11 +2155,8 @@ class UserDateTotalFactory extends Factory {
 							if ( !isset( $retval['total']['accumulated_time']['total']['total_time'] ) ) {
 								$retval['total']['accumulated_time']['total']['total_time'] = 0;
 							}
-							$retval['total']['accumulated_time']['total']['total_time_amount'] += ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0;
-							$retval['total']['accumulated_time']['total']['hourly_rate'] = ( $retval['total']['accumulated_time']['total']['total_time_amount'] / ( ( $retval['total']['accumulated_time']['total']['total_time'] > 0 ) ? TTDate::getHours( $retval['total']['accumulated_time']['total']['total_time'] ) : 1 ) );
-
-							//$retval['total']['accumulated_time']['worked_time']['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-							//$retval['total']['accumulated_time']['worked_time']['hourly_rate'] = ( $retval['total']['accumulated_time']['worked_time']['total_time_amount'] / ( ($retval['total']['accumulated_time']['worked_time']['total_time'] > 0 ) ? TTDate::getHours( $retval['total']['accumulated_time']['worked_time']['total_time'] ) : 1 ) );
+							$retval['total']['accumulated_time']['total']['total_time_amount'] = bcadd( $retval['total']['accumulated_time']['total']['total_time_amount'], ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0 );
+							$retval['total']['accumulated_time']['total']['hourly_rate'] = bcdiv( $retval['total']['accumulated_time']['total']['total_time_amount'], ( ( $retval['total']['accumulated_time']['total']['total_time'] > 0 ) ? TTDate::getHours( $retval['total']['accumulated_time']['total']['total_time'] ) : 1 ) );
 						}
 					}
 				}
@@ -2179,8 +2173,7 @@ class UserDateTotalFactory extends Factory {
 						$retval[$row['date_stamp']]['branch_time']['branch_' . $row['branch_id']] = [ 'label' => $branch_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order ];
 					}
 					$retval[$row['date_stamp']]['branch_time']['branch_' . $row['branch_id']]['total_time'] += $row['total_time'];
-					$retval[$row['date_stamp']]['branch_time']['branch_' . $row['branch_id']]['total_time_amount'] += ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0;
-					//$retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time'] ) : 1 ) );
+					$retval[$row['date_stamp']]['branch_time']['branch_' . $row['branch_id']]['total_time_amount'] = bcadd( $retval[$row['date_stamp']]['branch_time']['branch_' . $row['branch_id']]['total_time_amount'], ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0 );
 					$section_ids['branch'][] = TTUUID::castUUID( $row['branch_id'] );
 
 					//Department
@@ -2192,8 +2185,7 @@ class UserDateTotalFactory extends Factory {
 						$retval[$row['date_stamp']]['department_time']['department_' . $row['department_id']] = [ 'label' => $department_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order ];
 					}
 					$retval[$row['date_stamp']]['department_time']['department_' . $row['department_id']]['total_time'] += $row['total_time'];
-					$retval[$row['date_stamp']]['department_time']['department_' . $row['department_id']]['total_time_amount'] += ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0;
-					//$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time'] ) : 1 ) );
+					$retval[$row['date_stamp']]['department_time']['department_' . $row['department_id']]['total_time_amount'] = bcadd( $retval[$row['date_stamp']]['department_time']['department_' . $row['department_id']]['total_time_amount'], ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0 );
 					$section_ids['department'][] = TTUUID::castUUID( $row['department_id'] );
 
 					if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -2206,8 +2198,7 @@ class UserDateTotalFactory extends Factory {
 							$retval[$row['date_stamp']]['job_time']['job_' . $row['job_id']] = [ 'label' => $job_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order ];
 						}
 						$retval[$row['date_stamp']]['job_time']['job_' . $row['job_id']]['total_time'] += $row['total_time'];
-						$retval[$row['date_stamp']]['job_time']['job_' . $row['job_id']]['total_time_amount'] += ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0;
-						//$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] ) : 1 ) );
+						$retval[$row['date_stamp']]['job_time']['job_' . $row['job_id']]['total_time_amount'] = bcadd( $retval[$row['date_stamp']]['job_time']['job_' . $row['job_id']]['total_time_amount'], ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0 );
 						$section_ids['job'][] = TTUUID::castUUID( $row['job_id'] );
 
 						//Job Item/Task
@@ -2219,8 +2210,7 @@ class UserDateTotalFactory extends Factory {
 							$retval[$row['date_stamp']]['job_item_time']['job_item_' . $row['job_item_id']] = [ 'label' => $job_item_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order ];
 						}
 						$retval[$row['date_stamp']]['job_item_time']['job_item_' . $row['job_item_id']]['total_time'] += $row['total_time'];
-						$retval[$row['date_stamp']]['job_item_time']['job_item_' . $row['job_item_id']]['total_time_amount'] += ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0;
-						//$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] ) : 1 ) );
+						$retval[$row['date_stamp']]['job_item_time']['job_item_' . $row['job_item_id']]['total_time_amount'] = bcadd( $retval[$row['date_stamp']]['job_item_time']['job_item_' . $row['job_item_id']]['total_time_amount'], ( isset( $row['total_time_amount'] ) ) ? $row['total_time_amount'] : 0 );
 						$section_ids['job_item'][] = TTUUID::castUUID( $row['job_item_id'] );
 					}
 					//Debug::text('ID: '. $row['id'] .' User Date ID: '. $row['date_stamp'] .' Total Time: '. $row['total_time'] .' Branch: '. $branch_name .' Job: '. $job_name, __FILE__, __LINE__, __METHOD__, 10);

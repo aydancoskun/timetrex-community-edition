@@ -210,6 +210,11 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 			return false;
 		}
 
+		//Allow master administrators adding a new administrator for a company not populating the Legal Entity dropdown box due to the legal entity API not allowing cross-company filtering.
+		if ( $company_id != PRIMARY_COMPANY_ID || !isset($filter_data['company_id']) ) {
+			$filter_data['company_id'] = $company_id; //Unless its the primary company, never let the company_id be specified.
+		}
+
 		if ( !is_array( $order ) ) {
 			//Use Filter Data ordering if its set.
 			if ( isset( $filter_data['sort_column'] ) && $filter_data['sort_order'] ) {
@@ -331,6 +336,7 @@ class LegalEntityListFactory extends LegalEntityFactory implements IteratorAggre
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

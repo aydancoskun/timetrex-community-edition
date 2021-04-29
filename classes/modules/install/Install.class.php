@@ -1045,23 +1045,19 @@ class Install {
 	/**
 	 * @return mixed|null
 	 */
-	function getMemoryLimit() {
+	function getPHPINISize( $setting_name ) {
 		//
 		// NULL = unlimited
 		// INT = limited to that value
 
-		$raw_limit = ini_get( 'memory_limit' );
-		//Debug::text('RAW Limit: '. $raw_limit, __FILE__, __LINE__, __METHOD__, 9);
+		$size = convertHumanSizeToBytes( ini_get( $setting_name ) );
+		//Debug::text('RAW Limit: '. $size, __FILE__, __LINE__, __METHOD__, 9);
 
-		$limit = str_ireplace( [ 'G', 'M', 'K' ], [ '000000000', '000000', '000' ], $raw_limit ); //Use * 1000 rather * 1024 for easier parsing of G, M, K -- Make sure we consider -1 as the limit.
-		//$limit = (int)rtrim($raw_limit, 'M');
-		//Debug::text('Limit: '. $limit, __FILE__, __LINE__, __METHOD__, 9);
-
-		if ( $raw_limit == '' || $raw_limit <= 0 ) {
+		if ( $size == '' || $size <= 0 ) {
 			return null;
 		}
 
-		return $limit;
+		return $size;
 	}
 
 	/**
@@ -2113,9 +2109,56 @@ class Install {
 	/**
 	 * @return int
 	 */
+	function checkPHPMaxPostSize() {
+		if ( PHP_SAPI == 'cli' ) {
+			return 0;
+		} else {
+			$size = $this->getPHPINISize( 'post_max_size' );
+
+			//This must be greater than or equal to checkPHPMaxUploadSize() below.
+			$required_max_size = 2; //PHP default is 2M
+			if ( getTTProductEdition() >= 20 ) { //Corporate with document management
+				$required_max_size = 25;         //Recommend 128M or more?
+			}
+
+			if ( $size == null || $size >= ( $required_max_size * 1000 * 1000 ) ) {
+				return 0;
+			}
+
+			return 1;
+		}
+	}
+
+	/**
+	 * @return int
+	 */
+	function checkPHPMaxUploadSize() {
+		if ( PHP_SAPI == 'cli' ) {
+			return 0;
+		} else {
+			$size = $this->getPHPINISize( 'upload_max_filesize' );
+
+			//This must be less than or equal to checkPHPMaxPostSize() above.
+			$required_max_size = 2; //PHP default is 2M
+			if ( getTTProductEdition() >= 20 ) { //Corporate with document management
+				$required_max_size = 25;         //Recommend 128M or more?
+			}
+
+			if ( $size == null || $size >= ( $required_max_size * 1000 * 1000 ) ) {
+				return 0;
+			}
+
+			return 1;
+		}
+	}
+
+	/**
+	 * @return int
+	 */
 	function checkPHPMemoryLimit() {
+		$size = $this->getPHPINISize( 'memory_limit' );
 		//If changing the minimum memory limit, update Global.inc.php as well, because it always tries to force the memory limit to this value.
-		if ( $this->getMemoryLimit() == null || $this->getMemoryLimit() >= ( 512 * 1000 * 1000 ) ) { //512Mbytes - Use * 1000 rather than * 1024 so its easier to determine the limit in Global.inc.php and increase it.
+		if ( $size == null || $size >= ( 512 * 1000 * 1000 ) ) { //512Mbytes - Use * 1000 rather than * 1024 so its easier to determine the limit in Global.inc.php and increase it.
 			return 0;
 		}
 
@@ -2248,6 +2291,8 @@ class Install {
 		$retarr[$this->checkPHPDisabledFunctions()]++;
 		$retarr[$this->checkPHPAllowURLFopen()]++;
 		$retarr[$this->checkPHPMemoryLimit()]++;
+		$retarr[$this->checkPHPMaxPostSize()]++;
+		$retarr[$this->checkPHPMaxUploadSize()]++;
 		$retarr[$this->checkPHPMagicQuotesGPC()]++;
 
 		if ( $this->getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -2424,6 +2469,12 @@ class Install {
 		}
 		if ( $fail_all == true || $this->checkPHPMemoryLimit() != 0 ) {
 			$retarr[] = 'PHPMemoryLimit';
+		}
+		if ( $fail_all == true || $this->checkPHPMaxPostSize() != 0 ) {
+			$retarr[] = 'PHPPostSize';
+		}
+		if ( $fail_all == true || $this->checkPHPMaxUploadSize() != 0 ) {
+			$retarr[] = 'PHPUploadSize';
 		}
 		if ( $fail_all == true || $this->checkPHPMagicQuotesGPC() != 0 ) {
 			$retarr[] = 'PHPMagicQuotesGPC';

@@ -726,11 +726,12 @@ class APIAuthentication extends APIFactory {
 				'application_version'                 => $this->getApplicationVersion(),
 				'application_version_date'            => $this->getApplicationVersionDate(),
 				'application_build'                   => $this->getApplicationBuild(),
+				'installer_enabled'                   => ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] != '' ) ? (bool)$config_vars['other']['installer_enabled'] : false,
 				'is_logged_in'                        => false, //Requires DB connection.
 				'session_idle_timeout'                => $this->getSessionIdle(),
 				'footer_left_html'                    => ( isset( $config_vars['other']['footer_left_html'] ) && $config_vars['other']['footer_left_html'] != '' ) ? $config_vars['other']['footer_left_html'] : false,
 				'footer_right_html'                   => ( isset( $config_vars['other']['footer_right_html'] ) && $config_vars['other']['footer_right_html'] != '' ) ? $config_vars['other']['footer_right_html'] : false,
-				'support_email'                       => ( isset( $config_vars['other']['support_email'] ) && $config_vars['other']['support_email'] != '' ) ? $config_vars['other']['support_email'] : 'support@timetrex.com',
+				'support_email'                       => ( isset( $config_vars['other']['support_email'] ) ) ? $config_vars['other']['support_email'] : 'support@timetrex.com', //Allow this to be defined as empty to disable the Email Support icon.
 				'language_options'                    => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
 				//Make sure locale is set properly before this function is called, either in api.php or APIGlobal.js.php for example.
 				'enable_default_language_translation' => ( isset( $config_vars['other']['enable_default_language_translation'] ) ) ? $config_vars['other']['enable_default_language_translation'] : false,
@@ -740,7 +741,7 @@ class APIAuthentication extends APIFactory {
 				'map_api_key'     => ( isset( $config_vars['map']['api_key'] ) && $config_vars['map']['api_key'] != '' ) ? $config_vars['map']['map_api_key'] : '',
 				'map_provider'    => isset( $config_vars['map']['provider'] ) ? $config_vars['map']['provider'] : 'timetrex',
 
-				//registration key for the map servers must be added in JS because of the url formats
+				//Registration key for the map servers must be added in JS because of the url formats
 				'map_tile_url'    => isset( $config_vars['map']['tile_url'] ) ? rtrim( $config_vars['map']['tile_url'], '/' ) : '//map-tiles.timetrex.com',
 				'map_routing_url' => isset( $config_vars['map']['routing_url'] ) ? rtrim( $config_vars['map']['routing_url'], '/' ) : '//map-routing.timetrex.com',
 				'map_geocode_url' => isset( $config_vars['map']['geocode_url'] ) ? rtrim( $config_vars['map']['geocode_url'], '/' ) : '//map-geocode.timetrex.com',

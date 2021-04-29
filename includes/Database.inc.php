@@ -75,6 +75,26 @@ if ( !isset( $disable_database_connection ) ) {
 				foreach ( $db_hosts as $db_host_arr ) {
 					Debug::Text( 'Adding DB Connection: Host: ' . $db_host_arr[0] . ' Type: ' . $db_host_arr[1] . ' Weight: ' . $db_host_arr[2], __FILE__, __LINE__, __METHOD__, 1 );
 					$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
+					$db_connection_obj->setConnectionTestCallback( function( $connection_obj, $adodb_obj ) use ( $config_vars ) {
+						if ( $connection_obj->type == 'slave' ) {
+							//When connecting to a slave database, make sure the replication delay never exceeds our threshold, otherwise discard the connection and try a different host.
+							$maximum_replication_delay = 60; //Seconds
+							if ( isset($config_vars['database']['maximum_replication_delay']) && is_numeric( $config_vars['database']['maximum_replication_delay'] ) ) {
+								$maximum_replication_delay = (float)$config_vars['database']['maximum_replication_delay'];
+							}
+
+							$result = (float)$adodb_obj->GetOne( 'SELECT EXTRACT(epoch FROM ( now() - CASE WHEN pg_last_xact_replay_timestamp() IS NULL THEN now() ELSE pg_last_xact_replay_timestamp() END ) ) AS replication_delay' );
+							//Debug::Text( '  Database Replication Delay: '. $result .' Host: '. $connection_obj->host, __FILE__, __LINE__, __METHOD__, 10 );
+							if ( $result <= $maximum_replication_delay ) {
+								return true;
+							} else {
+								Debug::Text( 'ERROR: Database Connection is invalid, ignoring! Host: '. $connection_obj->host .' Replication Delay: '. $result, __FILE__, __LINE__, __METHOD__, 1 );
+								return false;
+							}
+						}
+
+						return true; //Always return true for master connections.
+					} );
 					$db_connection_obj->getADODbObject()->SetFetchMode( ADODB_FETCH_ASSOC );
 					$db_connection_obj->getADODbObject()->noBlobs = true; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 					$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";

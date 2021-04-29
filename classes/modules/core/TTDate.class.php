@@ -613,6 +613,10 @@ class TTDate {
 				}
 				if ( !isset( $time_units[2] ) ) {
 					$time_units[2] = 0;
+				} else {
+					if ( $time_units[2] != 0 ) {
+						$enable_rounding = false; //Since seconds were specified, don't round to nearest minute.
+					}
 				}
 
 				//Check if the first character is '-', or thre are any negative integers.
@@ -634,22 +638,27 @@ class TTDate {
 					$time_unit = TTDate::getTimeUnit( self::parseTimeUnit( $time_unit, 10 ), $format );
 				}
 
-				//Round to the nearest minute when entering decimal format to avoid issues with 0.33 (19.8 minutes) or 0.333 (19.98 minutes) or 0.33333...
-				//This is only for input, for things like absence time, or meal/break policies, its rare they need sub-minute resolution, and if they
-				//do they can use hh:mm:ss instead.
-				//However accrual policies have to be second accurate (weekly accruals rounded to 1 minute can result in 52minute differences in a year),
-				//so we need a way to disable this rounding as well so the user can properly zero out an accrual balance if needed.
 				$seconds = ( (float)$time_unit * 3600 );
-				if ( $enable_rounding == true ) {
-					$seconds = self::roundTime( $seconds, 60 );
-				}
 				break;
 			case 30: //minutes
 				$seconds = ( $time_unit * 60 );
 				break;
 			case 40: //seconds
-				$seconds = round( $time_unit ); //No decimal places when using seconds.
+				$seconds = $time_unit;
+				if ( $enable_rounding == true ) {
+					$seconds = round( $seconds );
+				}
+				$enable_rounding = false; //Since seconds were specified, don't round to nearest minute.
 				break;
+		}
+
+		//Round to the nearest minute when entering decimal format to avoid issues with 0.33 (19.8 minutes) or 0.333 (19.98 minutes) or 0.33333...
+		//This is only for input, for things like absence time, or meal/break policies, its rare they need sub-minute resolution, and if they
+		//do they can use hh:mm:ss instead.
+		//Accrual policies have to be second accurate (weekly accruals rounded to 1 minute can result in 52minute differences in a year),
+		//so we need a way to disable this rounding as well so the user can properly zero out an accrual balance if needed.
+		if ( $enable_rounding == true ) {
+			$seconds = self::roundTime( $seconds, 60 );
 		}
 
 		if ( isset( $seconds ) ) {

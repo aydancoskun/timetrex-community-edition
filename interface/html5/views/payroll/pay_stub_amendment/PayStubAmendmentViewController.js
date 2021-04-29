@@ -504,7 +504,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			Debug.Text( 'Calculate Amount before rounding: ' + calc_amount, 'PayStubAmendmentViewController.js', 'PayStubAmendmentViewController', 'onFormItemKeyUp', 10 );
 
 			var round_decimal_places;
-			if ( this.currency_array.round_decimal_places ) {
+			if ( this.currency_array && this.currency_array.round_decimal_places ) {
 				round_decimal_places = this.currency_array.round_decimal_places;
 			} else {
 				round_decimal_places = 2;

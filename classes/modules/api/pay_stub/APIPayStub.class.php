@@ -387,7 +387,7 @@ class APIPayStub extends APIFactory {
 									)
 									&& isset( $pay_stub_entry['amount'] )
 							) {
-								Debug::Text( 'Pay Stub Entry ID: ' . $pay_stub_entry['id'] . ' Amount: ' . $pay_stub_entry['amount'] . ' Pay Stub ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
+								Debug::Text( 'Pay Stub Entry ID: ' . ( ( isset($pay_stub_entry['id']) ) ? $pay_stub_entry['id'] : 'N/A' ) . ' Amount: ' . $pay_stub_entry['amount'] . ' Pay Stub ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
 
 								//Populate $pay_stub_entry_obj so we can find validation errors before postSave() is called.
 								if ( isset( $pay_stub_entry['id'] ) && $pay_stub_entry['id'] != '' && TTUUID::isUUID( $pay_stub_entry['id'] ) ) {
@@ -511,12 +511,12 @@ class APIPayStub extends APIFactory {
 									//$pst_obj->setPayStub( $lf->getId() ); //Don't set this here as it will cause validation failures. Its handled in addTransaction() instead.
 								}
 
-								$pst_obj->setType( 10 ); //Enabled
+								$pst_obj->setType( 10 ); //10=Valid
 
 								if ( isset( $pay_stub_transaction['status_id'] ) && $pay_stub_transaction['status_id'] != '' ) {
 									$pst_obj->setStatus( $pay_stub_transaction['status_id'] );
 								} else {
-									$pst_obj->setStatus( 10 ); //Pending
+									$pst_obj->setStatus( 10 ); //10=Pending
 								}
 
 								if ( isset( $pay_stub_transaction['deleted'] ) && $pay_stub_transaction['deleted'] == 1 ) {

@@ -94,10 +94,10 @@ class APIInstall extends APIFactory {
 			@fclose( $handle );
 
 			if ( $external_installer == 1 ) {
-				//When using the external installer, if no system_time_zone is defined in the .ini file, try to set it to the detected system timezone immediately, as the user won't get a chance to change it later on.
+				//When using the external installer, if no system_timezone is defined in the .ini file, try to set it to the detected system timezone immediately, as the user won't get a chance to change it later on.
 				global $config_vars;
-				if ( !isset( $config_vars['other']['system_time_zone'] ) ) {
-					$install_obj->writeConfigFile( [ 'other' => [ 'system_time_zone' => TTDate::detectSystemTimeZone() ] ] );
+				if ( !isset( $config_vars['other']['system_timezone'] ) ) {
+					$install_obj->writeConfigFile( [ 'other' => [ 'system_timezone' => TTDate::detectSystemTimeZone() ] ] );
 				}
 			}
 
@@ -149,7 +149,15 @@ class APIInstall extends APIFactory {
 				$retval['disk_space'] = $install_obj->checkDiskSpace();
 				$retval['memory_limit'] = [
 						'check_php_memory_limit' => $install_obj->checkPHPMemoryLimit(),
-						'memory_limit'           => $install_obj->getMemoryLimit(),
+						'memory_limit'           => $install_obj->getPHPINISize( 'memory_limit' ),
+				];
+				$retval['post_size'] = [
+						'check_php_post_size' => $install_obj->checkPHPMaxPostSize(),
+						'post_size'           => $install_obj->getPHPINISize( 'post_max_size' ),
+				];
+				$retval['upload_size'] = [
+						'check_php_upload_size' => $install_obj->checkPHPMaxUploadSize(),
+						'upload_size'           => $install_obj->getPHPINISize( 'upload_max_filesize' ),
 				];
 				$retval['base_url'] = [
 						'check_base_url'       => $install_obj->checkBaseURL(),
@@ -668,7 +676,7 @@ class APIInstall extends APIFactory {
 			}
 
 			if ( isset( $data['time_zone'] ) && $data['time_zone'] != '' ) {
-				$tmp_config_data['other']['system_time_zone'] = $data['time_zone'];
+				$tmp_config_data['other']['system_timezone'] = $data['time_zone'];
 			}
 
 			$install_obj->writeConfigFile( $tmp_config_data );

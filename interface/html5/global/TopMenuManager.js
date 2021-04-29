@@ -1341,7 +1341,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		id: 'EmailHelp',
 		group: help_group,
 		icon: 'emailhelp-35x35.png',
-		permission_result: true,
+		permission_result: ( Global.getProductEdition() == 10 || APIGlobal.pre_login_data.support_email != '' ) ? true : false,
 		permission: true
 	} );
 

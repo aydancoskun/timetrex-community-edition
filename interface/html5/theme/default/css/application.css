@@ -3305,11 +3305,15 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:after {
-	content: '✔';
+	content: '\2713'; /* When using \2714 (heavy check mark), it breaks Android Samsung devices running Chrome, and causes them to show all checkboxes as checked. */
 }
 
 input[type="checkbox"]:checked {
 	color: #000000;
+}
+
+input[type="checkbox"]:focus {
+	outline: 0;
 }
 
 .ui-state-hover {

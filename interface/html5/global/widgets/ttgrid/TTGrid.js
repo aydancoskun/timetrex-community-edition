@@ -595,7 +595,7 @@ TTGrid = function( table_id, setup, column_info_array ) {
 			for ( var i in LocalCacheData.resizeable_grids ) {
 				var ttgrid = LocalCacheData.resizeable_grids[i];
 
-				if ( !ttgrid || ttgrid.getTableIDElement().length === 0 || !ttgrid.grid || ttgrid.setup.onResizeGrid === false ) {
+				if ( !ttgrid || ( typeof ttgrid.getTableIDElement === 'function' && ttgrid.getTableIDElement().length === 0 ) || !ttgrid.grid || ttgrid.setup.onResizeGrid === false ) {
 					Debug.Arr( LocalCacheData.resizeable_grids, ' Grid ignored ' + i, 'TTGrid.js', 'TTGrid', 'setGridColumnsWidth', 10 );
 					LocalCacheData.resizeable_grids[i] = null;
 					continue;

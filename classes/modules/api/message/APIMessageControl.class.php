@@ -320,7 +320,7 @@ class APIMessageControl extends APIFactory {
 				if ( isset( $row['id'] ) && $row['id'] != '' ) {
 					$primary_validator->isTrue( 'permission', false, TTi18n::gettext( 'Edit permission denied' ) );
 				} else {
-					//Adding new object, check ADD permissions.
+					//Adding new object, check ADD permissions. -- *NOTE: This can't use the standard permissions checks with edit_own/edit_child, we mostly do those checks in a different way below.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check( 'message', 'add' ), TTi18n::gettext( 'Add permission denied' ) );
 
 					//Security check, make sure any data passed as to_user_id is within the list of users available.

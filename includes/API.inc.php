@@ -75,12 +75,16 @@ function getSessionID( $authentication_type_id = 800 ) {
 	$session_name = $authentication->getName( $authentication_type_id );
 
 	if ( isset( $_COOKIE[$session_name] ) && $_COOKIE[$session_name] != '' ) {
-		$session_id = (string)$_COOKIE[$session_name];
+		$session_id = $_COOKIE[$session_name];
 	} else if ( isset( $_POST[$session_name] ) && $_POST[$session_name] != '' ) {
-		$session_id = (string)$_POST[$session_name];
+		$session_id = $_POST[$session_name];
 	} else if ( isset( $_GET[$session_name] ) && $_GET[$session_name] != '' ) {
-		$session_id = (string)$_GET[$session_name];
+		$session_id = $_GET[$session_name];
 	} else {
+		$session_id = false;
+	}
+
+	if ( is_string( $session_id ) == false ) {
 		$session_id = false;
 	}
 
@@ -110,6 +114,10 @@ function getStationID() {
 				$station_id = $matches[1];
 			}
 		}
+	}
+
+	if ( is_string( $station_id ) == false ) {
+		$station_id = false;
 	}
 
 	return $station_id;

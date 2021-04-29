@@ -4340,10 +4340,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 					if ( time_sheet_view_controller.wage_btn && time_sheet_view_controller.wage_btn.getValue( true ) && data.hasOwnProperty( 'total_time_amount' ) && data.total_time_amount && data.hasOwnProperty( 'hourly_rate' ) && data.hourly_rate ) {
 						time_span = $( '<div class=\'total--bold time-sheet-view-wage-container\'></div>' );
-						cell_value = '<span class="time-sheet-view-wage-hour-rate">' + currency +
-							data.hourly_rate.toFixed( 2 ) + '/hr @</span>' +
+						cell_value = '<span class="time-sheet-view-wage-hour-rate">' + currency + Global.MoneyRound( data.hourly_rate ) + '/hr @</span>' +
 							'<span class="time-sheet-view-wage-value">' + cell_value +
-							'</span ><span class="time-sheet-view-wage-amount" >= ' + currency + data.total_time_amount.toFixed( 2 ) +
+							'</span ><span class="time-sheet-view-wage-amount" >= ' + currency + Global.MoneyRound( data.total_time_amount ) +
 							'</span>';
 					}
 
@@ -4382,10 +4381,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 					if ( time_sheet_view_controller.wage_btn && time_sheet_view_controller.wage_btn.getValue( true ) && data.hasOwnProperty( 'total_time_amount' ) && data.total_time_amount && data.hasOwnProperty( 'hourly_rate' ) && data.hourly_rate ) {
 						time_span = $( '<div class=\'time-sheet-view-wage-container\'></div>' );
-						cell_value = '<span class="time-sheet-view-wage-hour-rate">' + currency +
-							data.hourly_rate.toFixed( 2 ) + '/hr @</span>' +
+						cell_value = '<span class="time-sheet-view-wage-hour-rate">' + currency + Global.MoneyRound( data.hourly_rate ) + '/hr @</span>' +
 							'<span class="time-sheet-view-wage-value">' + cell_value +
-							'</span ><span class="time-sheet-view-wage-amount" >= ' + currency + data.total_time_amount.toFixed( 2 ) +
+							'</span ><span class="time-sheet-view-wage-amount" >= ' + currency + Global.MoneyRound( data.total_time_amount ) +
 							'</span>';
 					}
 
@@ -4440,10 +4438,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 					if ( time_sheet_view_controller.wage_btn && time_sheet_view_controller.wage_btn.getValue( true ) && data.hasOwnProperty( 'total_time_amount' ) && data.total_time_amount && data.hasOwnProperty( 'hourly_rate' ) && data.hourly_rate ) {
 						time_span = $( '<div class=\'time-sheet-view-wage-container\'></div>' );
-						cell_value = '<span class="time-sheet-view-wage-hour-rate">' + currency +
-							data.hourly_rate.toFixed( 2 ) + '/hr @</span>' +
+						cell_value = '<span class="time-sheet-view-wage-hour-rate">' + currency + Global.MoneyRound( data.hourly_rate ) + '/hr @</span>' +
 							'<span class="time-sheet-view-wage-value">' + cell_value +
-							'</span ><span class="time-sheet-view-wage-amount" >= ' + currency + data.total_time_amount.toFixed( 2 ) +
+							'</span ><span class="time-sheet-view-wage-amount" >= ' + currency + Global.MoneyRound( data.total_time_amount ) +
 							'</span>';
 					}
 					if ( data.hasOwnProperty( 'override' ) && data.override === true ) {
@@ -6640,13 +6637,17 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	getSelectDate: function() {
-		var retval = this.start_date_picker.getValue();
+		if ( this.start_date_picker ) {
+			var retval = this.start_date_picker.getValue();
 
-		if ( retval == 'Invalid date' ) {
-			retval = new Date();
+			if ( retval == 'Invalid date' ) {
+				retval = new Date();
+			}
+
+			return retval;
 		}
 
-		return retval;
+		return null;
 	},
 
 	onDeleteResult: function( result ) {

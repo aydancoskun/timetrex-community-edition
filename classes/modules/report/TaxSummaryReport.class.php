@@ -103,6 +103,10 @@ class TaxSummaryReport extends Report {
 					'-2070-default_department_id' => TTi18n::gettext( 'Default Department' ),
 					'-3000-custom_filter'         => TTi18n::gettext( 'Custom Filter' ),
 
+					'-2200-pay_stub_status_id' => TTi18n::gettext( 'Pay Stub Status' ),
+					'-2205-pay_stub_type_id'   => TTi18n::gettext( 'Pay Stub Type' ),
+					'-2210-pay_stub_run_id'    => TTi18n::gettext( 'Payroll Run' ),
+
 					//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
 					'-5000-columns'    => TTi18n::gettext( 'Display Columns' ),
@@ -215,6 +219,9 @@ class TaxSummaryReport extends Report {
 
 					'-1810-company_deduction_name' => TTi18n::gettext( 'Tax/Deduction Name' ),
 
+					'-2800-pay_stub_status' => TTi18n::gettext( 'Pay Stub Status' ),
+					'-2810-pay_stub_type'   => TTi18n::gettext( 'Pay Stub Type' ),
+					'-2820-pay_stub_run_id' => TTi18n::gettext( 'Payroll Run' ),
 				];
 
 				$retval = array_merge( $retval, $this->getOptions( 'date_columns' ), (array)$this->getOptions( 'custom_columns' ), (array)$this->getOptions( 'report_static_custom_column' ) );
@@ -727,6 +734,8 @@ class TaxSummaryReport extends Report {
 
 		//Debug::Text('    Processing PSE record: Agency ID: '. $remittance_agency_id .' Deduction: '. $cd_obj->getName() .' ('. $company_deduction_id .') PSE Name ID: '. $pay_stub_entry_name_id .' Amount: '. $pse_obj->getColumn('amount'), __FILE__, __LINE__, __METHOD__, 10);
 		if ( !isset( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$run_id][$user_id] ) ) {
+			$psf = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $psf */ //For getOptions() below.
+
 			$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$run_id][$user_id] = [
 					'pay_period_start_date'       => strtotime( $pse_obj->getColumn( 'pay_period_start_date' ) ),
 					'pay_period_end_date'         => strtotime( $pse_obj->getColumn( 'pay_period_end_date' ) ),
@@ -734,6 +743,8 @@ class TaxSummaryReport extends Report {
 					'pay_period'                  => strtotime( $pse_obj->getColumn( 'pay_period_transaction_date' ) ),
 					'pay_period_id'               => $pse_obj->getColumn( 'pay_period_id' ),
 
+					'pay_stub_status'           => Option::getByKey( $pse_obj->getColumn( 'pay_stub_status_id' ), $psf->getOptions( 'status' ) ),
+					'pay_stub_type'             => Option::getByKey( $pse_obj->getColumn( 'pay_stub_type_id' ), $psf->getOptions( 'type' ) ),
 					'pay_stub_start_date'       => strtotime( $pse_obj->getColumn( 'pay_stub_start_date' ) ),
 					'pay_stub_end_date'         => strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) ),
 					'pay_stub_transaction_date' => TTDate::getMiddleDayEpoch( strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ) ), //Some transaction dates could be throughout the day for terminated employees being paid early, so always forward them to the middle of the day to keep group_by working correctly.
@@ -914,8 +925,8 @@ class TaxSummaryReport extends Report {
 												&& $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$run_id][$user_id]['taxable_wages_ytd'] > $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount']
 										) {
 											//Make sure taxable wages abides by maximum amount properly.
-											$tmp_taxable_wages_ytd_diff = ( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$run_id][$user_id]['taxable_wages_ytd'] - $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$run_id][$user_id]['taxable_wages'] );
-											$tmp_taxable_wages_max_diff = ( $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'] - $tmp_taxable_wages_ytd_diff );
+											$tmp_taxable_wages_ytd_diff = bcsub( $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$run_id][$user_id]['taxable_wages_ytd'], $this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$run_id][$user_id]['taxable_wages'] );
+											$tmp_taxable_wages_max_diff = bcsub( $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'], $tmp_taxable_wages_ytd_diff );
 											//Debug::Text('  Taxable Wages YTD Diff: '. $tmp_taxable_wages_ytd_diff .' Max Diff: '. $tmp_taxable_wages_max_diff, __FILE__, __LINE__, __METHOD__, 10);
 											if ( $tmp_taxable_wages_ytd_diff < $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'] ) {
 												$this->tmp_data['pay_stub_entry'][$remittance_agency_id][$company_deduction_id][$date_stamp][$run_id][$user_id]['taxable_wages'] = $tmp_taxable_wages_max_diff;

@@ -324,7 +324,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 		// Current Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( { field: 'phone.current_password', width: 200 } );
-		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_quick_punch_password_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Current Web Password' ), form_item_input, tab_quick_punch_password_column1 );
 
 		// New Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );

@@ -184,6 +184,13 @@ class ADOdbLoadBalancer {
 					throw $e; //No connections left, reThrow exception so application can catch it.
 				}
 
+				//Check to see if a connetion test callback was defined, and if so execute it.
+				//  This is usefult for testing replication lag and such to ensure the connection is suitable to be used.
+				$test_connection_callback = $connection_obj->getConnectionTestCallback();
+				if ( is_callable( $test_connection_callback ) AND $test_connection_callback( $connection_obj, $adodb_obj ) !== TRUE ) {
+					return FALSE;
+				}
+
 				if ( is_array( $this->user_defined_session_init_sql ) ) {
 					foreach( $this->user_defined_session_init_sql as $session_init_sql ) {
 						$adodb_obj->Execute( $session_init_sql );
@@ -212,8 +219,11 @@ class ADOdbLoadBalancer {
 			if ( $connection_id !== FALSE ) {
 				try {
 					$adodb_obj = $this->_getConnection( $connection_id );
-					//$connection_obj = $this->connections[$connection_id];
-					break;
+					if ( is_object( $adodb_obj ) ) {
+						break; //Found valid connection, continue with it.
+					} else {
+						throw new Exception('ADODB Connection Object does not exist. Perhaps LoadBalancer Database Connection Test Failed?');
+					}
 				} catch ( Exception $e ) {
 					//Connection error, see if there are other connections to try still.
 					Debug::Text( 'ADOdb connection FAILED! Total Connections: ' . count( $this->connections ), __FILE__, __LINE__, __METHOD__, 10 );
@@ -322,7 +332,7 @@ class ADOdbLoadBalancer {
 					return $result_arr[0];
 				} else {
 					//When using lazy connections, there are cases where setSessionVariable() is called early on, but there are no connections to execute the queries on yet.
-					//This captures that case and forces a RETURN TRUE to occur. As likely the queries will be exectued as soon as a connection is established. 
+					//This captures that case and forces a RETURN TRUE to occur. As likely the queries will be exectued as soon as a connection is established.
 					Debug::Text( 'No active connections execute query on yet...', __FILE__, __LINE__, __METHOD__, 10);
 					return TRUE;
 				}
@@ -493,6 +503,8 @@ class ADOdbLoadBalancerConnection {
 	protected $driver = FALSE;
 	protected $adodb_obj = FALSE;
 
+	protected $connection_test_callback = NULL;
+
 	//Load balancing data
 	public $type = 'master';
 	public $weight = 1;
@@ -521,6 +533,17 @@ class ADOdbLoadBalancerConnection {
 		$this->database = $argDatabaseName;
 
 		return TRUE;
+	}
+
+	//Anonymous function that is called and must return TRUE for the connection to be usable.
+	//  The first argument is the type of connection to test.
+	//  Useful to check things like replication lag.
+	function setConnectionTestCallback( $callback ) {
+		$this->connection_test_callback = $callback;
+	}
+
+	function getConnectionTestCallback() {
+		return $this->connection_test_callback;
 	}
 
 	function getADOdbObject() {

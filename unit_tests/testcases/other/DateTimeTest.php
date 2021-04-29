@@ -90,6 +90,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::parseTimeUnit( '1:' ), 3600 );
 		$this->assertEquals( TTDate::parseTimeUnit( '1:00:00' ), 3600 );
 		$this->assertEquals( TTDate::parseTimeUnit( '1:00:01' ), 3601 );
+		$this->assertEquals( TTDate::parseTimeUnit( '"1:00:01"' ), 3601 );
 
 		$this->assertEquals( TTDate::parseTimeUnit( '00:60' ), 3600 );
 		$this->assertEquals( TTDate::parseTimeUnit( ':60' ), 3600 );
@@ -109,6 +110,44 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::parseTimeUnit( '0.50' ), 1800 );
 
 		$this->assertEquals( TTDate::parseTimeUnit( '0.34' ), 1200 ); //Automatically rounds to nearest 1min
+
+
+
+		TTDate::setTimeUnitFormat( 12 ); //HH:MM:SS
+		$this->assertEquals( TTDate::parseTimeUnit( '00:01' ), 60 );
+		$this->assertEquals( TTDate::parseTimeUnit( '-00:01' ), -60 );
+
+
+		$this->assertEquals( TTDate::parseTimeUnit( '01:00' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( '10:00' ), 36000 );
+		$this->assertEquals( TTDate::parseTimeUnit( '100:00' ), 360000 );
+		$this->assertEquals( TTDate::parseTimeUnit( '1000:00' ), 3600000 );
+		$this->assertEquals( TTDate::parseTimeUnit( '1,000:00' ), 3600000 );
+		$this->assertEquals( TTDate::parseTimeUnit( '10,000:00' ), 36000000 );
+		$this->assertEquals( TTDate::parseTimeUnit( '10,000:01.5' ), 36000060 );
+
+		$this->assertEquals( TTDate::parseTimeUnit( '01' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( '1' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( '-1' ), -3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( '1:' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( '1:00:00' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( '1:00:01' ), 3601 );
+		$this->assertEquals( TTDate::parseTimeUnit( '"1:00:01"' ), 3601 );
+
+		$this->assertEquals( TTDate::parseTimeUnit( '00:60' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( ':60' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( ':1' ), 60 );
+
+		$this->assertEquals( TTDate::parseTimeUnit( '1:00:01.5' ), 3601 );
+		$this->assertEquals( TTDate::parseTimeUnit( '1:1.5' ), 3660 );
+
+
+		TTDate::setTimeUnitFormat( 40 ); //Seconds
+		$this->assertEquals( TTDate::parseTimeUnit( '3600' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( '3600.001' ), 3600 );
+		$this->assertEquals( TTDate::parseTimeUnit( '"3600.001"' ), 3600.001 );
+		$this->assertEquals( TTDate::parseTimeUnit( '3629.001' ), 3629 );
+		$this->assertEquals( TTDate::parseTimeUnit( '"3629.001"' ), 3629.001 );
 	}
 
 	function testTimeUnit2() {
@@ -131,7 +170,12 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::parseTimeUnit( '10.00' ), 36000 );
 		$this->assertEquals( TTDate::parseTimeUnit( '100.00' ), 360000 );
 		$this->assertEquals( TTDate::parseTimeUnit( '1000.00' ), 3600000 );
+		$this->assertEquals( TTDate::parseTimeUnit( '1000.0001' ), 3600000 );
+		$this->assertEquals( TTDate::parseTimeUnit( '"1000.0001"' ), 3600000.36 );
 		$this->assertEquals( TTDate::parseTimeUnit( '1,000.00' ), 3600000 );
+		$this->assertEquals( TTDate::parseTimeUnit( '"1,000.00"' ), 3600000 );
+		$this->assertEquals( TTDate::parseTimeUnit( ' "1, 000.00" ' ), 3600000 );
+		$this->assertEquals( TTDate::parseTimeUnit( ' "-1, 000.00" ' ), -3600000 );
 		$this->assertEquals( TTDate::parseTimeUnit( '1' ), 3600 );
 		$this->assertEquals( TTDate::parseTimeUnit( '-1' ), -3600 );
 		$this->assertEquals( TTDate::parseTimeUnit( '01' ), 3600 );

@@ -100,8 +100,11 @@ class RemittanceSummaryReport extends Report {
 					'-2050-exclude_user_id'       => TTi18n::gettext( 'Employee Exclude' ),
 					'-2060-default_branch_id'     => TTi18n::gettext( 'Default Branch' ),
 					'-2070-default_department_id' => TTi18n::gettext( 'Default Department' ),
+					'-2100-custom_filter' => TTi18n::gettext( 'Custom Filter' ),
 
-					'-3000-custom_filter' => TTi18n::gettext( 'Custom Filter' ),
+					'-2200-pay_stub_status_id' => TTi18n::gettext( 'Pay Stub Status' ),
+					'-2205-pay_stub_type_id'   => TTi18n::gettext( 'Pay Stub Type' ),
+					'-2210-pay_stub_run_id'    => TTi18n::gettext( 'Payroll Run' ),
 
 					//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
@@ -187,6 +190,10 @@ class RemittanceSummaryReport extends Report {
 					'-1400-permission_control'  => TTi18n::gettext( 'Permission Group' ),
 					'-1410-pay_period_schedule' => TTi18n::gettext( 'Pay Period Schedule' ),
 					'-1420-policy_group'        => TTi18n::gettext( 'Policy Group' ),
+
+					'-2800-pay_stub_status' => TTi18n::gettext( 'Pay Stub Status' ),
+					'-2810-pay_stub_type'   => TTi18n::gettext( 'Pay Stub Type' ),
+					'-2820-pay_stub_run_id' => TTi18n::gettext( 'Payroll Run' ),
 				];
 
 				$retval = array_merge( $retval, $this->getOptions( 'date_columns' ), (array)$this->getOptions( 'report_static_custom_column' ) );
@@ -579,6 +586,8 @@ class RemittanceSummaryReport extends Report {
 		}
 		unset( $cdlf, $cd_obj, $udlf, $ud_obj );
 
+		$psf = TTnew( 'PayStubFactory' ); /** @var PayStubFactory $psf */ //For getOptions() below.
+
 		$pself = TTnew( 'PayStubEntryListFactory' ); /** @var PayStubEntryListFactory $pself */
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		if ( $pself->getRecordCount() > 0 ) {
@@ -601,27 +610,28 @@ class RemittanceSummaryReport extends Report {
 
 				if ( !isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] ) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = [
-							'date_stamp'            => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
-							'birth_date'            => strtotime( $pse_obj->getColumn( 'birth_date' ) ),
-							'pay_period_start_date' => strtotime( $pse_obj->getColumn( 'pay_period_start_date' ) ),
-							'pay_period_end_date'   => strtotime( $pse_obj->getColumn( 'pay_period_end_date' ) ),
+							'date_stamp' => strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ),
+							'birth_date' => strtotime( $pse_obj->getColumn( 'birth_date' ) ),
 
+							'pay_period_start_date'       => strtotime( $pse_obj->getColumn( 'pay_period_start_date' ) ),
+							'pay_period_end_date'         => strtotime( $pse_obj->getColumn( 'pay_period_end_date' ) ),
 							'pay_period_transaction_date' => strtotime( $pse_obj->getColumn( 'pay_period_transaction_date' ) ),
 							'pay_period'                  => strtotime( $pse_obj->getColumn( 'pay_period_transaction_date' ) ),
 							'pay_period_id'               => $pse_obj->getColumn( 'pay_period_id' ),
 
+							'pay_stub_status' => Option::getByKey( $pse_obj->getColumn( 'pay_stub_status_id' ), $psf->getOptions( 'status' ) ),
+							'pay_stub_type'   => Option::getByKey( $pse_obj->getColumn( 'pay_stub_type_id' ), $psf->getOptions( 'type' ) ),
 							'pay_stub_start_date'       => strtotime( $pse_obj->getColumn( 'pay_stub_start_date' ) ),
 							'pay_stub_end_date'         => strtotime( $pse_obj->getColumn( 'pay_stub_end_date' ) ),
 							'pay_stub_transaction_date' => TTDate::getMiddleDayEpoch( strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) ) ), //Some transaction dates could be throughout the day for terminated employees being paid early, so always forward them to the middle of the day to keep group_by working correctly.
 							'pay_stub_run_id'           => $run_id,
-
 					];
 
 					$this->form_data['pay_period'][] = strtotime( $pse_obj->getColumn( 'pay_stub_transaction_date' ) );
 				}
 
 				if ( isset( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] ) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = ( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] + $pse_obj->getColumn( 'amount' ) );
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn( 'amount' ) );
 				} else {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn( 'amount' );
 				}
@@ -633,7 +643,7 @@ class RemittanceSummaryReport extends Report {
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['ei']['include_pay_stub_entry_account'], $form_data['ei']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['cpp']['include_pay_stub_entry_account'], $form_data['cpp']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['tax']['include_pay_stub_entry_account'], $form_data['tax']['exclude_pay_stub_entry_account'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total'] = ( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total'] + $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total'] + $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total'] = bcadd( bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total'] ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $gross_payroll_psea_ids['include'], $gross_payroll_psea_ids['exclude'] );
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings'] = 0;
@@ -732,15 +742,15 @@ class RemittanceSummaryReport extends Report {
 					Debug::Text( ' User ID: ' . $user_id . ' PPs: ' . $tmp_total_cpp_pay_periods . '/' . $this->tmp_data['pay_period_schedule'][$user_id] . ' First Transaction Date: ' . TTDate::getDate( 'DATE+TIME', $first_date_stamp ) . ' Last Transaction Date: ' . TTDate::getDate( 'DATE+TIME', $last_date_stamp ) . ' CPP Earnings: ' . $tmp_cpp_total_earnings . ' CPP ProRate: ' . $tmp_cpp_pro_rate, __FILE__, __LINE__, __METHOD__, 10 );
 
 					//Calculate both Employee and Employer amounts, so thats why we multiply by 2.
-					$tmp_cpp_total = ( ( $tmp_cpp_total_earnings - ( $pd_obj->getCPPBasicExemption() * $tmp_cpp_pro_rate ) ) * $pd_obj->getCPPEmployeeRate() );
+					$tmp_cpp_total = bcmul( bcsub( $tmp_cpp_total_earnings, bcmul( $pd_obj->getCPPBasicExemption(), $tmp_cpp_pro_rate ) ), $pd_obj->getCPPEmployeeRate() );
 					if ( $tmp_cpp_total < 0 ) {
 						$tmp_cpp_total = 0;
 					}
 
 					$tmp_cpp_total_deducted = Misc::MoneyFormat( array_sum( Misc::arrayColumn( $this->tmp_data['pay_stub_entry'][$user_id], 'cpp_total' ) ), false );
 					if ( $tmp_cpp_total_deducted > 0 ) { //If nothing was deducted, assume they are exempt.
-						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] = Misc::MoneyFormat( ( ( $tmp_cpp_total > $pd_obj->getCPPEmployeeMaximumContribution() ? $pd_obj->getCPPEmployeeMaximumContribution() : $tmp_cpp_total ) * 2 ), false );
-						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] = ( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] - $tmp_cpp_total_deducted );
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] = Misc::MoneyFormat( bcmul( ( $tmp_cpp_total > $pd_obj->getCPPEmployeeMaximumContribution() ? $pd_obj->getCPPEmployeeMaximumContribution() : $tmp_cpp_total ), 2 ), false );
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'], $tmp_cpp_total_deducted );
 					} else {
 						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] = $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] = null;
 					}
@@ -748,13 +758,13 @@ class RemittanceSummaryReport extends Report {
 					$tmp_ei_total = ( $tmp_ei_total_earnings * $pd_obj->getEIEmployeeRate() );
 					$tmp_ei_total_deducted = Misc::MoneyFormat( array_sum( Misc::arrayColumn( $this->tmp_data['pay_stub_entry'][$user_id], 'ei_total' ) ), false );
 					if ( $tmp_ei_total_deducted > 0 ) { //If nothing was deducted, assume they are exempt.
-						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] = Misc::MoneyFormat( ( ( $tmp_ei_total > $pd_obj->getEIEmployeeMaximumContribution() ? $pd_obj->getEIEmployeeMaximumContribution() : $tmp_ei_total ) * ( 1 + $pd_obj->getEIEmployerRate() ) ), false );
-						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] = ( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] - $tmp_ei_total_deducted );
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] = Misc::MoneyFormat( bcmul( ( $tmp_ei_total > $pd_obj->getEIEmployeeMaximumContribution() ? $pd_obj->getEIEmployeeMaximumContribution() : $tmp_ei_total ), ( 1 + $pd_obj->getEIEmployerRate() ) ), false );
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'], $tmp_ei_total_deducted );
 					} else {
 						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] = $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] = null;
 					}
 
-					$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_total_diff'] = ( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] + $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] );
+					$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_total_diff'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'], $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] );
 				}
 				unset( $first_date_stamp, $last_date_stamp, $tmp_cpp_pro_rate, $tmp_gross_payroll, $tmp_cpp_total_earnings, $tmp_ei_total_earnings, $tmp_cpp_total, $tmp_ei_total, $tmp_cpp_total_deducted, $tmp_ei_total_deducted, $user_id, $data_a );
 			}
@@ -908,6 +918,8 @@ class RemittanceSummaryReport extends Report {
 	 * @return null |null
 	 */
 	function getSummaryTableData( $format = null ) {
+		$form_data = $this->formatFormConfig();
+
 		//Get the earliest transaction date of all pay periods.
 		$this->form_data['pay_period'] = array_unique( (array)$this->form_data['pay_period'] );
 		ksort( $this->form_data['pay_period'] );
@@ -915,6 +927,12 @@ class RemittanceSummaryReport extends Report {
 		Debug::Text( 'Transaction Date: ' . TTDate::getDate( 'DATE', $transaction_date ) . '(' . $transaction_date . ')', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$summary_table_data = $this->total_row;
+		if ( isset($form_data['this_payment']) && trim( $form_data['this_payment'] ) != '' ) {
+			$summary_table_data['raw_total'] = Misc::MoneyRound( $summary_table_data['total'] );
+			$summary_table_data['total_override'] = true;
+			$summary_table_data['total'] = Misc::MoneyRound( trim( $form_data['this_payment'] ) );
+		}
+
 		$summary_table_data['cpp_total'] = ( ( isset( $summary_table_data['cpp_total'] ) ) ? $summary_table_data['cpp_total'] : 0 );
 		$summary_table_data['ei_total'] = ( ( isset( $summary_table_data['ei_total'] ) ) ? $summary_table_data['ei_total'] : 0 );
 		$summary_table_data['tax_total'] = ( ( isset( $summary_table_data['tax_total'] ) ) ? $summary_table_data['tax_total'] : 0 );
@@ -1022,29 +1040,16 @@ class RemittanceSummaryReport extends Report {
 
 				$summary_table_data = $this->getSummaryTableData();
 
-//				//Get the earliest transaction date of all pay periods.
-//				$this->form_data['pay_period'] = array_unique( (array)$this->form_data['pay_period'] );
-//				ksort( $this->form_data['pay_period'] );
-//				$transaction_date = current( (array)$this->form_data['pay_period']);
-//				Debug::Text('Transaction Date: '. TTDate::getDate('DATE', $transaction_date) .'('.	$transaction_date .')', __FILE__, __LINE__, __METHOD__, 10);
-//
-//				$summary_table_data = $this->total_row;
-//				$summary_table_data['cpp_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['cpp_total']) ) ? $summary_table_data['cpp_total'] : 0 );
-//				$summary_table_data['ei_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['ei_total'] ) ) ? $summary_table_data['ei_total'] : 0 );
-//				$summary_table_data['tax_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['tax_total'] ) ) ? $summary_table_data['tax_total'] : 0 );
-//				$summary_table_data['total'] = TTi18n::formatCurrency( ( isset($summary_table_data['total'] ) ) ? $summary_table_data['total'] : 0 );
-//				$summary_table_data['gross_payroll'] = TTi18n::formatCurrency( ( isset($summary_table_data['gross_payroll'] ) ) ? $summary_table_data['gross_payroll'] : 0 );
-//				$summary_table_data['employees'] = count($this->user_ids);
-//				$remittance_due_date = Wage::getRemittanceDueDate($transaction_date, ( isset($summary_table_data['total'] ) ) ? $summary_table_data['total'] : 0 );
-//				$summary_table_data['due_date'] = ( $remittance_due_date > 0 ) ? TTDate::getDate('DATE', $remittance_due_date ) : TTi18n::getText("N/A");
-//				$summary_table_data['end_remitting_period'] = ( $transaction_date > 0 ) ? date('Y-m', $transaction_date) : TTi18n::getText("N/A");
-
 				foreach ( $columns as $column => $tmp ) {
 					$value = $summary_table_data[$column];
 					$cell_width = ( isset( $column_widths[$column] ) ) ? $column_widths[$column] : 30;
 
 					if ( $column == 'total' ) { //Highlight current payment.
 						$this->pdf->setTextColor( 255, 0, 0 );
+
+						if ( isset($summary_table_data['total_override']) && $summary_table_data['total_override'] == true ) {
+							$value .= '*'; //Append asterisk and add note so its clear this is an override.
+						}
 					}
 					$this->pdf->Cell( $cell_width, $this->_pdf_fontSize( $row_layout['height'] ), $value, $border, 0, $row_layout['align'], $row_layout['fill'], '', $row_layout['stretch'] );
 					$this->pdf->setTextColor( 0 );
@@ -1052,21 +1057,13 @@ class RemittanceSummaryReport extends Report {
 				$this->pdf->Ln();
 				$this->_pdf_drawLine( 0.75 ); //Slightly smaller than first/last lines.
 
-				$this->pdf->Ln( 1.0 );
+				if ( isset($summary_table_data['total_override']) && $summary_table_data['total_override'] == true ) {
+					$this->pdf->setTextColor( 255, 0, 0 );
+					$this->pdf->Cell( $page_width, $this->_pdf_fontSize( $row_layout['height'] ), '*' . TTi18n::getText( 'WARNING: This Payment amount has been overridden from its calculated amount of' ) . ': ' . TTi18n::formatCurrency( $summary_table_data['raw_total'] ), $border, 0, 'C', 0, '', 1 );
+					$this->pdf->setTextColor( 0 );
+				}
 
-//				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 16 ) );
-//				$this->pdf->setTextColor(0);
-//				$this->pdf->setDrawColor(255, 0, 0);
-//				$this->pdf->setFillColor(240); //Grayscale only.
-//				$this->pdf->setLineWidth( 1 );
-//
-//				$this->pdf->writeHTMLcell( 100, 5, ( ( $this->pdf->getPageWidth() - 100 ) / 2 ), $this->pdf->getY(), '<a href="https://www.timetrex.com/r.php?id=10100">PAY ONLINE NOW</>', 1, 0, FALSE, TRUE, 'C');
-//
-//				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
-//				$this->pdf->SetTextColor(0);
-//				$this->pdf->SetDrawColor(0);
-//				$this->pdf->setFillColor(255);
-//				$this->pdf->Ln( 2.0 );
+				$this->pdf->Ln( 1.0 );
 
 				$this->pdf->Ln();
 				$this->_pdf_drawLine( 0.75 ); //Slightly smaller than first/last lines.
@@ -1127,25 +1124,13 @@ class RemittanceSummaryReport extends Report {
 
 			$summary_table_data = $this->getSummaryTableData();
 
-//			$this->form_data['pay_period'] = array_unique( (array)$this->form_data['pay_period'] );
-//			ksort( $this->form_data['pay_period'] );
-//			$transaction_date = current( (array)$this->form_data['pay_period'] );
-//			Debug::Text('Transaction Date: '. TTDate::getDate('DATE', $transaction_date) .'('.	$transaction_date .')', __FILE__, __LINE__, __METHOD__, 10);
-//			$summary_table_data = $this->total_row;
-//			$summary_table_data['cpp_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['cpp_total']) ) ? $summary_table_data['cpp_total'] : 0 );
-//			$summary_table_data['ei_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['ei_total'] ) ) ? $summary_table_data['ei_total'] : 0 );
-//			$summary_table_data['tax_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['tax_total'] ) ) ? $summary_table_data['tax_total'] : 0 );
-//			$summary_table_data['total'] = TTi18n::formatCurrency( ( isset($summary_table_data['total'] ) ) ? $summary_table_data['total'] : 0 );
-//			$summary_table_data['gross_payroll'] = TTi18n::formatCurrency( ( isset($summary_table_data['gross_payroll'] ) ) ? $summary_table_data['gross_payroll'] : 0 );
-//			$summary_table_data['employees'] = count($this->user_ids);
-//			$remittance_due_date = Wage::getRemittanceDueDate($transaction_date, ( isset($summary_table_data['total'] ) ) ? $summary_table_data['total'] : 0 );
-//			$summary_table_data['due_date'] = ( $remittance_due_date > 0 ) ? TTDate::getDate('DATE', $remittance_due_date ) : TTi18n::getText("N/A");
-//			$summary_table_data['end_remitting_period'] = ( $transaction_date > 0 ) ? date('Y-m', $transaction_date) : TTi18n::getText("N/A");
-
 			$this->html .= '<tr>';
 			foreach ( $columns as $column => $tmp ) {
 				$value = $summary_table_data[$column];
 				if ( $column == 'total' ) {
+					if ( isset($summary_table_data['total_override']) && $summary_table_data['total_override'] == true ) {
+						$value .= '*'; //Append asterisk and add note so its clear this is an override.
+					}
 					$this->html .= '<th style="color: rgb(255, 0, 0);">' . wordwrap( $value, $this->config['other']['table_header_word_wrap'], '<br>' ) . '</th>';
 				} else {
 					$this->html .= '<th>' . wordwrap( $value, $this->config['other']['table_header_word_wrap'], '<br>' ) . '</th>';
@@ -1154,7 +1139,13 @@ class RemittanceSummaryReport extends Report {
 			$this->html .= '</tr>';
 
 			//$this->html .= '<tr><th class="pay-online" colspan="' . count($columns) . '"><a href="https://www.timetrex.com/r.php?id=10100" target="_blank">PAY ONLINE NOW</a></th></tr>';
-			$this->html .= '<tr><th class="content-tbody bg-white grand-border font-weight-td" colspan="' . count( $columns ) . '"><br></th></tr>';
+			if ( isset($summary_table_data['total_override']) && $summary_table_data['total_override'] == true ) {
+				$this_payment_override = '<tr><th style="text-align: center; color: rgb(255, 0, 0);" colspan="' . count( $columns ) . '">*'. TTi18n::getText('WARNING: This Payment amount has been overridden from its calculated amount of' ) .': '. TTi18n::formatCurrency( $summary_table_data['raw_total'] ) . '</th></tr>';
+			} else {
+				$this_payment_override = '<br>';
+			}
+			$this->html .= '<tr><th class="content-tbody bg-white top-border-bold font-weight-td" colspan="' . count( $columns ) . '">'. $this_payment_override .'</th></tr>';
+
 			$this->html .= '</thead>';
 			$this->html .= '</table>';
 		}

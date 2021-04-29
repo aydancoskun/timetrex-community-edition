@@ -185,6 +185,18 @@ class PayStubTransactionFactory extends Factory {
 		return $this->getGenericObject( 'PayStubListFactory', $this->getPayStub(), 'pay_stub_obj' );
 	}
 
+
+	/**
+	 * Allow setting the pay stub object so we can determine if its a new record or not rather than re-getting it from the database.
+	 * @param $pay_stub_obj PayStubFactory
+	 * @return bool
+	 */
+	function setPayStubObject( $pay_stub_obj ) {
+		$this->pay_stub_obj = $pay_stub_obj;
+
+		return true;
+	}
+
 	/**
 	 * @return bool
 	 */
@@ -517,6 +529,21 @@ class PayStubTransactionFactory extends Factory {
 
 
 	/**
+	 * @return bool
+	 */
+	function preValidate() {
+		if ( $this->getStatus() == '' ) {
+			$this->setStatus( 10 ); //Pending
+		}
+
+		if ( $this->getType() == '' ) {
+			$this->setType( 10 ); //Valid
+		}
+
+		return true;
+	}
+
+	/**
 	 * @param bool $ignore_warning
 	 * @return bool
 	 */
@@ -693,15 +720,15 @@ class PayStubTransactionFactory extends Factory {
 										  TTi18n::gettext( 'Currency not specified' ) );
 			}
 
-			//Make sure the pay stub is OPEN.
-			if ( is_object( $this->getPayStubObject() ) && $this->getPayStubObject()->getStatus() > 25 ) {
+			//Make sure the pay stub is OPEN if its not a new pay stub. This allow API to create a paid pay stub with paid transactions in a single operation.
+			if ( is_object( $this->getPayStubObject() ) && ( !isset( $this->getPayStubObject()->is_new ) || $this->getPayStubObject()->is_new == false ) && $this->getPayStubObject()->getStatus() > 25 ) {
 				$this->Validator->isTrue( 'pay_stub',
 										  false,
 										  TTi18n::gettext( 'Pay Stub must be OPEN to modify transactions' ) );
 			}
 		}
 
-		//paystub is paid. ensure failure on edit amount
+		//Transaction is paid, fail when editing amount.
 		if ( $this->getStatus() == 20 ) {
 			$changed_fields = array_keys( $this->getDataDifferences() );
 			$deny_fields = [ 'remittance_source_account_id', 'transaction_date', 'amount' ];

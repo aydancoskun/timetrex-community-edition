@@ -1003,10 +1003,18 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 						LEFT JOIN ' . $utf->getTable() . ' as utf ON ( b.title_id = utf.id AND utf.deleted = 0 )
 
 						LEFT JOIN ' . $pseaf->getTable() . ' as pseaf ON ( a.pay_stub_entry_name_id = pseaf.id AND pseaf.deleted = 0 )
+						';
+
+		//This join is slow and only needed if filtering by pay_period_id. Below there is another section at the bottom of the WHERE clause that is conditional on this too.
+		if ( isset( $filter_data['pay_period_id'] ) ) {
+			$query .= '					
 						LEFT JOIN ' . $ppsuf->getTable() . ' as ppsuf ON ( a.user_id = ppsuf.user_id )
 						LEFT JOIN ' . $ppsf->getTable() . ' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id AND ppsf.deleted = 0 )
 						LEFT JOIN ' . $ppf->getTable() . ' as ppf ON ( ppsuf.pay_period_schedule_id = ppf.pay_period_schedule_id AND ' . $this->getSQLToTimeStampFunction() . '(a.effective_date) >= ppf.start_date AND ' . $this->getSQLToTimeStampFunction() . '(a.effective_date) <= ppf.end_date AND ppf.deleted = 0 )
+					';
+		}
 
+		$query .= '
 						LEFT JOIN ' . $uf->getTable() . ' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN ' . $uf->getTable() . ' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	b.company_id = ?
@@ -1038,13 +1046,17 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= ( isset( $filter_data['created_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.created_by', 'y.first_name', 'y.last_name' ], $filter_data['created_by'], 'user_id_or_name', $ph ) : null;
 		$query .= ( isset( $filter_data['updated_by'] ) ) ? $this->getWhereClauseSQL( [ 'a.updated_by', 'z.first_name', 'z.last_name' ], $filter_data['updated_by'], 'user_id_or_name', $ph ) : null;
 
-		//Need to account for employees being assigned to deleted pay period schedules.
-		$query .= ' AND ( ppsuf.id IS NULL OR ppsf.id IS NOT NULL ) AND a.deleted = 0 ';
+		if ( isset( $filter_data['pay_period_id'] ) ) {
+			//Need to account for employees being assigned to deleted pay period schedules.
+			$query .= ' AND ( ppsuf.id IS NULL OR ppsf.id IS NOT NULL ) ';
+		}
+
+		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($query, 'Query: ', __FILE__, __LINE__, __METHOD__, 10);
 		$this->rs = $this->ExecuteSQL( $query, $ph, $limit, $page );
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

@@ -591,37 +591,48 @@ class EFT {
 		}
 
 		if ( $a->record_data['business_number'] == $b->record_data['business_number'] ) {
-			if ( !isset( $a->record_data['service_code'] ) ) {
-				$a->record_data['service_code'] = false;
+			if ( !isset( $a->record_data['type'] ) ) {
+				$a->record_data['type'] = false;
 			}
-			if ( !isset( $b->record_data['service_code'] ) ) {
-				$b->record_data['service_code'] = false;
+			if ( !isset( $b->record_data['type'] ) ) {
+				$b->record_data['type'] = false;
 			}
 
-			if ( $a->record_data['service_code'] == $b->record_data['service_code'] ) {
-				if ( !isset( $a->record_data['entry_description'] ) ) {
-					$a->record_data['entry_description'] = false;
+			if ( $a->record_data['type'] == $b->record_data['type'] ) {
+				if ( !isset( $a->record_data['service_code'] ) ) {
+					$a->record_data['service_code'] = false;
 				}
-				if ( !isset( $b->record_data['entry_description'] ) ) {
-					$b->record_data['entry_description'] = false;
+				if ( !isset( $b->record_data['service_code'] ) ) {
+					$b->record_data['service_code'] = false;
 				}
 
-				if ( $a->record_data['entry_description'] == $b->record_data['entry_description'] ) {
-					if ( $a->record_data['due_date'] == $b->record_data['due_date'] ) {
+				if ( $a->record_data['service_code'] == $b->record_data['service_code'] ) {
+					if ( !isset( $a->record_data['entry_description'] ) ) {
+						$a->record_data['entry_description'] = false;
+					}
+					if ( !isset( $b->record_data['entry_description'] ) ) {
+						$b->record_data['entry_description'] = false;
+					}
 
-						if ( $a->record_data['type'] == $b->record_data['type'] ) {
-							return strcmp( $a->record_data['name'], $b->record_data['name'] );
+					if ( $a->record_data['entry_description'] == $b->record_data['entry_description'] ) {
+						if ( $a->record_data['due_date'] == $b->record_data['due_date'] ) {
+
+							if ( $a->record_data['type'] == $b->record_data['type'] ) {
+								return strcmp( $a->record_data['name'], $b->record_data['name'] );
+							} else {
+								return strcmp( $a->record_data['type'], $b->record_data['type'] );
+							}
 						} else {
-							return strcmp( $a->record_data['type'], $b->record_data['type'] );
+							return ( $a->record_data['due_date'] < $b->record_data['due_date'] ) ? ( -1 ) : 1; //Sort ASC.
 						}
 					} else {
-						return ( $a->record_data['due_date'] < $b->record_data['due_date'] ) ? ( -1 ) : 1; //Sort ASC.
+						return strcmp( $a->record_data['entry_description'], $b->record_data['entry_description'] );
 					}
 				} else {
-					return strcmp( $a->record_data['entry_description'], $b->record_data['entry_description'] );
+					return strcmp( $a->record_data['service_code'], $b->record_data['service_code'] );
 				}
 			} else {
-				return strcmp( $a->record_data['service_code'], $b->record_data['service_code'] );
+				return strcmp( $a->record_data['type'], $b->record_data['type'] );
 			}
 		} else {
 			return ( $a->record_data['business_number'] < $b->record_data['business_number'] ) ? ( -1 ) : 1; //Sort ASC.
@@ -1019,7 +1030,7 @@ class EFT_record extends EFT {
 	 * @return string
 	 */
 	function getBatchKey() {
-		return trim( $this->getBusinessNumber() . $this->getServiceCode() . $this->getEntryDescription() . $this->getDueDate() );
+		return trim( $this->getBusinessNumber() . $this->getType() . $this->getServiceCode() . $this->getEntryDescription() . $this->getDueDate() );
 	}
 
 	/**

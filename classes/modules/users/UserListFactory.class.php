@@ -1666,6 +1666,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 				'title',
 				'currency',
 				'permission_control',
+				'terminated_permission_control',
 				'pay_period_schedule',
 				'policy_group',
 		];
@@ -1746,6 +1747,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							f.conversion_rate as currency_rate,
 							g.id as permission_control_id,
 							g.name as permission_control,
+							pcf.name as terminated_permission_control,
 							h.id as pay_period_schedule_id,
 							h.name as pay_period_schedule,
 							i.id as policy_group_id,
@@ -1792,6 +1794,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 								FROM ' . $puf->getTable() . ' as g1, ' . $pcf->getTable() . ' as g2
 								WHERE ( g1.permission_control_id = g2.id AND g2.deleted = 0)
 						) as g ON ( a.id = g.user_id )
+						LEFT JOIN ' . $pcf->getTable() . ' as pcf ON ( a.company_id = pcf.company_id AND a.terminated_permission_control_id = pcf.id AND pcf.deleted = 0 )
 						LEFT JOIN
 						(
 								SELECT h2.*, h1.user_id

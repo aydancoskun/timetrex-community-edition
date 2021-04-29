@@ -255,6 +255,7 @@ class APIRequest extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach ( $data as $key => $row ) {
+				//Put this above permission checks.
 				$transaction_function = function () use ( $row, $validate_only, $ignore_warning, $validator_stats, $validator, $save_result, $key, $permission_children_ids ) {
 					$primary_validator = $tertiary_validator = new Validator();
 					$lf = TTnew( 'RequestListFactory' ); /** @var RequestListFactory $lf */
@@ -289,7 +290,19 @@ class APIRequest extends APIFactory {
 						}
 					} else {
 						//Adding new object, check ADD permissions.
-						$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check( 'request', 'add' ), TTi18n::gettext( 'Add permission denied' ) );
+						if ( !( $validate_only == true
+								||
+								( $this->getPermissionObject()->Check( 'request', 'add' )
+										&&
+										(
+												$this->getPermissionObject()->Check( 'request', 'edit' )
+												|| ( isset( $row['user_id'] ) && $this->getPermissionObject()->Check( 'request', 'edit_own' ) && $this->getPermissionObject()->isOwner( false, $row['user_id'] ) === true ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+												|| ( isset( $row['user_id'] ) && $this->getPermissionObject()->Check( 'request', 'edit_child' ) && $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === true )
+										)
+								)
+						) ) {
+							$primary_validator->isTrue( 'permission', false, TTi18n::gettext( 'Add permission denied' ) );
+						}
 
 						//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
 						//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()

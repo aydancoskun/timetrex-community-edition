@@ -2025,13 +2025,14 @@ class StationFactory extends Factory {
 					break;
 				case 61: //Kiosk: Desktop
 				case 65: //Kiosk: Mobile App (iOS/Android)
-					Debug::Text( 'KIOSK station...', __FILE__, __LINE__, __METHOD__, 10 );
-
-					if ( DEMO_MODE == true || ( is_object( $user_obj ) && $user_obj->getPermissionLevel() >= 15 ) ) {
+					//if ( DEMO_MODE == true || ( is_object( $user_obj ) && $user_obj->getPermissionLevel() >= 50 ) ) {
+					if ( DEMO_MODE == true || ( is_object( $permission_obj ) && ( $permission_obj->Check( 'user', 'enroll' ) || $permission_obj->Check( 'user', 'enroll_child' ) || $permission_obj->Check( 'user', 'timeclock_admin' ) ) ) ) {
 						$status_id = 20; //Always activate immediately when using demo, or its a supervisor.
 					} else {
 						$status_id = 10; //Initially create as disabled and admin must manually enable it.
 					}
+					Debug::Text( 'KIOSK station... Default Status ID: '. $status_id, __FILE__, __LINE__, __METHOD__, 10 );
+
 
 					$sf->setType( $type_id ); //Need to set thie before setModeFlag()
 

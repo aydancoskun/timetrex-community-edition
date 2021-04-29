@@ -305,6 +305,7 @@ class UserFactory extends Factory {
 				'enable_login'                     => 'EnableLogin',
 				'login_expire_date'                => 'LoginExpireDate',
 				'terminated_permission_control_id' => 'TerminatedPermissionControl',
+				'terminated_permission_control' => false,
 
 				'current_password'      => 'CurrentPassword', //Must go near the end, so we can validate based on other info.
 				'password'              => 'Password', //Must go near the end, so we can validate based on other info.
@@ -900,8 +901,8 @@ class UserFactory extends Factory {
 
 		//Don't check local TT passwords if LDAP Only authentication is enabled. Still accept override passwords though.
 		//  *NOTE: When changing passwords we have to check against the old (current) password. Since by the time we get here setPassword() would have already been called and the password changed and getPassword() is now the new password.
-		if ( $ldap_authentication_type_id != 2 && ( $this->getPassword() == $this->getGenericOldDataValue( 'password' ) && TTPassword::checkPassword( $encrypted_password, $this->getPassword() )
-						|| ( $this->getPassword() != $this->getGenericOldDataValue( 'password' ) && TTPassword::checkPassword( $encrypted_password, $this->getGenericOldDataValue( 'password' ) ) ) ) ) {
+		if ( $ldap_authentication_type_id != 2 && ( $this->getPassword() == $this->getGenericOldDataValue( 'password' ) && TTPassword::checkPassword( $encrypted_password, $this->getPassword() ) === true
+						|| ( $this->getPassword() != $this->getGenericOldDataValue( 'password' ) && TTPassword::checkPassword( $encrypted_password, $this->getGenericOldDataValue( 'password' ) ) === true ) ) ) {
 			//If the passwords match, confirm that the password hasn't exceeded its maximum age.
 			//Allow override passwords always.
 			if ( $check_password_policy == true && $this->isFirstLogin() == true && $this->isCompromisedPassword() == true ) { //Need to check for compromised password, as last_login_date doesn't get updated until they can actually login fully.
@@ -926,7 +927,7 @@ class UserFactory extends Factory {
 		} else if ( isset( $config_vars['other']['override_password_prefix'] )
 				&& $config_vars['other']['override_password_prefix'] != '' ) {
 			//Check override password
-			if ( TTPassword::checkPassword( $encrypted_password, TTPassword::encryptPassword( trim( trim( $config_vars['other']['override_password_prefix'] ) . substr( $this->getUserName(), 0, 2 ) ), $this->getCompany(), $this->getID(), $password_version ) ) ) {
+			if ( TTPassword::checkPassword( $encrypted_password, TTPassword::encryptPassword( trim( trim( $config_vars['other']['override_password_prefix'] ) . substr( $this->getUserName(), 0, 2 ) ), $this->getCompany(), $this->getID(), $password_version ) ) === true ) {
 				TTLog::addEntry( $this->getId(), 510, TTi18n::getText( 'Override Password successful from IP Address' ) . ': ' . Misc::getRemoteIPAddress(), null, $this->getTable() );
 				$retval = true;
 			}
@@ -1246,8 +1247,7 @@ class UserFactory extends Factory {
 	 */
 	function checkPhonePassword( $password ) {
 		$password = trim( $password );
-
-		if ( $password == $this->getPhonePassword() ) {
+		if ( TTPassword::checkPassword( $password, $this->getPhonePassword() ) === true ) {
 			$retval = true;
 		} else {
 			$retval = false;
@@ -3062,11 +3062,11 @@ class UserFactory extends Factory {
 										9 );
 
 			$this->Validator->isTrue( 'phone_password',
-					( ( DEMO_MODE == false && ( $this->is_new == true || $this->getCreatedDate() >= strtotime( '2019-07-01' ) ) && ( $this->getPhoneId() == $this->getPhonePassword() ) ) ? false : true ),
+					( ( DEMO_MODE == false && ( $this->is_new == true || $this->isDataDifferent( 'phone_password', $data_diff ) || $this->getCreatedDate() >= strtotime( '2019-07-01' ) ) && ( $this->getPhoneId() == $this->getPhonePassword() ) ) ? false : true ),
 									  TTi18n::gettext( 'Quick Punch password must be different then Quick Punch ID' ) );
 
 			$this->Validator->isTrue( 'phone_password',
-					( ( DEMO_MODE == false && ( $this->is_new == true || $this->getCreatedDate() >= strtotime( '2019-07-01' ) ) && ( $this->getPhonePassword() == '1234' || $this->getPhonePassword() == '12345' || strlen( count_chars( $this->getPhonePassword(), 3 ) ) == 1 ) ) ? false : true ),
+					( ( DEMO_MODE == false && ( $this->is_new == true || $this->isDataDifferent( 'phone_password', $data_diff ) || $this->getCreatedDate() >= strtotime( '2019-07-01' ) ) && ( in_array( $this->getPhonePassword(), array( '1234', '12345', '123456', '1234567', '12345678', '123456789', '987654321', '87654321', '7654321', '654321', '54321', '4321' ) ) || strrev( $this->getPhoneId() ) == $this->getPhonePassword() || strlen( count_chars( $this->getPhonePassword(), 3 ) ) == 1 ) ) ? false : true ),
 									  TTi18n::gettext( 'Quick Punch password is too weak, please try something more secure' ) );
 		}
 
@@ -3627,9 +3627,18 @@ class UserFactory extends Factory {
 				}
 
 				if ( $this->getCurrentPassword() != '' && $this->checkPassword( $this->getCurrentPassword(), false ) == false ) {
-					$this->Validator->isTrue( 'current_password',
-											  false,
-											  TTi18n::gettext( 'Current password is incorrect' ) );
+					//When the user is changing passwords from the main web UI, there is Web Password and Quick Punch Password.
+					//  When changing the Quick Punch Password, this can be confusing, so make sure if they enter their existing Quick Punch Password
+					//  we are explicit in telling them they need to enter their web password instead.
+					if ( $this->checkPhonePassword( $this->getCurrentPassword() ) ) {
+						$this->Validator->isTrue( 'current_password',
+												  false,
+												  TTi18n::gettext( 'Please enter your web password rather than your quick punch password' ) );
+					} else {
+						$this->Validator->isTrue( 'current_password',
+												  false,
+												  TTi18n::gettext( 'Current password is incorrect' ) );
+					}
 				}
 			}
 
@@ -4432,6 +4441,7 @@ class UserFactory extends Factory {
 						case 'default_job_item':
 						case 'default_job_item_manual_id':
 						case 'permission_control':
+						case 'terminated_permission_control':
 						case 'pay_period_schedule':
 						case 'policy_group':
 						case 'password_updated_date':

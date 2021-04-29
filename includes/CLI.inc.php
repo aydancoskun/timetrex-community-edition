@@ -46,8 +46,8 @@ if ( !isset( $argc ) || !isset( $argv ) ) {
 	exit( 1 );
 }
 
-if ( version_compare( PHP_VERSION, 5, '<' ) == 1 ) {
-	echo "You are currently using PHP v" . PHP_VERSION . " TimeTrex requires PHP v5 or greater!\n";
+if ( version_compare( PHP_VERSION, '7.0.0', '<' ) == 1 ) {
+	echo "You are currently using PHP v" . PHP_VERSION . " TimeTrex requires PHP v7 or greater!\n";
 	exit( 1 );
 }
 

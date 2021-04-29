@@ -242,27 +242,26 @@ LogViewController = BaseViewController.extend( {
 			filter.filter_page = 1;
 		}
 
-		if ( this.sub_view_mode && this.parent_key && this.select_layout && this.select_layout.data ) {
-			this.select_layout.data.filter_data[this.parent_key] = this.parent_value;
+		if ( this.select_layout && this.select_layout.data ) {
+			if ( this.sub_view_mode && this.parent_key ) {
+				this.select_layout.data.filter_data[this.parent_key] = this.parent_value;
+			}
+
+			//If sub view controller set custom filters, get it
+			if ( Global.isSet( this.getSubViewFilter ) ) {
+				this.select_layout.data.filter_data = this.getSubViewFilter( this.select_layout.data.filter_data );
+			}
+
+			//select_layout will not be null, it's set in setSelectLayout function
+			filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
+			filter.filter_sort = this.select_layout.data.filter_sort;
 		}
-
-		//If sub view controller set custom filters, get it
-		if ( Global.isSet( this.getSubViewFilter ) ) {
-
-			this.select_layout.data.filter_data = this.getSubViewFilter( this.select_layout.data.filter_data );
-
-		}
-
-		//select_layout will not be null, it's set in setSelectLayout function
-		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
-		filter.filter_sort = this.select_layout.data.filter_sort;
 
 		if ( TTUUID.isUUID( this.refresh_id ) ) {
 			filter.filter_data = {};
 			filter.filter_data.id = [this.refresh_id];
 
 			this.last_select_ids = filter.filter_data.id;
-
 		} else {
 			this.last_select_ids = this.getGridSelectIdArray();
 		}

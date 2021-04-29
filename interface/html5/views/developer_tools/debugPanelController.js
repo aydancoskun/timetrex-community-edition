@@ -256,12 +256,14 @@ function runUnitTests() {
 		assert.equal( Global.parseTimeUnit( '1:', 10 ), 3600 );
 		assert.equal( Global.parseTimeUnit( '1:00:00', 10 ), 3600 );
 		assert.equal( Global.parseTimeUnit( '1:00:01', 10 ), 3601 );
+		assert.equal( Global.parseTimeUnit( '"1:00:01"', 10 ), 3601 );
 
 		assert.equal( Global.parseTimeUnit( '00:60', 10 ), 3600 );
 		assert.equal( Global.parseTimeUnit( ':60', 10 ), 3600 );
 		assert.equal( Global.parseTimeUnit( ':1', 10 ), 60 );
 
 		assert.equal( Global.parseTimeUnit( '1:00:01.5', 10 ), 3601 );
+		assert.equal( Global.parseTimeUnit( '"1:00:01.5"', 10 ), 3601 );
 		assert.equal( Global.parseTimeUnit( '1:1.5', 10 ), 3660 );
 
 		//Hybrid mode.
@@ -278,6 +280,11 @@ function runUnitTests() {
 	} );
 
 	QUnit.test( 'Global.js parseTimeUnit Hours', function( assert ) {
+		assert.equal( Global.parseTimeUnit( '1000.0000', 20 ), 3600000 );
+		assert.equal( Global.parseTimeUnit( '1,000.0000', 20 ), 3600000 );
+		assert.equal( Global.parseTimeUnit( '1 000.0000', 20 ), 3600000 );
+		assert.equal( Global.parseTimeUnit( '-1,000.0000', 20 ), -3600000 );
+		assert.equal( Global.parseTimeUnit( ' "-1, 000.0000" ', 20 ), -3600000 );
 		assert.equal( Global.parseTimeUnit( '1.000', 20 ), 3600 );
 		assert.equal( Global.parseTimeUnit( '1.00', 20 ), 3600 );
 		assert.equal( Global.parseTimeUnit( '1', 20 ), 3600 );

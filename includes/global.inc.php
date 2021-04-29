@@ -50,8 +50,8 @@ if ( ini_get( 'max_execution_time' ) < 1800 ) {
 	ini_set( 'max_execution_time', 1800 );
 }
 
-define( 'APPLICATION_VERSION', '12.1.1' );
-define( 'APPLICATION_VERSION_DATE', 1583737200 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("09-Mar-2020")."\n\n";'
+define( 'APPLICATION_VERSION', '12.1.2' );
+define( 'APPLICATION_VERSION_DATE', 1586761200 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("13-Apr-2020")."\n\n";'
 
 if ( strtoupper( substr( PHP_OS, 0, 3 ) ) == 'WIN' ) {
 	define( 'OPERATING_SYSTEM', 'WIN' );
@@ -129,8 +129,20 @@ if ( defined( 'LC_MESSAGES' ) == false ) {
 	define( 'LC_MESSAGES', 6 );
 }
 
+
+/**
+ * Converts human readable size to bytes.
+ * @param int|float|string $size Human readable size, ie: 1K, 1M, 1G
+ * @return int
+ */
+function convertHumanSizeToBytes( $size ) {
+	$retval = (int)str_ireplace( [ 'G', 'M', 'K' ], [ '000000000', '000000', '000' ], $size );
+	//Debug::text('Input Size: '. $size .' Bytes: '. $retval, __FILE__, __LINE__, __METHOD__, 9);
+	return $retval;
+}
+
 //If memory limit is set below the minimum required, just bump it up to that minimum. If its higher, keep the higher value.
-$memory_limit = str_ireplace( [ 'G', 'M', 'K' ], [ '000000000', '000000', '000' ], ini_get( 'memory_limit' ) );
+$memory_limit = convertHumanSizeToBytes( ini_get( 'memory_limit' ) );
 if ( $memory_limit >= 0 && $memory_limit < 512000000 ) { //Use * 1000 rather than * 1024 for easier parsing of G, M, K -- Make sure we consider -1 as the limit.
 	ini_set( 'memory_limit', '512000000' );
 }
@@ -372,50 +384,11 @@ function sendCSRFTokenCookie() {
 	setcookie( 'CSRF-Token', $csrf_token . '-' . sha1( $csrf_token . TTPassword::getPasswordSalt() ), ( time() + 9999999 ), Environment::getCookieBaseURL( 'json' ), null, Misc::isSSL( true ), false ); //Must not be HTTP only, as javascript needs to read this. Really should send the "SameSite=strict" flag, however PHP v7.3 and older handle this in different ways: https://stackoverflow.com/questions/39750906/php-setcookie-samesite-strict
 }
 
-define( 'TT_PRODUCT_COMMUNITY', 10 );
-define( 'TT_PRODUCT_PROFESSIONAL', 15 );
-define( 'TT_PRODUCT_CORPORATE', 20 );
-define( 'TT_PRODUCT_ENTERPRISE', 25 );
-
-/**
- * @return int
- */
-function getTTProductEdition() {
-	global $TT_PRODUCT_EDITION;
-	if ( isset( $TT_PRODUCT_EDITION ) && $TT_PRODUCT_EDITION > 0 ) {
-		return $TT_PRODUCT_EDITION;
-	} else if ( file_exists( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'expense' . DIRECTORY_SEPARATOR . 'UserExpenseFactory.class.php' ) ) {
-		return TT_PRODUCT_ENTERPRISE;
-	} else if ( file_exists( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'job' . DIRECTORY_SEPARATOR . 'JobFactory.class.php' ) ) {
-		return TT_PRODUCT_CORPORATE;
-	} else if ( file_exists( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'time_clock' . DIRECTORY_SEPARATOR . 'TimeClock.class.php' ) ) {
-		return TT_PRODUCT_PROFESSIONAL;
-	}
-
-	return TT_PRODUCT_COMMUNITY;
-}
-
-/**
- * @return string
- */
-function getTTProductEditionName() {
-	switch ( getTTProductEdition() ) {
-		case 15:
-			$retval = 'Professional';
-			break;
-		case 20:
-			$retval = 'Corporate';
-			break;
-		case 25:
-			$retval = 'Enterprise';
-			break;
-		default:
-			$retval = 'Community';
-			break;
-	}
-
-	return $retval;
-}
+/* @formatter:off */
+define('TT_PRODUCT_COMMUNITY', 10 ); define('TT_PRODUCT_PROFESSIONAL', 15 ); define('TT_PRODUCT_CORPORATE', 20 ); define('TT_PRODUCT_ENTERPRISE', 25 );
+function getTTProductEdition() { global $TT_PRODUCT_EDITION; if ( isset($TT_PRODUCT_EDITION) AND $TT_PRODUCT_EDITION > 0 ) { return $TT_PRODUCT_EDITION; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'expense'. DIRECTORY_SEPARATOR .'UserExpenseFactory.class.php') ) { return TT_PRODUCT_ENTERPRISE; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'job'. DIRECTORY_SEPARATOR .'JobFactory.class.php') ) { return TT_PRODUCT_CORPORATE; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'time_clock'. DIRECTORY_SEPARATOR .'TimeClock.class.php') ) { return TT_PRODUCT_PROFESSIONAL; } return TT_PRODUCT_COMMUNITY; }
+function getTTProductEditionName() { switch( getTTProductEdition() ) { case 15: $retval = 'Professional'; break; case 20: $retval = 'Corporate'; break; case 25: $retval = 'Enterprise'; break; default: $retval = 'Community'; break; } return $retval; }
+/* @formatter:on */
 
 function TTsaveRequestMetrics() {
 	global $config_vars;
@@ -443,12 +416,7 @@ set_include_path(
 
 require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'Exception.class.php' );
 require_once( Environment::getBasePath() . 'classes' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'Debug.class.php' );
-//**REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
-if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
-	define( 'COPYRIGHT_NOTICE', 'Copyright &copy; ' . date( 'Y' ) . ' <a href="https://' . ORGANIZATION_URL . '" class="footerLink">' . ORGANIZATION_NAME . '</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' );
-} else {
-	define( 'COPYRIGHT_NOTICE', 'Copyright &copy; ' . date( 'Y' ) . ' <a href="https://' . ORGANIZATION_URL . '" class="footerLink">' . ORGANIZATION_NAME . '</a>.' );
-}
+																																																																																				/* @formatter:off */ /* REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT -- Please don't steal from hard working volunteers. */ if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>.' ); } /* @formatter:on */
 Debug::setEnable( (bool)$config_vars['debug']['enable'] );
 Debug::setEnableDisplay( (bool)$config_vars['debug']['enable_display'] );
 Debug::setBufferOutput( (bool)$config_vars['debug']['buffer_output'] );
