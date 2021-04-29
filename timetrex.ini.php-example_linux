@@ -58,7 +58,7 @@ delivery_method = soap
 ;smtp_password=testpass123
 
 ;The domain that emails will be sent from, do not include the "@" or anything before it.
-; *ONLY* specify this if "delivery_method" above is "smtp"
+; *ONLY* specify this if "delivery_method" above is "smtp" or "mail"
 ;email_domain = mydomain.com
 
 ;The local part of the email address that emails will be sent from, do not include the "@" or anything after it.

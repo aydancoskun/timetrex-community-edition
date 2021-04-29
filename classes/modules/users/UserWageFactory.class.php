@@ -501,6 +501,8 @@ class UserWageFactory extends Factory {
 			$hourly_wage = $this->getAnnualHourlyRate( $this->getAnnualWage(), $epoch, $accurate_calculation );
 		}
 
+		//Use Misc::MoneyRound() still even though we are casting to float(), this just gets rid of extra decimals beyond what we want.
+		//  It can still return something like (float)42.3, which still needs to be formatted of course.
 		$retval = (float)Misc::MoneyRound( $hourly_wage, 2, ( ( is_object( $this->getUserObject() ) && is_object( $this->getUserObject()->getCurrencyObject() ) ) ? $this->getUserObject()->getCurrencyObject() : null ) );
 
 		//return Misc::MoneyFormat($hourly_wage, FALSE);

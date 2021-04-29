@@ -347,12 +347,14 @@ Global.getHost = function( host ) {
 };
 
 Global.setWidgetEnabled = function( widget, val ) {
-	if ( !val ) {
-		widget.attr( 'disabled', 'true' );
-		widget.addClass( 'disable-filter' );
-	} else {
-		widget.removeAttr( 'disabled' );
-		widget.removeClass( 'disable-filter' );
+	if ( widget ) {
+		if ( !val ) {
+			widget.attr( 'disabled', 'true' );
+			widget.addClass( 'disable-filter' );
+		} else {
+			widget.removeAttr( 'disabled' );
+			widget.removeClass( 'disable-filter' );
+		}
 	}
 };
 

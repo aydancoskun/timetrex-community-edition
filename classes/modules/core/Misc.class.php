@@ -2699,10 +2699,11 @@ class Misc {
 	}
 
 	/**
-	 * If rename fails for some reason, attempt a copy instead as that might work, specifically on windows where if the file is in use.
-	 * Might fix possible "Access is denied. (code: 5)" errors on Windows when using PHP v5.2 (https://bugs.php.net/bug.php?id=43817)
-	 * @param $old_name
-	 * @param $new_name
+	 * Renames a file or directory. If rename fails for some reason, attempt a copy instead as that might work, specifically on windows where if the file is in use.
+	 *   Might fix possible "Access is denied. (code: 5)" errors on Windows when using PHP v5.2 (https://bugs.php.net/bug.php?id=43817)
+	 *   On Windows a directory containing a file formerly opened within the same script may also cause access denied errors in some versions of PHP.
+	 * @param string $old_name
+	 * @param string $new_name
 	 * @return bool
 	 */
 	static function rename( $old_name, $new_name ) {
@@ -2711,14 +2712,23 @@ class Misc {
 			@mkdir( $new_dir, 0755, true );
 		}
 
+		//Some operating systems (ie: Windows) may not allow renaming if the destination already exists, so check for that is the case and delete it first.
+		if ( file_exists( $new_name ) ) {
+			if ( @unlink( $new_name ) == false ) {
+				Debug::Text( 'ERROR: Unable to unlink existing destination file: ' . $new_name .' Message: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		}
+
 		if ( @rename( $old_name, $new_name ) == false ) {
-			Debug::Text( 'ERROR: Unable to rename: ' . $old_name . ' to: ' . $new_name, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Text( 'ERROR: Unable to rename: ' . $old_name . ' to: ' . $new_name .' Message: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 			if ( is_dir( $old_name ) == false && @copy( $old_name, $new_name ) == true ) {
-				@unlink( $old_name );
+				if ( @unlink( $old_name ) == false ) {
+					Debug::Text( 'ERROR: Unable to unlink after copy: ' . $old_name . ' to: ' . $new_name .' Message: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+				}
 
 				return true;
 			} else {
-				Debug::Text( 'ERROR: Unable to copy after rename failure: ' . $old_name . ' to: ' . $new_name, __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( 'ERROR: Unable to copy after rename failure: ' . $old_name . ' to: ' . $new_name .' Message: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
 			}
 
 			return false;
@@ -3990,7 +4000,7 @@ class Misc {
 	 * @return mixed
 	 * @throws Exception
 	 */
-	static function Retry( $function, $retry_max_attempts = 3, $retry_sleep = 1 ) { //When changing function definition, also see APIFactory->RetryTransaction()
+	static function Retry( $function, $retry_max_attempts = 3, $retry_sleep = 1, $continue_on_error = false ) { //When changing function definition, also see APIFactory->RetryTransaction()
 		$tmp_sleep = ( $retry_sleep * 1000000 );
 		$retry_attempts = 0;
 		while ( $retry_attempts < $retry_max_attempts ) {
@@ -4018,9 +4028,13 @@ class Misc {
 			break;
 		}
 
-		if ( isset( $e ) ) { //$retry_attempts >= $retry_max_attempts ) { //Allow retry_max_attempst to be set at 0 to prevent any retries and fail without an error.
+		if ( isset( $e ) ) { //$retry_attempts >= $retry_max_attempts ) { //Allow retry_max_attempts to be set at 0 to prevent any retries and fail without an error.
 			Debug::text( 'ERROR: RETRY block failed after max attempts: ' . $retry_attempts . ' Max: ' . $retry_max_attempts, __FILE__, __LINE__, __METHOD__, 10 );
-			throw $e;
+
+			//If after all the retry attempts, if there is still an error, determine if should re-throw the exception or just continue.
+			if ( $continue_on_error != true ) {
+				throw $e;
+			}
 		}
 
 		if ( isset( $retval ) ) {

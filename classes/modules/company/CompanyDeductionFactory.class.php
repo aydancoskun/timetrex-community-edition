@@ -1316,7 +1316,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setApplyPayrollRunType( $value ) {
-		$value = trim( $value );
+		$value = (int)trim( $value );
 
 		return $this->setGenericDataValue( 'apply_payroll_run_type_id', $value );
 	}

@@ -1932,8 +1932,8 @@ class PunchFactory extends Factory {
 				if ( file_exists( $dir ) == false ) {
 					$mkdir_result = @mkdir( $dir, 0700, true );
 					if ( $mkdir_result == false ) {
-						Debug::Text( 'ERROR: Unable to create storage file directory: ' . $dir, __FILE__, __LINE__, __METHOD__, 10 );
-						throw new Exception( 'ERROR: Unable to create storage file directory: ' . $dir );
+						Debug::Text( 'ERROR: Unable to create storage file directory: ' . $dir .' Message: '. Debug::getLastPHPErrorMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+						throw new Exception( 'ERROR: Unable to create storage file directory: ' . $dir .' Message: '. Debug::getLastPHPErrorMessage() );
 					}
 				}
 
@@ -1946,7 +1946,7 @@ class PunchFactory extends Factory {
 				}
 			};
 
-			return Misc::Retry( $retry_function, 3, 0.25 );
+			return Misc::Retry( $retry_function, 3, 0.25 ); //If needed, could potentially continue on error here and the punch would get saved without an image.
 		}
 
 		Debug::Arr( $image_data, 'NOT Saving Image File Name: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );

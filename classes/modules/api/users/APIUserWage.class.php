@@ -461,12 +461,12 @@ class APIUserWage extends APIFactory {
 		//FIXME: Pass user_id and/or currency_id so we can properly round to the right number of decimals.
 		$uwf = TTnew( 'UserWageFactory' ); /** @var UserWageFactory $uwf */
 		$uwf->setObjectFromArray( $data );
-		$hourly_rate = TTi18n::formatNumber( $uwf->calcHourlyRate(), true, 2, 4 );
+		//$hourly_rate = TTi18n::formatNumber( $uwf->calcHourlyRate(), true, 2, 4 );
+
+		//calcHourlyRate() returns a float() so we have to re-format the value here again.
+		$hourly_rate = Misc::MoneyRound( $uwf->calcHourlyRate(), 2, ( ( is_object( $uwf->getUserObject() ) && is_object( $uwf->getUserObject()->getCurrencyObject() ) ) ? $uwf->getUserObject()->getCurrencyObject() : null ) );
 
 		return $this->returnHandler( $hourly_rate );
 	}
-
-
 }
-
 ?>

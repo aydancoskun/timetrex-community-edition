@@ -740,7 +740,11 @@ class ROEReport extends Report {
 
 					//remote_id=Should be the ROE record ID, rather than the user_id so we can better differentiate between multiple ROEs for the same employee.
 					$report_data[] = [ 'remote_id' => $row['id'], 'first_name' => $user_obj->getFirstName(), 'last_name' => $user_obj->getLastName(), 'sin' => $user_obj->getSIN(), 'first_date' => TTDate::parseDateTime( $row['first_date'] ), 'last_date' => TTDate::parseDateTime( $row['last_date'] ), 'pay_period_end_date' => TTDate::parseDateTime( $row['pay_period_end_date'] ) ];
-					$batch_id .= substr( $user_obj->getLastName(), 0, 9 ) . date( 'Ym', TTDate::parseDateTime( $row['pay_period_end_date'] ) );
+
+					//Use a batch_id (at least for a single employee) that could span an ROE being created/submitted, deleted, then created/submitted again with all the same information.
+					//  It also needs to work across employees with the same first/last names.
+					//$batch_id .= substr( $user_obj->getLastName(), 0, 9 ) . date( 'Ym', TTDate::parseDateTime( $row['pay_period_end_date'] ) );
+					$batch_id .= substr( str_pad( $user_obj->getEmployeeNumber(), 8, 0, STR_PAD_LEFT ), 0, 8 ) .'-'. date( 'Ym', TTDate::parseDateTime( $row['pay_period_end_date'] ) ); //Should be 15 or less characters for a single employee.
 
 					$roe->addRecord( $ee_data );
 

@@ -65,6 +65,7 @@ class APIUser extends APIFactory {
 		Debug::Text( 'Getting user default data for Company ID: ' . $company_id . ' TMP Company ID: ' . $tmp_company_id, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$uf = TTnew( 'UserFactory' ); /** @var UserFactory $uf */
+
 		//Get New Hire Defaults.
 		$udlf = TTnew( 'UserDefaultListFactory' ); /** @var UserDefaultListFactory $udlf */
 		$udlf->getByCompanyId( $company_id );
@@ -85,7 +86,7 @@ class APIUser extends APIFactory {
 					'work_phone'                       => $udf_obj->getWorkPhone(),
 					'work_phone_ext'                   => $udf_obj->getWorkPhoneExt(),
 					'work_email'                       => $udf_obj->getWorkEmail(),
-					'hire_date'                        => TTDate::getAPIDate( 'DATE', $udf_obj->getHireDate() ),
+					'hire_date'                        => TTDate::getAPIDate( 'DATE', time() ),
 					'sex_id'                           => 5, //Unspecified.
 					'default_branch_id'                => $udf_obj->getDefaultBranch(),
 					'default_department_id'            => $udf_obj->getDefaultDepartment(),

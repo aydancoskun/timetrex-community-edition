@@ -324,20 +324,16 @@ AccrualViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic.type_id.setSourceData( this.user_type_array );
 		}
 
-		var $this = this;
 		this._super( 'setEditViewData' ); //Set Navigation
 
 		if ( !this.sub_view_mode ) {
-			var widget = $this.edit_view_ui_dic['user_id'];
+			var widget = this.edit_view_ui_dic['user_id'];
 			if ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.is_mass_editing ) {
-
 				widget.setAllowMultipleSelection( true );
-
 			} else {
 				widget.setAllowMultipleSelection( false );
 			}
 		}
-
 	},
 
 	uniformVariable: function( records ) {

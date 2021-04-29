@@ -745,6 +745,16 @@ class TTDate {
 	}
 
 	/**
+	 * Takes an integer epoch and converts it to a PHP DateTime object.
+	 * @param $epoch
+	 * @return DateTime
+	 * @throws Exception
+	 */
+	public static function getDateTimeObject( $epoch ) {
+		return new DateTime( '@' . $epoch );
+	}
+
+	/**
 	 * @param $str
 	 * @return bool|false|int|null
 	 */
@@ -1617,7 +1627,7 @@ class TTDate {
 
 		if ( function_exists( 'date_diff' ) ) {
 			//If available, try to be as accurate as possible.
-			$diff = date_diff( new DateTime( '@' . $end_epoch ), new DateTime( '@' . $start_epoch ), false );
+			$diff = date_diff( self::getDateTimeObject( $end_epoch ), self::getDateTimeObject( $start_epoch ), false );
 			$x = ( ( ( $diff->y * 12 ) + $diff->m ) + ( $diff->d / 30 ) );
 		} else {
 			$epoch_diff = ( $end_epoch - $start_epoch );
@@ -1641,7 +1651,7 @@ class TTDate {
 
 		if ( function_exists( 'date_diff' ) ) {
 			//If available, try to be as accurate as possible.
-			$diff = date_diff( new DateTime( '@' . $start_epoch ), new DateTime( '@' . $end_epoch ), false );
+			$diff = date_diff( self::getDateTimeObject( $start_epoch ), self::getDateTimeObject( $end_epoch ), false );
 			$years = ( $diff->y + ( $diff->m / 12 ) + ( $diff->d / 365.25 ) );
 		} else {
 			$years = ( ( ( $end_epoch - $start_epoch ) / ( 86400 * 365.25 ) ) );
@@ -2618,14 +2628,14 @@ class TTDate {
 		if ( is_object( $start ) ) {
 			$start_date_obj = $start;
 		} else {
-			$start_date_obj = new DateTime( '@' . $start );
+			$start_date_obj = self::getDateTimeObject( $start );
 			$start_date_obj->setTimeZone( new DateTimeZone( TTDate::getTimeZone() ) );
 		}
 
 		if ( is_object( $end ) ) {
 			$end_date_obj = $end;
 		} else {
-			$end_date_obj = new DateTime( '@' . $end );
+			$end_date_obj = self::getDateTimeObject( $end );
 			$end_date_obj->setTimeZone( new DateTimeZone( TTDate::getTimeZone() ) );
 		}
 

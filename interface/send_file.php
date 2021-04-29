@@ -96,15 +96,16 @@ switch ( $object_type ) {
 			) {
 
 				$filter_data = [ 'filter_data' => [ 'id' => $parent_id, 'filter_items_per_page' => 1, 'filter_columns' => [ 'id' => true ] ] ];
-				if ( isset( $parent_object_type_id ) && $parent_object_type_id != '' ) {
-					$filter_data['filter_data']['object_type_id'] = $parent_object_type_id;
-				}
+				//Don't need to pass in object_type_id filter anymore as APIDocument->getDocument() now grabs the object_type and does its own permission checks there.
+				//if ( isset( $parent_object_type_id ) && $parent_object_type_id != '' ) {
+				//	$filter_data['filter_data']['object_type_id'] = $parent_object_type_id;
+				//}
 
 				//Make sure user has access to this document first, before checking for any revisions.
 				$api_f = TTNew( 'APIDocument' ); /** @var APIDocument $api_f */
 				$result = $api_f->stripReturnHandler( $api_f->getDocument( $filter_data ) );
 				if ( isset( $result[0] ) && count( $result[0] ) > 0 ) {
-					$parent_id = $result[0]['id'];
+					$document_id = TTUUID::castUUID( $result[0]['id'] );
 
 					// The attached documents to expenses all be marked as 'Private', and the regular employee no have the 'view_private' permission, so need to set the view_private to TRUE.
 					if ( isset( $parent_object_type_id ) && $parent_object_type_id == 400 ) {
@@ -114,7 +115,7 @@ switch ( $object_type ) {
 					}
 
 					$drlf = TTnew( 'DocumentRevisionListFactory' ); /** @var DocumentRevisionListFactory $drlf */
-					$drlf->getByCompanyIdAndIdAndDocumentIdAndPrivateAllowed( $current_company->getId(), $object_id, $parent_id, $private_allowed );
+					$drlf->getByCompanyIdAndIdAndDocumentIdAndPrivateAllowed( $current_company->getId(), $object_id, $document_id, $private_allowed );
 					Debug::Text( 'Record Count: ' . $drlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $drlf->getRecordCount() == 1 ) {
 						$dr_obj = $drlf->getCurrent();
@@ -126,7 +127,7 @@ switch ( $object_type ) {
 
 							//Log document downloads in audit report, just so people can see who has viewed which revision.
 							//Make sure we link this to the main document_id so its viewed in the main document audit tab.
-							TTLog::addEntry( (int)$parent_id, 5, TTi18n::getText( 'Downloaded Revision: %1', [ $dr_obj->getRevision() ] ), null, $dr_obj->getTable(), $dr_obj );
+							TTLog::addEntry( $document_id, 5, TTi18n::getText( 'Downloaded Revision: %1', [ $dr_obj->getRevision() ] ), null, $dr_obj->getTable(), $dr_obj );
 
 							$params['file'] = $file_name;
 							$params['ContentType'] = $dr_obj->getMimeType();

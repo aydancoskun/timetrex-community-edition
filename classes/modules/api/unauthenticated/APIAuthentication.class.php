@@ -178,6 +178,15 @@ class APIAuthentication extends APIFactory {
 	function Login( $user_name = null, $password = null, $type = 'USER_NAME' ) {
 		global $config_vars, $authentication;
 
+		//Prevent: NOTICE(8): Array to string conversion below.
+		if ( is_array( $user_name ) ) {
+			$user_name = '';
+		}
+
+		if ( is_array( $password ) ) {
+			$password = '';
+		}
+
 		Debug::text( 'User Name: ' . $user_name . ' Password Length: ' . strlen( $password ) . ' Type: ' . $type, __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( ( isset( $config_vars['other']['installer_enabled'] ) && $config_vars['other']['installer_enabled'] == 1 ) || ( isset( $config_vars['other']['down_for_maintenance'] ) && $config_vars['other']['down_for_maintenance'] == 1 ) ) {

@@ -225,6 +225,10 @@ class APISchedule extends APIFactory {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
+		if ( !isset( $data['filter_data'] ) ) {
+			$data['filter_data'] = [];
+		}
+
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		//Use the SQL based permission checks to avoid bugs with 'schedule' -> 'view' == TRUE and 'schedule' -> 'edit_child' == TRUE not allowing the user to edit any records.
 		$data['filter_data'] = array_merge( (array)$data['filter_data'], $this->getPermissionObject()->getPermissionFilterData( 'schedule', 'view' ) );

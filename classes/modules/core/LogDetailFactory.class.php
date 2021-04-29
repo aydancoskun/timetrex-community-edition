@@ -333,6 +333,13 @@ class LogDetailFactory extends Factory {
 							$diff_arr['department_id']
 					);
 					break;
+				case 'ClientFactory':
+				case 'ClientListFactory':
+					unset(
+							$diff_arr['company_name_metaphone'],
+							$diff_arr['company_dba_name_metaphone']
+					);
+					break;
 				case 'ClientContactFactory':
 				case 'ClientContactListFactory':
 					unset(
@@ -416,6 +423,8 @@ class LogDetailFactory extends Factory {
 					$diff_arr['user_date_id'], //UserDateTotal, Schedule, PunchControl, etc...
 
 					$diff_arr['name_metaphone'],
+					$diff_arr['first_name_metaphone'],
+					$diff_arr['last_name_metaphone'],
 
 					//General fields to skip
 					$diff_arr['created_date'],

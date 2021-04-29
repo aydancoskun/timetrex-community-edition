@@ -613,14 +613,10 @@ if ( isset( $argv[1] ) AND in_array( $argv[1], array('--help', '-help', '-h', '-
 								$handle = @fopen( 'http://www.timetrex.com/' . URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_rename_dir'), 'pre_install.php' ), 'r' );
 								@fclose( $handle );
 
+								//Make sure the latest directory does not exist before renaming the unzipped directory to it. This may help with some Access Denied errors on Windows.
+								Misc::cleanDir( $upgrade_staging_latest_dir, true, true, true );
+
 								Debug::Text( 'Upgrade Staging Extract Dir: ' . $upgrade_staging_extract_dir . ' Renaming to: ' . $upgrade_staging_latest_dir, __FILE__, __LINE__, __METHOD__, 10 );
-//								if ( @rename( $upgrade_staging_extract_dir, $upgrade_staging_latest_dir ) == FALSE ) {
-//									sleep(5); //Might fix possible "Access is denied. (code: 5)" errors on Windows when using PHP v5.2 (https://bugs.php.net/bug.php?id=43817)
-//									if ( rename( $upgrade_staging_extract_dir, $upgrade_staging_latest_dir ) == FALSE ) { //Don't hide any error messages this time.
-//										Debug::Text('ERROR: Unable to rename: '. $upgrade_staging_extract_dir .' to: '. $upgrade_staging_latest_dir, __FILE__, __LINE__, __METHOD__, 10);
-//										echo 'ERROR: Unable to rename: '. $upgrade_staging_extract_dir .' to: '. $upgrade_staging_latest_dir ."\n";
-//									}
-//								}
 								if ( Misc::rename( $upgrade_staging_extract_dir, $upgrade_staging_latest_dir ) == false ) {
 									Debug::Text( 'ERROR: Unable to rename: ' . $upgrade_staging_extract_dir . ' to: ' . $upgrade_staging_latest_dir, __FILE__, __LINE__, __METHOD__, 10 );
 									echo 'ERROR: Unable to rename: ' . $upgrade_staging_extract_dir . ' to: ' . $upgrade_staging_latest_dir . "\n";

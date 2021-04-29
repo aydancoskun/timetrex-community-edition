@@ -825,7 +825,8 @@ class Validator {
 		//$retval = false;
 		switch ( strtolower( trim( $country ) ) ) {
 			case 'ca':
-				if ( ( is_numeric( $sin ) && $sin >= 100000000 && $sin < 999999999 ) ) {
+				//As of around 2015, SINs starting with 0 can not be valid rather than just reserved for fictitious purposes.
+				if ( is_numeric( $sin ) && strlen( $sin ) == 9 && $sin >= 10000000 && $sin < 999999999 ) {
 					$split_sin = str_split( $sin );
 
 					if ( ( $split_sin[1] *= 2 ) >= 10 ) {

@@ -563,6 +563,18 @@ class Debug {
 	}
 
 	/**
+	 * @return string|false
+	 */
+	static function getLastPHPErrorMessage() {
+		$error = error_get_last();
+		if ( isset( $error['message'] ) ) {
+			return $error['message'];
+		}
+
+		return false;
+	}
+
+	/**
 	 * @return bool
 	 */
 	static function Shutdown() {

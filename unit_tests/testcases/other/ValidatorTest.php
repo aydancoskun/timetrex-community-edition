@@ -197,6 +197,44 @@ class ValidatorTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals( $validator->stripNonFloat( ' 1. 234,91 ' ), '1.23491' ); //Always strips commas out so it doesn't work in other locales, TTi18n::parseFloat() should be called before this.
 		}
 	}
+
+	function testValidatorIsSIN() {
+		TTi18n::setLocale( 'en_US' );
+
+		$validator = new Validator();
+
+		//
+		// SIN - Canada
+		//
+		$this->assertEquals( $validator->isSIN( 'sin', '765 904 024', null, 'CA' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', '765904024', null, 'CA' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', ' 765904024 ', null, 'CA' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', ' 765-904-024 ', null, 'CA' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', ' 765/904/024 ', null, 'CA' ), true );
+
+		$this->assertEquals( $validator->isSIN( 'sin', '765 904 024', null, 'CA' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', '958 752 115', null, 'CA' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', '046 454 286', null, 'CA' ), true ); //As of around 2015, SINs starting with 0 apparently can now be valid rather than just fictitious purposes.
+
+		//Special ones that can be entered if employee does not have one, or its unknown. Some tax documents may require this.
+		$this->assertEquals( $validator->isSIN( 'sin', '999 999 999', null, 'CA' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', '000 000 000', null, 'CA' ), true );
+
+		//Bogus ones that should fail.
+		$this->assertEquals( $validator->isSIN( 'sin', '123 456 789', null, 'CA' ), false );
+		$this->assertEquals( $validator->isSIN( 'sin', '987 654 321', null, 'CA' ), false );
+
+		//
+		// SSN - US
+		//
+		$this->assertEquals( $validator->isSIN( 'sin', '662-20-0887', null, 'US' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', '662/20/0887', null, 'US' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', '662 20 0887', null, 'US' ), true );
+		$this->assertEquals( $validator->isSIN( 'sin', '662200887', null, 'US' ), true );
+
+		// Foriegn
+		$this->assertEquals( $validator->isSIN( 'sin', 'ABC662200887', null, 'UK' ), true );
+	}
 }
 
 ?>

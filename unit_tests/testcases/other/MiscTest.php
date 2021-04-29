@@ -1347,6 +1347,8 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-9af4-7bc0-af20-999999191922', 12, false ), '9af47bc0af20' );
 		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-24dc-7bc0-af20-21ea65522ba3', 12, false ), '24dc7bc0af20' );
 		$this->assertEquals( TTUUID::truncateUUID( '11e7a84a-9af4-e9e0-b077-21ea65522ba3', 12, false ), '9af4e9e0b077' );
+		$this->assertEquals( TTUUID::truncateUUID( '11e7a84a-9af4-e9e0-b077-21ea65522ba3', 12, true ), '9af4-e9e0-b0' );
+		$this->assertEquals( TTUUID::truncateUUID( '11e7a84a-9af4-e9e0-b077-21ea65522ba3', 15, true ), '9af4-e9e0-b077' ); //Only 14 chars due to trailing dash being removed.
 	}
 
 	/**

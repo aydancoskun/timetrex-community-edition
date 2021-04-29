@@ -6847,7 +6847,6 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		if ( this.sub_view_mode || !this.show_search_tab ) {
-
 			$this.select_layout = null;
 			if ( callBack ) {
 				callBack();
@@ -6855,6 +6854,7 @@ BaseViewController = Backbone.View.extend( {
 
 			return;
 		}
+
 		// Check view layout cache.
 		if ( LocalCacheData.view_layout_cache[this.script_name] ) {
 			//Make this async way
@@ -6878,37 +6878,38 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		function onGetUserGenericDataResult( results ) {
-			var result_data = results.getResult();
-			$this.select_layout = null; //Reset select layout;
-			LocalCacheData.view_layout_cache[$this.script_name] = results;
-			if ( result_data && result_data.length > 0 ) {
-				result_data.sort( function( a, b ) {
-						return Global.compare( a, b, 'name' );
+			if ( results ) {
+				var result_data = results.getResult();
+				$this.select_layout = null; //Reset select layout;
+				LocalCacheData.view_layout_cache[$this.script_name] = results;
+				if ( result_data && result_data.length > 0 ) {
+					result_data.sort( function( a, b ) {
+							return Global.compare( a, b, 'name' );
+						}
+					);
+					var len = result_data.length;
+					for ( var i = 0; i < len; i++ ) {
+						var layout = result_data[i];
+						if ( layout.name === current_select_layout_name ) {
+							$this.select_layout = layout;
+							break;
+						}
 					}
-				);
-				var len = result_data.length;
-				for ( var i = 0; i < len; i++ ) {
-					var layout = result_data[i];
-					if ( layout.name === current_select_layout_name ) {
-						$this.select_layout = layout;
-						break;
+					if ( !$this.select_layout ) {
+						$this.select_layout = result_data[0];
+					}
+					$this.search_panel.setLayoutsArray( result_data );
+				} else {
+					$this.select_layout = null;
+					if ( $this.search_panel ) {
+						$this.search_panel.setLayoutsArray( null );
 					}
 				}
-				if ( !$this.select_layout ) {
-					$this.select_layout = result_data[0];
+				if ( callBack ) {
+					callBack();
 				}
-				$this.search_panel.setLayoutsArray( result_data );
-			} else {
-				$this.select_layout = null;
-				if ( $this.search_panel ) {
-					$this.search_panel.setLayoutsArray( null );
-				}
-			}
-			if ( callBack ) {
-				callBack();
 			}
 		}
-
 	},
 
 	getAllColumns: function( callBack ) {

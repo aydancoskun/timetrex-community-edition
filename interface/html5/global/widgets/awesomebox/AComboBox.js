@@ -227,15 +227,13 @@
 		this.setAllowMultipleSelection = function( val ) {
 			allow_multiple_selection = val;
 
-			if ( val ) {
+			if ( val == true ) {
 				if ( select_item ) {
 					select_items = [select_item];
-
 				}
 			} else {
 				if ( select_items && select_items.length > 0 ) {
 					select_item = select_items[0];
-
 				}
 			}
 
@@ -740,9 +738,18 @@
 			return column_filter;
 		};
 
+		this.cleanDropDownValues = function() {
+			if ( a_dropdown ) {
+				a_dropdown.setSelectGridData( [] );
+			}
+		};
+
 		this.setSelectItem = function( val ) {
+			//When setting select_item, clear out the select_items (plural) variable so it doesn't contain old data if the dropdown box happens to get switched back to it.
+			select_items = null;
 
 			select_item = val;
+
 			if ( val === false || val === '' ) {
 				this.setLabel( val );
 				if ( setRealValueCallBack ) {
@@ -756,16 +763,12 @@
 			} else {
 				this.setLabel();
 			}
-
-		};
-
-		this.cleanDropDownValues = function() {
-			if ( a_dropdown ) {
-				a_dropdown.setSelectGridData( [] );
-			}
 		};
 
 		this.setSelectItems = function( val ) {
+			//When setting select_items (plural), clear out the select_item variable so it doesn't contain old data if the dropdown box happens to get switched back to it.
+			select_item = null;
+
 			if ( !val || val.length < 1 ) {
 				this.setEmptyLabel();
 				select_items = null;

@@ -337,17 +337,16 @@ UserDefaultViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Title' ), form_item_input, tab_employee_id_column1 );
 
 		//Employee Number
-
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( { field: 'employee_number', width: 149 } );
-		this.addEditFieldToColumn( $.i18n._( 'Employee Number' ), form_item_input, tab_employee_id_column1 );
+		// form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		//
+		// form_item_input.TTextInput( { field: 'employee_number', width: 149 } );
+		// this.addEditFieldToColumn( $.i18n._( 'Employee Number' ), form_item_input, tab_employee_id_column1 );
 
 		//Hire Date
-		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
-		form_item_input.TDatePicker( { field: 'hire_date' } );
-		this.addEditFieldToColumn( $.i18n._( 'Hire Date' ), form_item_input, tab_employee_id_column1 );
+		// form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		//
+		// form_item_input.TDatePicker( { field: 'hire_date' } );
+		// this.addEditFieldToColumn( $.i18n._( 'Hire Date' ), form_item_input, tab_employee_id_column1 );
 
 		//Default Branch
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );

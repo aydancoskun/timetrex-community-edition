@@ -2021,20 +2021,20 @@ ScheduleViewController = BaseViewController.extend( {
 		this.clearNavigationData();
 		this.api['set' + this.api.key_name]( record, false, false, ignoreWarning, {
 			onResult: function( result ) {
+				if ( $this.current_edit_record ) {
+					var current_date_str = $this.current_edit_record.start_date_stamp;
 
-				var current_date_str = $this.current_edit_record.start_date_stamp;
+					if ( $.type( current_date_str ) === 'array' ) {
+						current_date_str = current_date_str[current_date_str.length - 1];
+					}
 
-				if ( $.type( current_date_str ) === 'array' ) {
-					current_date_str = current_date_str[current_date_str.length - 1];
+					var current_date = Global.strToDate( current_date_str );
+					var next_date = new Date( new Date( current_date.getTime() ).setDate( current_date.getDate() + 1 ) );
+
+					$this.current_edit_record.start_date_stamp = next_date.format();
+
+					$this.onSaveAndCopyResult( result );
 				}
-
-				var current_date = Global.strToDate( current_date_str );
-				var next_date = new Date( new Date( current_date.getTime() ).setDate( current_date.getDate() + 1 ) );
-
-				$this.current_edit_record.start_date_stamp = next_date.format();
-
-				$this.onSaveAndCopyResult( result );
-
 			}
 		} );
 	},
@@ -3700,7 +3700,9 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	getMode: function() {
-		return this.toggle_button.getValue();
+		if ( this.toggle_button ) {
+			return this.toggle_button.getValue();
+		}
 	},
 
 	search: function( setDefaultMenu, use_date_picker_date ) {

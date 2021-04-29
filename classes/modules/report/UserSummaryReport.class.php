@@ -361,7 +361,7 @@ class UserSummaryReport extends Report {
 						'-1230-by_hired_month+total_user'       => TTi18n::gettext( 'Total Employees Hired By Month' ),
 						'-1240-by_termination_month+total_user' => TTi18n::gettext( 'Total Employees Terminated By Month' ),
 
-
+						'-1300-by_sex_ethnic_group_user_title+total_user' => TTi18n::gettext( 'Total Employees By Gender/Ethnicity/Title' ),
 				];
 
 				break;
@@ -536,7 +536,26 @@ class UserSummaryReport extends Report {
 							$retval['sort'][] = [ 'termination-date_month_year' => 'desc' ];
 							$retval['sort'][] = [ 'total_user' => 'desc' ];
 							break;
+						case 'by_sex_ethnic_group_user_title+total_user': //Similar to US EEO-1 without component 2 data.
+							$retval['partial_employed_time_period']['time_period'] = 'custom_pay_period';
 
+							$retval['columns'][] = 'sex';
+							$retval['columns'][] = 'ethnic_group';
+							$retval['columns'][] = 'title';
+							$retval['columns'][] = 'total_user';
+
+							$retval['group'][] = 'sex';
+							$retval['group'][] = 'ethnic_group';
+							$retval['group'][] = 'title';
+
+							$retval['sub_total'][] = 'sex';
+							$retval['sub_total'][] = 'ethnic_group';
+							$retval['sub_total'][] = 'title';
+
+							$retval['sort'][] = [ 'sex' => 'asc' ];
+							$retval['sort'][] = [ 'ethnic_group' => 'asc' ];
+							$retval['sort'][] = [ 'title' => 'asc' ];
+							break;
 
 						//Address
 						case 'by_employee+address':

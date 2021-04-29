@@ -1289,7 +1289,7 @@ class TTi18n {
 	}
 
 	/**
-	 * @param $amount
+	 * @param int|float|string $amount
 	 * @param null $currency_code
 	 * @param int $show_code 0 = No, 1 = Left, 2 = Right
 	 * @return mixed|string
