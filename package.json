@@ -21,7 +21,7 @@
     "is-svg": ">=4.2.2",
     "jquery": "3.5.1",
     "jquery-bridget": "2.0.1",
-    "jquery-ui": "1.12.1",
+    "jquery-ui": "1.13.0",
     "leaflet": "1.7.1",
     "leaflet-draw": "1.0.4",
     "leaflet-providers": "1.11.0",
